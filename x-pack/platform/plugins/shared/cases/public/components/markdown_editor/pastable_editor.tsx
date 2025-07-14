@@ -13,16 +13,11 @@ import { type Owner } from '../../../common/constants/types';
 import { useImagePasteUpload } from './use_image_paste_upload';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { MarkdownEditor } from './editor';
-import { type MarkdownEditorRef } from './types';
+import { type EditorBaseProps, type MarkdownEditorRef } from './types';
 
-// Use the same prop names that <MarkdownEditor> expects so callers can switch components interchangeably
-interface PastableMarkdownEditorProps {
-  ariaLabel: string;
-  'data-test-subj': string;
+interface PastableMarkdownEditorProps extends EditorBaseProps {
   field: FieldHook<string>;
   caseId?: string;
-  editorId: string;
-  disabledUiPlugins?: string[];
 }
 
 const PastableMarkdownEditorComponent = forwardRef<MarkdownEditorRef, PastableMarkdownEditorProps>(

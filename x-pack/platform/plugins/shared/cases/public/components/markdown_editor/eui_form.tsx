@@ -42,6 +42,10 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   initialValue?: string;
 };
 
+/**
+ * It is not guaranteed that downstream consumers of cases will have
+ * defined a files context. This hook tests if the context is defined.
+ */
 function useHasFilesContext(): boolean {
   try {
     return !!useFilesContext();
@@ -68,6 +72,7 @@ export const MarkdownEditorForm = React.memo(
       },
       ref
     ) => {
+      // if there is no files context, we don't supply the paste functionality to the comment editor
       const hasFilesContext = useHasFilesContext();
 
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
@@ -92,6 +97,13 @@ export const MarkdownEditorForm = React.memo(
         [id, field.value, caseTitle, caseTags]
       );
 
+      const editorBaseProps = {
+        ariaLabel: idAria,
+        'data-test-subj': dataTestSubj,
+        editorId: id,
+        disabledUiPlugins,
+      };
+
       return (
         <CommentEditorContext.Provider value={commentEditorContextValue}>
           <EuiFormRow
@@ -106,23 +118,17 @@ export const MarkdownEditorForm = React.memo(
           >
             {hasFilesContext ? (
               <PastableMarkdownEditor
+                {...editorBaseProps}
                 ref={ref}
-                ariaLabel={idAria}
-                editorId={id}
                 field={field}
                 caseId={caseId}
-                disabledUiPlugins={disabledUiPlugins}
-                data-test-subj={`${dataTestSubj}-markdown-editor`}
               />
             ) : (
               <MarkdownEditor
+                {...editorBaseProps}
                 ref={ref}
-                ariaLabel={idAria}
-                editorId={id}
                 onChange={field.setValue}
                 value={field.value}
-                disabledUiPlugins={disabledUiPlugins}
-                data-test-subj={`${dataTestSubj}-markdown-editor`}
               />
             )}
           </EuiFormRow>

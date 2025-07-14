@@ -33,3 +33,11 @@ export interface MarkdownEditorRef {
   replaceNode: ContextShape['replaceNode'];
   toolbar: HTMLDivElement | null;
 }
+
+export interface EditorBaseProps {
+  ariaLabel: string;
+  'data-test-subj': string;
+  editorId: string;
+  disabledUiPlugins?: string[];
+  errors?: Array<string | Error>;
+}

@@ -11,25 +11,29 @@ import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
-import { type MarkdownEditorRef } from './types';
+import { type EditorBaseProps, type MarkdownEditorRef } from './types';
 import { scaledMarkdownImages } from '../utils';
 
-interface MarkdownEditorProps {
-  ariaLabel: string;
-  dataTestSubj?: string;
-  editorId: string;
+interface MarkdownEditorProps extends EditorBaseProps {
   height?: number;
   onChange: (content: string) => void;
-  disabledUiPlugins?: string[] | undefined;
   value: string;
-  errors?: Array<string | Error>;
 }
 
 export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
   (
-    { ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins, errors },
+    {
+      ariaLabel,
+      'data-test-subj': dataTestSubj,
+      editorId,
+      height,
+      onChange,
+      value,
+      disabledUiPlugins,
+      errors,
+    },
     ref
   ) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
