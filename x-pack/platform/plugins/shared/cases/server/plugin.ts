@@ -104,11 +104,14 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
-    registerCasesAnalyticsIndexesTasks({
-      taskManager: plugins.taskManager,
-      logger: this.logger,
-      core,
-    });
+
+    if (this.caseConfig.analytics.index?.enabled) {
+      registerCasesAnalyticsIndexesTasks({
+        taskManager: plugins.taskManager,
+        logger: this.logger,
+        core,
+      });
+    }
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
