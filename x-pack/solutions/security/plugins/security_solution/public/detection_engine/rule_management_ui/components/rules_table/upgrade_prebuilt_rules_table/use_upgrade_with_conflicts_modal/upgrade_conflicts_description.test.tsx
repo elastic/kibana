@@ -78,6 +78,29 @@ describe('UpgradeConflictsDescription displays proper text when there are', () =
     expect(normalizeText(container.textContent)).toBe(normalizeText(expectedText));
   });
 
+  it('rules with solvable conflicts and conflict-free rules', () => {
+    const { container } = render(
+      <UpgradeConflictsDescription
+        numOfRulesWithoutConflicts={10}
+        numOfRulesWithSolvableConflicts={3}
+        numOfRulesWithNonSolvableConflicts={0}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    const expectedText = [
+      'Rules with auto-resolved conflicts: 3',
+      'Rules without conflicts: 10',
+      '3 rules with auto-resolved conflicts can still be updated. Choose one of the following options:',
+      'Use the rule update flyout to address auto-resolved conflicts. This is the safest option and gives you more control over the final update. Learn more(external, opens in a new tab or window)',
+      'Click Update rules to bulk-update rules with auto-resolved conflicts and rules without conflicts.',
+      'Only choose this option if you’re comfortable accepting the fixes Elastic suggested.',
+      '10 rules without conflicts can still be updated by clicking Update rules without conflicts. Choose this option if you only want to update rules without conflicts.',
+    ].join('');
+
+    expect(normalizeText(container.textContent)).toBe(normalizeText(expectedText));
+  });
+
   it('rules with non-solvable conflicts and conflict-free rules', () => {
     const { container } = render(
       <UpgradeConflictsDescription
