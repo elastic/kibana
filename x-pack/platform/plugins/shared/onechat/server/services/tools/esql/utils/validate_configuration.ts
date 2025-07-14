@@ -6,27 +6,26 @@
  */
 
 import { validateQuery } from "@kbn/esql-validation-autocomplete";
-import { createBadRequestError } from "@kbn/onechat-common";
-import { EsqlToolDefinition } from "@kbn/onechat-server";
+import { createBadRequestError, EsqlToolConfig } from "@kbn/onechat-common";
 
-export const validateTool = async (tool: EsqlToolDefinition) => {
-
-    const validationResult = await validateQuery(tool.query, { ignoreOnMissingCallbacks: true });
+export const validateConfig = async (configuration: EsqlToolConfig) => {
+    
+    // Ensure query is proper ES|QL syntax
+    
+    const validationResult = await validateQuery(configuration.query, { ignoreOnMissingCallbacks: true });
     
     if (validationResult.errors.length > 0) {
         const message = `Validation error: \n${validationResult.errors.map((error) => 'text' in error ? error.text : '').join('\n')}`;
             throw createBadRequestError(message)
     }
 
-    //pull out query parameters from the query string
-    const queryParamMatches = tool.query.match(/\?([a-zA-Z_][a-zA-Z0-9_]*)/g);
-
-    console.log(`Query parameters found in tool ${tool.id}:`, queryParamMatches);
+    // Check for parameter mismatches
+    const queryParamMatches = configuration.query.match(/\?([a-zA-Z_][a-zA-Z0-9_]*)/g)
     const queryParams = queryParamMatches ? 
-        queryParamMatches.map(match => match.substring(1)) : 
+        queryParamMatches.map(param => param.substring(1)) : 
         [];
 
-    const definedParams = Object.keys(tool.params);
+    const definedParams = Object.keys(configuration.params);
 
     const undefinedParams = queryParams.filter(param => !definedParams.includes(param));
     if (undefinedParams.length > 0) {
