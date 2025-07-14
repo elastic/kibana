@@ -42,18 +42,17 @@ export default function (providerContext: FtrProviderContext) {
       await enableSecrets(providerContext);
 
       await supertest.delete(`/api/fleet/epm/packages/endpoint/8.6.1`).set('kbn-xsrf', 'xxxx');
-      const [{ body: agentPolicyResponse }, { body: managedAgentPolicyResponse }] =
-        await Promise.all([
-          supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
-            name: 'Test policy',
-            namespace: 'default',
-          }),
-          supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
-            name: 'Test hosted agent policy',
-            namespace: 'default',
-            is_managed: true,
-          }),
-        ]);
+      const [{ body: agentPolicyResponse }] = await Promise.all([
+        supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
+          name: 'Test policy',
+          namespace: 'default',
+        }),
+        supertest.post(`/api/fleet/agent_policies`).set('kbn-xsrf', 'xxxx').send({
+          name: 'Test hosted agent policy',
+          namespace: 'default',
+          is_managed: true,
+        }),
+      ]);
 
       agentPolicyId = agentPolicyResponse.item.id;
 
@@ -86,7 +85,7 @@ export default function (providerContext: FtrProviderContext) {
         package: { name: 'input_package', title: 'Input only package', version: '1.0.0' },
       };
 
-      const { body: packagePolicyResponse } = await supertest
+      await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -103,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
 
-      const { body: packagePolicyResponse2 } = await supertest
+      await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -119,9 +118,8 @@ export default function (providerContext: FtrProviderContext) {
             version: '0.1.0',
           },
         });
-      packagePolicyId2 = packagePolicyResponse2.item.id;
 
-      const { body: packagePolicyResponse3 } = await supertest
+      await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -169,7 +167,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
 
-      const { body: secretsPackagePolicyResponse } = await supertest
+      await supertest
         .post(`/api/fleet/package_policies?format=simplified`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -195,12 +193,10 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
 
-      const { body: inputOnlyPolicyResponse } = await supertest
+      await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send(inputOnlyBasePackagePolicy);
-
-      inputOnlyPackagePolicyId = inputOnlyPolicyResponse.item.id;
     });
 
     after(async function () {
