@@ -15,7 +15,6 @@ import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
 import { UsageAPIProvider } from './usage_api';
 
 import { IngestManagerProvider } from '../../common/services/ingest_manager';
-import { DataViewApiProvider } from './data_view_api';
 import { SecuritySolutionApiProvider } from './security_solution_api.gen';
 import { FleetAndAgents } from './fleet_and_agents';
 
@@ -24,8 +23,6 @@ export const services = {
 
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   supertest: kibanaApiIntegrationServices.supertest,
-
-  dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,
