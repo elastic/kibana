@@ -101,7 +101,7 @@ node scripts/scout.js start-server --stateful
 Now run the tests exactly like a normal Scout/Playwright suite in another terminal:
 
 ```bash
-npx playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
 ```
 
 The helper will spin up one `local` project per available connector so results are isolated per model.

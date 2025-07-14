@@ -10,7 +10,14 @@ import { loadConfiguration } from '@kbn/apm-config-loader';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { fromExternalVariant } from '@kbn/std';
 
-export function getPhoenixConfig(): { baseUrl: string; headers: { Authorization: string } } {
+export interface PhoenixConfig {
+  baseUrl: string;
+  headers: {
+    Authorization: string;
+  };
+}
+
+export function getPhoenixConfig(): PhoenixConfig {
   const config = loadConfiguration([], REPO_ROOT, false);
 
   const phoenixExporter = castArray(config.getTelemetryConfig()?.tracing?.exporters ?? []).flatMap(

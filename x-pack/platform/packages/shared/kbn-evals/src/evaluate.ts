@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createClient } from '@arizeai/phoenix-client';
 import {
   getConnectorModel,
   type BoundInferenceClient,
@@ -13,6 +12,7 @@ import {
   getConnectorFamily,
   getConnectorProvider,
   InferenceConnector,
+  Model,
 } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
@@ -26,6 +26,7 @@ import { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import { DefaultEvaluators } from './types';
+import { reportModelScore } from './utils/report_model_score';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -132,19 +133,27 @@ export const evaluate = base.extend<
         name: connector.name,
       };
 
-      const phoenixClient = new KibanaPhoenixClient(
-        createClient({
-          options: config,
-        }),
+      const model: Model = {
+        family: getConnectorFamily(inferenceConnector),
+        provider: getConnectorProvider(inferenceConnector),
+        id: getConnectorModel(inferenceConnector),
+      };
+
+      const phoenixClient = new KibanaPhoenixClient({
+        config,
         log,
-        {
-          family: getConnectorFamily(inferenceConnector),
-          provider: getConnectorProvider(inferenceConnector),
-          id: getConnectorModel(inferenceConnector),
-        }
-      );
+        model,
+        runId: process.env.TEST_RUN_ID!,
+      });
 
       await use(phoenixClient);
+
+      await reportModelScore({
+        phoenixClient,
+        log,
+        model,
+        experiments: await phoenixClient.getRanExperiments(),
+      });
     },
     {
       scope: 'worker',

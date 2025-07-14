@@ -5,21 +5,34 @@
  * 2.0.
  */
 import Path from 'path';
-import { PhoenixClient } from '@arizeai/phoenix-client';
+import pLimit from 'p-limit';
+import { PhoenixClient, createClient } from '@arizeai/phoenix-client';
 import { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import { SomeDevLog } from '@kbn/some-dev-log';
 import { withInferenceSpan } from '@kbn/inference-tracing';
 import { Model } from '@kbn/inference-common';
 import { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
 import { upsertDataset } from './upsert_dataset';
+import { PhoenixConfig } from '../utils/get_phoenix_config';
 
 export class KibanaPhoenixClient {
+  private readonly phoenixClient: PhoenixClient;
+
+  private readonly experiments: RanExperiment[] = [];
+
   constructor(
-    private readonly phoenixClient: PhoenixClient,
-    private readonly log: SomeDevLog,
-    private readonly model: Model
-  ) {}
+    private readonly options: {
+      config: PhoenixConfig;
+      log: SomeDevLog;
+      model: Model;
+      runId: string;
+    }
+  ) {
+    this.phoenixClient = createClient({
+      options: this.options.config,
+    });
+  }
 
   private async syncDataSet(dataset: EvaluationDataset): Promise<{ datasetId: string }> {
     const datasets = await import('@arizeai/phoenix-client/datasets');
@@ -79,6 +92,7 @@ export class KibanaPhoenixClient {
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<RanExperiment>;
+
   async runExperiment(
     {
       dataset,
@@ -89,50 +103,85 @@ export class KibanaPhoenixClient {
     },
     evaluators: Evaluator[]
   ): Promise<RanExperiment> {
-    const { datasetId } = await this.syncDataSet(dataset);
+    return await withInferenceSpan('run_experiment', async (span) => {
+      const { datasetId } = await this.syncDataSet(dataset);
 
-    // Because of a bug in the CommonJS distribution of
-    // @arizeai/phoenix, we have to import the ESM one,
-    // which means we also have to trick Node.js into
-    // allowing us to import it.
-    const path = Path.join(
-      Path.dirname(require.resolve('@arizeai/phoenix-client')),
-      '../esm/experiments/index.js'
-    );
+      // Because of a bug in the CommonJS distribution of
+      // @arizeai/phoenix, we have to import the ESM one,
+      // which means we also have to trick Node.js into
+      // allowing us to import it.
+      const path = Path.join(
+        Path.dirname(require.resolve('@arizeai/phoenix-client')),
+        '../esm/experiments/index.js'
+      );
 
-    const experiments = (await import(
-      path
-    )) as typeof import('@arizeai/phoenix-client/experiments');
+      const experiments = (await import(
+        path
+      )) as typeof import('@arizeai/phoenix-client/experiments');
 
-    const ranExperiment = await experiments.runExperiment({
-      client: this.phoenixClient,
-      dataset: { datasetId },
-      task,
-      experimentMetadata: {
-        model: this.model,
-      },
-      evaluators: evaluators.map((evaluator) => {
-        return {
-          ...evaluator,
-          evaluate: ({ input, output, expected, metadata }) => {
-            return withInferenceSpan('evaluate', () =>
-              evaluator.evaluate({
+      const ranExperiment = await experiments.runExperiment({
+        client: this.phoenixClient,
+        dataset: { datasetId },
+        task,
+        experimentMetadata: {
+          model: this.options.model,
+          runId: this.options.runId,
+        },
+        evaluators: evaluators.map((evaluator) => {
+          return {
+            ...evaluator,
+            evaluate: ({ input, output, expected, metadata }) => {
+              return evaluator.evaluate({
                 expected: expected ?? null,
                 input,
                 metadata: metadata ?? {},
                 output,
-              })
-            );
-          },
-        };
-      }),
-      logger: {
-        error: this.log.error.bind(this.log),
-        info: this.log.info.bind(this.log),
-        log: this.log.info.bind(this.log),
-      },
-    });
+              });
+            },
+          };
+        }),
+        logger: {
+          error: this.options.log.error.bind(this.options.log),
+          info: this.options.log.info.bind(this.options.log),
+          log: this.options.log.info.bind(this.options.log),
+        },
+      });
 
-    return ranExperiment;
+      this.experiments.push(ranExperiment);
+
+      return ranExperiment;
+    });
+  }
+
+  async getRanExperiments() {
+    return this.experiments;
+  }
+
+  /**
+   * Fetch dataset metadata for a list of IDs, returning a map id -> name.
+   * Falls back to id if name cannot be fetched.
+   */
+  async getDatasets(ids: string[]): Promise<DatasetInfo[]> {
+    const limiter = pLimit(5);
+
+    const datasets = await Promise.all(
+      ids.map(async (id) => {
+        return limiter(() =>
+          this.phoenixClient
+            .GET('/v1/datasets/{id}', {
+              params: { path: { id } },
+            })
+            .then((response) => {
+              const dataset = response.data?.data;
+              if (!dataset) {
+                throw new Error(`Could not find dataset for ${id}`);
+              }
+              return dataset;
+            })
+        );
+      })
+    );
+
+    return datasets;
   }
 }

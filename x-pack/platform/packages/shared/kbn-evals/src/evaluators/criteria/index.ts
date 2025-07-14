@@ -91,11 +91,30 @@ export function createCriteriaEvaluator({
         },
       });
 
+      function normalize(val: number) {
+        if (!isFinite(val)) {
+          return 0;
+        }
+        return val;
+      }
+
+      const maxScore = sumBy(structuredCriteria, (criterion) => criterion.score);
+
+      const successful = results.filter((result) => result.result === 'PASS');
+      const failed = results.filter((result) => result.result === 'FAIL');
+      const notApplicable = results.filter((result) => result.result === 'N/A');
+
+      const totalScore = sumBy(successful.concat(notApplicable), (result) => result.score);
+
       return {
         explanation: null,
         label: null,
-        metadata: {},
-        score: sumBy(results, (result) => (result.result !== 'FAIL' ? result.score || 1 : 0)),
+        metadata: {
+          successful: sumBy(successful, (result) => result.score),
+          failed: sumBy(failed, (result) => result.score),
+          not_applicable: sumBy(notApplicable, (result) => result.score),
+        },
+        score: normalize(totalScore / maxScore),
       };
     },
     kind: 'LLM',

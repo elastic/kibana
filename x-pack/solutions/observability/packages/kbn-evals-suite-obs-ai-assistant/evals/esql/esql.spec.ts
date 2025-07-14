@@ -62,7 +62,7 @@ async function evaluateEsqlDataset({
     },
     [
       {
-        name: 'foo',
+        name: 'esql-evaluator',
         kind: 'LLM',
         evaluate: async ({ input, output, expected, metadata }) => {
           const result = await evaluators
