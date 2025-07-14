@@ -8,11 +8,12 @@
  */
 
 import React, { type FunctionComponent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isNil } from 'lodash';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PendingSave } from '../index_update_service';
 import { ValueInput } from './value_input';
 
@@ -90,7 +91,16 @@ export const getCellValueRenderer =
               if (e.key === 'Enter') onEditStartHandler();
             }}
           >
-            {cellValue}
+            {cellValue === undefined ? (
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="indexEditor.flyout.grid.cell.default"
+                  defaultMessage="Add value…"
+                />
+              </EuiText>
+            ) : (
+              cellValue
+            )}
           </div>
         </EuiFlexItem>
         {isPendingToBeSaved && isIndexCreated ? (
