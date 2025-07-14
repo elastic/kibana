@@ -11,6 +11,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
 
@@ -61,6 +62,7 @@ import { handleState } from './state_machine';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
+  alertingRulesClient: RulesClientApi;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;

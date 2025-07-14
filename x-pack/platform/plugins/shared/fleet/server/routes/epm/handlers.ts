@@ -540,8 +540,12 @@ export const deletePackageHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const alertingRulesClient = await appContextService
+    .getAlerting()
+    .getRulesClientWithRequest(request);
   const res = await removeInstallation({
     savedObjectsClient,
+    alertingRulesClient,
     pkgName,
     pkgVersion,
     esClient,

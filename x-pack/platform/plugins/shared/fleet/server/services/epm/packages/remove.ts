@@ -6,11 +6,11 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { differenceBy, chunk } from 'lodash';
+import { differenceBy, chunk, partition } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
-
 import { SavedObjectsClient } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -60,13 +60,14 @@ const MAX_ASSETS_TO_DELETE = 1000;
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
+  alertingRulesClient: RulesClientApi;
   pkgName: string;
   pkgVersion?: string;
   esClient: ElasticsearchClient;
   force?: boolean;
   installSource?: InstallSource;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
+  const { savedObjectsClient, alertingRulesClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) {
     throw new PackageRemovalError(`${pkgName} is not installed`);
@@ -103,7 +104,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(savedObjectsClient, installation, esClient);
+  await deleteAssets(savedObjectsClient, alertingRulesClient, installation, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -144,11 +145,13 @@ export async function removeInstallation(options: {
  */
 export async function deleteKibanaAssets({
   installedObjects,
+  alertingRulesClient,
   packageSpecConditions,
   logger,
   spaceId = DEFAULT_SPACE_ID,
 }: {
   installedObjects: KibanaAssetReference[];
+  alertingRulesClient: RulesClientApi;
   logger: Logger;
   packageSpecConditions?: PackageSpecConditions;
   spaceId?: string;
@@ -170,8 +173,16 @@ export async function deleteKibanaAssets({
   // only in 8.x or later. If so, we can skip SO resolution step altogether
   // and delete the assets directly. Otherwise, we need to resolve the assets
   // which might create high memory pressure if a package has a lot of assets.
+  const [alertAssets, soAssets] = partition(
+    installedObjects,
+    (installedObject) => installedObject.type === 'alert'
+  );
+
   if (minKibana && minKibana.major >= 8) {
-    await bulkDeleteSavedObjects(installedObjects, namespace, savedObjectsClient, logger);
+    await Promise.all([
+      bulkDeleteSavedObjects(soAssets, namespace, savedObjectsClient, logger),
+      bulkDeleteAlertRules(alertAssets, alertingRulesClient, logger),
+    ]);
   } else {
     const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
       installedObjects,
@@ -220,6 +231,30 @@ async function bulkDeleteSavedObjects(
   // requests.
   for (const assetsChunk of chunk(assetsToDelete, MAX_ASSETS_TO_DELETE)) {
     await savedObjectsClient.bulkDelete(assetsChunk, { namespace });
+  }
+}
+
+async function bulkDeleteAlertRules(
+  alertRulesToDelete: Array<{ id: string; type: string }>,
+  alertingRulesClient: RulesClientApi,
+  logger: Logger
+) {
+  logger.debug(`Starting bulk deletion of alert rules`);
+  for (const alertRule of alertRulesToDelete) {
+    logger.debug(`Delete asset - id: ${alertRule?.id}, type: ${alertRule?.type},`);
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'delete',
+      id: alertRule.id,
+      savedObjectType: alertRule.type,
+    });
+  }
+  // Delete alert rules in chunks to avoid high memory pressure. This is mostly
+  // relevant for packages containing many assets, as large payload and response
+  // objects are created in memory during the delete operation. While chunking
+  // may work slower, it allows garbage collection to clean up memory between
+  // requests.
+  for (const alertRulesChunk of chunk(alertRulesToDelete, MAX_ASSETS_TO_DELETE)) {
+    await alertingRulesClient.bulkDeleteRules({ ids: alertRulesChunk.map(({ id }) => id) });
   }
 }
 
@@ -340,6 +375,7 @@ export async function deletePrerequisiteAssets(
 
 async function deleteAssets(
   savedObjectsClient: SavedObjectsClientContract,
+  alertingRulesClient: RulesClientApi,
   {
     installed_es: installedEs,
     installed_kibana: installedKibana,
@@ -378,6 +414,7 @@ async function deleteAssets(
       ...deleteESAssets(otherAssets, esClient),
       deleteKibanaAssets({
         installedObjects: installedKibana,
+        alertingRulesClient,
         spaceId,
         packageSpecConditions: packageInfo?.conditions,
         logger,
@@ -385,6 +422,7 @@ async function deleteAssets(
       Object.entries(installedInAdditionalSpacesKibana).map(([additionalSpaceId, kibanaAssets]) =>
         deleteKibanaAssets({
           installedObjects: kibanaAssets,
+          alertingRulesClient,
           spaceId: additionalSpaceId,
           logger,
           packageSpecConditions: packageInfo?.conditions,
@@ -423,10 +461,12 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
 
 export async function deleteKibanaSavedObjectsAssets({
   savedObjectsClient,
+  alertingRulesClient,
   installedPkg,
   spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  alertingRulesClient: RulesClientApi;
   installedPkg: SavedObject<Installation>;
   spaceId?: string;
 }) {
@@ -458,6 +498,7 @@ export async function deleteKibanaSavedObjectsAssets({
 
     await deleteKibanaAssets({
       installedObjects: assetsToDelete,
+      alertingRulesClient,
       spaceId: spaceIdToDelete,
       packageSpecConditions: packageInfo?.conditions,
       logger,
@@ -525,9 +566,10 @@ export async function cleanupAssets(
   installationToDelete: Installation,
   originalInstallation: Installation,
   esClient: ElasticsearchClient,
+  alertingRulesClient: RulesClientApi,
   soClient: SavedObjectsClientContract
 ) {
-  await deleteAssets(soClient, installationToDelete, esClient);
+  await deleteAssets(soClient, alertingRulesClient, installationToDelete, esClient);
 
   const {
     installed_es: installedEs,
