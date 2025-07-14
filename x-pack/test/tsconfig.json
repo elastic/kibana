@@ -108,5 +108,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/response-ops-rule-params",
     "@kbn/ml-string-hash",
+    "@kbn/uptime-plugin",
   ]
 }
