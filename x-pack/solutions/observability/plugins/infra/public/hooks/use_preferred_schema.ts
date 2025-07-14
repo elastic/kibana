@@ -9,7 +9,7 @@ import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 
 const usePreferredSchema = () => {
-  const [preferredSchema, setPreferredSchema] = useState<Array<'ecs' | 'semconv'>>(['ecs']);
+  const [preferredSchema, setPreferredSchema] = useState<Array<'ecs' | 'semconv'>>(['semconv']);
 
   const updatePreferredSchema = useCallback((schema: Array<'ecs' | 'semconv'>) => {
     setPreferredSchema(schema);
