@@ -2264,7 +2264,8 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": ["typings/@emotion"],
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
