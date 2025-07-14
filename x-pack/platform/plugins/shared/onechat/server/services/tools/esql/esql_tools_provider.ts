@@ -79,7 +79,7 @@ export const createEsqlToolClient = ({
         throw createBadRequestError(`Invalid configuration for esql tool: ${e.message}`);
       }
 
-      await validateConfig(createRequest.configuration)
+      await validateConfig(createRequest.configuration);
       const tool = await toolClient.create({
         ...createRequest,
         type: ToolType.esql,
@@ -96,7 +96,7 @@ export const createEsqlToolClient = ({
       const existingTool = await this.get(toolId);
       const query = updateRequest.configuration?.query ?? existingTool.configuration.query;
       const params = updateRequest.configuration?.params ?? existingTool.configuration.params;
-      
+
       await validateConfig({ query, params });
 
       const tool = await toolClient.update(toolId, updateRequest);
