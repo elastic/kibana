@@ -24,101 +24,76 @@ export const LOCAL_LOCATION = {
   isServiceManaged: true,
 };
 
-const runTests = (
-  { getService }: DeploymentAgnosticFtrProviderContext,
-  { isPublicEndpoint } = { isPublicEndpoint: false }
-) => {
-  const supertest = getService('supertestWithoutAuth');
-  const kibanaServer = getService('kibanaServer');
-  const samlAuth = getService('samlAuth');
-
-  const monitorTestService = new SyntheticsMonitorTestService(getService);
-
-  let newMonitor: MonitorFields;
-  let editorUser: RoleCredentials;
-
-  before(async () => {
-    await kibanaServer.savedObjects.cleanStandardList();
-    editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-    await supertest
-      .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-      .set(editorUser.apiKeyHeader)
-      .set(samlAuth.getInternalRequestHeader())
-      .expect(200);
-    newMonitor = getFixtureJson('http_monitor');
-  });
-  after(async () => {
-    await samlAuth.invalidateM2mApiKeyWithRoleScope(editorUser);
-  });
-
-  it('runs test manually', async () => {
-    const resp = await monitorTestService.addMonitor(newMonitor, editorUser);
-
-    const res = await supertest
-      .post(
-        `${
-          isPublicEndpoint
-            ? SYNTHETICS_API_URLS.TEST_NOW_MONITOR
-            : SYNTHETICS_API_URLS.TRIGGER_MONITOR
-        }` + `/${resp.id}`
-      )
-      .set(editorUser.apiKeyHeader)
-      .set(samlAuth.getInternalRequestHeader())
-      .expect(200);
-
-    const result = res.body;
-    expect(typeof result.testRunId).to.eql('string');
-    expect(typeof result.configId).to.eql('string');
-    expect(result.schedule).to.eql({ number: '5', unit: 'm' });
-    expect(result.locations).to.eql([LOCAL_LOCATION]);
-
-    expect(omit(result.monitor, ['id', 'config_id'])).to.eql(omit(newMonitor, ['id', 'config_id']));
-  });
-
-  it('works in non default space', async () => {
-    const { SPACE_ID } = await monitorTestService.addNewSpace();
-
-    const resp = await supertest
-      .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-      .set(editorUser.apiKeyHeader)
-      .set(samlAuth.getInternalRequestHeader())
-      .send({ ...newMonitor, spaces: [] });
-
-    expect(resp.status).to.eql(200, JSON.stringify(resp.body));
-
-    const res = await supertest
-      .post(
-        `/s/${SPACE_ID}${
-          isPublicEndpoint
-            ? SYNTHETICS_API_URLS.TEST_NOW_MONITOR
-            : SYNTHETICS_API_URLS.TRIGGER_MONITOR
-        }/${resp.body.id}`
-      )
-      .set(editorUser.apiKeyHeader)
-      .set(samlAuth.getInternalRequestHeader())
-      .expect(200);
-
-    const result = res.body;
-    expect(typeof result.testRunId).to.eql('string');
-    expect(typeof result.configId).to.eql('string');
-    expect(result.schedule).to.eql({ number: '5', unit: 'm' });
-    expect(result.locations).to.eql([LOCAL_LOCATION]);
-
-    expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
-      omit({ ...newMonitor, spaces: [SPACE_ID] }, ['id', 'config_id'])
-    );
-  });
-};
-
-export default function (context: DeploymentAgnosticFtrProviderContext) {
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('RunTestManually', function () {
     this.tags(['skipMKI', 'skipCloud']);
 
-    describe('Internal endpoint', () => {
-      runTests(context);
+    const supertest = getService('supertestWithoutAuth');
+    const kibanaServer = getService('kibanaServer');
+    const samlAuth = getService('samlAuth');
+
+    const monitorTestService = new SyntheticsMonitorTestService(getService);
+
+    let newMonitor: MonitorFields;
+    let editorUser: RoleCredentials;
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await supertest
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+      newMonitor = getFixtureJson('http_monitor');
     });
-    describe('Public endpoint', () => {
-      runTests(context, { isPublicEndpoint: true });
+
+    it('runs test manually', async () => {
+      const resp = await monitorTestService.addMonitor(newMonitor, editorUser);
+
+      const res = await supertest
+        .post(SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${resp.id}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      const result = res.body;
+      expect(typeof result.testRunId).to.eql('string');
+      expect(typeof result.configId).to.eql('string');
+      expect(result.schedule).to.eql({ number: '5', unit: 'm' });
+      expect(result.locations).to.eql([LOCAL_LOCATION]);
+
+      expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
+        omit(newMonitor, ['id', 'config_id'])
+      );
+    });
+
+    it('works in non default space', async () => {
+      const { SPACE_ID } = await monitorTestService.addNewSpace();
+
+      const resp = await supertest
+        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ ...newMonitor, spaces: [] });
+
+      expect(resp.status).to.eql(200, JSON.stringify(resp.body));
+
+      const res = await supertest
+        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.TEST_NOW_MONITOR}/${resp.body.id}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      const result = res.body;
+      expect(typeof result.testRunId).to.eql('string');
+      expect(typeof result.configId).to.eql('string');
+      expect(result.schedule).to.eql({ number: '5', unit: 'm' });
+      expect(result.locations).to.eql([LOCAL_LOCATION]);
+
+      expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
+        omit({ ...newMonitor, spaces: [SPACE_ID] }, ['id', 'config_id'])
+      );
     });
   });
 }

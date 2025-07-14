@@ -19,7 +19,7 @@ export const triggerTestNowMonitor = async ({
   spaceId?: string;
 }): Promise<TestNowResponse | undefined> => {
   return await apiService.post(
-    SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${configId}`,
+    SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${configId}`,
     undefined,
     undefined,
     {

@@ -18,11 +18,14 @@ import { getMonitorNotFoundResponse } from './service_errors';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'POST',
-  path: SYNTHETICS_API_URLS.TRIGGER_MONITOR + '/{monitorId}',
-  validate: {
-    params: schema.object({
-      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
-    }),
+  path: SYNTHETICS_API_URLS.TEST_NOW_MONITOR + '/{monitorId}',
+  validate: {},
+  validation: {
+    request: {
+      params: schema.object({
+        monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+      }),
+    },
   },
   handler: async (routeContext) => {
     const { monitorId } = routeContext.request.params;
