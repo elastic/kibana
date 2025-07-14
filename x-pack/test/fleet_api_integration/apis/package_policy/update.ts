@@ -28,8 +28,14 @@ export default function (providerContext: FtrProviderContext) {
   describe('Package Policy - update', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
+    let managedAgentPolicyId: string;
     let packagePolicyId: string;
+    let packagePolicyId2: string;
+    let packagePolicyId3: string;
+    let packagePolicySecretsId: string;
+    let packagePolicySecrets: any;
     let endpointPackagePolicyId: string;
+    let inputOnlyPackagePolicyId: string;
 
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
