@@ -43,7 +43,7 @@ export const observabilityAIAssistantFtrConfigs = {
       'logging.loggers': [observabilityAIAssistantDebugLogger],
       'plugin-path': path.resolve(
         __dirname,
-        '../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
+        '../../../../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
       ),
     },
   },
