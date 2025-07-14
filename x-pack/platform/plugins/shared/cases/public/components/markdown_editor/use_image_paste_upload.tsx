@@ -39,6 +39,13 @@ const IMAGE_PATH = (kindId: string, id: string) => `/api/files/files/${kindId}/$
 export const markdownImage = (fileName: string, kindId: string, id: string, ext?: string) =>
   `![${fileName}${ext ? `.${ext}` : ''}](${IMAGE_PATH(kindId, id)})`;
 
+function getTextarea(editorRef: React.ForwardedRef<MarkdownEditorRef | null>) {
+  if (!editorRef || typeof editorRef === 'function' || !editorRef.current) {
+    return null;
+  }
+  return editorRef.current.textarea;
+}
+
 const ALLOWED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
 
 export function useImagePasteUpload({
@@ -68,8 +75,7 @@ export function useImagePasteUpload({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadPlaceholder, setUploadPlaceholder] = useState<string | null>(null);
   const [uploadingFileName, setUploadingFileName] = useState<string | null>(null);
-  const textarea =
-    !editorRef || typeof editorRef === 'function' ? null : editorRef.current?.textarea ?? null;
+  const textarea = getTextarea(editorRef);
 
   const replacePlaceholder = useCallback(
     (file: DoneNotification) => {
