@@ -58,7 +58,7 @@ export class ContentMagementWrapper implements PersistenceAPI {
       });
     } catch (e) {
       if (e.body?.statusCode === 404) {
-        throw new SavedObjectNotFound('data view', id);
+        throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
       } else {
         throw e;
       }

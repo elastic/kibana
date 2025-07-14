@@ -400,7 +400,17 @@ export default function Expressions(props: Props) {
       {paramsError && !triggerResetDataView ? (
         <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
           <p>
-            {paramsError.message}
+            {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
+              defaultMessage: 'Error fetching search source',
+            })}
+            <br />
+            {i18n.translate(
+              'xpack.observability.customThreshold.rule.alertFlyout.error.messageDescription',
+              {
+                defaultMessage: 'Could not locate that data view (id: {id})',
+                values: { id: paramsError?.message?.split('(id: ')[1].substring(0, 36) }, // Extract id from error message
+              }
+            )}
             <br />
             <EuiButtonEmpty
               data-test-subj="thresholdRuleExpressionErrorButton"

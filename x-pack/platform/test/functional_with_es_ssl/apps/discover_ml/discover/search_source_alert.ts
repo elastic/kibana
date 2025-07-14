@@ -631,7 +631,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await toasts.getCount()).to.be.equal(1);
       const content = await toasts.getContentByIndex(1);
       expect(content).to.equal(
-        `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId})`
+        `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
       );
     });
 
