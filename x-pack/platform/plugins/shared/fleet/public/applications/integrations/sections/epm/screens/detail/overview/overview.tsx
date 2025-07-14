@@ -309,7 +309,9 @@ export const OverviewPage: React.FC<Props> = memo(
     const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
     const hideDashboards = config?.hideDashboards;
 
-    const showLogsEssentialsCallout = isEqual(config?.internal.excludeDataStreamTypes, ['metrics']);
+    const showLogsEssentialsCallout = isEqual(config?.internal?.excludeDataStreamTypes, [
+      'metrics',
+    ]);
 
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">

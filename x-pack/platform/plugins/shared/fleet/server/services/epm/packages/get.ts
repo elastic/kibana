@@ -204,13 +204,14 @@ export async function getPackages(
 function filterOutExcludedDataStreamTypes(
   packageList: Array<Installable<any>>
 ): Array<Installable<any>> {
-  const excludeDataStreamTypes = appContextService.getConfig().internal.excludeDataStreamTypes;
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
   if (excludeDataStreamTypes.length > 0) {
     // filter out packages where all data streams have excluded types e.g. metrics
     return packageList.filter((pkg) => {
       const shouldInclude =
         (pkg.data_streams || [])?.length === 0 ||
-        pkg.data_streams?.some((dataStream) => {
+        pkg.data_streams?.some((dataStream: any) => {
           return !excludeDataStreamTypes.includes(dataStream.type);
         });
       // if (!shouldInclude) {
@@ -579,7 +580,8 @@ export async function getPackageInfo({
 }
 
 function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | RegistryPackage) {
-  const excludeDataStreamTypes = appContextService.getConfig().internal.excludeDataStreamTypes;
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
   let filteredDataStreams = packageInfo.data_streams;
   let filteredPolicyTemplates = packageInfo.policy_templates;
 
@@ -588,19 +590,22 @@ function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | 
       (dataStream) => !excludeDataStreamTypes.includes(dataStream.type)
     );
     // filter out matching types e.g. nginx/metrics
-    filteredPolicyTemplates = packageInfo.policy_templates?.reduce((acc, policyTemplate) => {
-      const filteredInputs = policyTemplate.inputs?.filter((input) => {
-        const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
-          input.type.includes(excludedType)
-        );
-        // if (!shouldInclude) {
-        //   console.log('Excluding input type: ' + input.type + " for policy template: " + policyTemplate.name);
-        // }
-        return shouldInclude;
-      });
-      acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
-      return acc;
-    }, []);
+    filteredPolicyTemplates = packageInfo.policy_templates?.reduce(
+      (acc: any[], policyTemplate: any) => {
+        const filteredInputs = policyTemplate.inputs?.filter((input: any) => {
+          const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
+            input.type.includes(excludedType)
+          );
+          // if (!shouldInclude) {
+          //   console.log('Excluding input type: ' + input.type + " for policy template: " + policyTemplate.name);
+          // }
+          return shouldInclude;
+        });
+        acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
+        return acc;
+      },
+      []
+    );
   }
 
   return { filteredDataStreams, filteredPolicyTemplates };
