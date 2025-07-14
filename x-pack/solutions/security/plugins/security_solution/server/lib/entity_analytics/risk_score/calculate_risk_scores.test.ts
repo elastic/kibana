@@ -170,6 +170,7 @@ describe('calculateRiskScores()', () => {
       });
 
       it('should add the filter when excludeAlertStatuses is not empty', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         esClient.search as jest.Mock;
         params = { ...params, excludeAlertStatuses: ['closed'] };
         await calculateRiskScores(params);

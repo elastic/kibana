@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-  EntriesArray,
-} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  type ExceptionListItemSchema,
+  type CreateExceptionListItemSchema,
+  type UpdateExceptionListItemSchema,
+  type EntriesArray,
   ListOperatorTypeEnum,
   type ListOperatorType,
 } from '@kbn/securitysolution-io-ts-list-types';

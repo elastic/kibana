@@ -15,10 +15,10 @@ import type {
   InitEntityStoreResponse,
 } from '../../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import type { EntityType } from '../../../../../common/api/entity_analytics';
 import {
   type DeleteEntityEngineResponse,
   type StopEntityEngineResponse,
+  type EntityType,
 } from '../../../../../common/api/entity_analytics';
 import { useEntityStoreRoutes } from '../../../api/entity_store';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';

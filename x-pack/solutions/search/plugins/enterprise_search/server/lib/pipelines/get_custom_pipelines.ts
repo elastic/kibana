@@ -18,6 +18,7 @@ export const getCustomPipelines = async (
     });
 
     return pipelinesResponse;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // If we can't find anything, we return an empty object
     return {};

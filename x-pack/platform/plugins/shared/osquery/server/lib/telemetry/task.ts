@@ -104,7 +104,6 @@ export class OsqueryTelemetryTask {
                 state: updatedState,
               };
             },
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
             cancel: async () => {},
           };
         },

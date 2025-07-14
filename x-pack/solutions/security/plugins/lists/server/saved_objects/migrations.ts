@@ -21,6 +21,7 @@ import {
 
 import { ExceptionListSoSchema } from '../schemas/saved_objects';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const entryType = t.union([entry, entriesNested]);
 type EntryType = t.TypeOf<typeof entryType>;
 
