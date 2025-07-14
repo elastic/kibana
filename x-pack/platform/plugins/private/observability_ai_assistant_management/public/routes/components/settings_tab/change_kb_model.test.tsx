@@ -161,7 +161,7 @@ describe('ChangeKbModel', () => {
         setupMockGetModelOptions([
           {
             key: inferenceId,
-            label: elserDescription,
+            label: elserTitle,
             description: elserDescription,
           },
           {
@@ -187,7 +187,7 @@ describe('ChangeKbModel', () => {
         renderComponent(mockKb);
 
         const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
-        expect(dropdown).toHaveTextContent(elserDescription);
+        expect(dropdown).toHaveTextContent(elserTitle);
       });
 
       it('disables the `Update` button when the knowledge base is installed with ELSER and the current inference id is ${LEGACY_CUSTOM_INFERENCE_ID}', () => {
