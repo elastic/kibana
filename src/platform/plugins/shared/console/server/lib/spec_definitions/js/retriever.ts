@@ -52,6 +52,9 @@ export const retriever = (specService: SpecDefinitionsService) => {
           },
         ],
       },
+      query: '',
+      fields: [],
+      normalizer: { __one_of: ['minmax', 'l2_norm', 'none'] },
     },
     rescorer: {
       __template: {
@@ -91,6 +94,8 @@ export const retriever = (specService: SpecDefinitionsService) => {
       },
       rank_constant: 60,
       rank_window_size: 100,
+      query: '',
+      fields: [],
     },
     rule: {
       __template: {
