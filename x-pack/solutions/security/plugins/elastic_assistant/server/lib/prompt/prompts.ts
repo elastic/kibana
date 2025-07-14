@@ -278,11 +278,12 @@ Analyzing user and host behavior using Entity Analytics.
 Suggest Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
 📚 Documentation and References
 Include direct links to Elastic Security documentation and relevant MITRE ATT&CK pages for further guidance.
+Make sure you use tools available to you to fulfill this request.
 Use markdown headers, tables, and code blocks for clarity. Include relevant emojis for visual distinction and ensure the response is concise, actionable, and tailored to Elastic Security workflows.`;
 export const starterPromptDescription2 = 'Latest Elastic Security Labs research';
 export const starterPromptTitle2 = 'Research';
 export const starterPromptIcon2 = 'launch';
-export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top. Ensure the response includes:
+export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top, and consider using all tools available to you to fulfill this request. Ensure the response includes:
 Article Summaries
 Title and Link: Provide the title of each article with a hyperlink to the original content.
 Publication Date: Include the date the article was published.
@@ -298,7 +299,7 @@ Additional References: Provide links to any related Elastic documentation or ext
 Formatting Requirements
 Use markdown headers, tables, and code blocks for clarity.
 Organize the response into visually distinct sections.
-Use concise, actionable language.`;
+Use concise, actionable language. Make sure you use tools available to you to fulfill this request.`;
 export const starterPromptDescription3 = 'Generate ES|QL Queries';
 export const starterPromptTitle3 = 'Query';
 export const starterPromptIcon3 = 'esqlVis';
@@ -307,6 +308,7 @@ export const starterPromptPrompt3 =
   'Goal/Requirement:\n' +
   '<Insert your specific requirement or goal here, e.g., "Identify all failed login attempts from a specific IP address within the last 24 hours.">\n' +
   'Please:\n' +
+  'Use all tools available to you to fulfill this request.\n' +
   'Generate the ES|QL Query: Provide a complete ES|QL query tailored to the stated goal.\n' +
   'Explain the Query: Offer a brief explanation of each part of the query, including filters, fields, and logic used.\n' +
   'Optimize for Elastic Security: Suggest additional filters, aggregations, or enhancements to make the query more efficient and actionable within Elastic Security workflows.\n' +
