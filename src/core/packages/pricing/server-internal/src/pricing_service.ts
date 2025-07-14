@@ -91,19 +91,7 @@ export class PricingService implements CoreService<PricingServiceSetup, PricingS
       );
     }
 
-    return {
-      /**
-       * Checks if a specific feature is available in the current pricing tier configuration.
-       */
-      isFeatureAvailable: this.tiersClient.isFeatureAvailable,
-      /**
-       * @deprecated Don't rely on this API for customizing serverless tiers. Register a dedicated feature and use `isFeatureAvailable` instead.
-       */
-      product:
-        this.pricingConfig.tiers.enabled && this.pricingConfig.tiers.products != null
-          ? this.pricingConfig.tiers.products[0]
-          : undefined,
-    };
+    return this.tiersClient;
   }
 
   public stop() {

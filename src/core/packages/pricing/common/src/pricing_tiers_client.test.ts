@@ -113,14 +113,28 @@ describe('PricingTiersClient', () => {
   });
   describe('product', () => {
     describe('when tiers are disabled', () => {
-      beforeEach(() => {
+      it('returns undefined when no products are configured', () => {
         tiersConfig = {
           enabled: false,
           products: undefined,
         };
         client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+        expect(client.product()).toBeUndefined();
       });
-      it('returns undefined', () => {
+      it('returns undefined when products are an empty array', () => {
+        tiersConfig = {
+          enabled: false,
+          products: [],
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
+        expect(client.product()).toBeUndefined();
+      });
+      it('returns undefined when products are configured but pricing tiers are disabled', () => {
+        tiersConfig = {
+          enabled: false,
+          products: [{ name: 'observability', tier: 'complete' }],
+        };
+        client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
         expect(client.product()).toBeUndefined();
       });
     });
