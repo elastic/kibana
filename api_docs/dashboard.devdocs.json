@@ -1868,6 +1868,21 @@
       },
       {
         "parentPluginId": "dashboard",
+        "id": "def-server.DashboardSearchOut",
+        "type": "Type",
+        "tags": [],
+        "label": "DashboardSearchOut",
+        "description": [],
+        "signature": [
+          "{ hits: Readonly<{ error?: Readonly<{ metadata?: Readonly<{} & {}> | undefined; } & { error: string; message: string; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ tags?: string[] | undefined; } & { title: string; description: string; timeRestore: boolean; }>; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>[]; pagination: { total: number; cursor?: string | undefined; }; }"
+        ],
+        "path": "src/platform/plugins/shared/dashboard/server/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
         "id": "def-server.DashboardSection",
         "type": "Type",
         "tags": [],
