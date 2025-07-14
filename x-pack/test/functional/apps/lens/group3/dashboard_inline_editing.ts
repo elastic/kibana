@@ -62,6 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('applyFlyoutButton');
       await dashboard.waitForRenderComplete();
       const data = await lens.getMetricVisualizationData();
+      const normalizedData = data.map((item) => ({
+        ...item,
+        ...(item.extraText && { extraText: item.extraText.replace(/\n/g, ' ') }),
+      }));
       const expectedData = [
         {
           title: 'Average of bytes',
@@ -75,8 +79,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       ];
 
-      log.debug(data);
-      expect(data).to.eql(expectedData);
+      log.debug(normalizedData);
+      expect(normalizedData).to.eql(expectedData);
 
       await timeToVisualize.resetNewDashboard();
     });
