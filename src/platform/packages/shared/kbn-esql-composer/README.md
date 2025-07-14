@@ -233,20 +233,6 @@ from('logs-*')
 
 ```
 
-`EVAL`  with named parameters for dynamic field names
-
-```ts
-import { from, evaluate } from '@kbn/esql-composer';
-
-from('logs-*')
-  .pipe(
-    evaluate('latestTs = MAX(??ts)', {
-      ts: '@timestamp',
-    })
-  )
-  .asRequest();
-```
-
 Output: 
 
 ```sql
