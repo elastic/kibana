@@ -44,7 +44,7 @@ const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
     },
   },
   {
-    field: 'meta.tags',
+    field: 'tags',
     name: i18n.translate('xpack.onechat.tools.tagsLabel', {
       defaultMessage: 'Tags',
     }),
