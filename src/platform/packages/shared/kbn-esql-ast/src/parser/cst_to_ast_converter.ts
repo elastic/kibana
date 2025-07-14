@@ -325,13 +325,6 @@ export class CstToAstConverter {
     if (rerankCommandCtx) {
       return this.fromRerankCommand(rerankCommandCtx);
     }
-
-    const rrfCommandCtx = ctx.rrfCommand();
-
-    if (rrfCommandCtx) {
-      return this.fromRrfCommand(rrfCommandCtx);
-    }
-
     const fuseCommandCtx = ctx.fuseCommand();
 
     if (fuseCommandCtx) {
@@ -781,14 +774,6 @@ export class CstToAstConverter {
 
   private fromRerankCommand(ctx: cst.RerankCommandContext): ast.ESQLAstRerankCommand {
     const command = createRerankCommand(ctx);
-
-    return command;
-  }
-
-  // ---------------------------------------------------------------------- RRF
-
-  private fromRrfCommand(ctx: cst.RrfCommandContext): ast.ESQLCommand<'rrf'> {
-    const command = this.createCommand('rrf', ctx);
 
     return command;
   }

@@ -14,9 +14,11 @@ import { createCommand, textExistsAndIsValid } from '../factories';
 import { getEnrichClauses, getMatchField } from '../walkers';
 
 const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
-  const policyName = ctx._policyName;
+  const policyNameCtx = ctx._policyName;
+  const policyName = policyNameCtx?.ENRICH_POLICY_NAME() || policyNameCtx?.QUOTED_STRING();
+  // const policyName = ctx._policyName;
 
-  if (!policyName || !textExistsAndIsValid(policyName.text)) {
+  if (!policyName || !textExistsAndIsValid(policyName.getText())) {
     const source = Builder.expression.source.node(
       {
         sourceType: 'policy',
@@ -27,13 +29,13 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
       {
         incomplete: true,
         text: '',
-        location: { min: policyName.start, max: policyName.stop },
+        location: { min: policyNameCtx.start.start, max: policyNameCtx.start.stop },
       }
     );
     return source;
   }
 
-  const name = ctx._policyName.text;
+  const name = policyName.getText();
   const colonIndex = name.indexOf(':');
   const withPrefix = colonIndex !== -1;
   const incomplete = false;
@@ -53,7 +55,10 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
       {
         text: prefixName,
         incomplete: false,
-        location: { min: policyName.start, max: policyName.start + prefixName.length - 1 },
+        location: {
+          min: policyNameCtx.start.start,
+          max: policyNameCtx.start.start + prefixName.length - 1,
+        },
       }
     );
     index = Builder.expression.literal.string(
@@ -65,8 +70,8 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
         text: indexName,
         incomplete: false,
         location: {
-          min: policyName.start + prefixName.length + 1,
-          max: policyName.stop,
+          min: policyNameCtx.start.start + prefixName.length + 1,
+          max: policyNameCtx.start.stop,
         },
       }
     );
@@ -79,7 +84,7 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
       {
         text: name,
         incomplete: false,
-        location: { min: policyName.start, max: policyName.stop },
+        location: { min: policyNameCtx.start.start, max: policyNameCtx.start.stop },
       }
     );
   }
@@ -95,8 +100,8 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
       incomplete,
       text: name,
       location: {
-        min: policyName.start,
-        max: policyName.stop,
+        min: policyNameCtx.start.start,
+        max: policyNameCtx.start.stop,
       },
     }
   );
