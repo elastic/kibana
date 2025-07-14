@@ -12,9 +12,11 @@ import type { ESQLAstExpression, ESQLProperNode } from '../types';
 
 export type SynthGenerator<N extends ESQLProperNode> = (src: string, opts?: ParseOptions) => N;
 
+export type SynthTemplateHole = ESQLAstExpression | ESQLAstExpression[] | string | number | [];
+
 export type SynthTaggedTemplate<N extends ESQLProperNode> = (
   template: TemplateStringsArray,
-  ...params: Array<ESQLAstExpression | ESQLAstExpression[] | string | []>
+  ...params: SynthTemplateHole[]
 ) => N;
 
 export type SynthTaggedTemplateWithOpts<N extends ESQLProperNode> = (

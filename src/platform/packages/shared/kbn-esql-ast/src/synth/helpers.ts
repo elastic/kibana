@@ -9,9 +9,14 @@
 
 import { Builder } from '../builder';
 import { Walker, WalkerAstNode } from '../walker/walker';
-import { BasicPrettyPrinter } from '../pretty_print';
+import { BasicPrettyPrinter, LeafPrinter } from '../pretty_print';
 import type { ESQLProperNode } from '../types';
-import type { SynthGenerator, SynthMethod, SynthTaggedTemplateWithOpts } from './types';
+import type {
+  SynthGenerator,
+  SynthMethod,
+  SynthTaggedTemplateWithOpts,
+  SynthTemplateHole,
+} from './types';
 import type { ParseOptions } from '../parser';
 
 const serialize = (node: ESQLProperNode): string => {
@@ -49,29 +54,55 @@ export const makeSynthNode = (ast: WalkerAstNode) => {
   });
 };
 
+const holeToFragment = (hole: SynthTemplateHole): string => {
+  switch (typeof hole) {
+    case 'string': {
+      return hole;
+    }
+    case 'number': {
+      const isInteger = Math.round(hole) === hole;
+      const node = isInteger
+        ? Builder.expression.literal.integer(hole)
+        : Builder.expression.literal.decimal(hole);
+
+      return LeafPrinter.literal(node);
+    }
+    case 'object': {
+      if (Array.isArray(hole)) {
+        let list: string = '';
+
+        for (const item of hole) {
+          const serialized = typeof item === 'string' ? item : serialize(item);
+
+          list += (list ? ', ' : '') + serialized;
+        }
+
+        return list;
+      } else {
+        return serialize(hole);
+      }
+    }
+    default: {
+      throw new Error(`Unexpected hole synth hole: ${JSON.stringify(hole)}`);
+    }
+  }
+};
+
 export const createSynthMethod = <N extends ESQLProperNode>(
   generator: SynthGenerator<N>
 ): SynthMethod<N> => {
   const templateStringTag: SynthTaggedTemplateWithOpts<N> = ((opts?: ParseOptions) => {
-    return (template: TemplateStringsArray, ...params: Array<N | string>) => {
+    return (template: TemplateStringsArray, ...holes: SynthTemplateHole[]) => {
       let src = '';
       const length = template.length;
+
       for (let i = 0; i < length; i++) {
         src += template[i];
-        if (i < params.length) {
-          const param = params[i];
-          if (typeof param === 'string') src += param;
-          else if (Array.isArray(param)) {
-            let list: string = '';
+        if (i < holes.length) {
+          const hole = holes[i];
+          const fragment = holeToFragment(hole);
 
-            for (const item of param) {
-              const serialized = typeof item === 'string' ? item : serialize(item);
-
-              list += (list ? ', ' : '') + serialized;
-            }
-
-            src += list;
-          } else src += serialize(param);
+          src += fragment;
         }
       }
       return generator(src, opts);
