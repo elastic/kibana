@@ -1,6 +1,6 @@
 # ST_CONTAINS
 
-The ST_CONTAINS function determines if the first specified geometry encompasses the second one. This function is the inverse of the ST_WITHIN function.
+Determines whether the first geometry contains the second geometry. This is the inverse of the `ST_WITHIN` function.
 
 ## Syntax
 
@@ -10,19 +10,25 @@ The ST_CONTAINS function determines if the first specified geometry encompasses 
 
 #### geomA
 
-This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`.
+Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 #### geomB
 
-This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`.
+Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must have the same coordinate system as the first. Combining `geo_*` and `cartesian_*` parameters is not allowed.
 
 ## Examples
+
+Filtering city boundaries containing a specific polygon
 
 ```esql
 FROM airport_city_boundaries
 | WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))
 | KEEP abbrev, airport, region, city, city_location
 ```
+
+This query filters city boundaries that contain the specified polygon and keeps selected fields in the output.
+
+Filtering regional boundaries containing a specific polygon
 
 ```esql
 FROM regions
