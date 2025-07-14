@@ -190,7 +190,7 @@ const EmptySecurityFindingsPrompt = () => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiEmptyPrompt
-          style={{ padding: euiTheme.size.l }}
+          css={{ padding: euiTheme.size.l }}
           data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
           icon={
             <EmptyStatesIllustrationContainer>
@@ -266,7 +266,7 @@ const EmptySecurityFindingsPrompt = () => {
       {is3PSupportedPage && (
         <EuiFlexItem>
           <EuiEmptyPrompt
-            style={{ padding: euiTheme.size.l }}
+            css={{ padding: euiTheme.size.l }}
             data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT}
             icon={
               <EmptyStatesIllustrationContainer>
