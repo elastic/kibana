@@ -83,11 +83,7 @@ export function registerAPIRoutes({
               })
             ),
           }),
-          body: schema.object({
-            attributes: dashboardAttributesSchema,
-            references: schema.maybe(schema.arrayOf(referenceSchema)),
-            spaces: schema.maybe(schema.arrayOf(schema.string())),
-          }),
+          body: dashboardAttributesSchema,
         },
         response: {
           200: {
@@ -97,12 +93,14 @@ export function registerAPIRoutes({
       },
     },
     async (ctx, req, res) => {
+      console.log('Create route called---------', JSON.stringify(req.body, null, 2));
       const { id } = req.params;
-      const { attributes, references, spaces: initialNamespaces } = req.body;
+      const { references, spaces: initialNamespaces, ...attributes } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, LATEST_VERSION);
       let result;
+      console.log('title----------', attributes.title);
       try {
         ({ result } = await client.create(attributes, {
           id,
@@ -122,7 +120,7 @@ export function registerAPIRoutes({
           return res.forbidden();
         }
 
-        return res.badRequest();
+        return res.badRequest({ body: e });
       }
 
       return res.ok({ body: result });
@@ -167,6 +165,7 @@ export function registerAPIRoutes({
       let result;
       try {
         ({ result } = await client.update(req.params.id, attributes, { references }));
+        console.log('create result ++++----', JSON.stringify(result, null, 2));
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({

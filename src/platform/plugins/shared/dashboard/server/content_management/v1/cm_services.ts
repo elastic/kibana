@@ -28,7 +28,7 @@ const apiError = schema.object({
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
-const searchSourceSchema = schema.object(
+export const searchSourceSchema = schema.object(
   {
     type: schema.maybe(schema.string()),
     query: schema.maybe(
@@ -225,8 +225,7 @@ export const optionsSchema = schema.object({
   }),
 });
 
-// These are the attributes that are returned in search results
-export const searchResultsAttributesSchema = schema.object({
+export const searchResultsAttributes = {
   title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
   description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
   timeRestore: schema.boolean({
@@ -238,9 +237,12 @@ export const searchResultsAttributesSchema = schema.object({
       schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
     )
   ),
-});
+};
 
-export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
+// These are the attributes that are returned in search results
+export const searchResultsAttributesSchema = schema.object(searchResultsAttributes);
+
+export const dashboardRequestAttributes = {
   // Search
   kibanaSavedObjectMeta: schema.object(
     {
@@ -267,7 +269,12 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
-});
+};
+
+export const dashboardAttributes = {
+  ...searchResultsAttributes,
+  ...dashboardRequestAttributes,
+};
 
 export const referenceSchema = schema.object(
   {
@@ -277,6 +284,12 @@ export const referenceSchema = schema.object(
   },
   { unknowns: 'forbid' }
 );
+
+export const dashboardAttributesSchema = schema.object({
+  ...dashboardAttributes,
+  references: schema.maybe(schema.arrayOf(referenceSchema)),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
+});
 
 const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
   // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
@@ -324,6 +337,16 @@ export const dashboardItemSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+
+export const dashboardResponseMetaSchema = schema.object({
+  id: schema.string(),
+  type: schema.string(),
+  updatedAt: schema.string(),
+  createdAt: schema.string(),
+  updatedBy: schema.maybe(schema.string()),
+  createdBy: schema.maybe(schema.string()),
+  managed: schema.maybe(schema.boolean()),
+});
 
 export const dashboardSearchResultsSchema = dashboardItemSchema.extends({
   attributes: searchResultsAttributesSchema,
@@ -389,7 +412,8 @@ export const dashboardGetResultSchema = schema.object(
 
 export const dashboardCreateResultSchema = schema.object(
   {
-    item: dashboardItemSchema,
+    data: dashboardAttributesSchema,
+    meta: dashboardResponseMetaSchema,
   },
   { unknowns: 'forbid' }
 );

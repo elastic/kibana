@@ -156,10 +156,12 @@ export class ContentCrud<T = unknown> {
       data,
       options,
     });
-
+    console.log('create----', JSON.stringify(data, null, 2));
     try {
-      const result = await this.storage.create(ctx, data, options);
+      console.log('ctx----', JSON.stringify(ctx, null, 2));
 
+      const result = await this.storage.create(ctx, data, options);
+      console.log('create result----', JSON.stringify(result, null, 2));
       this.eventBus.emit({
         type: 'createItemSuccess',
         contentTypeId: this.contentTypeId,
