@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
+import { NO_BACKTICKS_ERROR_MESSAGE } from '@kbn/synthetics-plugin/common/translations/translations';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
@@ -225,6 +226,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             spaces: ['default'],
           })
         );
+      });
+
+      it('base browser monitor with backticks in inline_script', async () => {
+        const monitor = {
+          type: 'browser',
+          locations: [LOCAL_PUBLIC_LOCATION.id],
+          name: 'simple journey inline_script',
+          inline_script: 'step(`simple journey`, async () =\u003e {});',
+        };
+        const result = await addMonitorAPI(monitor, 400);
+
+        expect(result).eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Monitor is not a valid monitor of type browser',
+          attributes: {
+            details: NO_BACKTICKS_ERROR_MESSAGE,
+            payload: {
+              type: 'browser',
+              name: 'simple journey inline_script',
+              inline_script: 'step(`simple journey`, async () => {});',
+            },
+          },
+        });
       });
     });
   });
