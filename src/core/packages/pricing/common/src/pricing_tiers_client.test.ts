@@ -148,7 +148,7 @@ describe('PricingTiersClient', () => {
       });
       it('returns the current active product', () => {
         // Note this test and implementation assumes only one product is active at a time
-        expect(client.product()).toEqual({ name: 'observability', tier: 'complete' });
+        expect(client.product()).toEqual({ type: 'observability', tier: 'complete' });
       });
     });
   });

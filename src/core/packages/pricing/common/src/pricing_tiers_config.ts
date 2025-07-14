@@ -56,7 +56,7 @@ export const pricingProductsSchema = schema.oneOf([
  *
  * @public
  */
-export type PricingProduct = TypeOf<typeof pricingProductsSchema>;
+export type IPricingProduct = TypeOf<typeof pricingProductsSchema>;
 
 /**
  * Schema defining the pricing tiers configuration structure.
@@ -70,11 +70,31 @@ export const tiersConfigSchema = schema.object({
     traditional: schema.literal(false),
     options: { defaultValue: false },
   }),
-  /**
-   * Note: We only support a single active product at a time with maxSize: 1, even if the schema could allow for multiple active products in the future.
-   * If we ever change this assumption, we'll need to update the pricing service to support multiple active products.
-   */
-  products: schema.maybe(schema.arrayOf(pricingProductsSchema, { maxSize: 1 })),
+  products: schema.maybe(
+    schema.arrayOf(pricingProductsSchema, {
+      validate: (products) => {
+        if (products && products.length > 1) {
+          const firstTier = products[0].tier;
+          const allSameTier = products.every((product) => product.tier === firstTier);
+          if (!allSameTier) {
+            return `Invalid pricing configuration: All products must have the same tier. Found tiers: ${products
+              .map((p) => `${p.name}:${p.tier}`)
+              .join(', ')}`;
+          }
+
+          // Check for mixed product types (observability vs security-related)
+          const hasObservability = products.some((p) => p.name === 'observability');
+          const hasSecurityProducts = products.some((p) =>
+            ['ai_soc', 'endpoint', 'cloud', 'security'].includes(p.name)
+          );
+
+          if (hasObservability && hasSecurityProducts) {
+            return 'Cannot mix observability and security products in the same configuration';
+          }
+        }
+      },
+    })
+  ),
 });
 
 /**

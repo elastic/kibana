@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PricingProduct } from './pricing_tiers_config';
+import { IPricingProduct } from './pricing_tiers_config';
 
 /**
  * Represents a feature that is registered for specific pricing tiers.
@@ -20,7 +20,7 @@ export interface PricingProductFeature {
   /* Human-readable description of the feature. */
   description: string;
   /* List of products and tiers where this feature is available. */
-  products: PricingProduct[];
+  products: IPricingProduct[];
 }
 
 /**
@@ -42,3 +42,16 @@ export interface IPricingTiersClient {
    */
   product(): PricingProduct | undefined;
 }
+
+interface PricingProductSecurity {
+  type: 'security';
+  tier: 'search_ai_lake' | 'complete' | 'essentials';
+  product_lines: Array<'ai_soc' | 'endpoint' | 'cloud'>;
+}
+
+interface PricingProductObservability {
+  type: 'observability';
+  tier: 'complete' | 'logs_essentials';
+}
+
+export type PricingProduct = PricingProductSecurity | PricingProductObservability;

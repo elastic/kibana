@@ -29,10 +29,7 @@ describe('PricingService', () => {
     mockConfig = {
       tiers: {
         enabled: true,
-        products: [
-          { name: 'observability', tier: 'complete' },
-          { name: 'security', tier: 'essentials' },
-        ],
+        products: [{ name: 'observability', tier: 'complete' }],
       },
     };
 
@@ -167,7 +164,7 @@ describe('PricingService', () => {
       const start = service.start();
 
       // Mock config has observability complete enabled
-      expect(start.product).toMatchObject({ name: 'observability', tier: 'complete' });
+      expect(start.product()).toMatchObject({ type: 'observability', tier: 'complete' });
     });
   });
 });

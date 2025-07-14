@@ -8,8 +8,8 @@
  */
 
 import { isEqual } from 'lodash';
-import { IPricingTiersClient } from './types';
-import { PricingProduct, TiersConfig } from './pricing_tiers_config';
+import { IPricingTiersClient, PricingProduct } from './types';
+import { IPricingProduct, TiersConfig } from './pricing_tiers_config';
 import { ProductFeaturesRegistry } from './product_features_registry';
 
 /**
@@ -58,7 +58,7 @@ export class PricingTiersClient implements IPricingTiersClient {
    * @returns True if the product is active, false otherwise
    * @internal
    */
-  private isActiveProduct = (product: PricingProduct) => {
+  private isActiveProduct = (product: IPricingProduct) => {
     return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
   };
 
@@ -88,7 +88,39 @@ export class PricingTiersClient implements IPricingTiersClient {
     return false;
   };
 
-  public product = () => {
-    return this.tiers.enabled && this.tiers.products != null ? this.tiers.products[0] : undefined;
+  public product = (): PricingProduct | undefined => {
+    if (this.tiers.enabled === false || this.tiers.products == null) {
+      return undefined;
+    }
+
+    if (this.tiers.products[0].name === 'observability') {
+      return {
+        type: 'observability' as const,
+        tier: this.tiers.products[0].tier as 'complete' | 'logs_essentials',
+      };
+    } else {
+      // Assert all products are security-related product lines
+      const securityProductLines = ['ai_soc', 'endpoint', 'cloud', 'security'] as const;
+      const allProductsAreSecurityRelated = this.tiers.products.every((product) =>
+        securityProductLines.includes(product.name as any)
+      );
+
+      if (!allProductsAreSecurityRelated) {
+        throw new Error(
+          'Mixed product types detected: all products must be either observability or security-related'
+        );
+      }
+
+      // Note: We can safely use products[0].tier here because the schema validates
+      // that all products have the same tier
+      return {
+        type: 'security' as const,
+        tier: this.tiers.products[0].tier as 'search_ai_lake' | 'complete' | 'essentials',
+        // 'security' is not a real product line / addon, it's only used to be able to define the tier when no addons are active
+        product_lines: this.tiers.products
+          .map((p) => p.name)
+          .filter((name): name is 'ai_soc' | 'endpoint' | 'cloud' => name !== 'security'),
+      };
+    }
   };
 }
