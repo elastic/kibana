@@ -1042,6 +1042,8 @@
       "@kbn/functional-with-es-ssl-cases-test-plugin/*": ["x-pack/test/functional_with_es_ssl/plugins/cases/*"],
       "@kbn/gen-ai-functional-testing": ["src/platform/packages/private/kbn-gen-ai-functional-testing"],
       "@kbn/gen-ai-functional-testing/*": ["src/platform/packages/private/kbn-gen-ai-functional-testing/*"],
+      "@kbn/gen-ai-settings-plugin": ["x-pack/platform/plugins/private/gen_ai_settings"],
+      "@kbn/gen-ai-settings-plugin/*": ["x-pack/platform/plugins/private/gen_ai_settings/*"],
       "@kbn/gen-ai-streaming-response-example-plugin": ["x-pack/examples/gen_ai_streaming_response_example"],
       "@kbn/gen-ai-streaming-response-example-plugin/*": ["x-pack/examples/gen_ai_streaming_response_example/*"],
       "@kbn/generate": ["packages/kbn-generate"],

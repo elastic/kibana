@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/gen-ai-settings-plugin",
+  "owner": ["@elastic/obs-ai-assistant"],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "genAiSettings",
+    "browser": true,
+    "server": true,
+    "configPath": ["genAiSettings"],
+    "requiredPlugins": ["management", "observabilityAIAssistant"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

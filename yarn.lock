@@ -5865,6 +5865,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/gen-ai-settings-plugin@link:x-pack/platform/plugins/private/gen_ai_settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/gen-ai-streaming-response-example-plugin@link:x-pack/examples/gen_ai_streaming_response_example":
   version "0.0.0"
   uid ""

@@ -86,7 +86,7 @@ export class AiAssistantManagementObservabilityPlugin
         id: 'observabilityAiAssistantManagement',
         title,
         hideFromSidebar: true,
-        order: 1,
+        order: 2,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./app');
 

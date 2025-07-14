@@ -1,0 +1,17 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/management-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/ai-assistant"
+  ],
+  "exclude": ["target/**/*"]
+}
