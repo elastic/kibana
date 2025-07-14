@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import {
   createTaskRunError,
@@ -92,7 +93,12 @@ export class SynchronizationTaskRunner implements CancellableTask {
          * If the previous reindex task is completed we reindex
          * with a new time window.
          **/
-        await this.isIndexAvailable(esClient);
+
+        const indexAvailable = await this.isIndexAvailable(esClient);
+
+        if (!indexAvailable) {
+          return this.handleIndexNotAvailable();
+        }
 
         this.updateLastSyncTimes({ updateSuccessTime: true });
 
@@ -115,7 +121,11 @@ export class SynchronizationTaskRunner implements CancellableTask {
         previousReindexStatus === ReindexStatus.MISSING_TASK_ID ||
         previousReindexStatus === ReindexStatus.FAILED
       ) {
-        await this.isIndexAvailable(esClient);
+        const indexAvailable = await this.isIndexAvailable(esClient);
+
+        if (!indexAvailable) {
+          return this.handleIndexNotAvailable();
+        }
 
         /*
          * There are two possible scenarios here:
@@ -269,15 +279,37 @@ export class SynchronizationTaskRunner implements CancellableTask {
     return painlessScriptId;
   }
 
-  private async isIndexAvailable(esClient: ElasticsearchClient) {
+  private async isIndexAvailable(esClient: ElasticsearchClient): Promise<boolean> {
     this.logDebug('Checking index availability.');
 
-    return esClient.cluster.health({
-      index: this.destIndex,
-      wait_for_status: 'green',
-      timeout: '300ms', // this is probably too much
-      wait_for_active_shards: 'all',
-    });
+    try {
+      await esClient.cluster.health({
+        index: this.destIndex,
+        wait_for_status: 'green',
+        timeout: '30s',
+      });
+      return true;
+    } catch (error) {
+      if (error instanceof errors.TimeoutError) return false;
+      else {
+        throw createTaskRunError(
+          new Error(this.handleErrorMessage('Call to verify cluster health failed unexpectedly.')),
+          this.errorSource
+        );
+      }
+    }
+  }
+
+  private handleIndexNotAvailable() {
+    /*
+     * If the cluster is not available we silently fail
+     * and the next run will cover any missing updates.
+     **/
+    this.logDebug('Cluster not ready. Skipping synchronization.');
+
+    return {
+      state: this.getSyncState() as Record<string, unknown>,
+    };
   }
 
   public logDebug(message: string) {

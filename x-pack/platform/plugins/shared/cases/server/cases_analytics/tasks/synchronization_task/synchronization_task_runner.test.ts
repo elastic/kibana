@@ -95,8 +95,7 @@ describe('SynchronizationTaskRunner', () => {
     expect(esClient.cluster.health).toBeCalledWith({
       index: destIndex,
       wait_for_status: 'green',
-      timeout: '300ms',
-      wait_for_active_shards: 'all',
+      timeout: '30s',
     });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
     expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });
@@ -380,6 +379,55 @@ describe('SynchronizationTaskRunner', () => {
 
       expect(logger.error).toBeCalledWith(
         '[.internal.cases] Synchronization reindex failed. Error: My unrecoverable error',
+        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
+      );
+    });
+
+    it('returns previous state if call to cluster.health timesout', async () => {
+      esClient.tasks.get.mockResolvedValueOnce({
+        completed: true,
+        task: {} as TasksTaskInfo,
+      });
+      esClient.cluster.health.mockRejectedValueOnce(new esErrors.TimeoutError('timeout'));
+
+      const getESClient = async () => esClient;
+
+      taskRunner = new SynchronizationTaskRunner({
+        logger,
+        getESClient,
+        taskInstance,
+      });
+
+      const result = await taskRunner.run();
+
+      expect(result).toEqual({
+        state: taskInstance.state,
+      });
+    });
+
+    it('calls throwUnrecoverableError if cluster.health fails without a timeout', async () => {
+      esClient.tasks.get.mockResolvedValueOnce({
+        completed: true,
+        task: {} as TasksTaskInfo,
+      });
+      esClient.cluster.health.mockRejectedValueOnce(new Error('My unrecoverable error'));
+
+      const getESClient = async () => esClient;
+
+      taskRunner = new SynchronizationTaskRunner({
+        logger,
+        getESClient,
+        taskInstance,
+      });
+
+      try {
+        await taskRunner.run();
+      } catch (e) {
+        expect(isRetryableError(e)).toBe(null);
+      }
+
+      expect(logger.error).toBeCalledWith(
+        '[.internal.cases] Synchronization reindex failed. Error: Call to verify cluster health failed unexpectedly.',
         { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
       );
     });
