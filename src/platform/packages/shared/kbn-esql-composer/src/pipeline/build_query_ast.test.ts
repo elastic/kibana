@@ -44,13 +44,13 @@ describe('buildQueryAst', () => {
     const source: Query = {
       root: Builder.expression.query([]),
       commands: [synth.cmd`STATS ?funcName(foo) BY bar`],
-      params: [{ funcName: 'UPPER' }],
+      params: [{ funcName: 'AVG' }],
     };
 
     const ast = buildQueryAst(source);
     const queryString = BasicPrettyPrinter.print(ast, { multiline: false });
 
-    expect(queryString).toContain('STATS UPPER(foo) BY bar');
+    expect(queryString).toContain('STATS AVG(foo) BY bar');
   });
 
   it('does not replace missing parameter', () => {
