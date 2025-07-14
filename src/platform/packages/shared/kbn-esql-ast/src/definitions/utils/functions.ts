@@ -15,15 +15,17 @@ import {
   type FunctionParameterType,
   FunctionDefinitionTypes,
   type SupportedDataType,
+  type FunctionReturnType,
 } from '../types';
 import { operatorsDefinitions } from '../all_operators';
 import { aggFunctionDefinitions } from '../generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
-import { getSafeInsertText, getControlSuggestion } from './autocomplete';
+import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
 import { getTestFunctions } from './test_functions';
@@ -34,7 +36,7 @@ const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPrev
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 
-function buildFunctionLookup() {
+export function buildFunctionLookup() {
   // we always refresh if we have test functions
   if (!fnLookups || getTestFunctions().length) {
     fnLookups = operatorsDefinitions
@@ -42,6 +44,7 @@ function buildFunctionLookup() {
         scalarFunctionDefinitions,
         aggFunctionDefinitions,
         groupingFunctionDefinitions,
+        timeSeriesAggFunctionDefinitions,
         getTestFunctions()
       )
       .reduce((memo, def) => {
@@ -106,6 +109,17 @@ export const filterFunctionDefinitions = (
     return true;
   });
 };
+
+export function getAllFunctions(options?: {
+  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+}) {
+  const fns = buildFunctionLookup();
+  if (!options?.type) {
+    return Array.from(fns.values());
+  }
+  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
+  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
+}
 
 export function printArguments(
   {
@@ -176,7 +190,8 @@ const allFunctions = memoize(
     aggFunctionDefinitions
       .concat(scalarFunctionDefinitions)
       .concat(groupingFunctionDefinitions)
-      .concat(getTestFunctions()),
+      .concat(getTestFunctions())
+      .concat(timeSeriesAggFunctionDefinitions),
   () => getTestFunctions()
 );
 
@@ -191,6 +206,10 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   if (fn.customParametersSnippet) {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
+  let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
+  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
+    functionsPriority = '1A';
+  }
   return {
     label: fn.name.toUpperCase(),
     text,
@@ -200,8 +219,8 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     documentation: {
       value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
-    // agg functgions have priority over everything else
-    sortText: fn.type === FunctionDefinitionTypes.AGG ? '1A' : 'C',
+    // time_series_agg functions have priority over everything else
+    sortText: functionsPriority,
     // trigger a suggestion follow up on selection
     command: TRIGGER_SUGGESTION_COMMAND,
   };
@@ -347,3 +366,32 @@ export const buildFieldsDefinitionsWithMetadata = (
 
   return [...suggestions];
 };
+
+export function printFunctionSignature(arg: ESQLFunction): string {
+  const fnDef = getFunctionDefinition(arg.name);
+  if (fnDef) {
+    const signature = getFunctionSignatures(
+      {
+        ...fnDef,
+        signatures: [
+          {
+            ...fnDef?.signatures[0],
+            params: arg.args.map((innerArg) =>
+              Array.isArray(innerArg)
+                ? { name: `InnerArgument[]`, type: 'any' as const }
+                : // this cast isn't actually correct, but we're abusing the
+                  // getFunctionSignatures API anyways
+                  { name: innerArg.text, type: innerArg.type as FunctionParameterType }
+            ),
+            // this cast isn't actually correct, but we're abusing the
+            // getFunctionSignatures API anyways
+            returnType: '' as FunctionReturnType,
+          },
+        ],
+      },
+      { withTypes: false, capitalize: true }
+    );
+    return signature[0].declaration;
+  }
+  return '';
+}
