@@ -21,7 +21,7 @@ import {
 } from '../../../logic/prebuilt_rules/use_revert_prebuilt_rule';
 import { DiffLayout } from '../../../model/rule_details/rule_field_diff';
 
-export const PREBUILT_RULE_BASE_VERSION_FLYOUT_ANCHOR = 'baseVersionPrebuiltRulePreview';
+export const RULE_CUSTOMIZATIONS_DIFF_FLYOUT_ANCHOR = 'ruleCustomizationsDiffFlyout';
 
 interface PrebuiltRuleConcurrencyControl {
   revision: number;
@@ -155,8 +155,8 @@ export const RuleCustomizationsFlyout = memo(function RuleCustomizationsFlyout({
       title={i18n.BASE_VERSION_FLYOUT_TITLE}
       rule={currentRule}
       size="l"
-      id={PREBUILT_RULE_BASE_VERSION_FLYOUT_ANCHOR}
-      dataTestSubj={PREBUILT_RULE_BASE_VERSION_FLYOUT_ANCHOR}
+      id={RULE_CUSTOMIZATIONS_DIFF_FLYOUT_ANCHOR}
+      dataTestSubj={RULE_CUSTOMIZATIONS_DIFF_FLYOUT_ANCHOR}
       closeFlyout={closeFlyout}
       ruleActions={ruleActions}
       extraTabs={extraTabs}

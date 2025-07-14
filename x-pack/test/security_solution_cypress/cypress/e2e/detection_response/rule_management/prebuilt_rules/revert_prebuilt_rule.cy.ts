@@ -10,7 +10,7 @@ import { RULE_UPGRADE_PER_FIELD_DIFF_LABEL } from '../../../../screens/rule_upda
 import { POPOVER_ACTIONS_TRIGGER_BUTTON, RULE_NAME_HEADER } from '../../../../screens/rule_details';
 import { getIndexPatterns, getNewRule } from '../../../../objects/rule';
 import {
-  expectModifiedBadgeToNotBeDisplayed,
+  expectModifiedRuleBadgeToNotBeDisplayed,
   revertRuleFromDetailsPage,
 } from '../../../../tasks/alerts_detection_rules';
 import {
@@ -63,7 +63,7 @@ describe(
         cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
 
         revertRuleFromDetailsPage();
-        expectModifiedBadgeToNotBeDisplayed();
+        expectModifiedRuleBadgeToNotBeDisplayed();
 
         cy.get(RULE_NAME_HEADER).should('contain', 'Non-customized prebuilt rule'); // Correctly displays reverted title
       });

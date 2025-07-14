@@ -94,131 +94,159 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('does not modify `exception_list` field', async () => {
-        const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
-          body: {
-            rule_id: 'rule_1',
-            description: 'new description',
-            exceptions_list: [
-              {
-                id: 'some_uuid',
-                list_id: 'list_id_single',
-                namespace_type: 'single',
-                type: 'detection',
+      describe('customization adjacent fields', () => {
+        it('does not modify `exception_list` field', async () => {
+          const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+            body: {
+              rule_id: 'rule_1',
+              description: 'new description',
+              exceptions_list: [
+                {
+                  id: 'some_uuid',
+                  list_id: 'list_id_single',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+            },
+          });
+
+          const response = await revertPrebuiltRule(supertest, {
+            id: customizedPrebuiltRule.id,
+            version: customizedPrebuiltRule.version,
+            revision: customizedPrebuiltRule.revision,
+          });
+
+          expect(response.attributes.results.updated).toEqual([
+            expect.objectContaining({
+              rule_source: {
+                is_customized: false,
+                type: 'external',
               },
-            ],
-          },
+              exceptions_list: [
+                expect.objectContaining({
+                  id: 'some_uuid',
+                  list_id: 'list_id_single',
+                  namespace_type: 'single',
+                  type: 'detection',
+                }),
+              ],
+            }),
+          ]);
         });
 
-        const response = await revertPrebuiltRule(supertest, {
-          id: customizedPrebuiltRule.id,
-          version: customizedPrebuiltRule.version,
-          revision: customizedPrebuiltRule.revision,
-        });
-
-        expect(response.attributes.results.updated).toEqual([
-          expect.objectContaining({
-            rule_source: {
-              is_customized: false,
-              type: 'external',
+        it('does not modify `actions` field', async () => {
+          const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+            body: {
+              rule_id: 'rule_1',
+              description: 'new description',
+              actions: [
+                // use a pre-configured connector
+                {
+                  group: 'default',
+                  id: 'my-test-email',
+                  action_type_id: '.email',
+                  params: {},
+                },
+              ],
             },
-            exceptions_list: [
-              expect.objectContaining({
-                id: 'some_uuid',
-                list_id: 'list_id_single',
-                namespace_type: 'single',
-                type: 'detection',
-              }),
-            ],
-          }),
-        ]);
-      });
+          });
 
-      it('does not modify `actions` field', async () => {
-        const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
-          body: {
-            rule_id: 'rule_1',
-            description: 'new description',
-            actions: [
-              // use a pre-configured connector
-              {
-                group: 'default',
-                id: 'my-test-email',
-                action_type_id: '.email',
-                params: {},
+          const response = await revertPrebuiltRule(supertest, {
+            id: customizedPrebuiltRule.id,
+            version: customizedPrebuiltRule.version,
+            revision: customizedPrebuiltRule.revision,
+          });
+
+          expect(response.attributes.results.updated).toEqual([
+            expect.objectContaining({
+              rule_source: {
+                is_customized: false,
+                type: 'external',
               },
-            ],
-          },
+              actions: [
+                expect.objectContaining({
+                  id: 'my-test-email',
+                  action_type_id: '.email',
+                  frequency: { notifyWhen: 'onActiveAlert', summary: true, throttle: null },
+                  group: 'default',
+                  params: {},
+                }),
+              ],
+            }),
+          ]);
         });
 
-        const response = await revertPrebuiltRule(supertest, {
-          id: customizedPrebuiltRule.id,
-          version: customizedPrebuiltRule.version,
-          revision: customizedPrebuiltRule.revision,
-        });
-
-        expect(response.attributes.results.updated).toEqual([
-          expect.objectContaining({
-            rule_source: {
-              is_customized: false,
-              type: 'external',
+        it('does not modify `execution_summary` field', async () => {
+          const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+            body: {
+              rule_id: 'rule_1',
+              description: 'new description',
+              enabled: true,
             },
-            actions: [
-              expect.objectContaining({
-                id: 'my-test-email',
-                action_type_id: '.email',
-                frequency: { notifyWhen: 'onActiveAlert', summary: true, throttle: null },
-                group: 'default',
-                params: {},
-              }),
-            ],
-          }),
-        ]);
-      });
+          });
 
-      it('does not modify `execution_summary` field', async () => {
-        const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
-          body: {
-            rule_id: 'rule_1',
-            description: 'new description',
-            enabled: true,
-          },
+          await waitForRulePartialFailure({ supertest, log, id: customizedPrebuiltRule.id });
+
+          // Get the original execution summary field
+          const { body } = await supertest
+            .get(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .query({ id: customizedPrebuiltRule.id })
+            .expect(200);
+
+          // Revert the rule
+          await revertPrebuiltRule(supertest, {
+            id: customizedPrebuiltRule.id,
+            version: customizedPrebuiltRule.version,
+            revision: customizedPrebuiltRule.revision,
+          });
+
+          // Get the reverted rule's execution summary field
+          const { body: updatedBody } = await supertest
+            .get(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .query({ id: customizedPrebuiltRule.id })
+            .expect(200);
+
+          expect(updatedBody).toEqual(
+            expect.objectContaining({
+              rule_source: {
+                is_customized: false,
+                type: 'external',
+              },
+              execution_summary: body.execution_summary,
+            })
+          );
         });
 
-        await waitForRulePartialFailure({ supertest, log, id: customizedPrebuiltRule.id });
-
-        // Get the original execution summary field
-        const { body } = await supertest
-          .get(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .query({ id: customizedPrebuiltRule.id })
-          .expect(200);
-
-        // Revert the rule
-        await revertPrebuiltRule(supertest, {
-          id: customizedPrebuiltRule.id,
-          version: customizedPrebuiltRule.version,
-          revision: customizedPrebuiltRule.revision,
-        });
-
-        // Get the reverted rule's execution summary field
-        const { body: updatedBody } = await supertest
-          .get(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .query({ id: customizedPrebuiltRule.id })
-          .expect(200);
-
-        expect(updatedBody).toEqual(
-          expect.objectContaining({
-            rule_source: {
-              is_customized: false,
-              type: 'external',
+        it('does not modify `enabled` field', async () => {
+          const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+            body: {
+              rule_id: 'rule_1',
+              description: 'new description',
+              enabled: true,
             },
-            execution_summary: body.execution_summary,
-          })
-        );
+          });
+
+          const response = await revertPrebuiltRule(supertest, {
+            id: customizedPrebuiltRule.id,
+            version: customizedPrebuiltRule.version,
+            revision: customizedPrebuiltRule.revision,
+          });
+
+          expect(response.attributes.results.updated).toEqual([
+            expect.objectContaining({
+              rule_source: {
+                is_customized: false,
+                type: 'external',
+              },
+              enabled: true,
+            }),
+          ]);
+        });
       });
 
       it("skips a prebuilt rule if it's not customized", async () => {
