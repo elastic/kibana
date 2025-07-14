@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
+import type { SignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { ThreatMatchNamedQuery } from './types';
 

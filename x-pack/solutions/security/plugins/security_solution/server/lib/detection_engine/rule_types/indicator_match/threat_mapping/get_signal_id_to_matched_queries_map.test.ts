@@ -7,7 +7,7 @@
 
 import { ThreatMatchQueryType } from './types';
 
-import { getSignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
+import { getSignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 import { getThreatList } from './get_threat_list';
 import { encodeThreatMatchNamedQuery } from './utils';
 import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';

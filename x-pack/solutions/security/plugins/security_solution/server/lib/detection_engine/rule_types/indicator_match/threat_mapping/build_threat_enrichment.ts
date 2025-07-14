@@ -7,7 +7,7 @@
 
 import type { SignalsEnrichment } from '../../types';
 import type { BuildThreatEnrichmentOptions } from './types';
-import { getSignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
+import { getSignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 

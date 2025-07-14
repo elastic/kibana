@@ -14,8 +14,8 @@ import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
 } from '../../types';
-import { getSignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
-import type { SignalIdToMatchedQueriesMap } from './get_signals_map_from_threat_index';
+import { getSignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
+import type { SignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
