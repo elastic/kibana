@@ -91,39 +91,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('ES deprecations logs flyout', () => {
-      beforeEach(async () => {
-        await PageObjects.upgradeAssistant.navigateToPage();
-      });
-
-      it('with logs collection disabled', async () => {
-        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
-        const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
-        if (loggingEnabled) {
-          await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
-        }
-
-        await retry.waitFor('Deprecation logging to be disabled', async () => {
-          return !(await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled());
-        });
-        await a11y.testAppSnapshot();
-      });
-
-      it('with logs collection enabled', async () => {
-        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
-        const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
-        if (!loggingEnabled) {
-          await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
-        }
-
-        await retry.waitFor('UA external links title to be present', async () => {
-          return testSubjects.isDisplayed('externalLinksTitle');
-        });
-
-        await a11y.testAppSnapshot();
-      });
-    });
-
     describe('Elasticsearch deprecations page', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToUrl(
