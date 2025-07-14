@@ -104,6 +104,11 @@ describe('deanonymizeMessage', () => {
     expect(deanonymizedChunk.content).not.toContain(mask);
     expect(deanonymizedMessage.content).not.toContain(mask);
 
+    // deanonymized_output mask should also be gone
+    const outputMsg = deanonymizedChunk.deanonymized_output?.message as AssistantMessage;
+    expect(outputMsg.content).toBe(`Hi, I am ${value}.`);
+    expect(outputMsg.content).not.toContain(mask);
+
     // The deanonymized_input should include the original user message restored
     expect((deanonymizedMessage.deanonymized_input?.[0].message as UserMessage).content).toBe(
       `Hi, I am ${value}.`

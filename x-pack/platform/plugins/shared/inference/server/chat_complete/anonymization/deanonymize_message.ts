@@ -47,7 +47,7 @@ export function deanonymizeMessage(
           } satisfies Message;
 
           const {
-            message: { content, toolCalls },
+            message: { content: deanonymizedContent, toolCalls: deanonymizedToolCalls },
             deanonymizations,
           } = deanonymize(message, anonymization.anonymizations);
 
@@ -62,15 +62,19 @@ export function deanonymizeMessage(
 
           // Create deanonymized output metadata
           const deanonymizedOutput = {
-            message,
+            message: {
+              content: deanonymizedContent,
+              toolCalls: deanonymizedToolCalls,
+              role: MessageRole.Assistant,
+            } as Message,
             deanonymizations,
           };
 
           // Create a new chunk with the complete deanonymized content
           const completeChunk: ChatCompletionChunkEvent = {
             type: ChatCompletionEventType.ChatCompletionChunk,
-            content,
-            tool_calls: toolCalls.map((tc, idx) => ({
+            content: deanonymizedContent,
+            tool_calls: deanonymizedToolCalls.map((tc, idx) => ({
               index: idx,
               toolCallId: tc.toolCallId,
               function: {
@@ -85,8 +89,8 @@ export function deanonymizeMessage(
           // Create deanonymized message event
           const deanonymizedMsg = {
             ...event,
-            content,
-            toolCalls,
+            content: deanonymizedContent,
+            toolCalls: deanonymizedToolCalls,
             deanonymized_input: deanonymizedInput,
             deanonymized_output: deanonymizedOutput,
           };
