@@ -11,6 +11,12 @@ import {
 import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import type { APIReturnType } from '@kbn/observability-ai-assistant-plugin/public';
 import * as modelOptionsModule from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
+import {
+  e5SmallDescription,
+  e5SmallTitle,
+  elserDescription,
+  elserTitle,
+} from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 
 jest.mock('../../../hooks/use_install_product_doc', () => ({
   useInstallProductDoc: () => ({
@@ -73,45 +79,48 @@ const createMockKnowledgeBase = (
   warmupModel: jest.fn().mockResolvedValue(undefined),
   ...overrides,
 });
+
+const modelOptions = [
+  {
+    key: ELSER_IN_EIS_INFERENCE_ID,
+    label: elserTitle,
+    description: elserDescription,
+  },
+  {
+    key: E5_SMALL_INFERENCE_ID,
+    label: e5SmallTitle,
+    description: e5SmallDescription,
+  },
+];
+
+const setupMockGetModelOptions = (options = modelOptions) => {
+  mockGetModelOptions.mockReset();
+  mockGetModelOptions.mockReturnValue(options);
+};
+
+const renderComponent = (mockKb: UseKnowledgeBaseResult) => {
+  render(<ChangeKbModel knowledgeBase={mockKb} />);
+};
+
 describe('ChangeKbModel', () => {
-  const modelOptions = [
-    {
-      key: ELSER_IN_EIS_INFERENCE_ID,
-      label: 'ELSER v2 (English-only)',
-      description:
-        'Focus on query meaning, not just keyword matching, using learned associations between terms. It delivers more relevant, context-aware results and works out of the box with no need for deep machine learning expertise.',
-    },
-    {
-      key: E5_SMALL_INFERENCE_ID,
-      label: 'E5-small (multilingual)',
-      description:
-        'E5 is an NLP model by Elastic designed to enhance multilingual semantic search by focusing on query context rather than keywords. E5-small is a cross-platform version compatible with different hardware configurations.',
-    },
-  ];
-
-  const setupMockGetModelOptions = (options = modelOptions) => {
-    mockGetModelOptions.mockReset();
-    mockGetModelOptions.mockReturnValue(options);
-  };
-
-  const renderComponent = (mockKb: any) => {
-    render(<ChangeKbModel knowledgeBase={mockKb} />);
-  };
-
   beforeEach(() => {
     setupMockGetModelOptions();
   });
 
-  it('disables the button when selected model is the same as current and no redeployment needed', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('disables the `Update` button when selected model is the same as current and no redeployment needed', () => {
     const mockKb = createMockKnowledgeBase();
     renderComponent(mockKb);
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
     expect(button).toBeDisabled();
   });
 
-  it('enables the button when a different model is selected', async () => {
+  it('enables the `Update` button when a different model is selected', async () => {
     const mockKb = createMockKnowledgeBase({
-      status: createMockStatus({ currentInferenceId: '.elser-2-elastic' }),
+      status: createMockStatus({ currentInferenceId: ELSER_IN_EIS_INFERENCE_ID }),
     });
     renderComponent(mockKb);
 
@@ -121,7 +130,7 @@ describe('ChangeKbModel', () => {
     const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
     dropdown.click();
 
-    const newModelOption = await screen.findByText('E5-small (multilingual)');
+    const newModelOption = await screen.findByText(e5SmallTitle);
     newModelOption.click();
 
     await waitFor(() => {
@@ -129,7 +138,7 @@ describe('ChangeKbModel', () => {
     });
   });
 
-  it('disables the button when knowledge base is installing', () => {
+  it('disables the `Update` button when knowledge base is installing', () => {
     const mockKb = createMockKnowledgeBase({ isInstalling: true });
     renderComponent(mockKb);
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
@@ -138,26 +147,25 @@ describe('ChangeKbModel', () => {
 
   // Legacy inferenceId tests cover the component behavior when currentInferenceId is LEGACY_CUSTOM_INFERENCE_ID
   // TODO: Remove these tests after https://github.com/elastic/kibana/issues/227103 is implemented
-  const legacyInferenceTests = (inferenceId: string, label: string) => {
-    describe(`when ${inferenceId} is available`, () => {
+  describe.each([ELSER_IN_EIS_INFERENCE_ID, ELSER_ON_ML_NODE_INFERENCE_ID])(
+    'when %s is available',
+    (inferenceId) => {
       beforeEach(() => {
         setupMockGetModelOptions([
           {
             key: inferenceId,
-            label,
-            description:
-              'Focus on query meaning, not just keyword matching, using learned associations between terms. It delivers more relevant, context-aware results and works out of the box with no need for deep machine learning expertise.',
+            label: elserDescription,
+            description: elserDescription,
           },
           {
-            key: '.multilingual-e5-small-elasticsearch',
-            label: 'E5-small (multilingual)',
-            description:
-              'E5 is an NLP model by Elastic designed to enhance multilingual semantic search by focusing on query context rather than keywords. E5-small is a cross-platform version compatible with different hardware configurations.',
+            key: E5_SMALL_INFERENCE_ID,
+            label: e5SmallTitle,
+            description: e5SmallDescription,
           },
         ]);
       });
 
-      it('remaps legacy currentInferenceId to ELSER ID in dropdown', () => {
+      it('remaps the legacy inference ID to the ELSER inference ID in the dropdown', () => {
         const mockKb = createMockKnowledgeBase({
           status: createMockStatus({
             currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
@@ -172,10 +180,10 @@ describe('ChangeKbModel', () => {
         renderComponent(mockKb);
 
         const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
-        expect(dropdown).toHaveTextContent(label);
+        expect(dropdown).toHaveTextContent(elserDescription);
       });
 
-      it('disables the button initially when legacy inference is active', () => {
+      it('disables the `Update` button when the knowledge base is installed with ELSER and the current inference id is ${LEGACY_CUSTOM_INFERENCE_ID}', () => {
         const mockKb = createMockKnowledgeBase({
           status: createMockStatus({
             currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
@@ -193,7 +201,7 @@ describe('ChangeKbModel', () => {
         expect(button).toBeDisabled();
       });
 
-      it('enables the button when user selects E5 model while legacy inference is active', async () => {
+      it('enables the `Update` button when user selects E5 model from the dropdown and the current inference id is ${LEGACY_CUSTOM_INFERENCE_ID} ', async () => {
         const mockKb = createMockKnowledgeBase({
           status: createMockStatus({
             currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
@@ -210,7 +218,7 @@ describe('ChangeKbModel', () => {
         const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
         dropdown.click();
 
-        const e5Option = await screen.findByText('E5-small (multilingual)');
+        const e5Option = await screen.findByText(e5SmallTitle);
         e5Option.click();
 
         await waitFor(() => {
@@ -220,9 +228,6 @@ describe('ChangeKbModel', () => {
           expect(button).toBeEnabled();
         });
       });
-    });
-  };
-
-  legacyInferenceTests(ELSER_IN_EIS_INFERENCE_ID, 'ELSER v2 (English-only)');
-  legacyInferenceTests(ELSER_ON_ML_NODE_INFERENCE_ID, 'ELSER v2 (English-only)');
+    }
+  );
 });

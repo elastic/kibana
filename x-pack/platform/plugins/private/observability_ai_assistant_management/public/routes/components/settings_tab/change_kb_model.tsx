@@ -55,7 +55,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     return knowledgeBase.status.value?.currentInferenceId;
   }, [knowledgeBase.status.value?.currentInferenceId, modelOptions]);
 
-  const [selectedInferenceId, setSelectedInferenceId] = useState<string>(
+  const [selectedInferenceId, setSelectedInferenceId] = useState(
     currentlyDeployedInferenceId || ''
   );
 
