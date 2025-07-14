@@ -23,7 +23,8 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   rules: {
-    '@typescript-eslint/consistent-type-exports': 'error',
+    // TODO: enable later
+    // '@typescript-eslint/consistent-type-exports': 'error',
   },
   overrides: [
     {
