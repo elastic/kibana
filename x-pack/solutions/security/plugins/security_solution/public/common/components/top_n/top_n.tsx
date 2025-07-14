@@ -59,7 +59,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   setAbsoluteRangeDatePickerTarget: InputsModelId;
   scopeId?: string;
   toggleTopN: () => void;
-  onFilterAdded?: () => void;
+  onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
   applyGlobalQueriesAndFilters?: boolean;
 }
 

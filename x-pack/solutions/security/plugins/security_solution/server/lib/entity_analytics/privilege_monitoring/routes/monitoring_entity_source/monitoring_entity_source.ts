@@ -15,6 +15,8 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import type {
   GetEntitySourceResponse,
   UpdateEntitySourceResponse,
+} from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import {
   CreateEntitySourceRequestBody,
   UpdateEntitySourceRequestBody,
   type CreateEntitySourceResponse,

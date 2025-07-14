@@ -7,8 +7,8 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type {
-  FieldsUpgradeState,
+import type { FieldsUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
+import {
   FieldUpgradeStateEnum,
   type RuleUpgradeState,
   type SetRuleFieldResolvedValueFn,

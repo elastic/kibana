@@ -9,10 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
-import type {
-  RuleMigrationRule,
-  type RuleMigrationTranslationResult,
-} from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationRule } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type RuleMigrationTranslationResult } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
 type RuleMigrationTranslationCallOutMode = RuleMigrationTranslationResult | 'mapped';

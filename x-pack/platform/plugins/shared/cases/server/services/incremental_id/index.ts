@@ -9,7 +9,7 @@ import type {
   SavedObjectsFindResult,
   SavedObject,
   SavedObjectsClientContract,
-  Logger,
+  Logger
 } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';

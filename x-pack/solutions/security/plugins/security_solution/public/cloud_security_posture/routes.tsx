@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
-import type {
-  CloudSecurityPosturePageId,
-  type CspSecuritySolutionContext,
-} from '@kbn/cloud-security-posture-plugin/public';
+import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
+import { type CspSecuritySolutionContext } from '@kbn/cloud-security-posture-plugin/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
