@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridControlColumn,
   EuiDataGridProps,
@@ -15,8 +14,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { css } from '@emotion/css';
+import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
 
 export function PreviewTable({
@@ -30,9 +30,8 @@ export function PreviewTable({
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
-  selectableRow = false,
   selectedRowIndex,
-  onRowSelected,
+  leadingControlColumns,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
@@ -44,9 +43,8 @@ export function PreviewTable({
   columnOrderHint?: string[];
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
-  selectableRow?: boolean;
   selectedRowIndex?: number;
-  onRowSelected?: (selectedRowIndex: number) => void;
+  leadingControlColumns?: EuiDataGridControlColumn[];
 }) {
   const { euiTheme: theme } = useEuiTheme();
   // Determine canonical column order
@@ -116,6 +114,8 @@ export function PreviewTable({
     } as EuiDataGridSorting;
   }, [setSorting, sorting]);
 
+  const [columnWidths, setColumnWidths] = useState<Record<string, number | undefined>>({});
+
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
     if (displayColumns) {
@@ -124,7 +124,21 @@ export function PreviewTable({
     return canonicalColumnOrder;
   }, [canonicalColumnOrder, displayColumns]);
 
-  // Derive gridColumns from canonical order
+  const onColumnResize = useCallback(
+    ({ columnId, width }: { columnId: string; width: number | undefined }) => {
+      setColumnWidths((prev) => {
+        const updated = recalcColumnWidths({
+          columnId,
+          width,
+          prevWidths: prev,
+          visibleColumns,
+        });
+        return updated;
+      });
+    },
+    [visibleColumns]
+  );
+
   const gridColumns = useMemo(() => {
     return canonicalColumnOrder.map((column) => ({
       id: column,
@@ -139,48 +153,16 @@ export function PreviewTable({
               showSortDesc: Boolean(setSorting),
             }
           : (false as false),
-      initialWidth: visibleColumns.length > 10 ? 250 : undefined,
+      initialWidth: columnWidths[column],
     }));
-  }, [canonicalColumnOrder, setSorting, setVisibleColumns, visibleColumns.length]);
-
-  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
-    () =>
-      selectableRow && visibleColumns.length > 0
-        ? [
-            {
-              id: 'selection',
-              width: 36,
-              headerCellRender: () => null,
-              rowCellRender: ({ rowIndex }) => (
-                <EuiButtonIcon
-                  onClick={() => {
-                    if (selectableRow && onRowSelected) {
-                      onRowSelected(rowIndex);
-                    }
-                  }}
-                  aria-label={i18n.translate(
-                    'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
-                    {
-                      defaultMessage: 'Select row {rowIndex}',
-                      values: { rowIndex: rowIndex + 1 },
-                    }
-                  )}
-                  iconType={selectedRowIndex === rowIndex && selectableRow ? 'minimize' : 'expand'}
-                  color={selectedRowIndex === rowIndex && selectableRow ? 'primary' : 'text'}
-                />
-              ),
-            },
-          ]
-        : [],
-    [onRowSelected, selectableRow, selectedRowIndex, visibleColumns.length]
-  );
+  }, [canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   return (
     <EuiDataGrid
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}
-      leadingControlColumns={leadingControlColumns}
+      leadingControlColumns={visibleColumns.length > 0 ? leadingControlColumns : undefined}
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
@@ -204,6 +186,7 @@ export function PreviewTable({
       toolbarVisibility={toolbarVisibility}
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
+      onColumnResize={onColumnResize}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
@@ -217,7 +200,7 @@ export function PreviewTable({
           }
         }
 
-        const value = (doc as SampleDocument)[columnId];
+        const value = doc[columnId];
         if (value === undefined || value === null) {
           return '';
         }
