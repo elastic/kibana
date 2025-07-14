@@ -9,7 +9,7 @@ KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:pr-$BUILDKITE_PULL_R
 
 deploy() {
   PROJECT_TYPE=$1
-  PRODUCT_TIER=$2
+  PRODUCT_TIER=${2:-}
   # BOOKMARK - List of Kibana solutions
   case $PROJECT_TYPE in
     elasticsearch)
@@ -26,8 +26,16 @@ deploy() {
   PRODUCT_TIER_JSON_ENTRY=""
   PRODUCT_TIER_NAME=""
   if [ -n "${PRODUCT_TIER:-}" ]; then
-    PRODUCT_TIER_JSON_ENTRY='"product_tier": "'"$PRODUCT_TIER"'",'
     PRODUCT_TIER_NAME="-$PRODUCT_TIER"
+
+    case $PRODUCT_TIER in
+      logs_essentials)
+        PRODUCT_TIER_JSON_ENTRY='"product_tier": "'"$PRODUCT_TIER"'",'
+      ;;
+      ai_soc)
+        PRODUCT_TIER_JSON_ENTRY='"product_types": [{ "product_line": "ai_soc", "product_tier": "search_ai_lake" }],'
+      ;;
+    esac
   fi
 
   PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE$PRODUCT_TIER_NAME"
@@ -171,6 +179,7 @@ EOF
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
+is_pr_with_label "ci:project-deploy-ai4soc" && deploy "security" "ai_soc"
 is_pr_with_label "ci:project-deploy-log_essentials" && deploy "observability" "logs_essentials"
 if is_pr_with_label "ci:project-deploy-observability" ; then
   # Only deploy observability if the PR is targeting main
