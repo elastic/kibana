@@ -29,8 +29,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const SPACE1 = 'space1';
   const TEST_URL = '/internal/rac/alerts/fields';
+  const es = getService('es');
+  const config = getService('config');
+  const retryTimeout = config.get('timeouts.try');
 
   const createEsQueryRule = async (
     index: string,
@@ -130,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const getSampleWebLogsDataView = async () => {
     const { body } = await supertest
-      .post(`${getSpaceUrlPrefix(SPACE1)}/api/content_management/rpc/search`)
+      .post(`/api/content_management/rpc/search`)
       .set('kbn-xsrf', 'foo')
       .send({
         contentTypeId: 'index-pattern',
@@ -142,6 +144,53 @@ export default ({ getService }: FtrProviderContext) => {
       (dataView: { attributes: { title: string } }) =>
         dataView.attributes.title === 'kibana_sample_data_logs'
     );
+  };
+
+  const waitForAlertsToBeCreated = async (ruleId: string, spaceId: string = 'default') => {
+    return await retry.tryForTime(retryTimeout, async () => {
+      const response = await es.search({
+        index: '.alerts*',
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'kibana.alert.rule.uuid': ruleId,
+                },
+              },
+              {
+                term: {
+                  'kibana.space_ids': spaceId,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      if (response.hits.hits.length === 0) {
+        throw new Error(`No hits found for index .alerts* and ruleId ${ruleId}`);
+      }
+
+      return response;
+    });
+  };
+
+  const waitForRuleToBecomeActive = async (ruleId: string, spaceId: string = 'default') => {
+    return await retry.tryForTime(retryTimeout, async () => {
+      const { body: rule } = await supertest
+        .get(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+
+      const { execution_status: executionStatus } = rule || {};
+      const { status } = executionStatus || {};
+
+      if (status === 'active' || status === 'ok') {
+        return executionStatus?.status;
+      }
+
+      throw new Error(`waitForStatus(active|ok): got ${status}`);
+    });
   };
 
   const deleteRule = async (ruleId: string, spaceId: string = 'default') => {
@@ -165,24 +214,32 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
       await supertest
-        .post(`${getSpaceUrlPrefix(SPACE1)}/api/sample_data/logs`)
+        .post(`/api/sample_data/logs`)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'foo')
         .expect(200);
 
       const dataView = await getSampleWebLogsDataView();
       [stackRule, observabilityRule, securityRule] = await Promise.all([
-        createEsQueryRule(dataView.id, 'stack', SPACE1),
-        createEsQueryRule(dataView.id, 'observability', SPACE1),
-        createSecurityRule(dataView.id, SPACE1),
+        createEsQueryRule(dataView.id, 'stack'),
+        createEsQueryRule(dataView.id, 'observability'),
+        createSecurityRule(dataView.id),
       ]);
+
+      await waitForRuleToBecomeActive(stackRule.id);
+      await waitForRuleToBecomeActive(observabilityRule.id);
+      await waitForRuleToBecomeActive(securityRule.id);
+
+      await waitForAlertsToBeCreated(stackRule.id);
+      await waitForAlertsToBeCreated(observabilityRule.id);
+      await waitForAlertsToBeCreated(securityRule.id);
     });
 
     after(async () => {
-      await deleteRule(stackRule.id, SPACE1);
-      await deleteRule(observabilityRule.id, SPACE1);
+      await deleteRule(stackRule.id);
+      await deleteRule(observabilityRule.id);
       await supertest
-        .post(`${getSpaceUrlPrefix(SPACE1)}/api/detection_engine/rules/_bulk_action?dry_run=false`)
+        .post(`/api/detection_engine/rules/_bulk_action?dry_run=false`)
         .set('kbn-xsrf', 'foo')
         .send({
           action: 'delete',
@@ -190,7 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
       await supertest
-        .delete(`${getSpaceUrlPrefix(SPACE1)}/api/sample_data/logs`)
+        .delete(`/api/sample_data/logs`)
         .set('kbn-xsrf', 'true')
         .set('x-elastic-internal-origin', 'foo')
         .expect(204);
@@ -200,7 +257,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Users:', () => {
       it(`${superUser.username} should be able to get alert fields for all rule types`, async () => {
         await retry.try(async () => {
-          const resp = await getAlertFieldsByFeatureId(superUser, [], SPACE1);
+          const resp = await getAlertFieldsByFeatureId(superUser, []);
 
           expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana', 'signal']);
         });
@@ -208,7 +265,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`${superUser.username} should be able to get alert fields for o11y rule types`, async () => {
         await retry.try(async () => {
-          const resp = await getAlertFieldsByFeatureId(superUser, ruleTypeIds, SPACE1);
+          const resp = await getAlertFieldsByFeatureId(superUser, ruleTypeIds);
 
           expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana']);
         });
@@ -216,11 +273,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`${superUser.username} should be able to get alert fields for siem rule types`, async () => {
         await retry.try(async () => {
-          const resp = await getAlertFieldsByFeatureId(
-            superUser,
-            ['siem.queryRule', 'siem.esqlRule'],
-            SPACE1
-          );
+          const resp = await getAlertFieldsByFeatureId(superUser, [
+            'siem.queryRule',
+            'siem.esqlRule',
+          ]);
 
           expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana', 'signal']);
         });
@@ -228,7 +284,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`${obsOnly.username} should be able to get non empty alert fields for o11y ruleTypeIds`, async () => {
         await retry.try(async () => {
-          const resp = await getAlertFieldsByFeatureId(superUser, ruleTypeIds, SPACE1);
+          const resp = await getAlertFieldsByFeatureId(superUser, ruleTypeIds);
 
           expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana']);
         });
@@ -236,7 +292,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`${obsOnly.username} should be able to get non empty alert fields for all ruleTypeIds`, async () => {
         await retry.try(async () => {
-          const resp = await getAlertFieldsByFeatureId(superUser, [], SPACE1);
+          const resp = await getAlertFieldsByFeatureId(superUser, []);
 
           expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana', 'signal']);
         });
@@ -244,7 +300,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`${obsSecReadSpacesAll.username} should be able to get non empty alert fields for o11y ruleTypeIds`, async () => {
         await retry.try(async () => {
-          const resp = await getAlertFieldsByFeatureId(superUser, ruleTypeIds, SPACE1);
+          const resp = await getAlertFieldsByFeatureId(superUser, ruleTypeIds);
 
           expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana']);
         });
@@ -252,22 +308,17 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`${obsOnlyRead.username} should be able to get non empty alert fields for siem ruleTypeIds`, async () => {
         await retry.try(async () => {
-          const resp = await getAlertFieldsByFeatureId(
-            superUser,
-            ['siem.queryRule', 'siem.esqlRule'],
-            SPACE1
-          );
+          const resp = await getAlertFieldsByFeatureId(superUser, [
+            'siem.queryRule',
+            'siem.esqlRule',
+          ]);
 
           expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana', 'signal']);
         });
       });
 
       it(`${secOnlySpacesAllEsReadAll.username} should be able to get alert fields for siem rule types`, async () => {
-        const resp = await getAlertFieldsByFeatureId(
-          secOnlySpacesAllEsReadAll,
-          ['siem.queryRule'],
-          SPACE1
-        );
+        const resp = await getAlertFieldsByFeatureId(secOnlySpacesAllEsReadAll, ['siem.queryRule']);
 
         expect(Object.keys(resp.alertFields)).toEqual(['base', 'event', 'kibana', 'signal']);
       });
@@ -277,11 +328,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it(`${secOnlyRead.username} should NOT be able to get alert fields for siem rule types due to lack of ES access`, async () => {
-        await getAlertFieldsByFeatureId(secOnlyRead, ['siem.queryRule'], SPACE1, 403);
+        await getAlertFieldsByFeatureId(secOnlyRead, ['siem.queryRule'], '', 403);
       });
 
       it(`${noKibanaPrivileges.username} should NOT be able to get alert fields`, async () => {
-        await getAlertFieldsByFeatureId(noKibanaPrivileges, [], SPACE1, 403);
+        await getAlertFieldsByFeatureId(noKibanaPrivileges, [], '', 403);
       });
     });
   });
