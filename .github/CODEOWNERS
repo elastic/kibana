@@ -1652,6 +1652,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/disable_ems @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/165986
 /x-pack/test/functional/fixtures/kbn_archiver/dashboard* @elastic/kibana-presentation
 /src/platform/test/functional/page_objects/dashboard_page* @elastic/kibana-presentation
+/x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/kibana-presentation
 /src/platform/test/functional/firefox/dashboard.config.ts @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
 /src/platform/test/functional/fixtures/es_archiver/dashboard @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
 /src/platform/test/accessibility/apps/dashboard.ts @elastic/kibana-presentation
