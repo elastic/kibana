@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
+import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { indexExplorer, IndexExplorerResponse } from '@kbn/onechat-genai-utils';
 
 const indexExplorerSchema = z.object({
@@ -22,12 +22,12 @@ const indexExplorerSchema = z.object({
     .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
 });
 
-export const indexExplorerTool = (): RegisteredTool<
+export const indexExplorerTool = (): BuiltinToolDefinition<
   typeof indexExplorerSchema,
   IndexExplorerResponse
 > => {
   return {
-    id: BuiltinToolIds.indexExplorer,
+    id: builtinToolIds.indexExplorer,
     description: `List relevant indices and corresponding mappings based on a natural language query.
 
                   The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
@@ -53,8 +53,6 @@ export const indexExplorerTool = (): RegisteredTool<
         result,
       };
     },
-    meta: {
-      tags: [BuiltinTags.retrieval],
-    },
+    tags: [builtinTags.retrieval],
   };
 };
