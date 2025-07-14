@@ -113,7 +113,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         outerDirection="column"
         hideSubtitle
       >
-        {generateTableQuery && discoverUrl && (
+        {generateTableQuery && (
           <LinkAnchor href={discoverUrl}>
             {hasUrlError ? (
               <FormattedMessage
