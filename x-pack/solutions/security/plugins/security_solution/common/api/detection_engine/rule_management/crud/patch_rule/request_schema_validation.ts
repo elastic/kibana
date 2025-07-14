@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { validateThresholdBase } from '../../../../../utils/request_validation/threshold';
+import type { Threshold } from '../../../model';
 import type { PatchRuleRequestBody } from './patch_rule_route.gen';
 
 /**
@@ -55,25 +57,14 @@ const validateTimelineTitle = (rule: PatchRuleRequestBody): string[] => {
   return [];
 };
 
-const validateThreshold = (rule: PatchRuleRequestBody): string[] => {
+const patchRuleExtraValidation = (threshold: Threshold) => {
   const errors: string[] = [];
-  if (rule.type === 'threshold') {
-    if (!rule.threshold) {
-      errors.push('when "type" is "threshold", "threshold" is required');
-    } else {
-      if (
-        rule.threshold.cardinality?.length &&
-        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
-      ) {
-        errors.push('Cardinality of a field that is being aggregated on is always 1');
-      }
-      if (rule.threshold.value <= 0) {
-        errors.push('"threshold.value" has to be bigger than 0');
-      }
-      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 5) {
-        errors.push('Number of fields must be 5 or less');
-      }
-    }
+  if (threshold.value !== undefined && threshold.value <= 0) {
+    errors.push('"threshold.value" has to be bigger than 0');
   }
   return errors;
+};
+
+const validateThreshold = (rule: PatchRuleRequestBody): string[] => {
+  return validateThresholdBase(rule, patchRuleExtraValidation);
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { validateThresholdBase } from '../../../../../utils/request_validation/threshold';
 import type { RuleUpdateProps } from '../../../model';
 
 /**
@@ -55,22 +56,4 @@ const validateTimelineTitle = (props: RuleUpdateProps): string[] => {
   return [];
 };
 
-const validateThreshold = (props: RuleUpdateProps): string[] => {
-  const errors: string[] = [];
-  if (props.type === 'threshold') {
-    if (!props.threshold) {
-      errors.push('when "type" is "threshold", "threshold" is required');
-    } else {
-      if (
-        props.threshold.cardinality?.length &&
-        props.threshold.field.includes(props.threshold.cardinality[0].field)
-      ) {
-        errors.push('Cardinality of a field that is being aggregated on is always 1');
-      }
-      if (Array.isArray(props.threshold.field) && props.threshold.field.length > 5) {
-        errors.push('Number of fields must be 5 or less');
-      }
-    }
-  }
-  return errors;
-};
+const validateThreshold = (props: RuleUpdateProps): string[] => validateThresholdBase(props);
