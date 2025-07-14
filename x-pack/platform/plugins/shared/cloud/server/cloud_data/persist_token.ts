@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isDeepEqual } from 'react-use/lib/util';
+import isDeepEqual from 'fast-deep-equal/react';
 
 import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {

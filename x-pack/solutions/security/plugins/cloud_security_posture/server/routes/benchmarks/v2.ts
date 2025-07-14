@@ -10,10 +10,8 @@ import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import {
-  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '../../../common/constants';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 import { Benchmark } from '../../../common/types/latest';
 import { getClusters } from '../compliance_dashboard/get_clusters';
@@ -59,7 +57,7 @@ export const getBenchmarksData = async (
   const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
   const { id: pitId } = await esClient.openPointInTime({
-    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     keep_alive: '30s',
   });
   // Transform response to a benchmark row: {id, name, version}

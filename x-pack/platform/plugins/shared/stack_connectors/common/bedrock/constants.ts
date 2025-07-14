@@ -22,9 +22,11 @@ export enum SUB_ACTION {
   DASHBOARD = 'getDashboard',
   TEST = 'test',
   BEDROCK_CLIENT_SEND = 'bedrockClientSend',
+  CONVERSE = 'converse',
+  CONVERSE_STREAM = 'converseStream',
 }
 
-export const DEFAULT_TIMEOUT_MS = 120000;
+export const DEFAULT_TIMEOUT_MS = 200000;
 export const DEFAULT_TOKEN_LIMIT = 8191;
 export const DEFAULT_BEDROCK_MODEL = 'us.anthropic.claude-3-7-sonnet-20250219-v1:0';
 

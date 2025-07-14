@@ -28,6 +28,11 @@ import {
   EuiTextArea,
   EuiTextAreaProps,
 } from '@elastic/eui';
+import { MonitorSpaces, MonitorSpacesProps } from '../fields/monitor_spaces';
+import {
+  MaintenanceWindowsField,
+  MaintenanceWindowsFieldProps,
+} from '../fields/maintenance_windows/maintenance_windows';
 import {
   ThrottlingConfigField,
   ThrottlingConfigFieldProps,
@@ -154,3 +159,12 @@ export const ResponseBodyIndexField = React.forwardRef<unknown, DefaultResponseB
 export const ThrottlingWrapper = React.forwardRef<unknown, ThrottlingConfigFieldProps>(
   (props, _ref) => <ThrottlingConfigField {...props} />
 );
+
+export const MaintenanceWindowsFieldWrapper = React.forwardRef<
+  unknown,
+  MaintenanceWindowsFieldProps
+>((props, _ref) => <MaintenanceWindowsField {...props} />);
+
+export const KibanaSpacesWrapper = React.forwardRef<unknown, MonitorSpacesProps>((props, _ref) => (
+  <MonitorSpaces {...props} />
+));

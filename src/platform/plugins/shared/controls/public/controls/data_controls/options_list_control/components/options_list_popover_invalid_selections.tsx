@@ -26,7 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -39,7 +39,7 @@ const optionsListPopoverInvalidSelectionsStyles = {
 
 export const OptionsListPopoverInvalidSelections = () => {
   const { componentApi } = useOptionsListContext();
-  const styles = useMemoizedStyles(optionsListPopoverInvalidSelectionsStyles);
+  const styles = useMemoCss(optionsListPopoverInvalidSelectionsStyles);
 
   const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
     componentApi.invalidSelections$,
@@ -57,6 +57,11 @@ export const OptionsListPopoverInvalidSelections = () => {
         key: String(key),
         label: fieldFormatter(key),
         checked: 'on',
+        css: css`
+          .euiSelectableListItem__prepend {
+            margin-inline-end: 0;
+          }
+        `,
         className: 'optionsList__selectionInvalid',
         'data-test-subj': `optionsList-control-invalid-selection-${key}`,
         prepend: (
@@ -76,7 +81,7 @@ export const OptionsListPopoverInvalidSelections = () => {
     <>
       <EuiSpacer size="s" />
       <EuiTitle size="xxs" data-test-subj="optionList__invalidSelectionLabel" css={styles.title}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiIcon
               type="warning"
@@ -84,7 +89,7 @@ export const OptionsListPopoverInvalidSelections = () => {
               size="s"
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <label>
               {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
             </label>
@@ -97,7 +102,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           invalidSelections.size
         )}
         options={selectableOptions}
-        listProps={{ onFocusBadge: false, isVirtualized: false }}
+        listProps={{ onFocusBadge: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
           componentApi.deselectOption(changedOption.key);

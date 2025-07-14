@@ -7,15 +7,17 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertStatus, ALERT_DURATION, ALERT_FLAPPING, TIMESTAMP, TAGS } from '@kbn/rule-data-utils';
 import { css } from '@emotion/react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
+import { CaseLinks } from './case_links';
 
 export interface StatusBarProps {
   alert: TopAlert | null;
@@ -24,6 +26,8 @@ export interface StatusBarProps {
 
 export function StatusBar({ alert, alertStatus }: StatusBarProps) {
   const { euiTheme } = useEuiTheme();
+  const dateFormat = useUiSetting<string>('dateFormat');
+
   const tags = alert?.fields[TAGS];
 
   if (!alert) {
@@ -46,6 +50,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           />
         )}
       </EuiFlexItem>
+      <CaseLinks alert={alert} />
       <EuiFlexItem grow={false}>
         <TagsList tags={tags} ignoreEmpty color="default" />
       </EuiFlexItem>
@@ -58,14 +63,16 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
             />
             :&nbsp;
           </EuiText>
-          <EuiText
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-            size="s"
-          >
-            {moment(Number(alert.start)).locale(i18n.getLocale()).fromNow()}
-          </EuiText>
+          <EuiToolTip content={moment(Number(alert.start)).format(dateFormat)}>
+            <EuiText
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+              size="s"
+            >
+              {moment(Number(alert.start)).locale(i18n.getLocale()).fromNow()}
+            </EuiText>
+          </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
@@ -96,14 +103,16 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
             />
             :&nbsp;
           </EuiText>
-          <EuiText
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-            size="s"
-          >
-            {moment(alert.fields[TIMESTAMP]?.toString()).locale(i18n.getLocale()).fromNow()}
-          </EuiText>
+          <EuiToolTip content={moment(alert.fields[TIMESTAMP]).format(dateFormat)}>
+            <EuiText
+              css={css`
+                font-weight: ${euiTheme.font.weight.semiBold};
+              `}
+              size="s"
+            >
+              {moment(alert.fields[TIMESTAMP]?.toString()).locale(i18n.getLocale()).fromNow()}
+            </EuiText>
+          </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

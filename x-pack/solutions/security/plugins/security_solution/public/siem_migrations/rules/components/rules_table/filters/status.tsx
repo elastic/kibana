@@ -79,6 +79,7 @@ export const StatusFilterButton: React.FC<StatusFilterButtonProps> = React.memo(
         }}
         isSelected={isPopoverOpen}
         hasActiveFilters={status !== undefined}
+        numActiveFilters={status ? 1 : 0}
         data-test-subj="statusFilterButton"
       >
         {i18n.STATUS_BUTTON_TITLE}
@@ -103,7 +104,7 @@ export const StatusFilterButton: React.FC<StatusFilterButtonProps> = React.memo(
           singleSelection
           data-test-subj="statusFilterSelectableList"
         >
-          {(list) => <div style={{ width: STATUS_FILTER_POPOVER_WIDTH }}>{list}</div>}
+          {(list) => <div css={{ width: STATUS_FILTER_POPOVER_WIDTH }}>{list}</div>}
         </EuiSelectable>
       </EuiPopover>
     );

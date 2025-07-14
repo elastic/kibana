@@ -382,7 +382,8 @@ describe('#create', () => {
       });
 
       it(`prepends namespace to the id and adds namespace to the body when providing namespace for single-namespace type`, async () => {
-        await createSuccess(type, attributes, { id, namespace });
+        const res = await createSuccess(type, attributes, { id, namespace });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${namespace}:${type}:${id}`,
@@ -393,7 +394,8 @@ describe('#create', () => {
       });
 
       it(`doesn't prepend namespace to the id or add namespace to the body when providing no namespace for single-namespace type`, async () => {
-        await createSuccess(type, attributes, { id });
+        const res = await createSuccess(type, attributes, { id });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,
@@ -404,7 +406,8 @@ describe('#create', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await createSuccess(type, attributes, { id, namespace: 'default' });
+        const res = await createSuccess(type, attributes, { id, namespace: 'default' });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
             id: `${type}:${id}`,

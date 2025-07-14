@@ -39,7 +39,7 @@
       "_search/template",
       "{index}/_search/template"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-template.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-template",
     "availability": {
       "stack": true,
       "serverless": true

@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { timeUnitsToSuggest, ESQL_COMMON_NUMERIC_TYPES } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import {
   setup,
   getFunctionSignaturesByReturnType,
@@ -16,9 +17,6 @@ import {
   AssertSuggestionsFn,
   fields,
 } from './helpers';
-import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
-import { timeUnitsToSuggest } from '../../definitions/literals';
-import { Location } from '../../definitions/types';
 import { roundParameterTypes } from './constants';
 
 describe('autocomplete.suggest', () => {
@@ -231,6 +229,7 @@ describe('autocomplete.suggest', () => {
         'IN $0',
         'IS NOT NULL',
         'IS NULL',
+        'NOT IN $0',
       ]);
       await assertSuggestions(
         'from a | eval a=round(doubleField, /',
@@ -361,7 +360,7 @@ describe('autocomplete.suggest', () => {
     test('deep function nesting', async () => {
       for (const nesting of [1, 2, 3, 4]) {
         await assertSuggestions(
-          `from a | eval a=${Array(nesting).fill('round(/').join('')}`,
+          `from a | eval a=${Array(nesting).fill('round(').join('').concat('/')}`,
           [
             ...getFieldNamesByType(roundParameterTypes),
             ...getFunctionSignaturesByReturnType(
@@ -405,7 +404,6 @@ describe('autocomplete.suggest', () => {
 
     test('date math', async () => {
       const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
-
       // Eval bucket is not a valid expression
       await assertSuggestions('from a | eval col0 = bucket(@timestamp, /', [], {
         triggerCharacter: ' ',
@@ -429,7 +427,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(
         'from a | eval col0=date_trunc(/)',
         [
-          ...getLiteralsByType('time_literal').map((t) => `${t}, `),
+          ...getLiteralsByType('time_duration').map((t) => `${t}, `),
           ...getFunctionSignaturesByReturnType(Location.EVAL, ['time_duration', 'date_period'], {
             scalar: true,
           }).map((t) => `${t.text},`),

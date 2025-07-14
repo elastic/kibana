@@ -19,6 +19,7 @@ import type {
 } from 'openai/resources/chat/completions';
 import type { Stream } from 'openai/streaming';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
@@ -86,6 +87,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       const defaultHeaders = { ...this.headers };
       let defaultQuery: Record<string, string> | undefined;
 
+      const isHttps = this.url.toLowerCase().startsWith('https');
+
       if (
         this.provider === OpenAiProviderType.Other &&
         (('certificateData' in this.secrets && this.secrets.certificateData) ||
@@ -108,11 +111,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           this.url,
           this.sslOverrides
         );
-        httpAgent = agents.httpsAgent;
+        httpAgent = isHttps ? agents.httpsAgent : agents.httpAgent;
         baseURL = removeEndpointFromUrl(this.url);
       } else {
         const agents = getCustomAgents(this.configurationUtilities, this.logger, this.url);
-        httpAgent = agents.httpsAgent ?? agents.httpAgent;
+        httpAgent = isHttps ? agents.httpsAgent : agents.httpAgent;
         if (this.config.apiProvider === OpenAiProviderType.AzureAi) {
           baseURL = this.config.apiUrl;
           defaultHeaders['api-key'] = this.key;
@@ -424,6 +427,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
+
+      // Based on the OpenAI API documentation, the error contains the status code in the `status` property
+      if (e.status === 429) {
+        throw createTaskRunError(new Error(errorMessage), TaskErrorSource.USER);
+      }
+
       throw new Error(errorMessage);
     }
   }

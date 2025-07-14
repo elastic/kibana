@@ -265,6 +265,19 @@ function renderTestCases(
       expect(data).toMatchSnapshot(INJECTED_METADATA);
     });
 
+    it('renders initial feature flags', async () => {
+      mockRenderingSetupDeps.featureFlags.getInitialFeatureFlags.mockResolvedValueOnce({
+        'my-initial-flag': 1234,
+      });
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
     it('renders "core" with logging config injected', async () => {
       const loggingConfig = {
         root: {

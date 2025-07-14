@@ -23,7 +23,7 @@
             "label": "tiers",
             "description": [],
             "signature": [
-              "{ enabled: boolean; products: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[]; }"
+              "{ enabled: boolean; products: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[]; }"
             ],
             "path": "src/core/packages/pricing/browser/src/api.ts",
             "deprecated": false,

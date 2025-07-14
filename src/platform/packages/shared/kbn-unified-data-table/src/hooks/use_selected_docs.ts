@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { useRestorableState, UnifiedDataTableRestorableState } from '../restorable_state';
 
 export interface UseSelectedDocsState {
   isDocSelected: (docId: string) => boolean;
@@ -29,53 +30,68 @@ export interface UseSelectedDocsState {
 export const useSelectedDocs = (
   docMap: Map<string, { doc: DataTableRecord; docIndex: number }>
 ): UseSelectedDocsState => {
-  const [selectedDocsSet, setSelectedDocsSet] = useState<Set<string>>(new Set());
+  const [selectedDocsMap, setSelectedDocsMap] = useRestorableState('selectedDocsMap', {});
   const lastCheckboxToggledDocId = useRef<string | undefined>();
 
-  const toggleDocSelection = useCallback((docId: string) => {
-    setSelectedDocsSet((prevSelectedRowsSet) => {
-      const newSelectedRowsSet = new Set(prevSelectedRowsSet);
-      if (newSelectedRowsSet.has(docId)) {
-        newSelectedRowsSet.delete(docId);
-      } else {
-        newSelectedRowsSet.add(docId);
-      }
-      return newSelectedRowsSet;
-    });
-    lastCheckboxToggledDocId.current = docId;
-  }, []);
+  const toggleDocSelection = useCallback(
+    (docId: string) => {
+      setSelectedDocsMap((prevSelectedRowsSet) => {
+        const newSelectedRowsSet = { ...prevSelectedRowsSet };
+        if (newSelectedRowsSet[docId]) {
+          delete newSelectedRowsSet[docId];
+        } else {
+          newSelectedRowsSet[docId] = true;
+        }
+        return newSelectedRowsSet;
+      });
+      lastCheckboxToggledDocId.current = docId;
+    },
+    [setSelectedDocsMap]
+  );
 
-  const replaceSelectedDocs = useCallback((docIds: string[]) => {
-    setSelectedDocsSet(new Set(docIds));
-  }, []);
+  const replaceSelectedDocs = useCallback(
+    (docIds: string[]) => {
+      setSelectedDocsMap(createSelectedDocsMapFromIds(docIds));
+    },
+    [setSelectedDocsMap]
+  );
 
   const selectAllDocs = useCallback(() => {
-    setSelectedDocsSet(new Set(docMap.keys()));
-  }, [docMap]);
+    setSelectedDocsMap(createSelectedDocsMapFromIds([...docMap.keys()]));
+  }, [docMap, setSelectedDocsMap]);
 
-  const selectMoreDocs = useCallback((docIds: string[]) => {
-    setSelectedDocsSet((prevSelectedRowsSet) => new Set([...prevSelectedRowsSet, ...docIds]));
-  }, []);
+  const selectMoreDocs = useCallback(
+    (docIds: string[]) => {
+      setSelectedDocsMap((prevSelectedRowsSet) =>
+        createSelectedDocsMapFromIds([...getIdsFromSelectedDocsMap(prevSelectedRowsSet), ...docIds])
+      );
+    },
+    [setSelectedDocsMap]
+  );
 
-  const deselectSomeDocs = useCallback((docIds: string[]) => {
-    setSelectedDocsSet(
-      (prevSelectedRowsSet) =>
-        new Set([...prevSelectedRowsSet].filter((docId) => !docIds.includes(docId)))
-    );
-  }, []);
+  const deselectSomeDocs = useCallback(
+    (docIds: string[]) => {
+      setSelectedDocsMap((prevSelectedRowsSet) =>
+        createSelectedDocsMapFromIds(
+          getIdsFromSelectedDocsMap(prevSelectedRowsSet).filter((docId) => !docIds.includes(docId))
+        )
+      );
+    },
+    [setSelectedDocsMap]
+  );
 
   const clearAllSelectedDocs = useCallback(() => {
-    setSelectedDocsSet(new Set());
-  }, []);
+    setSelectedDocsMap({});
+  }, [setSelectedDocsMap]);
 
   const selectedDocIds = useMemo(
-    () => Array.from(selectedDocsSet).filter((docId) => docMap.has(docId)),
-    [selectedDocsSet, docMap]
+    () => getIdsFromSelectedDocsMap(selectedDocsMap).filter((docId) => docMap.has(docId)),
+    [selectedDocsMap, docMap]
   );
 
   const isDocSelected = useCallback(
-    (docId: string) => selectedDocsSet.has(docId) && docMap.has(docId),
-    [selectedDocsSet, docMap]
+    (docId: string) => Boolean(selectedDocsMap[docId]) && docMap.has(docId),
+    [selectedDocsMap, docMap]
   );
 
   const toggleMultipleDocsSelection = useCallback(
@@ -166,3 +182,18 @@ export const useSelectedDocs = (
     ]
   );
 };
+
+function createSelectedDocsMapFromIds(
+  docIds: string[]
+): UnifiedDataTableRestorableState['selectedDocsMap'] {
+  return docIds.reduce((acc, docId) => {
+    acc[docId] = true;
+    return acc;
+  }, {} as UnifiedDataTableRestorableState['selectedDocsMap']);
+}
+
+function getIdsFromSelectedDocsMap(
+  selectedDocsMap: UnifiedDataTableRestorableState['selectedDocsMap']
+): string[] {
+  return Object.keys(selectedDocsMap);
+}

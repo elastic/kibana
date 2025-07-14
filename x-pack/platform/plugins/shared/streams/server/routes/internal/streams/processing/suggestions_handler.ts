@@ -6,20 +6,20 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { get, cloneDeep } from 'lodash';
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { FlattenRecord, Streams } from '@kbn/streams-schema';
 import {
+  InferenceClient,
   MessageRole,
   type FromToolSchema,
-  type OutputOptions,
   type Message,
+  type OutputOptions,
 } from '@kbn/inference-common';
+import { FlattenRecord, Streams } from '@kbn/streams-schema';
+import { cloneDeep, get } from 'lodash';
 import { StreamsClient } from '../../../../lib/streams/client';
-import { simulateProcessing, type SimulationDocReport } from './simulation_handler';
-import { ProcessingSuggestionBody } from './route';
-import { getLogGroups, sortByProbability, getVariedSamples } from './get_log_groups';
 import { convertEcsFieldsToOtel } from './convert_ecs_fields_to_otel';
+import { getLogGroups, getVariedSamples, sortByProbability } from './get_log_groups';
+import { ProcessingSuggestionBody } from './route';
+import { simulateProcessing, type SimulationDocReport } from './simulation_handler';
 
 export interface SimulationWithPattern extends Awaited<ReturnType<typeof simulateProcessing>> {
   pattern: string;
@@ -342,11 +342,7 @@ export function getLogMessageGroups(sampleDocuments: FlattenRecord[], fieldName:
 }
 
 function getProcessingErrors(documents: SimulationDocReport[]) {
-  return documents.flatMap((doc) =>
-    doc.errors
-      .filter((error) => error.type !== 'non_additive_processor_failure')
-      .map((error) => error.message)
-  );
+  return documents.flatMap((doc) => doc.errors.map((error) => error.message));
 }
 
 function getErrorMessageGroups(errors: string[]) {

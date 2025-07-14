@@ -27,6 +27,7 @@ export const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:microsoft_sentinel',
   'epr:sentinel_one',
   'epr:crowdstrike',
+  'epr:elastic_security',
 ];
 const INTEGRATION_CARD_MIN_HEIGHT_PX = 88;
 
@@ -60,7 +61,6 @@ export const applyCategoryBadgeAndStyling = (
     showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
     showDescription: false,
     showReleaseBadge: false,
-    isUnverified: false, // temporarily hiding the 'unverified' badge from the integration card
     extraLabelsBadges: categoryBadge
       ? ([
           <EuiFlexItem grow={false}>

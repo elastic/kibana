@@ -87,6 +87,9 @@ export interface ContentEditorKibanaDependencies {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
       };
     };
+    rendering: {
+      addContext: (element: React.ReactNode) => React.ReactElement;
+    };
   };
   /**
    * The public API from the savedObjectsTaggingOss plugin.
@@ -123,7 +126,7 @@ export const ContentEditorKibanaProvider: FC<
   PropsWithChildren<ContentEditorKibanaDependencies>
 > = ({ children, ...services }) => {
   const { core, savedObjectsTagging } = services;
-  const { overlays, notifications, ...startServices } = core;
+  const { overlays, notifications, rendering } = core;
   const { openFlyout: coreOpenFlyout } = overlays;
 
   const TagList = useMemo(() => {
@@ -148,19 +151,19 @@ export const ContentEditorKibanaProvider: FC<
           <QueryClientProvider client={queryClient}>
             <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
           </QueryClientProvider>,
-          startServices
+          rendering
         ),
         options
       );
     },
-    [coreOpenFlyout, startServices, userProfilesServices, queryClient]
+    [coreOpenFlyout, rendering, userProfilesServices, queryClient]
   );
 
   return (
     <ContentEditorProvider
       openFlyout={openFlyout}
       notifyError={(title, text) => {
-        notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
+        notifications.toasts.addDanger({ title: toMountPoint(title, rendering), text });
       }}
       TagList={TagList}
       TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}

@@ -6,9 +6,10 @@
  */
 
 import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { getAttackDiscoveryMarkdownFields } from '@kbn/elastic-assistant-common';
+import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
@@ -21,19 +22,26 @@ import { getResourceName } from '../../../../ai_assistant_service';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
-import { AttackDiscoveryExecutorOptions } from '../types';
+import { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
-import { transformToBaseAlertDocument } from '../../persistence/transforms/transform_to_alert_documents';
+import {
+  generateAttackDiscoveryAlertHash,
+  transformToBaseAlertDocument,
+} from '../../persistence/transforms/transform_to_alert_documents';
+import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
+import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
   logger: Logger;
+  publicBaseUrl: string | undefined;
   telemetry: AnalyticsServiceSetup;
 }
 
 export const attackDiscoveryScheduleExecutor = async ({
   options,
   logger,
+  publicBaseUrl,
   telemetry,
 }: AttackDiscoveryScheduleExecutorParams) => {
   const { params, rule, services, spaceId } = options;
@@ -111,20 +119,71 @@ export const attackDiscoveryScheduleExecutor = async ({
       replacements,
     };
 
-    attackDiscoveries?.forEach((attack) => {
-      const payload = transformToBaseAlertDocument({
-        attackDiscovery: attack,
-        alertsParams,
-      });
-
-      const { id, ...restAttack } = attack;
-      alertsClient.report({
-        id: uuidv4(),
-        actionGroup: 'default',
-        payload,
-        context: { attack: restAttack },
-      });
+    // Deduplicate attackDiscoveries before creating alerts
+    const indexPattern = getScheduledIndexPattern(spaceId);
+    const dedupedDiscoveries = await deduplicateAttackDiscoveries({
+      esClient,
+      attackDiscoveries: attackDiscoveries ?? [],
+      connectorId: params.apiConfig.connectorId,
+      indexPattern,
+      logger,
+      ownerInfo: {
+        id: rule.id,
+        isSchedule: true,
+      },
+      replacements,
+      spaceId,
     });
+
+    await Promise.all(
+      dedupedDiscoveries.map(async (attackDiscovery) => {
+        const alertInstanceId = generateAttackDiscoveryAlertHash({
+          attackDiscovery,
+          connectorId: params.apiConfig.connectorId,
+          ownerId: rule.id,
+          replacements,
+          spaceId,
+        });
+        const { uuid: alertDocId } = alertsClient.report({
+          id: alertInstanceId,
+          actionGroup: 'default',
+        });
+
+        const baseAlertDocument = transformToBaseAlertDocument({
+          alertDocId,
+          alertInstanceId,
+          attackDiscovery,
+          alertsParams,
+          publicBaseUrl,
+          spaceId,
+        });
+
+        const { alertIds, timestamp, mitreAttackTactics } = attackDiscovery;
+        const { detailsMarkdown, entitySummaryMarkdown, title, summaryMarkdown } =
+          getAttackDiscoveryMarkdownFields({
+            attackDiscovery,
+            replacements,
+          });
+        const context: AttackDiscoveryScheduleContext = {
+          attack: {
+            alertIds,
+            detailsMarkdown,
+            detailsUrl: baseAlertDocument[ALERT_URL],
+            entitySummaryMarkdown,
+            mitreAttackTactics,
+            summaryMarkdown,
+            timestamp,
+            title,
+          },
+        };
+
+        alertsClient.setAlertData({
+          id: alertInstanceId,
+          payload: baseAlertDocument,
+          context,
+        });
+      })
+    );
   } catch (error) {
     logger.error(error);
     const transformedError = transformError(error);

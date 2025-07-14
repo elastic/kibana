@@ -28,6 +28,7 @@ import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
   ACTION_CONVERT_TO_LENS,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+  ACTION_CONVERT_AGG_BASED_TO_LENS,
   VisualizationsSetup,
   VisualizationsStart,
 } from '@kbn/visualizations-plugin/public';
@@ -672,11 +673,11 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerActionAsync(
       AGG_BASED_VISUALIZATION_TRIGGER,
-      ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+      ACTION_CONVERT_AGG_BASED_TO_LENS,
       async () => {
         const { convertToLensActionFactory } = await import('./async_services');
         const action = convertToLensActionFactory(
-          ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+          ACTION_CONVERT_AGG_BASED_TO_LENS,
           i18n.translate('xpack.lens.visualizeAggBasedLegend', {
             defaultMessage: 'Visualize agg based chart',
           }),

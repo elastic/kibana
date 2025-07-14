@@ -33,12 +33,12 @@ import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-c
 import type { Filter } from '@kbn/es-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
+import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import * as i18n from '../translations';
-import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
 import { SubmitButton } from './submit_button';
-import { convertToRRule } from '../helpers/convert_to_rrule';
 import { isScopedQueryError } from '../../../../common';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
 import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
@@ -167,11 +167,11 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       const maintenanceWindow = {
         title: formData.title,
         duration: endDate.diff(startDate),
-        rRule: convertToRRule(
-          startDate,
-          formData.timezone ? formData.timezone[0] : defaultTimezone,
-          formData.recurringSchedule
-        ),
+        rRule: convertToRRule({
+          startDate: startDate.toISOString(),
+          timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
+          recurringSchedule: formData.recurringSchedule,
+        }),
         categoryIds: formData.solutionId ? [formData.solutionId] : null,
         scopedQuery: availableSolutions.length !== 0 ? scopedQueryPayload : null,
       };
@@ -206,10 +206,11 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     onSubmit: submitMaintenanceWindow,
   });
 
-  const [{ recurring, timezone, solutionId }, _, mounted] = useFormData<FormProps>({
-    form,
-    watch: ['recurring', 'timezone', 'solutionId', 'scopedQuery'],
-  });
+  const [{ recurring, timezone, solutionId, startDate, endDate }, _, mounted] =
+    useFormData<FormProps>({
+      form,
+      watch: ['recurring', 'timezone', 'solutionId', 'scopedQuery', 'startDate', 'endDate'],
+    });
 
   const isRecurring = recurring || false;
   const showTimezone = isBrowser || initialValue?.timezone !== undefined;
@@ -408,7 +409,11 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         </EuiFlexItem>
         {isRecurring && (
           <EuiFlexItem>
-            <RecurringSchedule data-test-subj="recurring-form" />
+            <RecurringScheduleFormFields
+              startDate={startDate}
+              endDate={endDate}
+              timezone={timezone}
+            />
           </EuiFlexItem>
         )}
 

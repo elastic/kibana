@@ -39,7 +39,6 @@ describe('ZDT upgrades - basic downgrade', () => {
         keyword: { type: 'keyword' },
       },
     },
-    switchToModelVersionAt: '8.0.0',
     modelVersions: {
       1: {
         changes: [],
@@ -56,7 +55,6 @@ describe('ZDT upgrades - basic downgrade', () => {
         newField1: { type: 'text' },
       },
     },
-    switchToModelVersionAt: '8.0.0',
     modelVersions: {
       1: {
         changes: [],

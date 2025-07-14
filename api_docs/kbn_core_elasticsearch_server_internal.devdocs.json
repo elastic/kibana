@@ -1252,69 +1252,6 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.ClusterInfo",
-        "type": "Interface",
-        "tags": [
-          "private"
-        ],
-        "label": "ClusterInfo",
-        "description": [],
-        "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_name",
-            "type": "string",
-            "tags": [],
-            "label": "cluster_name",
-            "description": [],
-            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_uuid",
-            "type": "string",
-            "tags": [],
-            "label": "cluster_uuid",
-            "description": [],
-            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_version",
-            "type": "string",
-            "tags": [],
-            "label": "cluster_version",
-            "description": [],
-            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_build_flavor",
-            "type": "string",
-            "tags": [],
-            "label": "cluster_build_flavor",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-elasticsearch-server-internal",
         "id": "def-server.NodeInfo",
         "type": "Interface",
         "tags": [],

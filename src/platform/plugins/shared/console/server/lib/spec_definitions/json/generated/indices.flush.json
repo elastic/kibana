@@ -25,7 +25,7 @@
       "_flush",
       "{index}/_flush"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-flush.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-flush",
     "availability": {
       "stack": true,
       "serverless": false

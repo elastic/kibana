@@ -11,22 +11,20 @@ import {
   ESQLCommandOption,
   Walker,
   isIdentifier,
+  isOptionNode,
+  isSource,
+  isColumn,
+  isList,
   type ESQLAst,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { FunctionDefinitionTypes } from '../definitions/types';
-import { EDITOR_MARKER } from './constants';
-import {
-  isColumnItem,
-  isSourceItem,
-  pipePrecedesCurrentWord,
-  getFunctionDefinition,
-  isOptionItem,
-  within,
-} from './helpers';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
+import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
+import { within } from './helpers';
 
 function findCommand(ast: ESQLAst, offset: number) {
   const commandIndex = ast.findIndex(
@@ -39,7 +37,7 @@ function findCommand(ast: ESQLAst, offset: number) {
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
-  return findCommandSubType(nodes, offset, isOptionItem);
+  return findCommandSubType(nodes, offset, isOptionNode);
 }
 
 function findCommandSubType<T extends ESQLCommandOption>(
@@ -66,7 +64,7 @@ export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
 
   return Boolean(
     node &&
-      (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
+      (isColumn(node) || isIdentifier(node) || isSource(node)) &&
       node.name.endsWith(EDITOR_MARKER)
   );
 }
@@ -98,6 +96,18 @@ export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCo
   return node;
 }
 
+const removeMarkerNode = (node: ESQLAstExpression) => {
+  Walker.walk(node, {
+    visitAny: (current) => {
+      if ('args' in current) {
+        current.args = current.args.filter((n) => !isMarkerNode(n));
+      } else if ('values' in current) {
+        current.values = current.values.filter((n) => !isMarkerNode(n));
+      }
+    },
+  });
+};
+
 function findAstPosition(ast: ESQLAst, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
@@ -108,6 +118,12 @@ function findAstPosition(ast: ESQLAst, offset: number) {
   let node: ESQLSingleAstItem | undefined;
 
   Walker.walk(command, {
+    visitSource: (_node, parent, walker) => {
+      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+        node = _node as ESQLSingleAstItem;
+        walker.abort();
+      }
+    },
     visitAny: (_node) => {
       if (
         _node.type === 'function' &&
@@ -117,11 +133,17 @@ function findAstPosition(ast: ESQLAst, offset: number) {
         containingFunction = _node;
       }
 
-      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+      if (
+        _node.location.max >= offset &&
+        _node.text !== EDITOR_MARKER &&
+        (!isList(_node) || _node.subtype !== 'tuple')
+      ) {
         node = _node as ESQLSingleAstItem;
       }
     },
   });
+
+  if (node) removeMarkerNode(node);
 
   return {
     command: removeMarkerArgFromArgsList(command)!,
@@ -130,15 +152,6 @@ function findAstPosition(ast: ESQLAst, offset: number) {
     node: removeMarkerArgFromArgsList(cleanMarkerNode(node)),
   };
 }
-
-function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
-  return node.name !== '=' && command.name !== 'enrich';
-}
-
-function isOperator(node: ESQLFunction) {
-  return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
-}
-
 /**
  * Given a ES|QL query string, its AST and the cursor position,
  * it returns the type of context for the position ("list", "function", "option", "setting", "expression", "newCommand")
@@ -173,36 +186,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     };
   }
 
-  let withinStatsWhereClause = false;
-  Walker.walk(ast, {
-    visitFunction: (fn) => {
-      if (fn.name === 'where' && within(offset, fn.location)) {
-        withinStatsWhereClause = true;
-      }
-    },
-  });
-
   const { command, option, node, containingFunction } = findAstPosition(ast, offset);
-  if (node) {
-    if (node.type === 'literal' && node.literalType === 'keyword') {
-      // command ... "<here>"
-      return { type: 'value' as const, command, node, option, containingFunction };
-    }
-
-    if (node.type === 'function') {
-      if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
-        // command ... a in ( <here> )
-        return { type: 'list' as const, command, node, option, containingFunction };
-      }
-      if (
-        isNotEnrichClauseAssigment(node, command) &&
-        (!isOperator(node) || (command.name === 'stats' && !withinStatsWhereClause))
-      ) {
-        // command ... fn( <here> )
-        return { type: 'function' as const, command, node, option, containingFunction };
-      }
-    }
-  }
   if (
     !command ||
     (queryString.length <= offset &&

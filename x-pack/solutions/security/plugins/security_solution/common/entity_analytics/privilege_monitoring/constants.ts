@@ -7,10 +7,10 @@
 
 // Static index names: may be more obvious and easier to manage.
 export const privilegedMonitorBaseIndexName = '.entity_analytics.monitoring';
+export const ML_ANOMALIES_INDEX = '.ml-anomalies-shared';
 
-// Used in Phase 0.
-export const getPrivilegedMonitorUsersIndex = (namespace: string) =>
-  `${privilegedMonitorBaseIndexName}.users-${namespace}`;
-// Not required in phase 0.
-export const getPrivilegedMonitorGroupsIndex = (namespace: string) =>
-  `${privilegedMonitorBaseIndexName}.groups-${namespace}`;
+// Default index for privileged monitoring users. Not required.
+export const defaultMonitoringUsersIndex = 'entity_analytics.privileged_monitoring';
+
+export const PRIVILEGE_MONITORING_PRIVILEGE_CHECK_API =
+  '/api/entity_analytics/monitoring/privileges/privileges';

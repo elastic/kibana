@@ -26,6 +26,7 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
   UnifiedDataTableProps,
+  UnifiedDataTableRestorableState,
   UseColumnsProps,
 } from '@kbn/unified-data-table';
 import {
@@ -68,7 +69,6 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import type { CellRenderersExtensionParams } from '../../../../context_awareness';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
@@ -77,10 +77,12 @@ import {
 } from '../../../../context_awareness';
 import {
   internalStateActions,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -108,10 +110,11 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
-  const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -191,17 +194,17 @@ function DiscoverDocumentsComponent({
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const docViewerRef = useRef<DocViewerApi>(null);
@@ -344,9 +347,7 @@ function DiscoverDocumentsComponent({
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
-  const { customCellRenderer, customGridColumnsConfiguration } =
-    useContextualGridCustomisations(cellRendererParams) || {};
-  const additionalFieldGroups = useAdditionalFieldGroups();
+  const { customCellRenderer } = useContextualGridCustomisations(cellRendererParams) || {};
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
@@ -378,7 +379,7 @@ function DiscoverDocumentsComponent({
           size="xs"
           color="accent"
           position="absolute"
-          css={progressStyle}
+          css={styles.progress}
         />
       ) : null,
     [isDataLoading]
@@ -398,10 +399,18 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, loadingIndicator]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) =>
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
+    [dispatch, setDataGridUiState]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
-      <div className="dscDocuments__loading" css={dscDocumentsLoadingCss}>
+      <div className="dscDocuments__loading" css={styles.dscDocumentsLoading}>
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />
@@ -413,7 +422,7 @@ function DiscoverDocumentsComponent({
 
   return (
     // class is used in tests
-    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={styles.container}>
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
@@ -468,9 +477,7 @@ function DiscoverDocumentsComponent({
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
-            customGridColumnsConfiguration={customGridColumnsConfiguration}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-            additionalFieldGroups={additionalFieldGroups}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
@@ -478,6 +485,8 @@ function DiscoverDocumentsComponent({
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
+            initialState={dataGridUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </CellActionsProvider>
       </div>
@@ -487,20 +496,20 @@ function DiscoverDocumentsComponent({
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
 
-const containerStyles = css`
-  position: relative;
-  min-height: 0;
-`;
-
-const progressStyle = css`
-  z-index: 2;
-`;
-
-const dscDocumentsLoadingCss = css`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  height: 100%;
-  width: 100%;
-`;
+const styles = {
+  container: css({
+    position: 'relative',
+    minHeight: 0,
+  }),
+  progress: css({
+    zIndex: 2,
+  }),
+  dscDocumentsLoading: css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    textAlign: 'center',
+    height: '100%',
+    width: '100%',
+  }),
+};

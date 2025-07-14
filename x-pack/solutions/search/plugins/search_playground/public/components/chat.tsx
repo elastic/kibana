@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, FieldErrors, useFormContext } from 'react-hook-form';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -38,17 +38,20 @@ import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { PlaygroundBodySection } from './playground_body_section';
 import { elasticsearchQueryString } from '../utils/user_query';
 
-const buildFormData = (formData: PlaygroundForm): ChatRequestData => ({
-  connector_id: formData[PlaygroundFormFields.summarizationModel].connectorId!,
+const buildFormData = (
+  formData: PlaygroundForm,
+  formErrors: FieldErrors<PlaygroundForm>
+): ChatRequestData => ({
+  connector_id: formData[PlaygroundFormFields.summarizationModel]!.connectorId!,
   prompt: formData[PlaygroundFormFields.prompt],
   indices: formData[PlaygroundFormFields.indices].join(),
   citations: formData[PlaygroundFormFields.citations],
   elasticsearch_query: elasticsearchQueryString(
     formData[PlaygroundFormFields.elasticsearchQuery],
     formData[PlaygroundFormFields.userElasticsearchQuery],
-    formData[PlaygroundFormFields.userElasticsearchQueryValidations]
+    formErrors[PlaygroundFormFields.userElasticsearchQuery]
   ),
-  summarization_model: formData[PlaygroundFormFields.summarizationModel].value,
+  summarization_model: formData[PlaygroundFormFields.summarizationModel]!.value,
   source_fields: JSON.stringify(formData[PlaygroundFormFields.sourceFields]),
   doc_size: formData[PlaygroundFormFields.docSize],
 });
@@ -57,7 +60,7 @@ export const Chat = () => {
   const { euiTheme } = useEuiTheme();
   const {
     control,
-    formState: { isValid, isSubmitting },
+    formState: { isValid, isSubmitting, errors: formErrors },
     resetField,
     handleSubmit,
     getValues,
@@ -70,7 +73,7 @@ export const Chat = () => {
     await append(
       { content: data.question, role: MessageRole.user, createdAt: new Date() },
       {
-        data: buildFormData(data),
+        data: buildFormData(data, formErrors),
       }
     );
     usageTracker?.click(AnalyticsEvents.chatQuestionSent);
@@ -102,7 +105,7 @@ export const Chat = () => {
     setIsRegenerating(true);
     const formData = getValues();
     await reload({
-      data: buildFormData(formData),
+      data: buildFormData(formData, formErrors),
     });
     setIsRegenerating(false);
 
@@ -193,10 +196,6 @@ export const Chat = () => {
                   name={PlaygroundFormFields.question}
                   control={control}
                   defaultValue=""
-                  rules={{
-                    required: true,
-                    validate: (rule) => !!rule?.trim(),
-                  }}
                   render={({ field }) => (
                     <QuestionInput
                       value={field.value}

@@ -5,38 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React from 'react';
 import { UnsavedFormProvider } from './providers/unsaved_form_provider';
 
-import { useKibana } from './hooks/use_kibana';
 import { Playground } from './components/playgorund';
+
 import { usePlaygroundBreadcrumbs } from './hooks/use_playground_breadcrumbs';
+import { SearchPlaygroundPageTemplate } from './layout/page_template';
 
 export const PlaygroundOverview = () => {
-  const {
-    services: { history, console: consolePlugin, searchNavigation },
-  } = useKibana();
   usePlaygroundBreadcrumbs();
 
-  const embeddableConsole = useMemo(
-    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
-    [consolePlugin]
-  );
-
   return (
-    <KibanaPageTemplate
-      offset={0}
-      restrictWidth={false}
-      data-test-subj="svlPlaygroundPage"
-      grow={false}
-      panelled={false}
-      solutionNav={searchNavigation?.useClassicNavigation(history)}
-    >
+    <SearchPlaygroundPageTemplate data-test-subj="svlPlaygroundPage">
       <UnsavedFormProvider>
         <Playground showDocs />
       </UnsavedFormProvider>
-      {embeddableConsole}
-    </KibanaPageTemplate>
+    </SearchPlaygroundPageTemplate>
   );
 };

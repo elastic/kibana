@@ -21,7 +21,7 @@ export const SyncToAllSpacesWarning: FC = () => {
   return (
     <EuiCallOut
       size="s"
-      iconType="help"
+      iconType="question"
       title={
         <FormattedMessage
           id="xpack.ml.management.syncSavedObjectsFlyout.allSpacesWarning.title"

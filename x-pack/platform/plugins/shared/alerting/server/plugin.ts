@@ -88,6 +88,10 @@ import {
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
 import { scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
+import {
+  initializeMaintenanceWindowEventsGenerator,
+  scheduleMaintenanceWindowEventsGenerator,
+} from './maintenance_window_events/task';
 import type { AlertingConfig, AlertingRulesConfig } from './config';
 import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -415,6 +419,12 @@ export class AlertingPlugin {
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
+    initializeMaintenanceWindowEventsGenerator(
+      this.logger,
+      plugins.taskManager,
+      core.getStartServices
+    );
+
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
       'alerting',
       this.createRouteHandlerContext(core)
@@ -726,6 +736,7 @@ export class AlertingPlugin {
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager).catch(
       () => {}
     ); // it shouldn't reject, but just in case
+    scheduleMaintenanceWindowEventsGenerator(this.logger, plugins.taskManager).catch(() => {});
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),

@@ -10,6 +10,7 @@ import { callAssistantGraph } from '.';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { loggerMock } from '@kbn/logging-mocks';
+import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
@@ -31,6 +32,16 @@ jest.mock('@kbn/security-ai-prompts');
 const getDefaultAssistantGraphMock = getDefaultAssistantGraph as jest.Mock;
 const resolveProviderAndModelMock = resolveProviderAndModel as jest.Mock;
 const getPromptMock = getPrompt as jest.Mock;
+const telemetryTracerMock = TelemetryTracer as unknown as jest.Mock;
+const getTool = jest.fn();
+const mockTool: AssistantTool = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  sourceRegister: 'sourceRegister',
+  isSupported: (params: AssistantToolParams) => true,
+  getTool: getTool.mockReturnValue({ name: 'name' }),
+};
 describe('callAssistantGraph', () => {
   const mockDataClients = {
     anonymizationFieldsDataClient: {
@@ -38,7 +49,7 @@ describe('callAssistantGraph', () => {
     },
     kbDataClient: {
       isInferenceEndpointExists: jest.fn(),
-      getAssistantTools: jest.fn(),
+      getAssistantTools: jest.fn().mockReturnValue([{ name: 'MyKBTool' }]),
     },
   } as unknown as AssistantDataClients;
 
@@ -55,6 +66,7 @@ describe('callAssistantGraph', () => {
     total: 0,
     saved_objects: [],
   });
+  const mockLogger = loggerMock.create();
   const defaultParams = {
     actionsClient: actionsClientMock.create(),
     alertsIndexPattern: 'test-pattern',
@@ -68,7 +80,7 @@ describe('callAssistantGraph', () => {
     llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
     llmType: 'openai',
     isOssModel: false,
-    logger: loggerMock.create(),
+    logger: mockLogger,
     isStream: false,
     onLlmResponse: jest.fn(),
     onNewReplacements: jest.fn(),
@@ -184,15 +196,6 @@ describe('callAssistantGraph', () => {
   });
 
   it('calls getPrompt for each tool and the default system prompt', async () => {
-    const getTool = jest.fn();
-    const mockTool: AssistantTool = {
-      id: 'id',
-      name: 'name',
-      description: 'description',
-      sourceRegister: 'sourceRegister',
-      isSupported: (params: AssistantToolParams) => true,
-      getTool,
-    };
     const params = {
       ...defaultParams,
       assistantTools: [
@@ -232,6 +235,31 @@ describe('callAssistantGraph', () => {
       expect.objectContaining({
         description: 'prompt',
       })
+    );
+  });
+
+  it('Passes only Elastic tools, not custom, to Telemetry tracer', async () => {
+    await callAssistantGraph({
+      ...defaultParams,
+      assistantTools: [
+        { ...mockTool, name: 'test-tool', getTool: getTool.mockReturnValue({ name: 'test-tool' }) },
+        {
+          ...mockTool,
+          name: 'test-tool2',
+          getTool: getTool.mockReturnValue({ name: 'test-tool2' }),
+        },
+      ],
+    });
+    expect(telemetryTracerMock).toHaveBeenCalledWith(
+      {
+        elasticTools: ['test-tool2', 'test-tool2'],
+        telemetry: {},
+        telemetryParams: {},
+      },
+      {
+        ...mockLogger,
+        context: ['defaultAssistantGraph'],
+      }
     );
   });
 

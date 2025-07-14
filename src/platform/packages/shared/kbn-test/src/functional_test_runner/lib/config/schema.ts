@@ -259,6 +259,7 @@ export const schema = Joi.object()
           .default(),
         env: Joi.object().unknown().default(),
         delayShutdown: Joi.number(),
+        startRemoteKibana: Joi.boolean().default(false),
       })
       .default(),
 

@@ -25,11 +25,12 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
   const fieldAndError = field ? getFieldValidityAndErrorMessage(field) : undefined;
   const isInvalid = fieldAndError?.isInvalid;
   const errorMessage = fieldAndError?.errorMessage;
-  const comboBoxOptions = useMemo(
+  const comboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       dataViews.map(({ id, title, name }) => ({
         id,
         label: name ?? title,
+        toolTipContent: title,
       })),
     [dataViews]
   );
@@ -50,7 +51,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
           <EuiCallOut
             title={i18n.DATA_VIEW_NOT_FOUND_WARNING_LABEL}
             color="warning"
-            iconType="help"
+            iconType="question"
             data-test-subj="missingDataViewWarning"
           >
             <p>{i18n.DATA_VIEW_NOT_FOUND_WARNING_DESCRIPTION(field.value)}</p>
@@ -63,7 +64,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
           <EuiCallOut
             title={i18n.DATA_VIEW_ALERTS_ON_ALERTS_WARNING_LABEL}
             color="warning"
-            iconType="help"
+            iconType="question"
             data-test-subj="defaultSecurityDataViewWarning"
           >
             <p>{i18n.DATA_VIEW_ALERTS_ON_ALERTS_WARNING_DESCRIPTION}</p>
