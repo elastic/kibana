@@ -179,6 +179,17 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         acc[columnName] = ({ column }) => ({
           ...column,
           display: <AddColumnHeader />,
+          actions: false,
+          displayHeaderCellProps: {
+            className: 'custom-column--placeholder',
+          },
+        });
+      } else {
+        acc[columnName] = ({ column }) => ({
+          ...column,
+          displayHeaderCellProps: {
+            className: 'custom-column',
+          },
         });
       }
       return acc;
@@ -229,6 +240,15 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             height: 100%;
             width: 100%;
             display: block;
+          }
+          .custom-column {
+            justify-content: center;
+          }
+          .custom-column--placeholder {
+            padding: 0;
+            &:after {
+              display: none;
+            }
           }
         `}
       />

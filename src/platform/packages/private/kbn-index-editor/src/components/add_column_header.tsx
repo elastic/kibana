@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import React, { useState, KeyboardEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAddColumnName } from '../hooks/use_add_column_name';
 
 export const AddColumnHeader = () => {
+  const { euiTheme } = useEuiTheme();
   const [isEditing, setIsEditing] = useState(false);
   const { columnName, setColumnName, saveNewColumn } = useAddColumnName();
 
@@ -33,6 +34,8 @@ export const AddColumnHeader = () => {
       <EuiFieldText
         value={columnName}
         autoFocus
+        fullWidth
+        controlOnly
         compressed
         onChange={(e) => {
           setColumnName(e.target.value);
@@ -50,25 +53,28 @@ export const AddColumnHeader = () => {
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
-      <EuiFlexItem>
-        <div
-          tabIndex={0}
-          style={{
-            cursor: 'pointer',
-            height: '100%',
-            width: '100%',
-          }}
-          onClick={() => setIsEditing(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') setIsEditing(true);
-          }}
-        >
-          <FormattedMessage
-            id="indexEditor.flyout.grid.columnHeader.default"
-            defaultMessage="Add a field…"
-          />
-        </div>
+    <EuiFlexGroup
+      responsive={false}
+      style={{ height: euiTheme.size.xl, width: '100%' }}
+      justifyContent="center"
+      alignItems="center"
+    >
+      <EuiFlexItem
+        tabIndex={0}
+        style={{
+          color: euiTheme.colors.textSubdued,
+          cursor: 'pointer',
+          width: '100%',
+        }}
+        onClick={() => setIsEditing(true)}
+        onKeyDown={(e: KeyboardEvent) => {
+          if (e.key === 'Enter') setIsEditing(true);
+        }}
+      >
+        <FormattedMessage
+          id="indexEditor.flyout.grid.columnHeader.default"
+          defaultMessage="Add a field…"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
