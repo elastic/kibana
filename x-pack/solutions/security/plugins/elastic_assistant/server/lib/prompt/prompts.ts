@@ -220,7 +220,7 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
 export const RULE_ANALYSIS =
-  'Please provide a comprehensive analysis of each selected Elastic Security detection rule. For each rule, include:\n' +
+  'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
   '- The rule name and a brief summary of its purpose.\n' +
   '- The full detection query as published in Elastic’s official detection rules repository.\n' +
   '- An in-depth explanation of how the query works, including key fields, logic, and detection techniques.\n' +
@@ -230,9 +230,9 @@ export const RULE_ANALYSIS =
   'Format your response using markdown with clear headers for each rule, code blocks for queries, and concise bullet points for explanations.';
 
 export const DATA_QUALITY_ANALYSIS =
-  'Explain the ECS incompatibility results above, and describe some options to fix incompatibilities. In your explanation, include information about remapping fields, reindexing data, and modifying data ingestion pipelines. Also, describe how ES|QL can be used to identify and correct incompatible data, including examples of using RENAME, EVAL, DISSECT, GROK, and CASE functions.';
+  'Explain the ECS incompatibility results above, and describe some options to fix incompatibilities. In your explanation, include information about remapping fields, reindexing data, and modifying data ingestion pipelines. Also, describe how ES|QL can be used to identify and correct incompatible data, including examples of using RENAME, EVAL, DISSECT, GROK, and CASE functions. Please consider using applicable tools for this request. Make sure you’ve used the right tools for this request.';
 
-export const ALERT_EVALUATION = `Evaluate the security event described above and provide a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Ensure you're using all tools available to you. Your response must include:
+export const ALERT_EVALUATION = `Evaluate the security event described above and provide a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Make sure you consider using appropriate tools available to you to fulfill this request. Your response must include:
 1. Event Description
   - Summarize the event, including user and host risk scores from the provided context.
   - Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
@@ -240,7 +240,7 @@ export const ALERT_EVALUATION = `Evaluate the security event described above and
   - List clear, bulleted triage steps tailored to Elastic Security workflows (e.g., alert investigation, timeline creation, entity analytics review).
   - Highlight any relevant detection rules or anomaly findings.
 3. Recommended Actions
-  - Provide prioritized response actions, including:
+  - Provide prioritized response actions, and consider using applicable tools to generate each part of the response, including:
     - Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
     - Example ES|QL queries for further investigation, formatted as code blocks.
     - Example OSQuery Manager queries for further investigation, formatted as code blocks.
@@ -249,6 +249,7 @@ export const ALERT_EVALUATION = `Evaluate the security event described above and
   - Summarize the mapped MITRE ATT&CK techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
 5. Documentation Links
   - Include direct links to all referenced Elastic Security documentation and MITRE ATT&CK pages.
+Make sure you’ve used the right tools for this request.
 Formatting Requirements:
   - Use markdown headers, tables, and code blocks for clarity.
   - Organize the response into visually distinct sections.
