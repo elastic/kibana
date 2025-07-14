@@ -22,13 +22,14 @@ import type { EntityNodeViewModel, NodeProps } from '../types';
 import { PentagonHoverShape, PentagonShape } from './shapes/pentagon_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { Label } from './label';
+import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 
 const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
 `;
 
-const NODE_WIDTH = 91;
-const NODE_HEIGHT = 88;
+const NODE_SHAPE_WIDTH = 91;
+const NODE_SHAPE_HEIGHT = 88;
 
 export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
@@ -39,9 +40,9 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
       <NodeShapeContainer>
         {interactive && (
           <PentagonShapeOnHover
-            width={NODE_WIDTH}
-            height={NODE_HEIGHT}
-            viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
+            width={NODE_SHAPE_WIDTH}
+            height={NODE_SHAPE_HEIGHT}
+            viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -67,7 +68,11 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
             <NodeExpandButton
               color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 2}px`}
+              x={`${
+                NODE_WIDTH -
+                NodeExpandButton.ExpandButtonSize / 2 -
+                (NODE_WIDTH - NODE_SHAPE_WIDTH) / 2
+              }px`}
               y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
             />
           </>
