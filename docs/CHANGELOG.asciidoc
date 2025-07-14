@@ -129,7 +129,7 @@ Elastic Security solution::
 For the Elastic Security 8.18.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana platform::
 * Prevents navigation feedback popup from reappearing in each session ({kibana-pull}227199[#227199]).
-* Hides the header and side navigation when printing or exporting the dashboard with **Print layout** selected ({kibana-pull}227095[#227095]).
+* Hides the header and side navigation when printing or exporting a dashboard with **Print layout** selected ({kibana-pull}227095[#227095]).
 Search::
 * Fixes handling of context limit errors in Playground when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 
@@ -144,6 +144,7 @@ IMPORTANT: The 8.18.3 release contains fixes for potential security vulnerabilit
 [[known-issues-8.18.3]]
 === Known issues
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 [float]
 [[enhancement-v8.18.3]]
@@ -214,6 +215,7 @@ The 8.18.2 release includes the following known issues and fixes.
 === Known issues
 
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 // tag::known-issue-222127[]
 .Upgrading Kibana from 8.x to 8.18.2 fails due to a configuration conflict in the kibana.yml file.
@@ -268,6 +270,7 @@ The 8.18.1 release includes the following known issues, enhancements and fixes.
 include::CHANGELOG.asciidoc[tag=known-issue-320]
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
+include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 [float]
 [[enhancement-v8.18.1]]
@@ -386,6 +389,26 @@ For more information, check:
 
 ====
 // end::known-issue-220339[]
+
+// tag::known-issue-2088[]
+.Observability AI Assistant - Elastic Managed LLM may be automatically selected as default connector
+[%collapsible]
+====
+*Details* +
+The Elastic Managed LLM may be automatically selected as your default connector because of existing connector selection logic. 
+This can occur if you had not previously specified a connector for any of the following reasons:
+
+- You only had one connector available and it was always automatically picked for your conversations.
+- You had multiple connectors available but didn’t make a specific selection and used the automatically picked connector for your conversations.
+- You previously selected a connector but cleared your browser's local storage or switched browsers or devices.
+
+_And:_
+
+- All of your existing connector names come after the “Elastic Managed LLM connector" when sorted alphabetically.
+
+For more information, check https://github.com/elastic/docs-content/issues/2088[#2088]
+====
+// end::known-issue-2088[]
 
 // tag::known-issue-211850[]
 .Upgrade Assistant - Rollup jobs need to be stopped before rollup indices are reindexed.
