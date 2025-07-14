@@ -736,7 +736,6 @@
       "@kbn/custom-branding-plugin/*": ["x-pack/platform/plugins/private/custom_branding/*"],
       "@kbn/custom-icons": ["src/platform/packages/shared/kbn-custom-icons"],
       "@kbn/custom-icons/*": ["src/platform/packages/shared/kbn-custom-icons/*"],
-
       "@kbn/custom-integrations-plugin": ["src/platform/plugins/shared/custom_integrations"],
       "@kbn/custom-integrations-plugin/*": ["src/platform/plugins/shared/custom_integrations/*"],
       "@kbn/cypress-config": ["src/platform/packages/shared/kbn-cypress-config"],
