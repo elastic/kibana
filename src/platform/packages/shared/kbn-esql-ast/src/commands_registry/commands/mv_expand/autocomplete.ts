@@ -9,15 +9,17 @@
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { pipeCompleteItem } from '../../complete_items';
-import { findFinalWord } from '../../../definitions/utils/autocomplete';
+import { findFinalWord } from '../../../definitions/utils/autocomplete/helpers';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (/MV_EXPAND\s+\S+\s+$/i.test(query)) {
+  const innerText = query.substring(0, cursorPosition);
+  if (/MV_EXPAND\s+\S+\s+$/i.test(innerText)) {
     return [pipeCompleteItem];
   }
 
@@ -27,11 +29,11 @@ export async function autocomplete(
       openSuggestions: true,
     })) ?? [];
 
-  const fragment = findFinalWord(query);
+  const fragment = findFinalWord(innerText);
   columnSuggestions.forEach((suggestion) => {
     suggestion.rangeToReplace = {
-      start: query.length - fragment.length + 1,
-      end: query.length,
+      start: innerText.length - fragment.length + 1,
+      end: innerText.length,
     };
   });
 
