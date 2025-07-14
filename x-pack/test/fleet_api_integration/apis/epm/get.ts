@@ -9,10 +9,13 @@ import expect from '@kbn/expect';
 import { PackageInfo } from '@kbn/fleet-plugin/common/types/models/epm';
 import fs from 'fs';
 import path from 'path';
+import {
+  bundlePackage,
+  removeBundledPackages,
+} from '@kbn/test-suites-xpack-platform/fleet_api_integration/apis/epm/install_bundled';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
-import { bundlePackage, removeBundledPackages } from './install_bundled';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

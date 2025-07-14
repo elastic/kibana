@@ -13,7 +13,6 @@ import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const superTestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 

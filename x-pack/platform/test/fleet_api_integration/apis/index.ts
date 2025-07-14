@@ -8,7 +8,7 @@
 import { setupTestUsers } from './test_users';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   // total runtime ~ 4m
   describe('Fleet Endpoints', function () {
     before(async () => {

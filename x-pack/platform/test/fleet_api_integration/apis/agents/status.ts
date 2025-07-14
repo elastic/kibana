@@ -16,7 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const superTestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('fleet_agents_status', () => {
     before(async () => {
