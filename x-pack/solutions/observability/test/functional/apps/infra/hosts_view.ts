@@ -235,7 +235,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Hosts View', function () {
     let synthEsInfraClient: InfraSynthtraceEsClient;
-    let syntEsLogsClient: LogsSynthtraceEsClient;
+    let synthEsLogsClient: LogsSynthtraceEsClient;
     let synthtraceApmClient: ApmSynthtraceEsClient;
 
     before(async () => {
@@ -246,7 +246,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
 
       synthEsInfraClient = clients.infraEsClient;
-      syntEsLogsClient = clients.logsEsClient;
+      synthEsLogsClient = clients.logsEsClient;
       synthtraceApmClient = clients.apmEsClient;
 
       await synthtraceApmClient.initializePackage({ skipInstallation: false });
@@ -254,7 +254,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return Promise.all([
         synthtraceApmClient.clean(),
         synthEsInfraClient.clean(),
-        syntEsLogsClient.clean(),
+        synthEsLogsClient.clean(),
       ]);
     });
 
@@ -263,7 +263,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         synthtraceApmClient.uninstallPackage(),
         synthtraceApmClient.clean(),
         synthEsInfraClient.clean(),
-        syntEsLogsClient.clean(),
+        synthEsLogsClient.clean(),
       ]);
     });
 
@@ -312,7 +312,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await Promise.all([
           synthEsInfraClient.index(hosts),
           synthtraceApmClient.index(services),
-          syntEsLogsClient.index(logs),
+          synthEsLogsClient.index(logs),
         ]);
       });
 

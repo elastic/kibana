@@ -10,6 +10,7 @@
 import moment from 'moment/moment';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
 
@@ -18,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const synthtrace = getService('logSynthtraceEsClient');
+  const synthtrace = getService('synthtrace');
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
   const dataViews = getService('dataViews');
@@ -29,8 +30,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const searchQuery = 'error.stack_trace : * and _ignored : *';
 
   describe('discover/observability saved search embeddable triggering getDocViewer ', () => {
+    let synthEsLogsClient: LogsSynthtraceEsClient;
     before(async () => {
-      await synthtrace.index([
+      const { logsEsClient } = synthtrace.getClients(['logsEsClient']);
+
+      synthEsLogsClient = logsEsClient;
+
+      synthEsLogsClient.index([
         timerange(start, end)
           .interval('1m')
           .rate(5)
@@ -77,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await synthtrace.clean();
+      await synthEsLogsClient.clean();
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'dashboard'] });
     });
 
