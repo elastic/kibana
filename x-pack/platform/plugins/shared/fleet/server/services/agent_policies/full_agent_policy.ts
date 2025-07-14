@@ -198,7 +198,7 @@ export async function getFullAgentPolicy(
         use_output: input.use_output,
         package_policy_id: input.package_policy_id,
         data_stream: input.data_stream,
-        ...(otelInputs && otelInputs?.length > 0 ? { otelcol: otelInputs } : {}),
+        ...(otelInputs && otelInputs?.length > 0 ? otelInputs : {}),
       };
     }
     return input;
