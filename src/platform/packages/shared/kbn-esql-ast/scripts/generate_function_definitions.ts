@@ -380,7 +380,8 @@ ${
 }
 
 (async function main() {
-  const pathToElasticsearch = process.argv[2];
+  const pathToElasticsearch =
+    '/run/media/vabar/E82C21722C213CC6/Users/Valerio/Projects/elasticsearch';
   if (!pathToElasticsearch) {
     throw new Error('Path to Elasticsearch is required');
   }
