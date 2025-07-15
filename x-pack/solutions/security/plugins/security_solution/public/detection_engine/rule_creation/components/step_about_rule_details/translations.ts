@@ -48,10 +48,3 @@ export const ABOUT_CONTROL_LEGEND = i18n.translate(
     defaultMessage: 'Viewing',
   }
 );
-
-export const CUSTOMIZED_FIELD_TAB_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.details.stepAboutRule.customizedFieldTabLabel',
-  {
-    defaultMessage: 'This field has been modified.',
-  }
-);
