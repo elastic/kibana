@@ -8,7 +8,7 @@
 import { getMockDataView, getMockDataViewWithMatchedIndices } from '../../mocks/mock_data_view';
 import type { UseDataViewReturnValue } from '../use_data_view';
 
-const defaultImplementation = () =>
+export const defaultImplementation = () =>
   ({
     dataView: getMockDataView(),
     status: 'ready',

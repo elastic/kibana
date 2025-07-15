@@ -15,6 +15,9 @@ import { TestProviders } from '../../common/mock';
 import { DataQuality } from './data_quality';
 import { useKibana } from '../../common/lib/kibana';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks/mock_data_view';
+import { defaultImplementation } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 const mockedUseKibana = mockUseKibana();
 
@@ -100,6 +103,11 @@ describe('DataQuality', () => {
 
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
+
+    jest.mocked(useDataView).mockReturnValue({
+      dataView: getMockDataViewWithMatchedIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']),
+      status: 'ready',
+    });
   });
 
   describe('when indices exist, and loading is complete', () => {
@@ -137,6 +145,10 @@ describe('DataQuality', () => {
   describe('when indices exist, but sourcerer is still loading', () => {
     beforeEach(async () => {
       mockUseSourcererDataView.mockReturnValue({ ...defaultUseSourcererReturn, loading: true });
+      jest.mocked(useDataView).mockReturnValue({
+        dataView: getMockDataViewWithMatchedIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']),
+        status: 'loading',
+      });
 
       render(
         <KibanaRenderContextProvider {...mockedUseKibana.services}>
@@ -210,6 +222,7 @@ describe('DataQuality', () => {
         loading: false,
       });
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: false });
+      jest.mocked(useDataView).mockImplementation(defaultImplementation);
 
       render(
         <KibanaRenderContextProvider {...mockedUseKibana.services}>
@@ -249,6 +262,10 @@ describe('DataQuality', () => {
         loading: true,
       });
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: false });
+      jest.mocked(useDataView).mockReturnValue({
+        dataView: getMockDataViewWithMatchedIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']),
+        status: 'loading',
+      });
 
       render(
         <KibanaRenderContextProvider {...mockedUseKibana.services}>
