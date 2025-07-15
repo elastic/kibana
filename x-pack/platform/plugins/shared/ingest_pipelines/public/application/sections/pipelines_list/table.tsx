@@ -353,6 +353,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
                   <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
                     <EuiBetaBadge
                       label={deprecatedPipelineBadge.badge}
+                      color="subdued"
                       size="s"
                       data-test-subj="isDeprecatedBadge"
                     />

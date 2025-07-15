@@ -149,6 +149,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                 <EuiBetaBadge
                   label={deprecatedPipelineBadge.badge}
                   size="s"
+                  color="subdued"
                   data-test-subj="isDeprecatedBadge"
                 />
               </EuiToolTip>
