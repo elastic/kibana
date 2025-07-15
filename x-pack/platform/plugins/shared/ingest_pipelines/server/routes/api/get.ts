@@ -82,4 +82,40 @@ export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDepen
       }
     }
   );
+
+  // Get pipeline structure tree
+  router.get(
+    {
+      path: `${API_BASE_PATH}/structure_tree/{name}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: {
+        params: paramsSchema,
+      },
+    },
+    async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
+      const { name } = req.params;
+
+      try {
+        const pipelines = deserializePipelines(
+          await clusterClient.asCurrentUser.ingest.getPipeline({
+            id: name,
+          })
+        );
+        return res.ok({
+          body: {
+            ...pipelines!.find((pipeline) => pipeline.name),
+            name,
+          },
+        });
+      } catch (error) {
+        return handleEsError({ error, response: res });
+      }
+    }
+  );
 };
