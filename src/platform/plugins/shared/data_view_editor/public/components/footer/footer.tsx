@@ -26,12 +26,14 @@ export enum SubmittingType {
 interface FooterProps {
   onCancel: () => void;
   onSubmit: (isAdHoc?: boolean) => void;
+  onDuplicate?: () => void;
   submittingType: SubmittingType | undefined;
   submitDisabled: boolean;
   isEdit: boolean;
   isPersisted: boolean;
   allowAdHoc: boolean;
   canSave: boolean;
+  isManaged: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -66,6 +68,8 @@ export const Footer = ({
   allowAdHoc,
   isPersisted,
   canSave,
+  isManaged,
+  onDuplicate,
 }: FooterProps) => {
   const isEditingAdHoc = isEdit && !isPersisted;
   const submitPersisted = () => {
@@ -108,7 +112,7 @@ export const Footer = ({
               </EuiFlexItem>
             )}
 
-            {(canSave || isEditingAdHoc) && (
+            {(canSave || isEditingAdHoc) && !isManaged && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
@@ -126,6 +130,14 @@ export const Footer = ({
                       ? editButtonLabel
                       : editUnpersistedButtonLabel
                     : saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+
+            {(canSave || isEditingAdHoc) && isManaged && onDuplicate && (
+              <EuiFlexItem grow={false}>
+                <EuiButton color="primary" onClick={onDuplicate}>
+                  {'Duplicate'}
                 </EuiButton>
               </EuiFlexItem>
             )}
