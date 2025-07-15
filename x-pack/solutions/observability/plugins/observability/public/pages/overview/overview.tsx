@@ -138,6 +138,7 @@ export function OverviewPage() {
   }, [appsWithoutData, hasData, setScreenContext]);
 
   const { absoluteStart, absoluteEnd } = useDatePickerContext();
+  
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
     () =>
