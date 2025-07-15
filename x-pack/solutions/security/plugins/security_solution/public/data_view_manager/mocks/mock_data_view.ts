@@ -11,7 +11,17 @@ import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
 export const getMockDataView = () =>
   new DataView({
-    spec: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
+    spec: {
+      id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+      fields: {
+        mock_field: {
+          name: 'host.name',
+          type: 'keyword',
+          searchable: true,
+          aggregatable: true,
+        },
+      },
+    },
     fieldFormats: {} as unknown as FieldFormatsStartCommon,
   });
 
