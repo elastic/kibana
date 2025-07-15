@@ -14,9 +14,8 @@ export { type Props } from './settings_editor';
 export { type AutocompleteOptions } from './types';
 
 /**
- * A `SettingsEditor` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `SettingsEditorLazy` component lazily with
- * a predefined fallback and error boundary.
+ * The Lazily-loaded `SettingsEditorLazy` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
  */
 export const SettingsEditorLazy = React.lazy(() =>
   import('./settings_editor').then(({ SettingsEditor }) => ({
@@ -25,7 +24,8 @@ export const SettingsEditorLazy = React.lazy(() =>
 );
 
 /**
- * Direct import of SettingsEditor component for packaged environments.
- * This bypasses the lazy loading mechanism that doesn't work well in bundled packages.
+ * A `SettingsEditor` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `SettingsEditorLazy` component lazily with
+ * a predefined fallback and error boundary.
  */
 export const SettingsEditor = withSuspense(SettingsEditorLazy);

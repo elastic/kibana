@@ -14,9 +14,8 @@ export { type Props } from './variables_editor';
 export { type DevToolsVariable } from './types';
 
 /**
- * A `VariablesEditor` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `VariablesEditorLazy` component lazily with
- * a predefined fallback and error boundary.
+ * The Lazily-loaded `VariablesEditorLazy` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
  */
 export const VariablesEditorLazy = React.lazy(() =>
   import('./variables_editor').then(({ VariablesEditor }) => ({
@@ -25,7 +24,8 @@ export const VariablesEditorLazy = React.lazy(() =>
 );
 
 /**
- * Direct import of VariablesEditor component for packaged environments.
- * This bypasses the lazy loading mechanism that doesn't work well in bundled packages.
+ * A `VariablesEditor` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `VariablesEditorLazy` component lazily with
+ * a predefined fallback and error boundary.
  */
 export const VariablesEditor = withSuspense(VariablesEditorLazy);
