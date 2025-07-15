@@ -507,7 +507,7 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedFields$.next(value);
   }
 
-  public deleteUnsavedColumns() {
+  public discardUnsavedColumns() {
     this.actions$.next({ type: 'discard-unsaved-columns' });
   }
 

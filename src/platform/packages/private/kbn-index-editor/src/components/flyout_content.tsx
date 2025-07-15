@@ -17,7 +17,7 @@ import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
-import { UnsavedChangesModal } from './unsaved_changes_modal';
+import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { CustomPanel } from './custom_panel';
 import { FileDropzone } from './file_drop_zone';

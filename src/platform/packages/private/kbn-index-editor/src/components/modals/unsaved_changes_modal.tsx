@@ -12,7 +12,7 @@ import { EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { KibanaContextExtra } from '../types';
+import { KibanaContextExtra } from '../../types';
 
 export interface UnsavedChangesModal {
   onClose: () => void;
@@ -31,7 +31,7 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
   const pendingColumnsToBeSaved = useObservable(indexUpdateService.pendingColumnsToBeSaved$, []);
 
   const closeWithoutSaving = () => {
-    indexUpdateService.deleteUnsavedColumns();
+    indexUpdateService.discardUnsavedColumns();
     onClose();
   };
 
