@@ -13,7 +13,6 @@ import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
-import { ItemResult } from '@kbn/content-management-plugin/common/rpc/types';
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import {
@@ -99,8 +98,8 @@ export function registerAPIRoutes({
       const { references, spaces: initialNamespaces, ...attributes } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, LATEST_VERSION);
-      let result: ItemResult<DashboardItem>;
+        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
+      let result;
       try {
         ({ result } = await client.create(attributes, {
           id,
