@@ -93,6 +93,7 @@ export class AnalyticsIndex {
     this.sourceIndex = sourceIndex;
     this.sourceQuery = sourceQuery;
     this.indexSettings = {
+      hidden: true,
       // settings are not supported on serverless ES
       ...(isServerless
         ? {}
