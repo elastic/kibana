@@ -27,7 +27,7 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
     hasActiveConversation,
     actions: { setAgentId },
   } = useConversation();
-  const agentId = conversation?.agentId ?? oneChatDefaultAgentId;
+  const agentId = conversation?.agent_id ?? oneChatDefaultAgentId;
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
