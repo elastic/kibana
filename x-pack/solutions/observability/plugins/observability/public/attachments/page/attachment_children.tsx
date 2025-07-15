@@ -9,7 +9,7 @@ import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiCallOut, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { type PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
+import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
 import { useKibana } from '../../utils/kibana_react';
 
 interface AttachmentChildrenProps {

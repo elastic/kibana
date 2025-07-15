@@ -877,6 +877,7 @@ x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
+x-pack/platform/packages/shared/kbn-page-attachment-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
+import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
 import { render, screen } from '@testing-library/react';
 import { PageAttachmentChildren } from './attachment_children';
 import { useKibana } from '../../utils/kibana_react';

@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type TimeRange, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
+import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
 import { ClientPluginsStart } from '../../../../plugin';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './related_dashboards/latest';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-page-attachment-schema'],
+};

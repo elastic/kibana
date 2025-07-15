@@ -27,7 +27,7 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
-import { PAGE_ATTACHMENT_TYPE } from '@kbn/observability-schema';
+import { PAGE_ATTACHMENT_TYPE } from '@kbn/page-attachment-schema';
 import { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import {

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './related_dashboards/latest';
+export * from './src/latest';
+export * from './src/constants';

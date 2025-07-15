@@ -7,7 +7,10 @@
 
 import React, { Suspense } from 'react';
 import { screen, waitFor, render } from '@testing-library/react';
-import { type PageAttachmentPersistedState, PAGE_ATTACHMENT_TYPE } from '@kbn/observability-schema';
+import {
+  type PageAttachmentPersistedState,
+  PAGE_ATTACHMENT_TYPE,
+} from '@kbn/page-attachment-schema';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { getPageAttachmentType } from './attachment';
 
