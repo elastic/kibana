@@ -480,7 +480,6 @@ function DiscoverDocumentsComponent({
             onFetchMoreRecords={onFetchMoreRecords}
             externalCustomRenderers={cellRenderers}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
-            additionalFieldGroups={additionalFieldGroups}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             onUpdateESQLQuery={stateContainer.actions.updateESQLQuery}
