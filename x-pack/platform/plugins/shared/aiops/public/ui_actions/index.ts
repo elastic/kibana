@@ -23,9 +23,7 @@ export function registerAiopsUiActions(
     ADD_PANEL_TRIGGER,
     'create-pattern-analysis-embeddable',
     async () => {
-      const { createAddPatternAnalysisEmbeddableAction } = await import(
-        './create_pattern_analysis_action'
-      );
+      const { createAddPatternAnalysisEmbeddableAction } = await import('./actions');
       const addPatternAnalysisAction = createAddPatternAnalysisEmbeddableAction(
         coreStart,
         pluginStart
@@ -34,7 +32,7 @@ export function registerAiopsUiActions(
     }
   );
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, 'create-change-point-chart', async () => {
-    const { createAddChangePointChartAction } = await import('./create_change_point_chart');
+    const { createAddChangePointChartAction } = await import('./actions');
     const addChangePointChartAction = createAddChangePointChartAction(coreStart, pluginStart);
     return addChangePointChartAction;
   });
@@ -42,14 +40,12 @@ export function registerAiopsUiActions(
   uiActions.registerTrigger(categorizeFieldTrigger);
 
   uiActions.addTriggerActionAsync(CATEGORIZE_FIELD_TRIGGER, 'ACTION_CATEGORIZE_FIELD', async () => {
-    const { createCategorizeFieldAction } = await import(
-      '../components/log_categorization/categorize_field_actions'
-    );
+    const { createCategorizeFieldAction } = await import('./actions');
     return createCategorizeFieldAction(coreStart, pluginStart);
   });
 
   uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, 'open-change-point-in-ml-app', async () => {
-    const { createOpenChangePointInMlAppAction } = await import('./open_change_point_ml');
+    const { createOpenChangePointInMlAppAction } = await import('./actions');
     const openChangePointInMlAppAction = createOpenChangePointInMlAppAction(coreStart, pluginStart);
     return openChangePointInMlAppAction;
   });
@@ -58,9 +54,7 @@ export function registerAiopsUiActions(
     ADD_PANEL_TRIGGER,
     'create-log-rate-analysis-embeddable',
     async () => {
-      const { createAddLogRateAnalysisEmbeddableAction } = await import(
-        './create_log_rate_analysis_actions'
-      );
+      const { createAddLogRateAnalysisEmbeddableAction } = await import('./actions');
       const addLogRateAnalysisAction = createAddLogRateAnalysisEmbeddableAction(
         coreStart,
         pluginStart
