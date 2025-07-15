@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext, lookupIndexFields } from '../../../__tests__/context_fixtures';
+import {
+  mockContext,
+  lookupIndexFields,
+  getMockCallbacks,
+} from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks } from '../../types';
@@ -37,15 +41,7 @@ describe('JOIN Autocomplete', () => {
     jest.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-      getColumnsForQuery: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockCallbacks = getMockCallbacks();
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 

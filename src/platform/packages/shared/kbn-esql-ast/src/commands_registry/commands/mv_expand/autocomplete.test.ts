@@ -28,35 +28,20 @@ const mvExpandExpectSuggestions = (
 };
 
 describe('MV_EXPAND Autocomplete', () => {
-  let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
   });
 
   it('suggests columns', async () => {
-    mvExpandExpectSuggestions('from a | mv_expand ', getFieldNamesByType('any'), mockCallbacks);
+    mvExpandExpectSuggestions('from a | mv_expand ', getFieldNamesByType('any'));
   });
 
   it('works with field name prefixes', async () => {
-    mvExpandExpectSuggestions('from a | mv_expand key/', getFieldNamesByType('any'), mockCallbacks);
-    mvExpandExpectSuggestions(
-      'from a | mv_expand keywordField/',
-      getFieldNamesByType('any'),
-      mockCallbacks
-    );
+    mvExpandExpectSuggestions('from a | mv_expand key/', getFieldNamesByType('any'));
+    mvExpandExpectSuggestions('from a | mv_expand keywordField/', getFieldNamesByType('any'));
   });
 
   it('suggests pipe after column', async () => {
-    mvExpandExpectSuggestions('from a | mv_expand doubleField ', ['| '], mockCallbacks);
+    mvExpandExpectSuggestions('from a | mv_expand doubleField ', ['| ']);
   });
 });

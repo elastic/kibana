@@ -8,7 +8,7 @@
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
-import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
+import { expectSuggestions } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks } from '../../types';
 
 const limitExpectSuggestions = (
@@ -28,19 +28,8 @@ const limitExpectSuggestions = (
 };
 
 describe('LIMIT Autocomplete', () => {
-  let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
   });
 
   describe('LIMIT <number>', () => {

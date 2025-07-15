@@ -39,71 +39,46 @@ const PROMPT_SUGGESTIONS = [
 ];
 
 describe('COMPLETION Autocomplete', () => {
-  let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
   });
 
   it('suggests PROMPT_SUGGESTIONS + default prompt after COMPLETION keyword', async () => {
-    await completionExpectSuggestions(
-      `FROM a | COMPLETION `,
-      ['"${0:Your prompt to the LLM.}"', ...PROMPT_SUGGESTIONS],
-      mockCallbacks
-    );
+    await completionExpectSuggestions(`FROM a | COMPLETION `, [
+      '"${0:Your prompt to the LLM.}"',
+      ...PROMPT_SUGGESTIONS,
+    ]);
   });
 
   it('suggests PROMPT_SUGGESTIONS when typing a column', async () => {
-    await completionExpectSuggestions(
-      `FROM a | COMPLETION kubernetes.some/`,
-      PROMPT_SUGGESTIONS,
-      mockCallbacks
-    );
+    await completionExpectSuggestions(`FROM a | COMPLETION kubernetes.some/`, PROMPT_SUGGESTIONS);
   });
 
   it('suggests ASSIGN after the user writes a new custom colum name', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION newColumn `, ['= '], mockCallbacks);
+    await completionExpectSuggestions(`FROM a | COMPLETION newColumn `, ['= ']);
   });
 
   it('suggests WITH after the user writes a colum name that already exists', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION textField `, ['WITH '], mockCallbacks);
+    await completionExpectSuggestions(`FROM a | COMPLETION textField `, ['WITH ']);
   });
 
   it('suggests WITH after the user writes a param as prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH '], mockCallbacks);
+    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH ']);
   });
 
   it('suggests WITH after the prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH '], mockCallbacks);
-    await completionExpectSuggestions(
-      `FROM a | COMPLETION "prompt" WIT/`,
-      ['WITH '],
-      mockCallbacks
-    );
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
   });
 
   it('suggests inference endpoints after WITH', async () => {
-    await completionExpectSuggestions(
-      `FROM a | COMPLETION "prompt" WITH `,
-      ['`inference_1` '],
-      mockCallbacks
-    );
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, ['`inference_1` ']);
   });
 
   it('suggests pipe after complete command', async () => {
     await completionExpectSuggestions(
       `FROM a | COMPLETION "prompt" WITH inferenceId AS completion /`,
-      ['| '],
-      mockCallbacks
+      ['| ']
     );
   });
 });

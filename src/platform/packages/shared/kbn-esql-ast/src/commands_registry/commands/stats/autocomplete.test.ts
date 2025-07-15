@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext, lookupIndexFields } from '../../../__tests__/context_fixtures';
+import {
+  mockContext,
+  lookupIndexFields,
+  getMockCallbacks,
+} from '../../../__tests__/context_fixtures';
 import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
@@ -97,15 +101,7 @@ describe('STATS Autocomplete', () => {
     jest.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-      getColumnsForQuery: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockCallbacks = getMockCallbacks();
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
@@ -124,30 +120,25 @@ describe('STATS Autocomplete', () => {
       test('suggestions for a fresh expression', async () => {
         const expected = EXPECTED_FOR_EMPTY_EXPRESSION;
 
-        await statsExpectSuggestions('from a | stats ', expected, mockCallbacks);
-        await statsExpectSuggestions('FROM a | STATS ', expected, mockCallbacks);
-        await statsExpectSuggestions('from a | stats a=max(b), ', expected, mockCallbacks);
+        await statsExpectSuggestions('from a | stats ', expected);
+        await statsExpectSuggestions('FROM a | STATS ', expected);
+        await statsExpectSuggestions('from a | stats a=max(b), ', expected);
         await statsExpectSuggestions(
           'from a | stats a=max(b) WHERE doubleField > longField, ',
-          expected,
-          mockCallbacks
+          expected
         );
       });
 
       test('on assignment expression, shows all agg and eval functions', async () => {
-        await statsExpectSuggestions(
-          'from a | stats a= ',
-          [...allAggFunctions, ...allGroupingFunctions, ...allEvalFunctionsForStats],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | stats a= ', [
+          ...allAggFunctions,
+          ...allGroupingFunctions,
+          ...allEvalFunctionsForStats,
+        ]);
       });
 
       test('on space after aggregate field', async () => {
-        await statsExpectSuggestions(
-          'from a | stats a=min(b) ',
-          ['WHERE ', 'BY ', ', ', '| '],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | stats a=min(b) ', ['WHERE ', 'BY ', ', ', '| ']);
       });
 
       test('on function left paren', async () => {
@@ -373,49 +364,35 @@ describe('STATS Autocomplete', () => {
       });
 
       test('increments suggested variable name counter', async () => {
-        await statsExpectSuggestions(
-          'from a | eval col0=round(b), col1=round(c) | stats ',
-          [
-            ' = ',
-            // TODO verify that this change is ok
-            ...allAggFunctions,
-            ...allEvalFunctionsForStats,
-            ...allGroupingFunctions,
-          ],
-          mockCallbacks
-        );
-        await statsExpectSuggestions(
-          'from a | stats col0=min(b),col1=c,',
-          [' = ', ...allAggFunctions, ...allEvalFunctionsForStats, ...allGroupingFunctions],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | eval col0=round(b), col1=round(c) | stats ', [
+          ' = ',
+          // TODO verify that this change is ok
+          ...allAggFunctions,
+          ...allEvalFunctionsForStats,
+          ...allGroupingFunctions,
+        ]);
+        await statsExpectSuggestions('from a | stats col0=min(b),col1=c,', [
+          ' = ',
+          ...allAggFunctions,
+          ...allEvalFunctionsForStats,
+          ...allGroupingFunctions,
+        ]);
       });
 
       describe('...WHERE expression...', () => {
         it('suggests fields and functions in empty expression', async () => {
-          await statsExpectSuggestions(
-            'FROM a | STATS MIN(b) WHERE ',
-            [
-              ...getFieldNamesByType('any'),
-              ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, 'any', { scalar: true }),
-            ],
-            mockCallbacks
-          );
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE ', [
+            ...getFieldNamesByType('any'),
+            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, 'any', { scalar: true }),
+          ]);
         });
 
         it('suggests operators after a first operand', async () => {
-          await statsExpectSuggestions(
-            'FROM a | STATS MIN(b) WHERE keywordField ',
-            [
-              ...getFunctionSignaturesByReturnType(
-                Location.STATS_WHERE,
-                'any',
-                { operators: true },
-                ['keyword']
-              ),
-            ],
-            mockCallbacks
-          );
+          await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE keywordField ', [
+            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, 'any', { operators: true }, [
+              'keyword',
+            ]),
+          ]);
         });
 
         it('suggests after operator', async () => {
@@ -467,8 +444,7 @@ describe('STATS Autocomplete', () => {
                 { operators: true },
                 ['double']
               ),
-            ],
-            mockCallbacks
+            ]
           );
         });
       });
@@ -484,9 +460,9 @@ describe('STATS Autocomplete', () => {
           ...allGroupingFunctions,
         ];
 
-        await statsExpectSuggestions('from a | stats a=max(b) by ', expected, mockCallbacks);
-        await statsExpectSuggestions('from a | stats a=max(b) BY ', expected, mockCallbacks);
-        await statsExpectSuggestions('from a | stats a=min(b) by ', expected, mockCallbacks);
+        await statsExpectSuggestions('from a | stats a=max(b) by ', expected);
+        await statsExpectSuggestions('from a | stats a=max(b) BY ', expected);
+        await statsExpectSuggestions('from a | stats a=min(b) by ', expected);
       });
 
       test('no grouping functions as args to scalar function', async () => {
@@ -502,31 +478,29 @@ describe('STATS Autocomplete', () => {
           ...allGroupingFunctions,
         ];
 
-        await statsExpectSuggestions(
-          'from a | stats a=max(b) BY keywor/',
-          [...expected, ...getFieldNamesByType('any')],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | stats a=max(b) BY keywor/', [
+          ...expected,
+          ...getFieldNamesByType('any'),
+        ]);
 
-        await statsExpectSuggestions(
-          'from a | stats a=max(b) BY integerField, keywor',
-          [...expected, ...getFieldNamesByType('any')],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | stats a=max(b) BY integerField, keywor', [
+          ...expected,
+          ...getFieldNamesByType('any'),
+        ]);
       });
 
       test('on complete column name', async () => {
-        await statsExpectSuggestions(
-          'from a | stats a=max(b) by integerField',
-          [' = ', 'integerField | ', 'integerField, '],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | stats a=max(b) by integerField', [
+          ' = ',
+          'integerField | ',
+          'integerField, ',
+        ]);
 
-        await statsExpectSuggestions(
-          'from a | stats a=max(b) by keywordField, integerField',
-          [' = ', 'integerField | ', 'integerField, '],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | stats a=max(b) by keywordField, integerField', [
+          ' = ',
+          'integerField | ',
+          'integerField, ',
+        ]);
       });
 
       test('attaches field range', async () => {
@@ -539,38 +513,31 @@ describe('STATS Autocomplete', () => {
       });
 
       test('on space after grouping field', async () => {
-        await statsExpectSuggestions('from a | stats a=c by d ', [', ', '| '], mockCallbacks);
+        await statsExpectSuggestions('from a | stats a=c by d ', [', ', '| ']);
       });
 
       test('after comma "," in grouping fields', async () => {
         const fields = getFieldNamesByType('any');
-        await statsExpectSuggestions(
-          'from a | stats a=c by d, ',
-          [
-            ' = ',
-            getDateHistogramCompletionItem().text,
-            ...fields,
-            ...allEvalFunctionsForStats,
-            ...allGroupingFunctions,
-          ],
-          mockCallbacks
-        );
-        await statsExpectSuggestions(
-          'from a | stats a=min(b),',
-          [' = ', ...allAggFunctions, ...allEvalFunctionsForStats, ...allGroupingFunctions],
-          mockCallbacks
-        );
-        await statsExpectSuggestions(
-          'from a | stats avg(b) by c, ',
-          [
-            ' = ',
-            getDateHistogramCompletionItem().text,
-            ...fields,
-            ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-            ...allGroupingFunctions,
-          ],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | stats a=c by d, ', [
+          ' = ',
+          getDateHistogramCompletionItem().text,
+          ...fields,
+          ...allEvalFunctionsForStats,
+          ...allGroupingFunctions,
+        ]);
+        await statsExpectSuggestions('from a | stats a=min(b),', [
+          ' = ',
+          ...allAggFunctions,
+          ...allEvalFunctionsForStats,
+          ...allGroupingFunctions,
+        ]);
+        await statsExpectSuggestions('from a | stats avg(b) by c, ', [
+          ' = ',
+          getDateHistogramCompletionItem().text,
+          ...fields,
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+          ...allGroupingFunctions,
+        ]);
       });
 
       test('on space before expression right hand side operand', async () => {
@@ -619,16 +586,11 @@ describe('STATS Autocomplete', () => {
       });
 
       test('on space after expression right hand side operand', async () => {
-        await statsExpectSuggestions(
-          'from a | stats avg(b) by doubleField % 2 ',
-          [', ', '| '],
-          mockCallbacks
-        );
+        await statsExpectSuggestions('from a | stats avg(b) by doubleField % 2 ', [', ', '| ']);
 
         await statsExpectSuggestions(
           'from a | stats col0 = AVG(doubleField) BY col1 = BUCKET(dateField, 1 day) ',
-          [', ', '| '],
-          mockCallbacks
+          [', ', '| ']
         );
       });
 

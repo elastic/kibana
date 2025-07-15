@@ -28,88 +28,41 @@ const renameExpectSuggestions = (
 };
 
 describe('RENAME Autocomplete', () => {
-  let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
   });
 
   it('suggests fields', async () => {
     const expectedSuggestions = [' = ', ...getFieldNamesByType('any')];
-    await renameExpectSuggestions('from a | rename ', expectedSuggestions, mockCallbacks);
-    await renameExpectSuggestions('from a | rename fie', expectedSuggestions, mockCallbacks);
-    await renameExpectSuggestions(
-      'from a | rename field AS foo,',
-      [...expectedSuggestions, ' = '],
-      mockCallbacks
-    );
-    await renameExpectSuggestions(
-      'from a | rename field = foo, ',
-      expectedSuggestions,
-      mockCallbacks
-    );
-    await renameExpectSuggestions(
-      'from a | rename field AS foo, fie',
-      expectedSuggestions,
-      mockCallbacks
-    );
-    await renameExpectSuggestions(
-      'from a | rename field = foo, fie',
-      expectedSuggestions,
-      mockCallbacks
-    );
+    await renameExpectSuggestions('from a | rename ', expectedSuggestions);
+    await renameExpectSuggestions('from a | rename fie', expectedSuggestions);
+    await renameExpectSuggestions('from a | rename field AS foo,', [...expectedSuggestions, ' = ']);
+    await renameExpectSuggestions('from a | rename field = foo, ', expectedSuggestions);
+    await renameExpectSuggestions('from a | rename field AS foo, fie', expectedSuggestions);
+    await renameExpectSuggestions('from a | rename field = foo, fie', expectedSuggestions);
   });
 
   it('suggests AS after an existing field', async () => {
-    await renameExpectSuggestions('from a | rename textField ', ['AS '], mockCallbacks);
-    await renameExpectSuggestions(
-      'from a | rename keywordField AS foo, textField ',
-      ['AS '],
-      mockCallbacks
-    );
-    await renameExpectSuggestions(
-      'from a | rename keywordField as foo , textField ',
-      ['AS '],
-      mockCallbacks
-    );
+    await renameExpectSuggestions('from a | rename textField ', ['AS ']);
+    await renameExpectSuggestions('from a | rename keywordField AS foo, textField ', ['AS ']);
+    await renameExpectSuggestions('from a | rename keywordField as foo , textField ', ['AS ']);
   });
 
   it('suggests = after a field that does not exist', async () => {
-    await renameExpectSuggestions('from a | rename field ', ['= '], mockCallbacks);
-    await renameExpectSuggestions(
-      'from a | rename keywordField AS foo, field ',
-      ['= '],
-      mockCallbacks
-    );
-    await renameExpectSuggestions(
-      'from a | rename keywordField as foo , field ',
-      ['= '],
-      mockCallbacks
-    );
+    await renameExpectSuggestions('from a | rename field ', ['= ']);
+    await renameExpectSuggestions('from a | rename keywordField AS foo, field ', ['= ']);
+    await renameExpectSuggestions('from a | rename keywordField as foo , field ', ['= ']);
   });
 
   it('suggests nothing after AS', async () => {
-    await renameExpectSuggestions('from a | rename keywordField AS ', [], mockCallbacks);
+    await renameExpectSuggestions('from a | rename keywordField AS ', []);
   });
 
   it('suggests fields after =', async () => {
-    await renameExpectSuggestions(
-      'from a | rename field = ',
-      getFieldNamesByType('any'),
-      mockCallbacks
-    );
+    await renameExpectSuggestions('from a | rename field = ', getFieldNamesByType('any'));
   });
 
   it('suggests pipe and comma after complete expression', async () => {
-    await renameExpectSuggestions('from a | rename field AS foo ', ['| ', ', '], mockCallbacks);
+    await renameExpectSuggestions('from a | rename field AS foo ', ['| ', ', ']);
   });
 });

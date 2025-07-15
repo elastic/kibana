@@ -29,31 +29,18 @@ const dissectExpectSuggestions = (
 };
 
 describe('DISSECT Autocomplete', () => {
-  let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
   });
 
   it('suggests fields after DISSECT', async () => {
     await dissectExpectSuggestions(
       'from a | DISSECT ',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
-      mockCallbacks
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
     await dissectExpectSuggestions(
       'from a | DISSECT key/',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
-      mockCallbacks
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
     );
   });
 

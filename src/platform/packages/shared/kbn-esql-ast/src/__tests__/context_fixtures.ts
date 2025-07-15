@@ -11,8 +11,10 @@ import type {
   ESQLFieldWithMetadata,
   ESQLPolicy,
   ESQLUserDefinedColumn,
+  ICommandCallbacks,
   ICommandContext,
 } from '../commands_registry/types';
+import { getFieldNamesByType } from './autocomplete';
 
 export const joinIndices: IndexAutocompleteItem[] = [
   {
@@ -202,4 +204,15 @@ export const mockContext: ICommandContext = {
   timeSeriesSources: timeseriesIndices,
   inferenceEndpoints,
   histogramBarTarget: 50,
+};
+
+export const getMockCallbacks = (): ICommandCallbacks => {
+  const expectedFields = getFieldNamesByType('any');
+  return {
+    getByType: jest
+      .fn()
+      .mockResolvedValue(expectedFields.map((name) => ({ label: name, text: name }))),
+    getSuggestedUserDefinedColumnName: jest.fn(),
+    getColumnsForQuery: jest.fn(),
+  };
 };

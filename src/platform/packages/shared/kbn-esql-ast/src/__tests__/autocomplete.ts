@@ -34,7 +34,7 @@ import {
   FunctionReturnType,
   SupportedDataType,
 } from '../definitions/types';
-import { mockContext } from './context_fixtures';
+import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../definitions/utils/ast';
@@ -44,7 +44,7 @@ export const expectSuggestions = async (
   expectedSuggestions: string[],
   context = mockContext,
   commandName: string,
-  mockCallbacks: ICommandCallbacks = {},
+  mockCallbacks = getMockCallbacks(),
   autocomplete: (
     arg0: string,
     arg1: ESQLCommand,

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../__tests__/context_fixtures';
+import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
@@ -44,53 +44,30 @@ describe('EVAL Autocomplete', () => {
     jest.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockCallbacks = getMockCallbacks();
   });
   test('empty expression', async () => {
-    await evalExpectSuggestions(
-      'from a | eval ',
-      [
-        ' = ',
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval ', [
+      ' = ',
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
 
-    await evalExpectSuggestions(
-      'from a | eval col0 = /',
-      [
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval col0 = /', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
 
-    await evalExpectSuggestions(
-      'from a | eval col0 = 1, ',
-      [
-        ' = ',
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval col0 = 1, ', [
+      ' = ',
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
 
-    await evalExpectSuggestions(
-      'from a | eval col0 = 1, col1 = /',
-      [
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval col0 = 1, col1 = /', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
 
     // Re-enable with https://github.com/elastic/kibana/issues/210639
     // await evalExpectSuggestions('from a | eval a=doubleField, /', [
@@ -100,61 +77,33 @@ describe('EVAL Autocomplete', () => {
     //   ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     // ]);
 
-    await evalExpectSuggestions(
-      'from a | eval /',
-      [
-        ' = ',
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
-
-    await evalExpectSuggestions(
-      'from a | eval col0 = /',
-      [
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
-
-    await evalExpectSuggestions(
-      'from a | eval col0 = 1, ',
-      [
-        ' = ',
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
-
-    await evalExpectSuggestions(
-      'from a | eval col0 = 1, col1 = ',
-      [
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
-
-    const newUserDefinedColumns = new Map(mockContext.userDefinedColumns);
-    newUserDefinedColumns.set('avg(doubleField)', [
-      {
-        name: 'avg(doubleField)',
-        type: 'double',
-        location: { min: 0, max: 10 },
-      },
+    await evalExpectSuggestions('from a | eval /', [
+      ' = ',
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
+
+    await evalExpectSuggestions('from a | eval col0 = /', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
+
+    await evalExpectSuggestions('from a | eval col0 = 1, ', [
+      ' = ',
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
+
+    await evalExpectSuggestions('from a | eval col0 = 1, col1 = ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
+
     const expectedFields = getFieldNamesByType('any').map((name) => ({ label: name, text: name }));
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
       ...expectedFields,
       { label: 'avg(doubleField)', text: 'avg(doubleField)' },
     ]);
-    const context = {
-      ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
-    };
 
     await evalExpectSuggestions(
       'from b | stats avg(doubleField) by keywordField | eval ',
@@ -164,17 +113,13 @@ describe('EVAL Autocomplete', () => {
         ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ...getFieldNamesByType('any'),
       ],
-      mockCallbacks,
-      context
+      mockCallbacks
     );
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
       ...expectedFields,
       { label: 'abs(doubleField) + 1', text: 'abs(doubleField) + 1' },
     ]);
-    const context2 = {
-      ...mockContext,
-      userDefinedColumns: newUserDefinedColumns,
-    };
+
     await evalExpectSuggestions(
       'from c | eval abs(doubleField) + 1 | eval ',
       [
@@ -183,8 +128,7 @@ describe('EVAL Autocomplete', () => {
         'abs(doubleField) + 1',
         ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
       ],
-      mockCallbacks,
-      context2
+      mockCallbacks
     );
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue([
       ...expectedFields,
@@ -198,41 +142,32 @@ describe('EVAL Autocomplete', () => {
         ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
         ...getFieldNamesByType('any'),
       ],
-      mockCallbacks,
-      context
+      mockCallbacks
     );
   });
 
   it('after column', async () => {
-    await evalExpectSuggestions(
-      'from a | eval doubleField ',
-      [
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          'any',
-          { operators: true, skipAssign: true },
-          ['double']
-        ),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval doubleField ', [
+      ...getFunctionSignaturesByReturnType(
+        Location.EVAL,
+        'any',
+        { operators: true, skipAssign: true },
+        ['double']
+      ),
+    ]);
   });
 
   test('after column after assignment', async () => {
-    await evalExpectSuggestions(
-      'from a | eval col = doubleField ',
-      [
-        ', ',
-        '| ',
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          'any',
-          { operators: true, skipAssign: true, agg: false, scalar: false },
-          ['double']
-        ),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval col = doubleField ', [
+      ', ',
+      '| ',
+      ...getFunctionSignaturesByReturnType(
+        Location.EVAL,
+        'any',
+        { operators: true, skipAssign: true, agg: false, scalar: false },
+        ['double']
+      ),
+    ]);
   });
 
   test('after NOT', async () => {
@@ -257,35 +192,19 @@ describe('EVAL Autocomplete', () => {
   });
 
   test('with lists', async () => {
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
-    await evalExpectSuggestions('from index | EVAL doubleField in ', ['( $0 )'], mockCallbacks);
-    await evalExpectSuggestions(
-      'from index | EVAL doubleField not in /',
-      ['( $0 )'],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from index | EVAL doubleField in ', ['( $0 )']);
+    await evalExpectSuggestions('from index | EVAL doubleField not in /', ['( $0 )']);
   });
 
   test('after assignment', async () => {
-    await evalExpectSuggestions(
-      'from a | eval a=/',
-      [
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
-    await evalExpectSuggestions(
-      'from a | eval a=abs(doubleField), b= /',
-      [
-        ...getFieldNamesByType('any'),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval a=/', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
+    await evalExpectSuggestions('from a | eval a=abs(doubleField), b= /', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
   });
 
   test('in and around functions', async () => {
@@ -477,21 +396,13 @@ describe('EVAL Autocomplete', () => {
   });
 
   test('after comma ', async () => {
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
-    await evalExpectSuggestions(
-      'from a | eval a=round(doubleField), ',
-      [
-        ' = ',
-        ...getFieldNamesByType('any'),
-        // Re-enable with https://github.com/elastic/kibana/issues/210639
-        // 'a',
-        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval a=round(doubleField), ', [
+      ' = ',
+      ...getFieldNamesByType('any'),
+      // Re-enable with https://github.com/elastic/kibana/issues/210639
+      // 'a',
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+    ]);
   });
 
   test('deep function nesting', async () => {
@@ -523,20 +434,16 @@ describe('EVAL Autocomplete', () => {
 
   test('discards query after cursor', async () => {
     // Smoke testing for suggestions in previous position than the end of the statement
-    await evalExpectSuggestions(
-      'from a | eval col0 = abs(doubleField) / | eval abs(col0)',
-      [
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          'any',
-          { operators: true, skipAssign: true },
-          ['double']
-        ),
-        ', ',
-        '| ',
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval col0 = abs(doubleField) / | eval abs(col0)', [
+      ...getFunctionSignaturesByReturnType(
+        Location.EVAL,
+        'any',
+        { operators: true, skipAssign: true },
+        ['double']
+      ),
+      ', ',
+      '| ',
+    ]);
 
     const expectedFields = getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']);
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
@@ -564,31 +471,22 @@ describe('EVAL Autocomplete', () => {
   test('date math', async () => {
     const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
 
-    await evalExpectSuggestions(
-      'from a | eval a = 1 ',
-      [
-        ', ',
-        '| ',
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          'any',
-          { operators: true, skipAssign: true },
-          ['integer']
-        ),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval a = 1 ', [
+      ', ',
+      '| ',
+      ...getFunctionSignaturesByReturnType(
+        Location.EVAL,
+        'any',
+        { operators: true, skipAssign: true },
+        ['integer']
+      ),
+    ]);
 
-    await evalExpectSuggestions(
-      'from a | eval a = 1 year ',
-      [', ', '| ', '+ $0', '- $0'],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval a = 1 year ', [', ', '| ', '+ $0', '- $0']);
 
-    await evalExpectSuggestions(
-      'from a | eval col0=date_trunc(2 ',
-      [...dateSuggestions.map((t) => `${t}, `), ','],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval col0=date_trunc(2 ', [
+      ...dateSuggestions.map((t) => `${t}, `),
+      ',',
+    ]);
   });
 });

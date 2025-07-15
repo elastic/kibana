@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../__tests__/context_fixtures';
+import { getMockCallbacks, mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
-import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
+import { expectSuggestions } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
@@ -40,14 +40,7 @@ describe('TS Autocomplete', () => {
     jest.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockCallbacks = getMockCallbacks();
   });
   describe('... <sources> ...', () => {
     const suggest = async (query: string) => {
@@ -99,46 +92,28 @@ describe('TS Autocomplete', () => {
     test('on <// TS index METADATA field1, /kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
       const expected = ['METADATA ', ',', '| '].sort();
 
-      await tsExpectSuggestions('ts time_series_index ', expected, mockCallbacks);
+      await tsExpectSuggestions('ts time_series_index ', expected);
     });
 
     test('on <kbd>SPACE</kbd> after "METADATA" keyword suggests all metadata fields', async () => {
-      await tsExpectSuggestions('from time_series_index METADATA /', metadataFields, mockCallbacks);
+      await tsExpectSuggestions('from time_series_index METADATA /', metadataFields);
     });
 
     test('metadata field prefixes', async () => {
-      await tsExpectSuggestions('ts time_series_index METADATA _', metadataFields, mockCallbacks);
-      await tsExpectSuggestions(
-        'ts time_series_index METADATA _sour',
-        metadataFields,
-        mockCallbacks
-      );
+      await tsExpectSuggestions('ts time_series_index METADATA _', metadataFields);
+      await tsExpectSuggestions('ts time_series_index METADATA _sour', metadataFields);
     });
 
     test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {
-      await tsExpectSuggestions(
-        'ts time_series_index metadata _index ',
-        [',', '| '],
-        mockCallbacks
-      );
-      await tsExpectSuggestions(
-        'ts time_series_index metadata _index, _source ',
-        [',', '| '],
-        mockCallbacks
-      );
-      await tsExpectSuggestions(
-        `ts time_series_index metadata ${METADATA_FIELDS.join(', ')} `,
-        ['| '],
-        mockCallbacks
-      );
+      await tsExpectSuggestions('ts time_series_index metadata _index ', [',', '| ']);
+      await tsExpectSuggestions('ts time_series_index metadata _index, _source ', [',', '| ']);
+      await tsExpectSuggestions(`ts time_series_index metadata ${METADATA_FIELDS.join(', ')} `, [
+        '| ',
+      ]);
     });
 
     test('filters out already used metadata fields', async () => {
-      await tsExpectSuggestions(
-        'ts time_series_index metadata _index, ',
-        metadataFieldsAndIndex,
-        mockCallbacks
-      );
+      await tsExpectSuggestions('ts time_series_index metadata _index, ', metadataFieldsAndIndex);
     });
   });
 });

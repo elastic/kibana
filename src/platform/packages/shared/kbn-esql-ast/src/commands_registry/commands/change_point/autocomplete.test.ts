@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../__tests__/context_fixtures';
+import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks } from '../../types';
@@ -32,9 +32,7 @@ describe('CHANGE_POINT Autocomplete', () => {
   let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
+    mockCallbacks = getMockCallbacks();
     jest.clearAllMocks();
   });
   it('suggests value columns of numeric types', async () => {
@@ -55,20 +53,9 @@ describe('CHANGE_POINT Autocomplete', () => {
 
   it('suggests fields after ON', async () => {
     const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
-    await changePointExpectSuggestions(
-      `from a | change_point value on /`,
-      expectedFields,
-      mockCallbacks
-    );
+    await changePointExpectSuggestions(`from a | change_point value on /`, expectedFields);
 
-    await changePointExpectSuggestions(
-      `from a | change_point value on fi/`,
-      expectedFields,
-      mockCallbacks
-    );
+    await changePointExpectSuggestions(`from a | change_point value on fi/`, expectedFields);
   });
 
   describe('AS', () => {

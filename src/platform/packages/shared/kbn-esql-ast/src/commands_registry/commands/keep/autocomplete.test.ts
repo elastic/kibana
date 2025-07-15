@@ -8,7 +8,7 @@
  */
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
-import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
+import { expectSuggestions } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks } from '../../types';
 
 const keepExpectSuggestions = (
@@ -28,19 +28,8 @@ const keepExpectSuggestions = (
 };
 
 describe('KEEP Autocomplete', () => {
-  let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
   });
 
   it('suggests available fields after KEEP', async () => {
@@ -52,12 +41,11 @@ describe('KEEP Autocomplete', () => {
     ];
     keepExpectSuggestions(
       'FROM a | KEEP ',
-      allFields.map((field) => field.name),
-      mockCallbacks
+      allFields.map((field) => field.name)
     );
   });
 
   it('suggests command and pipe after a field has been used in KEEP', async () => {
-    keepExpectSuggestions('FROM logs* | KEEP doubleField ', ['| ', ','], mockCallbacks);
+    keepExpectSuggestions('FROM logs* | KEEP doubleField ', ['| ', ',']);
   });
 });

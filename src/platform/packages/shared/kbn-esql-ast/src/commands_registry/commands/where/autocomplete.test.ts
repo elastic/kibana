@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../__tests__/context_fixtures';
+import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
@@ -57,22 +57,14 @@ describe('WHERE Autocomplete', () => {
     jest.clearAllMocks();
 
     // Reset mocks before each test to ensure isolation
-    mockCallbacks = {
-      getByType: jest.fn(),
-    };
-
-    const expectedFields = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockCallbacks = getMockCallbacks();
   });
   test('beginning an expression', async () => {
-    await whereExpectSuggestions('from a | where ', EMPTY_WHERE_SUGGESTIONS, mockCallbacks);
-    await whereExpectSuggestions(
-      'from a | eval col0 = 1 | where ',
-      [...getFieldNamesByType('any'), ...allEvalFns],
-      mockCallbacks
-    );
+    await whereExpectSuggestions('from a | where ', EMPTY_WHERE_SUGGESTIONS);
+    await whereExpectSuggestions('from a | eval col0 = 1 | where ', [
+      ...getFieldNamesByType('any'),
+      ...allEvalFns,
+    ]);
   });
 
   describe('within the expression', () => {
@@ -87,39 +79,31 @@ describe('WHERE Autocomplete', () => {
       return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
     };
     test('after a field name', async () => {
-      await whereExpectSuggestions(
-        'from a | where keywordField ',
-        [
-          // all functions compatible with a keywordField type
-          ...getFunctionSignaturesByReturnType(
-            Location.WHERE,
-            'boolean',
-            {
-              operators: true,
-            },
-            undefined,
-            ['and', 'or', 'not']
-          ),
-        ],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('from a | where keywordField ', [
+        // all functions compatible with a keywordField type
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'boolean',
+          {
+            operators: true,
+          },
+          undefined,
+          ['and', 'or', 'not']
+        ),
+      ]);
 
-      await whereExpectSuggestions(
-        'from a | where keywordField I',
-        [
-          // all functions compatible with a keywordField type
-          ...getFunctionSignaturesByReturnType(
-            Location.WHERE,
-            'boolean',
-            {
-              operators: true,
-            },
-            undefined,
-            ['and', 'or', 'not']
-          ),
-        ],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('from a | where keywordField I', [
+        // all functions compatible with a keywordField type
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'boolean',
+          {
+            operators: true,
+          },
+          undefined,
+          ['and', 'or', 'not']
+        ),
+      ]);
     });
 
     test('suggests dates after a comparison with a date', async () => {
@@ -173,22 +157,17 @@ describe('WHERE Autocomplete', () => {
 
     test('after a logical operator', async () => {
       for (const op of ['and', 'or']) {
-        await whereExpectSuggestions(
-          `from a | where keywordField >= keywordField ${op} `,
-          [
-            ...getFieldNamesByType('any'),
-            ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
-          ],
-          mockCallbacks
-        );
+        await whereExpectSuggestions(`from a | where keywordField >= keywordField ${op} `, [
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
+        ]);
         await whereExpectSuggestions(
           `from a | where keywordField >= keywordField ${op} doubleField `,
           [
             ...getFunctionSignaturesByReturnType(Location.WHERE, 'boolean', { operators: true }, [
               'double',
             ]),
-          ],
-          mockCallbacks
+          ]
         );
       }
     });
@@ -212,18 +191,14 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggests operators after a field name', async () => {
-      await whereExpectSuggestions(
-        'from a | stats a=avg(doubleField) | where doubleField ',
-        [
-          ...getFunctionSignaturesByReturnType(
-            Location.WHERE,
-            'any',
-            { operators: true, skipAssign: true },
-            ['double']
-          ),
-        ],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('from a | stats a=avg(doubleField) | where doubleField ', [
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'any',
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
+      ]);
     });
 
     test('suggests function arguments', async () => {
@@ -263,85 +238,65 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggests boolean and numeric operators after a numeric function result', async () => {
-      await whereExpectSuggestions(
-        'from a | where log10(doubleField) ',
-        [
-          ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { operators: true }, [
-            'double',
-          ]),
-          ...getFunctionSignaturesByReturnType(Location.WHERE, 'boolean', { operators: true }, [
-            'double',
-          ]),
-        ],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('from a | where log10(doubleField) ', [
+        ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { operators: true }, [
+          'double',
+        ]),
+        ...getFunctionSignaturesByReturnType(Location.WHERE, 'boolean', { operators: true }, [
+          'double',
+        ]),
+      ]);
     });
 
     test('suggestions after NOT', async () => {
-      await whereExpectSuggestions(
-        'from index | WHERE keywordField not ',
-        ['LIKE $0', 'RLIKE $0', 'IN $0'],
-        mockCallbacks
-      );
-      await whereExpectSuggestions(
-        'from index | WHERE keywordField NOT ',
-        ['LIKE $0', 'RLIKE $0', 'IN $0'],
-        mockCallbacks
-      );
-      await whereExpectSuggestions(
-        'FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") ',
-        [
-          ...getFunctionSignaturesByReturnType(
-            Location.WHERE,
-            'boolean',
-            { operators: true },
-            ['boolean'],
-            [':']
-          ),
-          '| ',
-        ],
-        mockCallbacks
-      );
-      await whereExpectSuggestions(
-        'from index | WHERE keywordField IS NOT',
-        [
-          '!= $0',
-          '== $0',
-          'AND $0',
-          'IN $0',
-          'IS NOT NULL',
-          'IS NULL',
-          'NOT',
-          'NOT IN $0',
-          'OR $0',
-        ],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('from index | WHERE keywordField not ', [
+        'LIKE $0',
+        'RLIKE $0',
+        'IN $0',
+      ]);
+      await whereExpectSuggestions('from index | WHERE keywordField NOT ', [
+        'LIKE $0',
+        'RLIKE $0',
+        'IN $0',
+      ]);
+      await whereExpectSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") ', [
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'boolean',
+          { operators: true },
+          ['boolean'],
+          [':']
+        ),
+        '| ',
+      ]);
+      await whereExpectSuggestions('from index | WHERE keywordField IS NOT', [
+        '!= $0',
+        '== $0',
+        'AND $0',
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
+        'NOT',
+        'NOT IN $0',
+        'OR $0',
+      ]);
 
-      await whereExpectSuggestions(
-        'from index | WHERE keywordField IS NOT ',
-        [
-          '!= $0',
-          '== $0',
-          'AND $0',
-          'IN $0',
-          'IS NOT NULL',
-          'IS NULL',
-          'NOT',
-          'NOT IN $0',
-          'OR $0',
-        ],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('from index | WHERE keywordField IS NOT ', [
+        '!= $0',
+        '== $0',
+        'AND $0',
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
+        'NOT',
+        'NOT IN $0',
+        'OR $0',
+      ]);
     });
 
     test('suggestions after IN', async () => {
-      await whereExpectSuggestions('from index | WHERE doubleField in ', ['( $0 )'], mockCallbacks);
-      await whereExpectSuggestions(
-        'from index | WHERE doubleField not in ',
-        ['( $0 )'],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('from index | WHERE doubleField in ', ['( $0 )']);
+      await whereExpectSuggestions('from index | WHERE doubleField not in ', ['( $0 )']);
       const expectedFields = getFieldNamesByType(['double']);
       (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
         expectedFields.map((name) => ({ label: name, text: name }))
@@ -365,33 +320,24 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggestions after IS (NOT) NULL', async () => {
-      await whereExpectSuggestions(
-        'FROM index | WHERE tags.keyword IS NULL ',
-        ['AND $0', 'OR $0'],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('FROM index | WHERE tags.keyword IS NULL ', ['AND $0', 'OR $0']);
 
-      await whereExpectSuggestions(
-        'FROM index | WHERE tags.keyword IS NOT NULL ',
-        ['AND $0', 'OR $0'],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('FROM index | WHERE tags.keyword IS NOT NULL ', [
+        'AND $0',
+        'OR $0',
+      ]);
     });
 
     test('suggestions after an arithmetic expression', async () => {
-      await whereExpectSuggestions(
-        'FROM index | WHERE doubleField + doubleField ',
-        [
-          ...getFunctionSignaturesByReturnType(
-            Location.WHERE,
-            'any',
-            { operators: true, skipAssign: true },
-            ['double'],
-            [':']
-          ),
-        ],
-        mockCallbacks
-      );
+      await whereExpectSuggestions('FROM index | WHERE doubleField + doubleField ', [
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'any',
+          { operators: true, skipAssign: true },
+          ['double'],
+          [':']
+        ),
+      ]);
     });
 
     test('pipe suggestion after complete expression', async () => {
