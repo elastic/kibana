@@ -493,20 +493,13 @@ export class ModelsProvider {
    * Retrieves existing pipelines.
    *
    */
-  async getPipelines() {
-    let result = {};
-    try {
-      result = await this._client.asCurrentUser.ingest.getPipeline();
-    } catch (error) {
-      if (error.statusCode === 404) {
-        // ES returns 404 when there are no pipelines
-        // Instead, we should return an empty response and a 200
-        return result;
-      }
-      throw error;
-    }
+  async getPipelines(): Promise<string[]> {
+    const result = await this._client.asCurrentUser.ingest.getPipeline(
+      { summary: true },
+      { ignore: [404] }
+    );
 
-    return result;
+    return Object.keys(result);
   }
 
   /**

@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('trained models', function () {
+    this.tags(['dima']);
     loadTestFile(require.resolve('./trained_models_list'));
     loadTestFile(require.resolve('./get_models'));
     loadTestFile(require.resolve('./get_model_stats'));
@@ -17,5 +18,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./put_model'));
     loadTestFile(require.resolve('./start_stop_deployment'));
     loadTestFile(require.resolve('./model_downloads'));
+    loadTestFile(require.resolve('./get_all_pipelines'));
   });
 }
