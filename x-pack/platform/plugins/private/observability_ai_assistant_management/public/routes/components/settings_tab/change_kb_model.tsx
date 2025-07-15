@@ -31,14 +31,14 @@ import {
   LEGACY_CUSTOM_INFERENCE_ID,
   useKibana,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
+import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
 
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
-  const { mutateAsync: installProductDoc } = useInstallProductDoc();
+  const { installProductDoc } = useGetProductDoc(knowledgeBase.status.value?.currentInferenceId);
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
