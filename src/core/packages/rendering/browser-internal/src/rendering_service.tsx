@@ -90,7 +90,7 @@ export class RenderingService implements IRenderingService {
     const { chrome, featureFlags } = renderCoreDeps;
     const layoutType = featureFlags.getStringValue<LayoutFeatureFlag>(
       LAYOUT_FEATURE_FLAG_KEY,
-      'grid'
+      'legacy-fixed'
     );
     const debugLayout = featureFlags.getBooleanValue(LAYOUT_DEBUG_FEATURE_FLAG_KEY, false);
 
