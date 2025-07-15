@@ -21,6 +21,6 @@ export const NO_SIMULTANEOUS_UPLOADS_MESSAGE = i18n.translate(
 export const UNSUPPORTED_MIME_TYPE_MESSAGE = i18n.translate(
   'xpack.cases.markdownEditor.unsupportedMimeType.message',
   {
-    defaultMessage: 'Only PNG and JPG images are allowed.',
+    defaultMessage: 'Only PNG and JPG images are supported.',
   }
 );
