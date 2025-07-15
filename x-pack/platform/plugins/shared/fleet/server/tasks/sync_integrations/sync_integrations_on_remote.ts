@@ -10,6 +10,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import semverEq from 'semver/functions/eq';
 import semverGte from 'semver/functions/gte';
@@ -190,6 +191,7 @@ async function installPackageIfNotInstalled(
 async function uninstallPackageIfInstalled(
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClient,
+  alertingRulesClient: RulesClientApi,
   pkg: { package_name: string; package_version: string },
   logger: Logger
 ) {
@@ -213,6 +215,7 @@ async function uninstallPackageIfInstalled(
   try {
     await removeInstallation({
       savedObjectsClient,
+      alertingRulesClient,
       pkgName: pkg.package_name,
       pkgVersion: pkg.package_version,
       esClient,
@@ -231,6 +234,7 @@ async function uninstallPackageIfInstalled(
 export const syncIntegrationsOnRemote = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClient,
+  alertingRulesClient: RulesClientApi,
   packageClient: PackageClient,
   abortController: AbortController,
   logger: Logger
@@ -266,7 +270,7 @@ export const syncIntegrationsOnRemote = async (
     if (abortController.signal.aborted) {
       throw new Error('Task was aborted');
     }
-    await uninstallPackageIfInstalled(esClient, soClient, pkg, logger);
+    await uninstallPackageIfInstalled(esClient, soClient, alertingRulesClient, pkg, logger);
   }
 
   await clearCustomAssetFailedAttempts(soClient, syncIntegrationsDoc);

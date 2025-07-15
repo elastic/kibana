@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
@@ -161,6 +161,7 @@ export class PackageServiceImpl implements PackageService {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
+    private readonly alertingRulesClient: RulesClientApi,
     private readonly logger: Logger
   ) {}
 
@@ -185,6 +186,7 @@ export class PackageServiceImpl implements PackageService {
     return new PackageClientImpl(
       this.internalEsClient,
       this.internalSoClient,
+      this.alertingRulesClient,
       this.logger,
       preflightCheck,
       request
@@ -192,7 +194,12 @@ export class PackageServiceImpl implements PackageService {
   }
 
   public get asInternalUser() {
-    return new PackageClientImpl(this.internalEsClient, this.internalSoClient, this.logger);
+    return new PackageClientImpl(
+      this.internalEsClient,
+      this.internalSoClient,
+      this.alertingRulesClient,
+      this.logger
+    );
   }
 }
 
@@ -202,6 +209,7 @@ class PackageClientImpl implements PackageClient {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
+    private readonly alertingRulesClient: RulesClientApi,
     private readonly logger: Logger,
     private readonly preflightCheck?: (
       requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']
@@ -239,6 +247,7 @@ class PackageClientImpl implements PackageClient {
       ...options,
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
+      alertingRulesClient: this.alertingRulesClient,
     });
   }
 
@@ -276,6 +285,7 @@ class PackageClientImpl implements PackageClient {
       installSource: 'registry',
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
+      alertingRulesClient: this.alertingRulesClient,
       neverIgnoreVerificationError: !force,
       keepFailedInstallation,
       useStreaming,
@@ -309,6 +319,7 @@ class PackageClientImpl implements PackageClient {
       installSource: 'custom',
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
+      alertingRulesClient: this.alertingRulesClient,
       neverIgnoreVerificationError: !force,
       authorizationHeader: this.getAuthorizationHeader(),
     });

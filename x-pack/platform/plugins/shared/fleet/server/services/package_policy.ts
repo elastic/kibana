@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
 import semverGt from 'semver/functions/gt';
@@ -235,6 +236,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
+    alertingRulesClient: RulesClientApi,
     packagePolicy: NewPackagePolicy,
     options: {
       authorizationHeader?: HTTPAuthorizationHeader | null;
@@ -363,6 +365,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (!options?.skipEnsureInstalled) {
         await ensureInstalledPackage({
           esClient,
+          alertingRulesClient,
           spaceId: options?.spaceId || DEFAULT_SPACE_ID,
           savedObjectsClient: soClient,
           pkgName: enrichedPackagePolicy.package.name,
@@ -2148,6 +2151,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
+    alertingRulesClient: RulesClientApi,
     pkgName: string,
     options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined> {
@@ -2161,6 +2165,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       const esClient = await appContextService.getInternalUserESClient();
       const result = await ensureInstalledPackage({
         esClient,
+        alertingRulesClient,
         pkgName,
         savedObjectsClient: soClient,
       });
@@ -2648,6 +2653,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
   async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
+    alertingRulesClient: RulesClientApi,
     packagePolicy: NewPackagePolicy,
     options?: {
       authorizationHeader?: HTTPAuthorizationHeader | null;
@@ -2670,7 +2676,15 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.create(soClient, esClient, packagePolicy, options, context, request);
+    return super.create(
+      soClient,
+      esClient,
+      alertingRulesClient,
+      packagePolicy,
+      options,
+      context,
+      request
+    );
   }
 }
 
