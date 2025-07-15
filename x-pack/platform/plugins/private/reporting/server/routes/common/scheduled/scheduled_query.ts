@@ -81,8 +81,9 @@ export function transformSingleResponse(
     try {
       // if start date is provided and in the future, use it, otherwise use current time
       const startDateValue = new Date(rruleStart).valueOf();
-      if (startDateValue > Date.now()) {
-        dtstart = new Date(rruleStart);
+      const now = Date.now();
+      if (startDateValue > now) {
+        dtstart = new Date(startDateValue + 60000); // add 1 minute to ensure it's in the future
       }
     } catch (e) {
       logger.debug(
