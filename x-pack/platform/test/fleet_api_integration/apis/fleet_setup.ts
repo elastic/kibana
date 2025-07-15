@@ -69,7 +69,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(installedPackages).to.eql(['endpoint']);
     });
 
-    describe('TMPDEBUGMEupgrade managed package policies', () => {
+    describe('upgrade managed package policies', () => {
       const apiClient = new SpaceTestApiClient(supertest);
       before(async () => {
         const pkgRes = await apiClient.getPackage({
