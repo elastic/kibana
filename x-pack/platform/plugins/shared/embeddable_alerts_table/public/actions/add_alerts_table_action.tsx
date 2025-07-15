@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -46,20 +47,22 @@ export const getAddAlertsTableAction = (
         parentApi: embeddable,
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
           const { ConfigEditor } = await import('../components/config_editor');
-          return ConfigEditor({
-            coreServices,
-            closeFlyout,
-            ariaLabelledBy,
-            onSave: (tableConfig) => {
-              embeddable.addNewPanel(
-                {
-                  panelType: EMBEDDABLE_ALERTS_TABLE_ID,
-                  serializedState: { rawState: { tableConfig } },
-                },
-                true
-              );
-            },
-          });
+          return (
+            <ConfigEditor
+              coreServices={coreServices}
+              closeFlyout={closeFlyout}
+              ariaLabelledBy={ariaLabelledBy}
+              onSave={(tableConfig) => {
+                embeddable.addNewPanel(
+                  {
+                    panelType: EMBEDDABLE_ALERTS_TABLE_ID,
+                    serializedState: { rawState: { tableConfig } },
+                  },
+                  true
+                );
+              }}
+            />
+          );
         },
       });
     },

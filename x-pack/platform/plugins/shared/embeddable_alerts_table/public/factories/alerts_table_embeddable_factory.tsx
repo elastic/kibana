@@ -105,15 +105,17 @@ export const getAlertsTableEmbeddableFactory = (
             parentApi: api.parentApi,
             loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
               const { ConfigEditor } = await import('../components/config_editor');
-              return ConfigEditor({
-                initialConfig: tableConfig$.getValue(),
-                ariaLabelledBy,
-                coreServices,
-                closeFlyout,
-                onSave: (newConfig: EmbeddableAlertsTableConfig) => {
-                  tableConfig$.next(newConfig);
-                },
-              });
+              return (
+                <ConfigEditor
+                  initialConfig={tableConfig$.getValue()}
+                  ariaLabelledBy={ariaLabelledBy}
+                  coreServices={coreServices}
+                  closeFlyout={closeFlyout}
+                  onSave={(newConfig: EmbeddableAlertsTableConfig) => {
+                    tableConfig$.next(newConfig);
+                  }}
+                />
+              );
             },
           });
         } catch {
