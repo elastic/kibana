@@ -766,6 +766,7 @@
     "@kbn/presentation-containers": "link:src/platform/packages/shared/presentation/presentation_containers",
     "@kbn/presentation-panel-plugin": "link:src/platform/plugins/private/presentation_panel",
     "@kbn/presentation-publishing": "link:src/platform/packages/shared/presentation/presentation_publishing",
+    "@kbn/presentation-util": "link:src/platform/packages/shared/presentation/presentation_util",
     "@kbn/presentation-util-plugin": "link:src/platform/plugins/shared/presentation_util",
     "@kbn/product-doc-base-plugin": "link:x-pack/platform/plugins/shared/ai_infra/product_doc_base",
     "@kbn/product-doc-common": "link:x-pack/platform/packages/shared/ai-infra/product-doc-common",
