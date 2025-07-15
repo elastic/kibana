@@ -389,13 +389,6 @@ export class CstToAstConverter {
     if (rerankCommandCtx) {
       return this.fromRerankCommand(rerankCommandCtx);
     }
-
-    const rrfCommandCtx = ctx.rrfCommand();
-
-    if (rrfCommandCtx) {
-      return this.fromRrfCommand(rrfCommandCtx);
-    }
-
     const fuseCommandCtx = ctx.fuseCommand();
 
     if (fuseCommandCtx) {
@@ -868,9 +861,10 @@ export class CstToAstConverter {
   }
 
   private toPolicyNameFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLSource {
-    const policyName = ctx._policyName;
+    const policyNameCtx = ctx._policyName;
+    const policyName = policyNameCtx?.ENRICH_POLICY_NAME() || policyNameCtx?.QUOTED_STRING();
 
-    if (!policyName || !textExistsAndIsValid(policyName.text)) {
+    if (!policyName || !textExistsAndIsValid(policyName.getText())) {
       const source = Builder.expression.source.node(
         {
           sourceType: 'policy',
@@ -881,13 +875,13 @@ export class CstToAstConverter {
         {
           incomplete: true,
           text: '',
-          location: { min: policyName.start, max: policyName.stop },
+          location: { min: policyNameCtx.start.start, max: policyNameCtx.start.stop },
         }
       );
       return source;
     }
 
-    const name = ctx._policyName.text;
+    const name = policyName.getText();
     const colonIndex = name.indexOf(':');
     const withPrefix = colonIndex !== -1;
     const incomplete = false;
@@ -907,7 +901,10 @@ export class CstToAstConverter {
         {
           text: prefixName,
           incomplete: false,
-          location: { min: policyName.start, max: policyName.start + prefixName.length - 1 },
+          location: {
+            min: policyNameCtx.start.start,
+            max: policyNameCtx.start.start + prefixName.length - 1,
+          },
         }
       );
       index = Builder.expression.literal.string(
@@ -919,8 +916,8 @@ export class CstToAstConverter {
           text: indexName,
           incomplete: false,
           location: {
-            min: policyName.start + prefixName.length + 1,
-            max: policyName.stop,
+            min: policyNameCtx.start.start + prefixName.length + 1,
+            max: policyNameCtx.start.stop,
           },
         }
       );
@@ -933,7 +930,7 @@ export class CstToAstConverter {
         {
           text: name,
           incomplete: false,
-          location: { min: policyName.start, max: policyName.stop },
+          location: { min: policyNameCtx.start.start, max: policyNameCtx.start.stop },
         }
       );
     }
@@ -949,8 +946,8 @@ export class CstToAstConverter {
         incomplete,
         text: name,
         location: {
-          min: policyName.start,
-          max: policyName.stop,
+          min: policyNameCtx.start.start,
+          max: policyNameCtx.start.stop,
         },
       }
     );
@@ -1256,14 +1253,6 @@ export class CstToAstConverter {
 
   private fromRerankCommand(ctx: cst.RerankCommandContext): ast.ESQLAstRerankCommand {
     const command = this.createCommand<'rerank', ast.ESQLAstRerankCommand>('rerank', ctx, {});
-
-    return command;
-  }
-
-  // ---------------------------------------------------------------------- RRF
-
-  private fromRrfCommand(ctx: cst.RrfCommandContext): ast.ESQLCommand<'rrf'> {
-    const command = this.createCommand('rrf', ctx);
 
     return command;
   }
