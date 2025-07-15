@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-floating-promises */
+
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 interface PromisePoolArgs<Item, Result> {
@@ -73,7 +75,7 @@ export const initPromisePool = async <Item, Result, Error = unknown>({
         outcome.errors.push({ item, error });
       })
       .finally(() => {
-        tasks.splice(tasks.indexOf(task), 1);
+        void tasks.splice(tasks.indexOf(task), 1);
       });
 
     tasks.push(task);
