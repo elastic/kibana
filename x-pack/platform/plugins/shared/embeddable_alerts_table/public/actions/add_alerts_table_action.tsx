@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { openConfigEditor } from '../components/open_config_editor';
 import { ADD_ALERTS_TABLE_ACTION_ID, EMBEDDABLE_ALERTS_TABLE_ID } from '../constants';
 import { ADD_ALERTS_TABLE_ACTION_LABEL } from '../translations';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
@@ -41,17 +41,30 @@ export const getAddAlertsTableAction = (
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      const tableConfig = await openConfigEditor({
-        coreServices,
+
+      openLazyFlyout({
+        core: coreServices,
         parentApi: embeddable,
-      });
-      await embeddable.addNewPanel(
-        {
-          panelType: EMBEDDABLE_ALERTS_TABLE_ID,
-          serializedState: { rawState: { tableConfig } },
+        loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+          const { ConfigEditor } = await import('../components/config_editor');
+          return (
+            <ConfigEditor
+              coreServices={coreServices}
+              closeFlyout={closeFlyout}
+              ariaLabelledBy={ariaLabelledBy}
+              onSave={(tableConfig) => {
+                embeddable.addNewPanel(
+                  {
+                    panelType: EMBEDDABLE_ALERTS_TABLE_ID,
+                    serializedState: { rawState: { tableConfig } },
+                  },
+                  true
+                );
+              }}
+            />
+          );
         },
-        true
-      );
+      });
     },
     getDisplayName: () => ADD_ALERTS_TABLE_ACTION_LABEL,
   };

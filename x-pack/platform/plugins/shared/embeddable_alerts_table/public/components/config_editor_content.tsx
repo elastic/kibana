@@ -59,7 +59,7 @@ import {
   CONFIG_EDITOR_PANEL_DESCRIPTION,
 } from '../translations';
 
-export interface ConfigEditorFlyoutProps {
+export interface ConfigEditorContentProps {
   initialConfig?: EmbeddableAlertsTableConfig;
   onSave: (newConfig: EmbeddableAlertsTableConfig) => void;
   onCancel: () => void;
@@ -68,6 +68,7 @@ export interface ConfigEditorFlyoutProps {
     notifications: CoreStart['notifications'];
     overlays: CoreStart['overlays'];
   };
+  ariaLabelledBy: string;
 }
 
 const EMPTY_FILTERS: AlertsFiltersExpression = [{ filter: {} }];
@@ -94,12 +95,13 @@ const computeFiltersErrors = (
   });
 };
 
-export const ConfigEditorFlyout = ({
+export const ConfigEditorContent = ({
   initialConfig,
   onSave,
   onCancel,
   services,
-}: ConfigEditorFlyoutProps) => {
+  ariaLabelledBy,
+}: ConfigEditorContentProps) => {
   const { http, overlays } = services;
   const flyoutBodyRef = useRef<HTMLDivElement>(null);
   const solutionSelectorRef = useRef<EuiSuperSelect<RuleTypeSolution>>(null);
@@ -186,7 +188,7 @@ export const ConfigEditorFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder={true}>
-        <EuiTitle size="s">
+        <EuiTitle size="s" id={ariaLabelledBy}>
           <h2>{!initialConfig ? CONFIG_EDITOR_ADD_TABLE_TITLE : CONFIG_EDITOR_EDIT_TABLE_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>

@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { openAddFromLibraryFlyout } from '@kbn/embeddable-plugin/public';
-import { DashboardApi } from '../dashboard_api/types';
-
-export function addFromLibrary(dashboardApi: DashboardApi) {
-  dashboardApi.openOverlay(
-    openAddFromLibraryFlyout({
-      container: dashboardApi,
-      onClose: () => {
-        dashboardApi.clearOverlays();
-      },
-    })
-  );
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/presentation/presentation_util'],
+};
