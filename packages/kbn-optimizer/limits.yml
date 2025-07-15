@@ -25,7 +25,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 21486
-  dashboardEnhanced: 18616
+  dashboardEnhanced: 12500
   data: 453742
   dataQuality: 10387
   datasetQuality: 27203
@@ -73,7 +73,7 @@ pageLoadAssetSize:
   grokdebugger: 5484
   guidedOnboarding: 26999
   home: 13710
-  imageEmbeddable: 7024
+  imageEmbeddable: 6000
   indexLifecycleManagement: 29870
   indexManagement: 35861
   inference: 10368
@@ -165,7 +165,7 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 200384
   transform: 22722
-  triggersActionsUi: 126450
+  triggersActionsUi: 110000
   uiActions: 24712
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513

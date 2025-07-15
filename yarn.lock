@@ -6773,6 +6773,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/presentation-util@link:src/platform/packages/shared/presentation/presentation_util":
+  version "0.0.0"
+  uid ""
+
 "@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
   version "0.0.0"
   uid ""

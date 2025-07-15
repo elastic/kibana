@@ -9,7 +9,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { TracksOverlays } from '@kbn/presentation-containers';
+import { TracksOverlays } from '@kbn/presentation-util';
 import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
