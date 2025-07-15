@@ -59,8 +59,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   const handleToggleTypeTools = useCallback(
     (type: ToolType) => {
-      const providerTools = toolsByType[type] || [];
-      const newSelection = toggleTypeSelection(type, providerTools, selectedTools);
+      const typeTools = toolsByType[type] || [];
+      const newSelection = toggleTypeSelection(type, typeTools, selectedTools);
       onToolsChange(newSelection);
     },
     [selectedTools, onToolsChange, toolsByType]
@@ -68,8 +68,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   const handleToggleTool = useCallback(
     (toolId: string, type: ToolType) => {
-      const providerTools = toolsByType[type] || [];
-      const newSelection = toggleToolSelection(toolId, type, providerTools, selectedTools);
+      const typeTools = toolsByType[type] || [];
+      const newSelection = toggleToolSelection(toolId, type, typeTools, selectedTools);
       onToolsChange(newSelection);
     },
     [selectedTools, onToolsChange, toolsByType]
@@ -126,7 +126,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                 <EuiTitle size="s">
                   <h4>
                     <EuiCode>{type}</EuiCode>{' '}
-                    {i18n.translate('xpack.onechat.tools.providerToolsLabel', {
+                    {i18n.translate('xpack.onechat.tools.typeToolsLabel', {
                       defaultMessage: 'tools',
                     })}
                   </h4>
@@ -134,12 +134,12 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSwitch
-                  id={`provider-${type}`}
+                  id={`type-${type}`}
                   label={
                     <EuiText size="s" color="subdued">
-                      {i18n.translate('xpack.onechat.tools.selectAllProviderTools', {
-                        defaultMessage: 'Select all {providerName} tools',
-                        values: { providerName: type },
+                      {i18n.translate('xpack.onechat.tools.selectAllTypeTools', {
+                        defaultMessage: 'Select all {typeName} tools',
+                        values: { typeName: type },
                       })}
                     </EuiText>
                   }
