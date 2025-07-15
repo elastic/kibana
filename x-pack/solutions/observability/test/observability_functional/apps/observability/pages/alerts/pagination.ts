@@ -88,11 +88,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/120440
-      describe.skip('Pagination controls', () => {
+      describe('Pagination controls', () => {
         before(async () => {
-          await (await observability.alerts.pagination.getPageSizeSelector()).click();
-          await (await observability.alerts.pagination.getTenRowsPageSelector()).click();
+          await observability.alerts.common.selectAlertStatusFilter('recovered');
+          await retry.try(async () => {
+            await (await observability.alerts.pagination.getPageSizeSelector()).click();
+            await (await observability.alerts.pagination.getTenRowsPageSelector()).click();
+          });
           await observability.alerts.pagination.goToFirstPage();
         });
 
@@ -113,7 +115,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('Goes to nth page', async () => {
           await observability.alerts.pagination.goToNthPage(3);
-          await observability.alerts.common.alertDataIsBeingLoaded();
           await observability.alerts.common.alertDataHasLoaded();
           const tableRows = await observability.alerts.common.getTableCellsInRows();
           expect(tableRows.length).to.be(10);
@@ -121,7 +122,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('Goes to next page', async () => {
           await observability.alerts.pagination.goToNextPage();
-          await observability.alerts.common.alertDataIsBeingLoaded();
           await observability.alerts.common.alertDataHasLoaded();
           const tableRows = await observability.alerts.common.getTableCellsInRows();
           expect(tableRows.length).to.be(10);
@@ -129,7 +129,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('Goes to previous page', async () => {
           await observability.alerts.pagination.goToPrevPage();
-          await observability.alerts.common.alertDataIsBeingLoaded();
           await observability.alerts.common.alertDataHasLoaded();
           const tableRows = await observability.alerts.common.getTableCellsInRows();
           expect(tableRows.length).to.be(10);

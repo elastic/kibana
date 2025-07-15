@@ -5,7 +5,7 @@ Many API integration tests for Ingest Manager trigger at some point a connection
 - the deployed registry is temporarily unavailable
 - the packages served by the registry do not match the expectation of the code under test
 
-For that reason, we run a dockerized version of the package registry in Kibana CI. For this to work, our tests must run against a custom test configuration and be kept in a custom directory, `x-pack/test/fleet_api_integration`.
+For that reason, we run a dockerized version of the package registry in Kibana CI. For this to work, our tests must run against a custom test configuration and be kept in a custom directory, `x-pack/platform/test/fleet_api_integration`.
 
 ## How to run the tests locally
 
@@ -13,21 +13,21 @@ Usually, having the test server and the test runner in two different shells is m
 
 ```
 $ export FLEET_PACKAGE_REGISTRY_PORT=12345
-$ yarn test:ftr:server --config x-pack/test/fleet_api_integration/config.ts
+$ yarn test:ftr:server --config x-pack/platform/test/fleet_api_integration/config.ts
 ```
 
 In another shell in the same directory, run
 
 ```
 $ export FLEET_PACKAGE_REGISTRY_PORT=12345
-$ yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts
+$ yarn test:ftr:runner --config x-pack/platform/test/fleet_api_integration/config.ts
 ```
 
 However, it is also possible to **alternatively** run everything in one go, again from the main `kibana` directory:
 
 ```
 $ export FLEET_PACKAGE_REGISTRY_PORT=12345
-$ yarn test:ftr --config x-pack/test/fleet_api_integration/config.ts
+$ yarn test:ftr --config x-pack/platform/test/fleet_api_integration/config.ts
 ```
 
 Port `12345` is used as an example here, it can be anything, but the environment variable has to be present for the tests to run at all.
@@ -37,7 +37,7 @@ Port `12345` is used as an example here, it can be anything, but the environment
 We use the `DockerServers` service provided by `kbn-test`. The documentation for this functionality can be found here:
 https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/docker_servers/README.md
 
-The main configuration for the `DockerServers` service for our tests can be found in `x-pack/test/fleet_api_integration/config.ts`:
+The main configuration for the `DockerServers` service for our tests can be found in `x-pack/platform/test/fleet_api_integration/config.ts`:
 
 ### Specify the arguments to pass to `docker run`:
 
@@ -74,7 +74,7 @@ The containerized package registry contains a set of packages which should be su
 docker run -p 8080:8080 docker.elastic.co/package-registry/package-registry:kibana-testing-1
 ```
 
-Additional packages for testing certain corner cases or error conditions can be put into `x-pack/test/fleet_api_integration/apis/fixtures/test_packages`. A package `filetest` has been added there as an example.
+Additional packages for testing certain corner cases or error conditions can be put into `x-pack/platform/test/fleet_api_integration/apis/fixtures/test_packages`. A package `filetest` has been added there as an example.
 
 ## Some DockerServers background
 
