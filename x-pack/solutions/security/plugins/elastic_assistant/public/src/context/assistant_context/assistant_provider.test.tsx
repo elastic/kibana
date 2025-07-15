@@ -67,6 +67,7 @@ describe('AssistantProvider', () => {
           hasUpdateAIAssistantAnonymization: expect.any(Boolean),
           isAssistantEnabled: expect.any(Boolean),
           isStarterPromptsEnabled: expect.any(Boolean),
+          isAssistantVisible: expect.any(Boolean),
         }),
         assistantFeatures: expect.objectContaining({
           assistantModelEvaluation: expect.any(Boolean),

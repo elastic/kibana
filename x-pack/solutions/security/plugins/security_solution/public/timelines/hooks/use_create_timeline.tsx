@@ -58,7 +58,6 @@ export const useCreateTimeline = ({
   ) ?? { id: '', patternList: [] };
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-
   const {
     id: experimentalSecurityDefaultDataViewId,
     indexPatterns: experimentalSecurityDefaultIndexPatterns,

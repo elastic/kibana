@@ -3885,7 +3885,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-fixture-plugin@link:x-pack/test/functional_with_es_ssl/plugins/alerts":
+"@kbn/alerting-fixture-plugin@link:x-pack/platform/test/functional_with_es_ssl/plugins/alerts":
   version "0.0.0"
   uid ""
 
@@ -4145,7 +4145,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cloud-integration-saml-provider-plugin@link:x-pack/test/cloud_integration/plugins/saml_provider":
+"@kbn/cloud-integration-saml-provider-plugin@link:x-pack/platform/test/cloud_integration/plugins/saml_provider":
   version "0.0.0"
   uid ""
 
@@ -5833,7 +5833,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/functional-with-es-ssl-cases-test-plugin@link:x-pack/test/functional_with_es_ssl/plugins/cases":
+"@kbn/functional-with-es-ssl-cases-test-plugin@link:x-pack/platform/test/functional_with_es_ssl/plugins/cases":
   version "0.0.0"
   uid ""
 
