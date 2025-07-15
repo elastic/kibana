@@ -202,36 +202,56 @@ export const sectionSchema = schema.object({
   }),
 });
 
-export const optionsSchema = schema.object({
-  hidePanelTitles: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
-    meta: { description: 'Hide the panel titles in the dashboard.' },
-  }),
-  useMargins: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
-    meta: { description: 'Show margins between panels in the dashboard layout.' },
-  }),
-  syncColors: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
-    meta: { description: 'Synchronize colors between related panels in the dashboard.' },
-  }),
-  syncTooltips: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
-    meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
-  }),
-  syncCursor: schema.boolean({
-    defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncCursor,
-    meta: { description: 'Synchronize cursor position between related panels in the dashboard.' },
-  }),
-});
+export const optionsSchema = schema.maybe(
+  schema.object({
+    hidePanelTitles: schema.maybe(
+      schema.boolean({
+        defaultValue: DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
+        meta: { description: 'Hide the panel titles in the dashboard.' },
+      })
+    ),
+    useMargins: schema.maybe(
+      schema.boolean({
+        defaultValue: DEFAULT_DASHBOARD_OPTIONS.useMargins,
+        meta: { description: 'Show margins between panels in the dashboard layout.' },
+      })
+    ),
+    syncColors: schema.maybe(
+      schema.boolean({
+        defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncColors,
+        meta: { description: 'Synchronize colors between related panels in the dashboard.' },
+      })
+    ),
+    syncTooltips: schema.maybe(
+      schema.boolean({
+        defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncTooltips,
+        meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
+      })
+    ),
+    syncCursor: schema.maybe(
+      schema.boolean({
+        defaultValue: DEFAULT_DASHBOARD_OPTIONS.syncCursor,
+        meta: {
+          description: 'Synchronize cursor position between related panels in the dashboard.',
+        },
+      })
+    ),
+  })
+);
 
 export const searchResultsAttributes = {
-  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
-  timeRestore: schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Whether to restore time upon viewing this dashboard' },
-  }),
+  title: schema.maybe(
+    schema.string({ meta: { description: 'A human-readable title for the dashboard' } })
+  ),
+  description: schema.maybe(
+    schema.string({ defaultValue: '', meta: { description: 'A short description.' } })
+  ),
+  timeRestore: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: { description: 'Whether to restore time upon viewing this dashboard' },
+    })
+  ),
   tags: schema.maybe(
     schema.arrayOf(
       schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
@@ -244,16 +264,18 @@ export const searchResultsAttributesSchema = schema.object(searchResultsAttribut
 
 export const dashboardRequestAttributes = {
   // Search
-  kibanaSavedObjectMeta: schema.object(
-    {
-      searchSource: schema.maybe(searchSourceSchema),
-    },
-    {
-      meta: {
-        description: 'A container for various metadata',
+  kibanaSavedObjectMeta: schema.maybe(
+    schema.object(
+      {
+        searchSource: schema.maybe(searchSourceSchema),
       },
-      defaultValue: {},
-    }
+      {
+        meta: {
+          description: 'A container for various metadata',
+        },
+        defaultValue: {},
+      }
+    )
   ),
   // Time
   timeFrom: schema.maybe(
@@ -266,7 +288,9 @@ export const dashboardRequestAttributes = {
 
   // Dashboard Content
   controlGroupInput: schema.maybe(controlsGroupSchema),
-  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
+  panels: schema.maybe(
+    schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] })
+  ),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
@@ -322,8 +346,8 @@ const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
 export const dashboardResponseMetaSchema = schema.object({
   id: schema.string(),
   type: schema.string(),
-  updatedAt: schema.string(),
-  createdAt: schema.string(),
+  updatedAt: schema.maybe(schema.string()),
+  createdAt: schema.maybe(schema.string()),
   updatedBy: schema.maybe(schema.string()),
   createdBy: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
@@ -371,9 +395,7 @@ export const dashboardCreateResultSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const dashboardItemSchema = dashboardCreateResultSchema.extends({
-  error: schema.maybe(apiError),
-});
+export const dashboardItemSchema = dashboardCreateResultSchema;
 
 export const dashboardGetResultSchema = schema.object(
   {

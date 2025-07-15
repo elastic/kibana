@@ -28,30 +28,6 @@ type SavedObjectToItemReturn<T> =
       error: Error;
     };
 
-const transformKibanaSavedObjectMeta = (oldMeta: {
-  searchSourceJSON?: string;
-}): { searchSource?: SearchSourceObject } => {
-  if (!oldMeta.searchSourceJSON) {
-    return {};
-  }
-
-  try {
-    const parsedSearchSource = JSON.parse(oldMeta.searchSourceJSON);
-    return {
-      searchSource: {
-        type: parsedSearchSource.type,
-        query: parsedSearchSource.query,
-        filter: parsedSearchSource.filter,
-        sort: parsedSearchSource.sort,
-        // Add other properties as needed
-      },
-    };
-  } catch (error) {
-    console.error('Failed to parse searchSourceJSON:', error);
-    return {};
-  }
-};
-
 export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
@@ -103,17 +79,8 @@ export function savedObjectToItem(
       item: {
         data: {
           ...attributesOut,
-          // error,
-          title: attributesOut.title || '',
-          description: attributesOut.description || '',
-          spaces: namespaces,
           references: referencesOut,
-          kibanaSavedObjectMeta: attributesOut.kibanaSavedObjectMeta || {},
-          timeRestore: attributesOut.timeRestore || false,
-          panels: attributesOut.panels || [],
-          options: attributesOut.options || {},
-          // version,
-          // managed,
+          spaces: namespaces,
         },
         meta: {
           id,
@@ -127,6 +94,15 @@ export function savedObjectToItem(
       error: null,
     };
   } catch (e) {
-    return { item: { data: {}, meta: {} }, error: e };
+    return {
+      item: {
+        data: {},
+        meta: {
+          id,
+          type,
+        },
+      },
+      error: e,
+    };
   }
 }

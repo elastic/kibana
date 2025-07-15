@@ -13,6 +13,7 @@ import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
+import { ItemResult } from '@kbn/content-management-plugin/common/rpc/types';
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import {
@@ -21,6 +22,7 @@ import {
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
   referenceSchema,
+  DashboardItem,
 } from '../content_management/v1';
 
 interface RegisterAPIRoutesArgs {
@@ -98,7 +100,7 @@ export function registerAPIRoutes({
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, LATEST_VERSION);
-      let result;
+      let result: ItemResult<DashboardItem>;
       try {
         ({ result } = await client.create(attributes, {
           id,
@@ -163,7 +165,6 @@ export function registerAPIRoutes({
       let result;
       try {
         ({ result } = await client.update(req.params.id, attributes, { references }));
-        console.log('create result ++++----', JSON.stringify(result, null, 2));
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
