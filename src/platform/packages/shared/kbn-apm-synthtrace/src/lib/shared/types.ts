@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-
-import { FtrProviderContext } from '../../ftr_provider_context';
-
-export function LogSynthtraceEsClientProvider({ getService }: FtrProviderContext) {
-  return new LogsSynthtraceEsClient({
-    client: getService('es'),
-    logger: createLogger(LogLevel.info),
-    refreshAfterIndex: true,
-  });
+export interface PackageManagement {
+  initializePackage(opts?: { version?: string; skipInstallation?: boolean }): Promise<string>;
+  uninstallPackage(): Promise<void>;
 }

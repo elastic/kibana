@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { format, UrlObject } from 'url';
+import { UrlObject, format } from 'url';
 import {
+  createLogger,
+  LogLevel,
   SynthtraceClientsManager,
   SynthtraceClientTypes,
   GetClientsReturn,
-  createLogger,
-  LogLevel,
 } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SynthtraceClientProvider({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const config = getService('config');
-
   const servers = config.get('servers');
+
   const kibanaServer = servers.kibana as UrlObject;
   const kibanaServerUrlWithAuth = format(kibanaServer);
 

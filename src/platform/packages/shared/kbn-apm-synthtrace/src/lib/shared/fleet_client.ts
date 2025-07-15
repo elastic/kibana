@@ -6,34 +6,25 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import pRetry from 'p-retry';
-import { KibanaClient, KibanaClientHttpError } from '../../shared/base_kibana_client';
-import { Logger } from '../../utils/create_logger';
-import { getKibanaClient } from '../../../cli/utils/get_kibana_client';
+import { Logger } from '../utils/create_logger';
+import { KibanaClient, KibanaClientHttpError } from './base_kibana_client';
 
-export class ApmSynthtraceKibanaClient {
-  private readonly kibanaClient: KibanaClient;
-  private readonly logger: Logger;
-
-  constructor(options: { logger: Logger } & ({ target: string } | { kibanaClient: KibanaClient })) {
-    this.kibanaClient = 'kibanaClient' in options ? options.kibanaClient : getKibanaClient(options);
-    this.logger = options.logger;
-  }
-
-  getFleetApmPackagePath(packageVersion?: string): string {
-    let path = `/api/fleet/epm/packages/apm`;
+export class FleetClient {
+  constructor(private readonly kibanaClient: KibanaClient, private readonly logger: Logger) {}
+  getFleetPackagePath(packageName: string, packageVersion?: string): string {
+    let path = `/api/fleet/epm/packages/${packageName}`;
     if (packageVersion) {
       path = `${path}/${packageVersion}`;
     }
     return path;
   }
 
-  async fetchLatestApmPackageVersion() {
-    this.logger.debug(`Fetching latest APM package version`);
+  async fetchLatestPackageVersion(packageName: string) {
+    this.logger.debug(`Fetching latest ${packageName} package version`);
 
     const fetchPackageVersion = async ({ prerelease }: { prerelease: boolean }) => {
-      const url = `${this.getFleetApmPackagePath()}?prerelease=${prerelease}`;
+      const url = `${this.getFleetPackagePath(packageName)}?prerelease=${prerelease}`;
       this.logger.debug(`Fetching from URL: ${url}`);
 
       const response = await pRetry(
@@ -45,7 +36,7 @@ export class ApmSynthtraceKibanaClient {
             .catch((error) => {
               const statusCode = error instanceof KibanaClientHttpError ? error.statusCode : 0;
               throw new Error(
-                `Failed to fetch APM package version, received HTTP ${statusCode} and message: ${error.message}`
+                `Failed to fetch ${packageName} package version, received HTTP ${statusCode} and message: ${error.message}`
               );
             });
         },
@@ -53,7 +44,7 @@ export class ApmSynthtraceKibanaClient {
       );
 
       if (!response.item.latestVersion) {
-        throw new Error(`Failed to fetch APM package version`);
+        throw new Error(`Failed to fetch ${packageName} package version`);
       }
       return response.item.latestVersion;
     };
@@ -62,7 +53,7 @@ export class ApmSynthtraceKibanaClient {
       return await fetchPackageVersion({ prerelease: true });
     } catch (error) {
       this.logger.debug(
-        'Fetching latestes prerelease version failed, retrying with latest GA version'
+        'Fetching latest prerelease version failed, retrying with latest GA version'
       );
       const retryResult = await fetchPackageVersion({ prerelease: false });
 
@@ -70,13 +61,14 @@ export class ApmSynthtraceKibanaClient {
     }
   }
 
-  async installApmPackage(packageVersion?: string) {
-    this.logger.debug(`Installing APM package ${packageVersion}`);
+  async installPackage(packageName: string, packageVersion?: string) {
+    this.logger.debug(`Installing ${packageName} package ${packageVersion}`);
     if (!packageVersion) {
-      packageVersion = await this.fetchLatestApmPackageVersion();
+      packageVersion = await this.fetchLatestPackageVersion(packageName);
     }
 
-    const url = this.getFleetApmPackagePath(packageVersion);
+    const url = this.getFleetPackagePath(packageName, packageVersion);
+
     const response = await pRetry(
       async () => {
         const res = await this.kibanaClient
@@ -103,19 +95,20 @@ export class ApmSynthtraceKibanaClient {
       }
     );
 
-    if (!response.items) {
+    if (!response?.items) {
       throw new Error(`No installed assets received for APM package version ${packageVersion}`);
     }
 
-    this.logger.info(`Installed APM package ${packageVersion}`);
+    this.logger.info(`Installed ${packageName} package ${packageVersion}`);
     return { version: packageVersion };
   }
 
-  async uninstallApmPackage() {
-    this.logger.debug('Uninstalling APM package');
-    const latestApmPackageVersion = await this.fetchLatestApmPackageVersion();
+  async uninstallPackage(packageName: string) {
+    this.logger.debug(`Uninstalling ${packageName} package`);
+    const latestApmPackageVersion = await this.fetchLatestPackageVersion(packageName);
 
-    const url = this.getFleetApmPackagePath(latestApmPackageVersion);
+    const url = this.getFleetPackagePath(packageName, latestApmPackageVersion);
+
     const response = await pRetry(
       async () => {
         const res = await this.kibanaClient
@@ -136,7 +129,7 @@ export class ApmSynthtraceKibanaClient {
         retries: 5,
         onFailedAttempt: (error) => {
           this.logger.debug(
-            `APM package version ${latestApmPackageVersion} uninstallation failure. ${
+            `${packageName} package version ${latestApmPackageVersion} uninstallation failure. ${
               error.retriesLeft >= 1 ? 'Retrying' : 'Aborting'
             }`
           );
@@ -146,10 +139,10 @@ export class ApmSynthtraceKibanaClient {
 
     if (!response.items) {
       throw new Error(
-        `No uninstalled assets received for APM package version ${latestApmPackageVersion}`
+        `No uninstalled assets received for ${packageName} package version ${latestApmPackageVersion}`
       );
     }
 
-    this.logger.info(`Uninstalled APM package ${latestApmPackageVersion}`);
+    this.logger.info(`Uninstalled ${packageName} package ${latestApmPackageVersion}`);
   }
 }
