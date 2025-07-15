@@ -1952,6 +1952,8 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/accessibility/services.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/accessibility/apps/index.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @elastic/appex-qa
+/x-pack/platform/test/.gitignore @elastic/appex-qa
+/x-pack/solutions/**/test/.gitignore @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
