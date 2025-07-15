@@ -9,13 +9,12 @@ import { EuiBasicTable, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '
 import React, { useMemo } from 'react';
 import { sum } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { EntityType } from '../../../../../../common/search_strategy';
 import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
+import { EntityType, RiskScoreFields } from '../../../../../../common/search_strategy';
 import { ChartLabel } from '../../../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { DonutChart } from '../../../../../common/components/charts/donutchart';
 import { HeaderSection } from '../../../../../common/components/header_section';
@@ -100,14 +99,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
           title={TITLE}
           titleSize="s"
           outerDirection={'column'}
-        >
-          <SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.entityAnalytics}>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.tableTitle"
-              defaultMessage="View more in Risk Analytics"
-            />
-          </SecuritySolutionLinkAnchor>
-        </HeaderSection>
+        />
         {toggleStatus &&
           (isError ? (
             <div>
