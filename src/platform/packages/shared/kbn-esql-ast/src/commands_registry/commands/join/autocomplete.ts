@@ -66,8 +66,7 @@ export async function autocomplete(
     case 'index': {
       const indexNameInput = commandText.split(' ').pop() ?? '';
 
-      const isCreateCommandEnabled = (await callbacks?.getCurrentAppId?.()) === 'discover';
-
+      const isCreateCommandEnabled = context?.appId === 'discover';
       const joinSources = context?.joinSources;
 
       const suggestions: ISuggestionItem[] = [];
