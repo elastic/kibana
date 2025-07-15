@@ -21,10 +21,10 @@ export class ConversationsService {
   }
 
   async list({ agentId }: ConversationListOptions) {
-    const response = await this.http.post<ListConversationsResponse>('/api/chat/conversations', {
-      body: JSON.stringify({
-        agentId,
-      }),
+    const response = await this.http.get<ListConversationsResponse>('/api/chat/conversations', {
+      query: {
+        agent_id: agentId,
+      },
     });
     return response.results;
   }
