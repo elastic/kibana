@@ -33,6 +33,15 @@ export const multiFieldRT = rt.type({
   type: rt.string,
 });
 
+export const otelPropertyRT = rt.partial({
+  relation: rt.string,
+  stability: rt.string,
+  attribute: rt.string,
+  otlp_field: rt.string,
+  metric: rt.string,
+  note: rt.string,
+});
+
 const requiredBaseMetadataPlainRT = rt.type({
   name: rt.string,
 });
@@ -57,6 +66,7 @@ const optionalMetadataPlainRT = rt.partial({
   normalize: rt.array(rt.string),
   object_type: rt.string,
   original_fieldset: rt.string,
+  otel: rt.array(otelPropertyRT),
   output_format: rt.string,
   output_precision: rt.number,
   pattern: rt.string,
