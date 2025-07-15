@@ -32,7 +32,7 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
   handler: async (services): Promise<GetRelatedDashboardsResponse | IKibanaResponse> => {
     const { dependencies, params, request, response, context, logger } = services;
     const { alertId } = params.query;
-    const { ruleRegistry, dashboard } = dependencies;
+    const { ruleRegistry, dashboard, spaces } = dependencies;
     const { getContentClient } = dashboard;
     const dashboardClient = getContentClient()!.getForRequest<
       SavedObjectsFindResult<DashboardAttributes>
@@ -46,11 +46,14 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     const rulesClient = await ruleRegistry.alerting.getRulesClientWithRequest(request);
     const investigateAlertsClient = new InvestigateAlertsClient(alertsClient, rulesClient);
 
+    const spaceId =
+      (await spaces?.spacesService.getActiveSpace(request).then((space) => space?.id)) ?? '*';
     const dashboardParser = new RelatedDashboardsClient(
       logger,
       dashboardClient,
       investigateAlertsClient,
-      alertId
+      alertId,
+      spaceId
     );
     try {
       const { suggestedDashboards, linkedDashboards } =

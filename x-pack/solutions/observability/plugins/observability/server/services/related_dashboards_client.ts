@@ -33,7 +33,8 @@ export class RelatedDashboardsClient {
     private logger: Logger,
     private dashboardClient: IContentClient<Dashboard>,
     private alertsClient: InvestigateAlertsClient,
-    private alertId: string
+    private alertId: string,
+    private spaceId: string
   ) {}
 
   public async fetchRelatedDashboards(): Promise<{
@@ -121,7 +122,7 @@ export class RelatedDashboardsClient {
   }) {
     const dashboards = await this.dashboardClient.search(
       { limit: perPage, cursor: `${page}` },
-      { spaces: ['*'] }
+      { spaces: [this.spaceId] }
     );
     const {
       result: { hits },
