@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { TracksOverlays } from '@kbn/presentation-containers';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import React from 'react';
+import { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import { type UseEuiTheme } from '@elastic/eui';
-
+import { openLazyFlyout } from '@kbn/presentation-util';
 /**
  * Shared logic to mount the inline config panel
  * @param ConfigPanel
@@ -20,56 +17,45 @@ import { type UseEuiTheme } from '@elastic/eui';
  * @param uuid
  * @param container
  */
-export function mountInlinePanel(
-  InlinePanel: JSX.Element,
-  coreStart: CoreStart,
-  overlayTracker: TracksOverlays | undefined,
-  {
-    container,
-    dataTestSubj,
-    uuid,
-  }: {
+
+export const mountInlinePanel = async ({
+  core,
+  api,
+  loadContent,
+  options: { dataTestSubj, uuid, container } = {},
+}: {
+  core: CoreStart;
+  api?: unknown;
+  loadContent: ({
+    closeFlyout,
+  }?: {
+    closeFlyout: () => void;
+  }) => Promise<JSX.Element | null | void>;
+  uuid?: string;
+  options?: {
     dataTestSubj?: string;
     uuid?: string;
     container?: HTMLElement | null;
-  } = {}
-) {
-  const dataTestSubjFinal = dataTestSubj ?? 'customizeLens';
+  };
+}) => {
   if (container) {
-    ReactDOM.render(InlinePanel, container);
-  } else {
-    const handle = coreStart.overlays.openFlyout(
-      toMountPoint(
-        React.cloneElement(InlinePanel, {
-          closeFlyout: () => {
-            overlayTracker?.clearOverlays();
-            handle.close();
-          },
-        }),
-        coreStart
-      ),
-      {
-        className: 'lnsConfigPanel__overlay',
-        css: inlineFlyoutStyles,
-        size: 's',
-        'data-test-subj': dataTestSubjFinal,
-        type: 'push',
-        paddingSize: 'm',
-        maxWidth: 800,
-        hideCloseButton: true,
-        isResizable: true,
-        onClose: (overlayRef) => {
-          overlayTracker?.clearOverlays();
-          overlayRef.close();
-        },
-        outsideClickCloses: true,
-      }
-    );
-    if (uuid) {
-      overlayTracker?.openOverlay(handle, { focusedPanelId: uuid });
+    const component = await loadContent();
+    if (!component) {
+      throw new Error('Inline panel content is not available');
     }
+    return ReactDOM.render(component, container);
   }
-}
+  openLazyFlyout({
+    core,
+    parentApi: api,
+    loadContent,
+    flyoutProps: {
+      ...lensFlyoutProps,
+      'data-test-subj': dataTestSubj ?? 'customizeLens',
+    },
+    uuid,
+  });
+};
 
 // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
 const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
@@ -89,3 +75,11 @@ const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
     }
   }
 `;
+
+export const lensFlyoutProps: OverlayFlyoutOpenOptions & { triggerId?: string } = {
+  css: inlineFlyoutStyles,
+  'data-test-subj': 'customizeLens',
+  hideCloseButton: true,
+  isResizable: true,
+  outsideClickCloses: true,
+};
