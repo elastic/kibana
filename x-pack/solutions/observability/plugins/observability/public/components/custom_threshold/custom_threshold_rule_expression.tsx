@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -20,7 +19,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { ISearchSource, Query } from '@kbn/data-plugin/common';
+import deepEqual from 'fast-deep-equal';
+import { ISearchSource, Query, type SavedQuery } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewBase, type Filter } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
@@ -32,6 +32,7 @@ import {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { useKibana } from '../../utils/kibana_react';
@@ -43,7 +44,10 @@ import { MetricsExplorerFields, GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';
 
-const FILTER_TYPING_DEBOUNCE_MS = 500;
+const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
+  'pinFilter',
+  'disableFilter',
+];
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -89,6 +93,7 @@ export default function Expressions(props: Props) {
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
   const [paramsWarning, setParamsWarning] = useState<string>();
+  const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
     (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
       (!hasGroupBy && !!ruleParams.alertOnNoData)
@@ -247,21 +252,93 @@ export default function Expressions(props: Props) {
     [setRuleParams, ruleParams.criteria]
   );
 
-  const onFilterChange = useCallback(
-    ({ query }: { query?: Query }) => {
-      setParamsWarning(undefined);
+  // Saved query
+  const onSavedQueryUpdated = useCallback(
+    (newSavedQuery: SavedQuery) => {
+      setSavedQuery(newSavedQuery);
+      const newFilters = newSavedQuery.attributes.filters;
+      const newQuery = newSavedQuery.attributes.query;
+      if (newFilters || newQuery) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              filter: newFilters,
+              query: newQuery,
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
+
+  const onClearSavedQuery = () => {
+    setSavedQuery(undefined);
+    setRuleParams(
+      'searchConfiguration',
+      getSearchConfiguration(
+        { ...ruleParams.searchConfiguration, query: { language: 'kuery', query: '' } },
+        setParamsWarning
+      )
+    );
+  };
+
+  const onFilterUpdated = useCallback(
+    (filter: Filter[]) => {
       setRuleParams(
         'searchConfiguration',
-        getSearchConfiguration({ ...ruleParams.searchConfiguration, query }, setParamsWarning)
+        getSearchConfiguration(
+          {
+            ...ruleParams.searchConfiguration,
+            filter,
+          },
+          setParamsWarning
+        )
       );
     },
     [setRuleParams, ruleParams.searchConfiguration]
   );
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
+  const onQuerySubmit = useCallback(
+    ({ query: newQuery }: { query?: Query }) => {
+      setParamsWarning(undefined);
+      if (!deepEqual(newQuery, ruleParams.searchConfiguration.query)) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              query: { language: newQuery?.language ?? 'kuery', query: newQuery?.query ?? '' },
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
+
+  const onQueryChange = useCallback(
+    ({ query: newQuery }: { query?: Query }) => {
+      setParamsWarning(undefined);
+      if (!deepEqual(newQuery, ruleParams.searchConfiguration.query)) {
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...ruleParams.searchConfiguration,
+              query: newQuery ?? ruleParams.searchConfiguration.query,
+            },
+            setParamsWarning
+          )
+        );
+      }
+    },
+    [setRuleParams, ruleParams.searchConfiguration]
+  );
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
@@ -434,29 +511,24 @@ export default function Expressions(props: Props) {
         iconType="search"
         placeholder={placeHolder}
         indexPatterns={dataView ? [dataView] : undefined}
-        showQueryInput={true}
-        showQueryMenu={false}
-        showFilterBar={true}
+        allowSavingQueries
+        showQueryInput
+        showQueryMenu
+        showFilterBar
         showDatePicker={false}
         showSubmitButton={false}
         displayStyle="inPage"
-        onQueryChange={debouncedOnFilterChange}
-        onQuerySubmit={onFilterChange}
+        onQueryChange={onQueryChange}
+        onQuerySubmit={onQuerySubmit}
+        onClearSavedQuery={onClearSavedQuery}
+        onSavedQueryUpdated={onSavedQueryUpdated}
+        onSaved={onSavedQueryUpdated}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query}
         filters={ruleParams.searchConfiguration?.filter ?? EMPTY_FILTERS}
-        onFiltersUpdated={(filter) => {
-          setRuleParams(
-            'searchConfiguration',
-            getSearchConfiguration(
-              {
-                ...ruleParams.searchConfiguration,
-                filter,
-              },
-              setParamsWarning
-            )
-          );
-        }}
+        savedQuery={savedQuery}
+        onFiltersUpdated={onFilterUpdated}
+        hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
       />
       {errors.filterQuery && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
