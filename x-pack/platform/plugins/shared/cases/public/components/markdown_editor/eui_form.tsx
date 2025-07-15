@@ -94,7 +94,7 @@ export const MarkdownEditorForm = React.memo(
           >
             <CommentEditor
               ariaLabel={idAria}
-              data-test-subj={dataTestSubj}
+              data-test-subj={`${dataTestSubj}-markdown-editor`}
               editorId={id}
               disabledUiPlugins={disabledUiPlugins}
               field={field}
