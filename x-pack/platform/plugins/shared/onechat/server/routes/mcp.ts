@@ -19,7 +19,7 @@ const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic MCP Server
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
-const MCP_SERVER_PATH = '/api/mcp';
+const MCP_SERVER_PATH = '/api/chat/mcp';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });

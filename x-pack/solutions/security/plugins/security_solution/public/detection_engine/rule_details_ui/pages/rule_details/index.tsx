@@ -38,13 +38,12 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   RuleCustomizationsContextProvider,
   useRuleCustomizationsContext,
 } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import {
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
@@ -265,12 +264,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
     useSourcererDataView(SourcererScopeName.detections);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec: experimentalDataViewSpec, status } = useDataViewSpec(
-    SourcererScopeName.detections
-  );
-  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataViewSpec;
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
   const isLoadingIndexPattern = newDataViewPickerEnabled
     ? status !== 'ready'
     : oldIsLoadingIndexPattern;
@@ -647,7 +641,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
-            sourcererDataView={sourcererDataViewSpec}
+            sourcererDataView={oldSourcererDataViewSpec} // Can be removed after migration to new dataview picker
           />
         </FiltersGlobal>
         <RuleDetailsContextProvider>
@@ -817,7 +811,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <GroupedAlertsTable
                         accordionButtonContent={defaultGroupTitleRenderers}
                         accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                        dataViewSpec={sourcererDataViewSpec}
+                        dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
+                        dataView={experimentalDataView}
                         defaultFilters={alertMergedFilters}
                         defaultGroupingOptions={defaultGroupingOptions}
                         from={from}
