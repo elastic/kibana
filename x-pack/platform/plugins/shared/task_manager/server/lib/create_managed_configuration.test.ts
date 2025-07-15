@@ -422,6 +422,7 @@ describe('createManagedConfiguration()', () => {
       expect(subscription).toHaveBeenNthCalledWith(2, INTERVAL_AFTER_BLOCK_EXCEPTION);
       jest.advanceTimersByTime(INTERVAL_AFTER_BLOCK_EXCEPTION);
       expect(subscription).toHaveBeenCalledTimes(3);
+    });
 
     test('should decrease configuration back to normal incrementally after an error is emitted', async () => {
       const { subscription, errors$ } = setupScenario(100);
