@@ -103,6 +103,7 @@ class DataTableFormatClass extends Component<
                   })}
                   data-test-subj="filterForInspectorCellValue"
                   className="insDataTableFormat__filter"
+                  css={cellStyles.dataTableFilter}
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
                     const eventData = { table, column: columnIndex, row: rowIndex, value };
@@ -136,6 +137,7 @@ class DataTableFormatClass extends Component<
                     )}
                     data-test-subj="filterOutInspectorCellValue"
                     className="insDataTableFormat__filter"
+                    css={cellStyles.dataTableFilter}
                     onClick={() => {
                       const value = table.rows[rowIndex][column.id];
                       const eventData = { table, column: columnIndex, row: rowIndex, value };
@@ -204,25 +206,14 @@ class DataTableFormatClass extends Component<
     return (
       <EuiInMemoryTable
         tableLayout="auto"
-        className="insDataTableFormat__table eui-xScroll"
+        className="eui-xScroll"
         data-test-subj="inspectorTable"
         columns={columns}
         items={rows}
         sorting={sorting}
         pagination={pagination}
         onTableChange={onTableChange}
-        css={css`
-          // Set a min width on each column - you can use [data-test-subj] to target specific columns
-          .euiTableHeaderCell {
-            min-width: 100px;
-          }
-
-          // Make sure the pagination follows the scroll
-          > div:last-child {
-            position: sticky;
-            left: 0;
-          }
-        `}
+        css={tableStyles.table}
       />
     );
   }
@@ -233,3 +224,27 @@ export const DataTableFormat = withEuiTablePersist(DataTableFormatClass, {
   pageSizeOptions: PAGE_SIZE_OPTIONS,
   initialPageSize: 20,
 });
+
+const cellStyles = {
+  dataTableFilter: css({
+    opacity: 0,
+  }),
+};
+
+const tableStyles = {
+  table: css({
+    // Set a min width on each column
+    '.euiTableHeaderCell': {
+      minWidth: '100px',
+    },
+    // Make sure the pagination follows the scroll
+    '> div:last-child': {
+      position: 'sticky',
+      left: 0,
+    },
+    // Show filter buttons on row hover or focus
+    'tr:hover .insDataTableFormat__filter, .insDataTableFormat__filter:focus': {
+      opacity: 1,
+    },
+  }),
+};
