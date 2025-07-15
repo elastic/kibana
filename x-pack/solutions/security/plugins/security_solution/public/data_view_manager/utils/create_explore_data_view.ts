@@ -26,5 +26,6 @@ export const createExploreDataView = async (
     id: `${EXPLORE_DATA_VIEW_PREFIX}-${(await dependencies.spaces.getActiveSpace()).id}`,
     name: SECURITY_SOLUTION_EXPLORE_DATA_VIEW,
     title: exploreDataViewPattern,
+    managed: true,
   });
 };

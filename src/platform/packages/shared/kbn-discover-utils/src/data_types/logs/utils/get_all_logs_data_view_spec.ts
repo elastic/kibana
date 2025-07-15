@@ -22,4 +22,5 @@ export const getAllLogsDataViewSpec = ({
   }),
   title: allLogsIndexPattern,
   timeFieldName: '@timestamp',
+  managed: true,
 });

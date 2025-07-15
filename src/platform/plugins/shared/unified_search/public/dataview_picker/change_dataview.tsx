@@ -26,7 +26,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerProps } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
@@ -45,11 +45,16 @@ const mapDataViewListItem = (
   ...partial,
 });
 
-const mapAdHocDataView = (adHocDataView: DataView) =>
-  mapDataViewListItem(adHocDataView, { isAdhoc: true });
+const mapAdHocDataView = (adHocDataView: DataView) => {
+  if (adHocDataView.managed) {
+    return mapDataViewListItem(adHocDataView, { isManaged: true });
+  }
+  return mapDataViewListItem(adHocDataView, { isAdhoc: true });
+};
 
-const mapManagedDataView = (managedDataView: DataView) =>
-  mapDataViewListItem(managedDataView, { isManaged: true });
+const mapManagedDataView = (managedDataView: DataViewListItem) => {
+  return { ...managedDataView, isManaged: true };
+};
 
 const shrinkableContainerCss = css`
   min-width: 0;
@@ -59,7 +64,6 @@ export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
-  managedDataViews,
   savedDataViews,
   onChangeDataView,
   onAddField,
@@ -100,16 +104,16 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const savedDataViewRefs = savedDataViews
+      const availableDataViewRefs = savedDataViews
         ? savedDataViews
         : (await data.dataViews.getIdsWithTitle()) ?? [];
+      const savedDataViewRefs = availableDataViewRefs.filter((dataView) => !dataView.managed);
+      const managedDataViewRefs = savedDataViews?.filter((dataView) => dataView.managed === true).map(mapManagedDataView) ?? [];
       const adHocDataViewRefs = adHocDataViews?.map(mapAdHocDataView) ?? [];
-      const managedDataViewRefs = managedDataViews?.map(mapManagedDataView) ?? [];
-
       setDataViewsList([...savedDataViewRefs, ...adHocDataViewRefs, ...managedDataViewRefs]);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews, managedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
@@ -148,6 +152,18 @@ export function ChangeDataView({
       </EuiButtonEmpty>
     );
   };
+  const onDuplicate = useCallback(async () => {
+    const dataView = await dataViews.get(currentDataViewId!);
+    if (onEditDataView) {
+      dataViewEditor.openEditor({
+        editData: dataView,
+        onSave: (updatedDataView) => {
+          onEditDataView(updatedDataView);
+        },
+        allowAdHocDataView: true,
+      });
+    }
+  }, [currentDataViewId, dataViews, onEditDataView, dataViewEditor]);
 
   const items = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
@@ -179,6 +195,8 @@ export function ChangeDataView({
                   onSave: (updatedDataView) => {
                     onEditDataView(updatedDataView);
                   },
+                  onDuplicate,
+                  isEdit: true,
                   getDataViewHelpText,
                 });
               } else {

@@ -75,6 +75,10 @@ export interface SavedObjectCreateOptions {
    * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   initialNamespaces?: string[];
+  /**
+   * Whether the object is managed by the application.
+   */
+  managed?: boolean;
 }
 
 /** Saved Object search options - Pick and Omit to customize */
