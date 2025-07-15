@@ -70,9 +70,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 
   const setColorMapping = useCallback(
-    (colorMapping?: ColorMapping.Config) => {
+    (colorMapping?: ColorMapping.Config, partialState?: Partial<PieVisualizationState>) => {
       setLocalState({
         ...localState,
+        ...partialState,
         layers: localState.layers.map((layer) =>
           layer.layerId === currentLayer?.layerId
             ? {
@@ -124,10 +125,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
           isDarkMode={props.isDarkMode}
           panelRef={props.panelRef}
           palettes={props.palettes}
-          palette={props.state.palette}
+          palette={localState.palette}
           setPalette={(newPalette) => {
-            setLocalState({ ...props.state, palette: newPalette });
-            setColorMapping();
+            setLocalState({ ...localState, palette: newPalette });
+            setColorMapping(undefined, { palette: newPalette });
           }}
           colorMapping={currentLayer.colorMapping}
           setColorMapping={setColorMapping}
@@ -149,7 +150,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             columnId: props.accessor,
             paletteService: props.paletteService,
             datasource: props.datasource,
-            palette: props.state.palette,
+            palette: localState.palette,
           })}
           disabledMessage={colorPickerDisabledMessage}
           setConfig={setConfig}
