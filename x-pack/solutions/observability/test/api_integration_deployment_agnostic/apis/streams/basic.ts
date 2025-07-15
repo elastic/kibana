@@ -64,7 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   }
 
-  describe.only('Basic functionality', () => {
+  describe('Basic functionality', () => {
     async function getEnabled() {
       const response = await viewerApiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body.enabled;
