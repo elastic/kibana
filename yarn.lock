@@ -5257,10 +5257,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations@link:x-pack/solutions/observability/packages/kbn-custom-integrations":
-  version "0.0.0"
-  uid ""
-
 "@kbn/cypress-config@link:src/platform/packages/shared/kbn-cypress-config":
   version "0.0.0"
   uid ""

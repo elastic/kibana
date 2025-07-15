@@ -15,7 +15,6 @@
     "contentManagement": "src/platform/packages/shared/content-management",
     "core": ["src/core"],
     "customIntegrations": "src/platform/plugins/shared/custom_integrations",
-    "customIntegrationsPackage": "x-pack/solutions/observability/packages/kbn-custom-integrations",
     "dashboard": "src/platform/plugins/shared/dashboard",
     "cloud": "src/platform/packages/shared/cloud",
     "domDragDrop": "src/platform/packages/shared/kbn-dom-drag-drop",
