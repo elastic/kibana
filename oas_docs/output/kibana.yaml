@@ -40058,6 +40058,7 @@ paths:
                   - item
       summary: Get space settings
       tags: []
+      x-state: Generally available; added in 9.1.0
     put:
       description: '[Required authorization] Route required privileges: fleet-settings-all.'
       operationId: put-fleet-space-settings
@@ -40104,6 +40105,7 @@ paths:
                   - item
       summary: Create space settings
       tags: []
+      x-state: Generally available; added in 9.1.0
   /api/fleet/uninstall_tokens:
     get:
       description: 'List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
