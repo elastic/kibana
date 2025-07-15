@@ -11,10 +11,13 @@ const _allowedExperimentalValues = {
   showExperimentalShipperOptions: false,
   useSpaceAwareness: false,
   enableAutomaticAgentUpgrades: true,
-  enableSyncIntegrationsOnRemote: false,
+  enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: false,
-  installedIntegrationsTabularUI: false,
-  enabledUpgradeAgentlessDeploymentsTask: false,
+  installedIntegrationsTabularUI: true,
+  enabledUpgradeAgentlessDeploymentsTask: true,
+  enableAgentMigrations: false,
+  enablePackageRollback: false,
+  enableAutoInstallContentPackages: false,
 };
 
 /**

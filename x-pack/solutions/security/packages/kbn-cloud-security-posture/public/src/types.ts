@@ -85,7 +85,7 @@ export interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-interface BaseFlyoutProps {
+interface BaseMisconfigurationFlyoutProps {
   ruleId: string;
   resourceId: string;
 }
@@ -105,12 +105,12 @@ interface NonPreviewModeProps {
 }
 export type FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview = FlyoutPanelProps & {
   id: 'findings-misconfiguration-panel';
-  params: BaseFlyoutProps & NonPreviewModeProps;
+  params: BaseMisconfigurationFlyoutProps & NonPreviewModeProps;
 };
 
 export type FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = FlyoutPanelProps & {
   id: 'findings-misconfiguration-panel-preview';
-  params: BaseFlyoutProps & PreviewModeProps;
+  params: BaseMisconfigurationFlyoutProps & PreviewModeProps;
 };
 
 export type FindingsMisconfigurationPanelExpandableFlyoutProps =
@@ -143,10 +143,6 @@ export interface FindingVulnerabilityFlyoutProps extends Record<string, unknown>
   packageVersion: string | string[];
   eventId: string;
 }
-export interface FindingVulnerabilityPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'findings-vulnerability-panel';
-  params: FindingVulnerabilityFlyoutProps;
-}
 
 export interface FindingsVulnerabilityFlyoutHeaderProps {
   finding: CspVulnerabilityFinding;
@@ -154,6 +150,7 @@ export interface FindingsVulnerabilityFlyoutHeaderProps {
 
 export interface FindingsVulnerabilityFlyoutContentProps {
   finding: CspVulnerabilityFinding;
+  isPreviewMode?: boolean;
 }
 
 export interface FindingsVulnerabilityFlyoutFooterProps {
@@ -163,4 +160,27 @@ export interface FindingsVulnerabilityFlyoutFooterProps {
 export interface FindingVulnerabilityFullFlyoutContentProps {
   finding: CspVulnerabilityFinding;
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
+  isPreviewMode?: boolean;
 }
+
+interface BaseVulnerabilityFlyoutProps {
+  vulnerabilityId: string | string[];
+  resourceId?: string;
+  packageName: string | string[];
+  packageVersion: string | string[];
+  eventId?: string;
+}
+
+export type FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview = FlyoutPanelProps & {
+  id: 'findings-vulnerability-panel';
+  params: BaseVulnerabilityFlyoutProps & NonPreviewModeProps;
+};
+
+export type FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = FlyoutPanelProps & {
+  id: 'findings-vulnerability-panel-preview';
+  params: BaseVulnerabilityFlyoutProps & PreviewModeProps;
+};
+
+export type FindingsVulnerabilityPanelExpandableFlyoutProps =
+  | FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview
+  | FindingsVulnerabilityPanelExpandableFlyoutPropsPreview;

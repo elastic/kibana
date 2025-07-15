@@ -28,13 +28,16 @@ import {
   createRuntimeStateManager,
   createTabActionInjector,
   selectTab,
+  internalStateActions,
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
+import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
 let internalState: InternalStateStore;
 let savedSearchState: DiscoverSavedSearchContainer;
+let tabsStorageManager: TabsStorageManager;
 let getCurrentTab: () => TabState;
 
 describe('Test discover app state container', () => {
@@ -46,12 +49,20 @@ describe('Test discover app state container', () => {
       history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });
+    tabsStorageManager = createTabsStorageManager({
+      urlStateStorage: stateStorage,
+      storage: discoverServiceMock.storage,
+    });
     internalState = createInternalStateStore({
       services: discoverServiceMock,
       customizationContext: mockCustomizationContext,
       runtimeStateManager: createRuntimeStateManager(),
       urlStateStorage: stateStorage,
+      tabsStorageManager,
     });
+    internalState.dispatch(
+      internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    );
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
@@ -286,12 +297,14 @@ describe('Test discover app state container', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
+        hideChart: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -303,12 +316,14 @@ describe('Test discover app state container', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: true,
         rowHeight: true,
         breakdownField: true,
       });
@@ -320,13 +335,34 @@ describe('Test discover app state container', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
+        hideChart: true,
         rowHeight: false,
+        breakdownField: true,
+      });
+    });
+
+    it('should call setResetDefaultProfileState correctly with initial hide chart', () => {
+      const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
+      stateStorageGetSpy.mockReturnValue({ hideChart: true });
+      const state = getStateContainer();
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: false,
+        hideChart: false,
+        rowHeight: false,
+        breakdownField: false,
+      });
+      state.initAndSync();
+      expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
+        columns: true,
+        hideChart: false,
+        rowHeight: true,
         breakdownField: true,
       });
     });
@@ -343,12 +379,14 @@ describe('Test discover app state container', () => {
       const state = getStateContainer();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
       expect(omit(getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: false,
+        hideChart: false,
         rowHeight: false,
         breakdownField: false,
       });

@@ -46,6 +46,8 @@ interface Options {
   groupBy?: string[];
 }
 
+const RANGE_DURATION_24HOURS_LIMIT = 24 * 60 * 60 * 1000 + 60 * 1000; // 24 hours and 1min in milliseconds
+
 export class GetPreviewData {
   constructor(
     private esClient: ElasticsearchClient,
@@ -838,7 +840,7 @@ export class GetPreviewData {
       // they've breached the threshold.
       const rangeDuration = moment(params.range.to).diff(params.range.from, 'ms');
       const bucketSize =
-        rangeDuration <= 86_400_000 && params.objective?.timesliceWindow
+        rangeDuration <= RANGE_DURATION_24HOURS_LIMIT && params.objective?.timesliceWindow
           ? params.objective.timesliceWindow.asMinutes()
           : Math.max(
               calculateAuto.near(100, moment.duration(rangeDuration, 'ms'))?.asMinutes() ?? 0,

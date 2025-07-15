@@ -44,7 +44,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
           <EuiIconTip
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             data-test-subj="otherFieldsHelpTooltip"
             aria-label={i18n.ADDITIONAL_FIELDS_HELP}

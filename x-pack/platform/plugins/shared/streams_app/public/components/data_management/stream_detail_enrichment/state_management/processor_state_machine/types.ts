@@ -7,12 +7,14 @@
 
 import { ProcessorDefinition } from '@kbn/streams-schema';
 import { ActorRef, Snapshot } from 'xstate5';
+import { DraftGrokExpression } from '@kbn/grok-ui';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type ProcessorToParentEvent =
   | { type: 'processor.change'; id: string }
   | { type: 'processor.delete'; id: string }
-  | { type: 'processor.stage' };
+  | { type: 'processor.stage' }
+  | { type: 'processor.update' };
 
 export interface ProcessorInput {
   parentRef: ProcessorParentActor;
@@ -22,17 +24,29 @@ export interface ProcessorInput {
 
 export type ProcessorParentActor = ActorRef<Snapshot<unknown>, ProcessorToParentEvent>;
 
+export interface GrokProcessorResources {
+  grokExpressions: DraftGrokExpression[];
+}
+
+export type ProcessorResources = GrokProcessorResources;
+
 export interface ProcessorContext {
   parentRef: ProcessorParentActor;
   previousProcessor: ProcessorDefinitionWithUIAttributes;
   processor: ProcessorDefinitionWithUIAttributes;
+  // Additional resources to interact with the processor, these aren't persisted but facilitate certain UI functionality.
+  resources?: ProcessorResources;
   isNew: boolean;
   isUpdated?: boolean;
 }
 
 export type ProcessorEvent =
   | { type: 'processor.cancel' }
-  | { type: 'processor.change'; processor: ProcessorDefinition }
+  | {
+      type: 'processor.change';
+      processor: ProcessorDefinition;
+      resources?: ProcessorResources;
+    }
   | { type: 'processor.delete' }
   | { type: 'processor.edit' }
   | { type: 'processor.stage' }

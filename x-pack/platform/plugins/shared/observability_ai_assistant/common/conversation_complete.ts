@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ServerSentEventBase } from '@kbn/sse-utils';
-import { type Message } from './types';
+import { DeanonymizationInput, DeanonymizationOutput, type Message } from './types';
 
 export enum StreamingChatResponseEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
@@ -30,6 +30,8 @@ type BaseChatCompletionEvent<TType extends StreamingChatResponseEventType> = Ser
         arguments?: string;
       };
     };
+    deanonymized_input?: DeanonymizationInput;
+    deanonymized_output?: DeanonymizationOutput;
   }
 >;
 
@@ -64,7 +66,10 @@ export type ConversationUpdateEvent = ServerSentEventBase<
 export type MessageAddEvent = ServerSentEventBase<
   StreamingChatResponseEventType.MessageAdd,
   { message: Message; id: string }
->;
+> & {
+  deanonymized_input?: DeanonymizationInput;
+  deanonymized_output?: DeanonymizationOutput;
+};
 
 export type ChatCompletionErrorEvent = ServerSentEventBase<
   StreamingChatResponseEventType.ChatCompletionError,

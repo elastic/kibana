@@ -1,48 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FeatureProperties should render 1`] = `
-<div
-  className="mapFeatureTooltip_tableWrapper"
+<EmotionCssPropInternal
+  __EMOTION_TYPE_PLEASE_DO_NOT_USE__="table"
+  className="eui-yScrollWithShadows"
 >
-  <table
-    className="eui-yScrollWithShadows mapFeatureTooltip_table"
-  >
-    <tbody>
-      <tr
-        className="mapFeatureTooltip_row"
-        key="prop1"
+  <tbody>
+    <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
+      key="prop1"
+    >
+      <td
+        className="mapFeatureTooltip__propertyLabel"
       >
-        <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
-        >
-          prop1
-        </td>
-        <td
-          className="eui-textBreakWord"
-        >
-          foobar1
-        </td>
-        <td />
-      </tr>
-      <tr
-        className="mapFeatureTooltip_row"
-        key="prop2"
+        prop1
+      </td>
+      <td>
+        foobar1
+      </td>
+      <td />
+    </MapFeatureTooltipRow>
+    <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
+      key="prop2"
+    >
+      <td
+        className="mapFeatureTooltip__propertyLabel"
       >
-        <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
-        >
-          prop2
-        </td>
-        <td
-          className="eui-textBreakWord"
-        >
-          foobar2
-        </td>
-        <td />
-      </tr>
-    </tbody>
-  </table>
-</div>
+        prop2
+      </td>
+      <td>
+        foobar2
+      </td>
+      <td />
+    </MapFeatureTooltipRow>
+  </tbody>
+</EmotionCssPropInternal>
 `;
 
 exports[`FeatureProperties should show error message if unable to load tooltip content 1`] = `
@@ -59,28 +52,77 @@ exports[`FeatureProperties should show error message if unable to load tooltip c
 `;
 
 exports[`FeatureProperties should show filter button for filterable properties 1`] = `
-<div
-  className="mapFeatureTooltip_tableWrapper"
+<EmotionCssPropInternal
+  __EMOTION_TYPE_PLEASE_DO_NOT_USE__="table"
+  className="eui-yScrollWithShadows"
 >
-  <table
-    className="eui-yScrollWithShadows mapFeatureTooltip_table"
-  >
-    <tbody>
-      <tr
-        className="mapFeatureTooltip_row"
-        key="prop1"
+  <tbody>
+    <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
+      key="prop1"
+    >
+      <td
+        className="mapFeatureTooltip__propertyLabel"
       >
-        <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
+        prop1
+      </td>
+      <td>
+        foobar1
+      </td>
+      <td>
+        <EuiButtonEmpty
+          aria-label="Filter on property"
+          data-test-subj="mapTooltipCreateFilterButton"
+          onClick={[Function]}
+          size="xs"
+          title="Filter on property"
         >
-          prop1
-        </td>
-        <td
-          className="eui-textBreakWord"
-        >
-          foobar1
-        </td>
-        <td>
+          <EuiIcon
+            type="filter"
+          />
+        </EuiButtonEmpty>
+      </td>
+    </MapFeatureTooltipRow>
+    <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
+      key="prop2"
+    >
+      <td
+        className="mapFeatureTooltip__propertyLabel"
+      >
+        prop2
+      </td>
+      <td>
+        foobar2
+      </td>
+      <td />
+    </MapFeatureTooltipRow>
+  </tbody>
+</EmotionCssPropInternal>
+`;
+
+exports[`FeatureProperties should show view actions button when there are available actions 1`] = `
+<EmotionCssPropInternal
+  __EMOTION_TYPE_PLEASE_DO_NOT_USE__="table"
+  className="eui-yScrollWithShadows"
+>
+  <tbody>
+    <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
+      key="prop1"
+    >
+      <td
+        className="mapFeatureTooltip__propertyLabel"
+      >
+        prop1
+      </td>
+      <td>
+        foobar1
+      </td>
+      <td
+        className="mapFeatureTooltip_actionsRow"
+      >
+        <span>
           <EuiButtonEmpty
             aria-label="Filter on property"
             data-test-subj="mapTooltipCreateFilterButton"
@@ -92,97 +134,34 @@ exports[`FeatureProperties should show filter button for filterable properties 1
               type="filter"
             />
           </EuiButtonEmpty>
-        </td>
-      </tr>
-      <tr
-        className="mapFeatureTooltip_row"
-        key="prop2"
+          <EuiButtonEmpty
+            aria-label="View filter actions"
+            data-test-subj="mapTooltipMoreActionsButton"
+            onClick={[Function]}
+            size="xs"
+            title="View filter actions"
+          >
+            <EuiIcon
+              type="arrowRight"
+            />
+          </EuiButtonEmpty>
+        </span>
+      </td>
+    </MapFeatureTooltipRow>
+    <MapFeatureTooltipRow
+      className="mapFeatureTooltip_row"
+      key="prop2"
+    >
+      <td
+        className="mapFeatureTooltip__propertyLabel"
       >
-        <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
-        >
-          prop2
-        </td>
-        <td
-          className="eui-textBreakWord"
-        >
-          foobar2
-        </td>
-        <td />
-      </tr>
-    </tbody>
-  </table>
-</div>
-`;
-
-exports[`FeatureProperties should show view actions button when there are available actions 1`] = `
-<div
-  className="mapFeatureTooltip_tableWrapper"
->
-  <table
-    className="eui-yScrollWithShadows mapFeatureTooltip_table"
-  >
-    <tbody>
-      <tr
-        className="mapFeatureTooltip_row"
-        key="prop1"
-      >
-        <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
-        >
-          prop1
-        </td>
-        <td
-          className="eui-textBreakWord"
-        >
-          foobar1
-        </td>
-        <td
-          className="mapFeatureTooltip_actionsRow"
-        >
-          <span>
-            <EuiButtonEmpty
-              aria-label="Filter on property"
-              data-test-subj="mapTooltipCreateFilterButton"
-              onClick={[Function]}
-              size="xs"
-              title="Filter on property"
-            >
-              <EuiIcon
-                type="filter"
-              />
-            </EuiButtonEmpty>
-            <EuiButtonEmpty
-              aria-label="View filter actions"
-              data-test-subj="mapTooltipMoreActionsButton"
-              onClick={[Function]}
-              size="xs"
-              title="View filter actions"
-            >
-              <EuiIcon
-                type="arrowRight"
-              />
-            </EuiButtonEmpty>
-          </span>
-        </td>
-      </tr>
-      <tr
-        className="mapFeatureTooltip_row"
-        key="prop2"
-      >
-        <td
-          className="eui-textBreakWord mapFeatureTooltip__propertyLabel"
-        >
-          prop2
-        </td>
-        <td
-          className="eui-textBreakWord"
-        >
-          foobar2
-        </td>
-        <td />
-      </tr>
-    </tbody>
-  </table>
-</div>
+        prop2
+      </td>
+      <td>
+        foobar2
+      </td>
+      <td />
+    </MapFeatureTooltipRow>
+  </tbody>
+</EmotionCssPropInternal>
 `;

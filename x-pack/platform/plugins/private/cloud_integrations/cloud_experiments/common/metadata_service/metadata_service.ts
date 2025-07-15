@@ -67,6 +67,11 @@ export interface FlatMetadata {
    */
   project_type?: string;
   /**
+   * The Serverless product tier (only available on serverless for selected project types)
+   * @group Kibana Static Values
+   */
+  product_tier?: string;
+  /**
    * Whether this is a canary or non-canary project/deployment
    * @group Kibana Static Values
    */
@@ -142,6 +147,7 @@ export class MetadataService {
               build_sha: metadata.build_sha,
               build_sha_short: metadata.build_sha_short,
               project_type: metadata.project_type,
+              product_tier: metadata.product_tier,
               orchestrator_target: metadata.orchestrator_target,
               has_data: metadata.has_data,
             }),
@@ -181,7 +187,7 @@ export class MetadataService {
    * Schedules a timer that calls `fn` to update the {@link FlatMetadata} until `untilFn` returns true.
    * @param fn Method to calculate the dynamic metadata.
    * @param untilFn Method that returns true when the scheduler should stop calling fn (potentially because the dynamic value is not expected to change anymore).
-   * @private
+   * @internal
    */
   private scheduleUntil(
     fn: () => Partial<FlatMetadata> | Promise<Partial<FlatMetadata>>,

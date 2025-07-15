@@ -11,6 +11,8 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 
 import type { BuildFlavor } from '@kbn/config';
 import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
+import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
+import { PadPackageInstallationClient } from './lib/entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
@@ -21,7 +23,6 @@ import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { getApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
@@ -38,6 +39,10 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from './types';
 import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
+import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
+import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_analytics/entity_store/auth/api_key';
+import { PrivilegeMonitoringApiKeyType } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
+import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 
 export interface IRequestContextFactory {
   create(
@@ -111,7 +116,17 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getAuditLogger = () => security?.audit.asScoped(request);
 
     const getEntityStoreApiKeyManager = () =>
-      getApiKeyManager({
+      getApiKeyManagerEntityStore({
+        core: coreStart,
+        logger: options.logger,
+        security: startPlugins.security,
+        encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+        request,
+        namespace: getSpaceId(),
+      });
+
+    const getPrivilegedUserMonitoringApiKeyManager = () =>
+      getApiKeyManagerPrivilegedUserMonitoring({
         core: coreStart,
         logger: options.logger,
         security: startPlugins.security,
@@ -159,6 +174,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getDataViewsService: () => dataViewsService,
 
       getEntityStoreApiKeyManager,
+
+      getPrivilegedUserMonitoringApiKeyManager,
 
       getProductFeatureService: () => productFeaturesService,
 
@@ -255,17 +272,43 @@ export class RequestContextFactory implements IRequestContextFactory {
           })
       ),
       getPrivilegeMonitoringDataClient: memoize(() => {
-        // TODO:add soClient with ApiKeyType as with getEntityStoreDataClient
+        const soClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [
+            PrivilegeMonitoringApiKeyType.name,
+            monitoringEntitySourceType.name,
+          ],
+        });
+
         return new PrivilegeMonitoringDataClient({
           logger: options.logger,
           clusterClient: coreContext.elasticsearch.client,
           namespace: getSpaceId(),
-          soClient: coreContext.savedObjects.client,
+          soClient,
           taskManager: startPlugins.taskManager,
+          apiKeyManager: getPrivilegedUserMonitoringApiKeyManager(),
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
-          // TODO: add apiKeyManager
+        });
+      }),
+      getMonitoringEntitySourceDataClient: memoize(() => {
+        const soClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [monitoringEntitySourceType.name],
+        });
+        return new MonitoringEntitySourceDataClient({
+          logger: options.logger,
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          soClient,
+        });
+      }),
+      getPadPackageInstallationClient: memoize(() => {
+        return new PadPackageInstallationClient({
+          clusterClient: coreContext.elasticsearch.client,
+          soClient: coreContext.savedObjects.client,
+          logger: options.logger,
+          namespace: getSpaceId(),
+          dataViewsService,
         });
       }),
       getEntityStoreDataClient: memoize(() => {
@@ -304,6 +347,14 @@ export class RequestContextFactory implements IRequestContextFactory {
             uiSettingsClient: coreContext.uiSettings.client,
           })
       ),
+      getMlAuthz: memoize(() => {
+        return buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
+        });
+      }),
     };
   }
 }

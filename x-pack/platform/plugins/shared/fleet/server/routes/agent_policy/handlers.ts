@@ -17,7 +17,12 @@ import { inputsFormat } from '../../../common/constants';
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
+import {
+  appContextService,
+  agentPolicyService,
+  packagePolicyService,
+  licenseService,
+} from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import {
   AGENTS_PREFIX,
@@ -310,6 +315,12 @@ export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
 
   const agentClient = fleetContext.agentClient.asCurrentUser;
 
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError(
+      'Auto-upgrade agents feature requires at least Enterprise license'
+    );
+  }
+
   const body = await getAutoUpgradeAgentsStatus(agentClient, request.params.agentPolicyId);
   return response.ok({
     body,
@@ -328,6 +339,8 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const monitoringEnabled = request.body.monitoring_enabled;
+  const logger = appContextService.getLogger().get('httpCreateAgentPolicyHandler');
+
   const {
     has_fleet_server: hasFleetServer,
     force,
@@ -337,9 +350,13 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
+  logger.debug(`Creating agent policy [${newPolicy.name}]`);
+
   try {
     let authorizedSpaces: string[] | undefined;
     if (spaceIds?.length) {
+      logger.debug(`Checking privileges for spaces [${spaceIds.join(', ')}] `);
+
       authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(request, context, spaceIds);
       for (const requestedSpaceId of spaceIds) {
         if (!authorizedSpaces.includes(requestedSpaceId)) {
@@ -401,7 +418,7 @@ export const createAgentAndPackagePoliciesHandler: FleetRequestHandler<
   TypeOf<typeof CreateAgentAndPackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const logger = appContextService.getLogger();
+  const logger = appContextService.getLogger().get('httpCreateAgentAndPackagePoliciesHandler');
   logger.debug('Creating agent and package policies');
 
   // Try to create the agent policy
@@ -510,6 +527,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.query>,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
+  const logger = appContextService.getLogger().get('httpUpdateAgentPolicyHandler');
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -518,7 +536,11 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
 
   let spaceId = fleetContext.spaceId;
 
+  logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
+
   try {
+    const requestSpaceId = spaceId;
+
     if (spaceIds?.length) {
       const authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(
         request,
@@ -530,17 +552,21 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
-        options: { force },
+        options: { force, validateUniqueName: true },
       });
 
       spaceId = spaceIds[0];
+
+      logger.debug(
+        `spaceId now set to [${spaceId}] for updating agent policy [${request.params.agentPolicyId}]`
+      );
     }
     const agentPolicy = await agentPolicyService.update(
       appContextService.getInternalUserSOClientForSpaceId(spaceId),
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, bumpRevision, user, spaceId }
+      { force, bumpRevision, user, spaceId, requestSpaceId }
     );
 
     let item: any = agentPolicy;

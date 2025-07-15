@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../common/lib/integrations/components/integration_card_grid_tabs';
+import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../common/lib/integrations/components/security_integrations';
 import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
 import type { StartServices } from '../../../../../types';
 import type { OnboardingCardCheckComplete } from '../../../../types';

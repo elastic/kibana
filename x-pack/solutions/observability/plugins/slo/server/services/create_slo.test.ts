@@ -210,9 +210,7 @@ describe('CreateSLO', () => {
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
 
-      expect(mockSummaryTransformManager.stop).toHaveBeenCalledTimes(0);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledTimes(1);
-      expect(mockTransformManager.stop).toHaveBeenCalledTimes(0);
       expect(mockTransformManager.uninstall).toHaveBeenCalledTimes(1);
     });
 
@@ -227,14 +225,11 @@ describe('CreateSLO', () => {
       );
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
-
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
     });
 
     it('rollbacks completed operations when create temporary document fails', async () => {
@@ -248,12 +243,10 @@ describe('CreateSLO', () => {
       );
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
-      expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
       expect(
         mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
       ).toHaveBeenCalledTimes(2);
-      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
     });
   });

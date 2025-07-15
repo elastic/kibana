@@ -56,6 +56,10 @@ export const archiveMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Archive a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
       },
     },
     router.handleLegacyErrors(

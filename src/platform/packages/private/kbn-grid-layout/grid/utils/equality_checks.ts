@@ -62,6 +62,7 @@ export const isLayoutEqual = (a: GridLayoutData, b: GridLayoutData) => {
   for (const key of keys) {
     const widgetA = a[key];
     const widgetB = b[key];
+    if (!widgetA || !widgetB) return widgetA === widgetB;
 
     if (widgetA.type === 'panel' && widgetB.type === 'panel') {
       isEqual = isGridDataEqual(widgetA, widgetB);

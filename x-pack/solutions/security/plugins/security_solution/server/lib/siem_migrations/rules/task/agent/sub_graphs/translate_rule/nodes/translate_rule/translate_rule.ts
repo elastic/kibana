@@ -28,7 +28,6 @@ export const getTranslateRuleNode = ({
     const indexPatterns =
       state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
       'logs-*';
-    const integrationId = state.integration?.id || '';
 
     const splunkRule = {
       title: state.original_rule.title,
@@ -57,11 +56,11 @@ export const getTranslateRuleNode = ({
     return {
       comments: [generateAssistantComment(cleanMarkdown(translationSummary))],
       elastic_rule: {
-        integration_ids: [integrationId],
         query: esqlQuery,
         query_language: 'esql',
         risk_score: getElasticRiskScoreFromOriginalRule(state.original_rule),
         severity: getElasticSeverityFromOriginalRule(state.original_rule),
+        ...(state.integration?.id && { integration_ids: [state.integration.id] }),
       },
     };
   };

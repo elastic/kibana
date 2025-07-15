@@ -25,8 +25,10 @@ import type {
   CrowdstrikeGetAgentOnlineStatusResponse,
   RelaxedCrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
+  CrowdstrikeGetScriptsResponse,
 } from '../../../common/crowdstrike/types';
 import type { CrowdstrikeGetTokenResponseSchema } from '../../../common/crowdstrike/schema';
+import { CrowdstrikeGetScriptsResponseSchema } from '../../../common/crowdstrike/schema';
 import {
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
@@ -34,7 +36,6 @@ import {
   RelaxedCrowdstrikeBaseApiResponseSchema,
   CrowdstrikeRTRCommandParamsSchema,
   CrowdstrikeExecuteRTRResponseSchema,
-  CrowdstrikeGetScriptsParamsSchema,
   CrowdstrikeApiDoNotValidateResponsesSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
@@ -76,7 +77,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     batchExecuteRTR: string;
     batchActiveResponderExecuteRTR: string;
     batchAdminExecuteRTR: string;
-    getRTRCloudScriptsDetails: string;
+    getRTRCloudScripts: string;
   };
 
   constructor(
@@ -95,7 +96,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       batchExecuteRTR: `${this.config.url}/real-time-response/combined/batch-command/v1`,
       batchActiveResponderExecuteRTR: `${this.config.url}/real-time-response/combined/batch-active-responder-command/v1`,
       batchAdminExecuteRTR: `${this.config.url}/real-time-response/combined/batch-admin-command/v1`,
-      getRTRCloudScriptsDetails: `${this.config.url}/real-time-response/entities/scripts/v1`,
+      getRTRCloudScripts: `${this.config.url}/real-time-response/entities/scripts/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -146,11 +147,10 @@ export class CrowdstrikeConnector extends SubActionConnector<
         method: 'batchAdminExecuteRTR',
         schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
       });
-      // temporary to fetch scripts and help testing
       this.registerSubAction({
         name: SUB_ACTION.GET_RTR_CLOUD_SCRIPTS,
         method: 'getRTRCloudScripts',
-        schema: CrowdstrikeGetScriptsParamsSchema,
+        schema: CrowdstrikeRTRCommandParamsSchema, // Empty schema - this request do not have any parameters
       });
     }
   }
@@ -371,18 +371,16 @@ export class CrowdstrikeConnector extends SubActionConnector<
     );
   }
 
-  // TODO: for now just for testing purposes, will be a part of a following PR
   public async getRTRCloudScripts(
-    payload: CrowdstrikeGetAgentsParams,
+    payload: {},
     connectorUsageCollector: ConnectorUsageCollector
-  ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
-    // @ts-expect-error will be a part of the next PR
-    return this.crowdstrikeApiRequest(
+  ): Promise<CrowdstrikeGetScriptsResponse> {
+    return await this.crowdstrikeApiRequest(
       {
-        url: this.urls.getRTRCloudScriptsDetails,
+        url: this.urls.getRTRCloudScripts,
         method: 'GET',
         paramsSerializer,
-        responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+        responseSchema: CrowdstrikeGetScriptsResponseSchema,
       },
       connectorUsageCollector
     );

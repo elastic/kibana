@@ -68,6 +68,7 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
           borderRadius: euiTheme.border.radius.medium,
         },
       }}
+      data-test-subj="systemMessage"
     />
   );
 };

@@ -11,7 +11,7 @@ import { Logger } from '@kbn/logging';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { BedrockRuntimeClient } from './bedrock_runtime_client';
-import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../../utils/bedrock';
+import { DEFAULT_BEDROCK_REGION } from '../../utils/bedrock';
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -39,7 +39,8 @@ export class ActionsClientChatBedrockConverse extends ChatBedrockConverse {
     super({
       ...(fields ?? {}),
       credentials: { accessKeyId: '', secretAccessKey: '' },
-      model: fields?.model ?? DEFAULT_BEDROCK_MODEL,
+      // if no model is passed in the body, the connector is preconfigured and the model needs to be set on the server
+      model: fields?.model ?? 'preconfigured',
       region: DEFAULT_BEDROCK_REGION,
     });
     this.client = new BedrockRuntimeClient({

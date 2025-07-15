@@ -34,9 +34,11 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { TABS_ENABLED } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
-import { disconnectTab } from './tabs';
+import { disconnectTab, clearAllTabs } from './tabs';
+import { selectTab } from '../selectors';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
@@ -44,6 +46,7 @@ export interface InitializeSessionParams {
   discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
+  shouldClearAllTabs: boolean | undefined;
 }
 
 export const initializeSession: InternalStateThunkActionCreator<
@@ -58,25 +61,37 @@ export const initializeSession: InternalStateThunkActionCreator<
       discoverSessionId,
       dataViewSpec,
       defaultUrlState,
+      shouldClearAllTabs,
     },
   }) =>
   async (
     dispatch,
     getState,
-    { services, customizationContext, runtimeStateManager, urlStateStorage }
+    { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
   ) => {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
-    const discoverSessionLoadTracker =
-      services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
-    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
-      runtimeStateManager,
-      tabId
+    if (TABS_ENABLED && shouldClearAllTabs) {
+      dispatch(clearAllTabs());
+    }
+
+    const {
+      currentDataView$,
+      stateContainer$,
+      customizationService$,
+      scopedProfilesManager$,
+      scopedEbtManager$,
+    } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const tabState = selectTab(getState(), tabId);
+
+    let urlState = cleanupUrlState(
+      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+      services.uiSettings
     );
 
     /**
-     * New tab initialization or existing tab re-initialization
+     * New tab initialization with the restored data if available
      */
 
     const wasTabInitialized = Boolean(stateContainer$.getValue());
@@ -87,16 +102,39 @@ export const initializeSession: InternalStateThunkActionCreator<
       currentDataView$.next(undefined);
       stateContainer$.next(undefined);
       customizationService$.next(undefined);
+      scopedEbtManager$.next(services.ebtManager.createScopedEBTManager());
+      scopedProfilesManager$.next(
+        services.profilesManager.createScopedProfilesManager({
+          scopedEbtManager: scopedEbtManager$.getValue(),
+        })
+      );
     }
 
-    /**
-     * "No data" checks
-     */
+    if (TABS_ENABLED && !wasTabInitialized) {
+      const tabInitialGlobalState = tabState.initialGlobalState;
 
-    const urlState = cleanupUrlState(
-      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
-      services.uiSettings
-    );
+      if (tabInitialGlobalState?.filters) {
+        services.filterManager.setGlobalFilters(cloneDeep(tabInitialGlobalState.filters));
+      }
+
+      if (tabInitialGlobalState?.timeRange) {
+        services.timefilter.setTime(tabInitialGlobalState.timeRange);
+      }
+      if (tabInitialGlobalState?.refreshInterval) {
+        services.timefilter.setRefreshInterval(tabInitialGlobalState.refreshInterval);
+      }
+
+      const tabInitialAppState = tabState.initialAppState;
+
+      if (tabInitialAppState) {
+        urlState = cloneDeep(tabInitialAppState);
+      }
+    }
+
+    const discoverSessionLoadTracker = scopedEbtManager$
+      .getValue()
+      .trackPerformanceEvent('discoverLoadSavedSearch');
+
     const persistedDiscoverSession = discoverSessionId
       ? await services.savedSearch.get(discoverSessionId)
       : undefined;
@@ -267,6 +305,8 @@ export const initializeSession: InternalStateThunkActionCreator<
     // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialState);
     stateContainer.appState.resetInitialState();
+
+    // Set runtime state
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
 

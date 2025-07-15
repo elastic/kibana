@@ -7,31 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Walker, parse, type ESQLAstItem } from '@kbn/esql-ast';
+import { Walker, parse, type ESQLAstItem, TIME_SYSTEM_PARAMS } from '@kbn/esql-ast';
 import {
   ESQLAstQueryExpression,
   ESQLFunction,
   ESQLSingleAstItem,
+  ESQLSource,
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
-import {
-  ESQLFieldWithMetadata,
-  collectUserDefinedColumns,
-  getFunctionDefinition,
-  getFunctionSignatures,
-  type ESQLCallbacks,
-} from '@kbn/esql-validation-autocomplete';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { getFunctionSignatures, getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
+import { collectUserDefinedColumns, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
-import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
 import {
-  TIME_SYSTEM_DESCRIPTIONS,
-  TIME_SYSTEM_PARAMS,
-} from '@kbn/esql-validation-autocomplete/src/autocomplete/factories';
+  modeDescription,
+  ENRICH_MODES,
+} from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
 import {
   getQueryForFields,
   getValidSignaturesAndTypesToSuggestNext,
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
-import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
 import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
@@ -43,10 +38,26 @@ const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes
   defaultMessage: 'Acceptable types',
 });
 
+const TIME_SYSTEM_DESCRIPTIONS = {
+  '?_tstart': i18n.translate('monaco.esql.autocomplete.timeSystemParamStart', {
+    defaultMessage: 'The start time from the date picker',
+  }),
+  '?_tend': i18n.translate('monaco.esql.autocomplete.timeSystemParamEnd', {
+    defaultMessage: 'The end time from the date picker',
+  }),
+};
+
+export type HoverMonacoModel = Pick<monaco.editor.ITextModel, 'getValue'>;
+
+/**
+ * @todo Monaco dependencies are not necesasry here: (1) replace {@link HoverMonacoModel}
+ * by some generic `getText(): string` method; (2) replace {@link monaco.Position} by
+ * `offset: number`.
+ */
 export async function getHoverItem(
-  model: monaco.editor.ITextModel,
+  model: HoverMonacoModel,
   position: monaco.Position,
-  resourceRetriever?: ESQLCallbacks
+  callbacks?: ESQLCallbacks
 ) {
   const fullText = model.getValue();
   const offset = monacoPositionToOffset(fullText, position);
@@ -68,6 +79,12 @@ export async function getHoverItem(
           containingFunction = fn as ESQLFunction<'variadic-call'>;
       }
     },
+    visitSource: (source, parent, walker) => {
+      if (within(offset, source.location)) {
+        node = source;
+        walker.abort();
+      }
+    },
     visitSingleAstItem: (_node) => {
       // ignore identifiers because we don't want to choose them as the node type
       // instead of the function node (functions can have an "operator" child which is
@@ -86,7 +103,7 @@ export async function getHoverItem(
     return hoverContent;
   }
 
-  const variables = resourceRetriever?.getVariables?.();
+  const variables = callbacks?.getVariables?.();
   const variablesContent = getVariablesHoverContent(node, variables);
 
   if (variablesContent.length) {
@@ -99,7 +116,7 @@ export async function getHoverItem(
       root,
       fullText,
       offset,
-      resourceRetriever
+      callbacks
     );
     hoverContent.contents.push(...argHints);
   }
@@ -118,7 +135,8 @@ export async function getHoverItem(
   }
 
   if (node.type === 'source' && node.sourceType === 'policy') {
-    const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
+    const source = node as ESQLSource;
+    const { getPolicyMetadata } = getPolicyHelper(callbacks);
     const policyMetadata = await getPolicyMetadata(node.name);
     if (policyMetadata) {
       hoverContent.contents.push(
@@ -141,18 +159,22 @@ export async function getHoverItem(
         ]
       );
     }
-  }
 
-  if (node.type === 'mode') {
-    const mode = ENRICH_MODES.find(({ name }) => name === node!.name)!;
-    hoverContent.contents.push(
-      ...[
-        { value: modeDescription },
-        {
-          value: `**${mode.name}**: ${mode.description}`,
-        },
-      ]
-    );
+    if (!!source.prefix) {
+      const mode = ENRICH_MODES.find(
+        ({ name }) => '_' + name === source.prefix!.valueUnquoted.toLowerCase()
+      )!;
+      if (mode) {
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
+        );
+      }
+    }
   }
 
   return hoverContent;

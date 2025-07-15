@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { TabsBarMenu } from './tabs_bar_menu';
 
 const mockTabs = [
@@ -26,77 +27,94 @@ const tabsBarMenuButtonTestId = 'unifiedTabs_tabsBarMenuButton';
 
 describe('TabsBarMenu', () => {
   const mockOnSelectOpenedTab = jest.fn();
+  const mockOnSelectClosedTab = jest.fn();
 
   const defaultProps = {
-    openedItems: mockTabs,
+    items: mockTabs,
     selectedItem: mockTabs[0],
-    onSelectOpenedTab: mockOnSelectOpenedTab,
     recentlyClosedItems: mockRecentlyClosedTabs,
+    onSelect: mockOnSelectOpenedTab,
+    onSelectRecentlyClosed: mockOnSelectClosedTab,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the menu button', () => {
+  it('renders the menu button', async () => {
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
     expect(menuButton).toBeInTheDocument();
   });
 
-  it('opens popover when menu button is clicked', () => {
+  it('opens popover when menu button is clicked', async () => {
+    const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
 
-    fireEvent.click(menuButton);
-
-    const tabsBarMenu = screen.getByTestId('unifiedTabs_tabsBarMenu');
+    const tabsBarMenu = await screen.findByTestId('unifiedTabs_tabsBarMenu');
     expect(tabsBarMenu).toBeInTheDocument();
     expect(screen.getByText('Opened tabs')).toBeInTheDocument();
   });
 
-  it('displays opened tabs correctly', () => {
+  it('displays opened tabs correctly', async () => {
+    const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
 
-    fireEvent.click(menuButton);
-
-    mockTabs.forEach((tab) => {
-      expect(screen.getByText(tab.label)).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Opened tabs')).toBeInTheDocument();
+    for (const tab of mockTabs) {
+      expect(await screen.findByText(tab.label)).toBeInTheDocument();
+    }
   });
 
-  it('selects a tab when clicked', () => {
+  it('selects a tab when clicked', async () => {
+    const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
 
-    fireEvent.click(menuButton);
-
-    const secondTabOption = screen.getByText(mockTabs[1].label);
-    fireEvent.click(secondTabOption);
+    const secondTabOption = (await screen.findAllByRole('option'))[1];
+    await user.click(secondTabOption);
 
     expect(mockOnSelectOpenedTab).toHaveBeenCalledWith(mockTabs[1]);
   });
 
-  it('shows recently closed tabs when present', () => {
+  it('shows recently closed tabs when present', async () => {
+    const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
 
-    fireEvent.click(menuButton);
+    expect(await screen.findByText('Recently closed')).toBeInTheDocument();
 
-    expect(screen.getByText('Recently closed')).toBeInTheDocument();
-
-    mockRecentlyClosedTabs.forEach((tab) => {
-      expect(screen.getByText(tab.label)).toBeInTheDocument();
-    });
+    for (const tab of mockRecentlyClosedTabs) {
+      expect(await screen.findByText(tab.label)).toBeInTheDocument();
+    }
   });
 
-  it('does not show recently closed section when array is empty', () => {
+  it('selects a closed tab when clicked', async () => {
+    const user = userEvent.setup();
+    render(<TabsBarMenu {...defaultProps} />);
+
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
+
+    const closedTabOption = (await screen.findAllByTitle(mockRecentlyClosedTabs[0].label))[0];
+    await user.click(closedTabOption);
+
+    expect(mockOnSelectClosedTab).toHaveBeenCalledWith(mockRecentlyClosedTabs[0]);
+  });
+
+  it('does not show recently closed section when array is empty', async () => {
+    const user = userEvent.setup();
     const propsWithNoClosedTabs = {
       ...defaultProps,
       recentlyClosedItems: [],
@@ -104,22 +122,24 @@ describe('TabsBarMenu', () => {
 
     render(<TabsBarMenu {...propsWithNoClosedTabs} />);
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
-
-    fireEvent.click(menuButton);
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
 
     expect(screen.queryByText('Recently closed')).not.toBeInTheDocument();
   });
 
-  it('marks the selected tab as checked', () => {
-    render(<TabsBarMenu {...defaultProps} />);
+  it('marks the selected tab as checked', async () => {
+    const user = userEvent.setup();
+    render(
+      <div style={{ width: '1000px' }}>
+        <TabsBarMenu {...defaultProps} />
+      </div>
+    );
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
 
-    fireEvent.click(menuButton);
-
-    const selectedTabOption = screen.getByText(mockTabs[0].label);
-
+    const selectedTabOption = (await screen.findAllByTitle(mockTabs[0].label))[0];
     expect(selectedTabOption.closest('[aria-selected="true"]')).toBeInTheDocument();
   });
 });

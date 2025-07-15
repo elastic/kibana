@@ -63,14 +63,19 @@ Microsoft 365 connectors are being [retired](https://devblogs.microsoft.com/micr
 4. Add **Post message in a chat or channel** as the second step in the workflow.
 
     1. Set **Post as** to `Flow bot`.
-    2. Set **Post in** to `Channel`.
-    3. Set **Team** and **Channel** to the appropriate values for where you want the message displayed.
+
+       :::{note}
+       If you want to post to a private group, set **Post as** to `User`. Note that the formatting might be affected.
+       :::
+   
+    3. Set **Post in** to `Channel`.
+    4. Set **Team** and **Channel** to the appropriate values for where you want the message displayed.
 
         ::::{note}
         Per [https://learn.microsoft.com/en-us/power-automate/teams/send-a-message-in-teams#known-issues-and-limitations](https://learn.microsoft.com/en-us/power-automate/teams/send-a-message-in-teams#known-issues-and-limitations), you cannot use a private channel.
         ::::
 
-    4. Set the **Message** to `@{triggerBody()?['text']}`.
+    5. Set the **Message** to `@{triggerBody()?['text']}`.
 
         Alternatively, you can add a **Parse JSON** step before the **Post message in a chat or channel** step in the workflow. Set the **Content** to `Body` and the **Schema** to the following value:
 

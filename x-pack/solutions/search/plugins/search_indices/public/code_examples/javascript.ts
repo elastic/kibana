@@ -9,9 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
 import {
   CodeLanguage,
+  CodeSnippetParameters,
   IngestDataCodeDefinition,
   SearchCodeDefinition,
   SearchCodeSnippetFunction,
+  SearchCodeSnippetParameters,
 } from '../types';
 import { CreateIndexLanguageExamples } from './types';
 
@@ -25,178 +27,146 @@ export const JAVASCRIPT_INFO: CodeLanguage = {
 };
 
 const INSTALL_CMD = `npm install @elastic/elasticsearch`;
+const CLIENT_SERVERLESS_OPTION = `\n  serverMode: 'serverless',`;
+
+const createClientSnippet = ({
+  apiKey,
+  elasticsearchURL,
+  isServerless,
+}: CodeSnippetParameters): string => `const client = new Client({
+  node: '${elasticsearchURL}',
+  auth: {
+    apiKey: '${apiKey ?? API_KEY_PLACEHOLDER}'
+  },${isServerless ? CLIENT_SERVERLESS_OPTION : ''}
+});`;
 
 export const JavascriptCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
     installCommand: INSTALL_CMD,
-    createIndex: ({
-      elasticsearchURL,
-      apiKey,
-      indexName,
-    }) => `import { Client } from "@elastic/elasticsearch"
+    createIndex: (args) => `const { Client } = require('@elastic/elasticsearch');
 
-const client = new Client({
-  node: '${elasticsearchURL}',
-  auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
-  }
-});
+${createClientSnippet(args)}
 
-async function run() {
-  await client.indices.create({
-    index: "${indexName ?? INDEX_PLACEHOLDER}",
-    mappings: {
-      properties: {
-        text: { type: "text"}
-      },
+const createResponse = await client.indices.create({
+  index: '${args.indexName ?? INDEX_PLACEHOLDER}',
+  mappings: {
+    properties: {
+      text: { type: 'text'}
     },
   });
 }
-run().catch(console.log);`,
+console.log(createResponse);`,
   },
   dense_vector: {
     installCommand: INSTALL_CMD,
-    createIndex: ({
-      elasticsearchURL,
-      apiKey,
-      indexName,
-    }) => `import { Client } from "@elastic/elasticsearch"
+    createIndex: (args) => `const { Client } = require('@elastic/elasticsearch');
 
-const client = new Client({
-  node: '${elasticsearchURL}',
-  auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
-  }
-});
+${createClientSnippet(args)}
 
-async function run() {
-  await client.indices.create({
-    index: "${indexName ?? INDEX_PLACEHOLDER}",
-    mappings: {
-      properties: {
-        vector: { type: "dense_vector", dims: 3 },
-        text: { type: "text"}
-      },
+const createResponse = await client.indices.create({
+  index: '${args.indexName ?? INDEX_PLACEHOLDER}',
+  mappings: {
+    properties: {
+      vector: { type: 'dense_vector', dims: 3 },
+      text: { type: 'text'}
     },
   });
 }
-run().catch(console.log);`,
+console.log(createResponse);`,
   },
   semantic: {
     installCommand: INSTALL_CMD,
-    createIndex: ({
-      elasticsearchURL,
-      apiKey,
-      indexName,
-    }) => `import { Client } from "@elastic/elasticsearch"
+    createIndex: (args) => `const { Client } = require('@elastic/elasticsearch');
 
-const client = new Client({
-  node: '${elasticsearchURL}',
-  auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
-  }
-});
+${createClientSnippet(args)}
 
-async function run() {
-  await client.indices.create({
-    index: "${indexName ?? INDEX_PLACEHOLDER}",
-    mappings: {
-      properties: {
-        text: { type: "semantic_text"}
-      },
+const createResponse = client.indices.create({
+  index: '${args.indexName ?? INDEX_PLACEHOLDER}',
+  mappings: {
+    properties: {
+      text: { type: 'semantic_text'}
     },
   });
 }
-run().catch(console.log);`,
+console.log(createResponse);`,
   },
 };
 
 export const JSIngestDataExample: IngestDataCodeDefinition = {
   installCommand: INSTALL_CMD,
-  ingestCommand: ({
-    apiKey,
-    elasticsearchURL,
-    sampleDocuments,
-    indexName,
-  }) => `import { Client } from "@elastic/elasticsearch";
+  ingestCommand: (args) => `const { Client } = require('@elastic/elasticsearch');
 
-const client = new Client({
-  node: '${elasticsearchURL}',
-  auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
-  },
-});
+${createClientSnippet(args)}
 
-const index = "${indexName}";
-const docs = ${JSON.stringify(sampleDocuments, null, 2)};
+const index = '${args.indexName}';
+const docs = ${JSON.stringify(args.sampleDocuments, null, 2)};
 
-async function run() {}
-  const bulkIngestResponse = await client.helpers.bulk({
-    index,
-    datasource: docs,
-    onDocument() {
-      return {
-        index: {},
-      };
-    }
-  });
-  console.log(bulkIngestResponse);
-}
-run().catch(console.log);`,
-  updateMappingsCommand: ({
-    apiKey,
-    elasticsearchURL,
-    indexName,
-    mappingProperties,
-  }) => `import { Client } from "@elastic/elasticsearch";
-
-const client = new Client({
-node: '${elasticsearchURL}',
-auth: {
-  apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
-}
-});
-
-async function run() {
-  const index = "${indexName}";
-  const mapping = ${JSON.stringify(mappingProperties, null, 2)};
-
-  const updateMappingResponse = await client.indices.putMapping({
-    index,
-    properties: mapping,
-  });
-  console.log(updateMappingResponse);
-}
-run().catch(console.log);`,
-};
-
-const searchCommand: SearchCodeSnippetFunction = ({
-  elasticsearchURL,
-  apiKey,
-  indexName,
-  queryObject,
-}) => `import { Client } from "@elastic/elasticsearch";
-
-const client = new Client({
-  node: '${elasticsearchURL}',
-  auth: {
-    apiKey: "${apiKey ?? API_KEY_PLACEHOLDER}"
+const bulkIngestResponse = await client.helpers.bulk({
+  index,
+  datasource: docs,
+  onDocument() {
+    return {
+      index: {},
+    };
   }
 });
+console.log(bulkIngestResponse);`,
+  updateMappingsCommand: (args) => `const { Client } = require('@elastic/elasticsearch');
 
-const index = "${indexName}";
-const query = ${JSON.stringify(queryObject, null, 2)};
+${createClientSnippet(args)}
 
-async function run() {
-  const result = await client.search({
-    index,
-    query,
-  });
+const index = '${args.indexName}';
+const mapping = ${JSON.stringify(args.mappingProperties, null, 2)};
 
-  console.log(result.hits.hits);
-}
-run().catch(console.log);`;
+const updateMappingResponse = await client.indices.putMapping({
+  index,
+  properties: mapping,
+});
+console.log(updateMappingResponse);`,
+};
+
+const searchCommand: SearchCodeSnippetFunction = (
+  args: SearchCodeSnippetParameters
+) => `import { Client } from '@elastic/elasticsearch';
+
+${createClientSnippet(args)}
+
+const index = '${args.indexName}';
+const query = ${JSON.stringify(args.queryObject, null, 2)};
+
+const result = await client.search({
+  index,
+  query,
+});
+
+console.log(result.hits.hits);`;
 
 export const JavascriptSearchExample: SearchCodeDefinition = {
   searchCommand,
+};
+
+export const JSSemanticIngestDataExample: IngestDataCodeDefinition = {
+  ...JSIngestDataExample,
+  ingestCommand: (args) => `const { Client } = require('@elastic/elasticsearch');
+
+${createClientSnippet(args)}
+
+// Timeout to allow machine learning model loading and semantic ingestion to complete
+const timeout = '5m';
+
+const index = '${args.indexName}';
+const docs = ${JSON.stringify(args.sampleDocuments, null, 2)};
+
+const bulkIngestResponse = await client.helpers.bulk({
+  index,
+  datasource: docs,
+  timeout,
+  onDocument() {
+    return {
+      index: {},
+    };
+  }
+});
+
+console.log(bulkIngestResponse);`,
 };

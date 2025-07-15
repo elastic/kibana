@@ -17,8 +17,8 @@ import type {
   FindingsVulnerabilityFlyoutContentProps,
   FindingsVulnerabilityFlyoutFooterProps,
   FindingsVulnerabilityFlyoutHeaderProps,
-  FindingVulnerabilityFlyoutProps,
   FindingsMisconfigurationPanelExpandableFlyoutProps,
+  FindingsVulnerabilityPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { CspLoadingState } from './components/csp_loading_state';
@@ -138,7 +138,7 @@ export class CspPlugin
     const App = (props: CspRouterProps) => (
       <KibanaContextProvider services={{ ...core, ...plugins, storage }}>
         <RedirectAppLinks coreStart={core}>
-          <div style={{ width: '100%', height: '100%' }}>
+          <div css={{ width: '100%', height: '100%' }}>
             <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
               <CspRouter {...props} />
             </SetupContext.Provider>
@@ -169,7 +169,7 @@ export class CspPlugin
       },
       getCloudSecurityPostureVulnerabilityFlyout: () => {
         return {
-          Component: (props: FindingVulnerabilityFlyoutProps) => (
+          Component: (props: FindingsVulnerabilityPanelExpandableFlyoutProps['params']) => (
             <LazyCspFindingsVulnerabilityFlyout {...props}>
               {props.children}
             </LazyCspFindingsVulnerabilityFlyout>

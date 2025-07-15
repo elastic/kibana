@@ -30,6 +30,7 @@ export interface PolicyTemplateVarsFormProps {
   setupTechnology: SetupTechnology;
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
+  showCloudConnectors: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({
@@ -41,6 +42,7 @@ export const PolicyTemplateVarsForm = ({
   disabled,
   isEditPage,
   hasInvalidRequiredVars,
+  showCloudConnectors,
 }: PolicyTemplateVarsFormProps) => {
   const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
@@ -50,11 +52,13 @@ export const PolicyTemplateVarsForm = ({
         return (
           <AwsCredentialsFormAgentless
             newPolicy={newPolicy}
+            setupTechnology={setupTechnology}
             updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
             packageInfo={packageInfo}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             input={input}
-            disabled={disabled}
+            showCloudConnectors={showCloudConnectors}
           />
         );
       }

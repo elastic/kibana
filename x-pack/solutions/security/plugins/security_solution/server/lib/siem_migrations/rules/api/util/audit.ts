@@ -11,6 +11,7 @@ import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 
 export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_CREATED = 'siem_migration_created',
+  SIEM_MIGRATION_UPDATED = 'siem_migration_updated',
   SIEM_MIGRATION_RETRIEVED = 'siem_migration_retrieved',
   SIEM_MIGRATION_DELETED = 'siem_migration_deleted',
   SIEM_MIGRATION_ADDED_RULES = 'siem_migration_added_rules',
@@ -21,6 +22,7 @@ export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_STOPPED = 'siem_migration_stopped',
   SIEM_MIGRATION_UPDATED_RULE = 'siem_migration_updated_rule',
   SIEM_MIGRATION_INSTALLED_RULES = 'siem_migration_installed_rules',
+  SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS = 'siem_migration_retrieved_integrations_stats',
 }
 
 export enum AUDIT_TYPE {
@@ -49,6 +51,7 @@ export const siemMigrationAuditEventType: Record<
   ArrayElement<EcsEvent['type']>
 > = {
   [SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED]: AUDIT_TYPE.CREATION,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RESOURCES]: AUDIT_TYPE.ACCESS,
@@ -59,6 +62,7 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_RULES]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_DELETED]: AUDIT_TYPE.CHANGE,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS]: AUDIT_TYPE.ACCESS,
 };
 
 interface SiemMigrationAuditEvent {
@@ -117,6 +121,16 @@ export class SiemMigrationAuditLogger {
     const message = `User created a new SIEM migration`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED,
+      message,
+      error,
+    });
+  }
+
+  public async logUpdateMigration(params: { migrationId: string; error?: Error }): Promise<void> {
+    const { migrationId, error } = params;
+    const message = `User updated the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED,
       message,
       error,
     });
@@ -231,5 +245,18 @@ export class SiemMigrationAuditLogger {
       events.push({ action, message, error });
     }
     return this.log(events);
+  }
+
+  public async logGetAllIntegrationsStats({
+    error,
+  }: {
+    error?: Error;
+  } = {}): Promise<void> {
+    const message = `User retrieved all integrations stats for SIEM rule migrations`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS,
+      error,
+      message,
+    });
   }
 }

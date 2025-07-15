@@ -83,7 +83,7 @@ export function TimeScaling({ selectedColumn, columnId, layer, updateLayer }: Ti
             {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
               defaultMessage: 'Normalize by unit',
             })}{' '}
-            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+            <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       }

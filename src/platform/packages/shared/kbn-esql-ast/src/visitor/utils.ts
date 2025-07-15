@@ -38,7 +38,7 @@ export const firstItem = (items: ESQLAstItem[]): ESQLAstExpression | undefined =
   }
 };
 
-export const resolveItem = (items: ESQLAstItem | ESQLAstItem[]): ESQLAstItem => {
+export const resolveItem = (items: ESQLAstItem | ESQLAstItem[]): ESQLSingleAstItem => {
   return Array.isArray(items) ? resolveItem(items[0]) : items;
 };
 

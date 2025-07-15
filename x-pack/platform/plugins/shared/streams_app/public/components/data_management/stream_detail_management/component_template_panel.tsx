@@ -7,14 +7,13 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiPanel,
-  EuiIcon,
-  EuiLink,
-  EuiBasicTableColumn,
-  EuiText,
   EuiInMemoryTable,
+  EuiIcon,
+  EuiText,
+  EuiCard,
+  EuiLink,
   useEuiTheme,
-  EuiFlexGroup,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -31,7 +30,7 @@ export function ComponentTemplatePanel({
   componentTemplates: UnmanagedElasticsearchAssetDetails['componentTemplates'] | undefined;
   onFlyoutOpen: (name: string) => void;
 }) {
-  const theme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<UnmanagedComponentTemplateDetails>> = useMemo(
     () => [
@@ -96,25 +95,55 @@ export function ComponentTemplatePanel({
   );
 
   return (
-    <EuiPanel hasShadow={false} hasBorder>
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiText>
+    <EuiCard
+      display="subdued"
+      paddingSize="l"
+      textAlign="left"
+      css={{
+        '& [class*="euiCard__description"]': {
+          marginTop: '0',
+        },
+      }}
+      title={
+        <EuiText size="m" css={{ fontWeight: euiTheme.font.weight.semiBold }} color="inherit">
           {i18n.translate('xpack.streams.componentTemplatePanel.title', {
             defaultMessage: 'Component templates',
           })}
         </EuiText>
-        {componentTemplates && (
-          <EuiInMemoryTable
-            items={componentTemplates}
-            columns={columns}
-            tableLayout={'auto'}
-            // align text with heading
-            className={css`
-              margin: 0 -${theme.euiTheme.size.s};
-            `}
-          />
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
+      }
+      description={
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.streams.componentTemplatePanel.description', {
+            defaultMessage:
+              'Reuse settings, mappings, and aliases configurations in multiple index templates.',
+          })}{' '}
+          <EuiLink
+            href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-component-template"
+            target="_blank"
+            external={false}
+            color="subdued"
+            css={{ textDecoration: 'underline', fontWeight: euiTheme.font.weight.regular }}
+          >
+            {i18n.translate('xpack.streams.componentTemplatePanel.learnMore', {
+              defaultMessage: 'Learn more.',
+            })}
+          </EuiLink>
+        </EuiText>
+      }
+    >
+      {componentTemplates && (
+        <EuiInMemoryTable
+          items={componentTemplates}
+          columns={columns}
+          tableLayout={'auto'}
+          className={css`
+            margin: ${euiTheme.size.l} -${euiTheme.size.s} 0;
+            & .euiTable {
+              border-radius: ${euiTheme.border.radius.small};
+            }
+          `}
+        />
+      )}
+    </EuiCard>
   );
 }

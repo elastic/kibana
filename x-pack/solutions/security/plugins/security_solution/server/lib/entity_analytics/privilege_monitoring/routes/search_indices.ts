@@ -19,8 +19,7 @@ const LIMIT = 20;
 
 export const searchPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  logger: Logger
 ) => {
   router.versioned
     .get({

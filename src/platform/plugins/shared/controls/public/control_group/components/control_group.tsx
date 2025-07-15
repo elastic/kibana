@@ -38,8 +38,6 @@ import type { ControlGroupApi } from '../types';
 import { ControlClone } from './control_clone';
 import { ControlRenderer } from './control_renderer';
 
-import './control_group.scss';
-
 interface Props {
   applySelections: () => void;
   controlGroupApi: ControlGroupApi;
@@ -119,9 +117,7 @@ export function ControlGroup({
 
   return (
     <EuiPanel
-      css={css`
-        display: ${isInitialized ? 'none' : 'default'};
-      `}
+      css={styles.panel}
       borderRadius="m"
       paddingSize="none"
       color={draggingId ? 'success' : 'transparent'}
@@ -147,7 +143,13 @@ export function ControlGroup({
             }}
           >
             <SortableContext items={controlsInOrder} strategy={rectSortingStrategy}>
-              <EuiFlexGroup className="controlGroup" alignItems="center" gutterSize="s" wrap={true}>
+              <EuiFlexGroup
+                component="ul"
+                className="controlGroup"
+                alignItems="center"
+                gutterSize="s"
+                wrap={true}
+              >
                 {controlsInOrder.map(({ id, type }) => (
                   <ControlRenderer
                     key={id}
@@ -174,7 +176,7 @@ export function ControlGroup({
           </DndContext>
         </EuiFlexItem>
         {!autoApplySelections && (
-          <EuiFlexItem grow={false} className="controlGroup--endButtonGroup">
+          <EuiFlexItem grow={false} css={styles.autoApply}>
             {hasUnappliedSelections ? (
               ApplyButtonComponent
             ) : (
@@ -188,3 +190,11 @@ export function ControlGroup({
     </EuiPanel>
   );
 }
+
+const styles = {
+  panel: css({
+    display: 'flex',
+    alignItems: 'center',
+  }),
+  autoApply: css({ alignSelf: 'end' }),
+};

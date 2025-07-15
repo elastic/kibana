@@ -11,7 +11,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  useConnectorContext,
+  type ActionConnectorFieldsProps,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 import * as i18n from './translations';
 import { AuthConfig } from '../../common/auth/auth_config';
@@ -22,6 +25,10 @@ const { emptyField, urlField } = fieldValidators;
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
+  const {
+    services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
+  } = useConnectorContext();
+
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -67,7 +74,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <AuthConfig readOnly={readOnly} showOAuth2Option={true} />
+      <AuthConfig readOnly={readOnly} isPfxEnabled={isPfxEnabled} showOAuth2Option={true} />
     </>
   );
 };

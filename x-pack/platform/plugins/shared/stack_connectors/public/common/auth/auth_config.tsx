@@ -41,13 +41,14 @@ import * as i18n from './translations';
 interface Props {
   readOnly: boolean;
   showOAuth2Option?: boolean;
+  isPfxEnabled?: boolean;
 }
 
 const { emptyField } = fieldValidators;
 
 const VERIFICATION_MODE_DEFAULT = 'full';
 
-export const AuthConfig: FunctionComponent<Props> = ({ readOnly, showOAuth2Option = false }) => {
+export const AuthConfig: FunctionComponent<Props> = ({ readOnly, showOAuth2Option = false, isPfxEnabled = true }) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [
@@ -98,6 +99,7 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, showOAuth2Optio
           readOnly={readOnly}
           certTypeDefaultValue={certTypeDefaultValue}
           certType={certType}
+          isPfxEnabled={isPfxEnabled}
         />
       ),
       'data-test-subj': 'authSSL',

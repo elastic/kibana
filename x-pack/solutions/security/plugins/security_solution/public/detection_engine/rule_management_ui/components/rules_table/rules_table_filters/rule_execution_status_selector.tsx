@@ -12,8 +12,8 @@ import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine';
-import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
-import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
+import { getCapitalizedStatusText } from '../../../../common/components/rule_execution_status/utils';
+import { RuleStatusBadge } from '../../../../common/components/rule_execution_status';
 
 interface OptionData {
   status: RuleExecutionStatus;

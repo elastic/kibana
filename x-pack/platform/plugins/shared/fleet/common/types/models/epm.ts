@@ -341,6 +341,7 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
+  | 'discovery'
 >;
 
 // from /categories
@@ -684,6 +685,7 @@ export interface Installation {
   latest_uninstall_failed_attempts?: FailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
   latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
+  previous_version?: string;
 }
 
 export interface PackageUsageStats {

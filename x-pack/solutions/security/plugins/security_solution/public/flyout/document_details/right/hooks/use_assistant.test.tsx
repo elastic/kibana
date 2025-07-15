@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react';
 import type { UseAssistantParams, UseAssistantResult } from './use_assistant';
 import { useAssistant } from './use_assistant';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { useAssistantOverlay } from '@kbn/elastic-assistant';
+import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
 jest.mock('../../../../assistant/use_assistant_availability');
@@ -23,11 +23,11 @@ const renderUseAssistant = () =>
   renderHook((props: UseAssistantParams) => useAssistant(props), {
     initialProps: { dataFormattedForFieldBrowser, isAlert },
   });
+const useAssistantOverlayMock = useAssistantOverlay as jest.Mock;
 
 describe('useAssistant', () => {
-  let hookResult: RenderHookResult<UseAssistantResult, UseAssistantParams>;
-
-  it(`should return showAssistant true and a value for promptContextId`, () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
     jest.mocked(useAssistantAvailability).mockReturnValue({
       hasSearchAILakeConfigurations: false,
       hasAssistantPrivilege: true,
@@ -37,14 +37,62 @@ describe('useAssistant', () => {
       hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
-    jest
-      .mocked(useAssistantOverlay)
-      .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
+    useAssistantOverlayMock.mockReturnValue({
+      showAssistantOverlay: jest.fn,
+      promptContextId: '123',
+    });
+
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      basePromptContexts: [
+        {
+          category: 'alert',
+          description: 'Alert (from view)',
+          suggestedUserPrompt: 'ALERT EVALUATION',
+          tooltip: 'Add this alert as context',
+        },
+        {
+          category: 'data-quality-dashboard',
+          description: 'Data Quality (index)',
+          suggestedUserPrompt: 'DATA QUALITY ANALYSIS',
+          tooltip: 'Add this Data Quality report as context',
+        },
+        {
+          category: 'detection-rules',
+          description: 'Selected Detection Rules',
+          suggestedUserPrompt: 'RULE ANALYSIS',
+          tooltip: 'Add this alert as context',
+        },
+        {
+          category: 'event',
+          description: 'Event (from view)',
+          suggestedUserPrompt: 'EVENT EVALUATION',
+          tooltip: 'Add this event as context',
+        },
+      ],
+    });
+  });
+  let hookResult: RenderHookResult<UseAssistantResult, UseAssistantParams>;
+
+  it(`should return showAssistant true and a value for promptContextId`, () => {
+    hookResult = renderUseAssistant();
+    expect(hookResult.result.current.showAssistant).toEqual(true);
+    expect(hookResult.result.current.promptContextId).toEqual('123');
+  });
+
+  it(`should return showAssistant false if isAssistantEnabled is false`, () => {
+    jest.mocked(useAssistantAvailability).mockReturnValue({
+      hasSearchAILakeConfigurations: false,
+      hasAssistantPrivilege: true,
+      hasConnectorsAllPrivilege: true,
+      hasConnectorsReadPrivilege: true,
+      hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
+      isAssistantEnabled: false,
+    });
 
     hookResult = renderUseAssistant();
 
-    expect(hookResult.result.current.showAssistant).toEqual(true);
-    expect(hookResult.result.current.promptContextId).toEqual('123');
+    expect(hookResult.result.current.showAssistant).toEqual(false);
   });
 
   it(`should return showAssistant false if hasAssistantPrivilege is false`, () => {
@@ -57,9 +105,6 @@ describe('useAssistant', () => {
       hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
-    jest
-      .mocked(useAssistantOverlay)
-      .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
 
     hookResult = renderUseAssistant();
 
@@ -68,19 +113,6 @@ describe('useAssistant', () => {
   });
 
   it('returns anonymized prompt context data', async () => {
-    jest.mocked(useAssistantAvailability).mockReturnValue({
-      hasSearchAILakeConfigurations: false,
-      hasAssistantPrivilege: true,
-      hasConnectorsAllPrivilege: true,
-      hasConnectorsReadPrivilege: true,
-      hasUpdateAIAssistantAnonymization: true,
-      hasManageGlobalKnowledgeBase: true,
-      isAssistantEnabled: true,
-    });
-    jest
-      .mocked(useAssistantOverlay)
-      .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
-
     hookResult = renderUseAssistant();
 
     const getPromptContext = (useAssistantOverlay as jest.Mock).mock.calls[0][3];
@@ -104,5 +136,17 @@ describe('useAssistant', () => {
       'process.entity_id': ['process-entity_id'],
       'user.name': ['user-name'],
     });
+  });
+  it('returns correct prompt for alert', () => {
+    renderUseAssistant();
+    expect(useAssistantOverlayMock.mock.calls[0][0]).toEqual('alert');
+    expect(useAssistantOverlayMock.mock.calls[0][5]).toEqual('ALERT EVALUATION');
+  });
+  it('returns correct prompt for event', () => {
+    renderHook((props: UseAssistantParams) => useAssistant(props), {
+      initialProps: { dataFormattedForFieldBrowser, isAlert: false },
+    });
+    expect(useAssistantOverlayMock.mock.calls[0][0]).toEqual('event');
+    expect(useAssistantOverlayMock.mock.calls[0][5]).toEqual('EVENT EVALUATION');
   });
 });

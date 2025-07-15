@@ -13,6 +13,8 @@ export const SIEM_RULE_MIGRATIONS_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as cons
 export const SIEM_RULE_MIGRATIONS_ALL_STATS_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/stats` as const;
 export const SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH =
   `${SIEM_RULE_MIGRATIONS_PATH}/integrations` as const;
+export const SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH =
+  `${SIEM_RULE_MIGRATIONS_PATH}/integrations/stats` as const;
 export const SIEM_RULE_MIGRATION_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/{migration_id}` as const;
 export const SIEM_RULE_MIGRATION_RULES_PATH = `${SIEM_RULE_MIGRATION_PATH}/rules` as const;
 export const SIEM_RULE_MIGRATION_START_PATH = `${SIEM_RULE_MIGRATION_PATH}/start` as const;
@@ -35,9 +37,15 @@ export const SIEM_RULE_MIGRATION_EVALUATE_PATH = `${SIEM_RULE_MIGRATIONS_PATH}/e
 export const LOOKUPS_INDEX_PREFIX = 'lookup_';
 
 export enum SiemMigrationTaskStatus {
+  /** The Migration is not yet started */
   READY = 'ready',
+  /** The Migration is in progress */
   RUNNING = 'running',
+  /** The Migration is explicitly stopped by user */
   STOPPED = 'stopped',
+  /** The Migration process has been interrupted, usually a server restart. */
+  INTERRUPTED = 'interrupted',
+  /** The Migration process is finished */
   FINISHED = 'finished',
 }
 

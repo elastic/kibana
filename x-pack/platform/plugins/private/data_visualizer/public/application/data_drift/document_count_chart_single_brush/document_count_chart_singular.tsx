@@ -25,7 +25,6 @@ import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { type LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -181,7 +180,6 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
-  const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
   const overallSeriesName = i18n.translate('xpack.dataVisualizer.dataDriftt.seriesLabel', {
     defaultMessage: 'document count',
@@ -444,14 +442,13 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
-            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
-            timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-            style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
+            labelFormat={() => ''}
           />
           {adjustedChartPoints?.length && (
             <HistogramBarSeries
               id={SPEC_ID}
               name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"
@@ -468,6 +465,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
             <HistogramBarSeries
               id={`${SPEC_ID}_split`}
               name={chartPointsSplitLabel}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="time"

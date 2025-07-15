@@ -39,7 +39,6 @@
       "sessionView",
       "spaces",
       "taskManager",
-      "threatIntelligence",
       "timelines",
       "triggersActionsUi",
       "uiActions",
@@ -59,7 +58,8 @@
       "inference",
       "discoverShared",
       "productDocBase",
-      "telemetry"
+      "telemetry",
+      "elasticAssistantSharedState",
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

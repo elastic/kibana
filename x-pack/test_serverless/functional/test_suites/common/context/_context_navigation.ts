@@ -43,6 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover - context - back navigation', function contextSize() {
+    // see details: https://github.com/elastic/kibana/issues/221371
+    this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({

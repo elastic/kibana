@@ -40,15 +40,14 @@ export const MonitoredUserDoc = z.object({
   user: z
     .object({
       name: z.string().optional(),
+      /**
+       * Indicates if the user is privileged.
+       */
+      is_privileged: z.boolean().optional(),
     })
     .optional(),
   labels: z
     .object({
-      monitoring: z
-        .object({
-          privileged_users: z.enum(['monitored', 'deleted']).optional(),
-        })
-        .optional(),
       sources: z.array(z.unknown()).optional(),
       source_indices: z.array(z.string()).optional(),
       source_integrations: z.array(z.string()).optional(),

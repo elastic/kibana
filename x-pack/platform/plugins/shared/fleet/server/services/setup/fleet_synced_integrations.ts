@@ -20,6 +20,7 @@ import {
   indexPatternTypes,
 } from '../epm/kibana/index_pattern/install';
 import { SO_SEARCH_LIMIT } from '../../constants';
+import { licenseService } from '../license';
 
 export const FLEET_SYNCED_INTEGRATIONS_INDEX_NAME = 'fleet-synced-integrations';
 export const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
@@ -64,13 +65,14 @@ export const FLEET_SYNCED_INTEGRATIONS_INDEX_CONFIG = {
   },
 };
 
-export async function createOrUpdateFleetSyncedIntegrationsIndex(esClient: ElasticsearchClient) {
+export const canEnableSyncIntegrations = () => {
   const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
+  return enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !isServerless;
+};
 
-  if (!enableSyncIntegrationsOnRemote) {
-    return;
-  }
-
+export async function createOrUpdateFleetSyncedIntegrationsIndex(esClient: ElasticsearchClient) {
+  appContextService.getLogger().debug('Create or update fleet-synced-integrations index');
   await createOrUpdateIndex(
     esClient,
     FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
@@ -133,9 +135,7 @@ export async function createCCSIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsImporter: ISavedObjectsImporter
 ) {
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
-
-  if (!enableSyncIntegrationsOnRemote) {
+  if (!canEnableSyncIntegrations()) {
     return;
   }
 

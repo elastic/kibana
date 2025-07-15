@@ -48,6 +48,9 @@ function getCompFromConfig<T extends object = Record<string, any>>({
   return Comp;
 }
 
+/**
+ * @deprecated - use @testing-library/react instead
+ */
 export function mountComponentSync<T extends object = Record<string, any>>(
   config: Config<T>
 ): ReactWrapper {
@@ -55,6 +58,9 @@ export function mountComponentSync<T extends object = Record<string, any>>(
   return mountWithIntl(<Comp {...config.props} />);
 }
 
+/**
+ * @deprecated - use @testing-library/react instead
+ */
 export async function mountComponentAsync<T extends object = Record<string, any>>(
   config: Config<T>
 ): Promise<ReactWrapper> {

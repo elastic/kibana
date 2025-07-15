@@ -7,30 +7,33 @@
 
 import { i18n } from '@kbn/i18n';
 import type { LogEntry, LogEntryContext } from '@kbn/logs-shared-plugin/common';
-import {
-  LogEntryColumn,
-  LogEntryContextMenu,
-  LogEntryFieldColumn,
-  LogEntryMessageColumn,
-  LogEntryRowWrapper,
-  LogEntryTimestampColumn,
-} from '@kbn/logs-shared-plugin/public';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
+import {
+  EuiTable,
+  EuiTableBody,
+  EuiTableRow,
+  EuiTableRowCell,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiButtonIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   getFriendlyNameForPartitionId,
   partitionField,
 } from '../../../../../../common/log_analysis';
 import type { TimeRange } from '../../../../../../common/time';
 import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
-import type { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 
-export const exampleMessageScale = 'medium' as const;
-export const exampleTimestampFormat = 'dateTime' as const;
+const MENU_LABEL = i18n.translate('xpack.infra.logs.categoryExample.menuLabel', {
+  defaultMessage: 'View actions for log entry',
+});
 
-export const CategoryExampleMessage: React.FunctionComponent<{
+interface CategoryExampleMessageRowProps {
   id: string;
   dataset: string;
   message: string;
@@ -38,20 +41,24 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   timestamp: number;
   tiebreaker: number;
   context: LogEntryContext;
-}> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'];
+}
+
+const CategoryExampleMessageRow: React.FC<CategoryExampleMessageRowProps> = ({
+  id,
+  dataset,
+  message,
+  timestamp,
+  timeRange,
+  tiebreaker,
+  context,
+  euiTheme,
+}) => {
   const trackMetric = useUiTracker({ app: 'infra_logs' });
   const [, { setContextEntry }] = useViewLogInProviderContext();
-  // handle special cases for the dataset value
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
-
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-  const setHovered = useCallback(() => setIsHovered(true), []);
-  const setNotHovered = useCallback(() => setIsHovered(false), []);
-
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const openMenu = useCallback(() => setIsMenuOpen(true), []);
-  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
-
   const time = moment(timestamp).toISOString();
 
   const viewInStreamLinkProps = useLinkProps({
@@ -74,127 +81,124 @@ export const CategoryExampleMessage: React.FunctionComponent<{
     },
   });
 
-  return (
-    <LogEntryRowWrapper
-      scale={exampleMessageScale}
-      onMouseEnter={setHovered}
-      onMouseLeave={setNotHovered}
-    >
-      <LogEntryColumn {...columnWidths[timestampColumnId]}>
-        <LogEntryTimestampColumn format={exampleTimestampFormat} time={time} />
-      </LogEntryColumn>
-      <LogEntryColumn {...columnWidths[messageColumnId]}>
-        <LogEntryMessageColumn
-          columnValue={{
-            columnId: messageColumnId,
-            message: [{ field: 'message', value: [message], highlights: [] }],
-          }}
-          highlights={noHighlights}
-          isActiveHighlight={false}
-          wrapMode="none"
-        />
-      </LogEntryColumn>
-      <LogEntryColumn {...columnWidths[datasetColumnId]}>
-        <LogEntryFieldColumn
-          columnValue={{
-            columnId: datasetColumnId,
-            field: 'event.dataset',
-            value: [humanFriendlyDataset],
-            highlights: [],
-          }}
-          highlights={noHighlights}
-          isActiveHighlight={false}
-          wrapMode="none"
-        />
-      </LogEntryColumn>
-      <LogEntryColumn {...columnWidths[iconColumnId]}>
-        {isHovered || isMenuOpen ? (
-          <LogEntryContextMenu
-            isOpen={isMenuOpen}
-            onOpen={openMenu}
-            onClose={closeMenu}
-            items={[
-              {
-                label: i18n.translate('xpack.infra.logs.categoryExample.viewInDiscoverText', {
-                  defaultMessage: 'View in Discover',
-                }),
-                onClick: viewInStreamLinkProps.onClick!,
-                href: viewInStreamLinkProps.href,
-              },
-              {
-                label: i18n.translate('xpack.infra.logs.categoryExample.viewInContextText', {
-                  defaultMessage: 'View in context',
-                }),
-                onClick: () => {
-                  const logEntry: LogEntry = {
-                    id,
-                    index: '', // TODO: use real index when loading via async search
-                    context,
-                    cursor: {
-                      time: moment(timestamp).toISOString(),
-                      tiebreaker,
-                    },
-                    columns: [],
-                  };
-                  trackMetric({ metric: 'view_in_context__categories' });
+  const toggleMenu = useCallback(() => setIsMenuOpen(!isMenuOpen), [isMenuOpen]);
+  const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
-                  setContextEntry(logEntry);
-                },
-              },
+  const handleViewInContext = useCallback(() => {
+    const logEntry: LogEntry = {
+      id,
+      index: '', // TODO: use real index when loading via async search
+      context,
+      cursor: {
+        time: moment(timestamp).toISOString(),
+        tiebreaker,
+      },
+      columns: [],
+    };
+    trackMetric({ metric: 'view_in_context__categories' });
+    setContextEntry(logEntry);
+    closeMenu();
+  }, [closeMenu, context, id, setContextEntry, tiebreaker, timestamp, trackMetric]);
+
+  return (
+    <EuiTableRow>
+      <EuiTableRowCell
+        width="332px"
+        css={{
+          color: euiTheme.colors.textSubdued,
+        }}
+      >
+        {moment(timestamp).format('MMM D, YYYY @ HH:mm:ss.SSS')}
+      </EuiTableRowCell>
+      <EuiTableRowCell
+        width="auto"
+        css={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {message}
+      </EuiTableRowCell>
+      <EuiTableRowCell width="400px">{humanFriendlyDataset}</EuiTableRowCell>
+      <EuiTableRowCell width="32px">
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              data-test-subj="infraCategoryExampleMessageRowButton"
+              aria-label={MENU_LABEL}
+              iconType="boxesHorizontal"
+              size="s"
+              onClick={toggleMenu}
+            />
+          }
+          isOpen={isMenuOpen}
+          closePopover={closeMenu}
+          panelPaddingSize="none"
+          anchorPosition="leftCenter"
+        >
+          <EuiContextMenuPanel
+            items={[
+              <EuiContextMenuItem
+                key="viewInDiscover"
+                onClick={viewInStreamLinkProps.onClick}
+                href={viewInStreamLinkProps.href}
+              >
+                {i18n.translate('xpack.infra.logs.categoryExample.viewInDiscoverText', {
+                  defaultMessage: 'View in Discover',
+                })}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem key="viewInContext" onClick={handleViewInContext}>
+                {i18n.translate('xpack.infra.logs.categoryExample.viewInContextText', {
+                  defaultMessage: 'View in context',
+                })}
+              </EuiContextMenuItem>,
             ]}
           />
-        ) : null}
-      </LogEntryColumn>
-    </LogEntryRowWrapper>
+        </EuiPopover>
+      </EuiTableRowCell>
+    </EuiTableRow>
   );
 };
 
-const noHighlights: never[] = [];
-const timestampColumnId = 'category-example-timestamp-column' as const;
-const messageColumnId = 'category-examples-message-column' as const;
-const datasetColumnId = 'category-examples-dataset-column' as const;
-const iconColumnId = 'category-examples-icon-column' as const;
+export const CategoryExampleMessageTable: React.FC<{
+  examples: Array<{
+    id: string;
+    dataset: string;
+    message: string;
+    timestamp: number;
+    tiebreaker: number;
+    context: LogEntryContext;
+  }>;
+  timeRange: TimeRange;
+}> = ({ examples, timeRange }) => {
+  const { euiTheme } = useEuiTheme();
 
-const columnWidths = {
-  [timestampColumnId]: {
-    growWeight: 0,
-    shrinkWeight: 0,
-    // w_count + w_trend - w_padding = 120 px + 220 px - 8 px
-    baseWidth: '332px',
-  },
-  [messageColumnId]: {
-    growWeight: 1,
-    shrinkWeight: 0,
-    baseWidth: '0%',
-  },
-  [datasetColumnId]: {
-    growWeight: 0,
-    shrinkWeight: 0,
-    // w_dataset + w_max_anomaly + w_expand - w_padding = 200 px + 160 px + 40 px + 40 px - 8 px
-    baseWidth: '400px',
-  },
-  [iconColumnId]: {
-    growWeight: 0,
-    shrinkWeight: 0,
-    baseWidth: '32px',
-  },
+  return (
+    <EuiTable
+      css={{
+        tableLayout: 'fixed',
+        backgroundColor: euiTheme.colors.borderBaseFloating,
+        '& .euiTableRowCell': {
+          borderColor: euiTheme.colors.borderBaseFloating,
+          padding: '0px 8px',
+          fontFamily: euiTheme.font.familyCode,
+        },
+        '& .euiTableCellContent': {
+          padding: 0,
+          height: '24px',
+        },
+      }}
+    >
+      <EuiTableBody>
+        {examples.map((example, index) => (
+          <CategoryExampleMessageRow
+            key={index}
+            {...example}
+            timeRange={timeRange}
+            euiTheme={euiTheme}
+          />
+        ))}
+      </EuiTableBody>
+    </EuiTable>
+  );
 };
-
-export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
-  {
-    timestampColumn: {
-      id: timestampColumnId,
-    },
-  },
-  {
-    messageColumn: {
-      id: messageColumnId,
-    },
-  },
-  {
-    fieldColumn: {
-      field: 'event.dataset',
-      id: datasetColumnId,
-    },
-  },
-];

@@ -41,6 +41,7 @@ export interface GetPackagesRequest {
     prerelease?: boolean;
     excludeInstallStatus?: boolean;
     withPackagePoliciesCount?: boolean;
+    type?: string;
   };
 }
 
@@ -234,3 +235,17 @@ export type GetInputsTemplatesResponse =
   | {
       inputs: any;
     };
+
+export interface DeletePackageDatastreamAssetsRequest {
+  params: {
+    pkgName: string;
+    pkgVersion: string;
+  };
+  query: {
+    packagePolicyId: string;
+  };
+}
+
+export interface DeletePackageDatastreamAssetsResponse {
+  success: boolean;
+}

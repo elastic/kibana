@@ -86,6 +86,7 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
         gridLayoutStateManager.sectionRefs.current[sectionId] = rowRef;
       }}
       className={'kbnGridSection'}
+      data-test-subj={`kbnGridSectionWrapper-${sectionId}`}
     />
   );
 });

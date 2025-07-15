@@ -41,25 +41,19 @@ import type {
   InstallSource,
   InstallType,
   KibanaAssetType,
-  NewPackagePolicy,
-  PackageInfo,
   PackageVerificationResult,
   InstallResultStatus,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
-  DATASET_VAR_NAME,
-  DATA_STREAM_TYPE_VAR_NAME,
   GENERIC_DATASET_NAME,
 } from '../../../../common/constants';
 import {
   FleetError,
   PackageOutdatedError,
-  PackagePolicyValidationError,
   ConcurrentInstallOperationError,
   FleetUnauthorizedError,
-  PackageNotFoundError,
   FleetTooManyRequestsError,
   PackageInvalidDeploymentMode,
 } from '../../../errors';
@@ -68,7 +62,7 @@ import {
   MAX_TIME_COMPLETE_INSTALL,
   MAX_REINSTALL_RETRIES,
 } from '../../../constants';
-import { dataStreamService, licenseService } from '../..';
+import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -83,14 +77,17 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
-import { getFilteredInstallPackages } from '../filtered_packages';
+import {
+  getAllowedSearchAiLakeInstallPackagesIfEnabled,
+  getFilteredInstallPackages,
+} from '../filtered_packages';
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
 import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
-import { getInstalledPackageWithAssets, getPackageSavedObjects } from './get';
+import { getPackageSavedObjects } from './get';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -100,13 +97,13 @@ import { generateDatastreamEntries } from './custom_integrations/assets/dataset/
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
-import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
-import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+const MAX_INSTALL_RETRIES = 5;
+const BASE_RETRY_DELAY_MS = 1000; // 1s
 
 const PACKAGES_TO_INSTALL_WITH_STREAMING = [
   // The security_detection_engine package contains a large number of assets and
@@ -213,16 +210,32 @@ export async function ensureInstalledPackage(options: {
     };
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
-  const installResult = await installPackage({
-    installSource: 'registry',
-    savedObjectsClient,
-    pkgkey,
-    spaceId,
-    esClient,
-    neverIgnoreVerificationError: !force,
-    force: true, // Always force outdated packages to be installed if a later version isn't installed
-    authorizationHeader,
-  });
+
+  const installPackageWithRetries = async (attempt: number): Promise<InstallResult> => {
+    const installResult = await installPackage({
+      installSource: 'registry',
+      savedObjectsClient,
+      pkgkey,
+      spaceId,
+      esClient,
+      neverIgnoreVerificationError: !force,
+      force: true, // Always force outdated packages to be installed if a later version isn't installed
+      authorizationHeader,
+    });
+
+    if (
+      attempt < MAX_INSTALL_RETRIES &&
+      installResult.error?.message.includes('version_conflict_engine_exception')
+    ) {
+      const delayMs = BASE_RETRY_DELAY_MS * 2 ** attempt; // Exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return await installPackageWithRetries(++attempt);
+    } else {
+      return installResult;
+    }
+  };
+
+  const installResult = await installPackageWithRetries(0);
 
   if (installResult.error) {
     const errorPrefix =
@@ -394,6 +407,8 @@ interface InstallRegistryPackageParams {
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   keepFailedInstallation?: boolean;
+  useStreaming?: boolean;
+  automaticInstall?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -458,12 +473,14 @@ async function installPackageFromRegistry({
   skipDataStreamRollover = false,
   retryFromLastState = false,
   keepFailedInstallation = false,
+  useStreaming = false,
+  automaticInstall = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion: version } = Registry.splitPkgKey(pkgkey);
   let pkgVersion = version ?? '';
-  const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
+  useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName) || useStreaming;
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -506,6 +523,9 @@ async function installPackageFromRegistry({
       paths,
       archiveIterator,
     };
+    telemetryEvent.packageType = packageInfo.type;
+    telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
+    telemetryEvent.automaticInstall = automaticInstall;
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
@@ -559,6 +579,7 @@ async function installPackageFromRegistry({
       retryFromLastState,
       useStreaming,
       keepFailedInstallation,
+      automaticInstall,
     });
   } catch (e) {
     sendEvent({
@@ -600,6 +621,7 @@ export async function installPackageWithStateMachine(options: {
   retryFromLastState?: boolean;
   useStreaming?: boolean;
   keepFailedInstallation?: boolean;
+  automaticInstall?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -621,6 +643,7 @@ export async function installPackageWithStateMachine(options: {
     retryFromLastState,
     useStreaming,
     keepFailedInstallation,
+    automaticInstall,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -639,6 +662,9 @@ export async function installPackageWithStateMachine(options: {
     telemetryEvent = getTelemetryEvent(pkgName, pkgVersion);
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
+    telemetryEvent.packageType = packageInfo.type;
+    telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
+    telemetryEvent.automaticInstall = automaticInstall;
   }
 
   try {
@@ -650,6 +676,12 @@ export async function installPackageWithStateMachine(options: {
 
     const filteredPackages = getFilteredInstallPackages();
     if (filteredPackages.includes(pkgName)) {
+      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
+    }
+
+    const allowlistPackages = getAllowedSearchAiLakeInstallPackagesIfEnabled();
+    // This will only trigger if xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
+    if (allowlistPackages && !allowlistPackages.includes(pkgName)) {
       throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
     }
 
@@ -918,6 +950,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
       retryFromLastState,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -961,6 +995,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
       retryFromLastState,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     });
 
     return response;
@@ -1119,8 +1155,16 @@ export async function restartInstallation(options: {
   pkgVersion: string;
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
+  previousVersion?: string;
 }) {
-  const { savedObjectsClient, pkgVersion, pkgName, installSource, verificationResult } = options;
+  const {
+    savedObjectsClient,
+    pkgVersion,
+    pkgName,
+    installSource,
+    verificationResult,
+    previousVersion,
+  } = options;
 
   let savedObjectUpdate: Partial<Installation> = {
     install_version: pkgVersion,
@@ -1135,6 +1179,10 @@ export async function restartInstallation(options: {
       verification_key_id: null, // unset any previous verification key id
       ...formatVerificationResultForSO(verificationResult),
     };
+  }
+
+  if (previousVersion) {
+    savedObjectUpdate.previous_version = previousVersion;
   }
 
   auditLoggingService.writeCustomSoAuditLog({
@@ -1300,130 +1348,6 @@ export async function ensurePackagesCompletedInstall(
   );
   await Promise.all(installingPromises);
   return installingPackages;
-}
-
-export async function installAssetsForInputPackagePolicy(opts: {
-  pkgInfo: PackageInfo;
-  logger: Logger;
-  packagePolicy: NewPackagePolicy;
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
-  force: boolean;
-}) {
-  const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
-
-  if (pkgInfo.type !== 'input') return;
-
-  const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
-  const dataStreamType =
-    packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-    packagePolicy.inputs[0].streams[0].data_stream?.type ||
-    'logs';
-  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
-  const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
-    type: dataStream.type,
-    dataset: datasetName,
-  });
-
-  if (existingDataStreams.length) {
-    const existingDataStreamsAreFromDifferentPackage = existingDataStreams.some(
-      (ds) => ds._meta?.package?.name !== pkgInfo.name
-    );
-    if (existingDataStreamsAreFromDifferentPackage && !force) {
-      // user has opted to send data to an existing data stream which is managed by another
-      // package. This means certain custom setting such as elasticsearch settings
-      // defined by the package will not have been applied which could lead
-      // to unforeseen circumstances, so force flag must be used.
-      const streamIndexPattern = dataStreamService.streamPartsToIndexPattern({
-        type: dataStream.type,
-        dataset: datasetName,
-      });
-
-      throw new PackagePolicyValidationError(
-        `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
-      );
-    } else {
-      logger.info(
-        `Data stream for dataset ${datasetName} already exists, skipping index template creation for ${packagePolicy.id}`
-      );
-      return;
-    }
-  }
-
-  const existingIndexTemplate = await dataStreamService.getMatchingIndexTemplate(esClient, {
-    type: dataStream.type,
-    dataset: datasetName,
-  });
-
-  if (existingIndexTemplate) {
-    const indexTemplateOwnnedByDifferentPackage =
-      existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
-    if (indexTemplateOwnnedByDifferentPackage && !force) {
-      // index template already exists but there is no data stream yet
-      // we do not want to override the index template
-
-      throw new PackagePolicyValidationError(
-        `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
-      );
-    } else {
-      logger.info(
-        `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation for ${packagePolicy.id}`
-      );
-      return;
-    }
-  }
-
-  const installedPkgWithAssets = await getInstalledPackageWithAssets({
-    savedObjectsClient: soClient,
-    pkgName: pkgInfo.name,
-    logger,
-  });
-  let packageInstallContext: PackageInstallContext | undefined;
-  if (!installedPkgWithAssets) {
-    throw new PackageNotFoundError(
-      `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
-    );
-  }
-  try {
-    if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
-      const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
-        ignoreUnverified: force,
-      });
-
-      const archiveIterator = createArchiveIteratorFromMap(pkg.assetsMap);
-      packageInstallContext = {
-        packageInfo: pkg.packageInfo,
-        paths: pkg.paths,
-        archiveIterator,
-      };
-    } else {
-      const archiveIterator = createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap);
-      packageInstallContext = {
-        packageInfo: installedPkgWithAssets.packageInfo,
-        paths: installedPkgWithAssets.paths,
-        archiveIterator,
-      };
-    }
-
-    await installIndexTemplatesAndPipelines({
-      installedPkg: installedPkgWithAssets.installation,
-      packageInstallContext,
-      esReferences: installedPkgWithAssets.installation.installed_es || [],
-      savedObjectsClient: soClient,
-      esClient,
-      logger,
-      onlyForDataStreams: [dataStream],
-    });
-    // Upate ES index patterns
-    await optimisticallyAddEsAssetReferences(
-      soClient,
-      installedPkgWithAssets.installation.name,
-      [],
-      generateESIndexPatterns([dataStream])
-    );
-  } catch (error) {
-    logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
-  }
 }
 
 interface NoPkgArgs {

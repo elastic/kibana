@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonEmpty, EuiContextMenu, type EuiThemeComputed } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { css } from '@emotion/react';
 
@@ -86,16 +87,5 @@ export const StyledContextMenu = euiStyled(EuiContextMenu)<{ border: EuiThemeCom
   }
   .euiContextMenuItem:last-child {
     border: none;
-  }
-`;
-
-export const StyledEuiButtonEmpty = euiStyled(EuiButtonEmpty)`
-  font-weight: 'normal';
-
-  .euiButtonEmpty__text {
-    max-width: 300px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 `;

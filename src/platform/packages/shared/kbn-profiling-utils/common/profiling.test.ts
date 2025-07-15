@@ -38,12 +38,22 @@ describe('Stack frame metadata operations', () => {
     expect(getCalleeFunction(metadata)).toEqual('promtail');
   });
 
-  test('metadata has executable name but no function name or source line', () => {
+  test('metadata has executable name but no function name or source line, address = 0', () => {
     const metadata = createStackFrameMetadata({
       ExeFileName: 'promtail',
       FrameType: FrameType.Native,
+      AddressOrLine: 0,
     });
-    expect(getCalleeSource(metadata)).toEqual('promtail+0x0');
+    expect(getCalleeSource(metadata)).toEqual('promtail');
+  });
+
+  test('metadata has executable name but no function name or source line, address > 0', () => {
+    const metadata = createStackFrameMetadata({
+      ExeFileName: 'promtail',
+      FrameType: FrameType.Native,
+      AddressOrLine: 0x1234,
+    });
+    expect(getCalleeSource(metadata)).toEqual('promtail+0x1234');
   });
 
   test('metadata has no executable name, function name, or source line', () => {
@@ -89,7 +99,7 @@ describe('Stack frame metadata operations', () => {
 describe('getFrameSymbolStatus', () => {
   it('returns partially symbolized when metadata has executable name but no source name and source line', () => {
     expect(getFrameSymbolStatus({ sourceFilename: '', sourceLine: 0, exeFileName: 'foo' })).toEqual(
-      FrameSymbolStatus.PARTIALLY_SYMBOLYZED
+      FrameSymbolStatus.PARTIALLY_SYMBOLIZED
     );
   });
   it('returns not symbolized when metadata has no source name and source line and executable name', () => {

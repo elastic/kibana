@@ -130,7 +130,7 @@ export const AlertMonitorCount = ({ count, loading }: { count: number; loading?:
           {loading && <EuiLoadingSpinner />}
         </span>
       }
-      iconType="iInCircle"
+      iconType="info"
     />
   );
 };

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes, Location } from '../../definitions/types';
-import { setTestFunctions } from '../../shared/test_functions';
+import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
 describe('function validation', () => {
@@ -424,6 +425,60 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
     });
 
+    it('treats text and keyword as interchangeable', async () => {
+      setTestFunctions([
+        {
+          name: 'accepts_text',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'text' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'accepts_keyword',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'keyword' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'returns_keyword',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      // literals — all string literals are keywords
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
+
+      // fields
+      await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
+
+      // functions
+      // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
+    });
+
     it('enforces constant-only parameters', async () => {
       setTestFunctions([
         {
@@ -625,7 +680,7 @@ describe('function validation', () => {
 
         await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
         await expectErrors('FROM a_index | SORT SORT_FN()', []);
-        await expectErrors('FROM a_index | STATS STATS_FN()', []);
+        await expectErrors('FROM a_index | STATS max(doubleField)', []);
         await expectErrors('ROW ROW_FN()', []);
         await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
 
@@ -685,9 +740,7 @@ describe('function validation', () => {
             ],
           },
         ]);
-
         const { expectErrors } = await setup();
-
         await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
         await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
           'STATS BY does not support function does_not_support_by_option',
