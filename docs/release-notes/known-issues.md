@@ -4,7 +4,7 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
-For {{observability}} known issues, refer to [Observability known issues](docs-content://release-notes/elastic-observability/known-issues.md).
+For Elastic {{observability}} known issues, refer to [Elastic Observability known issues](docs-content://release-notes/elastic-observability/known-issues.md).
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
