@@ -478,6 +478,7 @@ function DiscoverDocumentsComponent({
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
+            additionalFieldGroups={additionalFieldGroups}
             externalCustomRenderers={cellRenderers}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             dataGridDensityState={density}

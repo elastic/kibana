@@ -53,6 +53,7 @@ import {
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -396,6 +397,10 @@ interface InternalUnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
+   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
+   */
+  additionalFieldGroups?: AdditionalFieldGroups;
+  /**
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -500,6 +505,7 @@ const InternalUnifiedDataTable = ({
   externalAdditionalControls,
   rowsPerPageOptions,
   externalCustomRenderers,
+  additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
@@ -1281,6 +1287,7 @@ const InternalUnifiedDataTable = ({
               getDocById={getDocById}
               replaceSelectedDocs={replaceSelectedDocs}
               setIsCompareActive={setIsCompareActive}
+              additionalFieldGroups={additionalFieldGroups}
             />
           ) : (
             <EuiDataGridMemoized

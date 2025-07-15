@@ -87,7 +87,6 @@ export type FieldListGroups<T extends FieldListItem> = {
 };
 
 export interface AdditionalFieldGroups<T extends FieldListItem = FieldListItem> {
-  smartFields?: FieldsGroup<T>['fields'];
   fallbackFields?: Record<string, string[]>;
   recommendedFields?: FieldsGroup<T>['fields'];
 }

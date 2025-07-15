@@ -17,6 +17,12 @@ import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  AdditionalFieldGroups,
+  getAllFallbackFields,
+  getAssociatedSmartFieldsAsString,
+  SmartFieldFallbackTooltip,
+} from '@kbn/unified-field-list';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
 import { calculateDiff, CalculateDiffProps, formatDiffValue } from './calculate_diff';
@@ -38,6 +44,7 @@ export interface UseComparisonCellValueProps {
   diffMode: DocumentDiffMode | undefined;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
+  additionalFieldGroups?: AdditionalFieldGroups;
 }
 
 export const useComparisonCellValue = ({
@@ -48,6 +55,7 @@ export const useComparisonCellValue = ({
   diffMode,
   fieldFormats,
   getDocById,
+  additionalFieldGroups,
 }: UseComparisonCellValueProps) => {
   const baseDocId = selectedDocIds[0];
   const baseDoc = useMemo(() => getDocById(baseDocId)?.flattened, [baseDocId, getDocById]);
@@ -65,11 +73,13 @@ export const useComparisonCellValue = ({
           diffMode={diffMode}
           fieldFormats={fieldFormats}
           getDocById={getDocById}
+          additionalFieldGroups={additionalFieldGroups}
           {...props}
         />
       </DiffProvider>
     ),
     [
+      additionalFieldGroups,
       baseDoc,
       baseDocId,
       calculateDiffMemoized,
@@ -87,18 +97,37 @@ type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
   EuiDataGridCellValueElementProps & {
     baseDocId: string;
     baseDoc: DataTableRecord['flattened'] | undefined;
+    additionalFieldGroups?: AdditionalFieldGroups;
   };
 
 const EMPTY_VALUE = '-';
 
 const CellValue = (props: CellValueProps) => {
-  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, getDocById } = props;
+  const {
+    dataView,
+    comparisonFields,
+    fieldColumnId,
+    rowIndex,
+    columnId,
+    getDocById,
+    additionalFieldGroups,
+  } = props;
   const fieldName = comparisonFields[rowIndex];
   const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
   const comparisonDoc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
-
+  const allFallbackFields = useMemo(
+    () => getAllFallbackFields(additionalFieldGroups),
+    [additionalFieldGroups]
+  );
   if (columnId === fieldColumnId) {
-    return <FieldCellValue field={field} fieldName={fieldName} />;
+    return (
+      <FieldCellValue
+        field={field}
+        fieldName={fieldName}
+        additionalFieldGroups={additionalFieldGroups}
+        allFallbackFields={allFallbackFields}
+      />
+    );
   }
 
   if (!comparisonDoc) {
@@ -115,7 +144,24 @@ interface FieldCellValueProps {
   fieldName: string;
 }
 
-const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
+const FieldCellValue = ({
+  field,
+  fieldName,
+  additionalFieldGroups,
+  allFallbackFields,
+}: FieldCellValueProps & {
+  additionalFieldGroups?: AdditionalFieldGroups;
+  allFallbackFields: string[]; // NOTE: Used purely as an optimisation to avoid looking up Smart Field names unless needed.
+}) => {
+  const isDerivedAsPartOfSmartField = allFallbackFields.includes(fieldName);
+  const associatedSmartFields = useMemo(
+    () =>
+      isDerivedAsPartOfSmartField
+        ? getAssociatedSmartFieldsAsString(fieldName, additionalFieldGroups)
+        : '',
+    [isDerivedAsPartOfSmartField, fieldName, additionalFieldGroups]
+  );
+
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">
       {field && (
@@ -130,6 +176,12 @@ const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
           data-test-subj="unifiedDataTableComparisonFieldName"
         >
           {field?.displayName ?? fieldName}
+          {isDerivedAsPartOfSmartField ? (
+            <>
+              {' '}
+              <SmartFieldFallbackTooltip associatedSmartFields={associatedSmartFields} />
+            </>
+          ) : null}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

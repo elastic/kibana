@@ -186,8 +186,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           .slice(0, popularFieldsLimit)
       : [];
 
-    const smartFields = additionalFieldGroups?.smartFields || [];
-
     // Recommended fields are not part of the data view fields list, so we need to check them separately
     const recommendedFields = additionalFieldGroups?.recommendedFields || [];
 
@@ -196,7 +194,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         ? {
             RecommendedFields: {
               fields: recommendedFields,
-              fieldCount: smartFields.length,
+              fieldCount: recommendedFields.length,
               isAffectedByGlobalFilter: true,
               isAffectedByTimeFilter: true,
               isInitiallyOpen: true,
@@ -330,19 +328,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
             defaultMessage: `There are no meta fields.`,
           }
         ),
-      },
-      SmartFields: {
-        fields: smartFields,
-        fieldCount: smartFields.length,
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: false,
-        isInitiallyOpen: true,
-        showInAccordion: true,
-        hideDetails: false,
-        hideIfEmpty: true,
-        title: i18n.translate('unifiedFieldList.useGroupedFields.smartFieldsLabel', {
-          defaultMessage: 'Smart fields',
-        }),
       },
     };
 
