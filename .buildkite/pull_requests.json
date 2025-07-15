@@ -117,7 +117,7 @@
       "allow_org_users": true,
       "allowed_repo_permissions": ["admin", "write"],
       "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
-      "build_on_commit": true,
+      "build_on_commit": false,
       "build_on_comment": true,
       "build_drafts": false,
       "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:run)\\W+(?:renovate)\\W+(?:helper))$",
