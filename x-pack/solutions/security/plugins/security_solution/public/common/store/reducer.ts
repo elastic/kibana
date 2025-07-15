@@ -41,6 +41,7 @@ import {
   dataViewManagerReducer,
   initialDataViewManagerState,
 } from '../../data_view_manager/redux/reducer';
+import { announcementReducer } from '../../a11y_announcements/a11y_announcements.slice';
 
 enableMapSet();
 
@@ -161,4 +162,5 @@ export const createReducer: (
     ...pluginsReducer,
     notes: notesReducer,
     dataViewManager: dataViewManagerReducer,
+    announcements: announcementReducer,
   });
