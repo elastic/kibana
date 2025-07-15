@@ -44,7 +44,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   onToolsChange,
   disabled = false,
 }) => {
-  // Group tools by provider
+  // Group tools by type
   const toolsByType = useMemo(() => {
     const grouped: Partial<Record<ToolType, ToolDefinition[]>> = {};
     tools.forEach((tool) => {
