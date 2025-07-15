@@ -108,6 +108,3 @@ xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
-
-# Disable role management (custom roles)
-xpack.security.roleManagementEnabled: true
