@@ -100,6 +100,9 @@ export interface FleetConfigType {
   syncIntegrations?: {
     taskInterval?: string;
   };
+  autoInstallContentPackages?: {
+    taskInterval?: string;
+  };
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
