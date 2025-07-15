@@ -323,10 +323,10 @@ describe('parseAndVerifyArchive', () => {
   it('should parse package successfully', async () => {
     const packageInfo: ArchivePackage = await _generatePackageInfoFromPaths(
       [
-        'x-pack/test/fleet_api_integration/apis/fixtures/package_verification/packages/src/input_only-0.1.0/docs/README.md',
-        'x-pack/test/fleet_api_integration/apis/fixtures/package_verification/packages/src/input_only-0.1.0/manifest.yml',
+        'x-pack/platform/test/fleet_api_integration/apis/fixtures/package_verification/packages/src/input_only-0.1.0/docs/README.md',
+        'x-pack/platform/test/fleet_api_integration/apis/fixtures/package_verification/packages/src/input_only-0.1.0/manifest.yml',
       ],
-      'x-pack/test/fleet_api_integration/apis/fixtures/package_verification/packages/src/input_only-0.1.0'
+      'x-pack/platform/test/fleet_api_integration/apis/fixtures/package_verification/packages/src/input_only-0.1.0'
     );
 
     expect(packageInfo).toEqual({
