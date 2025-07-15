@@ -27,6 +27,12 @@ export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFor
           searchable: true,
           aggregatable: true,
         },
+        attrName: {
+          name: 'attrName',
+          type: 'keyword',
+          searchable: true,
+          aggregatable: true,
+        },
       },
     },
     fieldFormats,
