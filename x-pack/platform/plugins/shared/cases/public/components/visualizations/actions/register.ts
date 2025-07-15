@@ -6,17 +6,18 @@
  */
 
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-
-import { createAddToExistingCaseLensAction } from './add_to_existing_case';
 import type { CasesActionContextProps, Services } from './types';
 
 export const registerUIActions = (
   casesActionContextProps: CasesActionContextProps,
   services: Services
 ) => {
-  const addToExistingCaseAction = createAddToExistingCaseLensAction(
-    casesActionContextProps,
-    services
+  services.plugins.uiActions.addTriggerActionAsync(
+    CONTEXT_MENU_TRIGGER,
+    'embeddable_addToExistingCase',
+    async () => {
+      const { createAddToExistingCaseLensAction } = await import('./add_to_existing_case');
+      return createAddToExistingCaseLensAction(casesActionContextProps, services);
+    }
   );
-  services.plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, addToExistingCaseAction);
 };
