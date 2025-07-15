@@ -123,7 +123,7 @@ const LogsEssentialsCallout: React.FC = () => {
           defaultMessage:
             'As this is a Logs Essentials project, these integrations will only install and configure for logs collection, even if the description mentions metrics.',
         })}
-        iconType="iInCircle"
+        iconType="info"
         color="primary"
       />
       <EuiSpacer size="l" />
