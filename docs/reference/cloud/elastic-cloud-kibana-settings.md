@@ -83,10 +83,10 @@ stack: ga 9.1
 :   The color for the banner link text. Defaults to `#0B64DD`.
 
 `xpack.product_intercept.enabled`
-:   Enable or disable the product intercept feature.
+:   Enable or disable Elastic product feedback prompts. Defaults to `true`.
 
 `xpack.product_intercept.interval`:
-:   Set the interval for the product intercept feature.
+:   Set the time that elapses between Elastic product feedback prompts. The time is formatted as a number and a time unit (d,h,m,s). For example, 20m, 24h, 7d. Defaults to `90d`.
 
 ### Version 8.18+ [ec_version_8_18]
 
