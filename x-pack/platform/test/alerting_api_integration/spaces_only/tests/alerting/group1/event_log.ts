@@ -125,6 +125,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
               retry,
               spaceId: space.id,
               execute: runs,
+              actionExecute: Math.min(runs - 1, 2),
               getService,
             });
           }

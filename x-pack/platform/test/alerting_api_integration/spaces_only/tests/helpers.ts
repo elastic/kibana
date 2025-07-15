@@ -97,14 +97,22 @@ export const waitForRuleExecute = ({
   retry,
   spaceId = Spaces.space1.id,
   execute,
+  actionExecute,
   getService,
 }: {
   id: string;
   retry: RetryService;
   spaceId?: string;
   execute: number;
+  actionExecute?: number;
   getService: FtrProviderContext['getService'];
 }) => {
+  const conditions: Array<[string, { gte: number } | { equal: number }]> = [
+    ['execute', { equal: execute }],
+  ];
+  if (Number.isInteger(actionExecute)) {
+    conditions.push(['execute-action', { equal: actionExecute as number }]);
+  }
   return retry.try(async () => {
     return await getEventLog({
       getService,
@@ -112,7 +120,7 @@ export const waitForRuleExecute = ({
       type: 'alert',
       id,
       provider: 'alerting',
-      actions: new Map([['execute', { equal: execute }]]),
+      actions: new Map(conditions),
     });
   });
 };
