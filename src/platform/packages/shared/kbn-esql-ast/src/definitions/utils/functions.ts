@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
@@ -82,7 +83,8 @@ export function getFunctionDefinition(name: string) {
 
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
-  predicates: FunctionFilterPredicates | undefined
+  predicates: FunctionFilterPredicates | undefined,
+  license?: ILicense
 ): FunctionDefinition[] => {
   if (!predicates) {
     return functions;
@@ -92,6 +94,18 @@ export const filterFunctionDefinitions = (
   return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
     if (ignoreAsSuggestion) {
       return false;
+    }
+
+    const hasRestrictedSignature = signatures.some((signature) => signature.license);
+    if (hasRestrictedSignature) {
+      const availableSignatures = signatures.filter((signature) => {
+        if (!signature.license) return true;
+        return license?.type === signature.license;
+      });
+
+      if (availableSignatures.length === 0) {
+        return false;
+      }
     }
 
     if (ignored.includes(name)) {
@@ -233,9 +247,10 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
  * @returns
  */
 export const getFunctionSuggestions = (
-  predicates?: FunctionFilterPredicates
+  predicates?: FunctionFilterPredicates,
+  license?: ILicense
 ): ISuggestionItem[] => {
-  return filterFunctionDefinitions(allFunctions(), predicates).map(getFunctionSuggestion);
+  return filterFunctionDefinitions(allFunctions(), predicates, license).map(getFunctionSuggestion);
 };
 
 export function checkFunctionInvocationComplete(

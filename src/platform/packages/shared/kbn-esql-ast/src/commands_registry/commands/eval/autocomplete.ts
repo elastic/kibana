@@ -59,6 +59,7 @@ export async function autocomplete(
     expressionRoot,
     location: Location.EVAL,
     context,
+    license: callbacks?.license,
   });
 
   const positionInExpression = getExpressionPosition(query, expressionRoot);

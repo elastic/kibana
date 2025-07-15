@@ -131,7 +131,9 @@ export async function autocomplete(
     {
       functions: true,
       fields: false,
-    }
+    },
+    {},
+    callbacks?.license
   );
 
   return await handleFragment(

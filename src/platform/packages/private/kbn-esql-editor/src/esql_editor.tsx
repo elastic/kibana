@@ -63,6 +63,7 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
+import { useGlobalESQLLicense } from './hooks/use_global_license';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -134,6 +135,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   } = kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
+  const { license: currentLicense } = useGlobalESQLLicense(kibana.services?.esql?.getLicense);
 
   const fixedQuery = useMemo(
     () => fixESQLQueryWithVariables(query.esql, esqlVariables),
@@ -466,6 +468,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
+        // eslint-disable-next-line no-console
+        console.log('license from state', license);
+        // eslint-disable-next-line no-console
+        console.log('license from global hook', currentLicense);
         clearCacheWhenOld(dataSourcesCache, fixedQuery);
         const getLicense = kibana.services?.esql?.getLicense;
         const sources = await memoizedSources(dataViews, core, getLicense).result;
@@ -543,6 +549,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         };
       },
       getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
+      license,
     };
     return callbacks;
   }, [
@@ -563,6 +570,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     indexManagementApiService,
     histogramBarTarget,
     activeSolutionId,
+    currentLicense,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {

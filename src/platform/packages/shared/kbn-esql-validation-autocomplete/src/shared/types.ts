@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import {
   Location,
   ESQLSourceResult,
@@ -58,6 +59,7 @@ export interface ESQLCallbacks {
   getInferenceEndpoints?: (
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
+  license?: ILicense;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

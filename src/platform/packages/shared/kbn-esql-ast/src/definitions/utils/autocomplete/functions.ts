@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniq } from 'lodash';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import {
   allStarConstant,
   commaCompleteItem,
@@ -140,7 +141,8 @@ export async function getFunctionArgsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   fullText: string,
   offset: number,
-  context?: ICommandContext
+  context?: ICommandContext,
+  license?: ILicense
 ): Promise<ISuggestionItem[]> {
   const astContext = findAstPosition(commands, offset);
   const node = astContext.node;
@@ -358,15 +360,18 @@ export async function getFunctionArgsSuggestions(
         location = Location.STATS_TIMESERIES;
       }
       suggestions.push(
-        ...getFunctionSuggestions({
-          location,
-          returnTypes: canBeBooleanCondition
-            ? ['any']
-            : (ensureKeywordAndText(
-                getTypesFromParamDefs(typesToSuggestNext)
-              ) as FunctionParameterType[]),
-          ignored: fnToIgnore,
-        }).map((suggestion) => ({
+        ...getFunctionSuggestions(
+          {
+            location,
+            returnTypes: canBeBooleanCondition
+              ? ['any']
+              : (ensureKeywordAndText(
+                  getTypesFromParamDefs(typesToSuggestNext)
+                ) as FunctionParameterType[]),
+            ignored: fnToIgnore,
+          },
+          license
+        ).map((suggestion) => ({
           ...suggestion,
           text: addCommaIf(shouldAddComma, suggestion.text),
         }))
@@ -439,7 +444,8 @@ async function getListArgsSuggestions(
   commands: ESQLCommand[],
   getFieldsByType: GetColumnsByTypeFn,
   fieldsMap: Map<string, ESQLFieldWithMetadata>,
-  offset: number
+  offset: number,
+  license?: ILicense
 ) {
   const suggestions = [];
   const { command, node } = findAstPosition(commands, offset);
@@ -487,7 +493,8 @@ async function getListArgsSuggestions(
               fields: true,
               userDefinedColumns: anyUserDefinedColumns,
             },
-            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
+            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] },
+            license
           ))
         );
       }
@@ -553,7 +560,8 @@ export const getInsideFunctionsSuggestions = async (
         ast,
         callbacks?.getByType ?? (() => Promise.resolve([])),
         context?.fields ?? new Map(),
-        cursorPosition ?? 0
+        cursorPosition ?? 0,
+        callbacks?.license
       );
     }
     if (
@@ -567,7 +575,8 @@ export const getInsideFunctionsSuggestions = async (
         callbacks?.getByType ?? (() => Promise.resolve([])),
         query,
         cursorPosition ?? 0,
-        context
+        context,
+        callbacks?.license
       );
     }
   }

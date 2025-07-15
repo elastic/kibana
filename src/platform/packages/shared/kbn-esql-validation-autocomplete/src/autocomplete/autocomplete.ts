@@ -257,6 +257,7 @@ async function getSuggestionsWithinCommandExpression(
             return await callbacks.getColumnsFor!({ query });
           }
         : undefined,
+      license: callbacks?.license,
     },
     context,
     offset
