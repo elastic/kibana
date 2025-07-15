@@ -24,6 +24,7 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import type { Filter } from '@kbn/es-query';
 
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -39,6 +40,7 @@ import { ScheduleDefinition } from './definition';
 import { Header } from './header';
 import { ScheduleExecutionLogs } from './execution_logs';
 import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
+import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
 
 interface Props {
   scheduleId: string;
@@ -65,6 +67,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     });
 
   const { sourcererDataView } = useSourcererDataView();
+  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.detections);
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -84,7 +87,8 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           alertsIndexPattern ?? '',
           connector,
           sourcererDataView,
-          uiSettings
+          uiSettings,
+          experimentalDataView
         );
         await updateAttackDiscoverySchedule({ id: scheduleId, scheduleToUpdate });
         setIsEditing(false);
@@ -94,11 +98,12 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     },
     [
       aiConnectors,
-      uiSettings,
-      sourcererDataView,
-      scheduleId,
       alertsIndexPattern,
+      sourcererDataView,
+      uiSettings,
+      experimentalDataView,
       updateAttackDiscoverySchedule,
+      scheduleId,
     ]
   );
 
