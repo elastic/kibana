@@ -667,7 +667,20 @@ owner: elastic`,
         savedObjectsClient: soClient,
       });
       expect(packages.find((item) => item.id === 'apache_spark')).toBeUndefined();
-      expect(packages.find((item) => item.id === 'nginx')).toBeDefined();
+      expect(packages.find((item) => item.id === 'nginx')).toEqual({
+        data_streams: [
+          {
+            dataset: 'nginx.access',
+            namespace: 'default',
+            type: 'logs',
+          },
+        ],
+        id: 'nginx',
+        name: 'nginx',
+        status: 'not_installed',
+        title: 'Nginx',
+        version: '1.0.0',
+      });
       expect(packages.find((item) => item.id === 'fleet_server')).toBeDefined();
     });
   });

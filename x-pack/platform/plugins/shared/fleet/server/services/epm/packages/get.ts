@@ -208,14 +208,22 @@ function filterOutExcludedDataStreamTypes(
     appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
   if (excludeDataStreamTypes.length > 0) {
     // filter out packages where all data streams have excluded types e.g. metrics
-    return packageList.filter((pkg) => {
+    return packageList.reduce((acc, pkg) => {
       const shouldInclude =
         (pkg.data_streams || [])?.length === 0 ||
-        pkg.data_streams?.some((dataStream: any) => {
+        pkg.data_streams?.some((dataStream) => {
           return !excludeDataStreamTypes.includes(dataStream.type);
         });
-      return shouldInclude;
-    });
+      if (shouldInclude) {
+        // filter out excluded data stream types
+        const filteredDataStreams =
+          pkg.data_streams?.filter(
+            (dataStream) => !excludeDataStreamTypes.includes(dataStream.type)
+          ) ?? [];
+        acc.push({ ...pkg, data_streams: filteredDataStreams });
+      }
+      return acc;
+    }, []);
   }
   return packageList;
 }

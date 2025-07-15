@@ -105,11 +105,22 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
         })
       : [];
 
-    const tiles = filterPolicyTemplatesTiles<PackageListItem>(
+    let tiles = filterPolicyTemplatesTiles<PackageListItem>(
       pkg.policy_templates_behavior,
       topPackage,
       integrationsPolicyTemplates
     );
+
+    // remove tiles that only have data streams of excluded types
+    tiles = tiles.filter((tile) => {
+      return (
+        !tile.integration ||
+        tile.data_streams.some(
+          (dataStream) => dataStream.dataset === `${tile.name}.${tile.integration}`
+        )
+      );
+    });
+
     return [...acc, ...tiles];
   }, []);
 };
