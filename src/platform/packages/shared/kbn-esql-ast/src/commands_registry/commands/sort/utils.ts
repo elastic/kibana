@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../../..';
+import {
+  pipeCompleteItem,
+  type ESQLCommand,
+  type ESQLSingleAstItem,
+  commaCompleteItem,
+  isColumn,
+} from '../../../..';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { ISuggestionItem } from '../../types';
 
@@ -54,10 +60,7 @@ export const sortModifierSuggestions = {
   } as ISuggestionItem,
 };
 
-export const getSortPos = (
-  query: string,
-  command: ESQLCommand<'sort'>
-): SortPosition | undefined => {
+export const getSortPos = (query: string, command: ESQLCommand): SortPosition | undefined => {
   const lastArg = command.args[command.args.length - 1];
   if (!lastArg || /,\s+$/.test(query)) {
     return 'empty_expression';
@@ -82,4 +85,45 @@ export const getSortPos = (
   if (/(?:nulls\s+first|nulls\s+last)\s+$/i.test(query)) {
     return 'after_nulls';
   }
+};
+
+export const getSuggestionsAfterCompleteExpression = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined
+): ISuggestionItem[] => {
+  let sortCommandKeywordSuggestions = [
+    sortModifierSuggestions.ASC,
+    sortModifierSuggestions.DESC,
+    sortModifierSuggestions.NULLS_FIRST,
+    sortModifierSuggestions.NULLS_LAST,
+  ];
+
+  const pipeSuggestion = { ...pipeCompleteItem, sortText: 'AAA' };
+  const commaSuggestion = {
+    ...commaCompleteItem,
+    text: ', ',
+    command: TRIGGER_SUGGESTION_COMMAND,
+    sortText: 'AAA',
+  };
+
+  if (/\s$/.test(innerText)) {
+    // comma needs to be sent back a column to replace the trailing space
+    commaSuggestion.rangeToReplace = {
+      start: innerText.length - 1,
+      end: innerText.length,
+    };
+  } else if (isColumn(expressionRoot)) {
+    // special case: cursor right after a column name
+    sortCommandKeywordSuggestions = sortCommandKeywordSuggestions.map((s) => ({
+      ...s,
+      text: `${expressionRoot.text} ${s.text}`, // add a space after the column name
+      filterText: expressionRoot.text, // turn off Monaco's filtering by the suggestion text
+    }));
+    pipeSuggestion.filterText = expressionRoot.text;
+    pipeSuggestion.text = expressionRoot.text + ' ' + pipeSuggestion.text;
+    commaSuggestion.filterText = expressionRoot.text;
+    commaSuggestion.text = expressionRoot.text + ' ' + commaSuggestion.text;
+  }
+
+  return [...sortCommandKeywordSuggestions, pipeSuggestion, commaSuggestion];
 };
