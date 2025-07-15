@@ -33,6 +33,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { TABS_ENABLED } from '../../../../constants';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -292,7 +293,7 @@ export const DiscoverTopNav = ({
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={draft}
-        onDraftChange={onDraftChange}
+        onDraftChange={TABS_ENABLED ? onDraftChange : undefined}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
