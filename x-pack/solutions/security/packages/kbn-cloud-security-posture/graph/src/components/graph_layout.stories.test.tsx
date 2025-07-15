@@ -9,6 +9,7 @@ import React from 'react';
 import { composeStories } from '@storybook/react';
 import { render } from '@testing-library/react';
 import * as stories from './graph_layout.stories';
+import type { MappedAssetProps } from '@kbn/cloud-security-posture-common/types/assets';
 
 const { GraphLargeStackedEdgeCases, GraphWithAssetInventoryData } = composeStories(stories);
 
@@ -102,7 +103,12 @@ describe('GraphWithAssetInventoryData story', () => {
 
     // Extract the nodes with asset data from the story
     const nodes = GraphWithAssetInventoryData.args?.nodes ?? [];
-    const nodesWithAssetData = nodes.filter((node) => 'assetData' in node && node.assetData);
+    const nodesWithAssetData = nodes.filter((node) => {
+      if (!('documentsData' in node) || !node.documentsData || !Array.isArray(node.documentsData)) {
+        return false;
+      }
+      return node.documentsData.some((doc) => doc.assetData !== undefined);
+    });
 
     // We expect to find three nodes with asset data (indices 0, 2, and 4 from the baseGraph)
     expect(nodesWithAssetData.length).toBe(3);
@@ -123,9 +129,11 @@ describe('GraphWithAssetInventoryData story', () => {
         // Find the EuiText element within this node
         const textElement = nodeElement.querySelector('.euiText');
 
-        // Verify the entity name is displayed
-        const assetData = node.assetData as { [key: string]: string };
-        const expectedEntityName = assetData['entity.name'];
+        // Get the node's asset data from the first document that has it
+        const docs = node.documentsData as Array<{ assetData?: MappedAssetProps }>;
+        const documentWithAssetData = docs?.find((doc) => doc.assetData);
+        const assetData = documentWithAssetData?.assetData;
+        const expectedEntityName = assetData?.entityName;
         expect(expectedEntityName).toBeDefined();
 
         // Check that the EuiText element contains the entity name
@@ -140,9 +148,19 @@ describe('GraphWithAssetInventoryData story', () => {
 
     // Extract nodes without asset data (excluding label and group nodes)
     const nodes = GraphWithAssetInventoryData.args?.nodes ?? [];
-    const regularNodes = nodes.filter(
-      (node) => !('assetData' in node) && node.shape !== 'label' && node.shape !== 'group'
-    );
+    const regularNodes = nodes.filter((node) => {
+      // Skip label and group nodes
+      if (node.shape === 'label' || node.shape === 'group') {
+        return false;
+      }
+
+      // Check if node has no documents with asset data
+      if (!('documentsData' in node) || !node.documentsData || !Array.isArray(node.documentsData)) {
+        return true;
+      }
+
+      return !node.documentsData.some((doc) => doc.assetData !== undefined);
+    });
 
     // We should have nodes without asset data
     expect(regularNodes.length).toBeGreaterThan(0);

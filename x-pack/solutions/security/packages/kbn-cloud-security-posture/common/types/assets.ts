@@ -23,3 +23,11 @@ export interface AssetProps {
   'event.ingested': string;
   [key: string]: any; // For any additional fields
 }
+
+/**
+ * Simplified version of asset properties used in graph node responses
+ * This is intentionally simplified to only expose the essential entity name field
+ */
+export interface MappedAssetProps {
+  entityName: string;
+}
