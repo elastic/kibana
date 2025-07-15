@@ -7,51 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSortPos } from './utils';
+import { synth } from '../../../..';
+import { SortPosition, getSortPos } from './utils';
+
+const getPos = (query: string) => {
+  const command = query.split('|')[1];
+  return getSortPos(query, synth.cmd(command.trim()));
+};
 
 test('returns correct position on complete modifier matches', () => {
-  expect(getSortPos('from a | ')).toBe('none');
-  expect(getSortPos('from a | s')).toBe('pre-start');
-  expect(getSortPos('from a | so')).toBe('pre-start');
-  expect(getSortPos('from a | sor')).toBe('pre-start');
-  expect(getSortPos('from a | sort')).toBe('start');
-  expect(getSortPos('from a | sort ')).toBe('expression');
-  expect(getSortPos('from a | sort col')).toBe('expression');
-  expect(getSortPos('from a | sort col + 23')).toBe('expression');
-  expect(getSortPos('from a | sort col, ')).toBe('expression');
-  expect(getSortPos('from a | sort col, col2')).toBe('expression');
-  expect(getSortPos('from a | sort col, col2 ')).toBe('after_expression');
-  expect(getSortPos('from a | sort col, FLOOR(col2) ')).toBe('after_expression');
-  expect(getSortPos('from a | sort col ')).toBe('after_expression');
-  expect(getSortPos('from a | sort col ASC')).toBe('order');
-  expect(getSortPos('from a | sort col DESC ')).toBe('space3');
-  expect(getSortPos('from a | sort col DESC NULLS FIRST')).toBe('nulls');
-  expect(getSortPos('from a | sort col DESC NULLS LAST ')).toBe('space4');
-  expect(getSortPos('from a | sort col DESC NULLS LAST, ')).toBe('space1');
-  expect(getSortPos('from a | sort col DESC NULLS LAST, col2')).toBe('expression');
-  expect(getSortPos('from a | sort col DESC NULLS LAST, col2 DESC')).toBe('order');
-  expect(getSortPos('from a | sort col DESC NULLS LAST, col2 NULLS LAST')).toBe('nulls');
-  expect(getSortPos('from a | sort col DESC NULLS LAST, col2 NULLS LAST ')).toBe('space4');
+  expect(getPos('from a | sort')).toBe<SortPosition>('empty_expression');
+  expect(getPos('from a | sort ')).toBe<SortPosition>('empty_expression');
+  expect(getPos('from a | sort col')).toBe<SortPosition>('expression');
+  expect(getPos('from a | sort col + 23')).toBe<SortPosition>('expression');
+  expect(getPos('from a | sort col, ')).toBe<SortPosition>('empty_expression');
+  expect(getPos('from a | sort col, col2')).toBe<SortPosition>('expression');
+  expect(getPos('from a | sort col, col2 ')).toBe<SortPosition>('expression');
+  expect(getPos('from a | sort col, FLOOR(col2) ')).toBe<SortPosition>('expression');
+  expect(getPos('from a | sort col ')).toBe<SortPosition>('expression');
+  expect(getPos('from a | sort col ASC')).toBe<SortPosition>('order_complete');
+  expect(getPos('from a | sort col DESC ')).toBe<SortPosition>('after_order');
+  expect(getPos('from a | sort col DESC NULLS FIRST')).toBe<SortPosition>('nulls_complete');
+  expect(getPos('from a | sort col DESC NULLS LAST ')).toBe<SortPosition>('after_nulls');
+  expect(getPos('from a | sort col DESC NULLS LAST, ')).toBe<SortPosition>('empty_expression');
+  expect(getPos('from a | sort col DESC NULLS LAST, col2')).toBe<SortPosition>('expression');
+  expect(getPos('from a | sort col DESC NULLS LAST, col2 DESC')).toBe<SortPosition>(
+    'order_complete'
+  );
+  expect(getPos('from a | sort col DESC NULLS LAST, col2 NULLS LAST')).toBe<SortPosition>(
+    'nulls_complete'
+  );
+  expect(getPos('from a | sort col DESC NULLS LAST, col2 NULLS LAST ')).toBe<SortPosition>(
+    'after_nulls'
+  );
 });
 
 test('returns ASC/DESC matched text', () => {
-  expect(getSortPos('from a | sort col ASC')).toBe('order');
+  expect(getPos('from a | sort col ASC')).toBe<SortPosition>('order_complete');
 
-  expect(getSortPos('from a | sort col as')).toBe('order');
+  expect(getPos('from a | sort col as')).toBe<SortPosition>('expression');
 
-  expect(getSortPos('from a | sort col DE')).toBe('order');
-});
-
-test('returns NULLS FIRST/NULLS LAST matched text', () => {
-  expect(getSortPos('from a | sort col ASC NULLS FIRST')).toBe('nulls');
-  expect(getSortPos('from a | sort col ASC NULLS FIRST').nulls).toBe('NULLS FIRST');
-
-  expect(getSortPos('from a | sort col ASC nulls fi')).toBe('nulls');
-  expect(getSortPos('from a | sort col ASC nulls fi').nulls).toBe('NULLS FI');
-
-  expect(getSortPos('from a | sort col nul')).toBe('nulls');
-  expect(getSortPos('from a | sort col nul').nulls).toBe('NUL');
-
-  expect(getSortPos('from a | sort col1, col2 NULLS LA')).toBe('nulls');
-  expect(getSortPos('from a | sort col1, col2 NULLS LA').nulls).toBe('NULLS LA');
+  expect(getPos('from a | sort col DE')).toBe<SortPosition>('expression');
 });
