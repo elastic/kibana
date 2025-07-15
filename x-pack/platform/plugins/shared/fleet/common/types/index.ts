@@ -89,6 +89,7 @@ export interface FleetConfigType {
         max?: string;
       };
       excludePackages: string[];
+      searchAiLakePackageAllowlistEnabled?: boolean;
     };
   };
   createArtifactsBulkBatchSize?: number;
@@ -97,6 +98,9 @@ export interface FleetConfigType {
     retryDelays?: string[];
   };
   syncIntegrations?: {
+    taskInterval?: string;
+  };
+  autoInstallContentPackages?: {
     taskInterval?: string;
   };
   integrationsHomeOverride?: string;

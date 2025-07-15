@@ -92,7 +92,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   const dataStatsButton = (
     <EuiButtonIcon
       color="text"
-      iconType="iInCircle"
+      iconType="info"
       aria-label="info"
       size="xs"
       onClick={onButtonClick}

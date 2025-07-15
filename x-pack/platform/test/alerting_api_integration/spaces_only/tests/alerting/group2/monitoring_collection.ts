@@ -25,7 +25,6 @@ const RULE_INTERVALS_TO_WRITE = 5;
 const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 const ES_GROUPS_TO_WRITE = 3;
 
-// eslint-disable-next-line import/no-default-export
 export default function alertingMonitoringCollectionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');

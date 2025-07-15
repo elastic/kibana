@@ -161,7 +161,7 @@ export * from './impl/assistant/api/conversations/bulk_update_actions_conversati
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
 export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
-export { getUserConversationsExist, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
+export { getUserConversationsExist, bulkUpdatePrompts } from './impl/assistant/api';
 
 export {
   /** A range slider component, typically used to configure the number of alerts sent as context */
@@ -191,6 +191,8 @@ export interface UseAssistantAvailability {
   hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
+  // True when the Assistant is visible, i.e. the Assistant is available and the Assistant is visible in the UI
+  isAssistantVisible: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
@@ -201,4 +203,6 @@ export interface UseAssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // remove once product has signed off on prompt text
+  isStarterPromptsEnabled: boolean;
 }

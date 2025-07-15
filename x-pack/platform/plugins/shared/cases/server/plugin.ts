@@ -47,11 +47,14 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import type { ServerlessProjectType } from '../common/constants/types';
+import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import {
   createCasesAnalyticsIndexes,
   registerCasesAnalyticsIndexesTasks,
   scheduleCasesAnalyticsSyncTasks,
 } from './cases_analytics';
+import { registerUiSettings } from './ui_settings';
 
 export class CasePlugin
   implements
@@ -71,6 +74,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -104,6 +108,7 @@ export class CasePlugin
       taskManager: plugins.taskManager,
       logger: this.logger,
       core,
+      analyticsConfig: this.caseConfig.analytics,
     });
 
     this.securityPluginSetup = plugins.security;
@@ -132,25 +137,38 @@ export class CasePlugin
       })
     );
 
-    if (plugins.taskManager && plugins.usageCollection) {
-      createCasesTelemetry({
-        core,
-        taskManager: plugins.taskManager,
-        usageCollection: plugins.usageCollection,
-        logger: this.logger,
-        kibanaVersion: this.kibanaVersion,
-      });
+    if (this.caseConfig.incrementalId.enabled) {
+      registerUiSettings(core);
+    }
+
+    if (plugins.taskManager) {
+      if (plugins.usageCollection) {
+        createCasesTelemetry({
+          core,
+          taskManager: plugins.taskManager,
+          usageCollection: plugins.usageCollection,
+          logger: this.logger,
+          kibanaVersion: this.kibanaVersion,
+        });
+      }
+
+      if (this.caseConfig.incrementalId.enabled) {
+        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
+          plugins.taskManager,
+          this.caseConfig.incrementalId,
+          this.logger,
+          plugins.usageCollection
+        );
+      }
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
-    const isServerless = plugins.cloud?.isServerlessEnabled;
-
     registerRoutes({
       router,
       routes: [
-        ...getExternalRoutes({ isServerless, docLinks: core.docLinks }),
+        ...getExternalRoutes({ isServerless: this.isServerless, docLinks: core.docLinks }),
         ...getInternalRoutes(this.userProfileService),
       ],
       logger: this.logger,
@@ -174,8 +192,9 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
-    const isServerlessSecurity =
-      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'security';
+    const serverlessProjectType = this.isServerless
+      ? (plugins.cloud?.serverless.projectType as ServerlessProjectType)
+      : undefined;
 
     registerConnectorTypes({
       actions: plugins.actions,
@@ -184,7 +203,7 @@ export class CasePlugin
       logger: this.logger,
       getCasesClient,
       getSpaceId,
-      isServerlessSecurity,
+      serverlessProjectType,
     });
 
     return {
@@ -204,6 +223,10 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+      if (this.caseConfig.incrementalId.enabled) {
+        void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+      }
+
       if (this.caseConfig.analytics.index?.enabled) {
         scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
         createCasesAnalyticsIndexes({

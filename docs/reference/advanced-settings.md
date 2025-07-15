@@ -5,7 +5,7 @@ mapped_pages:
 
 # Advanced settings [advanced-options]
 
-**Advanced Settings** control the behavior of {{kib}}. You can change the settings that apply to spaces, or to all of {{kib}}. For example, you can change the format used to display dates, specify the default data view, and apply your own branding.
+**Advanced Settings** control the behavior of {{kib}}. You can change the settings that apply to a specific space only, or to all of {{kib}}. For example, you can change the format used to display dates, specify the default data view, and apply your own branding.
 
 ::::{warning}
 Changing a setting can affect {{kib}} performance and cause problems that are difficult to diagnose. Setting a property value to a blank field reverts to the default behavior, which might not be compatible with other configuration settings. Deleting a custom setting permanently removes it from {{kib}}.
@@ -27,9 +27,9 @@ To add the privilege, go to the **Roles** management page using the navigation m
 For more information on granting access to {{kib}}, refer to [Granting access to {{kib}}](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/built-in-roles.md).
 
 
-## Change the space settings [kibana-settings-reference]
+## Change the space-specific setting [kibana-settings-reference]
 
-Change the settings that apply only to {{kib}} spaces.
+Change the settings that apply only to a speific {{kib}} space.
 
 1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
 2. Click **Space Settings**.
@@ -498,7 +498,7 @@ $$$visualization-visualize-heatmapChartslibrary$$$`visualization:visualize:legac
 
 ## Change the global settings [kibana-global-settings-reference]
 
-Change the settings that apply only to {{kib}} spaces.
+Change the only settings that apply to all of {{kib}}.
 
 1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
 2. Click **Global Settings**.

@@ -8,7 +8,7 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -255,6 +255,6 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/spaces-utils"
+    "@kbn/spaces-utils",
   ]
 }

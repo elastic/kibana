@@ -32,7 +32,7 @@ const getIcon = (type: DatatableColumnType | null) => {
       icon = 'invert';
       break;
     default:
-      icon = 'questionInCircle';
+      icon = 'question';
   }
 
   return <EuiIcon type={icon} color="subdued" />;

@@ -82,6 +82,13 @@ export function SloList() {
   usePageReady({
     isReady: !isLoading && sloList !== undefined,
     isRefreshing: isLoading,
+    customMetrics: {
+      key1: 'slo_list_count',
+      value1: sloList?.total ?? 0,
+    },
+    meta: {
+      description: '[ttfmp_slos] The SLOs list has finished loading.',
+    },
   });
 
   return (

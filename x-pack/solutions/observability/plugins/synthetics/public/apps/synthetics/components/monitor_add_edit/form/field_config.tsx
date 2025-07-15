@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { MaintenanceWindowsLink } from '../fields/maintenance_windows/create_maintenance_windows_btn';
 import { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
+import { MonitorSpacesProps } from '../fields/monitor_spaces';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import {
   PROFILE_OPTIONS,
@@ -63,6 +64,7 @@ import {
   TextArea,
   ThrottlingWrapper,
   MaintenanceWindowsFieldWrapper,
+  KibanaSpacesWrapper,
 } from './field_wrappers';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
@@ -1700,5 +1702,25 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       value: field?.value as string[],
     }),
     labelAppend: <MaintenanceWindowsLink />,
+  },
+  [ConfigKey.KIBANA_SPACES]: {
+    fieldKey: ConfigKey.KIBANA_SPACES,
+    component: KibanaSpacesWrapper,
+    label: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.label', {
+      defaultMessage: 'Kibana spaces',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.helpText', {
+      defaultMessage:
+        ' Current space should always be part of list, unless All spaces is selected.',
+    }),
+    controlled: true,
+    props: ({ field, setValue, trigger }): MonitorSpacesProps => ({
+      readOnly,
+      value: field?.value || [],
+      onChange: async (spaces?: string[]) => {
+        setValue(ConfigKey.KIBANA_SPACES, spaces);
+        await trigger(ConfigKey.KIBANA_SPACES);
+      },
+    }),
   },
 });

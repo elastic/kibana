@@ -33,7 +33,7 @@ import { MetricItemExtra } from './metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
 import { FlyoutParamProps } from '../types';
 
-const METRIC_ITEM_HEIGHT = 160;
+const METRIC_ITEM_HEIGHT = 170;
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
@@ -93,7 +93,7 @@ export const MetricItem = ({
       });
     }
 
-    if (trendData === null) {
+    if (!trendData) {
       return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage.noData', {
         defaultMessage: 'No data available for the selected time window.',
       });
@@ -171,7 +171,7 @@ export const MetricItem = ({
                   id: monitor.configId,
                   location: locationName,
                   locationId: monitor.locationId,
-                  spaceId: monitor.spaceId,
+                  spaces: monitor.spaces,
                 });
               }
             }}

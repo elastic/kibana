@@ -9,11 +9,28 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import type { ESQLControlState } from '@kbn/esql-types';
+import { EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
+import { BehaviorSubject } from 'rxjs';
+import { ControlFetchContext } from '../../control_group/control_fetch';
+
+const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
+const mockIsSuccess = jest.fn(() => true);
+
+jest.mock('./utils/get_esql_single_column_values', () => {
+  const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
+  getESQLSingleColumnValues.isSuccess = () => mockIsSuccess();
+  return {
+    getESQLSingleColumnValues,
+  };
+});
 
 describe('ESQLControlApi', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   const uuid = 'myESQLControl';
 
   const dashboardApi = {};
@@ -21,7 +38,7 @@ describe('ESQLControlApi', () => {
   const factory = getESQLControlFactory();
   const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
-  test('Should publish ES|QL variable', async () => {
+  test('should publish ES|QL variable', async () => {
     const initialState = {
       selectedOptions: ['option1'],
       availableOptions: ['option1', 'option2'],
@@ -43,7 +60,7 @@ describe('ESQLControlApi', () => {
     });
   });
 
-  test('Should serialize state', async () => {
+  test('should serialize state', async () => {
     const initialState = {
       selectedOptions: ['option1'],
       availableOptions: ['option1', 'option2'],
@@ -74,37 +91,70 @@ describe('ESQLControlApi', () => {
     });
   });
 
-  test('changing the dropdown should publish new ES|QL variable', async () => {
-    const initialState = {
-      selectedOptions: ['option1'],
-      availableOptions: ['option1', 'option2'],
-      variableName: 'variable1',
-      variableType: 'values',
-      esqlQuery: 'FROM foo | WHERE column = ?variable1',
-      controlType: 'STATIC_VALUES',
-    } as ESQLControlState;
-    const { Component, api } = await factory.buildControl({
-      initialState,
-      finalizeApi,
-      uuid,
-      controlGroupApi,
+  describe('values from query', () => {
+    test('should update on load and fetch', async () => {
+      const initialState = {
+        selectedOptions: ['option1'],
+        availableOptions: ['option1', 'option2'],
+        variableName: 'variable1',
+        variableType: 'values',
+        esqlQuery: 'FROM foo | STATS BY column',
+        controlType: EsqlControlType.VALUES_FROM_QUERY,
+      } as ESQLControlState;
+      await factory.buildControl({
+        initialState,
+        finalizeApi,
+        uuid,
+        controlGroupApi,
+      });
+      await waitFor(() => {
+        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
+        expect(mockIsSuccess).toHaveBeenCalledTimes(1);
+      });
+      const controlFetch$ = controlGroupApi.controlFetch$(
+        uuid
+      ) as BehaviorSubject<ControlFetchContext>;
+      controlFetch$.next({});
+      await waitFor(() => {
+        expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(2);
+        expect(mockIsSuccess).toHaveBeenCalledTimes(2);
+      });
     });
+  });
 
-    expect(api.esqlVariable$.value).toStrictEqual({
-      key: 'variable1',
-      type: 'values',
-      value: 'option1',
-    });
+  describe('changing the dropdown', () => {
+    test('should publish new ES|QL variable', async () => {
+      const initialState = {
+        selectedOptions: ['option1'],
+        availableOptions: ['option1', 'option2'],
+        variableName: 'variable1',
+        variableType: 'values',
+        esqlQuery: 'FROM foo | WHERE column = ?variable1',
+        controlType: 'STATIC_VALUES',
+      } as ESQLControlState;
+      const { Component, api } = await factory.buildControl({
+        initialState,
+        finalizeApi,
+        uuid,
+        controlGroupApi,
+      });
 
-    const { findByTestId, findByTitle } = render(<Component className="" />);
-    fireEvent.click(await findByTestId('comboBoxSearchInput'));
-    fireEvent.click(await findByTitle('option2'));
-
-    await waitFor(() => {
       expect(api.esqlVariable$.value).toStrictEqual({
         key: 'variable1',
         type: 'values',
-        value: 'option2',
+        value: 'option1',
+      });
+
+      const { findByTestId, findByTitle } = render(<Component className="" />);
+      fireEvent.click(await findByTestId('comboBoxSearchInput'));
+      fireEvent.click(await findByTitle('option2'));
+
+      await waitFor(() => {
+        expect(api.esqlVariable$.value).toStrictEqual({
+          key: 'variable1',
+          type: 'values',
+          value: 'option2',
+        });
       });
     });
   });

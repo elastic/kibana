@@ -14,16 +14,12 @@ interface BulkManualRuleRunRulesLimitErrorModalProps {
   onClose: () => void;
 }
 
-const text = {
-  title: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE,
-  message: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE(MAX_MANUAL_RULE_RUN_BULK_SIZE),
-  closeButton: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON,
-};
+const message = i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE(MAX_MANUAL_RULE_RUN_BULK_SIZE);
 
 const BulkManualRuleRunLimitErrorModalComponent = ({
   onClose,
 }: BulkManualRuleRunRulesLimitErrorModalProps) => {
-  return <BulkActionRuleLimitErrorModal onClose={onClose} text={text} />;
+  return <BulkActionRuleLimitErrorModal onClose={onClose} message={message} />;
 };
 
 export const BulkManualRuleRunLimitErrorModal = React.memo(

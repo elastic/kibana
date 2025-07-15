@@ -12,7 +12,12 @@ describe('config validation', () => {
     it('sets the defaults correctly', () => {
       expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
         Object {
-          "analytics": Object {},
+          "analytics": Object {
+            "index": Object {
+              "enabled": true,
+            },
+          },
+          "enabled": true,
           "files": Object {
             "allowedMimeTypes": Array [
               "image/aces",
@@ -103,6 +108,11 @@ describe('config validation', () => {
               "application/x-tar",
               "application/pdf",
             ],
+          },
+          "incrementalId": Object {
+            "enabled": false,
+            "taskIntervalMinutes": 10,
+            "taskStartDelayMinutes": 10,
           },
           "markdownPlugins": Object {
             "lens": true,

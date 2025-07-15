@@ -464,36 +464,16 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/types.ts"
+                "plugin": "visualizations",
+                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
               },
               {
                 "plugin": "fileUpload",
                 "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/platform/plugins/private/transform/public/app/mount_management_section.ts"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
-              },
-              {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/types.ts"
               },
               {
                 "plugin": "visualizations",

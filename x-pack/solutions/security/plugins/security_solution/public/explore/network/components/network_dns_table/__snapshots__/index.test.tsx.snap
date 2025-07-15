@@ -121,7 +121,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       >
                         <span
                           color="subdued"
-                          data-euiicon-type="iInCircle"
+                          data-euiicon-type="info"
                           data-test-subj="header-section-tooltip-icon"
                           tabindex="0"
                         >

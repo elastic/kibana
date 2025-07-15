@@ -102,6 +102,7 @@ paths-ignore:
   - src/platform/packages/private/kbn-telemetry-tools
   - src/platform/packages/shared/kbn-apm-synthtrace
   - src/platform/packages/shared/kbn-axe-config
+  - src/platform/packages/shared/kbn-cache-cli
   - src/platform/packages/shared/kbn-dev-cli-errors
   - src/platform/packages/shared/kbn-dev-cli-runner
   - src/platform/packages/shared/kbn-dev-proc-runner
@@ -119,7 +120,9 @@ paths-ignore:
   - x-pack/examples
   - x-pack/packages/ai-infra/product-doc-artifact-builder
   - x-pack/packages/kbn-synthetics-private-location
+  - x-pack/platform/packages/shared/kbn-ai-tools-cli
   - x-pack/platform/packages/shared/kbn-inference-cli
+  - x-pack/platform/packages/shared/kbn-kibana-api-cli
   - x-pack/platform/packages/shared/kbn-sample-parser
   - x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/public/assets/**
   - x-pack/platform/test

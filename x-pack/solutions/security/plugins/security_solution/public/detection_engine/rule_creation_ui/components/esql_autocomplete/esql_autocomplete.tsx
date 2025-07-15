@@ -72,7 +72,7 @@ export const EsqlAutocomplete: React.FC<AutocompleteFieldProps> = ({
         isClearable={false}
         singleSelection={AS_PLAIN_TEXT}
         data-test-subj="esqlAutocompleteComboBox"
-        style={{ width: `${COMPONENT_WIDTH}px` }}
+        css={{ width: `${COMPONENT_WIDTH}px` }}
         fullWidth
         isInvalid={isInvalid}
       />

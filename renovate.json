@@ -191,7 +191,12 @@
         "langsmith",
         "openai",
         "@types/json-schema",
-        "table"
+        "table",
+        "@huggingface/hub",
+        "cache-manager",
+        "cache-manager-fs-hash",
+        "keyv",
+        "@types/cache-manager-fs-hash"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -3348,6 +3353,24 @@
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
+    {
+      "groupName": "p-timeout",
+      "matchDepNames": [
+        "p-timeout"
+      ],
+      "reviewers": [
+        "team:obs-ai-assistant"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },    
     {
       "groupName": "redux-actions",
       "matchDepNames": [

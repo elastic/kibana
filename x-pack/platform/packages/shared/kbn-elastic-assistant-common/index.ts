@@ -72,12 +72,15 @@ export { getAttackDiscoveryLoadingMessage } from './impl/utils/get_attack_discov
 export {
   getAttackChainMarkdown,
   getAttackDiscoveryMarkdown,
+  getAttackDiscoveryMarkdownFields,
   getMarkdownFields,
   getMarkdownWithOriginalValues,
 } from './impl/utils/get_attack_discovery_markdown';
 
 export {
+  getOriginalAlertIds,
   getTacticLabel,
   getTacticMetadata,
   replaceNewlineLiterals,
+  transformInternalReplacements,
 } from './impl/utils/attack_discovery_helpers';

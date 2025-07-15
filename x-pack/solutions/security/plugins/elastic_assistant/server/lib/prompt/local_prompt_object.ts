@@ -29,6 +29,22 @@ import {
   RULE_ANALYSIS,
   DATA_QUALITY_ANALYSIS,
   ALERT_EVALUATION,
+  starterPromptTitle1,
+  starterPromptDescription1,
+  starterPromptIcon1,
+  starterPromptPrompt1,
+  starterPromptDescription2,
+  starterPromptTitle2,
+  starterPromptIcon2,
+  starterPromptPrompt2,
+  starterPromptDescription3,
+  starterPromptTitle3,
+  starterPromptIcon3,
+  starterPromptPrompt3,
+  starterPromptDescription4,
+  starterPromptTitle4,
+  starterPromptIcon4,
+  starterPromptPrompt4,
 } from './prompts';
 
 export const promptGroupId = {
@@ -41,9 +57,6 @@ export const promptGroupId = {
 };
 
 export const promptDictionary = {
-  alertEvaluation: `alertEvaluation`,
-  dataQualityAnalysis: 'dataQualityAnalysis',
-  ruleAnalysis: 'ruleAnalysis',
   alertSummary: `alertSummary`,
   alertSummarySystemPrompt: `alertSummarySystemPrompt`,
   systemPrompt: `systemPrompt`,
@@ -68,6 +81,26 @@ export const promptDictionary = {
     'defendInsights-incompatibleAntivirusEventsEndpointId',
   defendInsightsIncompatibleAntivirusEventsValue: 'defendInsights-incompatibleAntivirusEventsValue',
   // context prompts
+  alertEvaluation: `alertEvaluation`,
+  dataQualityAnalysis: 'dataQualityAnalysis',
+  ruleAnalysis: 'ruleAnalysis',
+  // starter prompts
+  starterPromptDescription1: 'starterPromptDescription1',
+  starterPromptTitle1: 'starterPromptTitle1',
+  starterPromptIcon1: 'starterPromptIcon1',
+  starterPromptPrompt1: 'starterPromptPrompt1',
+  starterPromptDescription2: 'starterPromptDescription2',
+  starterPromptTitle2: 'starterPromptTitle2',
+  starterPromptIcon2: 'starterPromptIcon2',
+  starterPromptPrompt2: 'starterPromptPrompt2',
+  starterPromptDescription3: 'starterPromptDescription3',
+  starterPromptTitle3: 'starterPromptTitle3',
+  starterPromptIcon3: 'starterPromptIcon3',
+  starterPromptPrompt3: 'starterPromptPrompt3',
+  starterPromptDescription4: 'starterPromptDescription4',
+  starterPromptTitle4: 'starterPromptTitle4',
+  starterPromptIcon4: 'starterPromptIcon4',
+  starterPromptPrompt4: 'starterPromptPrompt4',
 };
 
 export const localPrompts: Prompt[] = [
@@ -286,5 +319,85 @@ export const localPrompts: Prompt[] = [
     prompt: {
       default: RULE_ANALYSIS,
     },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt4 },
   },
 ];

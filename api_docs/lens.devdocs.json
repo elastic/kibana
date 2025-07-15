@@ -23949,7 +23949,38 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.PUBLIC_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "PUBLIC_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/lens\""
+        ],
+        "path": "x-pack/platform/plugins/shared/lens/server/api/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.PUBLIC_API_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "PUBLIC_API_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "x-pack/platform/plugins/shared/lens/server/api/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "lens",

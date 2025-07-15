@@ -2237,6 +2237,14 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
@@ -2253,12 +2261,16 @@
                 "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_policy.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_project_monitor_policy.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -25651,6 +25663,14 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/private_location/synthetics_private_location.ts"
               },
@@ -25667,12 +25687,16 @@
                 "path": "x-pack/solutions/observability/test/api_integration/apis/synthetics/sample_data/test_policy.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_project_monitor_policy.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_project_monitor_policy.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -28930,6 +28954,36 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_ASSET_PACKAGE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_ASSET_PACKAGE",
+        "description": [],
+        "signature": [
+          "\"cloud_asset_inventory\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"asset_inventory\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE",
         "type": "string",
         "tags": [],
@@ -30022,6 +30076,40 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES",
+        "type": "Array",
+        "tags": [],
+        "label": "SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES",
+        "description": [
+          "\nAllowlist of integrations in addition to {@link SEARCH_AI_LAKE_PACKAGES} which are available to\ninstall in the Serverless Security SearchAILake tier (AI4DSOC effort)."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/security_search_ai_lake.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.SEARCH_AI_LAKE_PACKAGES",
+        "type": "Array",
+        "tags": [],
+        "label": "SEARCH_AI_LAKE_PACKAGES",
+        "description": [
+          "\nAllowlist of the publicized integrations allowed in the Serverless Security SearchAILake tier (AI4DSOC effort).\nThis is used to control which integrations are displayed in the Configurations -> Integrations UI as well as\nwhich promotion rules will be installed."
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/security_search_ai_lake.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

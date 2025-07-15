@@ -203,6 +203,17 @@ const TLS_OPTIONS = (readOnly: boolean): AdvancedFieldGroup => ({
   ],
 });
 
+const KIBANA_SPACES_OPTIONS = (readOnly: boolean): AdvancedFieldGroup => ({
+  title: i18n.translate('xpack.synthetics.monitorConfig.section.kibanaSpaces.title', {
+    defaultMessage: 'Kibana Spaces',
+  }),
+  description: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.description', {
+    defaultMessage:
+      'Select the Kibana spaces where this monitor should be available. Current space should always be part of list, unless All spaces is selected.',
+  }),
+  components: [FIELD(readOnly)[ConfigKey.KIBANA_SPACES]],
+});
+
 export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
   [FormMonitorType.HTTP]: {
     step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
@@ -225,6 +236,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       HTTP_ADVANCED(readOnly).responseConfig,
       HTTP_ADVANCED(readOnly).responseChecks,
       TLS_OPTIONS(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.TCP]: {
@@ -246,6 +258,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       TCP_ADVANCED(readOnly).requestConfig,
       TCP_ADVANCED(readOnly).responseChecks,
       TLS_OPTIONS(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.MULTISTEP]: {
@@ -273,6 +286,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       },
       MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ...BROWSER_ADVANCED(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.SINGLE]: {
@@ -300,6 +314,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       },
       MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ...BROWSER_ADVANCED(readOnly),
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
   [FormMonitorType.ICMP]: {
@@ -319,6 +334,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       DEFAULT_DATA_OPTIONS(readOnly),
       MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ICMP_ADVANCED(readOnly).requestConfig,
+      KIBANA_SPACES_OPTIONS(readOnly),
     ],
   },
 });

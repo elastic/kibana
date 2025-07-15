@@ -225,7 +225,7 @@
               "_EuiThemeTransparentBackgroundColors",
               " | keyof ",
               "_EuiThemeBorderColors",
-              " | keyof ",
+              " | \"vis\" | keyof ",
               "_EuiThemeConstantColors",
               " | undefined"
             ],

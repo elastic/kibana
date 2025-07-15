@@ -8,7 +8,9 @@
  */
 
 import { parse } from '..';
+import { EsqlQuery } from '../../query';
 import { ESQLColumn, ESQLCommand, ESQLFunction, ESQLInlineCast } from '../../types';
+import { Walker } from '../../walker';
 
 describe('WHERE', () => {
   describe('correctly formatted', () => {
@@ -18,23 +20,20 @@ describe('WHERE', () => {
         | KEEP first_name, last_name, still_hired
         | WHERE still_hired == true
         `;
-      const { ast, errors } = parse(text);
+      const { ast, errors } = EsqlQuery.fromSrc(text);
+      const where = Walker.match(ast, { type: 'command', name: 'where' });
 
       expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {},
-        {},
-        {
-          type: 'command',
-          name: 'where',
-          args: [
-            {
-              type: 'function',
-              name: '==',
-            },
-          ],
-        },
-      ]);
+      expect(where).toMatchObject({
+        type: 'command',
+        name: 'where',
+        args: [
+          {
+            type: 'function',
+            name: '==',
+          },
+        ],
+      });
     });
 
     describe('match expression', () => {

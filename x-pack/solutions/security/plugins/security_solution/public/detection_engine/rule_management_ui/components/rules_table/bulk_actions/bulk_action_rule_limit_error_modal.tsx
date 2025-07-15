@@ -14,29 +14,26 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
+import * as i18n from '../../../../common/translations';
 
 interface BulkManualRuleRunRulesLimitErrorModalProps {
   onClose: () => void;
-  text: {
-    title: string;
-    message: string;
-    closeButton: string;
-  };
+  message: string;
 }
 
 const BulkActionRuleLimitErrorModalComponent = ({
   onClose,
-  text,
+  message,
 }: BulkManualRuleRunRulesLimitErrorModalProps) => {
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{text.title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{i18n.BULK_ACTION_LIMIT_ERROR_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>{text.message}</EuiModalBody>
+      <EuiModalBody>{message}</EuiModalBody>
       <EuiModalFooter>
         <EuiButton onClick={onClose} fill>
-          {text.closeButton}
+          {i18n.BULK_ACTION_ERROR_MODAL_CLOSE_BUTTON}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

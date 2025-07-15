@@ -246,7 +246,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
                               defaultMessage: 'Open licensing popover',
                             }
                           )}
-                          iconType="questionInCircle"
+                          iconType="question"
                           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                         />
                       }

@@ -15,11 +15,11 @@ disabled:
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts
 
   # Cypress configs, for now these are still run manually
-  - x-pack/test/defend_workflows_cypress/cli_config.ts
-  - x-pack/test/defend_workflows_cypress/config.ts
-  - x-pack/test/osquery_cypress/cli_config.ts
-  - x-pack/test/osquery_cypress/config.ts
-  - x-pack/test/osquery_cypress/visual_config.ts
+  - x-pack/solutions/security/test/defend_workflows_cypress/cli_config.ts
+  - x-pack/solutions/security/test/defend_workflows_cypress/config.ts
+  - x-pack/solutions/security/test/osquery_cypress/cli_config.ts
+  - x-pack/solutions/security/test/osquery_cypress/config.ts
+  - x-pack/solutions/security/test/osquery_cypress/visual_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
   - x-pack/test/security_solution_cypress/config.ts
 
@@ -61,13 +61,14 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/ess_basic_license.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/ess_air_gapped.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/edge_cases/ess_air_gapped.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/edge_cases/ess_air_gapped_large_package.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_disabled/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/edge_cases/ess_trial_license.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/type_specific_fields/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/prebuilt_rules_package/air_gapped/configs/ess_air_gapped_large_package.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/prebuilt_rules_package/air_gapped/configs/ess_air_gapped.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/ml_disabled/configs/ess_basic_license.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_bulk_actions/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_delete/basic_license_essentials_tier/configs/ess.config.ts
@@ -115,11 +116,14 @@ enabled:
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
-  - x-pack/test/spaces_api_integration/deployment_agnostic/spaces_only/config.ts
-  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_basic.ts
-  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_trial.ts
-  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_trial.ts
-  - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_basic.ts
-  - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group1/config.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/spaces_only/config.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_basic.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.config_trial.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_trial.ts
+  - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/stateful.copy_to_space.config_basic.ts
   - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/config.ts
   - x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
+  - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial_common.ts
+  - x-pack/solutions/security/test/api_integration_basic/config.ts
+  - x-pack/solutions/security/test/api_integration/apis/cases/config.ts

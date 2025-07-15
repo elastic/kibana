@@ -40,6 +40,9 @@ describe('AssistantProvider', () => {
               http: mockHttp,
               notifications,
               elasticAssistantSharedState,
+              featureFlags: {
+                getBooleanValue: jest.fn().mockReturnValue(false),
+              },
             }}
           >
             {children}
@@ -63,9 +66,10 @@ describe('AssistantProvider', () => {
           hasSearchAILakeConfigurations: expect.any(Boolean),
           hasUpdateAIAssistantAnonymization: expect.any(Boolean),
           isAssistantEnabled: expect.any(Boolean),
+          isStarterPromptsEnabled: expect.any(Boolean),
+          isAssistantVisible: expect.any(Boolean),
         }),
         assistantFeatures: expect.objectContaining({
-          advancedEsqlGeneration: expect.any(Boolean),
           assistantModelEvaluation: expect.any(Boolean),
           defendInsights: expect.any(Boolean),
         }),
