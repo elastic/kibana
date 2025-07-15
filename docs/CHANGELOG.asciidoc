@@ -109,6 +109,7 @@ IMPORTANT: The 8.18.3 release contains fixes for potential security vulnerabilit
 [float]
 [[known-issues-8.18.3]]
 === Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-227976]
 include::CHANGELOG.asciidoc[tag=known-issue-1508]
 include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
@@ -643,9 +644,28 @@ Machine Learning::
 [[release-notes-8.17.8]]
 == {kib} 8.17.8
 
-The 8.17.8 release includes the following fixes.
+The 8.17.8 release includes the following fixes and known issues.
 
 IMPORTANT: The 8.17.8 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory for more details].
+
+[float]
+[[known-issues-8.17.8]]
+=== Known issues
+
+// tag::known-issue-227976[]
+.Dashboard Copy link doesn't work when sharing from a space other than the default space
+[%collapsible]
+====
+**This issue is resolved in versions 8.19.0, 8.18.4, and 8.17.9** ({kibana-pull}227625[#227625]).
+
+*Details* +
+When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
+
+*Workaround* +
+To avoid this issue, don't upgrade {kib} to one of the affected versions, or upgrade to a higher version that includes a fix for it.
+
+====
+// end::known-issue-227976[]
 
 [float]
 [[fixes-v8.17.8]]
