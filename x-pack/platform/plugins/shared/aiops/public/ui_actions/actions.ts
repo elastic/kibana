@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 export { createAddChangePointChartAction } from './create_change_point_chart';
 export { createOpenChangePointInMlAppAction } from './open_change_point_ml';
 export { createCategorizeFieldAction } from '../components/log_categorization/categorize_field_actions';
