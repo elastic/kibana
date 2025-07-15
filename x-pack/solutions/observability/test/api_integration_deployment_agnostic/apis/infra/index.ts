@@ -17,9 +17,9 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./metrics_overview_top'));
     loadTestFile(require.resolve('./metrics_process_list'));
     loadTestFile(require.resolve('./metrics_process_list_chart'));
-    loadTestFile(require.resolve('./infra'));
+    loadTestFile(require.resolve('./infra/infra_metrics'));
     loadTestFile(require.resolve('./inventory_threshold_alert'));
     loadTestFile(require.resolve('./services'));
-    loadTestFile(require.resolve('./infra_asset_count'));
+    loadTestFile(require.resolve('./infra/infra_count'));
   });
 }

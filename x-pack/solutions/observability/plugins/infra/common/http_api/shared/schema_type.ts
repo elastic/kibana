@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as rt from 'io-ts';
 
-export * from './get_infra_metrics';
-export * from './get_infra_count';
+export const SchemaTypesRT = rt.keyof({
+  ecs: null,
+  semconv: null,
+});
+
+export type SchemaTypes = rt.TypeOf<typeof SchemaTypesRT>;
