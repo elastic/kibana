@@ -13,8 +13,6 @@ import {
   isCombinedFilter,
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 export const buildCombinedAssetFilter = ({
   field,
@@ -53,13 +51,4 @@ export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = [
   }
 
   return fields;
-};
-
-export const buildAssetIdFilter = (
-  assetId: string,
-  assetType: InventoryItemType,
-  dataView: DataView
-): Filter[] => {
-  const assetIdField = dataView.getFieldByName(findInventoryFields(assetType).id);
-  return assetIdField ? [buildPhraseFilter(assetIdField, assetId, dataView)] : [];
 };
