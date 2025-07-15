@@ -24,6 +24,7 @@ jest.mock('../../../assistant/use_assistant_availability', () => ({
   useAssistantAvailability: jest.fn(() => ({
     hasAssistantPrivilege: true,
     isAssistantEnabled: true,
+    isAssistantVisible: true,
   })),
 }));
 
