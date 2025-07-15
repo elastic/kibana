@@ -47,11 +47,8 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
-<<<<<<< HEAD
 import type { ServerlessProjectType } from '../common/constants/types';
-import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
-=======
->>>>>>> parent of 1683180a2bd ([Cases] Add incremental id service and expose the ID in the UI (#222874))
+
 import {
   createCasesAnalyticsIndexes,
   registerCasesAnalyticsIndexesTasks,
