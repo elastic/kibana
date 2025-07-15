@@ -1148,6 +1148,8 @@
       "@kbn/infra-plugin/*": ["x-pack/solutions/observability/plugins/infra/*"],
       "@kbn/ingest-pipelines-plugin": ["x-pack/platform/plugins/shared/ingest_pipelines"],
       "@kbn/ingest-pipelines-plugin/*": ["x-pack/platform/plugins/shared/ingest_pipelines/*"],
+      "@kbn/ingest-pipelines-shared": ["x-pack/platform/packages/shared/ingest-pipelines"],
+      "@kbn/ingest-pipelines-shared/*": ["x-pack/platform/packages/shared/ingest-pipelines/*"],
       "@kbn/input-control-vis-plugin": ["src/platform/plugins/private/input_control_vis"],
       "@kbn/input-control-vis-plugin/*": ["src/platform/plugins/private/input_control_vis/*"],
       "@kbn/inspector-plugin": ["src/platform/plugins/shared/inspector"],
