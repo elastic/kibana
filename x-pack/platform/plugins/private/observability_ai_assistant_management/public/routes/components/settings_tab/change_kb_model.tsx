@@ -26,7 +26,7 @@ import {
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseState, useKibana } from '@kbn/observability-ai-assistant-plugin/public';
-import { useInstallProductDoc } from '../../../hooks/use_install_product_doc';
+import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
@@ -39,7 +39,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
 
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
-  const { mutateAsync: installProductDoc } = useInstallProductDoc();
+  const { installProductDoc } = useGetProductDoc(currentlyDeployedInferenceId);
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
