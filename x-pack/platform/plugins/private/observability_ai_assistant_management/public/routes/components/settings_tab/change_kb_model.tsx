@@ -38,7 +38,6 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
 
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
-  const { installProductDoc } = useGetProductDoc(knowledgeBase.status.value?.currentInferenceId);
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
@@ -52,6 +51,8 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     }
     return knowledgeBase.status.value?.currentInferenceId;
   }, [knowledgeBase.status.value?.currentInferenceId, modelOptions]);
+
+  const { installProductDoc } = useGetProductDoc(currentlyDeployedInferenceId);
 
   const [selectedInferenceId, setSelectedInferenceId] = useState(
     currentlyDeployedInferenceId || ''
