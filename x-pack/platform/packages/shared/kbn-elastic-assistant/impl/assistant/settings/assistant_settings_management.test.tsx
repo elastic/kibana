@@ -16,7 +16,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantSettingsManagement } from './assistant_settings_management';
 
 import {
-  CONNECTORS_TAB,
   ANONYMIZATION_TAB,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
@@ -46,13 +45,9 @@ const testProps = {
   selectedConversation: welcomeConvo,
   dataViews: mockDataViews,
   onTabChange,
-  currentTab: CONNECTORS_TAB,
+  currentTab: CONVERSATIONS_TAB,
 };
 jest.mock('../../assistant_context');
-
-jest.mock('../../connectorland/connector_settings_management', () => ({
-  ConnectorsSettingsManagement: () => <span data-test-subj="connectors-tab" />,
-}));
 
 jest.mock('../conversations/conversation_settings_management', () => ({
   ConversationSettingsManagement: () => <span data-test-subj="conversations-tab" />,
@@ -107,7 +102,6 @@ describe('AssistantSettingsManagement', () => {
   });
 
   describe.each([
-    CONNECTORS_TAB,
     ANONYMIZATION_TAB,
     CONVERSATIONS_TAB,
     EVALUATION_TAB,

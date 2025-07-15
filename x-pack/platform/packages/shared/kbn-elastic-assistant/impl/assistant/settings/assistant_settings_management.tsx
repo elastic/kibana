@@ -13,7 +13,6 @@ import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
-import { ConnectorsSettingsManagement } from '../../connectorland/connector_settings_management';
 import { ConversationSettingsManagement } from '../conversations/conversation_settings_management';
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
 import { SystemPromptSettingsManagement } from '../prompt_editor/system_prompt/system_prompt_settings_management';
@@ -21,7 +20,6 @@ import { AnonymizationSettingsManagement } from '../../data_anonymization/settin
 
 import {
   ANONYMIZATION_TAB,
-  CONNECTORS_TAB,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
   KNOWLEDGE_BASE_TAB,
@@ -71,10 +69,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         {
           id: CONVERSATIONS_TAB,
           label: i18n.CONVERSATIONS_MENU_ITEM,
-        },
-        {
-          id: CONNECTORS_TAB,
-          label: i18n.CONNECTORS_MENU_ITEM,
         },
         {
           id: SYSTEM_PROMPTS_TAB,
@@ -148,7 +142,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           `}
           data-test-subj={`tab-${selectedSettingsTab}`}
         >
-          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement />}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
               connectors={connectors}
