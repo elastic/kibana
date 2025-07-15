@@ -374,3 +374,162 @@ Type guards for each type of error are exposed from the `@kbn/inference-common` 
 - `isInferenceInternalError`
 - `isInferenceRequestError`
 - ...`isXXXError`
+
+
+## Anonymization
+
+To avoid sending personally identifiable or other sensitive information to LLMs, the anonymization pipeline built into the Inference plugin replaces selected pieces of text with deterministic masks before the messages are sent and restores (de-anonymises) the original values in the responses.
+
+### How it works
+
+1.  When a request is handled, the Inference server looks for the UI-setting key
+    `ai:anonymizationSettings`.
+2.  The value of that setting is expected to be a JSON object that contains a list of **rules**.
+3.  Each rule is executed against relative parts of the message — that is, the system prompt, message `content`, any assistant `toolCalls.function` arguments/response, and tool-call `response` fields. `role`, `toolCallId`, timestamps, etc. are untouched. When a rule matches it produces replaces the original text with a deterministic placeholder such as `EMAIL_ee4587b4ba681e38996a1b716facbf375786bff7` where `EMAIL` is the entity class and `ee4587b4ba681e38996a1b716facbf375786bff7` is the deterministic hash of the original value.
+4.  The fully-masked conversation continues on to the model. Alongside the modified text the plugin keeps a mapping so that the same entity can later be restored.
+5.  After the model has responded, the plugin restores the original values across the entire conversation (system, history and new assistant message).
+
+Because the masking is deterministic (hash of the original value + its class) the same e-mail address
+will always be replaced by the same token – letting the model maintain logical consistency ("`EMAIL_x`"
+refers to the same email everywhere) without ever seeing the real address.
+
+### Rule types
+
+There are **two** kinds of rules and both share the common `{ enabled: boolean }` switch:
+
+* **RegExp**
+  ```jsonc
+  {
+    "type": "RegExp",           // required: literal string
+    "enabled": true,
+    "pattern": "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",  // JavaScript RegExp (string)
+    "entityClass": "EMAIL"       // label that will appear in the mask
+  }
+  ```
+
+* **NER (Named-Entity Recognition)**
+  ```jsonc
+  {
+    "type": "NER",                      // required: literal string
+    "enabled": true,
+    "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english", // any NER model
+    "allowedEntityClasses": ["PER", "ORG", "LOC"] // optional filter
+  }
+  ```
+  The referenced inference model is executed server-side to find entities in free text.  Only classes
+  listed in `allowedEntityClasses` are taken into account (omit the field to accept all).
+
+> Currently this feature has only been validated with Elastic’s publicly hosted NER model [`elastic/distilbert-base-uncased-finetuned-conll03-english`](https://huggingface.co/elastic/distilbert-base-uncased-finetuned-conll03-english).  
+
+Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, the first matching rule wins and later ones are skipped for that entity. 
+
+### Configuring rules
+
+1.  Navigate to **Management ➜ Advanced Settings** and search for
+    **“Anonymization Settings”** (category *Observability*).
+2.  Paste a JSON object with a `rules` array similar to the examples above.  The default template that
+    ships with the plugin looks like:
+    ```jsonc
+    {
+      "rules": [
+        {
+          "entityClass": "EMAIL",
+          "type": "RegExp",
+          "pattern": "([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
+          "enabled": false
+        },
+        {
+          "type": "NER",
+          "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english",
+          "enabled": false,
+          "allowedEntityClasses": ["PER", "ORG", "LOC"]
+        }
+      ]
+    }
+    ```
+3.  Toggle `enabled` to `true` (or add your own rules) and save.  A page refresh is required UI highlighting in chat.
+
+If **no rules are enabled**, anonymization does not run.
+
+> Note: Each request is processed with whatever rules are active at the time of the request, and those rules are applied to all messages included in that request – including any previous conversation history passed along.
+
+### Using the API
+
+Nothing special is required on the client side.  Any call made through
+`inference.getClient({ request })` automatically picks up and applies the enabled rules.
+
+Every response message received is already deanonymized. When masking has occurred, the payload will additionally contain:
+
+* `deanonymized_input` – array of the initial and previous user/system messages (conversation history) that were sent to the model
+* `deanonymized_output` – the assistant reply with original text restored
+
+Each message inside `deanonymized_input` or `deanonymized_output` carries its own `deanonymizations` array listing every replacement that was made.  This structured data can be stored and leveraged by UI components to visually highlight masked/unmasked segments in chat transcripts.
+
+When you use `chatComplete` in **streaming** mode:
+
+If no PII is detected, streaming proceeds normally (multiple `chatCompletionChunk` events followed by a final `chatCompletionMessage`).
+If PII **is** detected, the server downgrades to a minimal stream: one chunk and one final message.
+
+<details>
+<summary>Example request/response</summary>
+
+```http
+POST /internal/inference/chat_complete
+
+{
+  "connectorId": "azure-gpt4o",
+  "messages": [
+    { "role": "user", "content": "my name is jorge.  respond with my name." }
+  ],
+  "system": "You are a helpful assistant."
+}
+```
+
+```jsonc
+{
+  "content": "Hello, jorge! How can I assist you today?",
+  "toolCalls": [],
+  "tokens": {
+    "completion": 34,
+    "prompt": 165,
+    "total": 199,
+    "cached": 0
+  },
+  "deanonymized_input": [
+    {
+      "message": { "role": "user", "content": "my name is jorge.  respond with my name." },
+      "deanonymizations": [
+        {
+          "start": 11,
+          "end": 16,
+          "entity": {
+            "class_name": "PER",
+            "value": "jorge",
+            "mask": "PER_ee4587b4ba681e38996a1b716facbf375786bff7"
+          }
+        }
+      ]
+    }
+  ],
+  "deanonymized_output": {
+    "message": {
+      "content": "Hello, jorge! How can I assist you today?",
+      "toolCalls": [],
+      "role": "assistant"
+    },
+    "deanonymizations": [
+      {
+        "start": 7,
+        "end": 12,
+        "entity": {
+          "class_name": "PER",
+          "value": "jorge",
+          "mask": "PER_ee4587b4ba681e38996a1b716facbf375786bff7"
+        }
+      }
+    ]
+  }
+}
+```
+
+</details>
