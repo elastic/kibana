@@ -115,6 +115,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
     tiles = tiles.filter((tile) => {
       return (
         !tile.integration ||
+        !tile.data_streams ||
         tile.data_streams.some(
           (dataStream) => dataStream.dataset === `${tile.name}.${tile.integration}`
         )
