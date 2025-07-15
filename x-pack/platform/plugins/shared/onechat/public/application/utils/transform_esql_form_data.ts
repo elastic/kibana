@@ -7,7 +7,7 @@
 
 import { EsqlToolFieldTypes, ToolType } from '@kbn/onechat-common';
 import { CreateToolPayload } from '../../../common/http_api/tools';
-import { OnechatEsqlToolFormData } from '../components/tools/esql/form/esql_tool_form';
+import { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
 
 /**
  * Transforms ES|QL form data into a payload for the create tools API.

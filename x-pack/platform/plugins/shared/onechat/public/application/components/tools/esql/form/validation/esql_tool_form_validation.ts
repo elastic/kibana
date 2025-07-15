@@ -147,6 +147,7 @@ export const esqlFormValidationSchema = z
           }
         });
       }),
+    tags: z.array(z.string()),
   })
   .superRefine(({ esql, params }, ctx) => {
     const inferredParams = extractEsqlParams(esql);

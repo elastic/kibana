@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useOnechatCreateTool } from '../../../hooks/use_tools';
 import { transformEsqlFormData } from '../../../utils/transform_esql_form_data';
@@ -91,8 +91,14 @@ export const OnechatCreateEsqlToolFlyout: React.FC<OnechatCreateEsqlToolFlyoutPr
     mode: 'onBlur',
   });
   const { reset, formState, getValues } = form;
-  const { isSubmitting, errors } = formState;
+  const { isSubmitting, errors, isSubmitSuccessful } = formState;
   const { euiTheme } = useEuiTheme();
+
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      reset(defaultValues);
+    }
+  }, [isSubmitSuccessful, reset]);
 
   const newEsqlToolFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'newEsqlToolFlyoutTitle',
@@ -112,12 +118,11 @@ export const OnechatCreateEsqlToolFlyout: React.FC<OnechatCreateEsqlToolFlyoutPr
       try {
         const tool = await createTool(transformEsqlFormData(data));
         onSave(tool);
-        reset(defaultValues);
       } catch (error) {
         onError?.(error);
       }
     },
-    [createTool, onSave, onError, reset]
+    [createTool, onSave, onError]
   );
 
   const handleCloseFlyout = useCallback(() => {
