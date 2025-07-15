@@ -188,7 +188,27 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     const smartFields = additionalFieldGroups?.smartFields || [];
 
+    // Recommended fields are not part of the data view fields list, so we need to check them separately
+    const recommendedFields = additionalFieldGroups?.recommendedFields || [];
+
     let fieldGroupDefinitions: FieldListGroups<T> = {
+      ...(recommendedFields
+        ? {
+            RecommendedFields: {
+              fields: recommendedFields,
+              fieldCount: smartFields.length,
+              isAffectedByGlobalFilter: true,
+              isAffectedByTimeFilter: true,
+              isInitiallyOpen: true,
+              showInAccordion: true,
+              hideDetails: false,
+              hideIfEmpty: true,
+              title: i18n.translate('unifiedFieldList.useGroupedFields.recommendedFieldsLabel', {
+                defaultMessage: 'Recommended fields',
+              }),
+            },
+          }
+        : {}),
       SpecialFields: {
         fields: groupedFields.specialFields,
         fieldCount: groupedFields.specialFields.length,

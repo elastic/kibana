@@ -15,6 +15,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { useProfileAccessor } from '@kbn/discover-plugin/public/context_awareness';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
@@ -126,6 +127,11 @@ export const DiscoverMainContent = ({
     ]
   );
 
+  const getRecommendedFieldsAccessor = useProfileAccessor('getRecommendedFields');
+  const additionalFieldGroups = useMemo(() => {
+    return getRecommendedFieldsAccessor(() => ({ recommendedFields: [] }))();
+  }, [getRecommendedFieldsAccessor]);
+
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
@@ -153,6 +159,7 @@ export const DiscoverMainContent = ({
               onAddFilter={onAddFilter}
               stateContainer={stateContainer}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
+              additionalFieldGroups={additionalFieldGroups}
             />
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
@@ -165,6 +172,7 @@ export const DiscoverMainContent = ({
                 onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
                 isEsqlMode={isEsqlMode}
+                additionalFieldGroups={additionalFieldGroups}
               />
             </>
           ) : null}

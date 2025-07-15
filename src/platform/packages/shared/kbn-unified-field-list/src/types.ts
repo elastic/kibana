@@ -61,6 +61,7 @@ export enum FieldsGroupNames {
   MetaFields = 'MetaFields',
   UnmappedFields = 'UnmappedFields',
   SmartFields = 'SmartFields',
+  RecommendedFields = 'RecommendedFields',
 }
 
 export interface FieldsGroupDetails {
@@ -88,6 +89,7 @@ export type FieldListGroups<T extends FieldListItem> = {
 export interface AdditionalFieldGroups<T extends FieldListItem = FieldListItem> {
   smartFields?: FieldsGroup<T>['fields'];
   fallbackFields?: Record<string, string[]>;
+  recommendedFields?: FieldsGroup<T>['fields'];
 }
 
 export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;

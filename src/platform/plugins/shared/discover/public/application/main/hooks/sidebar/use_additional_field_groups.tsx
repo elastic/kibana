@@ -13,6 +13,7 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import * as constants from '../../../../../common/data_types/logs/constants';
 
 export const useAdditionalFieldGroups = () => {
+  // Remove this code as this PR is adding Context Resolution handling logic
   // TODO / NOTE: This will eventually rely on Discover's context resolution to determine which fields
   // are returned based on the data type.
   const isLogsContext = useDiscoverCustomization('field_list')?.logsFieldsEnabled;

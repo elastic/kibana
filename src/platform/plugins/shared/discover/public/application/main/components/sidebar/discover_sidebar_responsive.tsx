@@ -26,6 +26,7 @@ import {
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
 import type { Filter } from '@kbn/es-query';
+import { useProfileAccessor } from '../../../../context_awareness';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
@@ -38,7 +39,6 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -326,7 +326,14 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
-  const additionalFieldGroups = useAdditionalFieldGroups();
+  // As part of this POC, i am still not sure if my extension should only return recommended fields or
+  // something more generic. So i will process with generic logic,
+  // but will keep naming specific to Recommended Fields
+  const getRecommendedFieldsAccessor = useProfileAccessor('getRecommendedFields');
+  const additionalFieldGroups = useMemo(() => {
+    return getRecommendedFieldsAccessor(() => ({ recommendedFields: [] }))(sidebarState.allFields);
+  }, [getRecommendedFieldsAccessor, sidebarState.allFields]);
+
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
 
   const createField = unifiedFieldListSidebarContainerApi?.createField;
