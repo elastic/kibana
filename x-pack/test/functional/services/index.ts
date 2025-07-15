@@ -127,6 +127,4 @@ export const services = {
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
   dataStreams: DataStreamProvider,
-  slo: kibanaXPackApiIntegrationServices.slo,
-  dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
 };

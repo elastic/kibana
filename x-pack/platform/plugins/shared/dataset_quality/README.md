@@ -53,7 +53,7 @@ node scripts/functional_test_runner --config x-pack/solutions/observability/test
 | --inspect    | Add --inspect-brk flag to the ftr for debugging |
 | --times      | Repeat the test n number of times               |
 
-The API tests are located in [`x-pack/test/dataset_quality_api_integration/`](/x-pack/test/dataset_quality_api_integration/).
+The API tests are located in [`x-pack/solutions/observability/test/dataset_quality_api_integration/`](/x-pack/solutions/observability/test/dataset_quality_api_integration/).
 
 #### Start server and run test (single process)
 
