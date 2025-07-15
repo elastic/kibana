@@ -4,8 +4,9 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
-For {{observability}} known issues, refer to [Observability known issues](docs-content://release-notes/observability/known-issues.md).
-For {{elastic-sec}} known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
+For {{observability}} known issues, refer to [Observability known issues](docs-content://release-notes/elastic-observability/known-issues.md).
+
+For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
 ::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
 
