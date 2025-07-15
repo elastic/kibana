@@ -20,12 +20,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
 export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
