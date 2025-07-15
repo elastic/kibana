@@ -152,4 +152,29 @@ describe('transformToGap', () => {
     expect(result[0].filledIntervals).toHaveLength(1);
     expect(result[0].inProgressIntervals).toHaveLength(1);
   });
+
+  it('should filter out disabled gaps', () => {
+    const events = createMockEvent({
+      kibana: {
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [
+                validInterval,
+                { gte: undefined, lte: '2023-01-01T01:00:00.000Z' },
+              ],
+              in_progress_intervals: [
+                validInterval,
+                { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
+              ],
+              disabled: true,
+            },
+          },
+        },
+      },
+    });
+    const result = transformToGap(events);
+    expect(result).toHaveLength(0);
+  });
 });
