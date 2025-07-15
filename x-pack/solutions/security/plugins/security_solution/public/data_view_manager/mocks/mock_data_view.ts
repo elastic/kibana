@@ -6,10 +6,11 @@
  */
 
 import { DataView } from '@kbn/data-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
-export const getMockDataView = () =>
+export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFormatsMock) =>
   new DataView({
     spec: {
       id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
@@ -28,11 +29,14 @@ export const getMockDataView = () =>
         },
       },
     },
-    fieldFormats: {} as unknown as FieldFormatsStartCommon,
+    fieldFormats,
   });
 
-export const getMockDataViewWithMatchedIndices = (matchedIndices: string[] = ['test']) => {
-  const dataView = getMockDataView();
+export const getMockDataViewWithMatchedIndices = (
+  matchedIndices: string[] = ['test'],
+  fieldFormats?: FieldFormatsStartCommon
+) => {
+  const dataView = getMockDataView(fieldFormats);
   dataView.matchedIndices = matchedIndices;
   dataView.setIndexPattern(matchedIndices.join(','));
 
