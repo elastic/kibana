@@ -69,24 +69,33 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
         ],
         steps: [
           {
-            id: 'step3',
-            needs: ['step1', 'step2'],
+            id: 'step1',
             connectorType: 'slack-connector',
             connectorName: 'slack_keep',
             inputs: {
               message:
-                'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}"',
+                'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
             },
           },
           {
-            id: 'step4',
-            needs: ['step3'],
-            connectorName: 'console',
-            connectorType: 'console',
+            id: 'step2',
+            needs: ['step1'],
+            connectorType: 'slack-connector',
+            connectorName: 'slack_keep',
             inputs: {
-              message: 'Step 2 executed!',
+              message:
+                'Message from step 2: And this is the second step at {{ now() }}',
             },
           },
+          // {
+          //   id: 'step4',
+          //   needs: ['step3'],
+          //   connectorName: 'console',
+          //   connectorType: 'console',
+          //   inputs: {
+          //     message: 'Step 2 executed!',
+          //   },
+          // },
         ],
       },
       null,
@@ -194,6 +203,10 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                       onChange={setWorkflowInputs}
                       suggestionProvider={undefined}
                       dataTestSubj={'workflow-inputs-json-editor'}
+                      readOnlyMessage='You cannot edit the event sent to the workflow.'
+                      options={{
+                        readOnly: true,
+                      }}
                     />
                   </div>
                 </EuiFlexItem>

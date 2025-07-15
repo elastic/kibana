@@ -18,7 +18,20 @@ export class TemplatingEngine {
   }
 
   private renderNunjucks(template: string, context: Record<string, any>): string {
-    return nunjucks.renderString(template, context);
+    const env = nunjucks.configure({
+      autoescape: true,
+    });
+
+    // We can add custom functions to the Nunjucks environment here.
+    // In theory, this could be same as `keep.` functions
+    env.addGlobal('now', function (format: string = 'iso') {
+      const date = new Date();
+      if (format === 'iso') return date.toISOString();
+      if (format === 'locale') return date.toLocaleString();
+      return date;
+    });
+
+    return env.renderString(template, context);
   }
 
   private renderMustache(template: string, context: Record<string, any>): string {
