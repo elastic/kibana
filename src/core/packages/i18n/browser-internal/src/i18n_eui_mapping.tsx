@@ -1474,7 +1474,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       }
     ),
     'euiSaturation.ariaLabel': i18n.translate('core.euiSaturation.ariaLabel', {
-      defaultMessage: 'HSV color mode saturation and value 2-axis slider',
+      defaultMessage: 'Select a color',
     }),
     'euiSearchBox.ariaLabel': i18n.translate('core.euiSearchBox.ariaLabel', {
       defaultMessage:
@@ -1836,5 +1836,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{language} code block:',
         values: { language },
       }),
+    'euiSaturation.roleDescription': i18n.translate('core.euiSaturation.roleDescription', {
+      defaultMessage: 'HSV color mode saturation and value 2-axis slider.',
+    }),
+    'euiHue.ariaValueText': i18n.translate('core.euiHue.ariaValueText', {
+      defaultMessage: 'Hue',
+    }),
+    'euiHue.ariaRoleDescription': i18n.translate('core.euiHue.ariaRoleDescription', {
+      defaultMessage: 'Hue slider',
+    }),
+    'euiColorPicker.selectedColorLabel': i18n.translate('core.euiColorPicker.selectedColorLabel', {
+      defaultMessage: 'Selected color',
+    }),
   };
 };
