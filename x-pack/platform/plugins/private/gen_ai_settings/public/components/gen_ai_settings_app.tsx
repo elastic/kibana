@@ -59,17 +59,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   useEffect(() => {
     setBreadcrumbs([
       {
-        text: i18n.translate('genAiSettings.breadcrumbs.management', {
-          defaultMessage: 'Stack Management',
-        }),
-        href: '/app/management',
-      },
-      {
-        text: i18n.translate('genAiSettings.breadcrumbs.ai', {
-          defaultMessage: 'AI',
-        }),
-      },
-      {
         text: i18n.translate('genAiSettings.breadcrumbs.genAiSettings', {
           defaultMessage: 'GenAI Settings',
         }),
