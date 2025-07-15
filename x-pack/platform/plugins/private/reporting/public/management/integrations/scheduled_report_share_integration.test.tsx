@@ -14,6 +14,7 @@ import {
   createScheduledReportShareIntegration,
 } from './scheduled_report_share_integration';
 import { queryClient } from '../../query_client';
+import { ExportShareConfig } from '@kbn/share-plugin/public/types';
 
 jest.mock('../hooks/use_get_reporting_health_query', () => ({
   getKey: jest.fn(() => 'reportingHealthKey'),
@@ -80,30 +81,19 @@ describe('createScheduledReportShareIntegration', () => {
 
   describe('prerequisiteCheck', () => {
     const capabilities = {} as Capabilities;
-    const license = {} as ILicense;
 
-    it('should return false if license is missing', () => {
-      expect(
-        integration.prerequisiteCheck!({
-          license: undefined,
-          capabilities,
-          objectType: 'foo',
-        })
-      ).toBe(false);
-      expect(integration.prerequisiteCheck!({ license, capabilities, objectType: 'foo' })).toBe(
-        false
-      );
-    });
-
-    it('should return false for lens objectType without generateScreenshot', () => {
-      expect(
-        integration.prerequisiteCheck!({
-          license: { type: SCHEDULED_REPORT_VALID_LICENSES[0] } as ILicense,
-          capabilities: { visualize_v2: { generateScreenshot: false } } as unknown as Capabilities,
-          objectType: 'lens',
-        })
-      ).toBe(false);
-    });
+    it.each([undefined, {}] as ILicense[])(
+      'should return false if license is missing',
+      (license) => {
+        expect(
+          integration.prerequisiteCheck!({
+            license,
+            capabilities,
+            objectType: 'foo',
+          })
+        ).toBe(false);
+      }
+    );
 
     it('should return true for valid license', () => {
       expect(
@@ -123,6 +113,33 @@ describe('createScheduledReportShareIntegration', () => {
           objectType: 'dashboard',
         })
       ).toBe(false);
+    });
+  });
+
+  describe('config.shouldRender', () => {
+    const config = integration.config!({
+      sharingData: { exportType: 'pngV2' },
+    } as unknown as Parameters<typeof integration.config>[0]);
+
+    it('should return true when at least one supported export type is available', () => {
+      expect(
+        config.shouldRender!({
+          availableExportItems: [
+            { config: { exportType: 'pngV2' } },
+            { config: { exportType: 'printablePdfV2' } },
+          ] as unknown as ExportShareConfig[],
+        })
+      ).toBeTruthy();
+    });
+
+    it('should return false when no supported export type is available', () => {
+      expect(
+        config.shouldRender!({
+          availableExportItems: [
+            { config: { exportType: 'lens_csv' } },
+          ] as unknown as ExportShareConfig[],
+        })
+      ).toBeFalsy();
     });
   });
 });
