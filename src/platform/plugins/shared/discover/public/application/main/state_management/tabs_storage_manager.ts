@@ -15,10 +15,13 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
+import { createDataViewDataSource, createEsqlDataSource } from '../../../../common/data_sources';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -71,6 +74,7 @@ export interface TabsStorageManager {
   loadLocally: (props: {
     userId: string;
     spaceId: string;
+    persistedDiscoverSession?: DiscoverSession;
     defaultTabState: Omit<TabState, keyof TabItem>;
   }) => TabsInternalStatePayload;
   getNRecentlyClosedTabs: (
@@ -309,7 +313,12 @@ export const createTabsStorageManager = ({
     }
   };
 
-  const loadLocally: TabsStorageManager['loadLocally'] = ({ userId, spaceId, defaultTabState }) => {
+  const loadLocally: TabsStorageManager['loadLocally'] = ({
+    userId,
+    spaceId,
+    persistedDiscoverSession,
+    defaultTabState,
+  }) => {
     const selectedTabId = enabled ? getSelectedTabIdFromURL() : undefined;
     let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
@@ -327,10 +336,71 @@ export const createTabsStorageManager = ({
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
 
-    const openTabs = storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState));
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
+
+    if (persistedDiscoverSession) {
+      const openTabs = persistedDiscoverSession.tabs.map((rawTab) => {
+        const mappedTab: TabStateInLocalStorage = {
+          id: rawTab.id,
+          label: rawTab.label,
+          appState: {
+            columns: rawTab.columns,
+            filters: rawTab.serializedSearchSource.filter,
+            grid: rawTab.grid,
+            hideChart: rawTab.hideChart,
+            dataSource: isOfAggregateQueryType(rawTab.serializedSearchSource.query)
+              ? createEsqlDataSource()
+              : typeof rawTab.serializedSearchSource.index === 'string'
+              ? createDataViewDataSource({
+                  dataViewId: rawTab.serializedSearchSource.index,
+                })
+              : rawTab.serializedSearchSource.index?.id
+              ? createDataViewDataSource({
+                  dataViewId: rawTab.serializedSearchSource.index.id,
+                })
+              : undefined,
+            query: rawTab.serializedSearchSource.query,
+            sort: rawTab.sort,
+            viewMode: rawTab.viewMode,
+            hideAggregatedPreview: rawTab.hideAggregatedPreview,
+            rowHeight: rawTab.rowHeight,
+            headerRowHeight: rawTab.headerRowHeight,
+            rowsPerPage: rawTab.rowsPerPage,
+            sampleSize: rawTab.sampleSize,
+            breakdownField: rawTab.breakdownField,
+            density: rawTab.density,
+          },
+          globalState: {
+            timeRange: rawTab.timeRestore ? rawTab.timeRange : undefined,
+            refreshInterval: rawTab.timeRange ? rawTab.refreshInterval : undefined,
+          },
+        };
+
+        return toTabState(mappedTab, defaultTabState);
+      });
+
+      if (!enabled) {
+        return {
+          allTabs: [openTabs[0]],
+          selectedTabId: openTabs[0].id,
+          recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
+        };
+      }
+
+      const selectedTab = selectedTabId
+        ? openTabs.find((tab) => tab.id === selectedTabId) ?? openTabs[0]
+        : openTabs[0];
+
+      return {
+        allTabs: openTabs,
+        selectedTabId: selectedTab.id,
+        recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
+      };
+    }
+
+    const openTabs = storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState));
 
     if (enabled) {
       if (selectedTabId) {

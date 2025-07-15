@@ -269,6 +269,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
       spaceId,
+      persistedDiscoverSession,
       defaultTabState: DEFAULT_TAB_STATE,
     });
 
