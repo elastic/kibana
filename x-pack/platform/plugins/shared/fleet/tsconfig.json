@@ -1,13 +1,9 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "exclude": [
-    "cypress.config.ts",
-    "cypress.config.space_awareness.ts",
-    "target/**/*",
-  ],
+  "exclude": ["cypress.config.ts", "cypress.config.space_awareness.ts", "target/**/*"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
@@ -126,5 +122,6 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/alerting-plugin"
   ]
 }
