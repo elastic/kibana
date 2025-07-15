@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../__tests__/context_fixtures';
+import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks } from '../../types';
@@ -29,18 +29,28 @@ const dissectExpectSuggestions = (
 };
 
 describe('DISSECT Autocomplete', () => {
+  let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockCallbacks = getMockCallbacks();
+
+    const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
+    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      expectedFields.map((name) => ({ label: name, text: name }))
+    );
   });
 
   it('suggests fields after DISSECT', async () => {
     await dissectExpectSuggestions(
       'from a | DISSECT ',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
+      mockCallbacks
     );
     await dissectExpectSuggestions(
       'from a | DISSECT key/',
-      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+      getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
+      mockCallbacks
     );
   });
 

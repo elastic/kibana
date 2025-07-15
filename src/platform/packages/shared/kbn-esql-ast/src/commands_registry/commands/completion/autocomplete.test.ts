@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../__tests__/context_fixtures';
+import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks, Location } from '../../types';
@@ -39,19 +39,32 @@ const PROMPT_SUGGESTIONS = [
 ];
 
 describe('COMPLETION Autocomplete', () => {
+  let mockCallbacks: ICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockCallbacks = getMockCallbacks();
+
+    const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
+    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+      expectedFields.map((name) => ({ label: name, text: name }))
+    );
   });
 
   it('suggests PROMPT_SUGGESTIONS + default prompt after COMPLETION keyword', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION `, [
-      '"${0:Your prompt to the LLM.}"',
-      ...PROMPT_SUGGESTIONS,
-    ]);
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION `,
+      ['"${0:Your prompt to the LLM.}"', ...PROMPT_SUGGESTIONS],
+      mockCallbacks
+    );
   });
 
   it('suggests PROMPT_SUGGESTIONS when typing a column', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION kubernetes.some/`, PROMPT_SUGGESTIONS);
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION kubernetes.some/`,
+      PROMPT_SUGGESTIONS,
+      mockCallbacks
+    );
   });
 
   it('suggests ASSIGN after the user writes a new custom colum name', async () => {
