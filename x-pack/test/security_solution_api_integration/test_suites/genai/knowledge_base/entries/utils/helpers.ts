@@ -17,9 +17,9 @@ import {
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml';
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
 
 export const TINY_ELSER = {
@@ -35,22 +35,22 @@ export const TINY_ELSER_INFERENCE_ID = `${TINY_ELSER.id}_elasticsearch`;
  */
 export const installTinyElser = async ({
   es,
-  mlApi,
+  ml,
   log,
 }: {
   es: Client;
-  mlApi: ReturnType<typeof MachineLearningProvider>['api'];
+  ml: ReturnType<typeof MachineLearningProvider>;
   log: ToolingLog;
 }) => {
   try {
     const config = {
-      ...mlApi.getTrainedModelConfig(TINY_ELSER.name),
+      ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
       input: {
         field_names: ['text_field'],
       },
     };
-    await mlApi.assureMlStatsIndexExists();
-    await mlApi.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+    await ml.api.assureMlStatsIndexExists();
+    await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
   } catch (e) {
     log.error(`Error installing Tiny Elser: ${e}`);
   }
@@ -87,10 +87,7 @@ export const deleteTinyElser = async ({
   log,
 }: {
   es: Client;
-  ml: {
-    api: ReturnType<typeof MachineLearningProvider>['api'];
-    testResources: ReturnType<typeof MachineLearningProvider>['testResources'];
-  };
+  ml: ReturnType<typeof MachineLearningProvider>;
   log: ToolingLog;
 }) => {
   try {

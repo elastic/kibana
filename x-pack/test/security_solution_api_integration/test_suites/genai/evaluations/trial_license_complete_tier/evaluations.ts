@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   describe('@ess Basic Security AI Assistant Evaluations', () => {
     before(async () => {
-      await installTinyElser({ mlApi: ml.api, es, log });
+      await installTinyElser({ ml, es, log });
       await setupKnowledgeBase(supertest, log);
       await es.ingest.putPipeline({
         id: 'set-timestamp-pipeline',

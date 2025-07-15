@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   // Failing: See https://github.com/elastic/kibana/issues/218325
   describe.skip('@ess Basic Security AI Assistant Knowledge Base Entries', () => {
     before(async () => {
-      await installTinyElser({ es, mlApi: ml.api, log });
+      await installTinyElser({ es, ml, log });
       await setupKnowledgeBase(supertest, log);
     });
 
