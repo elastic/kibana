@@ -64,6 +64,22 @@ describe('<IndicatorsBarChart />', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
+          class="emotion-euiScreenReaderOnly"
+          tabindex="-1"
+        >
+          <div
+            aria-atomic="true"
+            aria-live="off"
+            role="status"
+          />
+          <div
+            aria-atomic="true"
+            aria-hidden="true"
+            aria-live="off"
+            role="status"
+          />
+        </div>
+        <div
           class="echChart"
           style="width: 100%; height: 200px;"
         >

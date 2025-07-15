@@ -21,6 +21,7 @@ import { FieldTypesContext } from '../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
 import { InspectorContext } from '../containers/inspector';
 import { TestProviders } from '../../common/mock/test_providers';
+import { ScreenReaderAnnouncements } from '../modules/indicators/containers/screen_reader_a11y';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};
@@ -81,7 +82,7 @@ export const TestProvidersComponent: FC<PropsWithChildren<{}>> = ({ children }) 
         <QueryClientProvider client={new QueryClient()}>
           <FieldTypesContext.Provider value={generateFieldTypeMap()}>
             <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-              {children}
+              <ScreenReaderAnnouncements>{children}</ScreenReaderAnnouncements>
             </IndicatorsFiltersContext.Provider>
           </FieldTypesContext.Provider>
         </QueryClientProvider>
