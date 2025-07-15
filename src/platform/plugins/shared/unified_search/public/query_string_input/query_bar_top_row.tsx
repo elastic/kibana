@@ -231,29 +231,6 @@ export const QueryBarTopRow = React.memo(
   function QueryBarTopRow<QT extends Query | AggregateQuery = Query>(
     props: QueryBarTopRowProps<QT>
   ) {
-    const {
-      onDraftChange,
-      isDirty: draftIsDirty,
-      query: draftQuery,
-      dateRangeFrom: draftDateRangeFrom,
-      dateRangeTo: draftDateRangeTo,
-    } = props;
-    const draft = useMemo(
-      () =>
-        onDraftChange && draftIsDirty
-          ? {
-              query: draftQuery,
-              dateRangeFrom: draftDateRangeFrom,
-              dateRangeTo: draftDateRangeTo,
-            }
-          : null,
-      [onDraftChange, draftIsDirty, draftQuery, draftDateRangeFrom, draftDateRangeTo]
-    );
-
-    useEffect(() => {
-      onDraftChange?.(draft);
-    }, [onDraftChange, draft]);
-
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
@@ -468,6 +445,36 @@ export const QueryBarTopRow = React.memo(
       },
       [onSubmit]
     );
+
+    const {
+      onDraftChange,
+      isDirty: draftIsDirty,
+      query: draftQuery,
+      dateRangeFrom: draftDateRangeFrom,
+      dateRangeTo: draftDateRangeTo,
+    } = props;
+    const draft = useMemo(
+      () =>
+        onDraftChange && draftIsDirty
+          ? {
+              query: draftQuery,
+              dateRangeFrom: showDatePicker ? draftDateRangeFrom : undefined,
+              dateRangeTo: showDatePicker ? draftDateRangeTo : undefined,
+            }
+          : null,
+      [
+        onDraftChange,
+        draftIsDirty,
+        draftQuery,
+        draftDateRangeFrom,
+        draftDateRangeTo,
+        showDatePicker,
+      ]
+    );
+
+    useEffect(() => {
+      onDraftChange?.(draft);
+    }, [onDraftChange, draft]);
 
     function shouldRenderQueryInput(): boolean {
       return Boolean(showQueryInput && props.query && storage);
