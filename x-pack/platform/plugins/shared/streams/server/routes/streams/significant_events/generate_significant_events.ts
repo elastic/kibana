@@ -76,12 +76,7 @@ export async function generateSignificantEventDefinitions({
       }).then((results) => {
         return results.map((result) => {
           const { sample, count, regex } = result;
-          return {
-            count,
-            highlight: highlightPatternFromRegex(regex, sample),
-            sample,
-            regex,
-          };
+          return { count, sample, regex };
         });
       })
     : undefined;
@@ -100,20 +95,51 @@ export async function generateSignificantEventDefinitions({
   }
 
   const instruction = `
-I want to generate KQL queries that help me find
-important log messages. Each pattern should have its own
-query. I will use these queries to help me see changes in
-these patterns. Only generate queries for patterns that
-are indicative of something unusual happening, like startup/
-shutdown messages, or warnings, errors and fatal messages. Prefer
-simple match queries over wildcards. The goal of this is to have
-queries that each represent a specific pattern, to be able to
-monitor for changes in the pattern and use it as a signal in
-root cause analysis. Some example of patterns:
+You are an expert log analyst tasked with generating KQL (Kibana Query Language) queries to identify significant events in some Elasticsearch logs. 
+Your goal is to create monitoring queries that detect unusual patterns, errors, and operational issues.
 
-- \`message: "CircuitBreakingException"\`
-- \`message: "max number of clients reached"\`
-- \`message: "Unable to connect * Connection refused"\`
+## Your Task
+Generate KQL queries that identify **operationally significant patterns** - events that indicate:
+1. **System health issues** (errors, timeouts, capacity problems)
+2. **Security concerns** (suspicious traffic, attack patterns)
+3. **Performance anomalies** (unusual response codes, slow responses)
+4. **Operational events** (deployments, configuration changes, service restarts)
+
+## Query Requirements
+
+### DO Generate Queries For:
+- **Error conditions**: 5xx status codes, connection failures, timeouts
+- **Security patterns**: Suspicious user agents, unusual request patterns, potential attacks
+- **Performance issues**: High response times, resource exhaustion messages
+- **Operational events**: Service startup/shutdown, configuration reloads
+- **Capacity warnings**: Rate limiting, queue full, max connections reached
+- **Bot/crawler anomalies**: Unusual bot behavior, unexpected crawling patterns
+
+### DO NOT Generate Queries For:
+- Normal successful requests (2xx, 3xx status codes for regular traffic)
+- Standard user agent patterns from legitimate browsers
+- Routine operational logs without significance
+- High-volume patterns that are part of normal operations
+
+### Query Style Guidelines:
+- **Prefer exact matches** over wildcards when possible
+- **Use specific field targeting**: \`message:"exact phrase"\` rather than broad searches
+- **Keep queries focused**: Each query should target one specific pattern
+- **Make queries actionable**: Include enough context to understand what the pattern indicates
+
+## Analysis Process
+1. **Examine the log patterns** provided
+2. **Identify anomalous or significant events** that deviate from normal web traffic
+3. **Focus on operational significance** - patterns that indicate system health, security, or performance issues
+4. **Create targeted queries** that can be used for alerting and monitoring
+5. **Prioritize high-value, low-noise patterns** that provide actionable insights
+
+## Example Query Patterns to Consider:
+- HTTP 5xx errors: \`message:"\" 5*"\`
+- Bot detection failures: \`message:"GoogleBot" and message:"POST"\`
+- Suspicious endpoint access: \`message:"/api/admin" or message:"/api/config"\`
+- Connection issues: \`message:"Connection refused" or message:"Connection timeout"\`
+- Rate limiting: \`message:"rate limit" or message:"too many requests"\`
 `;
 
   const chunks = [
@@ -136,7 +162,14 @@ ${JSON.stringify(
     `
       : '',
     `## Dataset analysis
+Following is the list of fields found in the dataset with their types, count and values:
+
 ${JSON.stringify(short)}
+    `,
+    `
+Remember: The goal is to create a focused set of queries that help operators 
+quickly identify when something unusual or problematic is happening in the system.
+Quality over quantity - aim for queries that have high signal-to-noise ratio.
     `,
   ];
 
