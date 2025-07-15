@@ -16,23 +16,29 @@ import ReactDOM from 'react-dom';
 import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { uriTransformer } from 'react-markdown';
 import { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 
-const ReactMarkdown = React.lazy(() => import('react-markdown'));
-const ErrorRenderer = ({
-  basePath,
-  children,
-}: {
+type MarkdownRendererProps = {
   basePath: HttpStart['basePath'];
   children: string;
-}) => (
-  <React.Suspense fallback={<EuiLoadingSpinner />}>
+};
+
+const MarkdownRenderer = React.lazy(async () => {
+  const { default: ReactMarkdown } = await import('react-markdown');
+  const WrappedRenderer = ({ basePath, children }: MarkdownRendererProps) => (
     <ReactMarkdown
+      transformLinkUri={(href) => ReactMarkdown.uriTransformer(basePath.prepend(href))}
       children={children}
-      transformLinkUri={(href) => uriTransformer(basePath.prepend(href))}
     />
+  );
+
+  return { default: WrappedRenderer };
+});
+
+const ErrorRenderer = (props: MarkdownRendererProps) => (
+  <React.Suspense fallback={<EuiLoadingSpinner />}>
+    <MarkdownRenderer {...props} />
   </React.Suspense>
 );
 
