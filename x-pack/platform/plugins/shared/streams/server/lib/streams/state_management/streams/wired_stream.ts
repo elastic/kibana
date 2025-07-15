@@ -440,8 +440,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
   }
 
-  protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
-    const ancestors = await this.dependencies.streamsClient.getAncestors(this._definition.name);
+  protected async doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]> {
+    const ancestors = getAncestorsAndSelf(this._definition.name).map(
+      (id) => desiredState.get(id)!.definition as Streams.WiredStream.Definition
+    );
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
 
     return [
