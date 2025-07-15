@@ -4,6 +4,24 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
+::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
+
+Applies to: {{stack}} 9.0.3
+
+**Details**
+
+When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
+
+**Action**
+
+To avoid this error, don't upgrade {{kib}} to {{stack}} 9.0.3 or upgrade {{kib}} to {{stack}} 9.0.4 when available.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.0.4.
+
+::::
+
 ::::{dropdown} Upgrading Kibana from 8.18.x to 9.0.2 fails due to a configuration conflict in the kibana.yml file
 
 Applies to: {{stack}} 9.0.2
