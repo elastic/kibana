@@ -39,7 +39,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Prevents dashboards from initiating duplicate requests when making a selection on a control [#224761]({{kib-pull}}224761).
 
 **Data ingestion and Fleet**:
-* Fixes bug that causes the CSV export to fail in export CSV in Agent list [#225050]({{kib-pull}}225050).
+* Fixes bug that causes the CSV export to fail in Agent list [#225050]({{kib-pull}}225050).
 * Replaces call to registry when deleting {{kib}} assets for custom packages [#224886]({{kib-pull}}224886).
 * Fixes an issue where the background task was not deleting some unenrolled {{agents}} [#224808]({{kib-pull}}224808).
 * Fixes bulk actions incorrectly selecting {{agents}} with the namespaces filter [#224036]({{kib-pull}}224036).
