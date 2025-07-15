@@ -24,6 +24,8 @@ const DataViewFlyoutContentContainer = ({
   editData,
   allowAdHocDataView,
   showManagementLink,
+  isEdit,
+  onDuplicate,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications, http },
@@ -99,6 +101,8 @@ const DataViewFlyoutContentContainer = ({
       showManagementLink={showManagementLink}
       allowAdHoc={allowAdHocDataView || false}
       dataViewEditorService={dataViewEditorService}
+      onDuplicate={onDuplicate}
+      isEdit={isEdit || false}
     />
   );
 };

@@ -71,6 +71,14 @@ export interface DataViewEditorProps {
    * if set to true a link to the management page is shown
    */
   showManagementLink?: boolean;
+  /**
+   * if set to true a duplicate button is shown
+   */
+  onDuplicate?: () => void;
+  /**
+   * if set to true an existing data view is being edited
+   */
+  isEdit?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
