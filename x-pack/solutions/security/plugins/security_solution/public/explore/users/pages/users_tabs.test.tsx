@@ -13,6 +13,13 @@ import { TestProviders } from '../../../common/mock';
 import { Users } from './users';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { withMatchedIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
+import {
+  getMockDataView,
+  getMockDataViewWithMatchedIndices,
+} from '@kbn/security-solution-plugin/public/data_view_manager/mocks/mock_data_view';
+import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 jest.mock('../../../common/components/empty_prompt');
 jest.mock('../../../sourcerer/containers');
@@ -68,8 +75,20 @@ const mockHistory = {
   listen: jest.fn(),
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
+const mockFieldFormats = {
+  getDefaultInstance: () => ({
+    toJSON: () => {},
+  }),
+} as unknown as FieldFormatsStartCommon;
+
 describe('Users - rendering', () => {
   test('it renders getting started page when no index is available', async () => {
+    const dataView = getMockDataView(mockFieldFormats);
+    jest.mocked(useDataView).mockReturnValue({
+      status: 'ready',
+      dataView,
+    });
+
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
@@ -86,6 +105,12 @@ describe('Users - rendering', () => {
   });
 
   test('it should render tab navigation', async () => {
+    const dataView = getMockDataViewWithMatchedIndices(['test-index'], mockFieldFormats);
+    jest.mocked(useDataView).mockReturnValue({
+      status: 'ready',
+      dataView,
+    });
+
     mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
