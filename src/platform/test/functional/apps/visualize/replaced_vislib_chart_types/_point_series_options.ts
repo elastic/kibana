@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -268,7 +268,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const xLabels = [
               'September 22, 2015',
-              '09:00',
               '10:00',
               '11:00',
               '12:00',
