@@ -64,6 +64,15 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       },
     };
 
+    const telemetryLabels: Record<string, string | boolean | undefined | number> = {
+      branch: process.env.BUILDKITE_BRANCH,
+      ciBuildId: process.env.BUILDKITE_BUILD_ID,
+      ciBuildJobId: process.env.BUILDKITE_JOB_ID,
+      ciBuildNumber: Number(process.env.BUILDKITE_BUILD_NUMBER) || 0,
+      gitRev: process.env.BUILDKITE_COMMIT,
+      ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
+    };
+
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles,
@@ -89,6 +98,9 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
+        // delay shutdown to ensure that APM can report the data it collects during test execution
+        delayShutdown: 15_000,
+
         env: {
           ELASTICSEARCH_USERNAME: kbnTestConfig.getUrlParts(kibanaTestUser).username,
           ELASTIC_APM_ACTIVE: DETECTION_ENGINE_APM_CONFIG.active,
@@ -108,6 +120,8 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
         },
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          `--telemetry.optIn=true`,
+          `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
