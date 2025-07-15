@@ -10,7 +10,7 @@ disabled:
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
   - src/platform/test/server_integration/config.base.js
-  - x-pack/test/functional_with_es_ssl/config.base.ts
+  - x-pack/platform/test/functional_with_es_ssl/config.base.ts
   - x-pack/test/api_integration/config.ts
   - x-pack/platform/test/api_integration/config.ts
   - x-pack/test/fleet_api_integration/config.base.ts
@@ -34,6 +34,7 @@ disabled:
   - x-pack/platform/test/load/config.ts
   - x-pack/platform/test/plugin_api_perf/config.ts
   - x-pack/test/screenshot_creation/config.ts
+  - x-pack/platform/test/screenshot_creation/config.ts
   - x-pack/platform/test/fleet_packages/config.ts
 
   # Scalability testing config that we run in its own pipeline
@@ -185,18 +186,18 @@ enabled:
   - x-pack/platform/test/functional_cors/config.ts
   - x-pack/platform/test/functional_embedded/config.ts
   - x-pack/platform/test/functional_execution_context/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/cases/group1/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/cases/basic/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/cases/group1/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/cases/basic/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
-  - x-pack/test/functional/apps/aiops/config.ts
+  - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts
   - x-pack/platform/test/functional/apps/canvas/config.ts
   - x-pack/test/functional/apps/cross_cluster_replication/config.ts
@@ -322,11 +323,11 @@ enabled:
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/session_view/basic/config.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_trial.ts
-  - x-pack/test/spaces_api_integration/spaces_only/config.ts
+  - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts
+  - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/spaces_api_integration/security_and_spaces/copy_to_space_config_trial.ts
+  - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts
   - x-pack/platform/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts

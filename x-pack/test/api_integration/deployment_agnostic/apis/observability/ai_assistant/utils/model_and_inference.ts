@@ -9,8 +9,8 @@ import { Client, errors } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import pRetry from 'p-retry';
+import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
 
 // tiny models
