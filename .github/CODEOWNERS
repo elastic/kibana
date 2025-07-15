@@ -650,6 +650,7 @@ src/platform/packages/shared/shared-ux/page/no_data/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/no_data/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/no_data/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/solution_nav @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/preview_screenshots @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/prompt/no_data_views/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/prompt/no_data_views/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/prompt/no_data_views/types @elastic/appex-sharedux

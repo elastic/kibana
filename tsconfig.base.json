@@ -1494,6 +1494,8 @@
       "@kbn/presentation-publishing/*": ["src/platform/packages/shared/presentation/presentation_publishing/*"],
       "@kbn/presentation-util-plugin": ["src/platform/plugins/shared/presentation_util"],
       "@kbn/presentation-util-plugin/*": ["src/platform/plugins/shared/presentation_util/*"],
+      "@kbn/preview-screenshots": ["src/platform/packages/shared/shared-ux/preview_screenshots"],
+      "@kbn/preview-screenshots/*": ["src/platform/packages/shared/shared-ux/preview_screenshots/*"],
       "@kbn/product-doc-artifact-builder": ["x-pack/packages/ai-infra/product-doc-artifact-builder"],
       "@kbn/product-doc-artifact-builder/*": ["x-pack/packages/ai-infra/product-doc-artifact-builder/*"],
       "@kbn/product-doc-base-plugin": ["x-pack/platform/plugins/shared/ai_infra/product_doc_base"],

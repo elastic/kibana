@@ -20,7 +20,7 @@ import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
 import {
-  getPreserveDrawingBuffer,
+  // getPreserveDrawingBuffer,
   getUsageCollection,
   isScreenshotMode,
 } from '../../kibana_services';
@@ -163,7 +163,8 @@ export class MbMap extends Component<Props, State> {
         container: this._containerRef!,
         style: mbStyle,
         canvasContextAttributes: {
-          preserveDrawingBuffer: getPreserveDrawingBuffer(),
+          // preserveDrawingBuffer: getPreserveDrawingBuffer(),
+          preserveDrawingBuffer: true,
         },
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,

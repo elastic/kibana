@@ -8,7 +8,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiText, EuiLink, EuiSpacer, EuiHighlight, useEuiTheme } from '@elastic/eui';
+import {
+  EuiText,
+  EuiLink,
+  EuiSpacer,
+  EuiHighlight,
+  useEuiTheme,
+  EuiImage,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+} from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FavoriteButton } from '@kbn/content-management-favorites-public';
 import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -50,10 +60,10 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   const { euiTheme } = useEuiTheme();
   const {
     references,
+    type,
     attributes: { title, description },
   } = item;
   const { navigateToUrl, currentAppId$, TagList, itemHasTags } = useServices();
-
   const redirectAppLinksCoreStart = useMemo(
     () => ({
       application: {
@@ -123,27 +133,91 @@ export function ItemDetails<T extends UserContentCommonSchema>({
 
   const hasTags = itemHasTags(references);
 
-  return (
-    <div>
-      <EuiText size="s">{renderTitle()}</EuiText>
-      {Boolean(description) && (
-        <EuiText size="s" color="subdued">
-          <p>
-            <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
-              {description!}
-            </EuiHighlight>
-          </p>
-        </EuiText>
-      )}
-      {hasTags && (
-        <>
-          <EuiSpacer size="s" />
-          <TagList
-            references={references}
-            tagRender={(tag) => <TagBadge key={tag.name} tag={tag} onClick={onClickTag} />}
-          />
-        </>
-      )}
+  let placeholder = 'logoElastic';
+
+  switch (type) {
+    case 'dashboard':
+      placeholder = 'dashboardApp';
+      break;
+    case 'map':
+      placeholder = 'gisApp';
+      break;
+    case 'lens':
+      placeholder = 'lensApp';
+      break;
+    case 'visualization':
+      placeholder = 'visualizeApp';
+      break;
+    default:
+      placeholder = 'logoElastic';
+  }
+
+  let previewImage = (
+    <div
+      css={css`
+        display: inline-flex;
+        width: 100px;
+        height: 75px;
+        align-items: center;
+        justify-content: center;
+        background-color: ${euiTheme.colors.backgroundBaseDisabled};
+        border: 1px solid ${euiTheme.colors.borderBaseDisabled};
+      `}
+    >
+      <EuiIcon
+        type={placeholder}
+        size="xl"
+        css={css`
+          filter: grayscale(100%);
+          opacity: 0.5;
+        `}
+        style={{ animation: 'none' }}
+      />
     </div>
+  );
+
+  const key = `kibana:preview:${item.id}`;
+  const preview = sessionStorage.getItem(key);
+
+  if (preview) {
+    const { image, timestamp } = JSON.parse(preview);
+    previewImage = (
+      <EuiImage
+        url={image}
+        alt={timestamp}
+        size="s"
+        hasShadow={false}
+        css={css`
+          border: 1px solid ${euiTheme.colors.borderBaseDisabled};
+        `}
+      />
+    );
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem grow={false}>{previewImage}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="s">{renderTitle()}</EuiText>
+        {Boolean(description) && (
+          <EuiText size="s" color="subdued">
+            <p>
+              <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
+                {description!}
+              </EuiHighlight>
+            </p>
+          </EuiText>
+        )}
+        {hasTags && (
+          <>
+            <EuiSpacer size="s" />
+            <TagList
+              references={references}
+              tagRender={(tag) => <TagBadge key={tag.name} tag={tag} onClick={onClickTag} />}
+            />
+          </>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
