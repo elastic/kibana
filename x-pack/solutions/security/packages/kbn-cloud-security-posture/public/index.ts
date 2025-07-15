@@ -20,5 +20,9 @@ export { getNormalizedSeverity } from './src/utils/get_normalized_severity';
 export { createMisconfigurationFindingsQuery } from './src/utils/findings_query_builders';
 export { ActionableBadge, type MultiValueCellAction } from './src/components/actionable_badge';
 export { MultiValueCellPopover } from './src/components/multi_value_cell_popover';
-export { findReferenceLink } from './src/utils/find_reference_link.util';
+export {
+  findReferenceLink,
+  isCveReference,
+  getNonCveReferences,
+} from './src/utils/vulnerability_reference';
 export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';

@@ -11,11 +11,12 @@ import { TableId } from '@kbn/securitysolution-data-table';
 
 import { TimelineId } from '../../../../common/types/timeline';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { mockGlobalState, TestProviders, createMockStore, mockDataViewSpec } from '../../mock';
+import { createMockStore, mockDataViewSpec, mockGlobalState, TestProviders } from '../../mock';
 import type { State } from '../../store';
 import { TopN } from './top_n';
 import { detectionAlertsTables } from './helpers';
 import { StatefulTopN } from '.';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -152,6 +153,7 @@ const store = createMockStore(state);
 
 const testProps = {
   browserFields: mockBrowserFields,
+  dataView: createStubDataView({ spec: {} }),
   field,
   indexPattern: mockDataViewSpec,
   scopeId: TableId.hostsPageEvents,
