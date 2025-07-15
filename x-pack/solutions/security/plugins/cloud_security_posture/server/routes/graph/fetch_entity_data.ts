@@ -7,6 +7,53 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { AssetProps } from '@kbn/cloud-security-posture-common';
+import type { MappedAssetProps } from '@kbn/cloud-security-posture-common/types/assets';
+
+/**
+ * Maps response fields to their corresponding entity fields
+ * This makes the relationship between MappedAssetProps and AssetProps explicit
+ */
+type EntityFieldMapper = Record<keyof MappedAssetProps, keyof AssetProps>;
+
+/**
+ * Field mapping from response fields to entity fields
+ */
+const ASSET_RESPONSE_TO_ENTITY_FIELD: EntityFieldMapper = {
+  entityName: 'entity.name',
+};
+
+/**
+ * ID field name constant - used to identify entities
+ */
+const ENTITY_ID_FIELD = 'entity.id' as keyof AssetProps;
+
+/**
+ * Maps an entity record from the source format to the simplified response format
+ * @param record The source entity record
+ * @returns A simplified asset response or undefined if the record is invalid
+ */
+const mapEntityToResponseObject = (record: AssetProps): [string, MappedAssetProps] | undefined => {
+  const entityId = record[ENTITY_ID_FIELD];
+
+  if (!entityId) {
+    return undefined;
+  }
+
+  // Build response by mapping each field according to ASSET_RESPONSE_TO_ENTITY_FIELD
+  const assetResponse = Object.entries(ASSET_RESPONSE_TO_ENTITY_FIELD).reduce<
+    Partial<MappedAssetProps>
+  >((response, [responseField, entityField]) => {
+    // Check if the entity field exists in the record
+    if (entityField in record) {
+      response[responseField as keyof MappedAssetProps] =
+        (record[entityField] as string) || (responseField === 'entityName' ? 'Unknown entity' : '');
+    }
+    return response;
+  }, {}) as MappedAssetProps;
+
+  // Return tuple of [entityId, simplified asset response]
+  return [entityId as string, assetResponse];
+};
 
 /**
  * Fetches entity data from the entities index for a given set of entity IDs
@@ -19,18 +66,18 @@ import type { AssetProps } from '@kbn/cloud-security-posture-common';
 export async function fetchEntityData(
   esClient: IScopedClusterClient,
   logger: Logger,
-  entityIds: string[]
-): Promise<Record<string, AssetProps>> {
+  entityIds: string[],
+  spaceId: string
+): Promise<Record<string, MappedAssetProps>> {
   if (entityIds.length === 0) {
     return {};
   }
 
   logger.debug(`Fetching entity data for ${entityIds.length} entities`);
-
   // Use ESQL to query entity data
-  const esqlQuery = `FROM .entities.*.latest.security_*_default
+  const esqlQuery = `FROM .entities.*.latest.security_*_${spaceId}
 | WHERE entity.id IN (${entityIds.map((_, idx) => `?entity_id${idx}`).join(', ')})
-| LIMIT ${entityIds.length * 2}`; // Allow for some duplicates
+| LIMIT ${entityIds.length * 2}`;
 
   const params = entityIds.map((id, idx) => ({
     [`entity_id${idx}`]: id,
@@ -47,14 +94,12 @@ export async function fetchEntityData(
       .toRecords<AssetProps>();
 
     // Transform results into a map of entity id -> entity data
-    const entityDataMap: Record<string, AssetProps> = {};
+    const entityDataMap: Record<string, MappedAssetProps> = {};
     for (const record of results.records) {
-      if (record['entity.id']) {
-        // Filter out null and undefined values
-        const cleanedRecord = Object.fromEntries(
-          Object.entries(record as Record<string, any>).filter(([_, value]) => value != null)
-        ) as AssetProps;
-        entityDataMap[record['entity.id']] = cleanedRecord;
+      const mappedEntity = mapEntityToResponseObject(record);
+      if (mappedEntity) {
+        const [entityId, assetResponse] = mappedEntity;
+        entityDataMap[entityId] = assetResponse;
       }
     }
 

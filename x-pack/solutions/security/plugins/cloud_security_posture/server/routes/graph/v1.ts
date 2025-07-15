@@ -11,7 +11,9 @@ import type {
   UiSettingsRequestHandlerContext,
 } from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import type { MappedAssetProps } from '@kbn/cloud-security-posture-common/types/assets';
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
@@ -75,6 +77,7 @@ export const getGraph = async ({
     graphData,
     esClient,
     assetInventoryEnabled,
+    spaceId,
   });
 
   // Return enhanced graph data
@@ -95,11 +98,13 @@ export const enhanceGraphWithEntityData = async ({
   graphData,
   esClient,
   assetInventoryEnabled,
+  spaceId,
 }: {
   logger: Logger;
   graphData: Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>;
   esClient: IScopedClusterClient;
   assetInventoryEnabled: boolean;
+  spaceId: string;
 }): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   if (!assetInventoryEnabled) {
     return graphData;
@@ -113,19 +118,58 @@ export const enhanceGraphWithEntityData = async ({
   });
 
   // Fetch entity data for all entity IDs
-  let assetData: Record<string, any> = {};
+  let assetData: Record<string, MappedAssetProps> = {};
   try {
-    assetData = await fetchEntityData(esClient, logger, Array.from(entityIds));
+    assetData = await fetchEntityData(esClient, logger, Array.from(entityIds), spaceId);
   } catch (error) {
     logger.error(`Error fetching entity data: ${error}`);
     // Continue without entity data if fetch fails
   }
 
   // Enhance nodes with entity data
-  const enhancedNodes = graphData.nodes.map((node, index) => ({
-    ...node,
-    assetData: entityIds.has(node.id) ? assetData[node.id] : undefined,
-  }));
+  const enhancedNodes = graphData.nodes.map((node) => {
+    // If entity has asset data
+    if (entityIds.has(node.id) && assetData[node.id]) {
+      // If documentsData exists, find the correct document to update
+      if ('documentsData' in node && node.documentsData && node.documentsData.length > 0) {
+        // Look for a document with matching id
+        const documentIndex = node.documentsData.findIndex((doc) => doc.id === node.id);
+
+        if (documentIndex >= 0) {
+          // We found a matching document, update only this one
+          return {
+            ...node,
+            documentsData: node.documentsData.map((doc, index) =>
+              index === documentIndex ? { ...doc, assetData: assetData[node.id] } : doc
+            ),
+          };
+        } else {
+          // No matching document found, but we have documentsData
+          // Just update the first document as a fallback
+          return {
+            ...node,
+            documentsData: [
+              { ...node.documentsData[0], assetData: assetData[node.id] },
+              ...node.documentsData.slice(1),
+            ],
+          };
+        }
+      }
+
+      // If documentsData doesn't exist, create it with asset data
+      return {
+        ...node,
+        documentsData: [
+          {
+            id: node.id,
+            type: DOCUMENT_TYPE_EVENT,
+            assetData: assetData[node.id],
+          },
+        ],
+      };
+    }
+    return node;
+  });
 
   // Return enhanced graph data
   return {

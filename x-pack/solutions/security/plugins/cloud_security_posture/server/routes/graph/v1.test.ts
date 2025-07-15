@@ -9,19 +9,34 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getGraph, type GetGraphParams } from './v1';
 import { fetchGraph } from './fetch_graph';
 import { parseRecords } from './parse_records';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import { fetchEntityData } from './fetch_entity_data';
 
 jest.mock('./fetch_graph');
 jest.mock('./parse_records');
+jest.mock('./fetch_entity_data');
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 describe('getGraph', () => {
   let esClient: any;
+  let uiSettings: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = {};
+    uiSettings = {
+      client: {
+        get: jest.fn(),
+      },
+    };
+
+    // Default to asset inventory disabled
+    uiSettings.client.get.mockResolvedValue(false);
+
+    // Mock fetchEntityData as a no-op since we're not testing that part
+    (fetchEntityData as jest.Mock).mockResolvedValue({});
   });
 
   it('should call fetchGraph and parseRecords with correct parameters', async () => {
@@ -32,7 +47,7 @@ describe('getGraph', () => {
     (parseRecords as jest.Mock).mockReturnValue(parsedResult);
 
     const params = {
-      services: { esClient, logger: mockLogger },
+      services: { esClient, logger: mockLogger, uiSettings },
       query: {
         originEventIds: [
           { id: 'event1', isAlert: false },
@@ -64,6 +79,9 @@ describe('getGraph', () => {
       esQuery: { bool: { must: [{ match_phrase: { field: 'value' } }] } },
     });
     expect(parseRecords).toHaveBeenCalledWith(mockLogger, fakeFetchResult.records, 10);
+    expect(uiSettings.client.get).toHaveBeenCalledWith(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
     expect(result).toEqual(parsedResult);
   });
 
@@ -75,7 +93,7 @@ describe('getGraph', () => {
     (parseRecords as jest.Mock).mockReturnValue(parsedResult);
 
     const params = {
-      services: { esClient, logger: mockLogger },
+      services: { esClient, logger: mockLogger, uiSettings },
       query: {
         originEventIds: [{ id: 'event3', isAlert: false }],
         // No indexPatterns provided; spaceId will be used to build default patterns.
