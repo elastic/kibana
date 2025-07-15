@@ -54,9 +54,9 @@ export const useLensDraftComment = () => {
 
   const openLensModal = useCallback(({ editorRef }: { editorRef: MarkdownEditorRef }) => {
     if (editorRef && editorRef.textarea && editorRef.toolbar) {
-      const lensPluginButton = editorRef.toolbar?.querySelector(
+      const lensPluginButton = editorRef.toolbar?.querySelector<HTMLButtonElement>(
         `[aria-label="${VISUALIZATION}"]`
-      ) as HTMLButtonElement | null;
+      );
       if (lensPluginButton) {
         lensPluginButton.click();
       }
