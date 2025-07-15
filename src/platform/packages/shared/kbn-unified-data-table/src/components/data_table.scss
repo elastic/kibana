@@ -186,6 +186,10 @@
     // might be limited by that.
     max-width: ($euiSizeXXL * 12.5) !important;
   }
+
+  mark {
+    text-decoration: dotted underline;
+  }
 }
 
 @include euiBreakpoint('xs', 's', 'm') {
