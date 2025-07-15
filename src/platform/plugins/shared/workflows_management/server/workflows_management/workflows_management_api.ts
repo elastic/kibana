@@ -24,11 +24,15 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.searchWorkflows(params);
   }
 
+  public async getWorkflow(id: string): Promise<WorkflowModel | null> {
+    return await this.workflowsService.getWorkflow(id);
+  }
+
   public async createWorkflow(workflow: WorkflowModel): Promise<WorkflowModel> {
     return await this.workflowsService.createWorkflow(workflow);
   }
 
-  public async getWorkflow(id: string): Promise<WorkflowModel> {
-    return await this.workflowsService.getWorkflow(id);
+  public async updateWorkflow(id: string, workflow: WorkflowModel): Promise<WorkflowModel> {
+    return await this.workflowsService.updateWorkflow(id, workflow);
   }
 }
