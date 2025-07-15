@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createBuiltinToolId, toSerializedToolIdentifier } from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
 import {
   createEmptyRunContext,
@@ -40,8 +39,7 @@ describe('RunContext utilities', () => {
         stack: [],
       };
 
-      const toolId = createBuiltinToolId('test-tool');
-      const expectedSerializedToolId = toSerializedToolIdentifier(toolId);
+      const toolId = 'test-tool';
       const forkedContext = forkContextForToolRun({ toolId, parentContext });
 
       expect(forkedContext).toEqual({
@@ -49,22 +47,22 @@ describe('RunContext utilities', () => {
         stack: [
           {
             type: 'tool',
-            toolId: expectedSerializedToolId,
+            toolId,
           },
         ],
       });
     });
 
     it('should preserve existing stack entries when forking', () => {
-      const existingToolId = createBuiltinToolId('existing-tool');
-      const newToolId = createBuiltinToolId('new-tool');
+      const existingToolId = 'existing-tool';
+      const newToolId = 'new-tool';
 
       const parentContext: RunContext = {
         runId: 'parent-run-id',
         stack: [
           {
             type: 'tool',
-            toolId: toSerializedToolIdentifier(existingToolId),
+            toolId: existingToolId,
           },
         ],
       };
@@ -76,11 +74,11 @@ describe('RunContext utilities', () => {
         stack: [
           {
             type: 'tool',
-            toolId: toSerializedToolIdentifier(existingToolId),
+            toolId: existingToolId,
           },
           {
             type: 'tool',
-            toolId: toSerializedToolIdentifier(newToolId),
+            toolId: newToolId,
           },
         ],
       });
