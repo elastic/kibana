@@ -13,6 +13,12 @@ import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextExtra } from '../types';
 
+const fieldAlreadyExistsError = (columnName: string) =>
+  i18n.translate('indexEditor.addColumn.duplicatedName', {
+    defaultMessage: 'Field name {columnName} already exists',
+    values: { columnName },
+  });
+
 export const useAddColumnName = () => {
   const {
     services: { indexUpdateService },
@@ -24,10 +30,7 @@ export const useAddColumnName = () => {
 
   const validationError = useMemo(() => {
     if (columns.some((existingColumn) => existingColumn.name === columnName)) {
-      return i18n.translate('indexEditor.addColumn.duplicatedName', {
-        defaultMessage: 'Field name {columnName} already exists',
-        values: { columnName },
-      });
+      return fieldAlreadyExistsError(columnName);
     }
 
     return null;
