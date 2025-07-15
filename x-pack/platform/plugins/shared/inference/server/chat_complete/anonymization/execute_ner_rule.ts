@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';
 import { withInferenceSpan } from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, GenAISemanticConventions } from '@kbn/inference-tracing/src/types';
 import { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
@@ -82,20 +83,33 @@ export async function executeNerRule({
     await Promise.all(
       batched.map(async (batch) => {
         return await limiter(() =>
-          withInferenceSpan('infer_ner', async (span) => {
-            try {
-              const response = await esClient.ml.inferTrainedModel({
-                model_id: rule.modelId,
-                docs: batch.map((text) => ({ text_field: text })),
-              });
+          withInferenceSpan(
+            {
+              name: 'inferTrainedModel',
+              [GenAISemanticConventions.GenAIResponseModel]: rule.modelId,
+              [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+            },
+            async (span) => {
+              try {
+                const docs = batch.map((text) => ({ text_field: text }));
 
-              return response.inference_results;
-            } catch (error) {
-              throw new Error(`Inference failed for NER model '${rule.modelId}'`, {
-                cause: error,
-              });
+                span?.setAttribute('input.value', JSON.stringify(docs));
+
+                const response = await esClient.ml.inferTrainedModel({
+                  model_id: rule.modelId,
+                  docs,
+                });
+
+                span?.setAttribute('output.value', JSON.stringify(response.inference_results));
+
+                return response.inference_results;
+              } catch (error) {
+                throw new Error(`Inference failed for NER model '${rule.modelId}'`, {
+                  cause: error,
+                });
+              }
             }
-          })
+          )
         );
       })
     )
