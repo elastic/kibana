@@ -193,9 +193,12 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/epm/packages/${pkgName}/rollback`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
-        expect(res.body.message).to.eql(
-          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}-1, ${pkgName}-2`
+        // Cannot predict order of SO creation.
+        const re = new RegExp(
+          `Failed to roll back package ${pkgName}: No previous version found for package policies: ${pkgName}-[1-2], ${pkgName}-[1-2]`,
+          'g'
         );
+        expect(res.body.message).to.match(re);
       });
 
       it('should fail when at least one package policy has a previous revision with a different version', async () => {
@@ -266,7 +269,7 @@ export default function (providerContext: FtrProviderContext) {
     });
   }
 
-  describe('TMPDEBUGMEPackage rollback', () => {
+  describe('Package rollback', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
