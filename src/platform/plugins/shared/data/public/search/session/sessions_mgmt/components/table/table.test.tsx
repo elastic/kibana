@@ -7,215 +7,187 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MockedKeys } from '@kbn/utility-types-jest';
-import { act, waitFor } from '@testing-library/react';
-import { mount, ReactWrapper } from 'enzyme';
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { act, render, screen, waitFor, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import moment from 'moment';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { SearchUsageCollector, SessionsClient } from '../../../..';
+import { SessionsClient } from '../../../..';
 import { SearchSessionStatus } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
-import { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
 
-let mockCoreSetup: MockedKeys<CoreSetup>;
-let mockCoreStart: CoreStart;
-let mockShareStart: jest.Mocked<SharePluginStart>;
-let mockConfig: SearchSessionsConfigSchema;
-let sessionsClient: SessionsClient;
-let api: SearchSessionsMgmtAPI;
-let mockSearchUsageCollector: SearchUsageCollector;
+const setup = async ({
+  mockSessionsFindResponse = {
+    saved_objects: [],
+    statuses: {},
+  },
+  refreshInterval = moment.duration(1, 'seconds'),
+  refreshTimeout = moment.duration(10, 'minutes'),
+  props = {},
+}: {
+  mockSessionsFindResponse?: any;
+  refreshInterval?: moment.Duration;
+  refreshTimeout?: moment.Duration;
+  props?: Partial<React.ComponentProps<typeof SearchSessionsMgmtTable>>;
+} = {}) => {
+  const mockCoreSetup = coreMock.createSetup();
+  const mockCoreStart = coreMock.createStart();
+  const mockShareStart = sharePluginMock.createStartContract();
 
-describe('Background Search Session Management Table', () => {
-  beforeEach(async () => {
-    mockCoreSetup = coreMock.createSetup();
-    mockCoreStart = coreMock.createStart();
-    mockShareStart = sharePluginMock.createStartContract();
-    mockConfig = {
-      defaultExpiration: moment.duration('7d'),
-      management: {
-        expiresSoonWarning: moment.duration(1, 'days'),
-        maxSessions: 2000,
-        refreshInterval: moment.duration(1, 'seconds'),
-        refreshTimeout: moment.duration(10, 'minutes'),
-      },
-    } as any;
-    mockSearchUsageCollector = createSearchUsageCollectorMock();
+  const mockConfig = {
+    defaultExpiration: moment.duration('7d'),
+    management: {
+      expiresSoonWarning: moment.duration(1, 'days'),
+      maxSessions: 2000,
+      refreshInterval,
+      refreshTimeout,
+    },
+  } as any;
 
-    sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
-    api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-      locators: mockShareStart.url.locators,
-      notifications: mockCoreStart.notifications,
-      application: mockCoreStart.application,
-    });
+  const mockSearchUsageCollector = createSearchUsageCollectorMock();
+
+  const sessionsClient = new SessionsClient({
+    http: mockCoreSetup.http,
+  }) as jest.Mocked<SessionsClient>;
+  sessionsClient.find = jest.fn().mockResolvedValue(mockSessionsFindResponse);
+
+  const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+    locators: mockShareStart.url.locators,
+    notifications: mockCoreStart.notifications,
+    application: mockCoreStart.application,
   });
 
-  describe('renders', () => {
-    let table: ReactWrapper;
+  let renderResult: RenderResult;
+  await act(async () => {
+    renderResult = render(
+      <LocaleWrapper>
+        <SearchSessionsMgmtTable
+          core={mockCoreStart}
+          api={api}
+          timezone="UTC"
+          config={mockConfig}
+          kibanaVersion="8.0.0"
+          searchUsageCollector={mockSearchUsageCollector}
+          {...props}
+        />
+      </LocaleWrapper>
+    );
+  });
 
-    const getInitialResponse = () => {
-      return {
-        saved_objects: [
-          {
+  return {
+    sessionsClient,
+    api,
+    mockSearchUsageCollector,
+    renderResult: renderResult!,
+  };
+};
+
+describe('<SearchSessionsMgmtTable />', () => {
+  const getInitialResponse = () => {
+    return {
+      saved_objects: [
+        {
+          id: 'wtywp9u2802hahgp-flps',
+          attributes: {
+            name: 'very background search',
             id: 'wtywp9u2802hahgp-flps',
-            attributes: {
-              name: 'very background search',
-              id: 'wtywp9u2802hahgp-flps',
-              url: '/app/great-app-url/#48',
-              appId: 'canvas',
-              created: '2020-12-02T00:19:32Z',
-              expires: '2020-12-07T00:19:32Z',
-              idMapping: {},
-            },
+            url: '/app/great-app-url/#48',
+            appId: 'canvas',
+            created: '2020-12-02T00:19:32Z',
+            expires: '2020-12-07T00:19:32Z',
+            idMapping: {},
           },
-        ],
-        statuses: {
-          'wtywp9u2802hahgp-flps': { status: SearchSessionStatus.EXPIRED },
         },
-      };
+      ],
+      statuses: {
+        'wtywp9u2802hahgp-flps': { status: SearchSessionStatus.EXPIRED },
+      },
     };
+  };
 
-    test('table header cells', async () => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
-        return getInitialResponse();
-      });
+  it('should render table header cells', async () => {
+    await setup({ mockSessionsFindResponse: getInitialResponse() });
 
-      await act(async () => {
-        table = mount(
-          <LocaleWrapper>
-            <SearchSessionsMgmtTable
-              core={mockCoreStart}
-              api={api}
-              timezone="UTC"
-              config={mockConfig}
-              kibanaVersion={'8.0.0'}
-              searchUsageCollector={mockSearchUsageCollector}
-            />
-          </LocaleWrapper>
-        );
-      });
+    // Check header cells (column titles)
+    expect(screen.getByRole('columnheader', { name: 'App' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: '# Searches' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Status' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Created' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Expiration' })).toBeInTheDocument();
+  });
 
-      expect(table.find('thead th').map((node) => node.text())).toMatchInlineSnapshot(`
-        Array [
-          "App",
-          "Name",
-          "# Searches",
-          "Status",
-          "Created",
-          "Expiration",
-        ]
-      `);
-    });
+  it('should render table body cells', async () => {
+    await setup({ mockSessionsFindResponse: getInitialResponse() });
 
-    test('table body cells', async () => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
-        return getInitialResponse();
-      });
-
-      await act(async () => {
-        table = mount(
-          <LocaleWrapper>
-            <SearchSessionsMgmtTable
-              core={mockCoreStart}
-              api={api}
-              timezone="UTC"
-              config={mockConfig}
-              kibanaVersion={'8.0.0'}
-              searchUsageCollector={mockSearchUsageCollector}
-            />
-          </LocaleWrapper>
-        );
-      });
-      table.update();
-
-      expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
-        Array [
-          "",
-          "very background search Info",
-          "0",
-          "Expired",
-          "2 Dec, 2020, 00:19:32",
-          "--",
-          "",
-          "",
-        ]
-      `);
+    // Check cell contents
+    await waitFor(() => {
+      expect(screen.getByText('very background search')).toBeInTheDocument();
+      expect(screen.getByText('Expired')).toBeInTheDocument();
+      expect(screen.getByText('2 Dec, 2020, 00:19:32')).toBeInTheDocument();
+      expect(screen.getByText('--')).toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument();
     });
   });
 
-  describe('fetching sessions data', () => {
-    test('re-fetches data', async () => {
-      jest.useFakeTimers();
-      const find = jest.fn();
-      sessionsClient.find = find;
-
-      await act(async () => {
-        mount(
-          <LocaleWrapper>
-            <SearchSessionsMgmtTable
-              core={mockCoreStart}
-              api={api}
-              timezone="UTC"
-              config={mockConfig}
-              kibanaVersion={'8.0.0'}
-              searchUsageCollector={mockSearchUsageCollector}
-            />
-          </LocaleWrapper>
-        );
-
-        await waitFor(
-          () => {
-            // 1 for initial load + 1 refresh calls
-            expect(find).toHaveBeenCalledTimes(2);
-          },
-          { timeout: 3000, interval: 500 }
-        );
+  describe('when the columns are filtered', () => {
+    it('should render table header cells', async () => {
+      await setup({
+        mockSessionsFindResponse: getInitialResponse(),
+        props: { columns: ['appId', 'name'] },
       });
-      jest.useRealTimers();
+
+      // Check header cells (column titles)
+      expect(screen.getByRole('columnheader', { name: 'App' })).toBeInTheDocument();
+      expect(screen.getByRole('columnheader', { name: 'Name' })).toBeInTheDocument();
+      expect(screen.queryByRole('columnheader', { name: '# Searches' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('columnheader', { name: 'Status' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('columnheader', { name: 'Created' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('columnheader', { name: 'Expiration' })).not.toBeInTheDocument();
+    });
+  });
+
+  it('re-fetches data', async () => {
+    jest.useFakeTimers();
+
+    const { sessionsClient } = await setup();
+
+    // Allow initial fetch to complete
+    await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(1));
+
+    // Fast-forward timer to trigger the refresh
+    act(() => {
+      jest.advanceTimersByTime(1000); // Advance by 1 second (refresh interval)
     });
 
-    test('refresh button uses the session client', async () => {
-      sessionsClient.find = jest.fn();
+    // Verify that the find method was called again
+    await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(2));
 
-      mockConfig = {
-        ...mockConfig,
-        management: {
-          ...mockConfig.management,
-          refreshInterval: moment.duration(1, 'day'),
-          refreshTimeout: moment.duration(2, 'days'),
-        },
-      };
+    jest.useRealTimers();
+  });
 
-      await act(async () => {
-        const table = mount(
-          <LocaleWrapper>
-            <SearchSessionsMgmtTable
-              core={mockCoreStart}
-              api={api}
-              timezone="UTC"
-              config={mockConfig}
-              kibanaVersion={'8.0.0'}
-              searchUsageCollector={mockSearchUsageCollector}
-            />
-          </LocaleWrapper>
-        );
+  describe('when the refresh button is clicked', () => {
+    it('uses the session client', async () => {
+      const user = userEvent.setup();
 
-        const buttonSelector = `[data-test-subj="sessionManagementRefreshBtn"] button`;
-
-        await waitFor(() => {
-          table.find(buttonSelector).first().simulate('click');
-          table.update();
-        });
+      const { sessionsClient } = await setup({
+        refreshInterval: moment.duration(1, 'day'),
+        refreshTimeout: moment.duration(2, 'days'),
       });
 
-      // initial call + click
-      expect(sessionsClient.find).toBeCalledTimes(2);
+      // Wait for initial load to complete
+      await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(1));
+
+      // Click the refresh button
+      const refreshButton = screen.getByTestId('sessionManagementRefreshBtn');
+      await user.click(refreshButton);
+
+      // Verify the find method was called again
+      await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(2));
     });
   });
 });

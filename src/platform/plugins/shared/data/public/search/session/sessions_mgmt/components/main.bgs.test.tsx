@@ -21,7 +21,7 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
 
 jest.mock('../../constants', () => ({
-  BACKGROUND_SEARCH_ENABLED: false,
+  BACKGROUND_SEARCH_ENABLED: true,
 }));
 
 const setup = async () => {
@@ -85,17 +85,17 @@ const setup = async () => {
 };
 
 describe('<SearchSessionsMgmtMain />', () => {
-  describe('when Background Search is disabled', () => {
+  describe('when Background Search is enabled', () => {
     it('should render the page title', async () => {
       await setup();
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Search Sessions');
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Background Search');
     });
 
     it('should render the documentation link', async () => {
       await setup();
 
-      const docLink = screen.getByText('Documentation');
-      expect(docLink).toBeVisible();
+      const docLink = screen.queryByText('Documentation');
+      expect(docLink).not.toBeInTheDocument();
     });
 
     it('should render the table', async () => {
