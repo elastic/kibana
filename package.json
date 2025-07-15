@@ -953,7 +953,7 @@
     "@kbn/snapshot-restore-plugin": "link:x-pack/platform/plugins/private/snapshot_restore",
     "@kbn/sort-predicates": "link:src/platform/packages/shared/kbn-sort-predicates",
     "@kbn/spaces-plugin": "link:x-pack/platform/plugins/shared/spaces",
-    "@kbn/spaces-test-plugin": "link:x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin",
+    "@kbn/spaces-test-plugin": "link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin",
     "@kbn/spaces-utils": "link:src/platform/packages/shared/kbn-spaces-utils",
     "@kbn/sse-utils": "link:src/platform/packages/shared/kbn-sse-utils",
     "@kbn/sse-utils-client": "link:src/platform/packages/shared/kbn-sse-utils-client",
