@@ -5,19 +5,15 @@
  * 2.0.
  */
 
+import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
 import { highlightPatternFromRegex, ShortIdTable } from '@kbn/genai-utils-common';
-import {
-  analyzeDocuments,
-  getLogPatterns,
-  sortAndTruncateAnalyzedFields,
-} from '@kbn/genai-utils-server';
-import { createPrompt, type InferenceClient } from '@kbn/inference-common';
+import { getLogPatterns } from '@kbn/genai-utils-server';
+import { type InferenceClient } from '@kbn/inference-common';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
-import { z } from '@kbn/zod';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
 import { KQL_GUIDE } from './kql_guide';
 
@@ -47,66 +43,14 @@ export async function generateSignificantEventDefinitions({
   const start = mstart.valueOf();
   const end = mend.valueOf();
 
-  const prompt = createPrompt({
-    name: 'analyze_dataset',
-    description: 'Analyze a dataset',
-    input: z.object({
-      prompt: z.string(),
-    }),
-  })
-    .version({
-      system: `You are a helpful assistant.`,
-      template: {
-        mustache: {
-          template: '',
-        },
-      },
-      temperature: 0.25,
-      toolChoice: {
-        function: 'describe_dataset',
-        arguments: {
-          index: 'logs',
-        },
-      },
-      tools: {
-        describe_dataset: {
-          description: `Get dataset description via sampling of documents`,
-          schema: {
-            type: 'object',
-            properties: {
-              index: {
-                type: 'string',
-                description: 'Index, data stream or index pattern you want to analyze',
-              },
-              kql: {
-                type: 'string',
-                description: 'KQL for filtering the data',
-              },
-            },
-            required: ['index'],
-          },
-        },
-      },
-    })
-    .get();
-
-  const wtf = await inferenceClient.prompt({
-    prompt,
-    input: {
-      prompt: 'analyze logs',
-    },
-    connectorId,
-  });
-
-  console.dir(['wtf', wtf], { depth: 100 });
-
-  const analysis = await analyzeDocuments({
-    esClient,
-    kuery: '',
+  const analysis = await describeDataset({
+    esClient: esClient.client,
     start,
     end,
     index: name,
   });
+
+  const short = sortAndTruncateAnalyzedFields(analysis);
 
   const textFields = analysis.fields
     .filter((field) => field.types.includes('text'))
@@ -127,7 +71,6 @@ export async function generateSignificantEventDefinitions({
         esClient,
         fields: [categorizationField],
         index: name,
-        kuery: '',
         includeChanges: true,
         metadata: [],
       }).then((results) => {
@@ -156,8 +99,6 @@ export async function generateSignificantEventDefinitions({
     });
   }
 
-  const short = sortAndTruncateAnalyzedFields(analysis);
-
   const instruction = `
 I want to generate KQL queries that help me find
 important log messages. Each pattern should have its own
@@ -180,23 +121,23 @@ root cause analysis. Some example of patterns:
     KQL_GUIDE,
     logPatterns
       ? `## Log patterns
+The following log patterns were found over the last ${LOOKBACK_DAYS} days.
+The field used is \`${categorizationField}\`:
     
-    The following log patterns were found over the last
-    ${LOOKBACK_DAYS} days. The field used is \`${categorizationField}\`:
-    
-    ${JSON.stringify(
-      logPatterns.map((pattern) => {
-        const { regex, count } = pattern;
-        return {
-          regex,
-          count,
-        };
-      })
-    )}`
+${JSON.stringify(
+  logPatterns.map((pattern) => {
+    const { regex, count } = pattern;
+    return {
+      regex,
+      count,
+    };
+  })
+)}
+    `
       : '',
     `## Dataset analysis
-    
-    ${JSON.stringify(short)}`,
+${JSON.stringify(short)}
+    `,
   ];
 
   logger.debug(() => {

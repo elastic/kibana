@@ -259,9 +259,9 @@ interface LogPatternOptions {
   start: number;
   end: number;
   index: string | string[];
-  kuery: string;
-  metadata?: string[];
   fields: string[];
+  metadata?: string[];
+  kql?: string;
 }
 
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
@@ -273,7 +273,7 @@ export async function getLogPatterns({
   start,
   end,
   index,
-  kuery,
+  kql,
   includeChanges,
   metadata = [],
   fields,
@@ -301,7 +301,7 @@ export async function getLogPatterns({
     track_total_hits: true,
     query: {
       bool: {
-        filter: [...kqlQuery(kuery), ...rangeQuery(start, end)],
+        filter: [...kqlQuery(kql), ...rangeQuery(start, end)],
       },
     },
   });
@@ -330,7 +330,7 @@ export async function getLogPatterns({
         fields: fieldGroup,
         query: {
           bool: {
-            filter: kqlQuery(kuery),
+            filter: kqlQuery(kql),
           },
         },
         samplingProbability,
@@ -368,7 +368,7 @@ export async function getLogPatterns({
         end,
         query: {
           bool: {
-            filter: kqlQuery(kuery),
+            filter: kqlQuery(kql),
             must_not: excludeQueries,
           },
         },

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+
 import { rangeQuery } from '@kbn/es-query';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { getSampleDocuments } from './get_sample_documents';
 import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
 

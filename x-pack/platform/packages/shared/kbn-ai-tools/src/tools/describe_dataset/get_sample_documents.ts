@@ -6,7 +6,7 @@
  */
 
 import { QueryDslFieldAndFormat, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { kqlQuery, rangeQuery } from '@kbn/es-query';
 
 export function getSampleDocuments({

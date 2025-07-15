@@ -6,4 +6,4 @@
  */
 
 export { ShortIdTable } from './short_id/short_id_table';
-export { highlightPatternFromRegex } from './log_analysis/highlight_patterns_from_regex';
+export { highlightPatternFromRegex } from './log_patterns/highlight_patterns_from_regex';

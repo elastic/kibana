@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { analyzeDocuments } from './log_analysis/analyze_documents';
-export { sortAndTruncateAnalyzedFields } from './log_analysis/sort_and_truncate_analyzed_fields';
-export { getLogPatterns } from './log_analysis/get_log_patterns';
+export { getLogPatterns } from './log_patterns/get_log_patterns';
