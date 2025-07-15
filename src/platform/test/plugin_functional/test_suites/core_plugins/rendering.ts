@@ -298,6 +298,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (boolean?)',
         // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.infra.featureFlags.profilingEnabled (boolean?)',
+        'xpack.infra.featureFlags.hostOtelEnabled (boolean?)',
 
         'xpack.index_management.enableIndexActions (boolean?|never)',
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
