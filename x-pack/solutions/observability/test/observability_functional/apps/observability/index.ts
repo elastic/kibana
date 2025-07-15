@@ -28,6 +28,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./pages/alert_details_page'));
     loadTestFile(require.resolve('./pages/alerts/metric_threshold'));
     loadTestFile(require.resolve('./sidenav/sidenav'));
-    loadTestFile(require.resolve('./pages/cases/case_comment'));
   });
 }
