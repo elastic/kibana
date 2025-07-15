@@ -16,13 +16,13 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
 } from '@elastic/eui';
-import { ExecutionStatus, WorkflowStepExecution } from '@kbn/workflows';
+import { ExecutionStatus, EsWorkflowStepExecution } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
-import { StatusBadge } from '../../../shared/ui/StatusBadge';
+import { StatusBadge } from '../../../shared/ui/status_badge';
 
 interface WorkflowExecutionProps {
   workflowExecutionId: string;
-  fields?: Array<keyof WorkflowStepExecution>;
+  fields?: Array<keyof EsWorkflowStepExecution>;
 }
 
 export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
@@ -36,7 +36,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowStepExecution>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<EsWorkflowStepExecution>>>(
     () =>
       [
         {
@@ -56,7 +56,11 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           field: 'executionTimeMs',
           name: 'Execution Time (ms)',
         },
-      ].filter((field) => fields.includes(field.field as keyof WorkflowStepExecution)),
+        {
+          field: 'error',
+          name: 'Error',
+        },
+      ].filter((field) => fields.includes(field.field as keyof EsWorkflowStepExecution)),
     [fields]
   );
 

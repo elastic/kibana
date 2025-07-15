@@ -8,7 +8,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { CreateWorkflowRequest, EsWorkflowSchema, WorkflowStatus } from '@kbn/workflows';
+import { CreateWorkflowCommand, EsWorkflow, WorkflowStatus } from '@kbn/workflows';
 import { v4 as uuidv4 } from 'uuid';
 import { getWorkflow } from './get_workflow';
 
@@ -16,7 +16,7 @@ interface CreateWorkflowParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   workflowIndex: string;
-  workflow: CreateWorkflowRequest;
+  workflow: CreateWorkflowCommand;
 }
 
 export const createWorkflow = async ({
@@ -50,7 +50,7 @@ export const createWorkflow = async ({
   }
 };
 
-function transformToCreateScheme(workflow: CreateWorkflowRequest): Omit<EsWorkflowSchema, 'id'> {
+function transformToCreateScheme(workflow: CreateWorkflowCommand): Omit<EsWorkflow, 'id'> {
   return {
     name: workflow.name,
     description: workflow.description || '',
@@ -58,13 +58,10 @@ function transformToCreateScheme(workflow: CreateWorkflowRequest): Omit<EsWorkfl
     triggers: workflow.triggers || [],
     steps: workflow.steps || [],
     tags: [],
-    yaml: '',
-    nodes: [],
-    executions: [],
-    history: [],
-    createdAt: new Date().toISOString(),
+    yaml: workflow.yaml,
+    createdAt: new Date(),
     createdBy: 'system',
-    lastUpdatedAt: new Date().toISOString(),
+    lastUpdatedAt: new Date(),
     lastUpdatedBy: 'system',
   };
 }

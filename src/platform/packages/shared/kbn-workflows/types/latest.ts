@@ -8,27 +8,41 @@
  */
 
 export type {
-  EsWorkflowSchema,
-  WorkflowExecution,
+  // elasticsearch documents types
+  EsWorkflow,
+  EsWorkflowTrigger,
+  EsWorkflowStep,
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
   WorkflowExecutionLogModel,
-  WorkflowExecutionModel,
   WorkflowExecutionHistoryModel,
-  WorkflowModel,
-  WorkflowNode,
-  WorkflowListModel,
-  WorkflowListItemModel,
-  WorkflowExecutionListModel,
 
-  // requests
-  CreateWorkflowRequest,
+  // dtos
+  WorkflowDetailDto,
+  WorkflowListDto,
+  WorkflowListItemDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionListDto,
+  WorkflowExecutionListItemDto,
+
+  // commands
+  CreateWorkflowCommand,
 
   // execution engine
   Provider,
   ProviderInput,
-  WorkflowStep,
-  WorkflowStepExecution,
   WorkflowExecutionEngineModel,
 } from './v1';
 
 // exported full to use enum as values
-export { ExecutionStatus, WorkflowStatus } from './v1';
+export {
+  ExecutionStatus,
+  WorkflowStatus,
+
+  // command schemas
+  CreateWorkflowCommandSchema,
+
+  // utils
+  transformWorkflowYamlJsontoExecutionEngineModel,
+  transformWorkflowExecutionEngineModelToYaml,
+} from './v1';

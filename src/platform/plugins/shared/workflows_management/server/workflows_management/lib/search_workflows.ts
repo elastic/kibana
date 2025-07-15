@@ -9,12 +9,7 @@
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
-  EsWorkflowSchema,
-  WorkflowExecutionHistoryModel,
-  WorkflowExecutionModel,
-  WorkflowListModel,
-} from '@kbn/workflows';
+import { EsWorkflow, WorkflowExecutionListItemDto, WorkflowListDto } from '@kbn/workflows';
 import { searchWorkflowExecutions } from './search_workflow_executions';
 
 interface SearchWorkflowsParams {
@@ -34,7 +29,7 @@ export const searchWorkflows = async ({
 }: SearchWorkflowsParams) => {
   try {
     logger.info(`Searching workflows in index ${workflowIndex}`);
-    const response = await esClient.search<EsWorkflowSchema>({
+    const response = await esClient.search<EsWorkflow>({
       index: workflowIndex,
       query: { match_all: {} },
       sort: [{ createdAt: 'desc' }],
@@ -69,7 +64,7 @@ export const searchWorkflows = async ({
         acc[execution.workflowId].push(execution);
       }
       return acc;
-    }, {} as Record<string, WorkflowExecutionModel[]>);
+    }, {} as Record<string, WorkflowExecutionListItemDto[]>);
 
     if (_full) {
       return transformToWorkflowListModel(response, lastExecutionsByWorkflowId);
@@ -82,20 +77,10 @@ export const searchWorkflows = async ({
   }
 };
 
-function transformToHistory(lastExecution: WorkflowExecutionModel): WorkflowExecutionHistoryModel {
-  return {
-    id: lastExecution.id,
-    status: lastExecution.status,
-    startedAt: lastExecution.startedAt,
-    finishedAt: lastExecution.finishedAt,
-    duration: lastExecution.duration,
-  };
-}
-
 function transformToWorkflowListModel(
-  response: SearchResponse<EsWorkflowSchema>,
-  lastExecutionsByWorkflowId: Record<string, WorkflowExecutionModel[]>
-): WorkflowListModel {
+  response: SearchResponse<EsWorkflow>,
+  lastExecutionsByWorkflowId: Record<string, WorkflowExecutionListItemDto[]>
+): WorkflowListDto {
   return {
     results: response.hits.hits.map((hit) => {
       const workflowId = hit._id!;
@@ -104,17 +89,16 @@ function transformToWorkflowListModel(
       return {
         id: workflowId,
         name: workflowSchema.name,
-        description: workflowSchema.description,
+        description: workflowSchema.description ?? '',
         createdAt: workflowSchema.createdAt,
         status: workflowSchema.status,
         triggers: workflowSchema.triggers,
         tags: workflowSchema.tags ?? [],
-        history: lastExecutions.map(transformToHistory),
+        history: lastExecutions,
         createdBy: workflowSchema.createdBy,
         lastUpdatedAt: workflowSchema.lastUpdatedAt,
         lastUpdatedBy: workflowSchema.lastUpdatedBy,
         steps: workflowSchema.steps,
-        nodes: workflowSchema.nodes,
       };
     }),
     _pagination: {
@@ -126,21 +110,21 @@ function transformToWorkflowListModel(
 }
 
 function transformToWorkflowListItemModel(
-  response: SearchResponse<EsWorkflowSchema>,
-  lastExecutionsByWorkflowId: Record<string, WorkflowExecutionModel[]>
-): WorkflowListModel {
+  response: SearchResponse<EsWorkflow>,
+  lastExecutionsByWorkflowId: Record<string, WorkflowExecutionListItemDto[]>
+): WorkflowListDto {
   const workflows = response.hits.hits.map((hit) => {
     const workflowSchema = hit._source!;
     const workflowId = hit._id!;
     return {
       id: workflowId,
       name: workflowSchema.name,
-      description: workflowSchema.description,
+      description: workflowSchema.description ?? '',
       createdAt: workflowSchema.createdAt,
       status: workflowSchema.status,
       triggers: workflowSchema.triggers,
       tags: workflowSchema.tags ?? [],
-      history: lastExecutionsByWorkflowId?.[workflowId]?.map(transformToHistory) ?? [],
+      history: lastExecutionsByWorkflowId?.[workflowId] ?? [],
       createdBy: workflowSchema.createdBy,
       lastUpdatedAt: workflowSchema.lastUpdatedAt,
       lastUpdatedBy: workflowSchema.lastUpdatedBy,

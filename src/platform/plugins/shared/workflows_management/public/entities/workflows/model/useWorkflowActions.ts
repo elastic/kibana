@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowModel } from '@kbn/workflows';
+import { CreateWorkflowCommand, EsWorkflow, WorkflowDetailDto } from '@kbn/workflows';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -15,9 +15,9 @@ export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const { http } = useKibana().services;
 
-  const createWorkflow = useMutation({
+  const createWorkflow = useMutation<WorkflowDetailDto, Error, CreateWorkflowCommand>({
     mutationKey: ['POST', 'workflows'],
-    mutationFn: (workflow: WorkflowModel) => {
+    mutationFn: (workflow) => {
       return http!.post('/api/workflows', {
         body: JSON.stringify(workflow),
       });
@@ -29,7 +29,7 @@ export function useWorkflowActions() {
 
   const updateWorkflow = useMutation({
     mutationKey: ['PUT', 'workflows', 'id'],
-    mutationFn: ({ id, workflow }: { id: string; workflow: WorkflowModel }) => {
+    mutationFn: ({ id, workflow }: { id: string; workflow: Partial<EsWorkflow> }) => {
       return http!.put(`/api/workflows/${id}`, {
         body: JSON.stringify(workflow),
       });

@@ -8,7 +8,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WorkflowModel } from '@kbn/workflows';
+import { EsWorkflow } from '@kbn/workflows';
 import { getWorkflow } from './get_workflow';
 
 interface UpdateWorkflowParams {
@@ -16,7 +16,7 @@ interface UpdateWorkflowParams {
   logger: Logger;
   workflowIndex: string;
   workflowId: string;
-  workflow: Partial<WorkflowModel>;
+  workflow: Partial<EsWorkflow>;
 }
 
 export const updateWorkflow = async ({
@@ -32,7 +32,7 @@ export const updateWorkflow = async ({
     const response = await esClient.update({
       id: workflowId,
       index: workflowIndex,
-      doc: document,
+      doc: { ...document, updatedAt: new Date(), updatedBy: esClient.info.toString() },
       refresh: 'wait_for',
     });
 
@@ -50,7 +50,7 @@ export const updateWorkflow = async ({
   }
 };
 
-function transformToUpdateScheme(workflow: Partial<WorkflowModel>) {
+function transformToUpdateScheme(workflow: Partial<EsWorkflow>) {
   return {
     ...workflow,
   };

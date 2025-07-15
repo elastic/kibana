@@ -43,18 +43,18 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
   ]);
 
-  const [workflowJson, setWorkflowJson] = useState(JSON.stringify(workflow, null, 2));
-  const originalWorkflowJson = useMemo(() => JSON.stringify(workflow, null, 2), [workflow]);
+  const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
+  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    setWorkflowJson(JSON.stringify(workflow, null, 2));
+    setWorkflowYaml(workflow?.yaml ?? '');
     setHasChanges(false);
   }, [workflow]);
 
   const handleChange = (wfString: string) => {
-    setWorkflowJson(wfString);
-    setHasChanges(originalWorkflowJson !== wfString);
+    setWorkflowYaml(wfString);
+    setHasChanges(originalWorkflowYaml !== wfString);
   };
 
   const [buttonGroupSelectedId, setButtonGroupSelectedId] = useState('workflow');
@@ -67,7 +67,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const handleSave = () => {
     updateWorkflow.mutate({
       id,
-      workflow: JSON.parse(workflowJson),
+      workflow: {
+        yaml: workflowYaml,
+      },
     });
   };
 
@@ -110,9 +112,15 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     if (workflow === undefined) {
       <EuiText>Failed to load workflow</EuiText>;
     }
-    return <WorkflowEditor value={workflowJson} onChange={handleChange} hasChanges={hasChanges} />;
+    return (
+      <WorkflowEditor
+        workflowId={workflow?.id}
+        value={workflowYaml}
+        onChange={handleChange}
+        hasChanges={hasChanges}
+      />
+    );
   };
-
   const renderWorkflowExecutions = () => {
     if (workflow === undefined) {
       return <EuiText>Failed to load workflow</EuiText>;

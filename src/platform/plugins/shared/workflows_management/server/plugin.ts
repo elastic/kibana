@@ -78,6 +78,9 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
+    const actionsTypes = plugins.actions.getAllTypes();
+    console.log('actionsTypes', actionsTypes);
+
     this.logger.debug('Workflows Management: Creating scheduler service');
     this.schedulerService = new SchedulerService(
       this.logger,

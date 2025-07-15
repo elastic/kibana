@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { WorkflowDetailDto } from '@kbn/workflows';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-
-export function useWorkflowDetail(id: string) {
-  const { http } = useKibana().services;
-
-  return useQuery<WorkflowDetailDto>({
-    queryKey: ['workflows', id],
-    queryFn: () => http!.get(`/api/workflows/${id}`),
-  });
-}
+export const MUSTACHE_REGEX = /\{\{\s*(.*?)\s*\}\}/g;

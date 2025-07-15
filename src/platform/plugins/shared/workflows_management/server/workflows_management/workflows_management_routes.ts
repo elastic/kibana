@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import { CreateWorkflowRequestSchema, WorkflowSchema } from '@kbn/workflows';
+import { CreateWorkflowCommandSchema } from '@kbn/workflows';
 import { WorkflowsManagementApi, type GetWorkflowsParams } from './workflows_management_api';
 
 export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
@@ -83,7 +83,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
         },
       },
       validate: {
-        body: CreateWorkflowRequestSchema,
+        body: CreateWorkflowCommandSchema.partial(),
       },
     },
     async (context, request, response) => {
@@ -115,7 +115,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
         params: schema.object({
           id: schema.string(),
         }),
-        body: WorkflowSchema.partial(),
+        body: CreateWorkflowCommandSchema.partial(),
       },
     },
     async (context, request, response) => {

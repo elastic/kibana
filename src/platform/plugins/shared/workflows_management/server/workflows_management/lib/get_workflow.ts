@@ -9,7 +9,7 @@
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EsWorkflowSchema } from '@kbn/workflows/types/v1';
+import { EsWorkflow } from '@kbn/workflows';
 
 interface GetWorkflowParams {
   esClient: ElasticsearchClient;
@@ -25,7 +25,7 @@ export const getWorkflow = async ({
   workflowId,
 }: GetWorkflowParams) => {
   try {
-    const response = await esClient.search<EsWorkflowSchema>({
+    const response = await esClient.search<EsWorkflow>({
       index: workflowIndex,
       query: {
         match: {
@@ -41,7 +41,7 @@ export const getWorkflow = async ({
   }
 };
 
-function transformToWorkflowModel(response: SearchResponse<EsWorkflowSchema>) {
+function transformToWorkflowModel(response: SearchResponse<EsWorkflow>) {
   return (
     response.hits.hits.map((hit) => {
       const workflowSchema = hit._source!;
@@ -52,7 +52,11 @@ function transformToWorkflowModel(response: SearchResponse<EsWorkflowSchema>) {
         status: workflowSchema.status,
         triggers: workflowSchema.triggers,
         steps: workflowSchema.steps,
-        nodes: workflowSchema.nodes,
+        yaml: workflowSchema.yaml,
+        createdAt: workflowSchema.createdAt,
+        createdBy: workflowSchema.createdBy,
+        lastUpdatedAt: workflowSchema.lastUpdatedAt,
+        lastUpdatedBy: workflowSchema.lastUpdatedBy,
       };
     })[0] ?? null
   );
