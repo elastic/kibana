@@ -90,16 +90,19 @@ export const getCellValueRenderer =
               if (e.key === 'Enter') onEditStartHandler();
             }}
           >
-            {cellValue === undefined ? (
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="indexEditor.flyout.grid.cell.default"
-                  defaultMessage="Add value…"
-                />
-              </EuiText>
-            ) : (
-              cellValue
-            )}
+            {
+              // Only check for undefined, other falsy values might be user inputs
+              cellValue === undefined ? (
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="indexEditor.flyout.grid.cell.default"
+                    defaultMessage="Add value…"
+                  />
+                </EuiText>
+              ) : (
+                cellValue
+              )
+            }
           </div>
         </EuiFlexItem>
         {isPendingToBeSaved && isIndexCreated ? (

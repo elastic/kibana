@@ -36,9 +36,9 @@ export const RowColumnCreator = () => {
   const toggleAddRow = () => {
     if (isIndexCreated) {
       setActiveMode('add-row');
-      return;
+    } else {
+      indexUpdateService.addEmptyRow();
     }
-    indexUpdateService.addEmptyRow();
   };
 
   const toggleAddColumn = () => {
