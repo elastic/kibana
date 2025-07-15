@@ -9,56 +9,39 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextExtra } from '../types';
 
 export const useAddColumnName = () => {
   const {
-    services: { indexUpdateService, notifications },
+    services: { indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
   const columns = useObservable(indexUpdateService.dataTableColumns$, []);
 
   const [columnName, setColumnName] = useState('');
 
-  const saveNewColumn = useCallback(async () => {
-    if (!columnName) {
-      notifications.toasts.addWarning({
-        title: i18n.translate('indexEditor.addColumn.emptyName', {
-          defaultMessage: 'Field name cannot be empty',
-        }),
-      });
-      return false;
-    }
-
+  const validationError = useMemo(() => {
     if (columns.some((existingColumn) => existingColumn.name === columnName)) {
-      notifications.toasts.addWarning({
-        title: i18n.translate('indexEditor.addColumn.duplicatedName', {
-          defaultMessage: 'Field name {columnName} already exists',
-          values: { columnName },
-        }),
+      return i18n.translate('indexEditor.addColumn.duplicatedName', {
+        defaultMessage: 'Field name {columnName} already exists',
+        values: { columnName },
       });
-      return false;
     }
 
-    indexUpdateService.addNewColumn(columnName);
-    notifications.toasts.addSuccess({
-      title: i18n.translate('indexEditor.addColumn.success', {
-        defaultMessage: 'Field {columnName} has been partially added',
-        values: { columnName },
-      }),
-      text: i18n.translate('indexEditor.addColumn.successDescription', {
-        defaultMessage: 'You need to add at least one value to this field before it is saved.',
-      }),
-      toastLifeTimeMs: 10000, // 10 seconds
-    });
+    return null;
+  }, [columnName, columns]);
 
-    return true;
-  }, [columnName, columns, indexUpdateService, notifications.toasts]);
+  const saveNewColumn = useCallback(async () => {
+    if (!validationError) {
+      indexUpdateService.addNewColumn(columnName);
+    }
+  }, [columnName, indexUpdateService, validationError]);
 
   return {
     columnName,
+    validationError,
     setColumnName,
     saveNewColumn,
   };

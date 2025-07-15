@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useState, KeyboardEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAddColumnName } from '../hooks/use_add_column_name';
@@ -15,15 +22,13 @@ import { useAddColumnName } from '../hooks/use_add_column_name';
 export const AddColumnHeader = () => {
   const { euiTheme } = useEuiTheme();
   const [isEditing, setIsEditing] = useState(false);
-  const { columnName, setColumnName, saveNewColumn } = useAddColumnName();
+  const { columnName, setColumnName, saveNewColumn, validationError } = useAddColumnName();
 
-  const submit = async () => {
-    if (!columnName.trim()) {
-      setIsEditing(false);
-      setColumnName('');
-      return;
-    }
-    if (await saveNewColumn()) {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!validationError) {
+      await saveNewColumn();
       setColumnName('');
       setIsEditing(false);
     }
@@ -31,24 +36,25 @@ export const AddColumnHeader = () => {
 
   if (isEditing) {
     return (
-      <EuiFieldText
-        value={columnName}
-        autoFocus
-        fullWidth
-        controlOnly
-        compressed
-        onChange={(e) => {
-          setColumnName(e.target.value);
-        }}
-        onBlur={() => {
-          setIsEditing(false);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            submit();
-          }
-        }}
-      />
+      <EuiForm component="form" onSubmit={onSubmit}>
+        <EuiToolTip position="top" content={validationError}>
+          <EuiFieldText
+            value={columnName}
+            autoFocus
+            fullWidth
+            controlOnly
+            compressed
+            required
+            isInvalid={!!validationError}
+            onChange={(e) => {
+              setColumnName(e.target.value);
+            }}
+            onBlur={() => {
+              setIsEditing(false);
+            }}
+          />
+        </EuiToolTip>
+      </EuiForm>
     );
   }
 

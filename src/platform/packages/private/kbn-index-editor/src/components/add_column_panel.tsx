@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiForm, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
+import { EuiFlexGroup, EuiForm, EuiButtonIcon, EuiFieldText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAddColumnName } from '../hooks/use_add_column_name';
 
@@ -17,38 +17,42 @@ interface AddColumnPanelProps {
 }
 
 export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
-  const { columnName, setColumnName, saveNewColumn } = useAddColumnName();
+  const { columnName, setColumnName, saveNewColumn, validationError } = useAddColumnName();
 
   const onSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      if (await saveNewColumn()) {
+      if (!validationError) {
+        await saveNewColumn();
         onHide();
       }
     },
-    [saveNewColumn, onHide]
+    [saveNewColumn, onHide, validationError]
   );
 
   return (
     <EuiForm component="form" onSubmit={onSubmit}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexGroup gutterSize="s">
-          <EuiFieldText
-            autoFocus
-            compressed
-            required
-            placeholder={i18n.translate('indexEditor.addColumn.name', {
-              defaultMessage: 'Field name',
-            })}
-            value={columnName}
-            aria-label={i18n.translate('indexEditor.addColumn.name.aria', {
-              defaultMessage: 'Field name input',
-            })}
-            onChange={(e) => {
-              setColumnName(e.target.value);
-            }}
-            type="text"
-          />
+          <EuiToolTip position="top" content={validationError}>
+            <EuiFieldText
+              autoFocus
+              compressed
+              required
+              isInvalid={!!validationError}
+              placeholder={i18n.translate('indexEditor.addColumn.name', {
+                defaultMessage: 'Field name',
+              })}
+              value={columnName}
+              aria-label={i18n.translate('indexEditor.addColumn.name.aria', {
+                defaultMessage: 'Field name input',
+              })}
+              onChange={(e) => {
+                setColumnName(e.target.value);
+              }}
+              type="text"
+            />
+          </EuiToolTip>
         </EuiFlexGroup>
         <EuiButtonIcon
           type="submit"
