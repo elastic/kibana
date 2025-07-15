@@ -13,6 +13,8 @@ import type { ModalInspectProps } from './modal';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
 import { InputsModelId } from '../../store/inputs/constants';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -23,9 +25,9 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-const getRequest = (
-  indices: string[] = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*']
-) =>
+const defaultIndices = ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'];
+
+const getRequest = (indices: string[] = defaultIndices) =>
   `{"index": ${JSON.stringify(
     indices
   )},"allowNoIndices": true, "ignoreUnavailable": true, "body": { "aggregations": {"hosts": {"cardinality": {"field": "host.name" } }, "hosts_histogram": {"auto_date_histogram": {"field": "@timestamp","buckets": "6"},"aggs": { "count": {"cardinality": {"field": "host.name" }}}}}, "query": {"bool": {"filter": [{"range": { "@timestamp": {"gte": 1562290224506,"lte": 1562376624506 }}}]}}, "size": 0, "track_total_hits": false}}`;
@@ -220,6 +222,9 @@ describe('Modal Inspect', () => {
 
   describe('index pattern messaging', () => {
     test('should show no messaging when all patterns match sourcerer selection', () => {
+      const dataView = getMockDataViewWithMatchedIndices(defaultIndices);
+      jest.mocked(useDataView).mockReturnValue({ dataView, status: 'ready' });
+
       renderModal();
 
       expect(screen.queryByTestId('not-sourcerer-msg')).toBeNull();
