@@ -70,10 +70,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 
   const setColorMapping = useCallback(
-    (colorMapping?: ColorMapping.Config, partialState?: Partial<PieVisualizationState>) => {
+    (colorMapping?: ColorMapping.Config) => {
       setLocalState({
         ...localState,
-        ...partialState,
         layers: localState.layers.map((layer) =>
           layer.layerId === currentLayer?.layerId
             ? {
@@ -128,7 +127,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
           palette={localState.palette}
           setPalette={(newPalette) => {
             setLocalState({ ...localState, palette: newPalette });
-            setColorMapping(undefined, { palette: newPalette });
+          }}
+          onModeChange={(isLegacy) => {
+            if (isLegacy) setColorMapping();
           }}
           colorMapping={currentLayer.colorMapping}
           setColorMapping={setColorMapping}
