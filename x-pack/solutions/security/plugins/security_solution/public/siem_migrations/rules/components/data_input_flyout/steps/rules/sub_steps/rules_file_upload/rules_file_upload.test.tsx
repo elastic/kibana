@@ -9,7 +9,7 @@ import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import type { RulesFileUploadProps } from './rules_file_upload';
 import { RulesFileUpload } from './rules_file_upload';
-import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
+import type { CreateRuleMigration } from '../../../../../../service/hooks/use_create_migration';
 import { screen } from '@elastic/eui/lib/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 // eslint-disable-next-line import/no-nodejs-modules
@@ -19,7 +19,7 @@ import os from 'os';
 import { splunkTestRules } from './splunk_rules.test.data';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 
-const mockCreateMigration: CreateMigration = jest.fn();
+const mockCreateMigration: CreateRuleMigration = jest.fn();
 const mockOnRulesFileChanged = jest.fn();
 const mockApiError = 'Some Mock API Error';
 const migrationName = 'test migration name';

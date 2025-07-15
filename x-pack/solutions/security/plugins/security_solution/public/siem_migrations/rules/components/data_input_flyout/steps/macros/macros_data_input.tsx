@@ -8,13 +8,13 @@
 import type { EuiStepProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStepNumber, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { MigrationDataInputSubSteps } from '../../../../../common/components/migration_data_input_sub_steps';
+import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated, OnMissingResourcesFetched } from '../../types';
-import { getStatus } from '../common/get_status';
 import * as i18n from './translations';
 import { DataInputStep } from '../constants';
-import { SubSteps } from '../common/sub_step';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
 import { useCheckResourcesStep } from './sub_steps/check_resources';
@@ -33,7 +33,7 @@ interface MacrosDataInputProps
 export const MacrosDataInput = React.memo<MacrosDataInputProps>(
   ({ dataInputStep, migrationStats, missingMacros, onMissingResourcesFetched }) => {
     const dataInputStatus = useMemo(
-      () => getStatus(DataInputStep.Macros, dataInputStep),
+      () => getEuiStepStatus(DataInputStep.Macros, dataInputStep),
       [dataInputStep]
     );
 
@@ -84,14 +84,14 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       setSubStep(2);
       telemetry.reportSetupMacrosQueryCopied({ migrationId: migrationStats.id });
     }, [telemetry, migrationStats.id]);
-    const copyStep = useCopyExportQueryStep({ status: getStatus(1, subStep), onCopied });
+    const copyStep = useCopyExportQueryStep({ status: getEuiStepStatus(1, subStep), onCopied });
 
     // Upload macros step
     const onMacrosCreatedStep = useCallback<OnResourcesCreated>(() => {
       setSubStep(3);
     }, []);
     const uploadStep = useMacrosFileUploadStep({
-      status: getStatus(2, subStep),
+      status: getEuiStepStatus(2, subStep),
       migrationStats,
       missingMacros,
       onMacrosCreated: onMacrosCreatedStep,
@@ -106,7 +106,7 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       [onMissingResourcesFetched]
     );
     const resourcesStep = useCheckResourcesStep({
-      status: getStatus(3, subStep),
+      status: getEuiStepStatus(3, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
     });
@@ -116,7 +116,7 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       [copyStep, uploadStep, resourcesStep]
     );
 
-    return <SubSteps steps={steps} />;
+    return <MigrationDataInputSubSteps steps={steps} />;
   }
 );
 MacrosDataInputSubSteps.displayName = 'MacrosDataInputActive';

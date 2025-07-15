@@ -9,7 +9,7 @@ import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SiemMigrationRetryFilter } from '../../../../../common/siem_migrations/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { reducer, initialState } from './common/api_request_reducer';
+import { initialState, asyncReducer } from '../../../common/utils/api_request_reducer';
 import type { RuleMigrationSettings } from '../../types';
 
 export const RULES_DATA_INPUT_START_MIGRATION_SUCCESS = i18n.translate(
@@ -30,7 +30,7 @@ export type OnSuccess = () => void;
 
 export const useStartMigration = (onSuccess?: OnSuccess) => {
   const { siemMigrations, notifications } = useKibana().services;
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(asyncReducer, initialState);
 
   const startMigration = useCallback<StartMigration>(
     (migrationId, retry, settings) => {

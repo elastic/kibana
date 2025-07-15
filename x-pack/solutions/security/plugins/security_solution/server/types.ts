@@ -47,6 +47,7 @@ import type { ApiKeyManager as PrivilegedUsersApiKeyManager } from './lib/entity
 import type { ProductFeaturesService } from './lib/product_features_service';
 import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
 import type { MlAuthz } from './lib/machine_learning/authz';
+import type { SiemDashboardMigrationsClient } from './lib/siem_migrations/dashboards/siem_dashboard_migration_service';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -77,6 +78,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
   getPadPackageInstallationClient: () => PadPackageInstallationClient;
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
+  getSiemDashboardMigrationsClient: () => SiemDashboardMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;

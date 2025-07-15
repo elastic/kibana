@@ -7,7 +7,7 @@
 
 import type { PackageList } from '@kbn/fleet-plugin/common';
 import type { RuleMigrationIntegration } from '../types';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import { SiemMigrationsDataBaseClient } from '../../common/data/rule_migrations_data_base_client';
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 40 as const;
@@ -17,7 +17,7 @@ const RETURNED_INTEGRATIONS = 5 as const;
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
-export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBaseClient {
+export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {
   /** Returns the Security integration packages that have "logs" type `data_streams` configured, including pre-release packages */
   public async getSecurityLogsPackages(): Promise<PackageList | undefined> {
     const packages = await this.dependencies.packageService?.asInternalUser.getPackages({

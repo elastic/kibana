@@ -7,8 +7,8 @@
 
 import React from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import { CopyExportQuery } from './copy_export_query';
 import * as i18n from './translations';
+import { CopyExportQuery } from './copy_export_query';
 
 export interface CopyExportQueryStepProps {
   status: EuiStepStatus;

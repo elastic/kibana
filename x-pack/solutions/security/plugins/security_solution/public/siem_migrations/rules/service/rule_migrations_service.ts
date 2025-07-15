@@ -7,11 +7,6 @@
 
 import { BehaviorSubject, distinctUntilChanged, type Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
-import {
-  DEFAULT_ASSISTANT_NAMESPACE,
-  TRACE_OPTIONS_SESSION_STORAGE_KEY,
-} from '@kbn/elastic-assistant/impl/assistant_context/constants';
 import { isEqual } from 'lodash';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
@@ -26,43 +21,27 @@ import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
 import * as api from '../api';
-import {
-  getMissingCapabilities,
-  type MissingCapability,
-  type CapabilitiesLevel,
-} from './capabilities';
 import type { RuleMigrationSettings, RuleMigrationStats } from '../types';
-import { getSuccessToast } from './notifications/success_notification';
-import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
-import { SiemRulesMigrationsTelemetry } from './telemetry';
-import { getNoConnectorToast } from './notifications/no_connector_notification';
-import { getMissingCapabilitiesToast } from './notifications/missing_capabilities_notification';
-
-// use the default assistant namespace since it's the only one we use
-const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
-  `${DEFAULT_ASSISTANT_NAMESPACE}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}` as const;
+import { getMissingCapabilitiesToast } from '../../common/service/notifications/missing_capabilities_notification';
+import { getNoConnectorToast } from '../../common/service/notifications/no_connector_notification';
+import { getSuccessToast } from '../../common/service/notifications/success_notification';
+import { SiemBaseMigrationService } from '../../common/service/siem_migration_service';
 
 export const TASK_STATS_POLLING_SLEEP_SECONDS = 10 as const;
 export const START_STOP_POLLING_SLEEP_SECONDS = 1 as const;
 const CREATE_MIGRATION_BODY_BATCH_SIZE = 50 as const;
 
-export class SiemRulesMigrationsService {
+export class SiemRulesMigrationsService extends SiemBaseMigrationService {
   private readonly latestStats$: BehaviorSubject<RuleMigrationStats[] | null>;
   private isPolling = false;
-  public connectorIdStorage = new RuleMigrationsStorage<string>('connectorId');
-  public traceOptionsStorage = new RuleMigrationsStorage<TraceOptions>('traceOptions', {
-    customKey: NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY,
-    storageType: 'session',
-  });
-  public telemetry: SiemRulesMigrationsTelemetry;
 
   constructor(
-    private readonly core: CoreStart,
-    private readonly plugins: StartPluginsDependencies,
+    protected readonly core: CoreStart,
+    protected readonly plugins: StartPluginsDependencies,
     telemetryService: TelemetryServiceStart
   ) {
-    this.telemetry = new SiemRulesMigrationsTelemetry(telemetryService);
+    super(core, plugins, telemetryService);
     this.latestStats$ = new BehaviorSubject<RuleMigrationStats[] | null>(null);
 
     this.plugins.spaces.getActiveSpace().then((space) => {
@@ -79,16 +58,6 @@ export class SiemRulesMigrationsService {
   /** Returns the latest stats observable, which is updated every time the stats are fetched */
   public getLatestStats$(): Observable<RuleMigrationStats[] | null> {
     return this.latestStats$.asObservable().pipe(distinctUntilChanged(isEqual));
-  }
-
-  /** Returns any missing capabilities for the user to use this feature */
-  public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
-    return getMissingCapabilities(this.core.application.capabilities, level);
-  }
-
-  /** Checks if the user has any missing capabilities for this feature */
-  public hasMissingCapabilities(level?: CapabilitiesLevel): boolean {
-    return this.getMissingCapabilities(level).length > 0;
   }
 
   /** Checks if the service is available based on the `license`, `capabilities` and `experimentalFeatures` */

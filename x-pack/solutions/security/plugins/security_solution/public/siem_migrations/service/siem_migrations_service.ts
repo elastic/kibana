@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { StartPluginsDependencies } from '../../types';
 import { SiemRulesMigrationsService } from '../rules/service/rule_migrations_service';
 import type { TelemetryServiceStart } from '../../common/lib/telemetry';
-import { SiemDashboardMigrationsService } from '../rules/service/dashboard_migration_service';
+import { SiemDashboardMigrationsService } from '../dashboards/service/dashboard_migration_service';
 
 export class SiemMigrationsService {
   public rules: SiemRulesMigrationsService;

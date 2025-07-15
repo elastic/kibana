@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: SIEM Dashboard Migration components
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    DashboardMigrationLastExecution:
+      type: object
+      description: The last execution of the dashboard migration task.
+      properties:
+        started_at:
+          type: string
+          description: The moment the last execution started.
+        finished_at:
+          type: string
+          nullable: true
+          description: The moment the last execution finished.
+        connector_id:
+          type: string
+          description: The connector ID used for the last execution.
+        error:
+          type: string
+          nullable: true
+          description: The error message if the last execution failed.
+        is_stopped:
+          type: boolean
+          description: Indicates if the last execution was stopped by the user.
+
+    DashboardMigration:
+      description: The dashboard migration object with its settings.
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              description: The rule migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - $ref: '#/components/schemas/DashboardMigrationData'
+
+    DashboardMigrationData:
+      type: object
+      description: The dashboard migration object ( without Id ) with its settings.
+      required:
+        - created_by
+        - created_at
+      properties:
+        name:
+          description: The rule migration name
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_by:
+          description: The user profile ID of the user who created the migration.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_at:
+          description:  The moment migration was created
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        last_execution:
+          description: The last execution of the rule migration task.
+          $ref: '#/components/schemas/DashboardMigrationLastExecution'
+
+
+    DashboardMigrationDashboard:
+      description: The rule migration document object.
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              description: The rule migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - $ref: '#/components/schemas/DashboardMigrationDashboardData'
+
+    DashboardMigrationDashboardData:
+      type: object
+      description: The rule migration document object.
+      required:
+        - '@timestamp'
+        - migration_id
+        - raw
+        - status
+        - created_by
+      properties:
+        '@timestamp':
+          type: string
+          description: The moment of creation
+        migration_id:
+          description: The migration id.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        created_by:
+          description: The user profile ID of the user who created the migration.
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        raw:
+          description: The original rule to migrate.
+          $ref: '#/components/schemas/RawDashboard'
+        status:
+          description: The status of the rule migration process.
+          $ref: '#/components/schemas/DashboardMigrationStatus'
+          default: pending
+        updated_at:
+          type: string
+          description: The moment of the last update
+        updated_by:
+          type: string
+          description: The user who last updated the migration
+
+    RawDashboard:
+      type: object
+      description: The raw dashboard object.
+      required:
+        - id
+        - label
+        - title
+        - xml
+        - app
+        - sharing
+        - owner
+        - updated
+      properties:
+        id:
+          type: string
+          description: The dashboard ID.
+        label:
+          type: string
+          description: The dashboard label.
+        title:
+          type: string
+          description: The dashboard title.
+        xml:
+          type: string
+          description: The raw XML data of the dashboard.
+        app:
+          type: string
+          description: The app associated with the EAI ACL.
+        sharing:
+          type: string
+          description: The sharing level of the EAI ACL.
+        owner:
+          type: string
+          description: The owner of the EAI ACL.
+        updated:
+          type: string
+          format: string
+          description: The last updated timestamp of the dashboard.
+
+
+    DashboardMigrationStatus:
+      type: string
+      description: The status of each Dashboard migration.
+      enum: # should match SiemMigrationsStatus enum at ../constants.ts
+        - pending
+        - processing
+        - completed
+        - failed
+
+    DashboardMigrationTaskStatus:
+      type: string
+      description: The status of the migration task.
+      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
+        - ready
+        - running
+        - stopped
+        - finished
+        - interrupted
+
+    DashboardMigrationTaskStats:
+      type: object
+      description: The rule migration task stats object.
+      required:
+        - id
+        - name
+        - status
+        - dashboard
+        - created_at
+        - last_updated_at
+      properties:
+        id:
+          description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        name:
+          description: The migration name
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        status:
+          description: Indicates if the migration task status.
+          $ref: '#/components/schemas/DashboardMigrationTaskStatus'
+        dashboards:
+          type: object
+          description: The rules migration stats.
+          required:
+            - total
+            - pending
+            - processing
+            - completed
+            - failed
+          properties:
+            total:
+              type: integer
+              description: The total number of rules to migrate.
+            pending:
+              type: integer
+              description: The number of rules that are pending migration.
+            processing:
+              type: integer
+              description: The number of rules that are being migrated.
+            completed:
+              type: integer
+              description: The number of rules that have been migrated successfully.
+            failed:
+              type: integer
+              description: The number of rules that have failed migration.
+        created_at:
+          type: string
+          description: The moment the migration was created.
+        last_updated_at:
+          type: string
+          description: The moment of the last update.

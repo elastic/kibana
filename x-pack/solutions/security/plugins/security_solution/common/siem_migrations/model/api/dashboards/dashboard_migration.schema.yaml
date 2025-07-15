@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: SIEM Dashboard Migration API
+  version: '1'
+paths:
+  /internal/siem_migrations/dashboards/stats:
+    get:
+      summary: Retrieves the stats for all dashboards migrations
+      operationId: GetAllStatsDashboardMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the dashboard migrations stats for all migrations stored in the system
+      tags:
+        - SIEM dashboard Migrations
+      responses:
+        200:
+          description: Indicates dashboard migrations have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigrationTaskStats'
+
+  /internal/siem_migrations/dashboards:
+    put:
+      summary: Creates a new dashboard migration
+      operationId: 'CreateDashboardMigration'
+      x-codegen-enabled: true
+      x-internal: true
+      description: Creates a new dashboard migration and returns the corresponding migration_id
+      tags:
+        - SIEM Dashboard Migrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  description: The dashboard migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: The migration was created successfully and migrationId, name is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - migration_id
+                properties:
+                  migration_id:
+                    description: The migration id created.
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+  ## Specific dashboard migration APIs
+  /internal/siem_migrations/dashboards/{migration_id}:
+    get:
+      summary: Retrieves a dashboard migration
+      operationId: GetDashboardMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the dashboard migration document stored in the system given the dashboard migration id
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to retrieve
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates dashboards migrations have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../dashboard_migration.schema.yaml#/components/schemas/DashboardMigration'
+        404:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/dashboards/{migration_id}/dashboards:
+    post:
+      summary: Adds dashboards to a migration
+      operationId: CreateDashboardMigrationDashboards
+      x-codegen-enabled: true
+      x-internal: true
+      description: Adds dashboards to an alreayd existing dashboard migration
+      tags:
+        - SIEM Dashboard Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to add the dashboards to
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                description: List of RAW Dashboards to be added to the migration
+                $ref: '../../dashboard_migration.schema.yaml#/components/schemas/RawDashboard'
+      responses:
+        200:
+          description: Indicates rules have been added to the migration successfully.
