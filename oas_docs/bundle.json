@@ -58838,7 +58838,7 @@
         "tags": [
           "streams"
         ],
-        "x-state": "Technical Preview"
+        "x-state": "Technical Preview; added in 9.1.0"
       }
     },
     "/api/streams/{name}/significant_events/_generate": {
@@ -58892,7 +58892,7 @@
         "tags": [
           "streams"
         ],
-        "x-state": "Technical Preview"
+        "x-state": "Technical Preview; added in 9.2.0"
       }
     },
     "/api/streams/{name}/significant_events/_preview": {
@@ -58984,7 +58984,7 @@
         "tags": [
           "streams"
         ],
-        "x-state": "Technical Preview"
+        "x-state": "Technical Preview; added in 9.1.0"
       }
     }
   },
