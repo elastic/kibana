@@ -72,19 +72,19 @@ export function DependenciesInventoryTable() {
     () =>
       data?.dependencies
         ? orderBy(
-            data.dependencies.map((item) => ({
-              name: getNodeName(item.location),
-              impact: item.currentStats.impact,
-              latency: item.currentStats.latency.value,
-              throughput: item.currentStats.throughput.value,
-              failureRate: item.currentStats.errorRate.value,
-            })),
-            sortField,
-            sortDirection
-          )
-            .slice(page * pageSize, (page + 1) * pageSize)
-            .map(({ name }) => name)
-            .sort()
+          data.dependencies.map((item) => ({
+            name: getNodeName(item.location),
+            impact: item.currentStats.impact,
+            latency: item.currentStats.latency.value,
+            throughput: item.currentStats.throughput.value,
+            failureRate: item.currentStats.errorRate.value,
+          })),
+          sortField,
+          sortDirection
+        )
+          .slice(page * pageSize, (page + 1) * pageSize)
+          .map(({ name }) => name)
+          .sort()
         : undefined,
     [data?.dependencies, page, pageSize, sortDirection, sortField]
   );
@@ -213,8 +213,13 @@ export function DependenciesInventoryTable() {
   );
   const showRandomSamplerBadge = data?.sampled && status === FETCH_STATUS.SUCCESS;
   const fetchingStatus =
-    isPending(status) || isPending(timeseriesStatus) ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS;
-
+    isPending(status) || status === undefined
+      ? FETCH_STATUS.LOADING
+      : !visibleDependenciesNames?.length || !data?.dependencies?.length
+        ? FETCH_STATUS.SUCCESS
+        : isPending(timeseriesStatus)
+          ? FETCH_STATUS.LOADING
+          : FETCH_STATUS.SUCCESS;
   return (
     <>
       <div

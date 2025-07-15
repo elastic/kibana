@@ -150,3 +150,20 @@ describe('Dependencies with high volume of data', () => {
     cy.contains('nav', 'Page 1 of 100');
   });
 });
+
+describe('Dependencies page with no data', () => {
+  before(() => {
+    synthtrace.clean(); // ensure no data
+  });
+
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+  });
+
+  it('shows empty message when no dependencies are present', () => {
+    cy.visitKibana(`/app/apm/dependencies/inventory?${new URLSearchParams(timeRange)}`);
+    cy.getByTestSubj('dependenciesTable');
+    cy.contains('No dependencies found');
+    cy.contains('Try another time range or reset the search filter');
+  });
+});
