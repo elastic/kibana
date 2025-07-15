@@ -320,6 +320,8 @@
       "@kbn/core-chrome-layout-components/*": ["src/core/packages/chrome/layout/core-chrome-layout-components/*"],
       "@kbn/core-chrome-layout-constants": ["src/core/packages/chrome/layout/core-chrome-layout-constants"],
       "@kbn/core-chrome-layout-constants/*": ["src/core/packages/chrome/layout/core-chrome-layout-constants/*"],
+      "@kbn/core-chrome-navigation": ["src/core/packages/chrome/navigation"],
+      "@kbn/core-chrome-navigation/*": ["src/core/packages/chrome/navigation/*"],
       "@kbn/core-config-server-internal": ["src/core/packages/config/server-internal"],
       "@kbn/core-config-server-internal/*": ["src/core/packages/config/server-internal/*"],
       "@kbn/core-custom-branding-browser": ["src/core/packages/custom-branding/browser"],
