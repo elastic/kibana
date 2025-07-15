@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
@@ -72,6 +72,8 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
+  isEdit: boolean;
+  onDuplicate?: () => void;
   getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
@@ -92,6 +94,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
   showManagementLink,
   getDataViewHelpText,
   dataViewEditorService,
+  onDuplicate,
+  isEdit,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
   const isMobile = useIsWithinBreakpoints(['s', 'xs']);
@@ -101,6 +105,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
+  const isManaged = isEdit ? !!editData?.managed : false;
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -113,8 +118,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       ...(editData
         ? {
             title: editData.getIndexPattern(),
-            id: editData.id,
-            name: editData.name,
+            id: isEdit ? editData.id : undefined,
+            name: isEdit ? editData.name : undefined,
             allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName === noTimeFieldValue
               ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
@@ -182,6 +187,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
   const rollupCaps = useObservable(dataViewEditorService.rollupCaps$);
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
+
+  const namesNotAllowed = useMemo(() => {
+    // if form is popoluated but not editing an existing data view
+    // add the editData data view name to the not allowed names
+    if (!isEdit && editData) {
+      return [editData.name, ...(existingDataViewNames || [])];
+    }
+    return existingDataViewNames || [];
+  }, [existingDataViewNames, isEdit, editData]);
 
   useDebounce(
     () => {
@@ -285,10 +299,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
             : SubmittingType.persisting
           : undefined
       }
-      isEdit={!!editData}
+      isEdit={isEdit}
       isPersisted={Boolean(editData && editData.isPersisted())}
       allowAdHoc={allowAdHoc}
       canSave={canSave}
+      isManaged={isManaged}
+      onDuplicate={onDuplicate}
     />
   );
 
@@ -297,9 +313,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
       <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2 id="dataViewEditorFlyoutTitle">{editData ? editorTitleEditMode : editorTitle}</h2>
+            <h2 id="dataViewEditorFlyoutTitle">{editData && isEdit ? editorTitleEditMode : editorTitle}</h2>
           </EuiTitle>
-          {showManagementLink && editData && editData.id && (
+          {showManagementLink && isEdit && editData && editData.id && (
             <EuiLink
               href={application.getUrlForApp('management', {
                 path: `/kibana/dataViews/dataView/${editData.id}`,
@@ -323,7 +339,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <NameField namesNotAllowed={existingDataViewNames || []} />
+                <NameField namesNotAllowed={namesNotAllowed} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
@@ -352,7 +368,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             </EuiFlexGroup>
             <AdvancedParamsContent
               disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-              disableId={!!editData}
+              disableId={isEdit}
               onAllowHiddenChange={() => {
                 form.getFields().title.validate();
               }}
