@@ -148,6 +148,14 @@ export function useImagePasteUpload({
 
   const pasteHandlerRef = useRef<(e: ClipboardEvent) => void>();
 
+  const handlePasteError = useCallback(
+    (e: ClipboardEvent, msg: string, opts: { clearUpload: () => void }) => {
+      opts.clearUpload();
+      setErrors([msg]);
+      e.preventDefault();
+    },
+    [setErrors]
+  );
   /*
    * Keep the paste handler up-to-date with the latest props, but without
    * re-attaching the DOM listener. The ref swap happens synchronously in
@@ -158,13 +166,21 @@ export function useImagePasteUpload({
       const items = e.clipboardData?.items;
       if (!items || items.length === 0) return;
 
+      // NOTE: In Firefox, there will always be only 1 or 0 items,
+      // see: https://bugzilla.mozilla.org/show_bug.cgi?id=1699743
       if (items.length > 1) {
-        setErrors([NO_SIMULTANEOUS_UPLOADS_MESSAGE]);
+        handlePasteError(e, NO_SIMULTANEOUS_UPLOADS_MESSAGE, {
+          clearUpload: () => setUploadingFileName(null),
+        });
         return;
       }
 
       const file = items[0].getAsFile();
-      if (!file) return;
+      if (!file) {
+        // this is a non-file paste, so bubble and clear errors
+        setErrors([]);
+        return;
+      }
 
       // prevent the default paste behaviour (inserts base64 string, etc.)
       e.preventDefault();
@@ -174,7 +190,9 @@ export function useImagePasteUpload({
           file.type as (typeof SUPPORTED_PASTE_MIME_TYPES)[number]
         )
       ) {
-        setErrors([UNSUPPORTED_MIME_TYPE_MESSAGE]);
+        handlePasteError(e, UNSUPPORTED_MIME_TYPE_MESSAGE, {
+          clearUpload: () => setUploadingFileName(null),
+        });
         return;
       }
 
@@ -189,7 +207,7 @@ export function useImagePasteUpload({
         uploadState.upload({ caseIds: [caseId], owner });
       }
     };
-  }, [caseId, owner, uploadState, setErrors]);
+  }, [caseId, owner, uploadState, setErrors, handlePasteError]);
 
   /*
    * Attach the listener once for the lifetime of the textarea element.
