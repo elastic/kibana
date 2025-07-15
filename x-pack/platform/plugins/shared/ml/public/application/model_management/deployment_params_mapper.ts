@@ -18,11 +18,9 @@ export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploym
   AdaptiveAllocations;
 
 /** Maximum allowed number of threads per allocation */
-const MAX_NUMBER_OF_THREADS = 8;
+const MAX_NUMBER_OF_THREADS = 16;
 
-/** To allow maximum number of threads to be 2^THREADS_MAX_EXPONENT */
-const THREADS_MAX_EXPONENT =
-  MAX_NUMBER_OF_THREADS > 1 ? Math.floor(Math.log2(MAX_NUMBER_OF_THREADS)) : 0;
+const MAX_NUMBER_OF_THREADS_SERVERLESS = 8;
 
 type VCPUBreakpoints = Record<
   DeploymentParamsUI['vCPUUsage'],
@@ -98,10 +96,16 @@ export class DeploymentParamsMapper {
      */
     const maxSingleMlNodeProcessors = this.mlServerLimits.max_single_ml_node_processors;
 
-    this.threadingParamsValues = new Array(THREADS_MAX_EXPONENT)
-      .fill(null)
-      .map((v, i) => Math.pow(2, i))
-      .filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : (v) => true);
+    this.threadingParamsValues = Array.from(
+      /** To allow maximum number of threads to be 2^THREADS_MAX_EXPONENT */
+      {
+        length:
+          Math.floor(
+            Math.log2(this.showNodeInfo ? MAX_NUMBER_OF_THREADS : MAX_NUMBER_OF_THREADS_SERVERLESS)
+          ) + 1,
+      },
+      (_, i) => 2 ** i
+    ).filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : () => true);
 
     const mediumValue = this.mlServerLimits!.total_ml_processors! / 2;
 
@@ -129,9 +133,22 @@ export class DeploymentParamsMapper {
   }
 
   private getNumberOfThreads(input: DeploymentParamsUI): number {
-    // 1 thread for ingest at all times
-    if (input.optimized === 'optimizedForIngest') return 1;
-    // for search deployments with low vCPUs level set 2, otherwise max available
+    // 1 thread for ingest-optimized deployments
+    if (input.optimized === 'optimizedForIngest') {
+      return 1;
+    }
+
+    // Serverless: fixed mapping per vCPU usage level
+    if (!this.showNodeInfo) {
+      const serverlessThreads: Record<DeploymentParamsUI['vCPUUsage'], number> = {
+        low: 2,
+        medium: 4,
+        high: 8,
+      };
+      return serverlessThreads[input.vCPUUsage];
+    }
+
+    // low → 2 threads, otherwise use the maximum
     return input.vCPUUsage === 'low' ? 2 : Math.max(...this.threadingParamsValues);
   }
 
