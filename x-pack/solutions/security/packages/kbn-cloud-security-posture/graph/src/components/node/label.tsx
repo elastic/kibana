@@ -6,7 +6,7 @@
  */
 
 import React, { memo, type PropsWithChildren } from 'react';
-import { EuiText, EuiTextTruncate, EuiToolTip } from '@elastic/eui';
+import { EuiText, EuiTextTruncate, EuiToolTip, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { NODE_LABEL_WIDTH, NODE_WIDTH } from './styles';
@@ -60,45 +60,109 @@ GeneratedText.displayName = 'GeneratedText';
 
 export interface LabelProps {
   text?: string;
+  entityType?: 'user' | 'host' | 'other';
+  secondaryLabel?: string;
+  flagBadges?: Array<{ flag: string; count: number }>;
 }
 
-const LabelComponent = ({ text = '' }: LabelProps) => {
+const LabelComponent = ({ text = '', entityType, secondaryLabel, flagBadges = [] }: LabelProps) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
 
+  // Map entity types to display names
+  const getEntityTypeDisplay = (type: string | undefined) => {
+    switch (type) {
+      case 'user':
+        return 'User';
+      case 'host':
+        return 'Host';
+      case 'other':
+        return 'Other Types';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <EuiText
-      size="xs"
-      textAlign="center"
+    <div
       css={css`
         width: ${NODE_LABEL_WIDTH}px;
         margin-left: ${-(NODE_LABEL_WIDTH - NODE_WIDTH) / 2}px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-height: 32px;
+        text-align: center;
+        max-height: 80px;
+        overflow: visible;
       `}
     >
-      <EuiToolTip content={isTruncated ? text : ''} position="bottom">
-        <EuiTextTruncate
-          truncation="end"
-          truncationOffset={20}
-          text={text}
-          width={NODE_LABEL_WIDTH * 1.5}
+      {/* Entity Type Tag */}
+      {entityType && (
+        <EuiText size="xs" color="subdued" textAlign="center">
+          <strong>{getEntityTypeDisplay(entityType)}</strong>
+        </EuiText>
+      )}
+      
+      {/* Entity Name - Bold, 14px font size, single line with middle ellipsis */}
+      <EuiText
+        size="s"
+        textAlign="center"
+        css={css`
+          font-weight: bold;
+          font-size: 14px;
+          margin-top: 2px;
+          line-height: 1.2;
+        `}
+      >
+        <EuiToolTip content={isTruncated ? text : ''} position="bottom">
+          <EuiTextTruncate
+            truncation="middle"
+            text={text}
+            width={NODE_LABEL_WIDTH}
+          >
+            {(truncatedText) => (
+              <>
+                {setIsTruncated(truncatedText.length !== text.length)}
+                <GeneratedText>{truncatedText}</GeneratedText>
+              </>
+            )}
+          </EuiTextTruncate>
+        </EuiToolTip>
+      </EuiText>
+
+      {/* Secondary Label */}
+      {secondaryLabel && (
+        <EuiText size="xs" color="subdued" textAlign="center">
+          {secondaryLabel}
+        </EuiText>
+      )}
+
+      {/* Flag Badges */}
+      {flagBadges.length > 0 && (
+        <div
+          css={css`
+            margin-top: 4px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px;
+          `}
         >
-          {(truncatedText) => (
-            <>
-              {setIsTruncated(truncatedText.length !== text.length)}
-              {<GeneratedText>{truncatedText}</GeneratedText>}
-            </>
-          )}
-        </EuiTextTruncate>
-      </EuiToolTip>
-    </EuiText>
+          {flagBadges.map((badge, index) => (
+            <EuiBadge
+              key={`${badge.flag}-${index}`}
+              color="hollow"
+              css={css`
+                font-size: 10px;
+                padding: 1px 4px;
+                min-width: auto;
+              `}
+            >
+              {badge.flag} +{badge.count}
+            </EuiBadge>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
 export const Label = styled(LabelComponent)`
-  width: ${NODE_LABEL_WIDTH}px;
-  margin-left: ${-(NODE_LABEL_WIDTH - NODE_WIDTH) / 2}px;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  /* All styling is handled within the component */
 `;

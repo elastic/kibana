@@ -28,6 +28,10 @@ export default {
       options: ['ellipse', 'hexagon', 'pentagon', 'rectangle', 'diamond', 'label'],
       control: { type: 'radio' },
     },
+    entityType: {
+      options: ['user', 'host', 'other'],
+      control: { type: 'radio' },
+    },
     expandButtonClick: { action: 'expandButtonClick' },
   },
   decorators: [GlobalStylesStorybookDecorator],
@@ -52,7 +56,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
         {
           id: args.id,
           type: args.shape,
-          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick']),
+          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick', 'entityType', 'secondaryLabel', 'flagBadges']),
           position: { x: 0, y: 0 },
         },
       ]}
@@ -68,11 +72,17 @@ export const ShortLabel: StoryObj<NodeViewModel> = {
 
   args: {
     id: 'siem-windows',
-    label: '',
+    label: 'Entity Name',
     color: 'primary',
     shape: 'hexagon',
     icon: 'okta',
     interactive: true,
+    entityType: 'host',
+    secondaryLabel: 'Detail information',
+    flagBadges: [
+      { flag: '🇺🇸', count: 5 },
+      { flag: '🇬🇧', count: 99 },
+    ],
   },
 };
 
@@ -83,9 +93,15 @@ export const ArnLabel: StoryObj<NodeViewModel> = {
     id: 'siem-windows',
     label: 'arn:aws:iam::1234567890:user/lorem-ipsumdol-sitamet-user-1234',
     color: 'primary',
-    shape: 'hexagon',
-    icon: 'okta',
+    shape: 'ellipse',
+    icon: 'user',
     interactive: true,
+    entityType: 'user',
+    secondaryLabel: 'Detail information +99',
+    flagBadges: [
+      { flag: '🇺🇸', count: 25 },
+      { flag: '🇪🇺', count: 99 },
+    ],
   },
 };
 
@@ -122,8 +138,15 @@ export const NoSpacesAllLoweredLabel: StoryObj<NodeViewModel> = {
     id: 'siem-windows',
     label: 'loremipsumdolorsitametconsectetur123',
     color: 'primary',
-    shape: 'hexagon',
-    icon: 'okta',
+    shape: 'rectangle',
+    icon: 'database',
     interactive: true,
+    entityType: 'other',
+    secondaryLabel: 'Detail information +99',
+    flagBadges: [
+      { flag: '🇺🇸', count: 10 },
+      { flag: '🇯🇵', count: 5 },
+      { flag: '🇫🇷', count: 99 },
+    ],
   },
 };

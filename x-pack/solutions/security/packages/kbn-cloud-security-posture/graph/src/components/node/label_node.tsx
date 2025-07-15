@@ -23,7 +23,7 @@ import type { LabelNodeViewModel, NodeProps } from '../types';
 import { NodeExpandButton } from './node_expand_button';
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, label, interactive, nodeClick, expandButtonClick } =
+  const { id, color, label, interactive, nodeClick, expandButtonClick, entityType, secondaryLabel, flagBadges } =
     props.data as LabelNodeViewModel;
   const text = label ? label : id;
 

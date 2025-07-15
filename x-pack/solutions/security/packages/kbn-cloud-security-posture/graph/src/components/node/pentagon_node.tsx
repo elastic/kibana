@@ -32,7 +32,7 @@ const NODE_SHAPE_WIDTH = 91;
 const NODE_SHAPE_HEIGHT = 88;
 
 export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick, entityType, secondaryLabel, flagBadges } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
@@ -92,7 +92,12 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <Label text={label ? label : id} />
+      <Label 
+        text={label ? label : id} 
+        entityType={entityType}
+        secondaryLabel={secondaryLabel}
+        flagBadges={flagBadges}
+      />
     </>
   );
 });

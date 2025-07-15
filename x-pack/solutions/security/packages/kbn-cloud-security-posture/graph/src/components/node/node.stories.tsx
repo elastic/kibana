@@ -27,15 +27,25 @@ const meta: Meta<NodeViewModel> = {
       options: ['ellipse', 'hexagon', 'pentagon', 'rectangle', 'diamond', 'label'],
       control: { type: 'radio' },
     },
+    entityType: {
+      options: ['user', 'host', 'other'],
+      control: { type: 'radio' },
+    },
     expandButtonClick: { action: 'expandButtonClick' },
   },
   args: {
     id: 'siem-windows',
-    label: '',
+    label: 'Entity Name',
     color: 'primary',
     shape: 'hexagon',
     icon: 'okta',
     interactive: true,
+    entityType: 'host',
+    secondaryLabel: 'Detail information',
+    flagBadges: [
+      { flag: '🇺🇸', count: 5 },
+      { flag: '🇬🇧', count: 99 },
+    ],
   },
   decorators: [GlobalStylesStorybookDecorator],
 };
@@ -61,7 +71,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
         {
           id: args.id,
           type: args.shape,
-          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick']),
+          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick', 'entityType', 'secondaryLabel', 'flagBadges']),
           position: { x: 0, y: 0 },
         },
       ]}

@@ -28,15 +28,29 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
           },
           {
             id: 'admin@example.com',
+            label: 'admin@example.com',
             color: 'primary',
             shape: 'ellipse',
             icon: 'user',
+            entityType: 'user',
+            secondaryLabel: 'Detail information +5',
+            flagBadges: [
+              { flag: '🇺🇸', count: 3 },
+              { flag: '🇪🇺', count: 7 },
+            ],
           },
           {
             id: 'projects/your-project-id/roles/customRole',
+            label: 'Custom Role',
             color: 'primary',
             shape: 'hexagon',
             icon: 'question',
+            entityType: 'host',
+            secondaryLabel: 'Detail information +99',
+            flagBadges: [
+              { flag: '🇺🇸', count: 15 },
+              { flag: '🇨🇦', count: 99 },
+            ],
             documentsData: [
               {
                 id: '1',

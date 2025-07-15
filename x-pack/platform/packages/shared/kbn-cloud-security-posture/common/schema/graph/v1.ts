@@ -78,6 +78,16 @@ export const nodeBaseDataSchema = schema.object({
   id: schema.string(),
   label: schema.maybe(schema.string()),
   icon: schema.maybe(schema.string()),
+  entityType: schema.maybe(schema.oneOf([
+    schema.literal('user'),
+    schema.literal('host'), 
+    schema.literal('other'),
+  ])),
+  secondaryLabel: schema.maybe(schema.string()),
+  flagBadges: schema.maybe(schema.arrayOf(schema.object({
+    flag: schema.string(),
+    count: schema.number(),
+  }))),
 });
 
 export const entityNodeDataSchema = schema.allOf([
