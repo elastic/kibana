@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
-// eslint-disable-next-line import/no-default-export
 export default function maintenanceWindowTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Maintenance Window - Group 3', () => {
     describe('maintenance window', () => {
@@ -37,6 +36,9 @@ export default function maintenanceWindowTests({ loadTestFile, getService }: Ftr
       loadTestFile(require.resolve('./internal/finish_maintenance_window'));
       loadTestFile(require.resolve('./internal/find_maintenance_windows'));
       loadTestFile(require.resolve('./internal/active_maintenance_windows'));
+
+      // event generation task
+      loadTestFile(require.resolve('./events_generation'));
     });
   });
 }

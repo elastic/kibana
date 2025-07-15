@@ -754,3 +754,15 @@ function getAlwaysFiringRuleWithSystemAction(reference: string) {
     ],
   };
 }
+
+export function getAlwaysFiringInternalRule() {
+  return {
+    enabled: true,
+    name: 'Internal Rule',
+    schedule: { interval: '1m' },
+    tags: [],
+    rule_type_id: 'test.internal-rule-type',
+    consumer: 'alertsFixture',
+    params: {},
+  };
+}

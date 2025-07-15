@@ -21,10 +21,8 @@ describe('DashboardService', () => {
       hits: [],
     });
 
-    // act
     const resp = await dashboardService.fetchDashboards({ text: 'test*' });
 
-    // assert
     expect(searchMock).toHaveBeenCalledWith({
       contentTypeId: 'dashboard',
       query: {
@@ -33,7 +31,6 @@ describe('DashboardService', () => {
       options: {
         fields: ['title', 'description'],
         includeReferences: ['tag'],
-        spaces: ['*'],
       },
     });
     expect(resp).toEqual([]);

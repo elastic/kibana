@@ -253,12 +253,56 @@ describe('logsDataSourceProfileProvider', () => {
           },
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        actions: {
+          setExpandedDoc: jest.fn(),
+        },
         dataView: dataViewWithLogLevel,
       });
 
       expect(rowAdditionalLeadingControls).toHaveLength(2);
       expect(rowAdditionalLeadingControls?.[0].id).toBe('connectedDegradedDocs');
       expect(rowAdditionalLeadingControls?.[1].id).toBe('connectedStacktraceDocs');
+    });
+
+    it('should not return the passed additional controls if the flag is turned off', () => {
+      const getRowAdditionalLeadingControls =
+        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
+        });
+      const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        actions: {},
+        dataView: dataViewWithLogLevel,
+      });
+
+      expect(rowAdditionalLeadingControls).toHaveLength(0);
+    });
+  });
+
+  describe('getColumnsConfiguration', () => {
+    it('should return custom configuration for the "_source" column', () => {
+      const getColumnsConfiguration =
+        logsDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
+        });
+
+      const columnConfiguration = getColumnsConfiguration?.();
+
+      expect(columnConfiguration).toBeDefined();
+      expect(columnConfiguration).toHaveProperty('_source');
+
+      const config = columnConfiguration!._source({
+        column: { id: '_source', displayAsText: 'Summary' },
+        headerRowHeight: 1,
+      });
+
+      expect(config).toBeDefined();
+      expect(config).toHaveProperty('display');
     });
   });
 });

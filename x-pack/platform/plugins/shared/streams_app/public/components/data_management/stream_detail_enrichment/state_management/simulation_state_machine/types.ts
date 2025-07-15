@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Condition, FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
-import { TimeState } from '@kbn/es-query';
+import { Query } from '@kbn/es-query';
+import { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
+import { PreviewDocsFilterOption } from './simulation_documents_search';
 import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
 export type DetectedField = Simulation['detected_fields'][number];
 
 export interface SimulationMachineDeps {
-  timeState$: BehaviorSubject<TimeState>;
+  data: DataPublicPluginStart;
   streamsRepositoryClient: StreamsRepositoryClient;
   toasts: IToasts;
 }
@@ -26,13 +26,24 @@ export interface SimulationMachineDeps {
 export type ProcessorMetrics =
   Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
+export interface SimulationSearchParams extends Required<QueryState> {
+  query: Query;
+}
+
 export interface SimulationInput {
   processors: ProcessorDefinitionWithUIAttributes[];
   streamName: string;
 }
 
+export interface SampleDocumentWithUIAttributes {
+  dataSourceId: string;
+  document: SampleDocument;
+}
+
 export type SimulationEvent =
-  | { type: 'dateRange.update' }
+  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
+  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
@@ -43,7 +54,9 @@ export type SimulationEvent =
   | { type: 'simulation.reset' }
   | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
-  | { type: 'previewColumns.order'; columns: string[] };
+  | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
+  | { type: 'previewColumns.order'; columns: string[] }
+  | { type: 'simulation.receive_samples'; samples: SampleDocumentWithUIAttributes[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
@@ -52,9 +65,12 @@ export interface SimulationContext {
   explicitlyEnabledPreviewColumns: string[];
   explicitlyDisabledPreviewColumns: string[];
   previewColumnsOrder: string[];
+  previewColumnsSorting: {
+    fieldName?: string;
+    direction: 'asc' | 'desc';
+  };
   processors: ProcessorDefinitionWithUIAttributes[];
-  samples: SampleDocument[];
-  samplingCondition?: Condition;
+  samples: SampleDocumentWithUIAttributes[];
   simulation?: Simulation;
   streamName: string;
 }

@@ -30,6 +30,7 @@ import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { ActionsApiRequestHandlerContext, ActionsClient } from '@kbn/actions-plugin/server';
 import type { AlertsHealth, RuleTypeSolution } from '@kbn/alerting-types';
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
@@ -274,6 +275,12 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   isSpaceAware?: boolean;
 
   /**
+   * Optional flag to indicate that these alerts should not be space aware. When set
+   * to true, alerts for this rule type will be created with the `*` space id.
+   */
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
+
+  /**
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
@@ -350,6 +357,16 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
+  /**
+   * Task priority allowing for tasks to be ran at lower priority (NormalLongRunning vs Normal), defaults to
+   * normal priority.
+   */
+  priority?: TaskPriority.Normal | TaskPriority.NormalLongRunning;
+  /**
+   * Indicates that the rule type is managed internally by a Kibana plugin.
+   * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
+   */
+  internallyManaged?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -357,6 +374,8 @@ export type UntypedRuleType = RuleType<
   AlertInstanceState,
   AlertInstanceContext
 >;
+
+export type UntypedRuleTypeAlerts = IRuleTypeAlerts<RuleAlertData>;
 
 export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;

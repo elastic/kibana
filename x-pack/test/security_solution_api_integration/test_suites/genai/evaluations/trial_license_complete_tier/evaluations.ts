@@ -12,6 +12,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import os from 'os';
+import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functional/services/ml';
 import { getSecurityGenAIConfigFromEnvVar } from '../../../../scripts/genai/vault/manage_secrets';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -22,7 +23,6 @@ import {
   setupKnowledgeBase,
 } from '../../knowledge_base/entries/utils/helpers';
 
-import { MachineLearningProvider } from '../../../../../functional/services/ml';
 import { routeWithNamespace } from '../../../../../common/utils/security_solution';
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 import { waitForEvaluationComplete } from './utils';
@@ -35,6 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
   const esArchiver = getService('esArchiver');
+  const isEvalLocalPrompts = process.env.IS_SECURITY_AI_PROMPT_TEST === 'true';
 
   /**
    * Results will be written to LangSmith for project associated with the langSmithAPIKey, then later
@@ -63,6 +64,12 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
       );
+      // if run is to test prompt changes, uninstall prompt integration to default to local prompts
+      if (isEvalLocalPrompts) {
+        // delete integration prompt saved objects
+        const route = routeWithNamespace(`/api/saved_objects/epm-packages/security_ai_prompts`);
+        await supertest.delete(route).set('kbn-xsrf', 'foo');
+      }
     });
 
     after(async () => {
@@ -78,9 +85,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Run Evaluations', () => {
       const buildNumber = process.env.BUILDKITE_BUILD_NUMBER || os.hostname();
+      const prNumber = process.env.BUILDKITE_PULL_REQUEST;
       const config = getSecurityGenAIConfigFromEnvVar();
       const defaultEvalPayload: PostEvaluateBody = {
-        runName: `Eval Automation${buildNumber ? ' - ' + buildNumber : ''}`,
+        runName: `Eval Automation${buildNumber ? ' | Build ' + buildNumber : ''}${
+          prNumber ? ' | PR ' + prNumber : ''
+        }${isEvalLocalPrompts ? ' | [Local Prompts]' : ''}`,
         graphs: ['DefaultAssistantGraph'],
         datasetName: 'Sample Dataset',
         connectorIds: Object.keys(config.connectors),

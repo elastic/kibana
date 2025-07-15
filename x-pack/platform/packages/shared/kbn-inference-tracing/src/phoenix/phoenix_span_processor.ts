@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { InferenceTracingPhoenixExportConfig } from '@kbn/inference-common';
+import { InferenceTracingPhoenixExportConfig } from '@kbn/inference-tracing-config';
 import { ReadableSpan } from '@opentelemetry/sdk-trace-node';
 import { memoize } from 'lodash';
 import {
   SEMRESATTRS_PROJECT_NAME,
   SemanticConventions,
 } from '@arizeai/openinference-semantic-conventions';
+import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
 import { ElasticGenAIAttributes, GenAISemanticConventions } from '../types';
 import { getChatSpan } from './get_chat_span';
@@ -21,10 +21,7 @@ import { PhoenixProtoExporter } from './phoenix_otlp_exporter';
 
 export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
-  constructor(
-    private readonly logger: Logger,
-    private readonly config: InferenceTracingPhoenixExportConfig
-  ) {
+  constructor(private readonly config: InferenceTracingPhoenixExportConfig) {
     const headers = {
       ...(config.api_key ? { Authorization: `Bearer ${config.api_key}` } : {}),
     };
@@ -57,7 +54,7 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
 
     this.getProjectId = () => {
       return getProjectIdMemoized().catch((error) => {
-        logger.error(`Could not get project ID from Phoenix: ${error.message}`);
+        diag.error(`Could not get project ID from Phoenix: ${error.message}`);
         getProjectIdMemoized.cache.clear?.();
         return undefined;
       });
@@ -87,7 +84,7 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
           `/projects/${projectId}/traces/${traceId}?selected`,
           new URL(this.config.public_url)
         );
-        this.logger.info(`View trace at ${url.toString()}`);
+        diag.info(`View trace at ${url.toString()}`);
       });
     }
     return span;

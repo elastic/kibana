@@ -1156,7 +1156,13 @@
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -1274,7 +1280,13 @@
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -1725,7 +1737,13 @@
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -2506,7 +2524,7 @@
             "tags": [],
             "label": "evaluate",
             "description": [
-              "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\n```js\nconst tweets = page.locator('.tweet .retweets');\nexpect(await tweets.evaluate(node => node.innerText)).toBe('10 retweets');\n```\n"
+              "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\nPassing argument to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression):\n\n```js\nconst result = await page.getByTestId('myId').evaluate((element, [x, y]) => {\n  return element.textContent + ' ' + x * y;\n}, [7, 8]);\nconsole.log(result); // prints \"myId text 56\"\n```\n"
             ],
             "signature": [
               "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
@@ -2591,7 +2609,7 @@
             "tags": [],
             "label": "evaluate",
             "description": [
-              "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\n```js\nconst tweets = page.locator('.tweet .retweets');\nexpect(await tweets.evaluate(node => node.innerText)).toBe('10 retweets');\n```\n"
+              "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\nPassing argument to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression):\n\n```js\nconst result = await page.getByTestId('myId').evaluate((element, [x, y]) => {\n  return element.textContent + ' ' + x * y;\n}, [7, 8]);\nconsole.log(result); // prints \"myId text 56\"\n```\n"
             ],
             "signature": [
               "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
@@ -3724,6 +3742,43 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.Locator.describe",
+            "type": "Function",
+            "tags": [],
+            "label": "describe",
+            "description": [
+              "\nDescribes the locator, description is used in the trace viewer and reports. Returns the locator pointing to the\nsame element.\n\n**Usage**\n\n```js\nconst button = page.getByTestId('btn-sub').describe('Subscribe button');\nawait button.click();\n```\n"
+            ],
+            "signature": [
+              "(description: string) => ",
+              "Locator"
+            ],
+            "path": "node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.Locator.describe.$1",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [
+                  "Locator description."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.Locator.dispatchEvent",
             "type": "Function",
             "tags": [],
@@ -4091,7 +4146,7 @@
               "Locator",
               " | undefined; hasNot?: ",
               "Locator",
-              " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; } | undefined) => ",
+              " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; visible?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
@@ -4170,6 +4225,22 @@
                     ],
                     "signature": [
                       "string | RegExp | undefined"
+                    ],
+                    "path": "node_modules/playwright-core/types/types.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout",
+                    "id": "def-common.Locator.filter.$1.visible",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "visible",
+                    "description": [
+                      "\nOnly matches visible or invisible elements."
+                    ],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
@@ -4557,7 +4628,7 @@
               "\nAllows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),\n[ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and\n[accessible name](https://w3c.github.io/accname/#dfn-accessible-name).\n\n**Usage**\n\nConsider the following DOM structure.\n\n```html\n<h3>Sign up</h3>\n<label>\n  <input type=\"checkbox\" /> Subscribe\n</label>\n<br/>\n<button>Submit</button>\n```\n\nYou can locate each element by it's implicit role:\n\n```js\nawait expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();\n\nawait page.getByRole('checkbox', { name: 'Subscribe' }).check();\n\nawait page.getByRole('button', { name: /submit/i }).click();\n```\n\n**Details**\n\nRole selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback\nabout the ARIA guidelines.\n\nMany html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)\nthat is recognized by the role selector. You can find all the\n[supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**\nduplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values."
             ],
             "signature": [
-              "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"generic\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
+              "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
@@ -4574,7 +4645,7 @@
                   "Required aria role."
                 ],
                 "signature": [
-                  "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"generic\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
+                  "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
@@ -6020,7 +6091,7 @@
             "tags": [],
             "label": "selectOption",
             "description": [
-              "\nSelects option or options in `<select>`.\n\n**Details**\n\nThis method waits for [actionability](https://playwright.dev/docs/actionability) checks, waits until all specified options are present in\nthe `<select>` element and selects these options.\n\nIf the target element is not a `<select>` element, this method throws an error. However, if the element is inside\nthe `<label>` element that has an associated\n[control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used\ninstead.\n\nReturns the array of option values that have been successfully selected.\n\nTriggers a `change` and `input` event once all the provided options have been selected.\n\n**Usage**\n\n```html\n<select multiple>\n  <option value=\"red\">Red</div>\n  <option value=\"green\">Green</div>\n  <option value=\"blue\">Blue</div>\n</select>\n```\n\n```js\n// single selection matching the value or label\nelement.selectOption('blue');\n\n// single selection matching the label\nelement.selectOption({ label: 'Blue' });\n\n// multiple selection for red, green and blue options\nelement.selectOption(['red', 'green', 'blue']);\n```\n"
+              "\nSelects option or options in `<select>`.\n\n**Details**\n\nThis method waits for [actionability](https://playwright.dev/docs/actionability) checks, waits until all specified options are present in\nthe `<select>` element and selects these options.\n\nIf the target element is not a `<select>` element, this method throws an error. However, if the element is inside\nthe `<label>` element that has an associated\n[control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used\ninstead.\n\nReturns the array of option values that have been successfully selected.\n\nTriggers a `change` and `input` event once all the provided options have been selected.\n\n**Usage**\n\n```html\n<select multiple>\n  <option value=\"red\">Red</option>\n  <option value=\"green\">Green</option>\n  <option value=\"blue\">Blue</option>\n</select>\n```\n\n```js\n// single selection matching the value or label\nelement.selectOption('blue');\n\n// single selection matching the label\nelement.selectOption({ label: 'Blue' });\n\n// multiple selection for red, green and blue options\nelement.selectOption(['red', 'green', 'blue']);\n```\n"
             ],
             "signature": [
               "(values: string | readonly string[] | ",
@@ -6406,7 +6477,7 @@
             "tags": [],
             "label": "tap",
             "description": [
-              "\nPerform a tap gesture on the element matching the locator.\n\n**Details**\n\nThis method taps the element by performing the following steps:\n1. Wait for [actionability](https://playwright.dev/docs/actionability) checks on the element, unless\n   [`force`](https://playwright.dev/docs/api/class-locator#locator-tap-option-force) option is set.\n1. Scroll the element into view if needed.\n1. Use [page.touchscreen](https://playwright.dev/docs/api/class-page#page-touchscreen) to tap the center of the\n   element, or the specified\n   [`position`](https://playwright.dev/docs/api/class-locator#locator-tap-option-position).\n\nIf the element is detached from the DOM at any moment during the action, this method throws.\n\nWhen all steps combined have not finished during the specified\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-tap-option-timeout), this method throws a\n[TimeoutError](https://playwright.dev/docs/api/class-timeouterror). Passing zero timeout disables this.\n\n**NOTE** `element.tap()` requires that the `hasTouch` option of the browser context be set to true.\n"
+              "\nPerform a tap gesture on the element matching the locator. For examples of emulating other gestures by manually\ndispatching touch events, see the [emulating legacy touch events](https://playwright.dev/docs/touch-events) page.\n\n**Details**\n\nThis method taps the element by performing the following steps:\n1. Wait for [actionability](https://playwright.dev/docs/actionability) checks on the element, unless\n   [`force`](https://playwright.dev/docs/api/class-locator#locator-tap-option-force) option is set.\n1. Scroll the element into view if needed.\n1. Use [page.touchscreen](https://playwright.dev/docs/api/class-page#page-touchscreen) to tap the center of the\n   element, or the specified\n   [`position`](https://playwright.dev/docs/api/class-locator#locator-tap-option-position).\n\nIf the element is detached from the DOM at any moment during the action, this method throws.\n\nWhen all steps combined have not finished during the specified\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-tap-option-timeout), this method throws a\n[TimeoutError](https://playwright.dev/docs/api/class-timeouterror). Passing zero timeout disables this.\n\n**NOTE** `element.tap()` requires that the `hasTouch` option of the browser context be set to true.\n"
             ],
             "signature": [
               "(options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
@@ -8005,6 +8076,108 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.SynthtraceFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "SynthtraceFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SynthtraceFixture.apmSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "apmSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "SynthtraceFixtureEsClient<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmFields",
+                "text": "ApmFields"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SynthtraceFixture.infraSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "infraSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "SynthtraceFixtureEsClient<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.InfraDocument",
+                "text": "InfraDocument"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SynthtraceFixture.logsSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "logsSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "SynthtraceFixtureEsClient<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.LogDocument",
+                "text": "LogDocument"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SynthtraceFixture.otelSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "otelSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "SynthtraceFixtureEsClient<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmOtelFields",
+                "text": "ApmOtelFields"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
             "deprecated": false,
             "trackAdoption": false
           }

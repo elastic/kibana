@@ -11,7 +11,6 @@ export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand =
   | ESQLCommand
-  | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
@@ -94,10 +93,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
-  sources: ESQLSource[];
-}
-
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
   commandType: 'lookup' | 'left' | 'right';
 }
@@ -128,14 +123,6 @@ export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
   args: ESQLAstItem[];
-}
-
-/**
- * Right now rename expressions ("clauses") are parsed as options in the
- * RENAME command.
- */
-export interface ESQLAstRenameExpression extends ESQLCommandOption {
-  name: 'as';
 }
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
@@ -232,15 +219,19 @@ export type BinaryExpressionOperator =
   | BinaryExpressionRegexOperator
   | BinaryExpressionRenameOperator
   | BinaryExpressionWhereOperator
-  | BinaryExpressionMatchOperator;
+  | BinaryExpressionMatchOperator
+  | BinaryExpressionIn
+  | BinaryExpressionLogical;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
-export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
+export type BinaryExpressionRegexOperator = 'like' | 'not like' | 'rlike' | 'not rlike';
 export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
 export type BinaryExpressionMatchOperator = ':';
+export type BinaryExpressionIn = 'in' | 'not in';
+export type BinaryExpressionLogical = 'and' | 'or';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =
@@ -357,9 +348,36 @@ export interface ESQLColumn extends ESQLAstBaseItem {
   quoted: boolean;
 }
 
+/**
+ * Represents list-like structures where elements are separated by commas.
+ *
+ * *Literal lists* use square brackets and can contain only
+ * string, number, or boolean literals and all elements must be of the same
+ * type:
+ *
+ * ```
+ * [1, 2, 3]
+ * ```
+ *
+ * *Tuple lists* use round brackets and can contain any type of expression.
+ * Tuple list are used in the `IN` expression:
+ *
+ * ```
+ * a IN ("abc", "def")
+ * ```
+ */
 export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
-  values: ESQLLiteral[];
+
+  /**
+   * The list can be a literal list (uses square brackets) or a tuple list (uses
+   * round brackets). If not specified, the list is assumed to be a literal list.
+   *
+   * @default 'literal'
+   */
+  subtype?: 'literal' | 'tuple';
+
+  values: ESQLAstExpression[];
 }
 
 /**

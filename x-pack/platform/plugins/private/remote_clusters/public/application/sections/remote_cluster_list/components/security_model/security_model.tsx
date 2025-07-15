@@ -24,7 +24,7 @@ export function SecurityModel({ securityModel }: { securityModel: Cluster['secur
       {securityModel !== SECURITY_MODEL.API && (
         <EuiFlexItem grow={false} data-test-subj="authenticationTypeWarning">
           <EuiIconTip
-            type="iInCircle"
+            type="info"
             color="subdued"
             content={
               <FormattedMessage

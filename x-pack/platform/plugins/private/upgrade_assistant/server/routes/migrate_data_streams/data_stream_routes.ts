@@ -35,10 +35,6 @@ export function registerMigrateDataStreamRoutes({
           reason: 'Relies on elasticsearch for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Get data stream status`,
-      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
@@ -90,10 +86,6 @@ export function registerMigrateDataStreamRoutes({
           reason: 'Relies on elasticsearch for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Start the data stream reindexing`,
-      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
@@ -143,10 +135,6 @@ export function registerMigrateDataStreamRoutes({
           reason: 'Relies on elasticsearch for authorization',
         },
       },
-      options: {
-        access: 'public',
-        summary: `Get data stream metadata`,
-      },
       validate: {
         params: schema.object({
           dataStreamName: schema.string(),
@@ -189,10 +177,6 @@ export function registerMigrateDataStreamRoutes({
           enabled: false,
           reason: 'Relies on elasticsearch for authorization',
         },
-      },
-      options: {
-        access: 'public',
-        summary: `Cancel Data Stream reindexing`,
       },
       validate: {
         params: schema.object({
@@ -247,7 +231,7 @@ export function registerMigrateDataStreamRoutes({
       },
       options: {
         access: 'public',
-        summary: `Mark Data Stream indices as read only`,
+        summary: `Set data stream indices as read-only`,
       },
       validate: {
         body: schema.object({

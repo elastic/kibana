@@ -313,12 +313,9 @@
     "enabled",
     "error",
     "filter",
-    "indexPattern",
     "integrationName",
     "managed",
     "matchers",
-    "matchers.fields",
-    "matchers.values",
     "name",
     "type"
   ],
@@ -373,6 +370,7 @@
     "latest_install_failed_attempts",
     "name",
     "package_assets",
+    "previous_version",
     "verification_key_id",
     "verification_status",
     "version"
@@ -550,6 +548,7 @@
     "enabled",
     "inputs",
     "is_managed",
+    "latest_revision",
     "name",
     "namespace",
     "output_id",
@@ -735,6 +734,7 @@
     "enabled",
     "inputs",
     "is_managed",
+    "latest_revision",
     "name",
     "namespace",
     "output_id",
@@ -841,19 +841,6 @@
     "job.job_id",
     "model_id"
   ],
-  "monitoring-entity-source": [
-    "enabled",
-    "error",
-    "filter",
-    "indexPattern",
-    "integrationName",
-    "managed",
-    "matchers",
-    "matchers.fields",
-    "matchers.values",
-    "name",
-    "type"
-  ],
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
@@ -926,8 +913,12 @@
   "privilege-monitoring-status": [
     "status"
   ],
+  "privmon-api-key": [
+    "apiKey"
+  ],
   "product-doc-install-status": [
     "index_name",
+    "inference_id",
     "installation_status",
     "last_installation_date",
     "product_name",
@@ -957,6 +948,9 @@
   "sample-data-telemetry": [
     "installCount",
     "unInstallCount"
+  ],
+  "scheduled_report": [
+    "createdBy"
   ],
   "search": [
     "description",
@@ -1157,6 +1151,35 @@
     "locations",
     "locations.id",
     "locations.label",
+    "maintenance_windows",
+    "name",
+    "origin",
+    "project_id",
+    "schedule",
+    "schedule.number",
+    "tags",
+    "throttling",
+    "throttling.label",
+    "type",
+    "urls"
+  ],
+  "synthetics-monitor-multi-space": [
+    "alert",
+    "alert.status",
+    "alert.status.enabled",
+    "alert.tls",
+    "alert.tls.enabled",
+    "config_id",
+    "custom_heartbeat_id",
+    "enabled",
+    "hash",
+    "hosts",
+    "id",
+    "journey_id",
+    "locations",
+    "locations.id",
+    "locations.label",
+    "maintenance_windows",
     "name",
     "origin",
     "project_id",

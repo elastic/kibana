@@ -13,12 +13,12 @@ import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../com
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib/get_event_log';
 
-// eslint-disable-next-line import/no-default-export
 export default function updateGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('update gaps', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/224475
+  describe.skip('update gaps', () => {
     const objectRemover = new ObjectRemover(supertest);
     const gapStart = moment().subtract(14, 'days').startOf('day').toISOString();
     const gapEnd = moment().subtract(13, 'days').startOf('day').toISOString();

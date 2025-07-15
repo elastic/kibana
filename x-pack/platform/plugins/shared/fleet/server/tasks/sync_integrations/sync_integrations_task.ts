@@ -131,6 +131,7 @@ export class SyncIntegrationsTask {
     this.logger.info(`[runTask()] started`);
 
     if (!canEnableSyncIntegrations()) {
+      this.logger.debug(`[SyncIntegrationsTask] Remote synced integration cannot be enabled.`);
       return;
     }
 

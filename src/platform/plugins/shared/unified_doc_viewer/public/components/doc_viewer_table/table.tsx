@@ -38,7 +38,7 @@ import {
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
@@ -51,7 +51,12 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
+import {
+  LOCAL_STORAGE_KEY_SEARCH_TERM,
+  TableFilters,
+  TableFiltersProps,
+  useTableFilters,
+} from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
 import { FieldRow } from './field_row';
@@ -68,7 +73,7 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
-const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
+export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
@@ -131,7 +136,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -181,7 +186,10 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
-  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters(storage);
+  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters({
+    storage,
+    storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
+  });
 
   const fieldToItem = useCallback(
     (field: string, isPinned: boolean): FieldRow => {

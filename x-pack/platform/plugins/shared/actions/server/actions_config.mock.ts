@@ -44,6 +44,7 @@ const createActionsConfigMock = () => {
       },
     }),
     getAwsSesConfig: jest.fn().mockReturnValue(null),
+    getEnabledEmailServices: jest.fn().mockReturnValue(['*']),
   };
   return mocked;
 };

@@ -74,7 +74,7 @@ export class AnalyticsService {
   /**
    * Enriches the event with the build information.
    * @param core The core context.
-   * @private
+   * @internal
    */
   private registerBuildInfoAnalyticsContext(core: CoreContext) {
     this.analyticsClient.registerContextProvider({

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import type { Sort } from '@elastic/elasticsearch/lib/api/types';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
+import type { APMConfig } from '../..';
 import {
   AT_TIMESTAMP,
   DURATION,
@@ -24,10 +24,12 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TIMESTAMP_US,
 } from '../../../common/es_fields/apm';
-import type { APMConfig } from '../..';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
+import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
+import type { UnifiedTraceErrors } from './get_unified_trace_errors';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -42,7 +44,28 @@ const optionalFields = asMutableArray([
   PROCESSOR_EVENT,
   PARENT_ID,
   STATUS_CODE,
+  TIMESTAMP_US,
 ] as const);
+
+export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
+  const groupedErrorCountByDocId: Record<string, number> = {};
+
+  function incrementErrorCount(id: string) {
+    if (!groupedErrorCountByDocId[id]) {
+      groupedErrorCountByDocId[id] = 0;
+    }
+    groupedErrorCountByDocId[id] += 1;
+  }
+
+  unifiedTraceErrors.apmErrors.forEach((doc) =>
+    doc.parent?.id ? incrementErrorCount(doc.parent.id) : undefined
+  );
+  unifiedTraceErrors.unprocessedOtelErrors.forEach((doc) =>
+    doc.id ? incrementErrorCount(doc.id) : undefined
+  );
+
+  return groupedErrorCountByDocId;
+}
 
 /**
  * Returns both APM documents and unprocessed OTEL spans
@@ -54,6 +77,7 @@ export async function getUnifiedTraceItems({
   start,
   end,
   config,
+  unifiedTraceErrors,
 }: {
   apmEventClient: APMEventClient;
   maxTraceItemsFromUrlParam?: number;
@@ -61,6 +85,7 @@ export async function getUnifiedTraceItems({
   start: number;
   end: number;
   config: APMConfig;
+  unifiedTraceErrors: UnifiedTraceErrors;
 }): Promise<TraceItem[]> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
@@ -110,27 +135,51 @@ export async function getUnifiedTraceItems({
     { skipProcessorEventFilter: true }
   );
 
-  return response.hits.hits.map((hit) => {
-    const event = unflattenKnownApmEventFields(hit.fields, fields);
-    const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
+  const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
 
-    return {
-      id: event.span?.id ?? event.transaction?.id,
-      timestamp: event[AT_TIMESTAMP],
-      name: event.span?.name ?? event.transaction?.name,
-      traceId: event.trace.id,
-      duration:
-        apmDuration !== undefined
-          ? apmDuration
-          : Array.isArray(event.duration)
-          ? (event.duration as number[])[0]
-          : event.duration ?? 0,
-      hasError:
-        event.status?.code && Array.isArray(event.status.code)
-          ? event.status.code[0] === 'Error'
-          : false,
-      parentId: event.parent?.id,
-      serviceName: event.service.name,
-    } as TraceItem;
-  });
+  return response.hits.hits
+    .map((hit) => {
+      const event = unflattenKnownApmEventFields(hit.fields, fields);
+      const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
+      const id = event.span?.id || event.transaction?.id;
+      if (!id) {
+        return undefined;
+      }
+
+      const docErrorCount = errorCountByDocId[id] || 0;
+      return {
+        id: event.span?.id ?? event.transaction?.id,
+        timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
+        name: event.span?.name ?? event.transaction?.name,
+        traceId: event.trace.id,
+        duration: resolveDuration(apmDuration, event.duration),
+        hasError:
+          docErrorCount > 0 ||
+          (event.status?.code && Array.isArray(event.status.code)
+            ? event.status.code[0] === 'Error'
+            : false),
+        parentId: event.parent?.id,
+        serviceName: event.service.name,
+      } as TraceItem;
+    })
+    .filter((_) => _) as TraceItem[];
 }
+
+/**
+ * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
+ */
+function resolveDuration(apmDuration?: number, otelDuration?: number[] | string): number {
+  if (apmDuration) {
+    return apmDuration;
+  }
+
+  const duration = Array.isArray(otelDuration)
+    ? otelDuration[0]
+    : otelDuration
+    ? parseFloat(otelDuration)
+    : 0;
+
+  return duration * 0.001;
+}
+
+const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us

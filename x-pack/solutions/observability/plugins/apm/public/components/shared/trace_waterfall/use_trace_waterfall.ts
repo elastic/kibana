@@ -8,6 +8,8 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { useMemo } from 'react';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { IWaterfallLegend } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export interface TraceWaterfallItem extends TraceItem {
   depth: number;
@@ -47,6 +49,19 @@ export function getServiceColors(traceItems: TraceItem[]) {
   }, {});
 }
 
+export function getServiceLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
+  const allServiceNames = new Set(traceItems.map((item) => item.serviceName));
+  const palette = euiPaletteColorBlind({
+    rotations: Math.ceil(allServiceNames.size / 10),
+  });
+
+  return Array.from(allServiceNames).map((serviceName, index) => ({
+    type: WaterfallLegendType.ServiceName,
+    value: serviceName,
+    color: palette[index],
+  }));
+}
+
 export function getTraceParentChildrenMap(traceItems: TraceItem[]) {
   const traceMap = traceItems.reduce<Record<string, TraceItem[]>>((acc, item) => {
     if (!item.parentId) {
@@ -68,10 +83,10 @@ export function getTraceWaterfall(
   parentChildMap: Record<string, TraceItem[]>,
   serviceColorsMap: Record<string, string>
 ): TraceWaterfallItem[] {
-  const rootStartMicroseconds = toMicroseconds(rootItem.timestamp);
+  const rootStartMicroseconds = rootItem.timestampUs;
 
   function getTraceWaterfallItem(item: TraceItem, depth: number, parent?: TraceWaterfallItem) {
-    const startMicroseconds = toMicroseconds(item.timestamp);
+    const startMicroseconds = item.timestampUs;
     const traceWaterfallItem: TraceWaterfallItem = {
       ...item,
       depth,
@@ -81,7 +96,7 @@ export function getTraceWaterfall(
     };
     const result = [traceWaterfallItem];
     const sortedChildren =
-      parentChildMap[item.id]?.sort((a, b) => a.timestamp.localeCompare(b.timestamp)) || [];
+      parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) || [];
 
     sortedChildren.forEach((child) => {
       result.push(...getTraceWaterfallItem(child, depth + 1, traceWaterfallItem));
@@ -103,7 +118,7 @@ export function getClockSkew({
 }) {
   let skew = 0;
   if (parent) {
-    const parentTimestamp = toMicroseconds(parent.timestamp);
+    const parentTimestamp = parent.timestampUs;
     const parentStart = parentTimestamp + parent.skew;
 
     const offsetStart = parentStart - itemTimestamp;
@@ -121,5 +136,3 @@ export function getTraceWaterfallDuration(flattenedTraceWaterfall: TraceWaterfal
     0
   );
 }
-
-const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us

@@ -329,6 +329,7 @@ describe('RuleMigrationsTaskClient', () => {
 
       data.migrations.get.mockResolvedValue({
         id: 'migration-1',
+        name: 'Test Migration',
         created_at: new Date().toISOString(),
         created_by: 'test-user',
         last_execution: {

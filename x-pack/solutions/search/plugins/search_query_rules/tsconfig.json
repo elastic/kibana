@@ -30,6 +30,9 @@
     "@kbn/search-index-documents",
     "@kbn/unsaved-changes-prompt",
     "@kbn/deeplinks-analytics",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",

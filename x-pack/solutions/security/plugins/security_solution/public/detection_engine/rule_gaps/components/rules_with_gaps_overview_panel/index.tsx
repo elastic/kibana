@@ -18,6 +18,7 @@ import {
   EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { gapStatus } from '@kbn/alerting-plugin/common';
@@ -35,9 +36,14 @@ export const RulesWithGapsOverviewPanel = () => {
     },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data } = useGetRuleIdsWithGaps({
+  const { data: totalRulesWithGaps } = useGetRuleIdsWithGaps({
     gapRange: gapSearchRange ?? defaultRangeValue,
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+  });
+  const { data: inProgressRulesWithGaps } = useGetRuleIdsWithGaps({
+    gapRange: gapSearchRange ?? defaultRangeValue,
+    statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+    hasInProgressIntervals: true,
   });
   const [isPopoverOpen, setPopover] = useState(false);
   const telemetry = useKibana().services.telemetry;
@@ -131,7 +137,13 @@ export const RulesWithGapsOverviewPanel = () => {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={data?.total === 0 ? 'success' : 'warning'}>{data?.total}</EuiBadge>
+              {inProgressRulesWithGaps && totalRulesWithGaps && (
+                <EuiToolTip position="bottom" content={i18n.RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT}>
+                  <EuiBadge color={totalRulesWithGaps?.total === 0 ? 'success' : 'warning'}>
+                    {totalRulesWithGaps?.total} {'/'} {inProgressRulesWithGaps?.total}
+                  </EuiBadge>
+                </EuiToolTip>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

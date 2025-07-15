@@ -24,3 +24,19 @@ xpack.spaces.maxSpaces: 1
 
 ## Content Connectors in stack management
 xpack.contentConnectors.enabled: false
+
+## Disable Kibana Product Intercept
+xpack.product_intercept.enabled: false
+
+# Elastic Managed LLM
+xpack.actions.preconfigured:
+  Elastic-Managed-LLM:
+    name: Elastic Managed LLM
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".rainbow-sprinkles-elastic"
+      providerConfig:
+        model_id: "rainbow-sprinkles"

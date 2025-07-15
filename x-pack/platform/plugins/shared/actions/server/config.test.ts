@@ -37,9 +37,6 @@ describe('config validation', () => {
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -83,9 +80,6 @@ describe('config validation', () => {
         },
         "preconfiguredAlertHistoryEsIndex": false,
         "responseTimeout": "PT1M",
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -224,9 +218,6 @@ describe('config validation', () => {
           "proxyVerificationMode": "none",
           "verificationMode": "none",
         },
-        "usage": Object {
-          "url": "https://usage-api.usage-api/api/v1/usage",
-        },
       }
     `);
   });
@@ -238,7 +229,7 @@ describe('config validation', () => {
 
     config.email = {};
     expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+      `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
     );
 
     config.email = { domain_allowlist: [] };
@@ -248,6 +239,103 @@ describe('config validation', () => {
     config.email = { domain_allowlist: ['a.com', 'b.c.com', 'd.e.f.com'] };
     result = configSchema.validate(config);
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
+  });
+
+  describe('email.recipient_allowlist', () => {
+    const config: Record<string, unknown> = {};
+    test('validates no email config at all', () => {
+      const result = configSchema.validate(config);
+      expect(result.email === undefined);
+    });
+
+    test('validates empty email config', () => {
+      config.email = {};
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist = null', () => {
+      config.email = { recipient_allowlist: null };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: expected value of type [array] but got [null]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist = []', () => {
+      config.email = { recipient_allowlist: [] };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.recipient_allowlist]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    test('validates email config with recipient_allowlist', () => {
+      config.email = {
+        recipient_allowlist: ['*.bar@a.com', 'foo.*@b.com', '*@d.e.f.com'],
+      };
+
+      const result = configSchema.validate(config);
+      expect(result.email?.recipient_allowlist).toEqual([
+        '*.bar@a.com',
+        'foo.*@b.com',
+        '*@d.e.f.com',
+      ]);
+    });
+  });
+
+  test('throws when domain_allowlist and recipient_allowlist are used at the same time', () => {
+    const config: Record<string, unknown> = {};
+    const result = configSchema.validate(config);
+    expect(result.email === undefined);
+
+    config.email = {
+      domain_allowlist: ['a.com'],
+      recipient_allowlist: ['*.bar@a.com'],
+    };
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+      `"[email]: email.domain_allowlist and email.recipient_allowlist can not be used at the same time"`
+    );
+  });
+
+  test('validates rate limiter connector name', () => {
+    let config: Record<string, unknown> = {
+      rateLimiter: { slack: { limit: 10, lookbackWindow: '1m' } },
+    };
+
+    expect(() => configSchema.validate(config)).toThrow(
+      'Rate limiter configuration for connector type "slack" is not supported. Supported types: email'
+    );
+
+    config = {
+      rateLimiter: { email: { limit: 10, lookbackWindow: '1m' } },
+    };
+
+    expect(configSchema.validate(config)).toMatchInlineSnapshot(`
+      Object {
+        "allowedHosts": Array [
+          "*",
+        ],
+        "enableFooterInEmail": true,
+        "enabledActionTypes": Array [
+          "*",
+        ],
+        "maxResponseContentLength": ByteSizeValue {
+          "valueInBytes": 1048576,
+        },
+        "microsoftExchangeUrl": "https://login.microsoftonline.com",
+        "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
+        "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
+        "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": false,
+        "rateLimiter": Object {
+          "email": Object {
+            "limit": 10,
+            "lookbackWindow": "1m",
+          },
+        },
+        "responseTimeout": "PT1M",
+      }
+    `);
   });
 
   test('validates xpack.actions.webhook', () => {
@@ -285,35 +373,35 @@ describe('config validation', () => {
     test('validates empty email config', () => {
       config.email = {};
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+        `"[email]: email.domain_allowlist, email.recipient_allowlist, or email.services must be defined"`
       );
     });
 
     test('validates email config with empty services', () => {
       config.email = { services: {} };
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+        `"[email.services]: email.services.enabled or email.services.ses must be defined"`
       );
     });
 
     test('validates email config with empty ses service', () => {
       config.email = { services: { ses: {} } };
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email]: Email configuration requires either domain_allowlist or services.ses to be specified"`
+        `"[email.services.ses.host]: expected value of type [string] but got [undefined]"`
       );
     });
 
     test('validates ses config with host only', () => {
       config.email = { services: { ses: { host: 'ses.host.com' } } };
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email]: Email configuration requires both services.ses.host and services.ses.port to be specified"`
+        `"[email.services.ses.port]: expected value of type [number] but got [undefined]"`
       );
     });
 
     test('validates ses config with port only', () => {
       config.email = { services: { ses: { port: 1 } } };
       expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email]: Email configuration requires both services.ses.host and services.ses.port to be specified"`
+        `"[email.services.ses.host]: expected value of type [string] but got [undefined]"`
       );
     });
 
@@ -321,6 +409,43 @@ describe('config validation', () => {
       config.email = { services: { ses: { host: 'ses.host.com', port: 1 } } };
       const result = configSchema.validate(config);
       expect(result.email?.services?.ses).toEqual({ host: 'ses.host.com', port: 1 });
+    });
+  });
+
+  describe('email.services.enabled', () => {
+    const config: Record<string, unknown> = {};
+    test('validates email config with empty enabled services', () => {
+      config.email = { services: { enabled: [] } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
+        `"[email.services.enabled]: array size is [0], but cannot be smaller than [1]"`
+      );
+    });
+
+    test('validates email config with enabled services', () => {
+      config.email = { services: { enabled: ['elastic-cloud', 'amazon-ses'] } };
+      const result = configSchema.validate(config);
+      expect(result.email?.services?.enabled).toEqual(['elastic-cloud', 'amazon-ses']);
+    });
+
+    test('validates email config with unexistend service', () => {
+      config.email = { services: { enabled: ['fake-service'] } };
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.services.enabled.0]: types that failed validation:
+        - [email.services.enabled.0.0]: expected value to equal [google-mail]
+        - [email.services.enabled.0.1]: expected value to equal [microsoft-exchange]
+        - [email.services.enabled.0.2]: expected value to equal [microsoft-outlook]
+        - [email.services.enabled.0.3]: expected value to equal [amazon-ses]
+        - [email.services.enabled.0.4]: expected value to equal [elastic-cloud]
+        - [email.services.enabled.0.5]: expected value to equal [other]
+        - [email.services.enabled.0.6]: expected value to equal [*]"
+      `);
+    });
+
+    test('validates enabled services but no ses service', () => {
+      config.email = { services: { enabled: ['google-mail', 'amazon-ses'] } };
+      const result = configSchema.validate(config);
+      expect(result.email?.services?.enabled).toEqual(['google-mail', 'amazon-ses']);
+      expect(result.email?.services?.ses).toBeUndefined();
     });
   });
 });

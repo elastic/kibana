@@ -30,6 +30,7 @@ interface CreateTestConfigOptions {
   customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
+  emailRecipientAllowlist?: string[];
   testFiles?: string[];
   reportName?: string;
   useDedicatedTaskRunner: boolean;
@@ -68,6 +69,7 @@ const enabledActionTypes = [
   '.tines',
   '.webhook',
   '.xmatters',
+  '.xsoar',
   '.torq',
   'test.sub-action-connector',
   'test.sub-action-connector-without-sub-actions',
@@ -216,6 +218,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostSsl = false,
     emailDomainsAllowed = undefined,
+    emailRecipientAllowlist = undefined,
     testFiles = undefined,
     reportName = undefined,
     useDedicatedTaskRunner,
@@ -287,9 +290,16 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
-    const emailSettings = emailDomainsAllowed
+    let emailSettings = emailDomainsAllowed
       ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
       : [];
+
+    emailSettings = emailRecipientAllowlist
+      ? [
+          ...emailSettings,
+          `--xpack.actions.email.recipient_allowlist=${JSON.stringify(emailRecipientAllowlist)}`,
+        ]
+      : emailSettings;
 
     const maxScheduledPerMinuteSettings =
       typeof maxScheduledPerMinute === 'number'

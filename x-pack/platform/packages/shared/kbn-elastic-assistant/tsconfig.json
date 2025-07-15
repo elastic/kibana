@@ -43,6 +43,7 @@
     "@kbn/shared-ux-router",
     "@kbn/datemath",
     "@kbn/alerts-ui-shared",
-    "@kbn/deeplinks-security"
+    "@kbn/deeplinks-security",
+    "@kbn/inference-common",
   ]
 }

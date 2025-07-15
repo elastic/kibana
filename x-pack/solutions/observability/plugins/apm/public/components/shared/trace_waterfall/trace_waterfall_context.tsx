@@ -11,6 +11,7 @@ import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
+import type { IWaterfallGetRelatedErrorsHref } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 interface TraceWaterfallContextProps {
   duration: number;
@@ -22,6 +23,9 @@ interface TraceWaterfallContextProps {
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   highlightedTraceId?: string;
+  scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  isEmbeddable: boolean;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -31,6 +35,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   margin: { left: 0, right: 0 },
   traceWaterfallMap: {},
   showAccordion: true,
+  isEmbeddable: false,
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -43,6 +48,9 @@ export function TraceWaterfallContextProvider({
   highlightedTraceId,
   onClick,
   onErrorClick,
+  scrollElement,
+  getRelatedErrorsHref,
+  isEmbeddable,
 }: {
   children: React.ReactNode;
   traceItems: TraceItem[];
@@ -50,6 +58,9 @@ export function TraceWaterfallContextProvider({
   highlightedTraceId?: string;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
+  scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  isEmbeddable: boolean;
 }) {
   const { duration, traceWaterfall, maxDepth, rootItem } = useTraceWaterfall({
     traceItems,
@@ -72,6 +83,9 @@ export function TraceWaterfallContextProvider({
         onClick,
         onErrorClick,
         highlightedTraceId,
+        scrollElement,
+        getRelatedErrorsHref,
+        isEmbeddable,
       }}
     >
       {children}

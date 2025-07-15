@@ -35,7 +35,7 @@ info:
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
   title: Kibana APIs
-  version: 1.0.2
+  version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/
@@ -126,6 +126,12 @@ tags:
   - description: Machine learning
     name: ml
     x-displayName: Machine learning
+  - description: Interact with the Observability AI Assistant resources.
+    externalDocs:
+      description: Observability AI Assistant
+      url: https://www.elastic.co/docs/solutions/observability/observability-ai-assistant
+    name: observability_ai_assistant
+    x-displayName: Observability AI Assistant
   - name: roles
     x-displayName: Roles
     description: Manage the roles that grant Elasticsearch and Kibana privileges.
@@ -168,7 +174,7 @@ tags:
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
-    x-displayName: Security endpoint exceptions
+    x-displayName: Security Elastic Endpoint exceptions
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
@@ -5953,7 +5959,7 @@ paths:
               deleteAgentConfigurationRequest1:
                 $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_delete_request1'
             schema:
-              $ref: '#/components/schemas/APM_UI_service_object'
+              $ref: '#/components/schemas/APM_UI_delete_service_object'
         required: true
       responses:
         '200':
@@ -10069,6 +10075,58 @@ paths:
                               timestamp: '2023-10-31T00:00:00.000Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
+              example27:
+                description: The following request set alert suppression to the rules with the specified IDs.
+                summary: Edit - Set alert suppression to rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_alert_suppression
+                      value:
+                        duration:
+                          unit: h
+                          value: 1
+                        group_by:
+                          - source.ip
+                        missing_fields_strategy: suppress
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example28:
+                description: The following request set alert suppression to threshold rules with the specified IDs.
+                summary: Edit - Set alert suppression to threshold rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_alert_suppression_for_threshold
+                      value:
+                        duration:
+                          unit: h
+                          value: 1
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example29:
+                description: The following request removes alert suppression from the rules with the specified IDs. If the rules do not have alert suppression, no changes are made.
+                summary: Edit - Removes alert suppression from rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: delete_alert_suppression
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example30:
+                description: The following request triggers the filling of gaps for the specified rule ids and time range
+                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
+                value:
+                  action: fill_gaps
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                    - 164d0918-f720-4c9f-9f5c-c5122587cf19
+                  run:
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteRules'
@@ -10077,6 +10135,7 @@ paths:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkExportRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDuplicateRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkManualRuleRun'
+                - $ref: '#/components/schemas/Security_Detections_API_BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkEditRules'
       responses:
         '200':
@@ -12248,7 +12307,7 @@ paths:
         - saved objects
   /api/endpoint_list:
     post:
-      description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
+      description: Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -12283,12 +12342,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list
+      summary: Create an Elastic Endpoint rule exception list
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
-      description: Delete an endpoint exception list item using the `id` or `item_id` field.
+      description: Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -12342,11 +12401,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Delete an endpoint exception list item
+      summary: Delete an Elastic Endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     get:
-      description: Get the details of an endpoint exception list item using the `id` or `item_id` field.
+      description: Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -12402,11 +12461,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get an endpoint exception list item
+      summary: Get an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     post:
-      description: Create an endpoint exception list item, and associate it with the endpoint exception list.
+      description: Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -12481,11 +12540,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list item
+      summary: Create an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     put:
-      description: Update an endpoint exception list item using the `id` or `item_id` field.
+      description: Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -12565,12 +12624,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Update an endpoint exception list item
+      summary: Update an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
-      description: Get a list of all endpoint exception list items.
+      description: Get a list of all Elastic Endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
         - description: |
@@ -12670,7 +12729,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get endpoint exception list items
+      summary: Get Elastic Endpoint exception list items
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint/action:
@@ -13278,10 +13337,44 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - status
+                  status:
+                    oneOf:
+                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+                      - enum:
+                          - not_found
+                        type: string
+                required:
+                  - status
           description: Successful response
       summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/privileges:
+    get:
+      description: Check if the current user has all required permissions for Privilege Monitoring
+      operationId: PrivMonPrivileges
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                has_all_required: true
+                privileges:
+                  elasticsearch:
+                    index:
+                      .entity_analytics.monitoring.user-default:
+                        read: true
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivileges'
+          description: Successful response
+      summary: Run a privileges check on Privilege Monitoring
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
@@ -13305,58 +13398,48 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      operationId: BulkUploadUsersCSV
+      operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
-          text/csv:
-            schema:
-              type: string
-        description: CSV file containing users to upsert
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  upserted_count:
-                    type: integer
-          description: Successful response
-      summary: Upsert multiple monitored users via CSV upload
-      tags:
-        - Security Entity Analytics API
-  /api/entity_analytics/monitoring/users/_json:
-    post:
-      operationId: BulkUploadUsersJSON
-      requestBody:
-        content:
-          text/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                users:
-                  items:
-                    type: object
-                    properties:
-                      is_monitored:
-                        type: boolean
-                      user_name:
-                        type: string
-                  type: array
-        description: JSON file containing users to upsert
-        required: true
+                file:
+                  description: The CSV file to upload.
+                  format: binary
+                  type: string
+              required:
+                - file
       responses:
         '200':
           content:
             application/json:
               schema:
+                example:
+                  errors:
+                    - index: 1
+                      message: Invalid monitored field
+                      username: john.doe
+                  stats:
+                    failed: 1
+                    successful: 1
+                    total: 2
                 type: object
                 properties:
-                  upserted_count:
-                    type: integer
-          description: Successful response
-      summary: Upsert multiple monitored users via JSON upload
+                  errors:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem'
+                    type: array
+                  stats:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivmonUserCsvUploadStats'
+                required:
+                  - errors
+                  - stats
+          description: Bulk upload successful
+        '413':
+          description: File too large
+      summary: Upsert multiple monitored users via CSV upload
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
@@ -13385,24 +13468,6 @@ paths:
                   - success
           description: User deleted successfully
       summary: Delete a monitored user
-      tags:
-        - Security Entity Analytics API
-    get:
-      operationId: GetPrivMonUser
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
-          description: User details retrieved
-      summary: Retrieve a monitored user by ID
       tags:
         - Security Entity Analytics API
     put:
@@ -13451,6 +13516,72 @@ paths:
       summary: List all monitored users
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/install:
+    post:
+      operationId: InstallPrivilegedAccessDetectionPackage
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Successful response
+      summary: Installs the privileged access detection package for the Entity Analytics privileged user monitoring experience
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/status:
+    get:
+      operationId: GetPrivilegedAccessDetectionPackageStatus
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        job_id:
+                          type: string
+                        state:
+                          enum:
+                            - closing
+                            - closed
+                            - opened
+                            - failed
+                            - opening
+                          type: string
+                      required:
+                        - job_id
+                        - state
+                    type: array
+                  ml_module_setup_status:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                  package_installation_status:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                required:
+                  - package_installation_status
+                  - ml_module_setup_status
+                  - jobs
+          description: Privileged access detection status retrieved
+      summary: Gets the status of the privileged access detection package for the Entity Analytics privileged user monitoring experience
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -13466,6 +13597,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -13488,10 +13620,14 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: The amount of time the transform looks back to calculate the aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: The initial page size to use for the composite aggregation of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -13594,7 +13730,7 @@ paths:
     post:
       operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine.
           in: path
           name: entityType
           required: true
@@ -13612,6 +13748,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -13630,10 +13767,14 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: The amount of time the transform looks back to calculate the aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: The initial page size to use for the composite aggregation of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -23623,7 +23764,7 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Update an agent
+      summary: Update an agent by ID
       tags:
         - Elastic Agents
   /api/fleet/agents/{agentId}/actions:
@@ -23766,109 +23907,6 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
-  /api/fleet/agents/{agentId}/migrate:
-    post:
-      description: 'Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
-      operationId: post-fleet-agents-agentid-migrate
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: agentId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                enrollment_token:
-                  type: string
-                settings:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    ca_sha256:
-                      type: string
-                    certificate_authorities:
-                      type: string
-                    elastic_agent_cert:
-                      type: string
-                    elastic_agent_cert_key:
-                      type: string
-                    elastic_agent_cert_key_passphrase:
-                      type: string
-                    headers:
-                      additionalProperties:
-                        type: string
-                      type: object
-                    insecure:
-                      type: boolean
-                    proxy_disabled:
-                      type: boolean
-                    proxy_headers:
-                      additionalProperties:
-                        type: string
-                      type: object
-                    proxy_url:
-                      type: string
-                    replace_token:
-                      type: boolean
-                    staging:
-                      type: boolean
-                    tags:
-                      items:
-                        type: string
-                      type: array
-                uri:
-                  format: uri
-                  type: string
-              required:
-                - uri
-                - enrollment_token
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Migrate a single agent
-      tags:
-        - Elastic Agents
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -43578,6 +43616,107 @@ paths:
       summary: Add or update a note
       tags:
         - Security Timeline API
+  /api/observability_ai_assistant/chat/complete:
+    post:
+      description: |
+        Create a new chat completion by using the Observability AI Assistant. 
+
+        The API returns the model's response based on the current conversation context. 
+
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: observability-ai-assistant-chat-complete
+      requestBody:
+        content:
+          application/json:
+            examples:
+              chatCompleteRequestExample:
+                $ref: '#/components/schemas/Observability_AI_Assistant_API_ChatCompleteRequestExample'
+            schema:
+              type: object
+              properties:
+                actions:
+                  items:
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Function'
+                  type: array
+                connectorId:
+                  description: A unique identifier for the connector.
+                  type: string
+                conversationId:
+                  description: A unique identifier for the conversation if you are continuing an existing conversation.
+                  type: string
+                disableFunctions:
+                  description: Flag indicating whether all function calls should be disabled for the conversation. If true, no calls to functions will be made.
+                  type: boolean
+                instructions:
+                  description: An array of instruction objects, which can be either simple strings or detailed objects.
+                  items:
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Instruction'
+                  type: array
+                messages:
+                  description: An array of message objects containing the conversation history.
+                  items:
+                    $ref: '#/components/schemas/Observability_AI_Assistant_API_Message'
+                  type: array
+                persist:
+                  description: Indicates whether the conversation should be saved to storage. If true, the conversation will be saved and will be available in Kibana.
+                  type: boolean
+                title:
+                  description: A title for the conversation.
+                  type: string
+              required:
+                - messages
+                - connectorId
+                - persist
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                chatCompleteResponseExample:
+                  $ref: '#/components/schemas/Observability_AI_Assistant_API_ChatCompleteResponseExample'
+              schema:
+                type: object
+          description: Successful response
+      summary: Generate a chat completion
+      tags:
+        - observability_ai_assistant
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl --request POST 'localhost:5601/api/observability_ai_assistant/chat/complete' -u <username>:<password> -H 'kbn-xsrf: true' -H "Content-Type: application/json" --data '
+            {
+            "connectorId": "<connectorId>",
+            "disableFunctions": false,
+              "messages": [
+                {
+                  "@timestamp": "2025-06-25T23:45:00.000Z",
+                  "message": {
+                    "role": "user",
+                    "content": "Is my Elasticsearch cluster healthy right now?"
+                  }
+                }
+              ],
+            "persist": false,
+            "actions": [
+              {
+                "name": "get_cluster_health",
+                "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+                "parameters": {
+                  "type": "object",
+                  "properties": {
+                    "includeShardStats": {
+                      "type": "boolean",
+                      "default": false
+                    }
+                  }
+                }
+              }
+            ],
+            "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
+            }'
+      x-state: Technical Preview
   /api/osquery/live_queries:
     get:
       description: Get a list of all live queries.
@@ -45265,6 +45404,63 @@ paths:
       tags:
         - Security AI Assistant API
   /api/security_ai_assistant/current_user/conversations:
+    delete:
+      description: This endpoint allows users to permanently delete all conversations.
+      operationId: DeleteAllConversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                excludedIds:
+                  description: Optional list of conversation IDs to delete.
+                  example:
+                    - abc123
+                    - def456
+                  items:
+                    type: string
+                  type: array
+        required: false
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                success: true
+              schema:
+                type: object
+                properties:
+                  failures:
+                    items:
+                      type: string
+                    type: array
+                  success:
+                    example: true
+                    type: boolean
+                  totalDeleted:
+                    example: 10
+                    type: number
+          description: Indicates a successful call. The conversations were deleted successfully.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    example: Bad Request
+                    type: string
+                  message:
+                    example: Invalid conversation ID
+                    type: string
+                  statusCode:
+                    example: 400
+                    type: number
+          description: Generic Error. This response indicates an issue with the request.
+      summary: Delete conversations
+      tags:
+        - Security AI Assistant API
     post:
       description: Create a new Security AI Assistant conversation. This endpoint allows the user to initiate a conversation with the Security AI Assistant by providing the required parameters.
       operationId: CreateConversation
@@ -47874,7 +48070,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -49206,7 +49401,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -50371,7 +50565,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -51556,7 +51749,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -52721,7 +52913,6 @@ paths:
                                     type: object
                                     properties:
                                       query:
-                                        minLength: 1
                                         type: string
                                     required:
                                       - query
@@ -55683,7 +55874,6 @@ paths:
                                     type: object
                                     properties:
                                       query:
-                                        minLength: 1
                                         type: string
                                     required:
                                       - query
@@ -55784,7 +55974,6 @@ paths:
                   type: object
                   properties:
                     query:
-                      minLength: 1
                       type: string
                   required:
                     - query
@@ -55813,13 +56002,11 @@ paths:
           name: from
           required: true
           schema:
-            format: date-time
             type: string
         - in: query
           name: to
           required: true
           schema:
-            format: date-time
             type: string
         - in: query
           name: bucketSize
@@ -55840,6 +56027,66 @@ paths:
                 - not: {}
       responses: {}
       summary: Read the significant events
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/significant_events/_preview:
+    post:
+      description: 'Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: post-streams-name-significant-events-preview
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: bucketSize
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                query:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    kql:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                      required:
+                        - query
+                  required:
+                    - kql
+              required:
+                - query
+      responses: {}
+      summary: Preview significant events
       tags:
         - streams
       x-state: Technical Preview
@@ -56817,6 +57064,69 @@ paths:
                 $ref: '#/components/schemas/Synthetics_getPrivateLocation'
           description: A successful response.
       summary: Get a private location
+      tags:
+        - synthetics
+    put:
+      description: |
+        Update an existing private location's label.
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+        When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+      operationId: put-private-location
+      parameters:
+        - description: The unique identifier of the private location to be updated.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putPrivateLocationRequestExample1:
+                description: Update a private location's label.
+                value: |-
+                  {
+                    "label": "Updated Private Location Name"
+                  }
+            schema:
+              type: object
+              properties:
+                label:
+                  description: A new label for the private location. Must be at least 1 character long.
+                  minLength: 1
+                  type: string
+              required:
+                - label
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "label": "Updated Private Location Name",
+                      "id": "test-private-location-id",
+                      "agentPolicyId": "test-private-location-id",
+                      "isServiceManaged": false,
+                      "isInvalid": false,
+                      "tags": ["private", "testing", "updated"],
+                      "geo": {
+                        "lat": 37.7749,
+                        "lon": -122.4194
+                      },
+                      "spaces": ["*"]
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+          description: A successful response.
+        '400':
+          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+        '404':
+          description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
+      summary: Update a private location
       tags:
         - synthetics
   /api/task_manager/_health:
@@ -63977,6 +64287,14 @@ components:
         result:
           description: Result
           type: string
+    APM_UI_delete_service_object:
+      description: Service
+      type: object
+      properties:
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+      required:
+        - service
     APM_UI_search_agent_configuration_object:
       type: object
       properties:
@@ -66549,6 +66867,134 @@ components:
           $ref: '#/components/schemas/Machine_learning_APIs_mlSyncResponseSuccess'
       title: Sync API response for trained models
       type: object
+    Observability_AI_Assistant_API_ChatCompleteRequestExample:
+      summary: Example of completing a chat interaction
+      value: |
+        {
+          "connectorId": "<connectorId>",
+          "disableFunctions": false,
+          "messages": [
+            {
+              "@timestamp": "2025-06-25T23:45:00.000Z",
+              "message": {
+                "role": "user",
+                "content": "Is my Elasticsearch cluster healthy right now?"
+              }
+            }
+          ],
+          "persist": false,
+          "actions": [
+            {
+              "name": "get_cluster_health",
+              "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "includeShardStats": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            }
+          ],
+          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
+        }
+    Observability_AI_Assistant_API_ChatCompleteResponseExample:
+      summary: Get a chat completion from the Observability AI Assistant
+      value: |
+        data: {"model":"unknown","choices":[{"delta":{"content":"","function_call":{"name":"get_cluster_health","arguments":"{\"includeShardStats\":true}"}},"finish_reason":null,"index":0}],"created":1750936626911,"id":"9c8eff9b-4fd4-4203-a4ab-2e364688deff","object":"chat.completion.chunk"}
+
+        data: [DONE]
+    Observability_AI_Assistant_API_Function:
+      type: object
+      properties:
+        description:
+          description: The description of the function.
+          type: string
+        name:
+          description: The name of the function.
+          type: string
+        parameters:
+          description: The parameters of the function.
+          type: object
+    Observability_AI_Assistant_API_FunctionCall:
+      description: Details of the function call within the message.
+      type: object
+      properties:
+        arguments:
+          description: The arguments for the function call.
+          type: string
+        name:
+          description: The name of the function.
+          type: string
+        trigger:
+          description: The trigger of the function call.
+          enum:
+            - assistant
+            - user
+            - elastic
+          type: string
+      required:
+        - name
+        - trigger
+    Observability_AI_Assistant_API_Instruction:
+      oneOf:
+        - description: A simple instruction represented as a string.
+          type: string
+        - description: A detailed instruction with an ID and text.
+          type: object
+          properties:
+            id:
+              description: A unique identifier for the instruction.
+              type: string
+            text:
+              description: The text of the instruction.
+              type: string
+          required:
+            - id
+            - text
+    Observability_AI_Assistant_API_Message:
+      name: Message
+      type: object
+      properties:
+        '@timestamp':
+          description: The timestamp when the message was created.
+          type: string
+        message:
+          description: The main content of the message.
+          type: object
+          properties:
+            content:
+              description: The content of the message.
+              type: string
+            data:
+              description: Additional data associated with the message.
+              type: string
+            event:
+              description: The event related to the message.
+              type: string
+            function_call:
+              $ref: '#/components/schemas/Observability_AI_Assistant_API_FunctionCall'
+            name:
+              description: The name associated with the message.
+              type: string
+            role:
+              $ref: '#/components/schemas/Observability_AI_Assistant_API_MessageRoleEnum'
+          required:
+            - role
+      required:
+        - '@timestamp'
+        - message
+    Observability_AI_Assistant_API_MessageRoleEnum:
+      description: The role of the message sender.
+      enum:
+        - system
+        - assistant
+        - function
+        - user
+        - elastic
+      type: string
     Saved_objects_400_response:
       title: Bad request
       type: object
@@ -68369,6 +68815,21 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSchedule'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppression'
+    Security_Detections_API_BulkActionEditPayloadAlertSuppression:
+      anyOf:
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSetAlertSuppression'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression'
+    Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - delete_alert_suppression
+          type: string
+      required:
+        - type
     Security_Detections_API_BulkActionEditPayloadIndexPatterns:
       description: |
         Edits index patterns of rulesClient.
@@ -68474,6 +68935,30 @@ components:
       required:
         - type
         - value
+    Security_Detections_API_BulkActionEditPayloadSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_AlertSuppression'
+      required:
+        - type
+        - value
+    Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression_for_threshold
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_ThresholdAlertSuppression'
+      required:
+        - type
+        - value
     Security_Detections_API_BulkActionEditPayloadTags:
       description: |
         Edits tags of rules.
@@ -68527,6 +69012,9 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+        - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
+        - RULE_FILL_GAPS_DISABLED_RULE
       type: string
     Security_Detections_API_BulkActionSkipResult:
       type: object
@@ -68536,7 +69024,9 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
+          oneOf:
+            - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
       required:
         - id
         - skip_reason
@@ -68778,6 +69268,48 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkGapsFillingSkipReason:
+      enum:
+        - NO_GAPS_TO_FILL
+      type: string
+    Security_Detections_API_BulkManualRuleFillGaps:
+      type: object
+      properties:
+        action:
+          enum:
+            - fill_gaps
+          type: string
+        fill_gaps:
+          description: Object that describes applying a manual gap fill action for the specified time range.
+          type: object
+          properties:
+            end_date:
+              description: End date of the manual gap fill
+              type: string
+            start_date:
+              description: Start date of the manual gap fill
+              type: string
+          required:
+            - start_date
+            - end_date
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
+        ids:
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules.
+          type: string
+      required:
+        - action
+        - fill_gaps
     Security_Detections_API_BulkManualRuleRun:
       type: object
       properties:
@@ -74197,7 +74729,7 @@ components:
       example: This list tracks allowlisted values.
       type: string
     Security_Endpoint_Exceptions_API_ExceptionListHumanId:
-      description: Exception list's human readable string identifier, e.g. `trusted-linux-processes`.
+      description: The exception list's human readable string identifier, `endpoint_list`.
       example: simple_list
       format: nonempty
       minLength: 1
@@ -76098,6 +76630,40 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_GenericEntity'
+    Security_Entity_Analytics_API_EntityAnalyticsPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        has_read_permissions:
+          type: boolean
+        has_write_permissions:
+          type: boolean
+        privileges:
+          type: object
+          properties:
+            elasticsearch:
+              type: object
+              properties:
+                cluster:
+                  additionalProperties:
+                    type: boolean
+                  type: object
+                index:
+                  additionalProperties:
+                    additionalProperties:
+                      type: boolean
+                    type: object
+                  type: object
+            kibana:
+              additionalProperties:
+                type: boolean
+              type: object
+          required:
+            - elasticsearch
+      required:
+        - has_all_required
+        - privileges
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -76351,14 +76917,6 @@ components:
         labels:
           type: object
           properties:
-            monitoring:
-              type: object
-              properties:
-                privileged_users:
-                  enum:
-                    - monitored
-                    - deleted
-                  type: string
             source_indices:
               items:
                 type: string
@@ -76377,6 +76935,9 @@ components:
         user:
           type: object
           properties:
+            is_privileged:
+              description: Indicates if the user is privileged.
+              type: boolean
             name:
               type: string
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
@@ -76387,6 +76948,34 @@ components:
       required:
         - type
         - status
+    Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
+      type: object
+      properties:
+        index:
+          nullable: true
+          type: integer
+        message:
+          type: string
+        username:
+          nullable: true
+          type: string
+      required:
+        - message
+        - index
+        - username
+    Security_Entity_Analytics_API_PrivmonUserCsvUploadStats:
+      type: object
+      properties:
+        failed:
+          type: integer
+        successful:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -76759,7 +77348,7 @@ components:
       example: This list tracks allowlisted values.
       type: string
     Security_Exceptions_API_ExceptionListHumanId:
-      description: Exception list's human readable string identifier, e.g. `trusted-linux-processes`.
+      description: The exception list's human readable string identifier, `endpoint_list`.
       example: simple_list
       format: nonempty
       minLength: 1
@@ -80901,7 +81490,7 @@ components:
         defaultModel:
           type: string
           description: The generative artificial intelligence model for Google Gemini to use.
-          default: gemini-1.5-pro-002
+          default: gemini-2.5-pro
         gcpRegion:
           type: string
           description: The GCP region where the Vertex AI endpoint enabled.

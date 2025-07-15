@@ -26,7 +26,7 @@ export function RequiredFieldsHelpInfo(): JSX.Element {
 
   const button = (
     <EuiButtonIcon
-      iconType="questionInCircle"
+      iconType="question"
       onClick={togglePopover}
       aria-label={i18n.OPEN_HELP_POPOVER_ARIA_LABEL}
     />
@@ -34,7 +34,7 @@ export function RequiredFieldsHelpInfo(): JSX.Element {
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={togglePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
+      <EuiText css={{ width: POPOVER_WIDTH }} size="s">
         <FormattedMessage
           id="xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.fieldRequiredFieldsHelpText"
           defaultMessage="Create an informational list of fields and data types this rule needs to function. Select fields in the rule's {source} index patterns or data view, or type in custom fields."

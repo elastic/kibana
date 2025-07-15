@@ -1,6 +1,6 @@
 # MV_AVG
 
-The MV_AVG function calculates the average of all values in a multivalued field and returns a single value.
+Converts a multivalued field into a single-valued field containing the average of all its values.
 
 ## Syntax
 
@@ -8,7 +8,7 @@ The MV_AVG function calculates the average of all values in a multivalued field 
 
 ### Parameters
 
-#### number
+#### `number`
 
 A multivalued expression.
 
@@ -19,8 +19,11 @@ ROW a=[3, 5, 1, 6]
 | EVAL avg_a = MV_AVG(a)
 ```
 
-**Retrieving the average value from a multivalued field**
+Calculate the average of the values in the multivalued column `a`.
+
 ```esql
 FROM bag_of_numbers
 | EVAL min = MV_AVG(numbers)
 ```
+
+Retrieve the average value from a multivalued field

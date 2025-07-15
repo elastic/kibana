@@ -37,6 +37,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           '--serverless=security',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'bulkEditAlertSuppressionEnabled',
+          ])}`,
           ...(options.kbnTestServerArgs || []),
           `--plugin-path=${path.resolve(
             __dirname,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './data_table.scss';
@@ -47,8 +47,10 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
-import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
+import {
+  type InTableSearchRestorableState,
+  useDataGridInTableSearch,
+} from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
@@ -96,6 +98,7 @@ import {
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
+import { withRestorableState, useRestorableState, useRestorableRef } from '../restorable_state';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
@@ -115,7 +118,7 @@ export enum DataLoadingState {
 /**
  * Unified Data Table props
  */
-export interface UnifiedDataTableProps {
+interface InternalUnifiedDataTableProps {
   /**
    * Determines which element labels the grid for ARIA
    */
@@ -393,10 +396,6 @@ export interface UnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
-   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
-   */
-  additionalFieldGroups?: AdditionalFieldGroups;
-  /**
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -443,7 +442,7 @@ export interface UnifiedDataTableProps {
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
-export const UnifiedDataTable = ({
+const InternalUnifiedDataTable = ({
   ariaLabelledBy,
   columns,
   columnsMeta,
@@ -501,7 +500,6 @@ export const UnifiedDataTable = ({
   externalAdditionalControls,
   rowsPerPageOptions,
   externalCustomRenderers,
-  additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
@@ -515,12 +513,12 @@ export const UnifiedDataTable = ({
   dataGridDensityState,
   onUpdateDataGridDensity,
   onUpdatePageIndex,
-}: UnifiedDataTableProps) => {
+}: InternalUnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [isFilterActive, setIsFilterActive] = useState(false);
-  const [isCompareActive, setIsCompareActive] = useState(false);
+  const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
+  const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
@@ -541,7 +539,9 @@ export const UnifiedDataTable = ({
     docIdsInSelectionOrder,
   } = selectedDocsState;
 
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = useRestorableState('pageIndex', 0);
+  const currentPageIndexRef = useRef<number>(currentPageIndex);
+  currentPageIndexRef.current = currentPageIndex;
 
   const changeCurrentPageIndex = useCallback(
     (value: number) => {
@@ -644,14 +644,12 @@ export const UnifiedDataTable = ({
      * to the consumer.
      *
      */
-    setCurrentPageIndex((previousPageIndex: number) => {
-      const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
-      if (calculatedPageIndex !== previousPageIndex) {
-        onUpdatePageIndex?.(calculatedPageIndex);
-      }
-      return calculatedPageIndex;
-    });
-  }, [onUpdatePageIndex, pageCount]);
+    const previousPageIndex = currentPageIndexRef.current;
+    const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
+    if (calculatedPageIndex !== previousPageIndex) {
+      changeCurrentPageIndex(calculatedPageIndex);
+    }
+  }, [pageCount, changeCurrentPageIndex]);
 
   const paginationObj = useMemo(() => {
     const onChangeItemsPerPage = (pageSize: number) => {
@@ -759,6 +757,14 @@ export const UnifiedDataTable = ({
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
+  const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);
+  const onInTableSearchInitialStateChange = useCallback(
+    (newState: InTableSearchRestorableState) => {
+      inTableSearchLatestStateRef.current = newState;
+    },
+    [inTableSearchLatestStateRef]
+  );
+
   const {
     inTableSearchTermCss,
     inTableSearchControl,
@@ -773,6 +779,8 @@ export const UnifiedDataTable = ({
     renderCellValue,
     cellContext,
     pagination: paginationObj,
+    initialState: inTableSearchLatestStateRef.current,
+    onInitialStateChange: onInTableSearchInitialStateChange,
   });
 
   const renderCustomPopover = useMemo(
@@ -1028,21 +1036,22 @@ export const UnifiedDataTable = ({
 
     return leftControls;
   }, [
-    selectedDocsCount,
-    selectedDocsState,
     externalAdditionalControls,
+    selectedDocsCount,
+    inTableSearchControl,
     isPlainRecord,
     isFilterActive,
-    setIsFilterActive,
-    enableComparisonMode,
     rows,
+    selectedDocsState,
+    enableComparisonMode,
+    setIsFilterActive,
+    setIsCompareActive,
     fieldFormats,
     unifiedDataTableContextValue.pageIndex,
     unifiedDataTableContextValue.pageSize,
     toastNotifications,
     visibleColumns,
     renderCustomToolbar,
-    inTableSearchControl,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
@@ -1264,7 +1273,6 @@ export const UnifiedDataTable = ({
               dataView={dataView}
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
-              additionalFieldGroups={additionalFieldGroups}
               selectedDocIds={docIdsInSelectionOrder}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
@@ -1346,3 +1354,7 @@ export const UnifiedDataTable = ({
     </UnifiedDataTableContext.Provider>
   );
 };
+
+export const UnifiedDataTable = withRestorableState(InternalUnifiedDataTable);
+
+export type UnifiedDataTableProps = ComponentProps<typeof UnifiedDataTable>;

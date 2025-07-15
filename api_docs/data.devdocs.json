@@ -9525,7 +9525,7 @@
           },
           "; history: ",
           "SearchRequest",
-          "<Record<string, any>>[]; destroy: () => void; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
+          "<Record<string, any>>[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9703,7 +9703,7 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; loadDataViewFields: (dataView: ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -9837,15 +9837,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; refreshInterval?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.RefreshInterval",
-            "text": "RefreshInterval"
-          },
-          " | undefined; filters?: ",
+          " | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -9884,9 +9876,9 @@
         "label": "RefreshInterval",
         "description": [],
         "signature": [
-          "{ pause: boolean; value: number; }"
+          "{ readonly value: number; readonly pause: boolean; }"
         ],
-        "path": "src/platform/plugins/shared/data/common/query/timefilter/types.ts",
+        "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11598,10 +11590,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "graph",
-              "path": "x-pack/platform/plugins/private/graph/public/plugin.ts"
-            },
-            {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/data_view_select.tsx"
             },
@@ -11620,6 +11608,10 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
+            },
+            {
+              "plugin": "graph",
+              "path": "x-pack/platform/plugins/private/graph/public/plugin.ts"
             },
             {
               "plugin": "inputControlVis",
@@ -25538,6 +25530,21 @@
           "unknown"
         ],
         "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.RefreshInterval",
+        "type": "Type",
+        "tags": [],
+        "label": "RefreshInterval",
+        "description": [],
+        "signature": [
+          "{ readonly value: number; readonly pause: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-service-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

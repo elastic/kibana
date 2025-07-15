@@ -22,7 +22,7 @@ export const EmptyPolicyNameHint = () => (
     {'- '}
     <EuiToolTip content={EMPTY_POLICY_NAME_HINT}>
       <EuiIcon
-        type="questionInCircle"
+        type="question"
         color="subdued"
         aria-label={EMPTY_POLICY_NAME_HINT}
         data-test-subj="emptyPolicyNameHint"

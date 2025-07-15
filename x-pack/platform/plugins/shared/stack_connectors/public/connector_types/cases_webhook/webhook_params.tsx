@@ -244,7 +244,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
             <EuiCallOut
               title={CREATE_COMMENT_WARNING_TITLE}
               color="warning"
-              iconType="help"
+              iconType="question"
               size="s"
             >
               <p>{CREATE_COMMENT_WARNING_DESC}</p>

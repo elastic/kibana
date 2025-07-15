@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import {
   getTraceWaterfall,
@@ -12,6 +13,7 @@ import {
   getTraceParentChildrenMap,
   getTraceWaterfallDuration,
   getClockSkew,
+  getServiceLegends,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -21,45 +23,46 @@ jest.mock('@elastic/eui', () => ({
   }),
 }));
 
+const root: TraceItem = {
+  id: '1',
+  timestampUs: new Date('2024-01-01T00:00:00.000Z').getTime() * 1000,
+  name: 'root',
+  traceId: 't1',
+  duration: 1000,
+  serviceName: 'svcA',
+};
+const child1: TraceItem = {
+  id: '2',
+  parentId: '1',
+  timestampUs: new Date('2024-01-01T00:00:00.500Z').getTime() * 1000,
+  name: 'child1',
+  traceId: 't1',
+  duration: 400,
+  serviceName: 'svcB',
+};
+const child2: TraceItem = {
+  id: '3',
+  parentId: '1',
+  timestampUs: new Date('2024-01-01T00:00:00.800Z').getTime() * 1000,
+  name: 'child2',
+  traceId: 't1',
+  duration: 100,
+  serviceName: 'svcC',
+};
+const grandchild: TraceItem = {
+  id: '4',
+  parentId: '2',
+  timestampUs: new Date('2024-01-01T00:00:01.000Z').getTime() * 1000,
+  name: 'grandchild',
+  traceId: 't1',
+  duration: 50,
+  serviceName: 'svcD',
+};
+
 describe('getFlattenedTraceWaterfall', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
-  const root: TraceItem = {
-    id: '1',
-    timestamp: '2024-01-01T00:00:00.000Z',
-    name: 'root',
-    traceId: 't1',
-    duration: 1000,
-    serviceName: 'svcA',
-  };
-  const child1: TraceItem = {
-    id: '2',
-    parentId: '1',
-    timestamp: '2024-01-01T00:00:00.500Z',
-    name: 'child1',
-    traceId: 't1',
-    duration: 400,
-    serviceName: 'svcB',
-  };
-  const child2: TraceItem = {
-    id: '3',
-    parentId: '1',
-    timestamp: '2024-01-01T00:00:00.800Z',
-    name: 'child2',
-    traceId: 't1',
-    duration: 100,
-    serviceName: 'svcC',
-  };
-  const grandchild: TraceItem = {
-    id: '4',
-    parentId: '2',
-    timestamp: '2024-01-01T00:00:01.000Z',
-    name: 'grandchild',
-    traceId: 't1',
-    duration: 50,
-    serviceName: 'svcD',
-  };
 
   const parentChildMap = {
     root: [root],
@@ -134,9 +137,9 @@ describe('getServiceColors', () => {
   });
   it('assigns a unique color to each serviceName', () => {
     const traceItems: TraceItem[] = [
-      { id: '1', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcB' },
-      { id: '3', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcC' },
+      { id: '1', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
+      { id: '2', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcB' },
+      { id: '3', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcC' },
     ];
 
     const result = getServiceColors(traceItems);
@@ -149,9 +152,9 @@ describe('getServiceColors', () => {
 
   it('handles duplicate service names gracefully', () => {
     const traceItems: TraceItem[] = [
-      { id: '1', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcA' },
-      { id: '3', timestamp: '', name: '', traceId: '', duration: 1, serviceName: 'svcB' },
+      { id: '1', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
+      { id: '2', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcA' },
+      { id: '3', timestampUs: 0, name: '', traceId: '', duration: 1, serviceName: 'svcB' },
     ];
 
     const result = getServiceColors(traceItems);
@@ -169,7 +172,7 @@ describe('getServiceColors', () => {
   it('rotates the palette if there are more than 10 unique services', () => {
     const traceItems: TraceItem[] = Array.from({ length: 15 }, (_, i) => ({
       id: `${i}`,
-      timestamp: '',
+      timestampUs: 0,
       name: '',
       traceId: '',
       duration: 1,
@@ -191,10 +194,10 @@ describe('getTraceMap', () => {
   });
   it('maps root and children correctly', () => {
     const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      { id: '1', timestampUs: 0, name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
       {
         id: '2',
-        timestamp: '',
+        timestampUs: 0,
         name: 'child1',
         traceId: 't1',
         duration: 50,
@@ -203,7 +206,7 @@ describe('getTraceMap', () => {
       },
       {
         id: '3',
-        timestamp: '',
+        timestampUs: 0,
         name: 'child2',
         traceId: 't1',
         duration: 30,
@@ -212,7 +215,7 @@ describe('getTraceMap', () => {
       },
       {
         id: '4',
-        timestamp: '',
+        timestampUs: 0,
         name: 'grandchild',
         traceId: 't1',
         duration: 10,
@@ -233,7 +236,7 @@ describe('getTraceMap', () => {
 
   it('returns only root if there are no children', () => {
     const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      { id: '1', timestampUs: 0, name: 'root', traceId: 't1', duration: 100, serviceName: 'svcA' },
     ];
 
     const result = getTraceParentChildrenMap(items);
@@ -244,8 +247,8 @@ describe('getTraceMap', () => {
 
   it('handles multiple roots (should only keep the last as root)', () => {
     const items: TraceItem[] = [
-      { id: '1', timestamp: '', name: 'root1', traceId: 't1', duration: 100, serviceName: 'svcA' },
-      { id: '2', timestamp: '', name: 'root2', traceId: 't1', duration: 100, serviceName: 'svcB' },
+      { id: '1', timestampUs: 0, name: 'root1', traceId: 't1', duration: 100, serviceName: 'svcA' },
+      { id: '2', timestampUs: 0, name: 'root2', traceId: 't1', duration: 100, serviceName: 'svcB' },
     ];
 
     const result = getTraceParentChildrenMap(items);
@@ -267,7 +270,7 @@ describe('getTraceWaterfallDuration', () => {
     const items: TraceWaterfallItem[] = [
       {
         id: '1',
-        timestamp: '',
+        timestampUs: 0,
         name: '',
         traceId: '',
         duration: 100,
@@ -279,7 +282,7 @@ describe('getTraceWaterfallDuration', () => {
       },
       {
         id: '2',
-        timestamp: '',
+        timestampUs: 0,
         name: '',
         traceId: '',
         duration: 50,
@@ -291,7 +294,7 @@ describe('getTraceWaterfallDuration', () => {
       },
       {
         id: '3',
-        timestamp: '',
+        timestampUs: 0,
         name: '',
         traceId: '',
         duration: 30,
@@ -315,7 +318,7 @@ describe('getclockSkew', () => {
     jest.clearAllMocks();
   });
   const parent = {
-    timestamp: '2024-01-01T00:00:00.000Z',
+    timestampUs: new Date('2024-01-01T00:00:00.000Z').getTime() * 1000,
     duration: 1000,
     skew: 0,
   } as unknown as TraceWaterfallItem;
@@ -338,7 +341,7 @@ describe('getclockSkew', () => {
     const result = getClockSkew({
       itemTimestamp: new Date('2024-01-01T00:00:00.000Z').getTime() * 1000,
       itemDuration: 500,
-      parent: { ...parent, timestamp: '2024-01-01T00:00:01.000Z' },
+      parent: { ...parent, timestampUs: new Date('2024-01-01T00:00:01.000Z').getTime() * 1000 },
     });
     expect(result).toBe(1000250);
   });
@@ -346,7 +349,7 @@ describe('getclockSkew', () => {
   it('latency is never negative', () => {
     const parentWithSkew = {
       ...parent,
-      timestamp: '2024-01-01T00:00:01.000Z',
+      timestampUs: new Date('2024-01-01T00:00:01.000Z').getTime() * 1000,
       duration: 400,
       skew: 0,
     } as unknown as TraceWaterfallItem;
@@ -361,7 +364,7 @@ describe('getclockSkew', () => {
   it('uses parent.skew in parentStart calculation', () => {
     const parentWithSkew = {
       ...parent,
-      timestamp: '2024-01-01T00:00:01.000Z',
+      timestampUs: new Date('2024-01-01T00:00:01.000Z').getTime() * 1000,
       skew: 100,
     } as unknown as TraceWaterfallItem;
 
@@ -371,5 +374,36 @@ describe('getclockSkew', () => {
       parent: parentWithSkew,
     });
     expect(result).toBe(1000350);
+  });
+});
+
+describe('getWaterfallLegends', () => {
+  it('should generate waterfall legends without duplicates', () => {
+    const traceItems: TraceItem[] = [root, root, child1, child2, grandchild];
+
+    const waterfallLegends = getServiceLegends(traceItems);
+
+    expect(waterfallLegends).toEqual([
+      {
+        type: WaterfallLegendType.ServiceName,
+        value: traceItems[0].serviceName,
+        color: 'color0',
+      },
+      {
+        type: WaterfallLegendType.ServiceName,
+        value: traceItems[2].serviceName,
+        color: 'color1',
+      },
+      {
+        type: WaterfallLegendType.ServiceName,
+        value: traceItems[3].serviceName,
+        color: 'color2',
+      },
+      {
+        type: WaterfallLegendType.ServiceName,
+        value: traceItems[4].serviceName,
+        color: 'color3',
+      },
+    ]);
   });
 });

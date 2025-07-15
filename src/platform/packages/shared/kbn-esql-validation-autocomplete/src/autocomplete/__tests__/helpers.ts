@@ -8,29 +8,32 @@
  */
 
 import { camelCase } from 'lodash';
-import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '../../definitions/all_operators';
-import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
-import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
-  FunctionDefinitionTypes,
-  Location,
-  getLocationFromCommandOrOptionName,
-} from '../../definitions/types';
-import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
-import * as autocomplete from '../autocomplete';
-import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLFieldWithMetadata } from '../../validation/types';
-import {
-  FieldType,
+  TRIGGER_SUGGESTION_COMMAND,
+  timeUnitsToSuggest,
   fieldTypes,
+  FieldType,
+  SupportedDataType,
   FunctionParameterType,
   FunctionReturnType,
-  SupportedDataType,
-} from '../../definitions/types';
+  FunctionDefinitionTypes,
+} from '@kbn/esql-ast';
+import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
+import {
+  Location,
+  ESQLFieldWithMetadata,
+  ISuggestionItem,
+} from '@kbn/esql-ast/src/commands_registry/types';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
+import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
+import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
+import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
+import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
+import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
+import { getLocationFromCommandOrOptionName } from '../../shared/types';
+import * as autocomplete from '../autocomplete';
+import type { ESQLCallbacks } from '../../shared/types';
+import type { EditorContext } from '../types';
 import {
   joinIndices,
   timeseriesIndices,
@@ -48,7 +51,7 @@ export interface Integration {
   }>;
 }
 
-export type PartialSuggestionWithText = Partial<SuggestionRawDefinition> & { text: string };
+export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
 
 export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
   text: '',
@@ -147,6 +150,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -155,6 +159,7 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -175,6 +180,9 @@ export function getFunctionSignaturesByReturnType(
   // eval functions (eval is a special keyword in JS)
   if (scalar) {
     list.push(...scalarFunctionDefinitions);
+  }
+  if (timeseriesAgg) {
+    list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (operators) {
     list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
@@ -267,11 +275,6 @@ export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]
   return [];
 }
 
-export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType[]) {
-  const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
-  return requestedType.includes('date') ? [TIME_PICKER_SUGGESTION, ...TIME_SYSTEM_PARAMS] : [];
-}
-
 export function createCustomCallbackMocks(
   /**
    * Columns that will come from Elasticsearch since the last command
@@ -313,9 +316,10 @@ export function createCustomCallbackMocks(
       if (queryString.includes('logs*')) {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
+          recommendedFields: editorExtensions.recommendedFields,
         };
       }
-      return { recommendedQueries: [] };
+      return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
   };
@@ -347,10 +351,16 @@ export type AssertSuggestionsFn = (
   opts?: SuggestOptions
 ) => Promise<void>;
 
-export type SuggestFn = (
+export type AssertSuggestionOrderFn = (
+  // query to test
   query: string,
-  opts?: SuggestOptions
-) => Promise<SuggestionRawDefinition[]>;
+  // field name to check the order of
+  fieldName: string,
+  // expected order of the field
+  order: string
+) => Promise<void>;
+
+export type SuggestFn = (query: string, opts?: SuggestOptions) => Promise<ISuggestionItem[]>;
 
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
@@ -396,10 +406,25 @@ export const setup = async (caret = '/') => {
     }
   };
 
+  const assertSuggestionsOrder: AssertSuggestionOrderFn = async (query, fieldName, order) => {
+    try {
+      const result = await suggest(query);
+      const resultField = result.find((s) => s.text === fieldName);
+      expect(resultField).toBeDefined();
+      expect(resultField?.sortText).toBeDefined();
+      expect(resultField?.sortText).toEqual(order);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed query\n-------------\n${query}`);
+      throw error;
+    }
+  };
+
   return {
     callbacks,
     suggest,
     assertSuggestions,
+    assertSuggestionsOrder,
   };
 };
 

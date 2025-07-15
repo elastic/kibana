@@ -652,7 +652,7 @@
         "label": "SupportedPytorchTasksType",
         "description": [],
         "signature": [
-          "\"text_embedding\" | \"ner\" | \"text_expansion\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
+          "\"text_embedding\" | \"text_expansion\" | \"ner\" | \"question_answering\" | \"zero_shot_classification\" | \"text_classification\" | \"fill_mask\""
         ],
         "path": "x-pack/platform/packages/shared/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

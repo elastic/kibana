@@ -32,6 +32,13 @@
         "shard_count",
         "failed_shard_count"
       ],
+      "state": [
+        "IN_PROGRESS",
+        "SUCCESS",
+        "FAILED",
+        "PARTIAL",
+        "INCOMPATIBLE"
+      ],
       "verbose": "__flag__"
     },
     "methods": [

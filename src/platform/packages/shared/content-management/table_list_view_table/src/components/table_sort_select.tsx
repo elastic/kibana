@@ -140,7 +140,7 @@ export function TableSortSelect({
               color="inherit"
               iconProps={{ style: { verticalAlign: 'text-bottom', marginLeft: 2 } }}
               css={{ textWrap: 'balance' }}
-              type={'questionInCircle'}
+              type={'question'}
               content={i18n.translate(
                 'contentManagement.tableList.listing.tableSortSelect.recentlyAccessedTip',
                 {

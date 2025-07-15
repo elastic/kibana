@@ -1,6 +1,6 @@
 # LTRIM
 
-The LTRIM function is used to remove leading whitespaces from a string.
+Removes leading whitespaces from a string.
 
 ## Syntax
 
@@ -8,9 +8,9 @@ The LTRIM function is used to remove leading whitespaces from a string.
 
 ### Parameters
 
-#### string
+#### `string`
 
-This is the string expression from which you want to remove leading whitespaces. If the string is `null`, the function will return `null`.
+String expression. If `null`, the function returns `null`.
 
 ## Examples
 
@@ -22,8 +22,4 @@ ROW message = "   some text  ",  color = " red "
 | EVAL color = CONCAT("'", color, "'")
 ```
 
-```esql
-ROW text = "   example text  "
-| EVAL trimmed_text = LTRIM(text)
-| EVAL formatted_text = CONCAT("Trimmed: '", trimmed_text, "'")
-```
+This example removes leading whitespaces from the `message` and `color` columns, then wraps the resulting strings in single quotes.
