@@ -175,6 +175,11 @@ export interface CodeEditorProps {
    * this prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions.
    */
   customContextMenuActions?: ContextMenuAction[];
+
+  /**
+   * Optional html id for accessibility labeling
+   */
+  htmlId?: string;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -210,6 +215,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   classNameCss,
   enableCustomContextMenu = false,
   customContextMenuActions = [],
+  htmlId,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -298,7 +304,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         })}
       </strong>
     );
-
     return (
       <EuiToolTip
         data-test-subj="codeEditorAccessibilityOverlay"
@@ -346,7 +351,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 display: none;
               `,
           ]}
-          id={htmlIdGenerator('codeEditor')()}
+          id={htmlId ?? htmlIdGenerator('codeEditor')()}
           ref={editorHint}
           tabIndex={0}
           role="button"
@@ -362,7 +367,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         />
       </EuiToolTip>
     );
-  }, [isHintActive, isReadOnly, euiTheme, startEditing, onKeyDownHint, ariaLabel]);
+  }, [isHintActive, isReadOnly, euiTheme, startEditing, onKeyDownHint, ariaLabel, htmlId]);
 
   const _editorWillMount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillMount']>>(
     (__monaco) => {

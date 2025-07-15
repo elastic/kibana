@@ -16,6 +16,8 @@ import {
   EuiToolTip,
   EuiButton,
   type EuiButtonColor,
+  EuiFormLabel,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -109,6 +111,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   esqlVariables,
   expandToFitQueryOnMount,
   dataErrorsControl,
+  label,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -769,17 +772,29 @@ export const ESQLEditor = memo(function ESQLEditor({
     [isDisabled]
   );
 
+  const formId = useGeneratedHtmlId({ prefix: 'esql-editor' });
   const editorPanel = (
     <>
       {Boolean(editorIsInline) && !hideRunQueryButton && (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
-          justifyContent="flexEnd"
+          justifyContent="spaceBetween"
+          alignItems="center"
           css={css`
             padding: ${theme.euiTheme.size.s};
           `}
         >
+          <EuiFlexItem grow={false}>
+            {label && (
+              <EuiFormLabel
+                onClick={() => document.getElementById(formId)?.focus()}
+                htmlFor={formId}
+              >
+                {label}
+              </EuiFormLabel>
+            )}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
@@ -828,6 +843,8 @@ export const ESQLEditor = memo(function ESQLEditor({
             >
               <div css={styles.editorContainer}>
                 <CodeEditor
+                  htmlId={formId}
+                  aria-label={label}
                   languageId={ESQL_LANG_ID}
                   classNameCss={getEditorOverwrites(theme)}
                   value={code}

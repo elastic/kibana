@@ -15,8 +15,12 @@
       "dataViews",
       "data",
       "unifiedSearch",
-      "uiActions"
+      "uiActions",
+      "contentManagement",
+      "expressions"
     ],
+    "optionalPlugins": ["fieldsMetadata", "usageCollection"],
+    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"]
   }
 }

@@ -96,6 +96,14 @@ export const DataControlEditorStrings = {
           }
         }
       },
+      getEsqlQueryTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.esqlQueryTitle', {
+          defaultMessage: 'ES|QL query',
+        }),
+      getListOptionsTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.listOptionsTitle', {
+          defaultMessage: 'List options',
+        }),
     },
     displaySettings: {
       getTitleInputTitle: () =>

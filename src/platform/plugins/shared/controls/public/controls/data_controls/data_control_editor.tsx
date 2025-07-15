@@ -77,9 +77,9 @@ import {
   type DataControlFieldRegistry,
 } from './types';
 import { ControlFactory } from '../types';
-// import { ESQLLangEditor } from '@kbn/esql/public';
 import { confirmDeleteControl } from '../../common';
 import { ListOptionsInput } from '../../common/list_options_input/list_options_input';
+import { ESQLLangEditor } from './esql_lang_editor';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -434,16 +434,31 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
               fieldRegistry={fieldRegistry}
             />
           )}
-          {/* {isESQLInputMode && (
+          {isESQLInputMode && (
             <ESQLLangEditor
-              query={{ esql: 'FROM logs-* | STATS BY category.keyword' }}
+              label={DataControlEditorStrings.manageControl.dataSource.getEsqlQueryTitle()}
+              query={{ esql: editorState.esqlQuery ?? '' }}
               editorIsInline
               errors={[]}
+              hideTimeFilterInfo={true}
+              disableAutoFocus={true}
+              hideRunQueryText
+              onTextLangQueryChange={(q) => {
+                setEditorState({ ...editorState, esqlQuery: q.esql });
+              }}
+              onTextLangQuerySubmit={async (q, a) => {
+                // if (q) {
+                //   await onValuesQuerySubmit(q.esql);
+                // }
+              }}
+              isDisabled={false}
+              isLoading={false}
+              hasOutline
             />
-          )} */}
+          )}
           {isStaticInputMode && (
             <ListOptionsInput
-              label="List options"
+              label={DataControlEditorStrings.manageControl.dataSource.getListOptionsTitle()}
               value={staticOptions}
               onChange={setStaticOptions}
             />

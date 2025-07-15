@@ -96,7 +96,7 @@ export const openDataControlEditor = <
     {
       size: 'm',
       maxWidth: 500,
-      isResizable: true,
+      isResizable: false,
       paddingSize: 'm',
       onClose: () => closeOverlay(overlay),
     }

@@ -64,7 +64,7 @@ export const CONTROL_INPUT_OPTIONS = [
     id: 'esql',
     'data-test-subj': 'control-editor-input-esql',
     label: i18n.translate('controls.controlGroup.management.input.esql', {
-      defaultMessage: 'ES|QL',
+      defaultMessage: 'Query',
     }),
   },
   {
