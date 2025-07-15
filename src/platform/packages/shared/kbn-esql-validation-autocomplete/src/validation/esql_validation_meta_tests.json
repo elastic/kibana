@@ -581,7 +581,7 @@
     {
       "query": "from a_index | enrich",
       "error": [
-        "SyntaxError: missing ENRICH_POLICY_NAME at '<EOF>'"
+        "SyntaxError: missing {ENRICH_POLICY_NAME, QUOTED_STRING} at '<EOF>'"
       ],
       "warning": []
     },

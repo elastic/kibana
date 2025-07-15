@@ -22,7 +22,7 @@ export type ChartProps = Pick<LensChartProps, 'overrides'> & {
   id: string;
   queryField: string;
   dateRange: TimeRange;
-  assetId: string;
+  entityId: string;
   lensAttributes: LensConfig;
 };
 
@@ -31,7 +31,7 @@ export const Chart = ({
   queryField,
   overrides,
   dateRange,
-  assetId,
+  entityId,
   lensAttributes,
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
@@ -49,11 +49,11 @@ export const Chart = ({
     return [
       buildCombinedAssetFilter({
         field: queryField,
-        values: [assetId],
+        values: [entityId],
         dataView: resolvedDataView.dataViewReference,
       }),
     ];
-  }, [assetId, dataViews, lensAttributes.dataset, queryField]);
+  }, [entityId, dataViews, lensAttributes.dataset, queryField]);
 
   const handleBrushEnd = useCallback(
     ({ range, preventDefault }: BrushEndArgs) => {
