@@ -51,5 +51,8 @@
     "@kbn/std",
     "@kbn/esql-validation-autocomplete",
     "@kbn/esql-utils",
+    "@kbn/esql",
+    "@kbn/field-types",
+    "@kbn/monaco",
   ]
 }
