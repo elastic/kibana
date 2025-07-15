@@ -40,6 +40,10 @@ import {
 } from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  checkRuleTypeUsageCustomizationInvariant,
+  checkRuleTypeUsageFields,
+} from '../../../utils/telemetry';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -432,6 +436,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_name: 'Custom query rule',
             rule_type: 'query',
             enabled: false,
+            is_customized: true,
             elastic_rule: true,
             alert_count_daily: 0,
             cases_count_total: 0,
@@ -443,18 +448,44 @@ export default ({ getService }: FtrProviderContext) => {
             has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
             alert_suppression_fields_count: 0,
           });
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_enabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_disabled
-          ).to.eql(1);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
-          ).to.eql(0);
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_disabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'legacy_notifications_enabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'legacy_notifications_disabled',
+            {
+              total: 1,
+              customized: 1,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_enabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
+
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
             getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
           );
@@ -492,6 +523,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_name: 'Custom query rule',
             rule_type: 'query',
             enabled: true,
+            is_customized: true,
             elastic_rule: true,
             alert_count_daily: 0,
             cases_count_total: 0,
@@ -503,18 +535,42 @@ export default ({ getService }: FtrProviderContext) => {
             has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
             alert_suppression_fields_count: 0,
           });
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_enabled
-          ).to.eql(1);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
-          ).to.eql(0);
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_disabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'legacy_notifications_enabled',
+            {
+              total: 1,
+              customized: 1,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'legacy_notifications_disabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_enabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
             getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
           );
