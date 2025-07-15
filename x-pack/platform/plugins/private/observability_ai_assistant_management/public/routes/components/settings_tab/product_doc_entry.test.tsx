@@ -8,20 +8,17 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ProductDocEntry } from './product_doc_entry';
-import { useKnowledgeBase } from '@kbn/ai-assistant';
-import { useGetProductDocStatus } from '../../../hooks/use_get_product_doc_status';
 import {
+  APIReturnType,
   ELSER_ON_ML_NODE_INFERENCE_ID,
+  KnowledgeBaseState,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
+import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
-// Mocks
-jest.mock('@kbn/ai-assistant', () => ({
-  useKnowledgeBase: jest.fn(),
-}));
-
-jest.mock('../../../hooks/use_get_product_doc_status', () => ({
-  useGetProductDocStatus: jest.fn(),
+jest.mock('../../../hooks/use_get_product_doc', () => ({
+  useGetProductDoc: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_install_product_doc', () => ({
@@ -32,67 +29,75 @@ jest.mock('../../../hooks/use_uninstall_product_doc', () => ({
   useUninstallProductDoc: () => ({ mutateAsync: jest.fn() }),
 }));
 
+const createMockStatus = (
+  overrides?: Partial<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>
+): UseKnowledgeBaseResult['status'] => ({
+  value: {
+    enabled: true,
+    kbState: KnowledgeBaseState.READY,
+    isReIndexing: false,
+    currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
+    concreteWriteIndex: 'index_1',
+    endpoint: {
+      inference_id: ELSER_ON_ML_NODE_INFERENCE_ID,
+      task_type: 'text_embedding',
+      service: 'my-service',
+      service_settings: {},
+    },
+    ...overrides,
+  },
+  loading: false,
+  refresh: () => undefined,
+});
+
+const createMockKnowledgeBase = (
+  overrides: Partial<UseKnowledgeBaseResult> = {}
+): UseKnowledgeBaseResult => ({
+  status: createMockStatus(),
+  isInstalling: false,
+  isWarmingUpModel: false,
+  isPolling: false,
+  install: jest.fn().mockResolvedValue(undefined),
+  warmupModel: jest.fn().mockResolvedValue(undefined),
+  ...overrides,
+});
+
 describe('ProductDocEntry', () => {
   it('calls useGetProductDocStatus with ELSER_ON_ML_NODE_INFERENCE_ID when inference ID is LEGACY_CUSTOM_INFERENCE_ID', async () => {
-    // Mock Knowledge Base
-    (useKnowledgeBase as jest.Mock).mockReturnValue({
-      status: {
-        value: {
-          currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
-        },
-      },
+    (useGetProductDoc as jest.Mock).mockReturnValue({
+      status: 'installed',
     });
 
-    // Mock Product Doc Status
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({
-      status: {
-        overall: 'installed',
-        inferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
-        perProducts: {
-          elasticsearch: { status: 'installed', version: '8.18' },
-          kibana: { status: 'installed', version: '8.18' },
-          observability: { status: 'installed', version: '8.18' },
-          security: { status: 'installed', version: '8.18' },
+    const mockKnowledgeBase = createMockKnowledgeBase({
+      status: createMockStatus({
+        currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+        endpoint: {
+          inference_id: LEGACY_CUSTOM_INFERENCE_ID,
+          task_type: 'text_embedding',
+          service: 'my-service',
+          service_settings: {},
         },
-      },
+      }),
     });
 
-    render(<ProductDocEntry />);
+    render(<ProductDocEntry knowledgeBase={mockKnowledgeBase} />);
 
-    // Assert that the "Installed" badge appears
     await waitFor(() => {
       expect(screen.getByText('Installed')).toBeInTheDocument();
     });
 
-    // Assert that the hook was called with the correct remapped ID
-    expect(useGetProductDocStatus).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
+    expect(useGetProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
   });
 
   it('calls useGetProductDocStatus with the current inference ID when inference ID is not LEGACY_CUSTOM_INFERENCE_ID"', async () => {
-    // Mock Knowledge Base
-    (useKnowledgeBase as jest.Mock).mockReturnValue({
-      status: {
-        value: {
-          currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
-        },
-      },
-    });
+    const mockKnowledgeBase = createMockKnowledgeBase();
 
     // Mock Product Doc Status
-    (useGetProductDocStatus as jest.Mock).mockReturnValue({
-      status: {
-        overall: 'installed',
-        inferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
-        perProducts: {
-          elasticsearch: { status: 'installed', version: '8.18' },
-          kibana: { status: 'installed', version: '8.18' },
-          observability: { status: 'installed', version: '8.18' },
-          security: { status: 'installed', version: '8.18' },
-        },
-      },
+    (useGetProductDoc as jest.Mock).mockReturnValue({
+      status: 'installed',
     });
 
-    render(<ProductDocEntry />);
+    render(<ProductDocEntry knowledgeBase={mockKnowledgeBase} />);
 
     // Assert that the "Installed" badge appears
     await waitFor(() => {
@@ -100,6 +105,6 @@ describe('ProductDocEntry', () => {
     });
 
     // Assert that the hook was called with the correct remapped ID
-    expect(useGetProductDocStatus).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
+    expect(useGetProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
   });
 });
