@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
+import { useEnabledFeatures } from '../contexts/serverless_context';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -52,6 +53,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   coreStart,
 }) => {
   const { application, http, docLinks } = coreStart;
+  const { showSpacesIntegration } = useEnabledFeatures();
 
   useEffect(() => {
     setBreadcrumbs([
@@ -114,7 +116,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
               <p>
                 <FormattedMessage
                   id="genAiSettings.aiConnectorDescriptionWithLink"
-                  defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector. Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.`}
+                  defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
+                    showSpacesIntegration
+                      ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
+                      : ''
+                  }`}
                   values={{
                     link: (
                       <EuiLink
@@ -127,7 +133,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                       </EuiLink>
                     ),
                     elasticManagedLlm: <strong>Elastic Managed LLM</strong>,
-                    aiFeatureVisibility: <strong>AI feature visibility</strong>,
+                    ...(showSpacesIntegration && {
+                      aiFeatureVisibility: <strong>AI feature visibility</strong>,
+                    }),
                   }}
                 />
               </p>
@@ -153,33 +161,35 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
             </EuiFormRow>
           </EuiDescribedFormGroup>
 
-          <EuiSpacer size="l" />
+          {showSpacesIntegration && <EuiSpacer size="l" />}
 
-          <EuiDescribedFormGroup
-            fullWidth
-            title={
-              <h3>
-                {i18n.translate('genAiSettings.aiFeatureVisibilityLabel', {
-                  defaultMessage: 'AI feature visibility',
-                })}
-              </h3>
-            }
-            description={
-              <p>
-                <FormattedMessage
-                  id="genAiSettings.showAIAssistantDescriptionLabel"
-                  defaultMessage="Enable or disable AI-powered features in the {spaces} settings."
-                  values={{
-                    spaces: <strong>Spaces</strong>,
-                  }}
-                />
-              </p>
-            }
-          >
-            <EuiFormRow fullWidth>
-              <GoToSpacesButton getUrlForSpaces={getUrlForSpaces} />
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
+          {showSpacesIntegration && (
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h3>
+                  {i18n.translate('genAiSettings.aiFeatureVisibilityLabel', {
+                    defaultMessage: 'AI feature visibility',
+                  })}
+                </h3>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="genAiSettings.showAIAssistantDescriptionLabel"
+                    defaultMessage="Enable or disable AI-powered features in the {spaces} settings."
+                    values={{
+                      spaces: <strong>Spaces</strong>,
+                    }}
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth>
+                <GoToSpacesButton getUrlForSpaces={getUrlForSpaces} />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          )}
         </EuiPanel>
       </EuiPageSection>
     </div>

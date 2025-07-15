@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '@kbn/core/public';
 import { GenAiSettingsPlugin } from './plugin';
 
-export function plugin() {
-  return new GenAiSettingsPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new GenAiSettingsPlugin(initializerContext);
 }
 
 export type { GenAiSettingsPluginSetup, GenAiSettingsPluginStart } from './plugin';

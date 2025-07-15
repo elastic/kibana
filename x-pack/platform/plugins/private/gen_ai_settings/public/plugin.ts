@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CoreSetup, Plugin, type CoreStart } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  Plugin,
+  type CoreStart,
+  type PluginInitializerContext,
+} from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -31,7 +36,11 @@ export class GenAiSettingsPlugin
       StartDependencies
     >
 {
-  constructor() {}
+  private isServerless: boolean = false;
+
+  constructor(private initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(
     core: CoreSetup<StartDependencies, GenAiSettingsPluginStart>,
@@ -50,6 +59,7 @@ export class GenAiSettingsPlugin
         return mountManagementSection({
           core,
           mountParams,
+          isServerless: this.isServerless,
         });
       },
     });

@@ -14,24 +14,29 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { GenAiSettingsApp } from '../components/gen_ai_settings_app';
+import { EnabledFeaturesContextProvider } from '../contexts/serverless_context';
 
 interface MountSectionParams {
   core: CoreSetup;
   mountParams: ManagementAppMountParams;
+  isServerless: boolean;
 }
 
 export const mountManagementSection = async ({
   core,
   mountParams: { element, setBreadcrumbs, history },
+  isServerless,
 }: MountSectionParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
 
   const GenAiSettingsAppWithContext = () => (
     <I18nProvider>
       <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
-        <Router history={history}>
-          <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} coreStart={coreStart} />
-        </Router>
+        <EnabledFeaturesContextProvider isServerless={isServerless}>
+          <Router history={history}>
+            <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} coreStart={coreStart} />
+          </Router>
+        </EnabledFeaturesContextProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
