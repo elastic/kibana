@@ -16,7 +16,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
 import { ChangePointType } from '@kbn/es-types/src';
-import { pValueToLabel } from '@kbn/genai-utils-common/p_value_to_label';
+import { pValueToLabel } from '@kbn/genai-utils-common';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';

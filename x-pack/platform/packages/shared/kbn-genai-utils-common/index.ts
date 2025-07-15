@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ShortIdTable } from './short_id/short_id_table';
 export { highlightPatternFromRegex } from './log_patterns/highlight_patterns_from_regex';
+export { pValueToLabel } from './p_value_to_label';

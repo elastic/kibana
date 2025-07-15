@@ -7,9 +7,9 @@
 
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
-import { highlightPatternFromRegex, ShortIdTable } from '@kbn/genai-utils-common';
+import { highlightPatternFromRegex } from '@kbn/genai-utils-common';
 import { getLogPatterns } from '@kbn/genai-utils-server';
-import { type InferenceClient } from '@kbn/inference-common';
+import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
