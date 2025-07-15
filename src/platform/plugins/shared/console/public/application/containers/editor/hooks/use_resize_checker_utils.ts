@@ -8,8 +8,8 @@
  */
 
 import { useRef } from 'react';
-import { monaco } from '@kbn/monaco';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
+import { monaco } from '@kbn/monaco';
 
 /**
  * Hook that returns functions for setting up and destroying a {@link ResizeChecker}
@@ -25,7 +25,6 @@ export const useResizeCheckerUtils = () => {
     if (resizeChecker.current) {
       resizeChecker.current.destroy();
     }
-
     resizeChecker.current = new ResizeChecker(divElement);
     resizeChecker.current.on('resize', () => {
       editor.layout();

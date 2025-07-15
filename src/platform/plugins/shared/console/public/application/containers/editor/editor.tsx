@@ -28,7 +28,7 @@ import {
   OutputPanelEmptyState,
   NetworkRequestStatusBar,
 } from '../../components';
-import { StorageKeys, getAutocompleteInfo } from '../../../services';
+import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import {
   useServicesContext,
   useRequestReadContext,
