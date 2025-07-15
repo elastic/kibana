@@ -25,11 +25,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
+import {
+  SERVICE_PROVIDERS,
+  solutionKeys,
+  type SolutionKeys,
+} from './providers/render_service_provider/service_provider';
 import { DEFAULT_TASK_TYPE, ServiceProviderKeys, INTERNAL_OVERRIDE_FIELDS } from '../constants';
 import { SelectableProvider } from './providers/selectable';
 import {
@@ -50,6 +55,7 @@ interface InferenceServicesProps {
   isEdit?: boolean;
   enforceAdaptiveAllocations?: boolean;
   isPreconfigured?: boolean;
+  getActiveSpace?: SpacesPluginStart['getActiveSpace'];
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
@@ -58,6 +64,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   isEdit,
   enforceAdaptiveAllocations,
   isPreconfigured,
+  getActiveSpace,
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
@@ -67,6 +74,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
+  const [activeSpaceSolution, setActiveSpaceSolution] = useState<SolutionKeys | undefined>();
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [requiredProviderFormFields, setRequiredProviderFormFields] = useState<ConfigEntryView[]>(
@@ -84,6 +92,22 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       'config.providerConfig',
     ],
   });
+
+  useEffect(() => {
+    let active = true;
+    async function getSolution() {
+      if (!active || !getActiveSpace) {
+        return;
+      }
+      const space = await getActiveSpace();
+      setActiveSpaceSolution(space?.solution);
+    }
+    getSolution();
+
+    return () => {
+      active = false;
+    };
+  }, [getActiveSpace]);
 
   const toggleProviderPopover = useCallback(() => {
     setProviderPopoverOpen((isOpen) => !isOpen);
@@ -301,17 +325,31 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   useEffect(() => {
     if (providers) {
+      const filteredBySolution = activeSpaceSolution
+        ? providers.filter((provider) => {
+            const providerSolutions =
+              SERVICE_PROVIDERS[provider.service as ServiceProviderKeys]?.solutions ?? [];
+            return (
+              !solutionKeys[activeSpaceSolution] ||
+              providerSolutions.includes(solutionKeys[activeSpaceSolution])
+            );
+          })
+        : providers;
       // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
-      const elasticServiceIndex = providers.findIndex((provider) => provider.service === 'elastic');
+      const elasticServiceIndex = filteredBySolution.findIndex(
+        (provider) => provider.service === 'elastic'
+      );
       if (elasticServiceIndex !== -1) {
-        const elasticService = providers[elasticServiceIndex];
-        const remainingProviders = providers.filter((_, index) => index !== elasticServiceIndex);
+        const elasticService = filteredBySolution[elasticServiceIndex];
+        const remainingProviders = filteredBySolution.filter(
+          (_, index) => index !== elasticServiceIndex
+        );
         setUpdatedProviders([elasticService, ...remainingProviders]);
       } else {
-        setUpdatedProviders(providers);
+        setUpdatedProviders(filteredBySolution);
       }
     }
-  }, [providers]);
+  }, [providers, activeSpaceSolution]);
 
   useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {

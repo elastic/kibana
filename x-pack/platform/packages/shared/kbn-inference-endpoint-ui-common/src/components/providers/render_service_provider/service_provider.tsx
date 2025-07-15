@@ -7,6 +7,7 @@
 
 import { EuiAvatar, EuiHighlight } from '@elastic/eui';
 import React from 'react';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 
 import { ServiceProviderKeys } from '../../../constants';
 import elasticIcon from '../assets/images/elastic.svg';
@@ -30,6 +31,14 @@ interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
   searchValue?: string;
 }
+
+export const solutionKeys = {
+  oblt: 'Observability',
+  security: 'Security',
+  es: 'Search',
+} as const;
+
+export type SolutionKeys = keyof typeof solutionKeys | SolutionView;
 
 export type ProviderSolution = 'Observability' | 'Security' | 'Search';
 

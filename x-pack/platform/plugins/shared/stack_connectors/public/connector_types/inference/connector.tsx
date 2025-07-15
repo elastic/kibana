@@ -17,6 +17,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
   const {
     http,
     notifications: { toasts },
+    spaces,
     isServerless: isServerlessKibanaContext,
   } = useKibana().services;
   const { isServerless: isServerlessConnectorContext } = useConnectorContext();
@@ -27,6 +28,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       http={http}
       isEdit={isEdit}
       enforceAdaptiveAllocations={isServerless}
+      getActiveSpace={spaces?.getActiveSpace}
       toasts={toasts}
     />
   );
