@@ -201,7 +201,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the rule's bulk action to manage alert suppression
    */
-  bulkEditAlertSuppressionEnabled: false,
+  bulkEditAlertSuppressionEnabled: true,
 
   /**
    * Enables the new data ingestion hub
