@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+// We need to adjust the whole workflow schema here to the actual workflow schema
+// https://docs.google.com/document/d/1c4cyLIMTzEYn9XxDFwrNSmFpVJVLavRVM9DOa_HI9w8
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import {
   EuiButton,
-  EuiHorizontalRule,
   EuiPageTemplate,
   EuiTitle,
   EuiText,
@@ -15,6 +16,8 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { css } from '@emotion/react';
 import { WorkflowStatus } from '@kbn/workflows';
 import { CodeEditor } from '@kbn/code-editor';
@@ -29,6 +32,26 @@ interface WorkflowsAppDeps {
 
 export const WorkflowsApp = ({ basename, notifications, http, navigation }: WorkflowsAppDeps) => {
   const theme = useEuiTheme();
+  const { services } = useKibana();
+  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
+
+  // Get current user
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        if (services.security) {
+          const user = await services.security.authc.getCurrentUser();
+          console.log(user);
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        console.error('Failed to get current user:', error);
+      }
+    };
+
+    getCurrentUser();
+  }, [services.security]);
+
   // Use React hooks to manage state.
   const [stringWorkflow, setWorkflow] = useState<string>(
     JSON.stringify(
@@ -46,29 +69,13 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
         ],
         steps: [
           {
-            id: 'step1',
-            connectorType: 'console',
-            connectorName: 'console',
-            inputs: {
-              message: 'Step 1 executed "{{event.ruleName}}"',
-            },
-          },
-          {
-            id: 'step2',
-            connectorName: 'slow-console',
-            connectorType: 'console',
-            inputs: {
-              message: 'Step 2 executed "{{event.additionalData.user}}"',
-            },
-          },
-          {
             id: 'step3',
             needs: ['step1', 'step2'],
             connectorType: 'slack-connector',
             connectorName: 'slack_keep',
             inputs: {
               message:
-                'Message from step 3: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.user}}" and workflowRunId is "{{workflowRunId}}"',
+                'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}"',
             },
           },
           {
@@ -77,7 +84,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
             connectorName: 'console',
             connectorType: 'console',
             inputs: {
-              message: 'Step 4 executed!',
+              message: 'Step 2 executed!',
             },
           },
         ],
@@ -86,20 +93,32 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
       4
     )
   );
-  const [workflowInputs, setWorkflowInputs] = useState<string>(
-    JSON.stringify(
+
+  // Update workflow inputs with current user email
+  const getWorkflowInputs = () => {
+    const userEmail = currentUser?.email || 'workflow-user@gmail.com';
+    const userName = currentUser?.username || 'workflow-user';
+    return JSON.stringify(
       {
         event: {
           ruleName: 'Detect vulnerabilities',
           additionalData: {
-            user: 'workflow-user@gmail.com',
+            user: userEmail,
+            userName: userName,
           },
         },
       },
       null,
       4
-    )
-  );
+    );
+  };
+
+  const [workflowInputs, setWorkflowInputs] = useState<string>(getWorkflowInputs());
+
+  // Update workflow inputs when current user changes
+  useEffect(() => {
+    setWorkflowInputs(getWorkflowInputs());
+  }, [currentUser]);
 
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
@@ -171,7 +190,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                       languageId="json"
                       value={workflowInputs}
                       height={200}
-                      editorDidMount={() => {}}
+                      editorDidMount={() => { }}
                       onChange={setWorkflowInputs}
                       suggestionProvider={undefined}
                       dataTestSubj={'workflow-inputs-json-editor'}
@@ -187,7 +206,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                     languageId="json"
                     value={stringWorkflow}
                     height={500}
-                    editorDidMount={() => {}}
+                    editorDidMount={() => { }}
                     onChange={setWorkflow}
                     suggestionProvider={undefined}
                     dataTestSubj={'workflow-json-editor'}

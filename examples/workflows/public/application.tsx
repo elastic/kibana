@@ -1,21 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppPluginStartDependencies } from './types';
 import { WorkflowsApp } from './components/app';
 
 export const renderApp = (
-  { notifications, http }: CoreStart,
-  { navigation }: AppPluginStartDependencies,
+  coreStart: CoreStart,
+  depsStart: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <WorkflowsApp
-      basename={appBasePath}
-      notifications={notifications}
-      http={http}
-      navigation={navigation}
-    />,
+    <KibanaContextProvider services={{ ...coreStart, ...depsStart }}>
+      <WorkflowsApp
+        basename={appBasePath}
+        notifications={coreStart.notifications}
+        http={coreStart.http}
+        navigation={depsStart.navigation}
+      />
+    </KibanaContextProvider>,
     element
   );
 
