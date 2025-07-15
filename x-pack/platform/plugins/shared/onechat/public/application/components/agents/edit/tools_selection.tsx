@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ToolSelection, ToolDefinition } from '@kbn/onechat-common';
+import type { ToolSelection, ToolDefinition, ToolType } from '@kbn/onechat-common';
 import {
   toggleTypeSelection,
   toggleToolSelection,
@@ -46,19 +46,19 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 }) => {
   // Group tools by provider
   const toolsByType = useMemo(() => {
-    const grouped: Record<string, ToolDefinition[]> = {};
+    const grouped: Partial<Record<ToolType, ToolDefinition[]>> = {};
     tools.forEach((tool) => {
       const toolType = tool.type;
       if (!grouped[toolType]) {
         grouped[toolType] = [];
       }
-      grouped[toolType].push(tool);
+      grouped[toolType]!.push(tool);
     });
     return grouped;
   }, [tools]);
 
   const handleToggleTypeTools = useCallback(
-    (type: string) => {
+    (type: ToolType) => {
       const providerTools = toolsByType[type] || [];
       const newSelection = toggleTypeSelection(type, providerTools, selectedTools);
       onToolsChange(newSelection);
@@ -67,9 +67,9 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   );
 
   const handleToggleTool = useCallback(
-    (toolId: string, providerId: string) => {
-      const providerTools = toolsByType[providerId] || [];
-      const newSelection = toggleToolSelection(toolId, providerId, providerTools, selectedTools);
+    (toolId: string, type: ToolType) => {
+      const providerTools = toolsByType[type] || [];
+      const newSelection = toggleToolSelection(toolId, type, providerTools, selectedTools);
       onToolsChange(newSelection);
     },
     [selectedTools, onToolsChange, toolsByType]
@@ -81,7 +81,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   return (
     <div>
-      {Object.entries(toolsByType).map(([providerId, providerTools]) => {
+      {Object.entries(toolsByType).map(([type, typeTools]) => {
         const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
           {
             field: 'id',
@@ -93,7 +93,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                   <EuiCheckbox
                     id={`tool-${tool.id}`}
                     checked={isToolSelected(tool, selectedTools)}
-                    onChange={() => handleToggleTool(tool.id, providerId)}
+                    onChange={() => handleToggleTool(tool.id, type as ToolType)}
                     disabled={disabled}
                   />
                 </EuiFlexItem>
@@ -119,12 +119,12 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
         ];
 
         return (
-          <div key={providerId}>
+          <div key={type}>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
               <EuiFlexItem>
                 <EuiTitle size="s">
                   <h4>
-                    <EuiCode>{providerId}</EuiCode>{' '}
+                    <EuiCode>{type}</EuiCode>{' '}
                     {i18n.translate('xpack.onechat.tools.providerToolsLabel', {
                       defaultMessage: 'tools',
                     })}
@@ -133,17 +133,17 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSwitch
-                  id={`provider-${providerId}`}
+                  id={`provider-${type}`}
                   label={
                     <EuiText size="s" color="subdued">
                       {i18n.translate('xpack.onechat.tools.selectAllProviderTools', {
                         defaultMessage: 'Select all {providerName} tools',
-                        values: { providerName: providerId },
+                        values: { providerName: type },
                       })}
                     </EuiText>
                   }
-                  checked={isAllToolsSelectedForType(providerId, providerTools, selectedTools)}
-                  onChange={() => handleToggleTypeTools(providerId)}
+                  checked={isAllToolsSelectedForType(type, typeTools, selectedTools)}
+                  onChange={() => handleToggleTypeTools(type as ToolType)}
                   disabled={disabled}
                 />
               </EuiFlexItem>
@@ -153,7 +153,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
             <EuiBasicTable
               columns={columns}
-              items={providerTools}
+              items={typeTools}
               itemId="id"
               noItemsMessage={i18n.translate('xpack.onechat.tools.noToolsAvailable', {
                 defaultMessage: 'No tools available',

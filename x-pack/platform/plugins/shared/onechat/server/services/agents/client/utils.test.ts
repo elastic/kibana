@@ -7,6 +7,7 @@
 
 import { validateToolSelection } from './utils';
 import type { KibanaRequest } from '@kbn/core/server';
+import { ToolType } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
 
 const mockRequest = {} as KibanaRequest;
@@ -53,7 +54,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ type: 'provX', tool_ids: ['toolA'] }],
+      toolSelection: [{ type: ToolType.esql, tool_ids: ['toolA'] }],
     });
     expect(errors.join(' ')).toMatch(/Provider 'provX' does not exist/);
   });
@@ -63,7 +64,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ type: 'prov2', tool_ids: ['*'] }],
+      toolSelection: [{ type: ToolType.esql, tool_ids: ['*'] }],
     });
     expect(errors.join(' ')).toMatch(/Provider 'prov2' does not exist/);
   });
@@ -73,7 +74,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ type: 'prov1', tool_ids: ['toolC'] }],
+      toolSelection: [{ type: ToolType.esql, tool_ids: ['toolC'] }],
     });
     expect(errors.join(' ')).toMatch(/does not exist for provider/);
   });
@@ -83,7 +84,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ type: 'prov1', tool_ids: ['toolA'] }],
+      toolSelection: [{ type: ToolType.esql, tool_ids: ['toolA'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -113,7 +114,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ type: 'prov1', tool_ids: ['*'] }],
+      toolSelection: [{ type: ToolType.esql, tool_ids: ['*'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -124,7 +125,7 @@ describe('validateToolSelection (unit)', () => {
     const errors = await validateToolSelection({
       toolRegistry: registry as any,
       request: mockRequest,
-      toolSelection: [{ type: 'builtIn', tool_ids: ['*'] }],
+      toolSelection: [{ type: ToolType.builtin, tool_ids: ['*'] }],
     });
     expect(errors).toHaveLength(0);
   });
@@ -136,7 +137,7 @@ describe('validateToolSelection (unit)', () => {
       request: mockRequest,
       toolSelection: [
         { tool_ids: ['toolA', 'nonexistent'] },
-        { type: 'provX', tool_ids: ['toolA'] },
+        { type: 'provX' as ToolType, tool_ids: ['toolA'] },
       ],
     });
     expect(errors).toEqual(

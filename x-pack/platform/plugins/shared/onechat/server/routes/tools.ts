@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ToolType } from '@kbn/onechat-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
@@ -24,7 +23,7 @@ import {
   configurationSchema as esqlConfigSchema,
   configurationUpdateSchema as esqlConfigUpdateSchema,
 } from '../services/tools/esql/schemas';
-import { getTechnicalPreviewWarning } from './utils';
+import { getTechnicalPreviewWarning, supportedToolTypes } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Tool API');
 
@@ -125,7 +124,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
           request: {
             body: schema.object({
               id: schema.string(),
-              type: schema.oneOf([schema.literal(ToolType.esql)]),
+              type: supportedToolTypes,
               description: schema.string({ defaultValue: '' }),
               tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
               configuration: esqlConfigSchema,

@@ -16,13 +16,13 @@ import type {
   DeleteAgentResponse,
   ListAgentResponse,
 } from '../../common/http_api/agents';
-import { getTechnicalPreviewWarning } from './utils';
+import { getTechnicalPreviewWarning, supportedToolTypes } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Agent API');
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object({
-    type: schema.maybe(schema.string()),
+    type: supportedToolTypes,
     tool_ids: schema.arrayOf(schema.string()),
   })
 );
