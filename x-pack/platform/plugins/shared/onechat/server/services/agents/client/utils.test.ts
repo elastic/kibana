@@ -26,14 +26,11 @@ describe('validateToolSelection (unit)', () => {
   const toolB = generateMockTool('toolB', ToolType.esql);
   const toolC = generateMockTool('toolC', ToolType.builtin);
 
-  const makeRegistry = (tools: any[], hasImpl?: (toolId: string) => Promise<boolean>) => ({
+  const makeRegistry = (tools: any[]) => ({
     list: jest.fn().mockResolvedValue(tools),
-    has:
-      hasImpl ||
-      jest.fn().mockImplementation((toolId: string) => {
-        // Return true only if the tool exists in the tools array
-        return Promise.resolve(tools.some((tool) => tool.id === toolId));
-      }),
+    has: jest.fn().mockImplementation((toolId: string) => {
+      return Promise.resolve(tools.some((tool) => tool.id === toolId));
+    }),
   });
 
   it('returns error if tool id does not exist globally', async () => {
