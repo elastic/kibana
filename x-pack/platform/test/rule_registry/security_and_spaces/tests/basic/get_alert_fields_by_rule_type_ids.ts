@@ -146,53 +146,6 @@ export default ({ getService }: FtrProviderContext) => {
     );
   };
 
-  const waitForAlertsToBeCreated = async (ruleId: string, spaceId: string = 'default') => {
-    return await retry.tryForTime(retryTimeout, async () => {
-      const response = await es.search({
-        index: '.alerts*',
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'kibana.alert.rule.uuid': ruleId,
-                },
-              },
-              {
-                term: {
-                  'kibana.space_ids': spaceId,
-                },
-              },
-            ],
-          },
-        },
-      });
-
-      if (response.hits.hits.length === 0) {
-        throw new Error(`No hits found for index .alerts* and ruleId ${ruleId}`);
-      }
-
-      return response;
-    });
-  };
-
-  const waitForRuleToBecomeActive = async (ruleId: string, spaceId: string = 'default') => {
-    return await retry.tryForTime(retryTimeout, async () => {
-      const { body: rule } = await supertest
-        .get(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule/${ruleId}`)
-        .expect(200);
-
-      const { execution_status: executionStatus } = rule || {};
-      const { status } = executionStatus || {};
-
-      if (status === 'active' || status === 'ok') {
-        return executionStatus?.status;
-      }
-
-      throw new Error(`waitForStatus(active|ok): got ${status}`);
-    });
-  };
-
   const deleteRule = async (ruleId: string, spaceId: string = 'default') => {
     await supertest
       .delete(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule/${ruleId}`)
@@ -225,14 +178,6 @@ export default ({ getService }: FtrProviderContext) => {
         createEsQueryRule(dataView.id, 'observability'),
         createSecurityRule(dataView.id),
       ]);
-
-      await waitForRuleToBecomeActive(stackRule.id);
-      await waitForRuleToBecomeActive(observabilityRule.id);
-      await waitForRuleToBecomeActive(securityRule.id);
-
-      await waitForAlertsToBeCreated(stackRule.id);
-      await waitForAlertsToBeCreated(observabilityRule.id);
-      await waitForAlertsToBeCreated(securityRule.id);
     });
 
     after(async () => {
