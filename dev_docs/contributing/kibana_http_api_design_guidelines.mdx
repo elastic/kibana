@@ -46,7 +46,7 @@ While API clients are better designed as:
 ```
 # Request 1
 GET /api/my_domain/my_resource_as?page=1
-# responds with
+# responds with:
 {
   "items": [{ id: "1", "name": "Resource A 1" }, { id: "2", "name": "Resource A 2" }],
   "page": 1,
@@ -54,6 +54,7 @@ GET /api/my_domain/my_resource_as?page=1
 }
 # Request 2
 GET /api/my_domain/my_resource_bs?page=1
+# responds with:
 {
   "items": [{ id: "1", "name": "Resource B 1" }],
   "page": 1,
