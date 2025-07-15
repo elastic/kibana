@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-floating-promises */
-
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 interface PromisePoolArgs<Item, Result> {
