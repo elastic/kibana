@@ -6,7 +6,11 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { type UserIdAndName, type Conversation } from '@kbn/onechat-common';
+import {
+  type UserIdAndName,
+  type Conversation,
+  ConversationWithoutRounds,
+} from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
   ConversationUpdateRequest,
@@ -15,9 +19,9 @@ import { ConversationProperties } from './storage';
 
 export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
 
-export const fromEs = (
+const convertBaseFromEs = (
   document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
-): Conversation => {
+) => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -32,8 +36,23 @@ export const fromEs = (
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
-    rounds: document._source.rounds,
   };
+};
+
+export const fromEs = (
+  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
+): Conversation => {
+  const base = convertBaseFromEs(document);
+  return {
+    ...base,
+    rounds: document._source!.rounds,
+  };
+};
+
+export const fromEsWithoutRounds = (
+  document: Pick<GetResponse<ConversationProperties>, '_source' | '_id'>
+): ConversationWithoutRounds => {
+  return convertBaseFromEs(document);
 };
 
 export const toEs = (conversation: Conversation): ConversationProperties => {
