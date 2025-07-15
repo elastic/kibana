@@ -104,10 +104,6 @@ else
   export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
 fi
 
-## Manual overrides
-export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=1
-export ELASTIC_APM_ACTIVE=true
-
 # These are for backwards-compatibility
 export GIT_COMMIT="${BUILDKITE_COMMIT:-}"
 export GIT_BRANCH="${BUILDKITE_BRANCH:-}"
