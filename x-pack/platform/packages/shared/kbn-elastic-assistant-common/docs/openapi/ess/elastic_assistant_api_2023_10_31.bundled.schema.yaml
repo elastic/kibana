@@ -218,11 +218,11 @@ paths:
                   anonymized:
                     buckets:
                       allowed:
-                        doc_count: 50
+                        doc_count: 1
                       anonymized:
-                        doc_count: 30
+                        doc_count: 1
                       denied:
-                        doc_count: 20
+                        doc_count: 1
                 all:
                   - allowed: true
                     anonymized: true
