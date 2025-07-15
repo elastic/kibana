@@ -6781,6 +6781,14 @@
                 "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
+              },
+              {
                 "plugin": "@kbn/search-api-keys-server",
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
               },
@@ -12036,6 +12044,18 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cloud_integration/plugins/saml_provider/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/functional_execution_context/plugins/alerts/server/plugin.ts"
               },
               {
@@ -13988,22 +14008,6 @@
                 "path": "x-pack/platform/plugins/shared/cloud/server/routes/get_cloud_data_route.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get_all.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get_all.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/get_runtime_field.ts"
               },
@@ -14046,6 +14050,22 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/get_all.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/get_all.ts"
               },
               {
                 "plugin": "data",
@@ -14877,6 +14897,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileges.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/get.ts"
               },
               {
@@ -15279,14 +15303,6 @@
                 "path": "src/core/packages/apps/server-internal/src/core_app.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/put.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/put.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/put_runtime_field.ts"
               },
@@ -15297,6 +15313,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/put.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/put.ts"
               },
               {
                 "plugin": "data",
@@ -15594,18 +15618,6 @@
                 "path": "x-pack/platform/plugins/shared/cloud/server/routes/set_cloud_data_route.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/post.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/post.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/query.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/fields/update_fields.ts"
               },
@@ -15644,6 +15656,18 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/post.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/post.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/query.ts"
               },
               {
                 "plugin": "data",
@@ -16952,14 +16976,6 @@
             "trackAdoption": true,
             "references": [
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/delete.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/delete.ts"
-              },
-              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/runtime_fields/delete_runtime_field.ts"
               },
@@ -16970,6 +16986,14 @@
               {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/rest_api_routes/public/delete_data_view.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/routes/api/external/delete.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/authorization/roles/delete.ts"
               },
               {
                 "plugin": "data",
