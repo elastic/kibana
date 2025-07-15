@@ -38,6 +38,7 @@ import {
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import {
   Rule,
   RuleTableItem,
@@ -169,6 +170,7 @@ export const RulesList = ({
   navigateToEditRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
+  const { onPageReady } = usePerformanceContext();
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
@@ -416,6 +418,12 @@ export const RulesList = ({
   );
 
   const handleClearRuleParamFilter = () => updateFilters({ filter: 'ruleParams', value: {} });
+
+  useEffect(() => {
+    if (onPageReady && !rulesState?.isLoading) {
+      onPageReady();
+    }
+  }, [onPageReady, rulesState?.isLoading]);
 
   useEffect(() => {
     if (statusFilter) {
