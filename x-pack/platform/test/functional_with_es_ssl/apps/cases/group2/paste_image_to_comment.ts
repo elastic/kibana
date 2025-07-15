@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('creates a case and navigates to it', async () => {
       await cases.navigation.navigateToApp();
-      const caseData = await cases.api.createCase({
+      await cases.api.createCase({
         title: 'Sample case',
         description: 'Testing image paste in comments',
       });
