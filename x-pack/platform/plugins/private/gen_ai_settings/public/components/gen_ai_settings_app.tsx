@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { useEnabledFeatures } from '../contexts/serverless_context';
 
 interface GenAiSettingsAppProps {
@@ -77,8 +78,11 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   }, [setBreadcrumbs]);
 
   const getUrlForSpaces = () => {
+    const basePath = http.basePath.get();
+    const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
+
     return application.getUrlForApp('management', {
-      path: '/kibana/spaces',
+      path: `/kibana/spaces/edit/${spaceId}`,
     });
   };
 
