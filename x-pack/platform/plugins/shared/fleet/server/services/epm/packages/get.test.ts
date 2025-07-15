@@ -1109,6 +1109,57 @@ owner: elastic`,
       });
     });
 
+    it('should do nothing if no excluded data streams', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'pkg',
+        version: '1.0.0',
+      } as RegistryPackage);
+      const packageInfo = {
+        name: 'pkg',
+        version: '1.0.0',
+        assets: [],
+        policy_templates: [
+          {
+            name: 'pkg',
+            inputs: [],
+          },
+        ],
+      } as unknown as RegistryPackage;
+      MockRegistry.fetchInfo.mockResolvedValue(packageInfo);
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        packageInfo,
+      });
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'pkg',
+          pkgVersion: '1.0.0',
+        })
+      ).resolves.toMatchObject({
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+        policy_templates: [
+          {
+            name: 'pkg',
+            inputs: [],
+          },
+        ],
+      });
+    });
+
     describe('installation status', () => {
       it('should be not_installed when no package SO exists', async () => {
         const soClient = savedObjectsClientMock.create();
