@@ -211,14 +211,14 @@ function filterOutExcludedDataStreamTypes(
     return packageList.reduce((acc, pkg) => {
       const shouldInclude =
         (pkg.data_streams || [])?.length === 0 ||
-        pkg.data_streams?.some((dataStream) => {
+        pkg.data_streams?.some((dataStream: any) => {
           return !excludeDataStreamTypes.includes(dataStream.type);
         });
       if (shouldInclude) {
         // filter out excluded data stream types
         const filteredDataStreams =
           pkg.data_streams?.filter(
-            (dataStream) => !excludeDataStreamTypes.includes(dataStream.type)
+            (dataStream: any) => !excludeDataStreamTypes.includes(dataStream.type)
           ) ?? [];
         acc.push({ ...pkg, data_streams: filteredDataStreams });
       }
