@@ -126,5 +126,12 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/es",
     "@kbn/mock-idp-utils",
+    "@kbn/aiops-change-point-detection",
+    "@kbn/aiops-plugin",
+    "@kbn/ml-category-validator",
+    "@kbn/response-ops-alerts-filters-form",
+    "@kbn/embeddable-alerts-table-plugin",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace",
   ]
 }
