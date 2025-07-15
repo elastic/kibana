@@ -89,15 +89,13 @@ export const EmptyConvo: React.FC<Props> = ({
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
-      {assistantAvailability.isStarterPromptsEnabled && (
-        <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
-          <StarterPrompts
-            compressed={compressed}
-            connectorId={connectorId}
-            setUserPrompt={setUserPrompt}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
+        <StarterPrompts
+          compressed={compressed}
+          connectorId={connectorId}
+          setUserPrompt={setUserPrompt}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
