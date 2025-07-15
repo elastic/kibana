@@ -17,7 +17,7 @@ import {
   PricingTiersClient,
 } from '@kbn/core-pricing-common';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import { PricingServiceSetup, PricingServiceStart } from '@kbn/core-pricing-server';
+import type { PricingServiceSetup, PricingServiceStart } from '@kbn/core-pricing-server';
 import type { PricingConfigType } from './pricing_config';
 import { registerRoutes } from './routes';
 

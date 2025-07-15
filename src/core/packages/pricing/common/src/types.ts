@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IPricingProduct } from './pricing_tiers_config';
+import type { IPricingProduct } from './pricing_tiers_config';
 
 /**
  * APIs to access pricing tier information during the start phase.
