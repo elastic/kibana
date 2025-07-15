@@ -92,19 +92,16 @@ describe('ProductDocEntry', () => {
   it('calls useGetProductDocStatus with the current inference ID when inference ID is not LEGACY_CUSTOM_INFERENCE_ID"', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase();
 
-    // Mock Product Doc Status
     (useGetProductDoc as jest.Mock).mockReturnValue({
       status: 'installed',
     });
 
     render(<ProductDocEntry knowledgeBase={mockKnowledgeBase} />);
 
-    // Assert that the "Installed" badge appears
     await waitFor(() => {
       expect(screen.getByText('Installed')).toBeInTheDocument();
     });
 
-    // Assert that the hook was called with the correct remapped ID
     expect(useGetProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
   });
 });
