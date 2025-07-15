@@ -13,7 +13,7 @@ disabled:
   - x-pack/platform/test/functional_with_es_ssl/config.base.ts
   - x-pack/test/api_integration/config.ts
   - x-pack/platform/test/api_integration/config.ts
-  - x-pack/test/fleet_api_integration/config.base.ts
+  - x-pack/platform/test/fleet_api_integration/config.base.ts
   - x-pack/platform/test/functional_basic/apps/ml/config.base.ts
   - x-pack/platform/test/functional_basic/apps/transform/config.base.ts
   - x-pack/platform/test/api_integration_basic/config.basic_license.ts
@@ -24,7 +24,6 @@ disabled:
   - x-pack/platform/test/upgrade/config.ts
   - src/platform/test/functional/config.edge.js
   - x-pack/platform/test/functional/config.edge.ts
-  - x-pack/test/functional/config.edge.js
 
   # Configs that exist but weren't running in CI when this file was introduced
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
@@ -167,12 +166,15 @@ enabled:
   - x-pack/platform/test/disable_ems/config.ts
   - x-pack/platform/test/examples/config.ts
   - x-pack/test/fleet_api_integration/config.agent.ts
-  - x-pack/test/fleet_api_integration/config.agent_policy.ts
   - x-pack/test/fleet_api_integration/config.epm.ts
-  - x-pack/test/fleet_api_integration/config.event_ingested.ts
-  - x-pack/test/fleet_api_integration/config.fleet.ts
   - x-pack/test/fleet_api_integration/config.package_policy.ts
-  - x-pack/test/fleet_api_integration/config.space_awareness.ts
+  - x-pack/platform/test/fleet_api_integration/config.agent.ts
+  - x-pack/platform/test/fleet_api_integration/config.agent_policy.ts
+  - x-pack/platform/test/fleet_api_integration/config.epm.ts
+  - x-pack/platform/test/fleet_api_integration/config.event_ingested.ts
+  - x-pack/platform/test/fleet_api_integration/config.fleet.ts
+  - x-pack/platform/test/fleet_api_integration/config.package_policy.ts
+  - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/test/fleet_functional/config.ts
   - x-pack/platform/test/fleet_tasks/config.ts
   - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
@@ -217,7 +219,6 @@ enabled:
   - x-pack/test/functional/apps/home/config.ts
   - x-pack/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/test/functional/apps/index_management/config.ts
-  - x-pack/test/functional/apps/infra/config.ts
   - x-pack/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/test/functional/apps/lens/group1/config.ts
   - x-pack/test/functional/apps/lens/group2/config.ts
@@ -270,7 +271,6 @@ enabled:
   - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
-  - x-pack/test/functional/config.firefox.js
   - x-pack/platform/test/functional/config.firefox.ts
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/platform/test/functional_cloud/config.ts

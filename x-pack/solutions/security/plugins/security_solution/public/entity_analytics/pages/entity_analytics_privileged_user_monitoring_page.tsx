@@ -39,6 +39,7 @@ import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useLinkInfo, useUpdateLinkConfig } from '../../common/links/links_hooks';
 import { PageLoader } from '../../common/components/page_loader';
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 
@@ -111,7 +112,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
@@ -178,6 +179,25 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     engineStatus.isLoading,
   ]);
 
+  const linkInfo = useLinkInfo(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring);
+  const updateLinkConfig = useUpdateLinkConfig();
+
+  // Update UrlParam to add hideTimeline to the URL when the onboarding is loaded and removes it when dashboard is loaded
+  useEffect(() => {
+    // do not change the link config when the engine status is being fetched
+    if (state.type === 'fetchingEngineStatus') {
+      return;
+    }
+
+    const hideTimeline = ['onboarding', 'initializingEngine'].includes(state.type);
+    // update the hideTimeline property in the link config. This call triggers expensive operations, use with love
+    const hideTimelineConfig = linkInfo?.hideTimeline ?? false;
+
+    if (hideTimeline !== hideTimelineConfig) {
+      updateLinkConfig(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring, { hideTimeline });
+    }
+  }, [linkInfo?.hideTimeline, state.type, updateLinkConfig]);
+
   const fullHeightCSS = css`
     min-height: calc(100vh - 240px);
   `;
@@ -194,7 +214,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     <>
       {state.type === 'dashboard' && (
         <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+          <SiemSearchBar id={InputsModelId.global} sourcererDataView={oldSourcererDataViewSpec} />
         </FiltersGlobal>
       )}
 

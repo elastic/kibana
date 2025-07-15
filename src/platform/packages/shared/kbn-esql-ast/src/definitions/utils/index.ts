@@ -13,7 +13,7 @@ export {
   getControlSuggestion,
   getSafeInsertText,
   pushItUpInTheList,
-} from './autocomplete';
+} from './autocomplete/helpers';
 export { getSuggestionsToRightOfOperatorExpression } from './operators';
 export {
   buildFieldsDefinitionsWithMetadata,

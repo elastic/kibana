@@ -156,6 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_analytics:monitoring:privileges:engine',
         'entity_store:data_view:refresh',
         'entity_store:field_retention:enrichment',
+        'fleet:auto-install-content-packages-task',
         'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',
         'fleet:check-deleted-files-task',
