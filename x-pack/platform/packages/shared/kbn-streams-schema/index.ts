@@ -77,6 +77,7 @@ export {
   getAncestorsAndSelf,
   getParentId,
   getSegments,
+  MAX_NESTING_LEVEL,
   isRoot,
 } from './src/shared/hierarchy';
 

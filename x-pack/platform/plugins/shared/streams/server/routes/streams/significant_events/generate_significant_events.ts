@@ -5,21 +5,18 @@
  * 2.0.
  */
 
+import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
-import { highlightPatternFromRegex, ShortIdTable } from '@kbn/genai-utils-common';
-import {
-  analyzeDocuments,
-  getLogPatterns,
-  sortAndTruncateAnalyzedFields,
-} from '@kbn/genai-utils-server';
-import type { InferenceClient } from '@kbn/inference-common';
+import { getLogPatterns } from '@kbn/genai-utils-server';
+import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
 import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
-import { KQL_GUIDE } from './kql_guide';
+import KQL_GUIDE from './prompts/kql_guide.text';
+import INSTRUCTION from './prompts/generate_queries_instruction.text';
 
 const LOOKBACK_DAYS = 7;
 
@@ -42,13 +39,14 @@ export async function generateSignificantEventDefinitions({
   const start = mstart.valueOf();
   const end = mend.valueOf();
 
-  const analysis = await analyzeDocuments({
-    esClient,
-    kuery: '',
+  const analysis = await describeDataset({
+    esClient: esClient.client,
     start,
     end,
     index: name,
   });
+
+  const short = sortAndTruncateAnalyzedFields(analysis);
 
   const textFields = analysis.fields
     .filter((field) => field.types.includes('text'))
@@ -69,18 +67,12 @@ export async function generateSignificantEventDefinitions({
         esClient,
         fields: [categorizationField],
         index: name,
-        kuery: '',
         includeChanges: true,
         metadata: [],
       }).then((results) => {
         return results.map((result) => {
           const { sample, count, regex } = result;
-          return {
-            count,
-            highlight: highlightPatternFromRegex(regex, sample),
-            sample,
-            regex,
-          };
+          return { count, sample, regex };
         });
       })
     : undefined;
@@ -98,47 +90,34 @@ export async function generateSignificantEventDefinitions({
     });
   }
 
-  const short = sortAndTruncateAnalyzedFields(analysis);
-
-  const instruction = `
-I want to generate KQL queries that help me find
-important log messages. Each pattern should have its own
-query. I will use these queries to help me see changes in
-these patterns. Only generate queries for patterns that
-are indicative of something unusual happening, like startup/
-shutdown messages, or warnings, errors and fatal messages. Prefer
-simple match queries over wildcards. The goal of this is to have
-queries that each represent a specific pattern, to be able to
-monitor for changes in the pattern and use it as a signal in
-root cause analysis. Some example of patterns:
-
-- \`message: "CircuitBreakingException"\`
-- \`message: "max number of clients reached"\`
-- \`message: "Unable to connect * Connection refused"\`
-`;
-
   const chunks = [
-    instruction,
+    INSTRUCTION,
     KQL_GUIDE,
     logPatterns
       ? `## Log patterns
+The following log patterns were found over the last ${LOOKBACK_DAYS} days.
+The field used is \`${categorizationField}\`:
     
-    The following log patterns were found over the last
-    ${LOOKBACK_DAYS} days. The field used is \`${categorizationField}\`:
-    
-    ${JSON.stringify(
-      logPatterns.map((pattern) => {
-        const { regex, count } = pattern;
-        return {
-          regex,
-          count,
-        };
-      })
-    )}`
+${JSON.stringify(
+  logPatterns.map((pattern) => {
+    const { regex, count } = pattern;
+    return {
+      regex,
+      count,
+    };
+  })
+)}
+    `
       : '',
     `## Dataset analysis
-    
-    ${JSON.stringify(short)}`,
+Following is the list of fields found in the dataset with their types, count and values:
+
+${JSON.stringify(short)}
+    `,
+    `Remember: The goal is to create a focused set of queries that help operators 
+quickly identify when something unusual or problematic is happening in the system.
+Quality over quantity - aim for queries that have high signal-to-noise ratio.
+    `,
   ];
 
   logger.debug(() => {
@@ -252,25 +231,27 @@ root cause analysis. Some example of patterns:
     id: 'verify_kql_queries',
     connectorId,
     input: [
-      instruction,
-      `You've previously generated some queries. I've ran those queries
-      to get the count for each. The total count of documents for the
-      given time period is ${totalCount}. Based on these document counts,
-      select the queries that you consider relevant.
-      
-      ## Queries
+      INSTRUCTION,
+      `You've previously generated KQL queries to identify significant operational patterns. 
+I've executed those queries and obtained document counts for each. 
+Now I need you to analyze these results and prioritize the most operationally relevant queries.
 
-      ${JSON.stringify(
-        queriesWithShortIds.map(({ shortId, kql, title, count }) => {
-          return {
-            id: shortId,
-            kql,
-            title,
-            count,
-          };
-        })
-      )}
-      `,
+## Analysis Context
+- Total documents in time period: ${totalCount}
+- Lookback period: ${LOOKBACK_DAYS} days
+- Goal: Identify queries that provide the best signal-to-noise ratio for operational monitoring
+
+## Queries
+${JSON.stringify(
+  queriesWithShortIds.map(({ shortId, kql, title, count }) => {
+    return {
+      id: shortId,
+      kql,
+      title,
+      count,
+    };
+  })
+)}`,
     ].join('\n\n'),
     schema: {
       type: 'object',

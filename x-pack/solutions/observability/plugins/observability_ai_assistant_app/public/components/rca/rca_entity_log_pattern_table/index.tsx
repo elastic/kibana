@@ -17,7 +17,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { formatInteger } from '@kbn/observability-utils-common/format/integer';
-import { highlightPatternFromRegex } from '@kbn/genai-utils-common/log_analysis/highlight_patterns_from_regex';
+import { highlightPatternFromRegex } from '@kbn/genai-utils-common';
 import type { EntityInvestigation } from '@kbn/observability-ai-server/root_cause_analysis/tasks/investigate_entity/types';
 import React, { useMemo, useState } from 'react';
 import { orderBy } from 'lodash';

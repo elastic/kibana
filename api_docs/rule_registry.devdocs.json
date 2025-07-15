@@ -804,23 +804,15 @@
             "signature": [
               "({ ruleTypeIds, indices, metaFields, allowNoIndex, includeEmptyFields, indexFilter, }: { ruleTypeIds: string[]; indices: string[]; metaFields: string[]; allowNoIndex: boolean; includeEmptyFields: boolean; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; }) => Promise<{ browserFields: ",
+              " | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/alerting-types",
                 "scope": "common",
                 "docId": "kibKbnAlertingTypesPluginApi",
-                "section": "def-common.BrowserFields",
-                "text": "BrowserFields"
+                "section": "def-common.GetBrowserFieldsResponse",
+                "text": "GetBrowserFieldsResponse"
               },
-              "; fields: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "server",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-server.FieldDescriptor",
-                "text": "FieldDescriptor"
-              },
-              "[]; }>"
+              ">"
             ],
             "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
             "deprecated": false,
@@ -2982,11 +2974,7 @@
             "label": "createdAlerts",
             "description": [],
             "signature": [
-              "(T & ",
-              "CommonAlertFields870",
-              " & ",
-              "RevisionField880",
-              " & { _id: string; _index: string; })[]"
+              "(T & { \"kibana.alert.rule.category\": string; \"kibana.alert.rule.consumer\": string; \"kibana.alert.rule.execution.uuid\": string; \"kibana.alert.rule.name\": string; \"kibana.alert.rule.producer\": string; \"kibana.alert.rule.rule_type_id\": string; \"kibana.alert.rule.uuid\": string; \"kibana.space_ids\": string[]; \"kibana.alert.rule.tags\": string[]; \"@timestamp\": string; \"kibana.alert.rule.parameters\": { [key: string]: unknown; }; \"kibana.alert.rule.revision\": number; } & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
@@ -3120,9 +3108,9 @@
             "label": "alertWithSuppression",
             "description": [],
             "signature": [
-              "<T extends ",
-              "SuppressionFields8170",
-              ">(alerts: { _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
+              "<T extends { \"kibana.alert.suppression.terms\": { field: string; value: ",
+              "LeafNodeTypes",
+              "; }[]; \"kibana.alert.suppression.start\": Date; \"kibana.alert.suppression.end\": Date; \"kibana.alert.suppression.docs_count\": number; \"kibana.alert.instance.id\": string; }>(alerts: { _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -3844,9 +3832,9 @@
         "label": "SuppressedAlertService",
         "description": [],
         "signature": [
-          "<T extends ",
-          "SuppressionFields8170",
-          ">(alerts: { _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
+          "<T extends { \"kibana.alert.suppression.terms\": { field: string; value: ",
+          "LeafNodeTypes",
+          "; }[]; \"kibana.alert.suppression.start\": Date; \"kibana.alert.suppression.end\": Date; \"kibana.alert.suppression.docs_count\": number; \"kibana.alert.instance.id\": string; }>(alerts: { _id: string; _source: T; subAlerts?: { _id: string; _source: T; }[] | undefined; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined, maxAlerts?: number | undefined) => Promise<",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
