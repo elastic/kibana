@@ -311,8 +311,8 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleCompleteTourButton');
   }
 
-  public async clickRerunTour() {
-    await this.testSubjects.click('consoleRerunTourButton');
+  public async clickRunTour() {
+    await this.testSubjects.click('consoleRunTourButton');
   }
 
   public async openConsole() {

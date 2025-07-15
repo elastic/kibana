@@ -76,18 +76,18 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         },
       },
       {
-        label: i18n.translate('console.helpPopover.rerunTourLabel', {
-          defaultMessage: 'Re-run feature tour',
+        label: i18n.translate('console.helpPopover.runTourLabel', {
+          defaultMessage: 'Run getting started guide',
         }),
         css: styles.listItem,
         onClick: resetTour,
         extraAction: {
-          iconType: 'refresh',
+          iconType: 'play',
           alwaysShow: true,
           onClick: resetTour,
-          'data-test-subj': 'consoleRerunTourButton',
-          'aria-label': i18n.translate('console.helpPopover.rerunTourButtonAriaLabel', {
-            defaultMessage: 'Re-run feature tour button',
+          'data-test-subj': 'consoleRunTourButton',
+          'aria-label': i18n.translate('console.helpPopover.runTourButtonAriaLabel', {
+            defaultMessage: 'Run getting started guide button',
           }),
         },
       },
