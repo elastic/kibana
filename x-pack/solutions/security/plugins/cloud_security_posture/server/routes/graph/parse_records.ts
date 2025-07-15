@@ -108,16 +108,22 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     // Create entity nodes
     [...actorIdsArray, ...targetIdsArraySafe].forEach((id) => {
       if (nodesMap[id] === undefined) {
+        const shapeInfo = determineEntityNodeShape(
+          id,
+          castArray(ips ?? []),
+          castArray(hosts ?? []),
+          castArray(users ?? [])
+        );
+
+        // Generate sample flag badges (in a real implementation, this would come from the data)
+        const flagBadges = generateFlagBadges(id, shapeInfo.entityType);
+
         nodesMap[id] = {
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          ...determineEntityNodeShape(
-            id,
-            castArray(ips ?? []),
-            castArray(hosts ?? []),
-            castArray(users ?? [])
-          ),
+          ...shapeInfo,
+          flagBadges,
         };
       }
     });
@@ -159,23 +165,55 @@ const determineEntityNodeShape = (
 ): {
   shape: EntityNodeDataModel['shape'];
   icon?: string;
+  entityType?: 'user' | 'host' | 'other';
+  secondaryLabel?: string;
 } => {
   // If actor is a user return ellipse
   if (users.includes(actorId)) {
-    return { shape: 'ellipse', icon: 'user' };
+    return { 
+      shape: 'ellipse', 
+      icon: 'user',
+      entityType: 'user',
+      secondaryLabel: 'Detail information +99'
+    };
   }
 
   // If actor is a host return hexagon
   if (hosts.includes(actorId)) {
-    return { shape: 'hexagon', icon: 'storage' };
+    return { 
+      shape: 'hexagon', 
+      icon: 'storage',
+      entityType: 'host',
+      secondaryLabel: 'Detail information +99'
+    };
   }
 
   // If actor is an IP return diamond
   if (ips.includes(actorId)) {
-    return { shape: 'diamond', icon: 'globe' };
+    return { 
+      shape: 'diamond', 
+      icon: 'globe',
+      entityType: 'other',
+      secondaryLabel: 'Detail information +99'
+    };
   }
 
-  return { shape: 'hexagon' };
+  // Default logic for other types - use different shapes based on patterns in the ID
+  if (actorId.includes('database') || actorId.includes('service') || actorId.includes('application')) {
+    return { 
+      shape: 'rectangle',
+      icon: 'database',
+      entityType: 'other',
+      secondaryLabel: 'Detail information +99'
+    };
+  }
+
+  // Default to hexagon for unknown types
+  return { 
+    shape: 'hexagon',
+    entityType: 'other',
+    secondaryLabel: 'Detail information +99'
+  };
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
@@ -287,6 +325,39 @@ const connectNodes = (
     color: colorOverride ?? color,
     type: edgeType,
   };
+};
+
+const generateFlagBadges = (id: string, entityType?: string): Array<{ flag: string; count: number }> => {
+  // In a real implementation, this would analyze the actual data to determine
+  // the geographical distribution of related events/alerts
+  // For demonstration purposes, we'll generate consistent sample data based on the ID hash
+  
+  const sampleFlags = ['🇺🇸', '🇬🇧', '🇩🇪', '🇫🇷', '🇯🇵', '🇨🇦', '🇦🇺', '🇪🇺'];
+  const flagBadges = [];
+  
+  // Use a simple hash of the ID to make the flags consistent
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    const char = id.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  
+  // Generate 1-3 flag badges per node based on hash
+  const numFlags = Math.abs(hash % 3) + 1;
+  
+  for (let i = 0; i < numFlags; i++) {
+    const flagIndex = Math.abs(hash + i) % sampleFlags.length;
+    const flag = sampleFlags[flagIndex];
+    const count = Math.abs(hash + i * 7) % 99 + 1;
+    
+    // Avoid duplicate flags
+    if (!flagBadges.some(badge => badge.flag === flag)) {
+      flagBadges.push({ flag, count });
+    }
+  }
+  
+  return flagBadges;
 };
 
 const parseDocumentsData = (docs: string[] | string): NodeDocumentDataModel[] => {

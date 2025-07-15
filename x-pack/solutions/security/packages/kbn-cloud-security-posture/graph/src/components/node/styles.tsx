@@ -43,8 +43,9 @@ export const NODE_LABEL_WIDTH = 140;
 /**
  * The height of a node label in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
+ * Increased to accommodate multi-line labels with entity type, name, secondary label, and badges.
  */
-export const NODE_LABEL_HEIGHT = 20;
+export const NODE_LABEL_HEIGHT = 80;
 
 export const LABEL_BORDER_WIDTH = 1;
 export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;

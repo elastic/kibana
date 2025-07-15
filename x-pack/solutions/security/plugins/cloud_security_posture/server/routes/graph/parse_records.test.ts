@@ -229,12 +229,33 @@ describe('parseRecords', () => {
     const result = parseRecords(mockLogger, records);
 
     const userNode = result.nodes.find((n) => n.id === 'user1');
-    expect(userNode).toMatchObject({ shape: 'ellipse', icon: 'user' });
+    expect(userNode).toMatchObject({ 
+      shape: 'ellipse', 
+      icon: 'user',
+      entityType: 'user',
+      secondaryLabel: 'Detail information +99'
+    });
+    expect(userNode).toHaveProperty('flagBadges');
+    expect(Array.isArray(userNode?.flagBadges)).toBe(true);
 
     const hostNode = result.nodes.find((n) => n.id === 'host1');
-    expect(hostNode).toMatchObject({ shape: 'hexagon', icon: 'storage' });
+    expect(hostNode).toMatchObject({ 
+      shape: 'hexagon', 
+      icon: 'storage',
+      entityType: 'host',
+      secondaryLabel: 'Detail information +99'
+    });
+    expect(hostNode).toHaveProperty('flagBadges');
+    expect(Array.isArray(hostNode?.flagBadges)).toBe(true);
 
     const ipNode = result.nodes.find((n) => n.id === 'ip1');
-    expect(ipNode).toMatchObject({ shape: 'diamond', icon: 'globe' });
+    expect(ipNode).toMatchObject({ 
+      shape: 'diamond', 
+      icon: 'globe',
+      entityType: 'other',
+      secondaryLabel: 'Detail information +99'
+    });
+    expect(ipNode).toHaveProperty('flagBadges');
+    expect(Array.isArray(ipNode?.flagBadges)).toBe(true);
   });
 });
