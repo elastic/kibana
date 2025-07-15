@@ -7,6 +7,12 @@
 
 import * as rt from 'io-ts';
 
-export const AssetTypeRT = rt.type({
-  assetType: rt.literal('host'),
+export const SupportedEntityTypesRT = rt.keyof({
+  host: null,
 });
+
+export const EntityTypeRT = rt.type({
+  entityType: SupportedEntityTypesRT,
+});
+
+export type EntityTypes = rt.TypeOf<typeof SupportedEntityTypesRT>;
