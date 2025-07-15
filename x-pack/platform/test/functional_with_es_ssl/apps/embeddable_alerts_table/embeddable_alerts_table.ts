@@ -47,9 +47,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const config = getService('config');
   const retryTimeout = config.get('timeouts.try');
+  const waitForAlertsRetryTimeout = 5 * 60 * 1000; // 5 minutes
 
-  // Failing: See https://github.com/elastic/kibana/issues/227748
-  describe.skip('Embeddable alerts panel', () => {
+  describe('Embeddable alerts panel', () => {
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
@@ -59,8 +59,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       )!;
 
       const [stackRule, observabilityRule, securityRule] = await Promise.all([
-        createEsQueryRule(sampleDataLogsDataView.id, 'stack'),
-        createEsQueryRule(sampleDataLogsDataView.id, 'observability'),
+        createEsQueryRule(),
+        createCustomThreasholdRule(sampleDataLogsDataView.id),
         createSecurityRule(sampleDataLogsDataView.id),
       ]);
 
@@ -68,10 +68,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await waitForRuleToBecomeActive(observabilityRule.id);
       await waitForRuleToBecomeActive(securityRule.id);
 
-      await waitForAlertsToBeCreated(stackRule.id);
-      await waitForAlertsToBeCreated(observabilityRule.id);
-      await waitForAlertsToBeCreated(securityRule.id);
+      await waitForAlertsToBeCreated(stackRule.id, stackRule.rule_type_id);
+      await waitForAlertsToBeCreated(observabilityRule.id, observabilityRule.rule_type_id);
+      await waitForAlertsToBeCreated(securityRule.id, securityRule.rule_type_id);
 
+      // await indexAlertDocs();
       await pageObjects.dashboard.gotoDashboardURL();
     });
 
@@ -232,15 +233,68 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   });
 
-  const createEsQueryRule = async (index: string, solution: 'stack' | 'observability') => {
-    const name = `${solution}-rule`;
+  const createEsQueryRule = async () => {
+    const name = 'stack-rule';
     const createdRule = await rules.api.createRule({
       name,
-      ruleTypeId: `.es-query`,
-      schedule: { interval: '5s' },
-      consumer: solution === 'stack' ? 'stackAlerts' : 'logs',
+      schedule: {
+        interval: '5s',
+      },
+      consumer: 'stackAlerts',
+      ruleTypeId: '.es-query',
+      actions: [],
       tags: [name],
       params: {
+        searchType: 'esQuery',
+        timeWindowSize: 5,
+        timeWindowUnit: 'd',
+        threshold: [0],
+        thresholdComparator: '>',
+        size: 100,
+        esQuery: '{\n    "query":{\n      "match_all" : {}\n    }\n  }',
+        aggType: 'count',
+        groupBy: 'all',
+        termSize: 5,
+        excludeHitsFromPreviousRun: false,
+        sourceFields: [],
+        index: ['kibana_sample_data_logs'],
+        timeField: '@timestamp',
+      },
+    });
+
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
+
+    return createdRule;
+  };
+
+  const createCustomThreasholdRule = async (index: string) => {
+    const name = 'observability-rule';
+    const createdRule = await rules.api.createRule({
+      name,
+      schedule: {
+        interval: '5s',
+      },
+      consumer: 'logs',
+      ruleTypeId: 'observability.rules.custom_threshold',
+      actions: [],
+      tags: [name],
+      params: {
+        criteria: [
+          {
+            comparator: '>',
+            metrics: [
+              {
+                name: 'A',
+                aggType: 'count',
+              },
+            ],
+            threshold: [0],
+            timeSize: 1,
+            timeUnit: 'd',
+          },
+        ],
+        alertOnNoData: false,
+        alertOnGroupDisappear: false,
         searchConfiguration: {
           query: {
             query: '',
@@ -248,18 +302,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
           index,
         },
-        timeField: 'timestamp',
-        searchType: 'searchSource',
-        timeWindowSize: 5,
-        timeWindowUnit: 'h',
-        threshold: [-1],
-        thresholdComparator: '>',
-        size: 1,
-        aggType: 'count',
-        groupBy: 'all',
-        termSize: 5,
-        excludeHitsFromPreviousRun: false,
-        sourceFields: [],
       },
     });
 
@@ -294,7 +336,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         setup: '',
         license: '',
         interval: '5s',
-        from: 'now-10m',
+        from: 'now-10d',
         to: 'now',
         actions: [],
         enabled: true,
@@ -309,8 +351,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const waitForAlertsToBeCreated = async (ruleId: string) => {
-    return await retry.tryForTime(retryTimeout, async () => {
+  const waitForAlertsToBeCreated = async (ruleId: string, ruleTypeId: string) => {
+    return await retry.tryForTime(waitForAlertsRetryTimeout, async () => {
       const response = await es.search({
         index: '.alerts*',
         query: {
@@ -327,7 +369,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       if (response.hits.hits.length === 0) {
-        throw new Error(`No hits found for index .alerts* and ruleId ${ruleId}`);
+        throw new Error(
+          `No hits found for index .alerts*, ruleTypeId ${ruleTypeId}, and ruleId ${ruleId}`
+        );
       }
 
       return response;
@@ -341,11 +385,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const { execution_status: executionStatus } = rule || {};
       const { status } = executionStatus || {};
 
-      if (status === 'active' || status === 'ok') {
+      if (status !== 'error' && status !== 'unknown' && status !== 'pending') {
         return executionStatus?.status;
       }
 
-      throw new Error(`waitForStatus(active|ok): got ${status}`);
+      throw new Error(`Waiting for rule to become active. Status: ${status}`);
     });
   };
 
