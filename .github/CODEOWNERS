@@ -853,6 +853,7 @@ x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
+x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana @elastic/obs-ai-assistant
 x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
@@ -1036,7 +1037,6 @@ x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
-x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-knowledge-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
