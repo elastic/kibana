@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 const PREWRITTEN_ACTION_ID = 'uuid-actionId';
 const DISABLED_ACTION_TYPE = 'test.not-enabled';
 
-// eslint-disable-next-line import/no-default-export
 export default function typeNotEnabledTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
