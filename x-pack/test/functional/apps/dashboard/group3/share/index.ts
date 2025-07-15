@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { Conversation } from '@kbn/onechat-common';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export interface ListConversationsResponse {
-  results: Conversation[];
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Share', function () {
+    loadTestFile(require.resolve('./share_from_custom_space'));
+  });
 }
