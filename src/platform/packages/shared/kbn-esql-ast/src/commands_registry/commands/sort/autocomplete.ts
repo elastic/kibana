@@ -6,14 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-// import { isColumn } from '../../../ast/is';
+import { isColumn } from '../../../ast/is';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { ICommandCallbacks, Location } from '../../types';
 import type { ESQLCommand } from '../../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import {
-  handleFragment,
+  getFragmentData,
   suggestForExpression,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
@@ -44,6 +44,7 @@ export async function autocomplete(
         expressionRoot: undefined,
         location: Location.SORT,
         context,
+        advanceCursorInitially: false,
       });
     }
     case 'expression': {
@@ -61,7 +62,7 @@ export async function autocomplete(
         context,
       });
 
-      const sortCommandKeywordSuggestions = [
+      let sortCommandKeywordSuggestions = [
         sortModifierSuggestions.ASC,
         sortModifierSuggestions.DESC,
         sortModifierSuggestions.NULLS_FIRST,
@@ -70,13 +71,14 @@ export async function autocomplete(
         { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND, sortText: 'AAA' },
       ];
 
-      // // special case: cursor right after a column name
-      // if (isColumn(expressionRoot) && !/\s+$/.test(innerText)) {
-      //   sortCommandKeywordSuggestions.forEach((s) => {
-      //     s.text = `${expressionRoot.text} ${s.text}`; // add a space after the column name
-      //     s.filterText = expressionRoot.text; // turn off Monaco's filtering by the suggestion text
-      //   });
-      // }
+      // special case: cursor right after a column name
+      if (isColumn(expressionRoot) && !/\s+$/.test(innerText)) {
+        sortCommandKeywordSuggestions = sortCommandKeywordSuggestions.map((s) => ({
+          ...s,
+          text: `${expressionRoot.text} ${s.text}`, // add a space after the column name
+          filterText: expressionRoot.text, // turn off Monaco's filtering by the suggestion text
+        }));
+      }
 
       if (
         isExpressionComplete(
@@ -90,25 +92,20 @@ export async function autocomplete(
       return suggestions;
     }
     case 'order_complete': {
-      return handleFragment(
-        innerText,
-        () => true,
-        () => [],
-        (fragment, rangeToReplace) => {
-          return [
-            { ...pipeCompleteItem, text: ' | ' },
-            { ...commaCompleteItem, text: ', ' },
-            prependSpace(sortModifierSuggestions.NULLS_FIRST),
-            prependSpace(sortModifierSuggestions.NULLS_LAST),
-          ].map((suggestion) => ({
-            ...suggestion,
-            filterText: fragment,
-            text: fragment + suggestion.text,
-            rangeToReplace,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }));
-        }
-      );
+      const { fragment, rangeToReplace } = getFragmentData(innerText);
+
+      return [
+        { ...pipeCompleteItem, text: ' | ' },
+        { ...commaCompleteItem, text: ', ' },
+        prependSpace(sortModifierSuggestions.NULLS_FIRST),
+        prependSpace(sortModifierSuggestions.NULLS_LAST),
+      ].map((suggestion) => ({
+        ...suggestion,
+        filterText: fragment,
+        text: fragment + suggestion.text,
+        rangeToReplace,
+        command: TRIGGER_SUGGESTION_COMMAND,
+      }));
     }
     case 'after_order': {
       return [
@@ -119,23 +116,18 @@ export async function autocomplete(
       ];
     }
     case 'nulls_complete': {
-      return handleFragment(
-        innerText,
-        () => true,
-        () => [],
-        (fragment, rangeToReplace) => {
-          return [
-            { ...pipeCompleteItem, text: ' | ' },
-            { ...commaCompleteItem, text: ', ' },
-          ].map((suggestion) => ({
-            ...suggestion,
-            filterText: fragment,
-            text: fragment + suggestion.text,
-            rangeToReplace,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }));
-        }
-      );
+      const { fragment, rangeToReplace } = getFragmentData(innerText);
+
+      return [
+        { ...pipeCompleteItem, text: ' | ' },
+        { ...commaCompleteItem, text: ', ' },
+      ].map((suggestion) => ({
+        ...suggestion,
+        filterText: fragment,
+        text: fragment + suggestion.text,
+        rangeToReplace,
+        command: TRIGGER_SUGGESTION_COMMAND,
+      }));
     }
     case 'after_nulls': {
       return [

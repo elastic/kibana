@@ -135,25 +135,28 @@ export function handleFragment(
     rangeToReplace: { start: number; end: number }
   ) => ISuggestionItem[] | Promise<ISuggestionItem[]>
 ): ISuggestionItem[] | Promise<ISuggestionItem[]> {
-  /**
-   * @TODO — this string manipulation is crude and can't support all cases
-   * Checking for a partial word and computing the replacement range should
-   * really be done using the AST node, but we'll have to refactor further upstream
-   * to make that available. This is a quick fix to support the most common case.
-   */
-  const fragment = findFinalWord(innerText);
+  const { fragment, rangeToReplace } = getFragmentData(innerText);
   if (!fragment) {
     return getSuggestionsForIncomplete('');
   } else {
-    const rangeToReplace = {
-      start: innerText.length - fragment.length,
-      end: innerText.length,
-    };
     if (isFragmentComplete(fragment)) {
       return getSuggestionsForComplete(fragment, rangeToReplace);
     } else {
       return getSuggestionsForIncomplete(fragment, rangeToReplace);
     }
+  }
+}
+
+export function getFragmentData(innerText: string) {
+  const fragment = findFinalWord(innerText);
+  if (!fragment) {
+    return { fragment: '', rangeToReplace: { start: 0, end: 0 } };
+  } else {
+    const rangeToReplace = {
+      start: innerText.length - fragment.length,
+      end: innerText.length,
+    };
+    return { fragment, rangeToReplace };
   }
 }
 
@@ -341,6 +344,7 @@ export async function suggestForExpression({
   location,
   preferredExpressionType,
   context,
+  advanceCursorInitially = true,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
@@ -348,6 +352,7 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType: GetColumnsByTypeFn;
   context?: ICommandContext;
+  advanceCursorInitially?: boolean;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
 
@@ -450,7 +455,7 @@ export async function suggestForExpression({
 
     case 'empty_expression':
       const columnSuggestions: ISuggestionItem[] = await getColumnsByType('any', [], {
-        advanceCursor: true,
+        advanceCursor: advanceCursorInitially,
         openSuggestions: true,
       });
       suggestions.push(
