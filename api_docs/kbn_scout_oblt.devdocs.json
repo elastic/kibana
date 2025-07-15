@@ -1109,7 +1109,7 @@
         "tags": [],
         "label": "spaceTest",
         "description": [
-          "\nShould be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance."
+          "\nShould be used test spec files, running in parallel in isolated spaces against the same Kibana instance."
         ],
         "signature": [
           "TestType",
@@ -1255,7 +1255,7 @@
         "tags": [],
         "label": "test",
         "description": [
-          "\nShould be used for the test spec files executed seqentially."
+          "\nShould be used for the test spec files executed sequentially."
         ],
         "signature": [
           "TestType",
@@ -1395,7 +1395,9 @@
             "section": "def-common.ObltWorkerFixtures",
             "text": "ObltWorkerFixtures"
           },
-          ">"
+          " & { sloData: ",
+          "SloDataFixture",
+          "; }>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/single_thread_fixtures.ts",
         "deprecated": false,
@@ -6119,6 +6121,20 @@
                 "section": "def-common.ApiServicesFixture",
                 "text": "ApiServicesFixture"
               }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ObltWorkerFixtures.sloData",
+            "type": "Object",
+            "tags": [],
+            "label": "sloData",
+            "description": [],
+            "signature": [
+              "SloDataFixture"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
             "deprecated": false,
