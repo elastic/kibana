@@ -10,13 +10,13 @@
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
+import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CodeEditor } from '@kbn/code-editor';
 import { UISession } from '../../types';
 import { IClickActionDescriptor } from '..';
-import './inspect_button.scss';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 
 interface InspectFlyoutProps {
@@ -59,7 +59,7 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody className="searchSessionsFlyout" data-test-subj="searchSessionsFlyout">
+      <EuiFlyoutBody css={styles.flyout} data-test-subj="searchSessionsFlyout">
         <EuiText>
           <EuiText size="xs">
             <p>
@@ -129,3 +129,14 @@ export const createInspectActionDescriptor = (
     await overlay.onClose;
   },
 });
+
+const styles = {
+  flyout: css({
+    '.euiFlyoutBody__overflowContent': {
+      height: '100%',
+      '> div': {
+        height: '100%',
+      },
+    },
+  }),
+};
