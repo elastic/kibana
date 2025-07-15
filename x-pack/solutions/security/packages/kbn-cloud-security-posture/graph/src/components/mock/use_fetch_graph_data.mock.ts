@@ -33,6 +33,7 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             shape: 'ellipse',
             icon: 'user',
             entityType: 'user',
+            entityCount: 5,
             secondaryLabel: 'Detail information +5',
             flagBadges: [
               { flag: '🇺🇸', count: 3 },
@@ -46,10 +47,11 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             shape: 'hexagon',
             icon: 'question',
             entityType: 'host',
-            secondaryLabel: 'Detail information +99',
+            secondaryLabel: 'IP: 10.200.0.202 +99',
             flagBadges: [
               { flag: '🇺🇸', count: 15 },
               { flag: '🇨🇦', count: 99 },
+              { flag: '🇩🇪', count: 25 },
             ],
             documentsData: [
               {

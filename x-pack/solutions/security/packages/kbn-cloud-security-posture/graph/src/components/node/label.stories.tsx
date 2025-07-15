@@ -32,6 +32,9 @@ export default {
       options: ['user', 'host', 'other'],
       control: { type: 'radio' },
     },
+    entityCount: {
+      control: { type: 'number', min: 1, max: 20 },
+    },
     expandButtonClick: { action: 'expandButtonClick' },
   },
   decorators: [GlobalStylesStorybookDecorator],
@@ -56,7 +59,7 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
         {
           id: args.id,
           type: args.shape,
-          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick', 'entityType', 'secondaryLabel', 'flagBadges']),
+          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick', 'entityType', 'entityCount', 'secondaryLabel', 'flagBadges']),
           position: { x: 0, y: 0 },
         },
       ]}
@@ -97,6 +100,69 @@ export const ArnLabel: StoryObj<NodeViewModel> = {
     icon: 'user',
     interactive: true,
     entityType: 'user',
+    entityCount: 5,
+    secondaryLabel: 'Detail information +99',
+    flagBadges: [
+      { flag: '🇺🇸', count: 25 },
+      { flag: '🇪🇺', count: 99 },
+      { flag: '🇯🇵', count: 42 },
+    ],
+  },
+};
+
+export const HostWithIPs: StoryObj<NodeViewModel> = {
+  render: Template,
+
+  args: {
+    id: 'tin-mpb-pro-15',
+    label: 'tin-mpb-pro-15',
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'storage',
+    interactive: true,
+    entityType: 'host',
+    secondaryLabel: 'IP: 10.200.0.202 +99',
+    flagBadges: [
+      { flag: '🇺🇸', count: 45 },
+      { flag: '🇬🇧', count: 99 },
+    ],
+  },
+};
+
+export const GroupedUsers: StoryObj<NodeViewModel> = {
+  render: Template,
+
+  args: {
+    id: 'user-group',
+    label: 'Entity Name',
+    color: 'primary',
+    shape: 'ellipse',
+    icon: 'user',
+    interactive: true,
+    entityType: 'user',
+    entityCount: 12,
+    secondaryLabel: 'Detail information +99',
+    flagBadges: [
+      { flag: '🇺🇸', count: 25 },
+      { flag: '🇬🇧', count: 15 },
+      { flag: '🇩🇪', count: 8 },
+      { flag: '🇫🇷', count: 3 },
+    ],
+  },
+};
+
+export const GroupedOtherTypes: StoryObj<NodeViewModel> = {
+  render: Template,
+
+  args: {
+    id: 'other-group',
+    label: 'Entity Name',
+    color: 'primary',
+    shape: 'rectangle',
+    icon: 'database',
+    interactive: true,
+    entityType: 'other',
+    entityCount: 8,
     secondaryLabel: 'Detail information +99',
     flagBadges: [
       { flag: '🇺🇸', count: 25 },

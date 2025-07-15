@@ -61,26 +61,78 @@ GeneratedText.displayName = 'GeneratedText';
 export interface LabelProps {
   text?: string;
   entityType?: 'user' | 'host' | 'other';
+  entityCount?: number;
   secondaryLabel?: string;
   flagBadges?: Array<{ flag: string; count: number }>;
 }
 
-const LabelComponent = ({ text = '', entityType, secondaryLabel, flagBadges = [] }: LabelProps) => {
+const LabelComponent = ({ text = '', entityType, entityCount, secondaryLabel, flagBadges = [] }: LabelProps) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
 
   // Map entity types to display names
-  const getEntityTypeDisplay = (type: string | undefined) => {
-    switch (type) {
-      case 'user':
-        return 'User';
-      case 'host':
-        return 'Host';
-      case 'other':
-        return 'Other Types';
-      default:
-        return '';
+  const getEntityTypeDisplay = (type: string | undefined, count?: number) => {
+    const baseDisplay = (() => {
+      switch (type) {
+        case 'user':
+          return 'User';
+        case 'host':
+          return 'Host';
+        case 'other':
+          return 'Other Types';
+        default:
+          return '';
+      }
+    })();
+    
+    // Add count if provided and greater than 1
+    if (count && count > 1) {
+      return `${count} ${baseDisplay}`;
     }
+    
+    return baseDisplay;
   };
+
+  // Process secondary label for IP addresses (hosts)
+  const processSecondaryLabel = (label?: string, entityType?: string) => {
+    if (!label) return label;
+    
+    // For hosts, check if the label contains IP addresses
+    if (entityType === 'host' && label.includes('IP:')) {
+      // Extract IP addresses from the label
+      // Format: "IP: 10.200.0.202 +99" or similar
+      const ipMatch = label.match(/IP:\s*([^+]*)\s*(\+\d+)?/);
+      if (ipMatch) {
+        const ipPart = ipMatch[1].trim();
+        const countPart = ipMatch[2] || '';
+        
+        // For long IP lists, show only the first IP and then +count
+        if (ipPart.includes(',') || ipPart.includes(' ')) {
+          const firstIp = ipPart.split(/[,\s]+/)[0];
+          return `IP: ${firstIp} ${countPart}`;
+        }
+        return `IP: ${ipPart} ${countPart}`;
+      }
+    }
+    
+    return label;
+  };
+
+  // Limit flag badges to maximum 2 with overflow indicator
+  const processedFlagBadges = React.useMemo(() => {
+    if (flagBadges.length <= 2) {
+      return flagBadges;
+    }
+    
+    // Show first 2 flags and combine the rest into a +X indicator
+    const visibleBadges = flagBadges.slice(0, 2);
+    const remainingCount = flagBadges.length - 2;
+    const totalRemainingEvents = flagBadges.slice(2).reduce((sum, badge) => sum + badge.count, 0);
+    
+    return [
+      ...visibleBadges,
+      { flag: `+${remainingCount}`, count: totalRemainingEvents }
+    ];
+  }, [flagBadges]);
 
   return (
     <div
@@ -92,10 +144,10 @@ const LabelComponent = ({ text = '', entityType, secondaryLabel, flagBadges = []
         overflow: visible;
       `}
     >
-      {/* Entity Type Tag */}
+      {/* Entity Type Tag with Count */}
       {entityType && (
         <EuiText size="xs" color="subdued" textAlign="center">
-          <strong>{getEntityTypeDisplay(entityType)}</strong>
+          <strong>{getEntityTypeDisplay(entityType, entityCount)}</strong>
         </EuiText>
       )}
       
@@ -126,15 +178,15 @@ const LabelComponent = ({ text = '', entityType, secondaryLabel, flagBadges = []
         </EuiToolTip>
       </EuiText>
 
-      {/* Secondary Label */}
+      {/* Secondary Label with IP processing */}
       {secondaryLabel && (
         <EuiText size="xs" color="subdued" textAlign="center">
-          {secondaryLabel}
+          {processSecondaryLabel(secondaryLabel, entityType)}
         </EuiText>
       )}
 
-      {/* Flag Badges */}
-      {flagBadges.length > 0 && (
+      {/* Flag Badges with 2-badge limit */}
+      {processedFlagBadges.length > 0 && (
         <div
           css={css`
             margin-top: 4px;
@@ -144,7 +196,7 @@ const LabelComponent = ({ text = '', entityType, secondaryLabel, flagBadges = []
             gap: 2px;
           `}
         >
-          {flagBadges.map((badge, index) => (
+          {processedFlagBadges.map((badge, index) => (
             <EuiBadge
               key={`${badge.flag}-${index}`}
               color="hollow"

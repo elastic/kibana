@@ -166,25 +166,33 @@ const determineEntityNodeShape = (
   shape: EntityNodeDataModel['shape'];
   icon?: string;
   entityType?: 'user' | 'host' | 'other';
+  entityCount?: number;
   secondaryLabel?: string;
 } => {
+  // Generate sample entity count for demonstration (in real implementation, this would come from actual grouping logic)
+  const entityCount = Math.random() < 0.3 ? Math.floor(Math.random() * 8) + 2 : undefined;
+
   // If actor is a user return ellipse
   if (users.includes(actorId)) {
     return { 
       shape: 'ellipse', 
       icon: 'user',
       entityType: 'user',
+      entityCount,
       secondaryLabel: 'Detail information +99'
     };
   }
 
   // If actor is a host return hexagon
   if (hosts.includes(actorId)) {
+    // Generate sample IP addresses for hosts
+    const sampleIps = generateSampleIps(actorId);
     return { 
       shape: 'hexagon', 
       icon: 'storage',
       entityType: 'host',
-      secondaryLabel: 'Detail information +99'
+      entityCount,
+      secondaryLabel: sampleIps
     };
   }
 
@@ -194,6 +202,7 @@ const determineEntityNodeShape = (
       shape: 'diamond', 
       icon: 'globe',
       entityType: 'other',
+      entityCount,
       secondaryLabel: 'Detail information +99'
     };
   }
@@ -204,6 +213,7 @@ const determineEntityNodeShape = (
       shape: 'rectangle',
       icon: 'database',
       entityType: 'other',
+      entityCount,
       secondaryLabel: 'Detail information +99'
     };
   }
@@ -212,6 +222,7 @@ const determineEntityNodeShape = (
   return { 
     shape: 'hexagon',
     entityType: 'other',
+    entityCount,
     secondaryLabel: 'Detail information +99'
   };
 };
@@ -327,6 +338,31 @@ const connectNodes = (
   };
 };
 
+const generateSampleIps = (hostId: string): string => {
+  // Generate sample IP addresses for hosts based on hash to make it consistent
+  let hash = 0;
+  for (let i = 0; i < hostId.length; i++) {
+    const char = hostId.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  
+  // Generate IP addresses
+  const ipBase = Math.abs(hash % 255);
+  const ipSecond = Math.abs((hash >> 8) % 255);
+  const ipThird = Math.abs((hash >> 16) % 255);
+  const numIps = Math.abs(hash % 3) + 1; // 1-3 IPs
+  
+  if (numIps === 1) {
+    return `IP: 10.${ipBase}.${ipSecond}.${ipThird}`;
+  }
+  
+  const firstIp = `10.${ipBase}.${ipSecond}.${ipThird}`;
+  const additionalCount = Math.abs(hash % 99) + numIps - 1;
+  
+  return `IP: ${firstIp} +${additionalCount}`;
+};
+
 const generateFlagBadges = (id: string, entityType?: string): Array<{ flag: string; count: number }> => {
   // In a real implementation, this would analyze the actual data to determine
   // the geographical distribution of related events/alerts
@@ -343,8 +379,8 @@ const generateFlagBadges = (id: string, entityType?: string): Array<{ flag: stri
     hash = hash & hash; // Convert to 32-bit integer
   }
   
-  // Generate 1-3 flag badges per node based on hash
-  const numFlags = Math.abs(hash % 3) + 1;
+  // Generate 1-4 flag badges per node based on hash (frontend will limit display to 2)
+  const numFlags = Math.abs(hash % 4) + 1;
   
   for (let i = 0; i < numFlags; i++) {
     const flagIndex = Math.abs(hash + i) % sampleFlags.length;

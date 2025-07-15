@@ -27,7 +27,7 @@ const NODE_SHAPE_WIDTH = 87;
 const NODE_SHAPE_HEIGHT = 96;
 
 export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick, entityType, secondaryLabel, flagBadges } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick, entityType, entityCount, secondaryLabel, flagBadges } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
@@ -90,6 +90,7 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
       <Label 
         text={label ? label : id} 
         entityType={entityType}
+        entityCount={entityCount}
         secondaryLabel={secondaryLabel}
         flagBadges={flagBadges}
       />

@@ -83,6 +83,7 @@ export const nodeBaseDataSchema = schema.object({
     schema.literal('host'), 
     schema.literal('other'),
   ])),
+  entityCount: schema.maybe(schema.number()),
   secondaryLabel: schema.maybe(schema.string()),
   flagBadges: schema.maybe(schema.arrayOf(schema.object({
     flag: schema.string(),

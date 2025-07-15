@@ -27,7 +27,7 @@ const NODE_SHAPE_WIDTH = 90;
 const NODE_SHAPE_HEIGHT = 90;
 
 export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick, entityType, secondaryLabel, flagBadges } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick, entityType, entityCount, secondaryLabel, flagBadges } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
@@ -86,6 +86,7 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
       <Label 
         text={label ? label : id} 
         entityType={entityType}
+        entityCount={entityCount}
         secondaryLabel={secondaryLabel}
         flagBadges={flagBadges}
       />

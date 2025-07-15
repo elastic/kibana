@@ -237,16 +237,25 @@ describe('parseRecords', () => {
     });
     expect(userNode).toHaveProperty('flagBadges');
     expect(Array.isArray(userNode?.flagBadges)).toBe(true);
+    // entityCount is optional and may or may not be present
+    if ('entityCount' in userNode!) {
+      expect(typeof userNode.entityCount).toBe('number');
+    }
 
     const hostNode = result.nodes.find((n) => n.id === 'host1');
     expect(hostNode).toMatchObject({ 
       shape: 'hexagon', 
       icon: 'storage',
-      entityType: 'host',
-      secondaryLabel: 'Detail information +99'
+      entityType: 'host'
     });
     expect(hostNode).toHaveProperty('flagBadges');
     expect(Array.isArray(hostNode?.flagBadges)).toBe(true);
+    // Host should have IP information in secondaryLabel
+    expect(hostNode?.secondaryLabel).toMatch(/IP:/);
+    // entityCount is optional and may or may not be present
+    if ('entityCount' in hostNode!) {
+      expect(typeof hostNode.entityCount).toBe('number');
+    }
 
     const ipNode = result.nodes.find((n) => n.id === 'ip1');
     expect(ipNode).toMatchObject({ 
@@ -257,5 +266,9 @@ describe('parseRecords', () => {
     });
     expect(ipNode).toHaveProperty('flagBadges');
     expect(Array.isArray(ipNode?.flagBadges)).toBe(true);
+    // entityCount is optional and may or may not be present
+    if ('entityCount' in ipNode!) {
+      expect(typeof ipNode.entityCount).toBe('number');
+    }
   });
 });
