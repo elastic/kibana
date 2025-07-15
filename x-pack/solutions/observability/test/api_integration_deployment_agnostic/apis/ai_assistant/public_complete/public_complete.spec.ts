@@ -16,7 +16,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { createLlmProxy, LlmProxy } from '../utils/create_llm_proxy';
-import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { decodeEvents } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
