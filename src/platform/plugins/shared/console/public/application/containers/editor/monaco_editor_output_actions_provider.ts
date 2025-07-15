@@ -145,10 +145,6 @@ export class MonacoEditorOutputActionsProvider {
     startLineNumber: number,
     endLineNumber: number
   ): Promise<AdjustedParsedRequest[]> {
-    if (!model) {
-      return [];
-    }
-
     const parser = createOutputParser();
     const parsedRequests = await parser(model.getValue(), undefined).responses;
 
@@ -181,10 +177,6 @@ export class MonacoEditorOutputActionsProvider {
 
   // Set the cursor to the first line of the editor
   public selectFirstLine() {
-    const model = this.editor.getModel();
-    if (!model) {
-      return;
-    }
     this.editor.setSelection(new monaco.Selection(0, 0, 0, 0));
   }
 

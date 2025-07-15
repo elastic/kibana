@@ -209,9 +209,7 @@ export class MonacoEditorActionsProvider {
     if (!model) {
       return [];
     }
-
     const parsedRequests = await this.parsedRequestsProvider.getRequests();
-
     const selectedRequests: AdjustedParsedRequest[] = [];
     for (const [index, parsedRequest] of parsedRequests.entries()) {
       const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
