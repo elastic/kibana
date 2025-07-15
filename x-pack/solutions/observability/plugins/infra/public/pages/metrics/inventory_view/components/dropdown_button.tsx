@@ -17,14 +17,12 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { KubernetesTour } from './kubernetes_tour';
 
 interface Props {
   'data-test-subj'?: string;
   label: string;
   onClick: () => void;
   children: ReactNode;
-  showKubernetesInfo?: boolean;
 }
 
 type PropsWithTheme = Props & WithEuiThemeProps;
@@ -46,7 +44,7 @@ const ButtonLabel = ({ label, theme }: { label: string; theme?: EuiThemeComputed
 );
 
 export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
-  const { onClick, label, theme, children, showKubernetesInfo } = props;
+  const { onClick, label, theme, children } = props;
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -55,13 +53,8 @@ export const DropdownButton = withEuiTheme((props: PropsWithTheme) => {
         border: theme?.euiTheme.border.thin,
       }}
     >
-      {showKubernetesInfo ? (
-        <KubernetesTour>
-          <ButtonLabel label={label} theme={theme.euiTheme} />
-        </KubernetesTour>
-      ) : (
-        <ButtonLabel label={label} theme={theme.euiTheme} />
-      )}
+      <ButtonLabel label={label} theme={theme.euiTheme} />
+
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           aria-label={i18n.translate('xpack.infra.dropdownButton.button.ariaLabel', {
