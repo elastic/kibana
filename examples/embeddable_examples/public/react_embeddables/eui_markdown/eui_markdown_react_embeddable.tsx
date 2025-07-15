@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiMarkdownEditor, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
+import { EuiLink, EuiMarkdownEditor, EuiMarkdownFormat, getDefaultEuiMarkdownPlugins, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -99,14 +99,25 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     return {
       api,
       Component: () => {
+
+
         // get state for rendering
         const content = useStateFromPublishingSubject(markdownStateManager.api.content$);
         const viewMode = useStateFromPublishingSubject(
           getViewModeSubject(api) ?? new BehaviorSubject('view')
         );
-        const { euiTheme } = useEuiTheme();
+        const excludingPlugins = Array<'lineBreaks' | 'linkValidator' | 'tooltip'>();
 
-        return viewMode === 'edit' ? (
+        const { euiTheme } = useEuiTheme();
+        const { parsingPlugins, processingPlugins, uiPlugins } = getDefaultEuiMarkdownPlugins({
+          exclude: excludingPlugins,
+        });
+          // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
+  processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
+       
+  console.log(uiPlugins);
+
+        return viewMode === 'edit' ? ( 
           <EuiMarkdownEditor
             css={css`
               width: 100%;
@@ -116,7 +127,10 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
             aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableAriaLabel', {
               defaultMessage: 'Dashboard markdown editor',
             })}
+            processingPluginList={processingPlugins}
             height="full"
+            uiPlugins={uiPlugins}
+
           />
         ) : (
           <EuiMarkdownFormat
