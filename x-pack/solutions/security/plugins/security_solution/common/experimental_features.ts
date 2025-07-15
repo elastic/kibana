@@ -104,11 +104,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables advanced ESQL generation for the Assistant.
-   */
-  advancedEsqlGeneration: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -166,7 +161,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Response actions telemetry collection
    * Should be enabled in 8.17.0
    */
-  responseActionsTelemetryEnabled: false,
+  responseActionsTelemetryEnabled: true,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
@@ -196,7 +191,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables scheduling gap fills for rules
    */
-  bulkFillRuleGapsEnabled: false,
+  bulkFillRuleGapsEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters

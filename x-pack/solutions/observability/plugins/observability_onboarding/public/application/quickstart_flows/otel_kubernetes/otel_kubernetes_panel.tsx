@@ -170,7 +170,7 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
                       }
                     )}
                     position="top"
-                    type="iInCircle"
+                    type="info"
                   />
                 </p>
                 <EuiSpacer />

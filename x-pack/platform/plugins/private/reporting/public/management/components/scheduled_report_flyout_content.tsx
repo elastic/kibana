@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import {
   EuiBetaBadge,
   EuiButton,
@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormLabel,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -39,6 +40,12 @@ import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { Frequency } from '@kbn/rrule';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
+import {
+  convertStringToMoment,
+  convertMomentToString,
+} from '@kbn/response-ops-recurring-schedule-form/converters/moment';
 import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ResponsiveFormGroup } from './responsive_form_group';
 import { getReportParams } from '../report_params';
@@ -49,15 +56,25 @@ import { useGetReportingHealthQuery } from '../hooks/use_get_reporting_health_qu
 import { ReportTypeData, ScheduledReport } from '../../types';
 import * as i18n from '../translations';
 import { SCHEDULED_REPORT_FORM_ID } from '../constants';
+import { getStartDateValidator } from '../validators/start_date_validator';
+
+const { emptyField } = fieldValidators;
 
 const FormField = getUseField({
   component: Field,
 });
 
+const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((tz) => ({
+  inputDisplay: tz,
+  value: tz,
+})) ?? [{ text: 'UTC', value: 'UTC' }];
+
 export type FormData = Pick<
   ScheduledReport,
   | 'title'
   | 'reportTypeId'
+  | 'startDate'
+  | 'timezone'
   | 'recurringSchedule'
   | 'sendByEmail'
   | 'emailRecipients'
@@ -119,8 +136,6 @@ export const ScheduledReportFlyoutContent = ({
     http,
   });
   const { defaultTimezone } = useDefaultTimezone();
-  const now = useMemo(() => moment().tz(defaultTimezone), [defaultTimezone]);
-  const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
   const schema = useMemo(
     () =>
       getScheduledReportFormSchema(
@@ -130,8 +145,6 @@ export const ScheduledReportFlyoutContent = ({
     [availableReportTypes, validateEmailAddresses]
   );
   const recurring = true;
-  const startDate = defaultStartDateValue;
-  const timezone = defaultTimezone;
   const { form } = useForm<FormData>({
     defaultValue: scheduledReport,
     options: { stripEmptyFields: true },
@@ -141,14 +154,15 @@ export const ScheduledReportFlyoutContent = ({
         const {
           title,
           reportTypeId,
+          startDate,
+          timezone,
           recurringSchedule,
           optimizedForPrinting,
           sendByEmail,
           emailRecipients,
         } = formData;
-        // Remove start date since it's not supported for now
-        const { dtstart, ...rrule } = convertToRRule({
-          startDate: now,
+        const rrule = convertToRRule({
+          startDate,
           timezone,
           recurringSchedule,
           includeTime: true,
@@ -187,10 +201,12 @@ export const ScheduledReportFlyoutContent = ({
       }
     },
   });
-  const [{ reportTypeId, sendByEmail }] = useFormData<FormData>({
+  const [{ reportTypeId, startDate, timezone, sendByEmail }] = useFormData<FormData>({
     form,
-    watch: ['reportTypeId', 'sendByEmail'],
+    watch: ['reportTypeId', 'startDate', 'timezone', 'sendByEmail'],
   });
+  const now = useMemo(() => moment().set({ second: 0, millisecond: 0 }), []);
+  const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
 
   useEffect(() => {
     if (!readOnly && !hasManageReportingPrivilege && userProfile?.user.email) {
@@ -302,17 +318,79 @@ export const ScheduledReportFlyoutContent = ({
             <ResponsiveFormGroup
               title={<h3>{i18n.SCHEDULED_REPORT_FORM_SCHEDULE_SECTION_TITLE}</h3>}
             >
+              <FormField<string, FormData, Moment>
+                path="startDate"
+                config={{
+                  type: FIELD_TYPES.DATE_PICKER,
+                  label: i18n.SCHEDULED_REPORT_FORM_START_DATE_LABEL,
+                  defaultValue: defaultStartDateValue,
+                  serializer: convertMomentToString,
+                  deserializer: convertStringToMoment,
+                  validations: [
+                    {
+                      validator: emptyField(i18n.SCHEDULED_REPORT_FORM_START_DATE_REQUIRED_MESSAGE),
+                    },
+                    {
+                      validator: getStartDateValidator(now, timezone ?? defaultTimezone),
+                    },
+                  ],
+                }}
+                componentProps={{
+                  compressed: true,
+                  fullWidth: true,
+                  'data-test-subj': 'startDatePicker',
+                  euiFieldProps: {
+                    compressed: true,
+                    fullWidth: true,
+                    showTimeSelect: true,
+                    minDate: now,
+                    readOnly,
+                  },
+                }}
+              />
+              <FormField
+                path="timezone"
+                config={{
+                  type: FIELD_TYPES.SUPER_SELECT,
+                  defaultValue: defaultTimezone,
+                  validations: [
+                    {
+                      validator: emptyField(i18n.SCHEDULED_REPORT_FORM_START_DATE_REQUIRED_MESSAGE),
+                    },
+                  ],
+                }}
+                componentProps={{
+                  id: 'timezone',
+                  compressed: true,
+                  fullWidth: true,
+                  'data-test-subj': 'timezoneCombobox',
+                  euiFieldProps: {
+                    compressed: true,
+                    fullWidth: true,
+                    options: TIMEZONE_OPTIONS,
+                    prepend: (
+                      <EuiFormLabel htmlFor="timezone">
+                        {i18n.SCHEDULED_REPORT_FORM_TIMEZONE_LABEL}
+                      </EuiFormLabel>
+                    ),
+                    readOnly,
+                  },
+                }}
+              />
               {isRecurring && (
-                <RecurringScheduleFormFields
-                  startDate={!readOnly ? startDate : undefined}
-                  timezone={!readOnly ? (timezone ? [timezone] : [defaultTimezone]) : undefined}
-                  hideTimezone
-                  readOnly={readOnly}
-                  supportsEndOptions={false}
-                  minFrequency={Frequency.MONTHLY}
-                  showTimeInSummary
-                  compressed
-                />
+                <>
+                  <EuiSpacer size="m" />
+                  <RecurringScheduleFormFields
+                    startDate={!readOnly ? startDate : undefined}
+                    timezone={!readOnly ? (timezone ? [timezone] : [defaultTimezone]) : undefined}
+                    hideTimezone
+                    readOnly={readOnly}
+                    supportsEndOptions={false}
+                    minFrequency={Frequency.MONTHLY}
+                    showTimeInSummary
+                    compressed
+                  />
+                </>
               )}
             </ResponsiveFormGroup>
             <ResponsiveFormGroup
@@ -367,7 +445,7 @@ export const ScheduledReportFlyoutContent = ({
                       {!readOnly && (
                         <EuiCallOut
                           title={i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE}
-                          iconType="iInCircle"
+                          iconType="info"
                           size="s"
                         >
                           <p>{i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_MESSAGE}</p>
@@ -381,7 +459,7 @@ export const ScheduledReportFlyoutContent = ({
                   <EuiSpacer size="m" />
                   <EuiCallOut
                     title={i18n.SCHEDULED_REPORT_FORM_MISSING_EMAIL_CONNECTOR_TITLE}
-                    iconType="iInCircle"
+                    iconType="info"
                     size="s"
                     color="warning"
                   >
@@ -405,6 +483,7 @@ export const ScheduledReportFlyoutContent = ({
               <EuiButton
                 type="submit"
                 form={SCHEDULED_REPORT_FORM_ID}
+                data-test-subj="scheduleExportSubmitButton"
                 isDisabled={isReportingHealthLoading || isUserProfileLoading}
                 onClick={onSubmit}
                 isLoading={isScheduleExportLoading}

@@ -34,7 +34,7 @@ export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const
 export const CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID = 'cases:incrementalIdDisplay:enabled';
 
 /**
- * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
+ * If more values are added here please also add them here: x-pack/platform/test/cases_api_integration/common/plugins
  */
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,

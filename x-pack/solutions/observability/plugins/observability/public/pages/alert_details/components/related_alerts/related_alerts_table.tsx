@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -95,6 +96,15 @@ export function RelatedAlertsTable({ alertData }: Props) {
           defaultHeight: 'auto',
         }}
         height="600px"
+        emptyState={{
+          messageTitle: i18n.translate('xpack.observability.relatedAlertsTable.emptyState.title', {
+            defaultMessage: 'No related alerts found',
+          }),
+          messageBody: i18n.translate('xpack.observability.relatedAlertsTable.emptyState.body', {
+            defaultMessage:
+              'No existing alerts match our related alerts criteria at this time. This may change if more alerts appear, so you may want to check back later.',
+          }),
+        }}
       />
     </EuiFlexGroup>
   );

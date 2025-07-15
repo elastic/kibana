@@ -2946,6 +2946,9 @@
       "index_name": {
         "type": "keyword"
       },
+      "inference_id": {
+        "type": "keyword"
+      },
       "installation_status": {
         "type": "keyword"
       },

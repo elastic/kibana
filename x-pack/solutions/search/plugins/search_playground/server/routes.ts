@@ -115,15 +115,16 @@ export function defineRoutes({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
       const { messages, data } = request.body;
-      const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
-        {
-          connectorId: data.connector_id,
-          model: data.summarization_model,
-          citations: data.citations,
-          prompt: data.prompt,
-        },
-        { actions, inference, logger, request }
-      );
+      const { chatModel, chatPrompt, questionRewritePrompt, connector, summarizationModel } =
+        await getChatParams(
+          {
+            connectorId: data.connector_id,
+            model: data.summarization_model,
+            citations: data.citations,
+            prompt: data.prompt,
+          },
+          { actions, inference, logger, request }
+        );
 
       let sourceFields = {};
 
@@ -139,7 +140,7 @@ export function defineRoutes({
         throw Error(e);
       }
 
-      const model = MODELS.find((m) => m.model === data.summarization_model);
+      const model = MODELS.find((m) => m.model === summarizationModel);
       const modelPromptLimit = model?.promptTokenLimit;
 
       const chain = ConversationalChain({
@@ -162,7 +163,7 @@ export function defineRoutes({
           connectorType:
             connector.actionTypeId +
             (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
-          model: data.summarization_model ?? '',
+          model: summarizationModel ?? '',
           isCitationsEnabled: data.citations,
         });
 

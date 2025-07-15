@@ -146,36 +146,33 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         query: schema.object({
           forceWrite: schema.boolean({ defaultValue: false }),
         }),
-        // TODO: body is not going to be nullable. It will be fixed in the followup PR
-        body: schema.nullable(
-          schema.maybe(
-            schema.object({
-              rules: schema.arrayOf(
-                schema.object({
-                  rule_id: schema.string(),
-                  type: schema.string(),
-                  criteria: schema.arrayOf(
-                    schema.object({
-                      type: schema.string(),
-                      metadata: schema.maybe(schema.string()),
-                      values: schema.maybe(schema.arrayOf(schema.string())),
-                    })
+        body: schema.maybe(
+          schema.object({
+            rules: schema.arrayOf(
+              schema.object({
+                rule_id: schema.string(),
+                type: schema.string(),
+                criteria: schema.arrayOf(
+                  schema.object({
+                    type: schema.string(),
+                    metadata: schema.maybe(schema.string()),
+                    values: schema.maybe(schema.arrayOf(schema.string())),
+                  })
+                ),
+                actions: schema.object({
+                  ids: schema.maybe(schema.arrayOf(schema.string())),
+                  docs: schema.maybe(
+                    schema.arrayOf(
+                      schema.object({
+                        _id: schema.string(),
+                        _index: schema.string(),
+                      })
+                    )
                   ),
-                  actions: schema.object({
-                    ids: schema.maybe(schema.arrayOf(schema.string())),
-                    docs: schema.maybe(
-                      schema.arrayOf(
-                        schema.object({
-                          _id: schema.string(),
-                          _index: schema.string(),
-                        })
-                      )
-                    ),
-                  }),
-                })
-              ),
-            })
-          )
+                }),
+              })
+            ),
+          })
         ),
       },
     },
@@ -201,7 +198,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       }
       const rulesetId = request.params.ruleset_id;
       const forceWrite = request.query.forceWrite;
-      const rules = request.body?.rules as QueryRulesQueryRuleset['rules'] | undefined;
+      const rules = request.body?.rules as QueryRulesQueryRuleset['rules'];
       const isExisting = await isQueryRulesetExist(asCurrentUser, rulesetId);
       if (isExisting && !forceWrite) {
         return response.customError({

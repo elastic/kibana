@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import {
   batchTelemetryRecords,
   responseActionsCustomRuleTelemetryData,
@@ -55,7 +55,7 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
       ];
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running response actions rules telemetry task');
+      log.debug('Running response actions rules telemetry task');
 
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
@@ -108,9 +108,9 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
           licenseInfo
         );
 
-        log.l('Custom response actions rules data', {
+        log.debug('Custom response actions rules data', {
           data: JSON.stringify(responseActionsRulesTelemetryData),
-        });
+        } as LogMeta);
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelEndpointPrefix),
@@ -127,7 +127,7 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         const documents = cloneDeep(Object.values(responseActionsRulesTelemetryData));
 
         if (telemetryConfiguration.use_async_sender) {
-          await sender.sendAsync(TelemetryChannel.LISTS, documents);
+          sender.sendAsync(TelemetryChannel.LISTS, documents);
         } else {
           const batches = batchTelemetryRecords(documents, maxTelemetryBatch);
           for (const batch of batches) {
@@ -141,9 +141,9 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
           responseActionsRulesTelemetryData.response_actions_rules
         ).reduce((acc, count) => acc + count, 0);
 
-        log.l('Response actions rules telemetry task executed', {
+        log.debug('Response actions rules telemetry task executed', {
           totalCount,
-        });
+        } as LogMeta);
 
         return totalCount;
       } catch (err) {

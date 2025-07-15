@@ -43,6 +43,8 @@ describe('Host Summary Component', () => {
     startDate: '2019-06-15T06:00:00.000Z',
     hostName: 'testHostName',
     jobNameById: {},
+    scopeId: 'default',
+    isFlyoutOpen: false,
   };
 
   beforeEach(() => {

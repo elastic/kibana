@@ -176,11 +176,11 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
             name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
               defaultMessage: 'Documentation',
             }),
-            icon: 'iInCircle',
+            icon: 'info',
             renderItem: () => (
               <EuiContextMenuItem
                 key="about"
-                icon="iInCircle"
+                icon="info"
                 data-test-subj="esql-about"
                 target="_blank"
                 href={docLinks.links.query.queryESQL}

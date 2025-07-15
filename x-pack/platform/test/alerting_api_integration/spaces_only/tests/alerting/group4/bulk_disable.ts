@@ -14,7 +14,6 @@ import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
-// eslint-disable-next-line import/no-default-export
 export default function createDisableRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');

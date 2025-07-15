@@ -29,7 +29,7 @@ info:
     This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
   title: Kibana Serverless APIs
-  version: 1.0.2
+  version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/
@@ -64719,7 +64719,7 @@ components:
         defaultModel:
           type: string
           description: The generative artificial intelligence model for Google Gemini to use.
-          default: gemini-1.5-pro-002
+          default: gemini-2.5-pro
         gcpRegion:
           type: string
           description: The GCP region where the Vertex AI endpoint enabled.

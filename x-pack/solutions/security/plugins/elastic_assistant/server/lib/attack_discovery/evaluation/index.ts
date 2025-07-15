@@ -98,6 +98,7 @@ export const evaluateAttackDiscovery = async ({
         telemetryMetadata: {
           pluginId: 'security_attack_discovery',
         },
+        model: connector.config?.defaultModel,
       });
 
       const graph = getDefaultAttackDiscoveryGraph({

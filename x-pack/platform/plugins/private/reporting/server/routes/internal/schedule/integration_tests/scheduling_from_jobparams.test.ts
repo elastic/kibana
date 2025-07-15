@@ -204,6 +204,28 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       );
   });
 
+  it('returns 400 on invalid rrule.dtstart date', async () => {
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }),
+        schedule: { rrule: { dtstart: '2025-06-23T14:1719.765Z', freq: 1, interval: 2 } },
+      })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(`
+          "[request body.schedule.rrule]: types that failed validation:
+          - [request body.schedule.rrule.0.dtstart]: Invalid date: 2025-06-23T14:1719.765Z
+          - [request body.schedule.rrule.1.freq]: expected value to equal [2]
+          - [request body.schedule.rrule.2.freq]: expected value to equal [3]"
+        `)
+      );
+  });
+
   it('returns 400 on invalid notification list', async () => {
     registerScheduleRoutesInternal(reportingCore, mockLogger);
 
@@ -334,7 +356,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
             bcc: ['single@email.com'],
           },
         },
-        schedule: { rrule: { freq: 1, interval: 2 } },
+        schedule: { rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 } },
       })
       .expect(200)
       .then(({ body }) => {
@@ -352,7 +374,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
               title: 'abc',
               version: '7.14.0',
             },
-            schedule: { rrule: { freq: 1, interval: 2 } },
+            schedule: { rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 } },
           },
         });
       });

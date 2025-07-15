@@ -12,6 +12,8 @@ import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } 
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
+import useLatest from 'react-use/lib/useLatest';
+import { cloneDeep } from 'lodash';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
@@ -19,6 +21,7 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
   LensSuggestionsApi,
+  TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
@@ -192,6 +195,12 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
 
   table?: Datatable;
   abortController?: AbortController;
+  /**
+   * Callback to modify the default Lens vis attributes used in the chart
+   */
+  getModifiedVisAttributes?: (
+    attributes: TypedLensByValueInput['attributes']
+  ) => TypedLensByValueInput['attributes'];
 }
 
 export const UnifiedHistogramLayout = ({
@@ -233,6 +242,7 @@ export const UnifiedHistogramLayout = ({
   children,
   withDefaultActions,
   abortController,
+  getModifiedVisAttributes,
 }: UnifiedHistogramLayoutProps) => {
   const columnsMap = useMemo(() => {
     if (!columns?.length) {
@@ -257,6 +267,8 @@ export const UnifiedHistogramLayout = ({
     lensVisService.currentSuggestionContext$
   );
 
+  const latestGetModifiedVisAttributes = useLatest(getModifiedVisAttributes);
+
   const originalChartTimeInterval = originalChart?.timeInterval;
   useEffect(() => {
     if (isChartLoading) {
@@ -279,8 +291,12 @@ export const UnifiedHistogramLayout = ({
       table,
       onSuggestionContextChange,
       onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
+      getModifiedVisAttributes: (attributes) => {
+        return latestGetModifiedVisAttributes.current?.(cloneDeep(attributes)) ?? attributes;
+      },
     });
   }, [
+    latestGetModifiedVisAttributes,
     lensVisService,
     dataView,
     requestParams.query,

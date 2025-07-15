@@ -21,6 +21,7 @@ import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './pollin
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import type { EphemeralTaskLifecycle as EphemeralTaskLifecycleClass } from './ephemeral_task_lifecycle';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {
@@ -162,6 +163,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
@@ -179,6 +181,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
@@ -198,6 +201,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
@@ -216,6 +220,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       await taskManagerPlugin.stop();
@@ -232,6 +237,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       discoveryIsStarted.mockReturnValueOnce(true);

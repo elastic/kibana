@@ -66,6 +66,9 @@ are ignored.
 `csp.report_only.form_action`::
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action[Content Security Policy `form-action` directive] in reporting mode.
 
+`csp.report_only.object_src`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/object-src[Content Security Policy `object-src` directive] in reporting mode.
+
 `csp.report_uri`::
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
 

@@ -462,31 +462,38 @@ export class KnowledgeBaseService {
     }
 
     try {
-      const bulkBody = entries.flatMap((entry) => [
-        { index: { _index: resourceNames.writeIndexAlias.kb, _id: entry.id } },
-        {
-          '@timestamp': new Date().toISOString(),
-          ...entry,
-          ...(entry.text ? { semantic_text: entry.text } : {}),
-          user,
-          namespace,
+      const result = await this.dependencies.esClient.asInternalUser.helpers.bulk({
+        onDocument(doc) {
+          return [
+            { index: { _index: resourceNames.writeIndexAlias.kb, _id: doc.id } },
+            {
+              '@timestamp': new Date().toISOString(),
+              ...doc,
+              ...(doc.text ? { semantic_text: doc.text } : {}),
+              user,
+              namespace,
+            },
+          ];
         },
-      ]);
-
-      const bulkResult = await this.dependencies.esClient.asInternalUser.bulk({
+        onDrop: (doc) => {
+          this.dependencies.logger.error(
+            `Failed ingesting document: ${doc.error?.reason || 'unknown reason'}`
+          );
+        },
+        datasource: entries,
         refresh: 'wait_for',
-        body: bulkBody,
+        concurrency: 3,
+        flushBytes: 100 * 1024,
+        flushInterval: 1000,
+        retries: 5,
       });
 
-      if (bulkResult.errors) {
-        const errorMessages = bulkResult.items
-          .filter((item: any) => item.index?.error)
-          .map((item: any) => item.index?.error?.reason);
-        throw new Error(`Indexing failed: ${errorMessages.join(', ')}`);
+      if (result.failed > 0) {
+        throw Error(`Failed ingesting ${result.failed} documents.`);
       }
 
       this.dependencies.logger.debug(
-        `Successfully added ${entries.length} entries to the knowledge base`
+        `Successfully added ${result.successful} entries to the knowledge base`
       );
     } catch (error) {
       this.dependencies.logger.error(`Failed to add entries to the knowledge base: ${error}`);

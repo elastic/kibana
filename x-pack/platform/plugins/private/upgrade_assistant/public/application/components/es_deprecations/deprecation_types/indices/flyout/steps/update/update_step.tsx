@@ -27,7 +27,7 @@ import { StepProgress, type StepProgressStep } from '../../../../../common/step_
 import type { ReindexState } from '../../../use_reindex';
 
 interface UpdateIndexModalStepProps {
-  action: 'unfreeze' | 'makeReadonly';
+  action: 'unfreeze' | 'makeReadonly' | 'delete';
   closeModal: () => void;
   meta: ReindexState['meta'];
   updateIndexState: UpdateIndexState;
@@ -42,6 +42,57 @@ const ErrorCallout: React.FunctionComponent<{ reason: string }> = ({ reason }) =
   </EuiCallOut>
 );
 
+const getTitle = (actionType: UpdateIndexModalStepProps['action'], indexName: string) => {
+  const messages = {
+    makeReadonly: {
+      id: 'xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.readonlyStepText',
+      defaultMessage: 'Setting {indexName} index to read-only.',
+    },
+    unfreeze: {
+      id: 'xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.unfreezeStepText',
+      defaultMessage: 'Unfreezing {indexName} index.',
+    },
+    delete: {
+      id: 'xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.deleteStepText',
+      defaultMessage: 'Deleting {indexName} index.',
+    },
+  };
+
+  const message = messages[actionType];
+  if (!message) return null;
+
+  return (
+    <FormattedMessage
+      id={message.id}
+      defaultMessage={message.defaultMessage}
+      values={{
+        indexName: <EuiCode>{indexName}</EuiCode>,
+      }}
+    />
+  );
+};
+const getModalTitle = (actionType: UpdateIndexModalStepProps['action']) => {
+  const messages = {
+    makeReadonly: {
+      id: 'xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.readonlyStep.title',
+      defaultMessage: 'Setting index to read-only',
+    },
+    unfreeze: {
+      id: 'xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.unfreezeStep.title',
+      defaultMessage: 'Unfreezing index',
+    },
+    delete: {
+      id: 'xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.deleteStep.title',
+      defaultMessage: 'Deleting index',
+    },
+  };
+
+  const message = messages[actionType];
+  if (!message) return null;
+
+  return <FormattedMessage id={message.id} defaultMessage={message.defaultMessage} />;
+};
+
 /**
  * In charge of rendering the result of the make read-only calls
  */
@@ -54,37 +105,10 @@ export const UpdateIndexModalStep: React.FunctionComponent<UpdateIndexModalStepP
 }) => {
   const { indexName } = meta;
   const { status, failedBefore, reason } = updateIndexState;
-  const title =
-    action === 'makeReadonly' ? (
-      <FormattedMessage
-        id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.readonlyStepText"
-        defaultMessage="Setting {indexName} index to read-only."
-        values={{
-          indexName: <EuiCode>{indexName}</EuiCode>,
-        }}
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.unfreezeStepText"
-        defaultMessage="Unfreezing {indexName} index."
-        values={{
-          indexName: <EuiCode>{indexName}</EuiCode>,
-        }}
-      />
-    );
 
-  const modalTitle =
-    action === 'makeReadonly' ? (
-      <FormattedMessage
-        id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.readonlyStep.title"
-        defaultMessage="Setting index to read-only"
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.unfreezeStep.title"
-        defaultMessage="Unfreezing index"
-      />
-    );
+  const title = getTitle(action, indexName);
+
+  const modalTitle = getModalTitle(action);
 
   const steps: StepProgressStep[] = [
     {

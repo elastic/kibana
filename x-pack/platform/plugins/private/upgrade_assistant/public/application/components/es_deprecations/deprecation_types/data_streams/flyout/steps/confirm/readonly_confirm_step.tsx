@@ -89,7 +89,7 @@ export const ConfirmMigrationReadonlyFlyoutStep: React.FunctionComponent<{
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="readonlyDataStreamModalTitle" size="m">
+        <EuiModalHeaderTitle data-test-subj="dataStreamModalTitle" size="m">
           <FormattedMessage
             id="xpack.upgradeAssistant.dataStream.modal.confirmStep.readonly.title"
             defaultMessage="Set data stream to read-only"
