@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('embeddablePanelAction-clonePanel');
       await dashboard.waitForRenderComplete();
       await dashboardExpect.tsvbMetricValuesExist(['35', '35']);
+      await timeToVisualize.resetNewDashboard();
     });
 
     it('adding a new metric to a new dashboard by value', async function () {
