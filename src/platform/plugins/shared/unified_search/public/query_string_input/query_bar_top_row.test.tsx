@@ -404,6 +404,70 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(CANCEL_BUTTON_SELECTOR).length).toBe(0);
   });
+
+  describe('draft', () => {
+    it('Should call onDraftChange when in dirty state', () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: true,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      expect(getByText(kqlQuery.query)).toBeInTheDocument();
+      expect(onDraftChange).toHaveBeenCalledWith(state);
+    });
+
+    it('Should call onDraftChange when in dirty state and no date picker', () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: true,
+          showDatePicker: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      expect(getByText(kqlQuery.query)).toBeInTheDocument();
+      expect(onDraftChange).toHaveBeenCalledWith({
+        query: state.query,
+        dateRangeFrom: undefined,
+        dateRangeTo: undefined,
+      });
+    });
+
+    it('Should call onDraftChange with empty draft when in normal state', () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      expect(getByText(kqlQuery.query)).toBeInTheDocument();
+      expect(onDraftChange).toHaveBeenCalledWith(null);
+    });
+  });
 });
 
 describe('SharingMetaFields', () => {
