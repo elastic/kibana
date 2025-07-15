@@ -19,6 +19,7 @@ export const buildThreatEnrichment = ({
   threatFilters,
   threatIndicatorPath,
   pitId,
+  reassignThreatPitId,
   threatIndexFields,
   allowedFieldsForTermsQuery,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
@@ -29,6 +30,7 @@ export const buildThreatEnrichment = ({
       signals,
       allowedFieldsForTermsQuery,
       pitId,
+      reassignThreatPitId,
       threatFilters,
       threatIndexFields,
       threatIndicatorPath,

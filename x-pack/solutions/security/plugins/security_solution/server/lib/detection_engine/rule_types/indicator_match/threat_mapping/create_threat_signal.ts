@@ -29,6 +29,7 @@ export const createThreatSignal = async ({
   wrapSuppressedHits,
   threatFilters,
   threatPitId,
+  reassignThreatPitId,
   allowedFieldsForTermsQuery,
   inputIndexFields,
   threatIndexFields,
@@ -83,6 +84,7 @@ export const createThreatSignal = async ({
       threatFilters,
       threatIndicatorPath,
       pitId: threatPitId,
+      reassignThreatPitId,
       threatIndexFields,
       allowedFieldsForTermsQuery,
     });

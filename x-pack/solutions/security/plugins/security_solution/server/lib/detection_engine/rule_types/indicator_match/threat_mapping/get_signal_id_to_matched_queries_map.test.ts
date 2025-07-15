@@ -49,6 +49,7 @@ const termsThreatMock = {
 
 const ruleServices = createPersistenceExecutorOptionsMock();
 const sharedParamsMock = getSharedParamsMock({ ruleParams: getThreatRuleParams() });
+const reassignPitIdMock = () => {};
 
 getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
@@ -63,6 +64,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     await getSignalIdToMatchedQueriesMap({
       allowedFieldsForTermsQuery: { source: {}, threat: {} },
       pitId: 'pitId',
+      reassignThreatPitId: reassignPitIdMock,
       services: ruleServices,
       sharedParams: sharedParamsMock,
       signals: [
@@ -87,6 +89,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     const result = await getSignalIdToMatchedQueriesMap({
       allowedFieldsForTermsQuery: { source: {}, threat: {} },
       pitId: 'pitId',
+      reassignThreatPitId: reassignPitIdMock,
       services: ruleServices,
       sharedParams: sharedParamsMock,
       signals: [
@@ -111,6 +114,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     const result = await getSignalIdToMatchedQueriesMap({
       allowedFieldsForTermsQuery: { source: {}, threat: {} },
       pitId: 'pitId',
+      reassignThreatPitId: reassignPitIdMock,
       services: ruleServices,
       sharedParams: sharedParamsMock,
       signals: [
@@ -156,6 +160,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     const result = await getSignalIdToMatchedQueriesMap({
       allowedFieldsForTermsQuery: { source: {}, threat: {} },
       pitId: 'pitId',
+      reassignThreatPitId: reassignPitIdMock,
       services: ruleServices,
       sharedParams: sharedParamsMock,
       signals: [
@@ -224,6 +229,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     const result = await getSignalIdToMatchedQueriesMap({
       allowedFieldsForTermsQuery: { source: {}, threat: {} },
       pitId: 'pitId',
+      reassignThreatPitId: reassignPitIdMock,
       services: ruleServices,
       sharedParams: sharedParamsMock,
       signals: [
@@ -262,6 +268,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     const result = await getSignalIdToMatchedQueriesMap({
       allowedFieldsForTermsQuery: { source: { 'source.ip': true }, threat: { 'source.ip': true } },
       pitId: 'pitId',
+      reassignThreatPitId: reassignPitIdMock,
       services: ruleServices,
       sharedParams: sharedParamsMock,
       signals: [
@@ -298,6 +305,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     const result = await getSignalIdToMatchedQueriesMap({
       allowedFieldsForTermsQuery: { source: { 'source.ip': true }, threat: { 'source.ip': true } },
       pitId: 'pitId',
+      reassignThreatPitId: reassignPitIdMock,
       services: ruleServices,
       sharedParams: sharedParamsMock,
       signals: [
@@ -356,6 +364,7 @@ describe('getSignalIdToMatchedQueriesMap', () => {
     const result = await getSignalIdToMatchedQueriesMap({
       allowedFieldsForTermsQuery: { source: { 'source.ip': true }, threat: { 'source.ip': true } },
       pitId: 'pitId',
+      reassignThreatPitId: reassignPitIdMock,
       services: ruleServices,
       sharedParams: sharedParamsMock,
       signals: [

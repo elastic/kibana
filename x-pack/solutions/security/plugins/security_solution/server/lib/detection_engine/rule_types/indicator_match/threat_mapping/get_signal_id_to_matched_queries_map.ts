@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewFieldBase } from '@kbn/es-query';
 
 import { ThreatMatchQueryType } from './types';
@@ -36,6 +37,7 @@ interface GetSignalIdToMatchedQueriesMapOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
   signals: EventItem[];
   pitId: string;
+  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatFilters: unknown[];
   threatIndexFields: DataViewFieldBase[];
   threatIndicatorPath: string;
@@ -84,6 +86,7 @@ const addMatchedQueryToMaps = ({
 export async function getSignalIdToMatchedQueriesMap({
   allowedFieldsForTermsQuery,
   pitId,
+  reassignThreatPitId,
   services,
   sharedParams,
   signals,
@@ -122,6 +125,7 @@ export async function getSignalIdToMatchedQueriesMap({
       fields: undefined,
     },
     pitId,
+    reassignPitId: reassignThreatPitId,
     indexFields: threatIndexFields,
   };
 
