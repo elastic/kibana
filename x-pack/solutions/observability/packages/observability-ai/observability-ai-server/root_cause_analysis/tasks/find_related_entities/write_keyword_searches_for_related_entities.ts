@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_patterns/get_log_patterns';
 import { InferenceClient } from '@kbn/inference-common';
-import { TruncatedDocumentAnalysis } from '@kbn/genai-utils-common/log_analysis/document_analysis';
-import { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_analysis/get_log_patterns';
 import { RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';

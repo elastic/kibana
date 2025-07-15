@@ -20,7 +20,7 @@ export async function describeDataset({
   esClient: ElasticsearchClient;
   start: number;
   end: number;
-  index: string;
+  index: string | string[];
   kql?: string;
 }) {
   const [fieldCaps, hits] = await Promise.all([
