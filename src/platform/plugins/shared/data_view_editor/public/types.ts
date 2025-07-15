@@ -72,6 +72,14 @@ export interface DataViewEditorProps {
    */
   showManagementLink?: boolean;
   /**
+   * if set to true a duplicate button is shown
+   */
+  onDuplicate?: () => void;
+  /**
+   * if set to true an existing data view is being edited
+   */
+  isEdit?: boolean;
+  /**
    * Optional callback to get help text based on the active data view
    */
   getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;

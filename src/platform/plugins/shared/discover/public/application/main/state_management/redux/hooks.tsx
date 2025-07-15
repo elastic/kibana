@@ -102,16 +102,10 @@ export const useCurrentChartPortalNode = () => useCurrentTabContext().currentCha
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
-  const defaultProfileAdHocDataViewIds = useInternalStateSelector(
-    (state) => state.defaultProfileAdHocDataViewIds
-  );
 
   return useMemo(() => {
-    const managedDataViews = originalAdHocDataViews.filter(
-      ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
-    );
-    const adHocDataViews = differenceBy(originalAdHocDataViews, managedDataViews, 'id');
+    const adHocDataViews = differenceBy(originalAdHocDataViews, savedDataViews, 'id');
 
-    return { savedDataViews, managedDataViews, adHocDataViews };
-  }, [defaultProfileAdHocDataViewIds, originalAdHocDataViews, savedDataViews]);
+    return { savedDataViews, adHocDataViews };
+  }, [originalAdHocDataViews, savedDataViews]);
 };

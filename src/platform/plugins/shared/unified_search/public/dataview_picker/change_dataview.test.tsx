@@ -20,6 +20,9 @@ import { DataViewSelector } from './data_view_selector';
 import { dataViewMock, dataViewMockEsql } from './mocks/dataview';
 import type { DataViewPickerProps } from './data_view_picker';
 
+const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+const openEditorMock = jest.fn();
+
 describe('DataView component', () => {
   const createMockWebStorage = () => ({
     clear: jest.fn(),
@@ -48,8 +51,8 @@ describe('DataView component', () => {
     storageValue: boolean,
     uiSettingValue: boolean = false
   ) {
-    const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
     (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
+    (dataViewEditorMock.openEditor as jest.Mock).mockImplementation(openEditorMock);
     let dataMock = dataPluginMock.createStartContract();
     dataMock = {
       ...dataMock,
@@ -66,6 +69,9 @@ describe('DataView component', () => {
       uiSettings: {
         get: jest.fn(() => uiSettingValue),
       },
+      application: {
+        navigateToApp: jest.fn(),
+      },
     };
 
     return (
@@ -78,6 +84,7 @@ describe('DataView component', () => {
   }
   let props: DataViewPickerProps;
   beforeEach(() => {
+    jest.clearAllMocks();
     props = {
       currentDataViewId: 'dataview-1',
       trigger: {
@@ -209,8 +216,14 @@ describe('DataView component', () => {
               id: 'dataview-1',
               title: 'dataview-1',
             },
+            {
+              id: 'the-data-view-id',
+              title: 'the-data-view-title',
+              name: 'the-data-view',
+              type: 'default',
+              managed: true,
+            },
           ],
-          managedDataViews: [dataViewMock],
         },
         false
       )
@@ -226,6 +239,7 @@ describe('DataView component', () => {
         title: 'the-data-view-title',
         name: 'the-data-view',
         type: 'default',
+        managed: true,
         isManaged: true,
       },
     ]);
