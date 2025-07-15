@@ -22,6 +22,7 @@ import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/fu
 import { UserProfilePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/user_profile_page';
 import { SearchSessionsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/search_sessions_management_page';
 import { GraphPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/graph_page';
+import { MaintenanceWindowsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/maintenance_windows_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -40,7 +41,6 @@ import { InfraSavedViewsProvider } from './infra_saved_views';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { LogstashPageObject } from './logstash_page';
-import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { NavigationalSearchPageObject } from './navigational_search';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
