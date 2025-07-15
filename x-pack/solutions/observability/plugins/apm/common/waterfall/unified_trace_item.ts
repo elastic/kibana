@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { STATUS_CODE, EVENT_OUTCOME } from '@kbn/apm-types';
+
+const STATUS_FIELD_NAME = [EVENT_OUTCOME, STATUS_CODE] as const;
 
 export interface TraceItem {
   id: string;
@@ -13,7 +16,7 @@ export interface TraceItem {
   duration: number;
   errorCount: number;
   status?: {
-    fieldName: string;
+    fieldName: (typeof STATUS_FIELD_NAME)[number];
     value: string;
   };
   parentId?: string;
