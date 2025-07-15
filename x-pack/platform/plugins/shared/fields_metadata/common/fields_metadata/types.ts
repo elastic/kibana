@@ -33,14 +33,65 @@ export const multiFieldRT = rt.type({
   type: rt.string,
 });
 
-export const otelPropertyRT = rt.partial({
-  relation: rt.string,
-  stability: rt.string,
-  attribute: rt.string,
-  otlp_field: rt.string,
-  metric: rt.string,
-  note: rt.string,
+export const baseOTELPropertyRT = rt.intersection([
+  rt.type({
+    stability: rt.keyof({
+      stable: null,
+      experimental: null,
+    }),
+  }),
+  rt.partial({
+    note: rt.string,
+  }),
+]);
+
+export const otelMatchPropertyRT = rt.type({
+  relation: rt.literal('match'),
 });
+
+export const otelEquivalentPropertyRT = rt.type({
+  relation: rt.literal('equivalent'),
+  attribute: rt.string,
+});
+
+export const otelRelatedPropertyRT = rt.type({
+  relation: rt.literal('related'),
+  attribute: rt.string,
+});
+
+export const otelConflictPropertyRT = rt.type({
+  relation: rt.literal('conflict'),
+  attribute: rt.string,
+});
+
+export const otelOtlpPropertyRT = rt.type({
+  relation: rt.literal('otlp'),
+  otlp_field: rt.string,
+});
+
+export const otelMetricPropertyRT = rt.type({
+  relation: rt.literal('metric'),
+  metric: rt.string,
+});
+
+export const otelNaPropertyRT = rt.type({
+  relation: rt.literal('na'),
+});
+
+export const otelPropertyRT = rt.union([
+  rt.intersection([
+    baseOTELPropertyRT,
+    rt.union([
+      otelMatchPropertyRT,
+      otelEquivalentPropertyRT,
+      otelRelatedPropertyRT,
+      otelConflictPropertyRT,
+      otelOtlpPropertyRT,
+      otelMetricPropertyRT,
+    ]),
+  ]),
+  otelNaPropertyRT,
+]);
 
 const requiredBaseMetadataPlainRT = rt.type({
   name: rt.string,
@@ -92,6 +143,8 @@ export const fieldAttributeRT = rt.union([
   rt.keyof(requiredBaseMetadataPlainRT.props),
   rt.keyof(optionalMetadataPlainRT.props),
 ]);
+
+export const fieldsMetadataDictionaryRT = rt.record(rt.string, fieldMetadataPlainRT);
 
 export type AnyFieldName = string & {};
 export type TMetadataFields = typeof MetadataFields;
