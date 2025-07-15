@@ -63,7 +63,7 @@ const canManageAlerts: SubFeaturePrivilegeGroupConfig = {
         all: [],
         read: [],
       },
-      ui: ['alerting:save'],
+      ui: [],
     },
   ],
 };
