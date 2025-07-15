@@ -14,17 +14,17 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('ES|QL Tools API', () => {
-    let createdToolIds: string[] = [];
+    const createdToolIds: string[] = [];
 
     const mockTool = {
       id: 'cases-tool',
       type: 'esql',
       description: 'A test tool',
-      tags: ["test"],
-      configuration: { 
-        query: 'FROM my_cases | WHERE case_id == ?case_id', 
-        params: { case_id: { type: 'keyword', description: 'Case ID' } } 
-      } 
+      tags: ['test'],
+      configuration: {
+        query: 'FROM my_cases | WHERE case_id == ?case_id',
+        params: { case_id: { type: 'keyword', description: 'Case ID' } },
+      },
     };
 
     before(async () => {
@@ -36,10 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       for (const toolId of createdToolIds) {
         try {
-          await supertest
-            .delete(`/api/chat/tools/${toolId}`)
-            .set('kbn-xsrf', 'kibana')
-            .expect(200);
+          await supertest.delete(`/api/chat/tools/${toolId}`).set('kbn-xsrf', 'kibana').expect(200);
         } catch (error) {
           log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }
@@ -81,7 +78,9 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400);
 
         expect(response.body).to.have.property('message');
-        expect(response.body.message).to.eql('Invalid tool id: invalid tool id!: Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, and underscores');
+        expect(response.body.message).to.eql(
+          'Invalid tool id: invalid tool id!: Tool ids must start and end with a letter or number, and can only contain lowercase letters, numbers, and underscores'
+        );
       });
 
       it('should require required fields', async () => {
@@ -107,12 +106,12 @@ export default function ({ getService }: FtrProviderContext) {
           .send(mockTool)
           .expect(404);
 
-          await kibanaServer.uiSettings.update({
-            'onechat:api:enabled': true,
-          });
-       });
+        await kibanaServer.uiSettings.update({
+          'onechat:api:enabled': true,
+        });
+      });
 
-       it('should validate parameter types', async () => {
+      it('should validate parameter types', async () => {
         const toolWithInvalidParams = {
           ...mockTool,
           id: 'invalid-params-tool',
@@ -133,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'kibana')
           .send(toolWithInvalidParams)
           .expect(400);
-      }); 
+      });
     });
 
     describe('GET /api/chat/tools/get-test-tool', () => {
@@ -156,22 +155,18 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve an existing ES|QL tool', async () => {
-        const response = await supertest
-          .get(`/api/chat/tools/${testToolId}`)
-          .expect(200);
+        const response = await supertest.get(`/api/chat/tools/${testToolId}`).expect(200);
 
-          expect(response.body).to.have.property('id', 'get-test-tool');
-          expect(response.body).to.have.property('type', 'esql');
-          expect(response.body).to.have.property('description', mockTool.description);
-          expect(response.body).to.have.property('configuration');
-          expect(response.body.configuration).to.have.property('query', mockTool.configuration.query);
-          expect(response.body.configuration.params).to.eql(mockTool.configuration.params);
+        expect(response.body).to.have.property('id', 'get-test-tool');
+        expect(response.body).to.have.property('type', 'esql');
+        expect(response.body).to.have.property('description', mockTool.description);
+        expect(response.body).to.have.property('configuration');
+        expect(response.body.configuration).to.have.property('query', mockTool.configuration.query);
+        expect(response.body.configuration.params).to.eql(mockTool.configuration.params);
       });
 
       it('should return 404 for non-existent tool', async () => {
-        const response = await supertest
-          .get('/api/chat/tools/non-existent-tool')
-          .expect(404);
+        const response = await supertest.get('/api/chat/tools/non-existent-tool').expect(404);
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');
@@ -182,9 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
           'onechat:api:enabled': false,
         });
 
-        await supertest
-          .get(`/api/chat/tools/get-test-tool`)
-          .expect(404);
+        await supertest.get(`/api/chat/tools/get-test-tool`).expect(404);
 
         await kibanaServer.uiSettings.update({
           'onechat:api:enabled': true,
@@ -214,9 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should list all ES|QL tools', async () => {
-        const response = await supertest
-          .get('/api/chat/tools')
-          .expect(200);
+        const response = await supertest.get('/api/chat/tools').expect(200);
 
         expect(response.body).to.have.property('results');
         expect(response.body.results).to.be.an('array');
@@ -228,9 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
           'onechat:api:enabled': false,
         });
 
-        await supertest
-          .get('/api/chat/tools/esql')
-          .expect(404);
+        await supertest.get('/api/chat/tools/esql').expect(404);
 
         await kibanaServer.uiSettings.update({
           'onechat:api:enabled': true,
@@ -243,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
         const testTool = {
           ...mockTool,
           id: 'update-test-tool',
-        }
+        };
 
         await supertest
           .post('/api/chat/tools')
@@ -342,6 +331,6 @@ export default function ({ getService }: FtrProviderContext) {
           'onechat:api:enabled': true,
         });
       });
-    }); 
+    });
   });
 }
