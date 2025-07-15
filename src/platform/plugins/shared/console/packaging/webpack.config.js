@@ -14,6 +14,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 // const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const ConsoleDefinitionsPlugin = require('./console-definitions-plugin');
+const webpack = require('webpack');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
 const isProd = process.env.NODE_ENV === 'production';
@@ -31,7 +32,8 @@ module.exports = [
       libraryTarget: 'commonjs',
       path: path.resolve(__dirname, '../target/react'),
       filename: 'index.js',
-      publicPath: '',
+      chunkFilename: '[name].chunk.js',
+      publicPath: 'auto',
       chunkLoadingGlobal: 'webpackChunk_console_react_bundle',
     },
     target: 'web',
@@ -215,6 +217,7 @@ module.exports = [
       minimize: false,
       noEmitOnErrors: true,
       splitChunks: false,
+      runtimeChunk: false,
     },
 
     plugins: [
