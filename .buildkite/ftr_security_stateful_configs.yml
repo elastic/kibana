@@ -127,3 +127,6 @@ enabled:
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial_common.ts
   - x-pack/solutions/security/test/api_integration_basic/config.ts
   - x-pack/solutions/security/test/api_integration/apis/cases/config.ts
+  - x-pack/solutions/security/test/fleet_api_integration/config.agent.ts
+  - x-pack/solutions/security/test/fleet_api_integration/config.epm.ts
+  - x-pack/solutions/security/test/fleet_api_integration/config.package_policy.ts
