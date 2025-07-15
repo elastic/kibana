@@ -8,5 +8,5 @@
 import type { Conversation } from '@kbn/onechat-common';
 
 export interface ListConversationsResponse {
-  conversations: Conversation[];
+  results: Conversation[];
 }

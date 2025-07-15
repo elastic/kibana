@@ -21,18 +21,15 @@ export class ConversationsService {
   }
 
   async list({ agentId }: ConversationListOptions) {
-    const response = await this.http.post<ListConversationsResponse>(
-      '/internal/onechat/conversations',
-      {
-        body: JSON.stringify({
-          agentId,
-        }),
-      }
-    );
-    return response.conversations;
+    const response = await this.http.get<ListConversationsResponse>('/api/chat/conversations', {
+      query: {
+        agent_id: agentId,
+      },
+    });
+    return response.results;
   }
 
   async get({ conversationId }: ConversationGetOptions) {
-    return await this.http.get<Conversation>(`/internal/onechat/conversations/${conversationId}`);
+    return await this.http.get<Conversation>(`/api/chat/conversations/${conversationId}`);
   }
 }
