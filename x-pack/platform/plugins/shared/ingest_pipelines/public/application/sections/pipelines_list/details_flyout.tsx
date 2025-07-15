@@ -58,7 +58,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
   const [showPopover, setShowPopover] = useState(false);
   const popoverActions = [
     /**
-     * Clone pipeline
+     * Duplicate pipeline
      */
     {
       name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.duplicateActionLabel', {

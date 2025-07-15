@@ -404,10 +404,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
           },
           {
             name: i18n.translate('xpack.ingestPipelines.list.table.cloneActionLabel', {
-              defaultMessage: 'Clone',
+              defaultMessage: 'Duplicate',
             }),
             description: i18n.translate('xpack.ingestPipelines.list.table.cloneActionDescription', {
-              defaultMessage: 'Clone this pipeline',
+              defaultMessage: 'Duplicate this pipeline',
             }),
             type: 'icon',
             icon: 'copy',
