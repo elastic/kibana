@@ -8,10 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import {
-  ProductFeaturesPrivilegeId,
-  ProductFeaturesPrivileges,
-} from '../../product_features_privileges';
 
 import { SecuritySubFeatureId } from '../../product_features_keys';
 import { APP_ID } from '../../constants';
@@ -695,7 +691,8 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].all,
+          ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
+          api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
         },
         {
           id: 'endpoint_exceptions_read',
@@ -705,7 +702,8 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].read,
+          ui: ['showEndpointExceptions'],
+          api: [`${APP_ID}-showEndpointExceptions`],
         },
       ],
     },
