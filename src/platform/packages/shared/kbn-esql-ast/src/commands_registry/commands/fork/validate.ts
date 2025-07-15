@@ -48,8 +48,12 @@ export const validate = (
   const allCommands = Walker.commands(ast);
   const forks = allCommands.filter(({ name }) => name === 'fork');
 
-  if (forks.length > 1) {
-    messages.push(errors.tooManyForks(forks[1] as any));
+  const hasTooManyForksError = errors.tooManyForks(command);
+  const hasTooManyForksErrorExists = messages.some(
+    (message) => message.code === hasTooManyForksError.code
+  );
+  if (forks.length > 1 && !hasTooManyForksErrorExists) {
+    messages.push(errors.tooManyForks(forks[1]));
   }
 
   context?.fields.set('_fork', {
