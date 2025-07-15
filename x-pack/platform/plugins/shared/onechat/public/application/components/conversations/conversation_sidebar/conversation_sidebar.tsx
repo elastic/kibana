@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useConversationList } from '../../../hooks/use_conversation_list';
+import { Conversation } from '@kbn/onechat-common';
 import { ConversationSections } from './conversation_sections';
 
 const sidebarStyles = css`
@@ -21,8 +21,15 @@ const loadingStyles = css`
   justify-content: center;
 `;
 
-export const ConversationSidebar: React.FC = () => {
-  const { conversations, isLoading } = useConversationList();
+interface ConversationsSidebarProps {
+  conversations: Conversation[];
+  isLoading: boolean;
+}
+
+export const ConversationSidebar: React.FC<ConversationsSidebarProps> = ({
+  conversations,
+  isLoading,
+}) => {
   return (
     <EuiFlexGroup
       css={sidebarStyles}

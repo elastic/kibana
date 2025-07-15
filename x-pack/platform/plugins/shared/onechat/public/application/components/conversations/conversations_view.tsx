@@ -13,6 +13,7 @@ import React, { useState } from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header';
 import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
+import { useConversationList } from '../../hooks/use_conversation_list';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -53,6 +54,9 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
+  // Prefetch conversations before sidebar is opened
+  const { conversations, isLoading } = useConversationList();
+
   return (
     <KibanaPageTemplate
       offset={0}
@@ -66,7 +70,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     >
       {isSidebarOpen && (
         <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
-          <ConversationSidebar />
+          <ConversationSidebar conversations={conversations} isLoading={isLoading} />
         </KibanaPageTemplate.Sidebar>
       )}
 
