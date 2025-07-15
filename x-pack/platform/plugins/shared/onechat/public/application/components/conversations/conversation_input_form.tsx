@@ -32,7 +32,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   const { euiTheme } = useEuiTheme();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const { actions, conversation, hasActiveConversation } = useConversation();
-  const agentId = conversation?.agentId ?? oneChatDefaultAgentId;
+  const agentId = conversation?.agent_id ?? oneChatDefaultAgentId;
 
   const { status, sendMessage } = useChat();
   const disabled = !message.trim() || status === 'loading';

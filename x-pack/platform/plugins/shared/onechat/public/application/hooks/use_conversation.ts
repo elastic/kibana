@@ -72,7 +72,7 @@ const createActions = ({
       setConversation(
         produce((draft) => {
           if (draft) {
-            draft.agentId = agentId;
+            draft.agent_id = agentId;
           }
         })
       );
