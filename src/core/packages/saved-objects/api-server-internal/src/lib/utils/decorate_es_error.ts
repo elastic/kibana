@@ -38,7 +38,10 @@ export function decorateEsError(error: EsErrors) {
     throw new Error('Expected an instance of Error');
   }
 
-  const { reason } = get(error, 'body.error', { reason: undefined }) as { reason?: string };
+  const { reason: esErrorReason } = get(error, 'body.error', { reason: undefined }) as {
+    reason?: string | null;
+  };
+  const reason = esErrorReason || undefined;
   if (
     error instanceof ConnectionError ||
     error instanceof NoLivingConnectionsError ||
