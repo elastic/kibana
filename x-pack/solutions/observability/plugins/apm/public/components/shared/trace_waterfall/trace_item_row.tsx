@@ -8,6 +8,7 @@ import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Bar } from './bar';
 import { BarDetails } from './bar_details';
 import { TOGGLE_BUTTON_WIDTH, ToggleAccordionButton } from './toggle_accordion_button';
@@ -76,7 +77,6 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
           <div
             data-test-subj="trace-bar-row"
             css={css`
@@ -88,6 +88,26 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
                 onClick(item.id);
               }
             }}
+            onKeyDown={(e) => {
+              if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+                // Ignore event if it comes from a link
+                if ((e.target as HTMLElement).tagName === 'A') {
+                  return;
+                }
+                e.preventDefault(); // Prevent scroll if Space is pressed
+                onClick(item.id);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={
+              onClick
+                ? i18n.translate('xpack.apm.traceItemRow.openDetailsButton', {
+                    defaultMessage: 'View details for {name}',
+                    values: { name: item.name },
+                  })
+                : undefined
+            }
           >
             <Bar width={widthPercent} left={leftPercent} color={item.color} />
             <BarDetails item={item} left={leftPercent} onErrorClick={onErrorClick} />
@@ -108,7 +128,6 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
         buttonContent={content}
         paddingSize="none"
         forceState={state}
-        onToggle={() => onToggle(item.id)}
         arrowDisplay="none"
         buttonContentClassName="accordion__buttonContent"
         css={css`
