@@ -4,7 +4,7 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
-::::{dropdown} Dashboard **Copy link** doesn't work when sharing from a space other than the default space
+::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
 
 Applies to: {{stack}} 9.0.3
 
