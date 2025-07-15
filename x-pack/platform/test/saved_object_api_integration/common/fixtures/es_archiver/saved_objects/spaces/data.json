@@ -942,3 +942,219 @@
     "type": "doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType:1",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType": {
+        "title": "Alpha",
+        "titleKeyword": "alpha",
+        "textWithKeyword": "zulu"
+      },
+      "type": "sortTestingType",
+      "namespaces": ["default"],
+      "updated_at": "2024-06-01T10:00:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType:2",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType": {
+        "title": "Bravo",
+        "titleKeyword": "bravo",
+        "textWithKeyword": "yankee"
+      },
+      "type": "sortTestingType",
+      "namespaces": ["default"],
+      "updated_at": "2024-06-01T10:01:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType:3",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType": {
+        "title": "Charlie",
+        "titleKeyword": "charlie",
+        "textWithKeyword": "xray"
+      },
+      "type": "sortTestingType",
+      "namespaces": ["space_1"],
+      "updated_at": "2024-06-01T10:02:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType:4",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType": {
+        "title": "Delta",
+        "titleKeyword": "delta",
+        "textWithKeyword": "whiskey"
+      },
+      "type": "sortTestingType",
+      "namespaces": ["space_2"],
+      "updated_at": "2024-06-01T10:03:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType:5",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType": {
+        "title": "Echo",
+        "titleKeyword": "echo",
+        "textWithKeyword": "victor"
+      },
+      "type": "sortTestingType",
+      "namespaces": ["default", "space_1"],
+      "updated_at": "2024-06-01T10:04:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType:6",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType": {
+        "title": "Foxtrot",
+        "titleKeyword": "foxtrot",
+        "textWithKeyword": "uniform"
+      },
+      "type": "sortTestingType",
+      "namespaces": ["space_2"],
+      "updated_at": "2024-06-01T10:05:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType2:1",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType2": {
+        "title": "Alpha2",
+        "titleKeyword": "alpha2",
+        "textWithKeyword": "zulu2"
+      },
+      "type": "sortTestingType2",
+      "namespaces": ["default"],
+      "updated_at": "2024-06-01T11:00:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType2:2",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType2": {
+        "title": "Bravo2",
+        "titleKeyword": "bravo2",
+        "textWithKeyword": "yankee2"
+      },
+      "type": "sortTestingType2",
+      "namespaces": ["default"],
+      "updated_at": "2024-06-01T11:01:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType2:3",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType2": {
+        "title": "Charlie2",
+        "titleKeyword": "charlie2",
+        "textWithKeyword": "xray2"
+      },
+      "type": "sortTestingType2",
+      "namespaces": ["space_1"],
+      "updated_at": "2024-06-01T11:02:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType2:4",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType2": {
+        "title": "Delta2",
+        "titleKeyword": "delta2",
+        "textWithKeyword": "whiskey2"
+      },
+      "type": "sortTestingType2",
+      "namespaces": ["space_2"],
+      "updated_at": "2024-06-01T11:03:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType2:5",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType2": {
+        "title": "Echo2",
+        "titleKeyword": "echo2",
+        "textWithKeyword": "victor2"
+      },
+      "type": "sortTestingType2",
+      "namespaces": ["default", "space_1"],
+      "updated_at": "2024-06-01T11:04:00.000Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sortTestingType2:6",
+    "index": ".kibana",
+    "source": {
+      "sortTestingType2": {
+        "title": "Foxtrot2",
+        "titleKeyword": "foxtrot2",
+        "textWithKeyword": "uniform2"
+      },
+      "type": "sortTestingType2",
+      "namespaces": ["space_2"],
+      "updated_at": "2024-06-01T11:05:00.000Z"
+    }
+  }
+}

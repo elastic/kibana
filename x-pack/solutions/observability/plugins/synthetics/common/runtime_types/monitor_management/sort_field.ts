@@ -7,18 +7,35 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ConfigKey } from '../../constants/monitor_management';
 
-export const MonitorSortFieldSchema = schema.maybe(
-  schema.oneOf([
-    schema.literal('enabled'),
-    schema.literal('status'),
-    schema.literal('updated_at'),
-    schema.literal(`${ConfigKey.NAME}.keyword`),
-    schema.literal(`${ConfigKey.TAGS}.keyword`),
-    schema.literal(`${ConfigKey.PROJECT_ID}.keyword`),
-    schema.literal(`${ConfigKey.MONITOR_TYPE}.keyword`),
-    schema.literal(`${ConfigKey.SCHEDULE}.keyword`),
-    schema.literal(ConfigKey.JOURNEY_ID),
-  ])
-);
+const allowedSortFields = new Set([
+  'enabled',
+  'status',
+  'updated_at',
+  ConfigKey.NAME,
+  `${ConfigKey.NAME}.keyword`,
+  ConfigKey.TAGS,
+  `${ConfigKey.TAGS}.keyword`,
+  ConfigKey.PROJECT_ID,
+  ConfigKey.MONITOR_TYPE,
+  `${ConfigKey.MONITOR_TYPE}.keyword`,
+  ConfigKey.SCHEDULE,
+  `${ConfigKey.SCHEDULE}.keyword`,
+  ConfigKey.JOURNEY_ID,
+]);
+
+function isValidSortField(value: unknown): value is string {
+  return typeof value === 'string' && allowedSortFields.has(value);
+}
+
+export const MonitorSortFieldSchema = schema.string({
+  minLength: 1,
+  validate(value) {
+    if (!isValidSortField(value)) {
+      return `Invalid sort field: ${value}. Allowed fields are: ${Array.from(
+        allowedSortFields
+      ).join(', ')}`;
+    }
+  },
+});
 
 export type MonitorListSortField = TypeOf<typeof MonitorSortFieldSchema>;
