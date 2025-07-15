@@ -34,13 +34,8 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-block: ${euiTheme.size.base};
-    padding-inline: ${euiTheme.size.base};
     border: none;
     block-size: ${headerHeight};
-    & > div {
-      padding: 0;
-    }
   `;
   const contentStyles = css`
     ${backgroundStyles}
@@ -75,7 +70,12 @@ export const OnechatConversationsView: React.FC<{}> = () => {
         </KibanaPageTemplate.Sidebar>
       )}
 
-      <KibanaPageTemplate.Header css={headerStyles} bottomBorder={false} aria-label={labels.header}>
+      <KibanaPageTemplate.Header
+        css={headerStyles}
+        bottomBorder={false}
+        aria-label={labels.header}
+        paddingSize="m"
+      >
         <ConversationHeader
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => {
