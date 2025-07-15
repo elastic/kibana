@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 import {
   EuiFlyoutFooter,
@@ -17,9 +16,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export enum SubmittingType {
   savingAsAdHoc = 'savingAsAdHoc',
@@ -70,7 +67,6 @@ export const Footer = ({
   isPersisted,
   canSave,
 }: FooterProps) => {
-  const styles = useMemoCss(componentStyles);
   const isEditingAdHoc = isEdit && !isPersisted;
   const submitPersisted = () => {
     onSubmit(false);
@@ -80,7 +76,7 @@ export const Footer = ({
   };
 
   return (
-    <EuiFlyoutFooter css={styles.footer}>
+    <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -138,12 +134,4 @@ export const Footer = ({
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
-};
-
-const componentStyles = {
-  footer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginLeft: -euiTheme.size.l,
-      marginRight: -euiTheme.size.l,
-    }),
 };
