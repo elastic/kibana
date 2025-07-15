@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
+  const queryBar = getService('queryBar');
 
   describe('tabs restorable state', function () {
     describe('sidebar', function () {
@@ -212,6 +213,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
         await expectState(true, 'By line');
+      });
+    });
+
+    describe('search bar', function () {
+      it('should restore the search bar state', async () => {
+        const expectState = async (query: string, isDirty: boolean) => {
+          await retry.try(async () => {
+            expect(await queryBar.getQueryString()).to.be(query);
+          });
+          expect(await testSubjects.getAttribute('querySubmitButton', 'aria-label')).to.be(
+            isDirty ? 'Needs updating' : 'Refresh query'
+          );
+        };
+
+        const draftQuery0 = 'jpg';
+        await expectState('', false);
+        await queryBar.setQuery(draftQuery0);
+        await expectState(draftQuery0, true);
+
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await expectState('', false);
+
+        const draftQuery2 = 'png';
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await expectState('', false);
+        await queryBar.setQuery(draftQuery2);
+        await expectState(draftQuery2, true);
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, true);
+        expect(await discover.getHitCount()).to.be('14,004');
+        await queryBar.clickQuerySubmitButton();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, false);
+        expect(await discover.getHitCount()).to.be('11,829');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await expectState('', false);
+        expect(await discover.getHitCount()).to.be('14,004');
+
+        await unifiedTabs.selectTab(2);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery2, true);
+        expect(await discover.getHitCount()).to.be('14,004');
+        await queryBar.clickQuerySubmitButton();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery2, false);
+        expect(await discover.getHitCount()).to.be('1,373');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, false);
+        expect(await discover.getHitCount()).to.be('11,829');
       });
     });
   });
