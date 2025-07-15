@@ -30,6 +30,7 @@ export function useHackSyncPushFlyout() {
         if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
           const oldValue = mutation.oldValue;
           const newValue = (mutation.target as HTMLElement).getAttribute(mutation.attributeName);
+          // eslint-disable-next-line no-console
           console.log('HackSyncPushFlyout: Style attribute changed: ', oldValue, '->', newValue);
         }
       });
@@ -44,6 +45,7 @@ export function useHackSyncPushFlyout() {
       paddingInlineStart = paddingInlineStart || start || '0px';
       paddingInlineEnd = paddingInlineEnd || end || '0px';
 
+      // eslint-disable-next-line no-console
       console.log(
         'HackSyncPushFlyout:',
         JSON.stringify({
