@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
+import { useUninstallProductDoc } from './use_uninstall_product_doc';
+import { useInstallProductDoc } from './use_install_product_doc';
 
-export function useGetProductDocStatus(inferenceId: string | undefined) {
+export function useGetProductDoc(inferenceId: string | undefined) {
   const { productDocBase } = useKibana().services;
 
-  const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
+  const { mutateAsync: installProductDoc, isLoading: isInstalling } = useInstallProductDoc();
+
+  const { mutateAsync: uninstallProductDoc, isLoading: isUninstalling } = useUninstallProductDoc();
+
+  const { isLoading, data, refetch } = useQuery({
     queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId],
     queryFn: async () => {
       return productDocBase!.installation.getStatus({ inferenceId });
@@ -21,12 +28,15 @@ export function useGetProductDocStatus(inferenceId: string | undefined) {
     refetchOnWindowFocus: false,
   });
 
+  useEffect(() => {
+    refetch();
+  }, [inferenceId, isInstalling, isUninstalling, refetch]);
+
   return {
-    status: data,
+    status: data?.inferenceId === inferenceId ? data?.overall : undefined,
     refetch,
     isLoading,
-    isRefetching,
-    isSuccess,
-    isError,
+    installProductDoc,
+    uninstallProductDoc,
   };
 }
