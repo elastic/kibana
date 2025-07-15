@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Adapters, StoredSiemMigration } from '../types';
+import type { RuleMigrationAdapters, StoredSiemMigration } from '../types';
 import { RuleMigrationSpaceIndexMigrator } from './rule_migrations_per_space_index_migrator';
 import type { SearchResponseBody } from 'elasticsearch-8.x/lib/api/types';
 
@@ -70,7 +70,7 @@ const ruleMigrationIndexAdapters = {
       `.kibana-siem-rule-migrations-migrations-${spaceId}`,
     createIndex: jest.fn(),
   },
-} as unknown as Adapters;
+} as unknown as RuleMigrationAdapters;
 
 describe('RuleMigrationSpaceIndexMigrator', () => {
   beforeEach(() => {

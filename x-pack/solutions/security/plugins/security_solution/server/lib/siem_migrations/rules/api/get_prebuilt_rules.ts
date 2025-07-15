@@ -11,8 +11,8 @@ import type { GetRuleMigrationPrebuiltRulesResponse } from '../../../../../commo
 import { GetRuleMigrationPrebuiltRulesRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
+import { authz } from '../../common/utils/authz';
+import { withLicense } from '../../common/utils/with_license';
 import { getPrebuiltRulesForMigration } from './util/prebuilt_rules';
 
 export const registerSiemRuleMigrationsPrebuiltRulesRoute = (

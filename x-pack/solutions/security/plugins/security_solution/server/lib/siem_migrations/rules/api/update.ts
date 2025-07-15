@@ -13,9 +13,9 @@ import {
   UpdateRuleMigrationRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from './util/audit';
-import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
+import { SiemMigrationAuditLogger } from '../../common/utils/audit';
+import { authz } from '../../common/utils/authz';
+import { withLicense } from '../../common/utils/with_license';
 import { withExistingMigration } from './util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsUpdateRoute = (

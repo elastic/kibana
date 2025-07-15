@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,12 +14,12 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { RuleMigrationsReadMore } from '../../../rules/components/migration_status_panels/read_more';
 import { SiemMigrationsIcon } from '../../../common/icon';
 import * as i18n from './translations';
 import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../common/styles';
 import { useUploadPanelStyles } from '../../../common/styles/upload_panel.styles';
+import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 
 export interface UploadDashboardsPanelProps {
   isUploadMore?: boolean;
@@ -106,14 +106,19 @@ export const UploadDashboardsPanel = React.memo<UploadDashboardsPanelProps>(
     isUploadMore = false,
     isDisabled = false,
   }: UploadDashboardsPanelProps) {
-    const { telemetry } = useKibana().services.siemMigrations.dashboards;
+    const { openFlyout } = useMigrationDataInputContext();
 
-    // const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
-    //   // openFlyout();
-    //   // telemetry.reportSetupMigrationOpen({ isFirstMigration: !isUploadMore });
-    // }, [openFlyout, telemetry, isUploadMore]);
+    const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
+      openFlyout();
+    }, [openFlyout]);
 
-    return <UploadDashboardsSectionPanel isDisabled={isDisabled} isUploadMore={isUploadMore} />;
+    return (
+      <UploadDashboardsSectionPanel
+        isDisabled={isDisabled}
+        isUploadMore={isUploadMore}
+        onOpenFlyout={onOpenFlyout}
+      />
+    );
   }
 );
 

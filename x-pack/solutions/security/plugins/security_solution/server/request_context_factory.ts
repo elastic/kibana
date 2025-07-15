@@ -228,6 +228,22 @@ export class RequestContextFactory implements IRequestContextFactory {
         })
       ),
 
+      getSiemDashboardMigrationsClient: memoize(() =>
+        siemMigrationsService.createDashboardsClient({
+          request,
+          currentUser: coreContext.security.authc.getCurrentUser(),
+          spaceId: getSpaceId(),
+          dependencies: {
+            inferenceClient: startPlugins.inference.getClient({ request }),
+            rulesClient,
+            actionsClient,
+            savedObjectsClient: coreContext.savedObjects.client,
+            packageService: startPlugins.fleet?.packageService,
+            telemetry: core.analytics,
+          },
+        })
+      ),
+
       getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
 
       getExceptionListClient: () => {

@@ -18,7 +18,7 @@ import { RuleMigrationsDataService } from './data/rule_migrations_data_service';
 import type { RuleMigrationsDataClient } from './data/rule_migrations_data_client';
 import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
 import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
-import type { SiemRuleMigrationsClientDependencies } from './types';
+import type { SiemMigrationsClientDependencies } from '../common/types';
 
 export interface SiemRulesMigrationsSetupParams {
   esClusterClient: IClusterClient;
@@ -30,7 +30,7 @@ export interface SiemRuleMigrationsCreateClientParams {
   request: KibanaRequest;
   currentUser: AuthenticatedUser | null;
   spaceId: string;
-  dependencies: SiemRuleMigrationsClientDependencies;
+  dependencies: SiemMigrationsClientDependencies;
 }
 
 export interface SiemRuleMigrationsClient {

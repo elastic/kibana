@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { DashboardMigrationDataInputWrapper } from '../../../../../../../siem_migrations/dashboards/components/data_input_flyout/wrapper';
 import { UploadDashboardsPanel } from '../../../../../../../siem_migrations/dashboards/components/status_panels/upload_panel';
 import {
   MissingPrivilegesCallOut,
@@ -14,7 +15,6 @@ import {
 } from '../../../../../../../common/missing_privileges';
 import { useUpsellingComponent } from '../../../../../../../common/hooks/use_upselling';
 import { PanelText } from '../../../../../../../common/components/panel_text';
-import { OnboardingCardId } from '../../../../../../constants';
 import { CenteredLoadingSpinner } from '../../../../../../../common/components/centered_loading_spinner';
 import type { OnboardingCardComponent } from '../../../../../../types';
 import { OnboardingCardContentPanel } from '../../../common/card_content_panel';
@@ -26,39 +26,32 @@ const StartDashboardMigrationBody: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId, checkComplete }) => {
     const styles = useStyles();
 
-    // useEffect(() => {
-    //   // Set card complete if any migration is finished
-    //   if (!isCardComplete(OnboardingCardId.dashboards) && migrationsStats) {
-    //     if (migrationsStats.some(({ status }) => status === SiemMigrationTaskStatus.FINISHED)) {
-    //       setComplete(true);
-    //     }
-    //   }
-    // }, [isCardComplete, migrationsStats, setComplete]);
-
-    const isConnectorsCardComplete = useMemo(
-      () => isCardComplete(OnboardingCardId.siemMigrationsAiConnectors),
-      [isCardComplete]
-    );
-
-    const expandConnectorsCard = useCallback(() => {
-      setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors);
-    }, [setExpandedCardId]);
+    // const isConnectorsCardComplete = useMemo(
+    //   () => isCardComplete(OnboardingCardId.siemMigrationsAiConnectors),
+    //   [isCardComplete]
+    // );
+    //
+    // const expandConnectorsCard = useCallback(() => {
+    //   setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors);
+    // }, [setExpandedCardId]);
 
     const onFlyoutClosed = useCallback(() => {
       checkComplete();
     }, [checkComplete]);
 
     return (
-      <OnboardingCardContentPanel
-        data-test-subj="startDashboardMigrationsCardBody"
-        className={styles}
-      >
-        <UploadDashboardsPanel isUploadMore={false} />
-        <EuiSpacer size="m" />
-        <PanelText size="xs" subdued cursive>
-          <p>{START_MIGRATION_CARD_FOOTER_NOTE}</p>
-        </PanelText>
-      </OnboardingCardContentPanel>
+      <DashboardMigrationDataInputWrapper onFlyoutClosed={onFlyoutClosed}>
+        <OnboardingCardContentPanel
+          data-test-subj="startDashboardMigrationsCardBody"
+          className={styles}
+        >
+          <UploadDashboardsPanel isUploadMore={false} />
+          <EuiSpacer size="m" />
+          <PanelText size="xs" subdued cursive>
+            <p>{START_MIGRATION_CARD_FOOTER_NOTE}</p>
+          </PanelText>
+        </OnboardingCardContentPanel>
+      </DashboardMigrationDataInputWrapper>
     );
   }
 );

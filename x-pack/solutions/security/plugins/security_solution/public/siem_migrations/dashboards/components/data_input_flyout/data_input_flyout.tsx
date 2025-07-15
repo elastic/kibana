@@ -19,15 +19,26 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
+import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
+import { DashboardsUploadStep } from './steps/upload_dashboards';
+
+interface DashboardMigrationDataInputFlyoutProps {
+  onClose: () => void;
+  migrationStats: RuleMigrationTaskStats | undefined;
+}
 
 export const DashboardMigrationDataInputFlyout = React.memo(
-  function DashboardMigrationDataInputFlyout() {
-    const onClose = () => {};
+  function DashboardMigrationDataInputFlyout({
+    onClose,
+    migrationStats,
+  }: DashboardMigrationDataInputFlyoutProps) {
+    const { closeFlyout } = useMigrationDataInputContext();
     const isRetry = false; // This would be determined by your application logic
     return (
       <EuiFlyoutResizable
-        onClose={() => {}}
+        onClose={closeFlyout}
         ownFocus
         data-test-subj="dashboardMigrationDataInputFlyout"
         aria-labelledby="dashboardMigrationDataInputFlyoutTitle"
@@ -37,7 +48,13 @@ export const DashboardMigrationDataInputFlyout = React.memo(
             <EuiText>{i18n.DATA_INPUT_FLYOUT_TITLE}</EuiText>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody />
+        <EuiFlyoutBody>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiFlexItem>
+              <DashboardsUploadStep />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>

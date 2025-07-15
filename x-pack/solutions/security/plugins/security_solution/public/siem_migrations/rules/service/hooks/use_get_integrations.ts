@@ -9,7 +9,7 @@ import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { reducer, initialState } from './common/api_request_reducer';
+import { initialState, asyncReducer } from '../../../common/utils/api_request_reducer';
 
 export const GET_INTEGRATIONS_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.getIntegrationsError',
@@ -20,7 +20,7 @@ export type OnSuccess = (integrations: Record<string, RelatedIntegration>) => vo
 
 export const useGetIntegrations = (onSuccess: OnSuccess) => {
   const { siemMigrations, notifications } = useKibana().services;
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(asyncReducer, initialState);
 
   const getIntegrations = useCallback(() => {
     (async () => {

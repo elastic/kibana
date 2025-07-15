@@ -15,18 +15,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_status';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type {
   RuleMigrationResourceData,
   RuleMigrationTaskStats,
 } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated } from '../../types';
-import { getStatus } from '../common/get_status';
 import * as i18n from './translations';
 import { DataInputStep } from '../constants';
-import { SubSteps } from '../common/sub_step';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
+import { MigrationDataInputSubSteps } from '../../../../../common/components/migration_data_input_sub_steps';
 
 export type UploadedLookups = Record<string, string>;
 export type AddUploadedLookups = (lookups: RuleMigrationResourceData[]) => void;
@@ -45,7 +45,7 @@ interface LookupsDataInputProps
 export const LookupsDataInput = React.memo<LookupsDataInputProps>(
   ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
     const dataInputStatus = useMemo(
-      () => getStatus(DataInputStep.Lookups, dataInputStep),
+      () => getEuiStepStatus(DataInputStep.Lookups, dataInputStep),
       [dataInputStep]
     );
 
@@ -120,7 +120,7 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     }, [telemetry, migrationStats.id]);
 
     const copyStep = useMissingLookupsListStep({
-      status: getStatus(1, subStep),
+      status: getEuiStepStatus(1, subStep),
       migrationStats,
       missingLookups,
       uploadedLookups,
@@ -130,7 +130,7 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
 
     // Upload macros step
     const uploadStep = useLookupsFileUploadStep({
-      status: getStatus(2, subStep),
+      status: getEuiStepStatus(2, subStep),
       migrationStats,
       missingLookups,
       addUploadedLookups,
@@ -138,7 +138,7 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
 
     const steps = useMemo<EuiStepProps[]>(() => [copyStep, uploadStep], [copyStep, uploadStep]);
 
-    return <SubSteps steps={steps} />;
+    return <MigrationDataInputSubSteps steps={steps} />;
   }
 );
 LookupsDataInputSubSteps.displayName = 'LookupsDataInputActive';

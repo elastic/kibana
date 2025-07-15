@@ -19,6 +19,7 @@ export const startDashboardMigrationCardConfig: OnboardingCardConfig<StartMigrat
   title: START_DASHBOARD_MIGRATION_CARD_TITLE,
   icon: startDashboardMigrationIcon,
   iconDark: startDashboardMigrationDarkIcon,
+  experimentalFlagRequired: 'automaticDashboardsMigration',
   Component: React.lazy(
     () =>
       import(

@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiCode, EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RULES_SPLUNK_QUERY } from '../../../../constants';
+import { CopyQuery } from '../../../../../../../common/components/copy_query';
 import * as i18n from './translations';
+import { RULES_SPLUNK_QUERY } from '../../../../constants';
 
 interface CopyExportQueryProps {
   onCopied: () => void;
 }
-export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) => {
-  const onClick: React.MouseEventHandler = useCallback(
-    (ev) => {
-      // The only button inside the element is the "copy" button.
-      if ((ev.target as Element).tagName === 'BUTTON') {
-        onCopied();
-      }
-    },
-    [onCopied]
-  );
 
+export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -40,15 +32,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        {/* The click event is also dispatched when using the keyboard actions (space or enter) for "copy" button. 
-        No need to use keyboard specific events, disabling the a11y lint rule:*/}
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-        <div onClick={onClick}>
-          {/* onCopy react event is dispatched when the user copies text manually */}
-          <EuiCodeBlock language="text" fontSize="m" paddingSize="m" isCopyable onCopy={onCopied}>
-            {RULES_SPLUNK_QUERY}
-          </EuiCodeBlock>
-        </div>
+        <CopyQuery query={RULES_SPLUNK_QUERY} onCopied={onCopied} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">

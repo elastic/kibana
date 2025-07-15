@@ -14,8 +14,8 @@ import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrat
 import { SIEM_RULE_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/constants';
 import { createTracersCallbacks } from '../util/tracing';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../util/authz';
-import { withLicense } from '../util/with_license';
+import { authz } from '../../../common/utils/authz';
+import { withLicense } from '../../../common/utils/with_license';
 import type { MigrateRuleGraphConfig } from '../../task/agent/types';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes

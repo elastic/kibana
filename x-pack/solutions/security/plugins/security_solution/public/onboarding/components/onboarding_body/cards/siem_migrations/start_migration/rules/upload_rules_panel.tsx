@@ -14,13 +14,13 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
+import { useMigrationDataInputContext } from '../../../../../../../siem_migrations/common/components/migration_data_input_flyout_context';
 import { useUploadPanelStyles } from '../../../../../../../siem_migrations/common/styles/upload_panel.styles';
 import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../../../../../siem_migrations/common/styles';
 import { useKibana } from '../../../../../../../common/lib/kibana/kibana_react';
 import { RuleMigrationsReadMore } from '../../../../../../../siem_migrations/rules/components/migration_status_panels/read_more';
 import { SiemMigrationsIcon } from '../../../../../../../siem_migrations/common/icon';
 import * as i18n from './translations';
-import { useRuleMigrationDataInputContext } from '../../../../../../../siem_migrations/rules/components/data_input_flyout/context';
 
 export interface UploadRulesPanelProps {
   isUploadMore?: boolean;
@@ -103,7 +103,7 @@ export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(function Uploa
   isDisabled = false,
 }: UploadRulesPanelProps) {
   const { telemetry } = useKibana().services.siemMigrations.rules;
-  const { openFlyout } = useRuleMigrationDataInputContext();
+  const { openFlyout } = useMigrationDataInputContext();
 
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout();

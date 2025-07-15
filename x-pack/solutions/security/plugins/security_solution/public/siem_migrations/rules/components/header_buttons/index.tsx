@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import * as i18n from './translations';
 import type { RuleMigrationStats } from '../../types';
 
@@ -62,7 +62,13 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
           <EuiTitle size="xxxs">
             <h6>{i18n.SIEM_MIGRATIONS_OPTION_TITLE}</h6>
           </EuiTitle>
-          <EuiSpacer size="xs" />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: 400px;
+          `}
+        >
           <EuiComboBox
             id={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
             aria-label={i18n.SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
