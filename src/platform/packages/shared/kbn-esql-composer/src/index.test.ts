@@ -33,8 +33,8 @@ describe('composer', () => {
   it('returns query in request format', () => {
     const pipeline = source.pipe(
       where(`@timestamp <= NOW() AND @timestamp > NOW() - 24 hours`),
-      stats(`avg_duration = ?func(??duration) BY service.name`, {
-        func: 'AVG',
+      stats(`avg_duration = ??funcName(??duration) BY service.name`, {
+        funcName: 'AVG',
         duration: 'transaction.duration.us',
       }),
       keep('@timestamp', 'avg_duration', 'service.name'),
@@ -43,10 +43,10 @@ describe('composer', () => {
 
     expect(pipeline.asRequest()).toEqual({
       query:
-        'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = ?FUNC(??duration) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT avg_duration ASC, @timestamp DESC',
+        'FROM logs-*\n  | WHERE @timestamp <= NOW() AND @timestamp > NOW() - 24 hours\n  | STATS avg_duration = ??FUNCNAME(??duration) BY service.name\n  | KEEP @timestamp, avg_duration, service.name\n  | SORT avg_duration ASC, @timestamp DESC',
       params: [
         {
-          func: 'AVG',
+          funcName: 'AVG',
           duration: 'transaction.duration.us',
         },
       ],

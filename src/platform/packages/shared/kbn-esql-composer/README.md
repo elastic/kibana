@@ -200,8 +200,8 @@ import { from, stats } from '@kbn/esql-composer';
 
 from('logs-*')
   .pipe(
-    stats('?func(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env', {
-      func: 'AVG',
+    stats('??funcName(??duration), COUNT(??svcName) WHERE agent.name == "java" BY ??env', {
+      funcName: 'AVG',
       duration: 'transaction.duration.us',
       svcName: 'service.name',
       env: 'service.environment',
