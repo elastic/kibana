@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
@@ -13,6 +22,7 @@ export enum ExecutionStatus {
 
 export interface WorkflowExecution {
   id: string;
+  workflowId: string;
   status: ExecutionStatus;
   triggers: WorkflowTrigger[];
   steps: WorkflowStep[];
@@ -57,6 +67,7 @@ export interface WorkflowStepExecution {
 }
 
 export enum WorkflowStatus {
+  DRAFT = 'draft',
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   DELETED = 'deleted',
@@ -105,6 +116,18 @@ export interface WorkflowExecutionModel {
   workflowId?: string;
   workflowName?: string;
   stepExecutions: WorkflowStepExecution[];
+  duration: number | null;
+}
+
+export interface WorkflowExecutionListModel {
+  results: WorkflowExecutionModel[];
+  _pagination: {
+    offset: number;
+    limit: number;
+    total: number;
+    next?: string;
+    prev?: string;
+  };
 }
 
 // TODO: convert to actual elastic document spec
@@ -124,6 +147,14 @@ export interface EsWorkflowSchema {
   yaml: string;
   steps: WorkflowStep[];
   nodes: WorkflowNode[];
+}
+
+export interface CreateWorkflowRequest {
+  name: string;
+  description?: string;
+  status?: WorkflowStatus;
+  triggers?: WorkflowTrigger[];
+  steps?: WorkflowStep[];
 }
 
 export type WorkflowModel = EsWorkflowSchema;

@@ -1,0 +1,32 @@
+workflow:
+  name: 'Malicious Alert Handler'
+  description: 'Handle alerts based on maliciousness'
+  version: 1
+  enabled: true
+  triggers:
+    - type: triggers.elastic.scheduled
+      with:
+        every: 1
+        unit: day
+    - type: triggers.elastic.manual
+  steps:
+    - name: AI Summary
+      type: openai.completion
+      connectorId: '6f8af2b0-7502-4966-a0db-644d24bf052e'
+      with:
+        prompt: 'Determine if the following email is malicious or not: {{alert.message}}'
+        structuredOutput:
+          malicious: bool
+          reason: string
+          confidence: number
+      on-failure:
+        fallback-step:
+          name: AI Summary (Anthropic)
+          type: anthropic.completion
+          connectorId: '615add2a-5f89-4a7e-a7e0-9e62f42ad200'
+          with:
+            prompt: 'Determine if the following email is malicious or not: {{alert.message}}'
+            structuredOutput:
+              malicious: bool
+              reason: string
+              confidence: number

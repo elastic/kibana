@@ -22,12 +22,20 @@ import { WorkflowsManagementApi } from './workflows_management/workflows_managem
 import { WorkflowsService } from './workflows_management/workflows_management_service';
 import type { WorkflowsExecutionEnginePluginStartDeps } from './types';
 import { SchedulerService } from './scheduler/scheduler_service';
+import {
+  WORKFLOWS_EXECU,
+  WORKFLOWS_STEP_EXECUTIONS_INDEXTIONS_INDEX,
+  WORKFLOWS_INDEX,
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../common';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
   private workflowsService: WorkflowsService | null = null;
   private schedulerService: SchedulerService | null = null;
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
+  private api: WorkflowsManagementApi | null = null;
   // TODO: replace with esClient promise from core
   private esClient: Client = new Client({
     node: 'http://localhost:9200', // or your ES URL
@@ -51,17 +59,17 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.workflowsService = new WorkflowsService(
       Promise.resolve(this.esClient),
       this.logger,
-      '.workflows',
-      '.workflow-executions',
-      '.workflow-step-executions'
+      WORKFLOWS_INDEX,
+      WORKFLOWS_EXECUTIONS_INDEX,
+      WORKFLOWS_STEP_EXECUTIONS_INDEX
     );
-    const api = new WorkflowsManagementApi(this.workflowsService);
+    this.api = new WorkflowsManagementApi(this.workflowsService);
 
     // Register server side APIs
-    defineRoutes(router, api);
+    defineRoutes(router, this.api);
 
     return {
-      management: api,
+      management: this.api,
     };
   }
 
@@ -77,6 +85,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       this.unsecureActionsClient!,
       plugins.workflowsExecutionEngine
     );
+    this.api!.setSchedulerService(this.schedulerService!);
 
     this.logger.debug('Workflows Management: Started');
 

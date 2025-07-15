@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useEffect, useMemo } from 'react';
+import {
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+} from '@elastic/eui';
+import { ExecutionStatus, WorkflowStepExecution } from '@kbn/workflows';
+import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { StatusBadge } from '../../../shared/ui/StatusBadge';
+
+interface WorkflowExecutionProps {
+  workflowExecutionId: string;
+  fields?: Array<keyof WorkflowStepExecution>;
+}
+
+export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
+  workflowExecutionId,
+  fields = ['stepId', 'workflowId', 'status', 'executionTimeMs'],
+}) => {
+  const {
+    data: workflowExecution,
+    isLoading,
+    error,
+    refetch,
+  } = useWorkflowExecution(workflowExecutionId);
+
+  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowStepExecution>>>(
+    () =>
+      [
+        {
+          field: 'stepId',
+          name: 'Step ID',
+        },
+        {
+          field: 'workflowId',
+          name: 'Workflow ID',
+        },
+        {
+          field: 'status',
+          name: 'Status',
+          render: (value: ExecutionStatus) => <StatusBadge status={value} />,
+        },
+        {
+          field: 'executionTimeMs',
+          name: 'Execution Time (ms)',
+        },
+      ].filter((field) => fields.includes(field.field as keyof WorkflowStepExecution)),
+    [fields]
+  );
+
+  useEffect(() => {
+    if (!workflowExecution) {
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      if (workflowExecution.status === ExecutionStatus.RUNNING) {
+        refetch();
+        return;
+      }
+
+      clearInterval(intervalId);
+    }, 500); // Refresh every 500ms
+
+    return () => clearInterval(intervalId);
+  }, [workflowExecution, refetch]);
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent={'center'} alignItems={'center'}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>Loading workflows...</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (error) {
+    return <EuiText>Error loading workflow execution</EuiText>;
+  }
+
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={workflowExecution?.stepExecutions ?? []}
+      responsiveBreakpoint={false}
+    />
+  );
+};

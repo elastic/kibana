@@ -8,31 +8,31 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { CreateWorkflowRequest, EsWorkflowSchema, WorkflowStatus } from '@kbn/workflows';
-import { v4 as uuidv4 } from 'uuid';
+import { WorkflowModel } from '@kbn/workflows';
 import { getWorkflow } from './get_workflow';
 
-interface CreateWorkflowParams {
+interface UpdateWorkflowParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   workflowIndex: string;
-  workflow: CreateWorkflowRequest;
+  workflowId: string;
+  workflow: Partial<WorkflowModel>;
 }
 
-export const createWorkflow = async ({
+export const updateWorkflow = async ({
   esClient,
   logger,
   workflowIndex,
+  workflowId,
   workflow,
-}: CreateWorkflowParams) => {
-  const workflowId = uuidv4();
-  const document = transformToCreateScheme(workflow);
+}: UpdateWorkflowParams) => {
+  const document = transformToUpdateScheme(workflow);
 
   try {
-    const response = await esClient.create({
+    const response = await esClient.update({
       id: workflowId,
       index: workflowIndex,
-      document,
+      doc: document,
       refresh: 'wait_for',
     });
 
@@ -45,26 +45,13 @@ export const createWorkflow = async ({
 
     return createdWorkflow;
   } catch (error) {
-    logger.error(`Failed to create workflow: ${error}`);
+    logger.error(`Failed to update workflow: ${error}`);
     throw error;
   }
 };
 
-function transformToCreateScheme(workflow: CreateWorkflowRequest): Omit<EsWorkflowSchema, 'id'> {
+function transformToUpdateScheme(workflow: Partial<WorkflowModel>) {
   return {
-    name: workflow.name,
-    description: workflow.description || '',
-    status: workflow.status || WorkflowStatus.DRAFT,
-    triggers: workflow.triggers || [],
-    steps: workflow.steps || [],
-    tags: [],
-    yaml: '',
-    nodes: [],
-    executions: [],
-    history: [],
-    createdAt: new Date().toISOString(),
-    createdBy: 'system',
-    lastUpdatedAt: new Date().toISOString(),
-    lastUpdatedBy: 'system',
+    ...workflow,
   };
 }

@@ -8,3 +8,4 @@
  */
 
 export * from './types/latest';
+export * from './types/schema';
