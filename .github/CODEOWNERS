@@ -2188,8 +2188,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional_with_es_ssl/lib/object_remover.ts @elastic/response-ops
 /x-pack/test/stack_functional_integration/apps/alerts @elastic/response-ops
 /x-pack/platform/test/functional/services/actions @elastic/response-ops
-/x-pack/solutions/security/test/api_integration_basic/apis/security_solution/index.ts@elastic/kibana-cases
-/x-pack/solutions/security/test/api_integration_basic/apis/security_solution/cases_privileges.ts@elastic/kibana-cases
+/x-pack/solutions/security/test/api_integration_basic/apis/security_solution/index.ts @elastic/kibana-cases
+/x-pack/solutions/security/test/api_integration_basic/apis/security_solution/cases_privileges.ts @elastic/kibana-cases
 /x-pack/platform/test/upgrade/services/rules_upgrade_services.ts @elastic/response-ops
 /x-pack/platform/test/upgrade/apps/rules @elastic/response-ops
 /x-pack/platform/test/examples/triggers_actions_ui_examples @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/main/x-pack/examples/triggers_actions_ui_example/kibana.jsonc#L4
@@ -2217,17 +2217,17 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/platform/test/cases_api_integration/ @elastic/response-ops
 /x-pack/solutions/security/test/cases_api_integration/ @elastic/response-ops
-/x-pack/platform/test/functional/services/cases/@elastic/kibana-cases
-/x-pack/platform/test/functional_with_es_ssl/apps/cases/@elastic/kibana-cases
-/x-pack/platform/test/api_integration/apis/cases/@elastic/kibana-cases
-/x-pack/solutions/observability/test/api_integration/apis/cases/@elastic/kibana-cases
-/x-pack/solutions/security/test/api_integration/apis/cases/@elastic/kibana-cases
-/x-pack/test_serverless/functional/test_suites/observability/cases@elastic/kibana-cases
-/x-pack/test_serverless/functional/test_suites/search/cases/@elastic/kibana-cases
-/x-pack/test_serverless/functional/test_suites/security/ftr/cases/@elastic/kibana-cases
-/x-pack/test_serverless/api_integration/test_suites/search/cases/@elastic/kibana-cases
-/x-pack/test_serverless/api_integration/test_suites/observability/cases/@elastic/kibana-cases
-/x-pack/test_serverless/api_integration/test_suites/security/cases/@elastic/kibana-cases
+/x-pack/platform/test/functional/services/cases/ @elastic/kibana-cases
+/x-pack/platform/test/functional_with_es_ssl/apps/cases/ @elastic/kibana-cases
+/x-pack/platform/test/api_integration/apis/cases/ @elastic/kibana-cases
+/x-pack/solutions/observability/test/api_integration/apis/cases/ @elastic/kibana-cases
+/x-pack/solutions/security/test/api_integration/apis/cases/ @elastic/kibana-cases
+/x-pack/test_serverless/functional/test_suites/observability/cases @elastic/kibana-cases
+/x-pack/test_serverless/functional/test_suites/search/cases/ @elastic/kibana-cases
+/x-pack/test_serverless/functional/test_suites/security/ftr/cases/ @elastic/kibana-cases
+/x-pack/test_serverless/api_integration/test_suites/search/cases/ @elastic/kibana-cases
+/x-pack/test_serverless/api_integration/test_suites/observability/cases/ @elastic/kibana-cases
+/x-pack/test_serverless/api_integration/test_suites/security/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/search/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
