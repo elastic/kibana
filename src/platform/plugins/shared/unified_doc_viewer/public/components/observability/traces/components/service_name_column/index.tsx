@@ -10,6 +10,11 @@
 import React, { useMemo } from 'react';
 import { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getFlattenedSpanDocumentOverview, getSpanDocumentOverview } from '@kbn/discover-utils/src';
+import {
+  OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
+  AGENT_NAME_FIELD,
+  SERVICE_NAME_FIELD,
+} from '@kbn/discover-utils';
 import { HighlightField } from '../highlight_field';
 import ServiceNameWithIcon from '../service_name_with_icon';
 
@@ -28,12 +33,14 @@ export default function ServiceNameColumn({
   );
 
   const agentName =
-    flattenedDoc['resource.attributes.telemetry.sdk.language'] || flattenedDoc['agent.name'] || '';
+    flattenedDoc[OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE] ||
+    flattenedDoc[AGENT_NAME_FIELD] ||
+    '';
 
   return (
     <HighlightField
-      value={flattenedDoc['service.name']}
-      formattedValue={formattedDoc['service.name']}
+      value={flattenedDoc[SERVICE_NAME_FIELD]}
+      formattedValue={formattedDoc[SERVICE_NAME_FIELD]}
     >
       {({ content }) => (
         <ServiceNameWithIcon agentName={agentName} formattedServiceName={content} />

@@ -61,6 +61,10 @@ export function ServiceNameLink({
       })
     : undefined;
 
+  const content = (
+    <ServiceNameWithIcon agentName={agentName} formattedServiceName={formattedServiceName} />
+  );
+
   return (
     <>
       {canViewApm && routeLinkProps ? (
@@ -68,7 +72,7 @@ export function ServiceNameLink({
           {...routeLinkProps}
           data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
         >
-          <ServiceNameWithIcon agentName={agentName} formattedServiceName={formattedServiceName} />
+          {content}
         </EuiLink>
       ) : (
         content
