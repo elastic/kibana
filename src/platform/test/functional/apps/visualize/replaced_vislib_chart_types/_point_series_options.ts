@@ -233,14 +233,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('timezones', function () {
       it('should show round labels in default timezone', async function () {
-        const expectedLabels = ['September 2015', '19th', '20th', '21st', '22nd', '23rd'];
+        const expectedLabels = ['September 2015', '20th', '21st', '22nd', '23rd'];
         await initChart();
         const labels = await visChart.getXAxisLabels(xyChartSelector);
         expect(labels.join()).to.contain(expectedLabels.join());
       });
 
       it('should show round labels in different timezone', async function () {
-        const expectedLabels = ['September 2015', '19th', '20th', '21st', '22nd', '23rd'];
+        const expectedLabels = ['September 2015', '20th', '21st', '22nd', '23rd'];
 
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
