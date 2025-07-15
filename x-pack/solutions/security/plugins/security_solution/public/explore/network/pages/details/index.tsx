@@ -34,6 +34,7 @@ import { FlowTargetSelectConnected } from '../../components/flow_target_select_c
 import type { IpOverviewProps } from '../../components/details';
 import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
+import { PageLoader } from '../../../../common/components/page_loader';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -191,6 +192,10 @@ const NetworkDetailsComponent: React.FC = () => {
   const indexPattern = useMemo(() => {
     return dataViewSpecToViewBase(sourcererDataView);
   }, [sourcererDataView]);
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <div data-test-subj="network-details-page">

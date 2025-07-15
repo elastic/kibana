@@ -55,6 +55,7 @@ import { userNameExistsFilter } from './details/helpers';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageLoader } from '../../../common/components/page_loader';
 
 const ID = 'UsersQueryId';
 
@@ -178,6 +179,10 @@ const UsersComponent = () => {
 
   const capabilities = useMlCapabilities();
   const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
+
+  if (newDataViewPickerEnabled && status === 'pristine') {
+    return <PageLoader />;
+  }
 
   return (
     <>
