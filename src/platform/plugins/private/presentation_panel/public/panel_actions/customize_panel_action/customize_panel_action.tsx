@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TracksOverlays } from '@kbn/presentation-containers';
+import { TracksOverlays } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
   apiPublishesDataViews,
