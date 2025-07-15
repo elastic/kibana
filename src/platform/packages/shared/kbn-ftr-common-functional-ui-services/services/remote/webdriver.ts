@@ -326,6 +326,11 @@ async function attemptToCreateCommand(
 
   const { session, consoleLog$ } = await buildDriverInstance();
 
+  // @ts-expect-error
+  await session.sendDevToolsCommand('Emulation.setCPUThrottlingRate', {
+    rate: 6, // This makes the CPU 4x slower
+  });
+
   if (throttleOption === '1' && browserType === 'chrome') {
     const KBN_NETWORK_TEST_PROFILE = (process.env.KBN_NETWORK_TEST_PROFILE ??
       'CLOUD_USER') as NetworkProfile;
