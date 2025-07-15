@@ -14,8 +14,14 @@ export const getMockDataView = () =>
     spec: {
       id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
       fields: {
-        mock_field: {
+        'host.name': {
           name: 'host.name',
+          type: 'keyword',
+          searchable: true,
+          aggregatable: true,
+        },
+        'source.ip': {
+          name: 'source.ip',
           type: 'keyword',
           searchable: true,
           aggregatable: true,
