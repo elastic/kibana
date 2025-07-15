@@ -18,6 +18,7 @@ import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/discover-utils';
+import type { DiscoverSessionTab } from '../server';
 import type { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings extends SerializableRecord {
@@ -69,6 +70,8 @@ export interface SavedSearchAttributes {
   breakdownField?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
+
+  tabs?: DiscoverSessionTab[];
 }
 
 /** @internal **/
