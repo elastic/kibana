@@ -22,6 +22,7 @@ const createSetupContractMock = () => {
 const createStartContractMock = () => {
   const startContract: jest.Mocked<PricingServiceStart> = {
     isFeatureAvailable: jest.fn(),
+    getActiveProduct: jest.fn(),
   };
   return startContract;
 };

@@ -91,7 +91,10 @@ export class PricingService implements CoreService<PricingServiceSetup, PricingS
       );
     }
 
-    return this.tiersClient;
+    return {
+      isFeatureAvailable: this.tiersClient.isFeatureAvailable.bind(this.tiersClient),
+      getActiveProduct: this.tiersClient.getActiveProduct.bind(this.tiersClient),
+    };
   }
 
   public stop() {
