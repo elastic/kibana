@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_NAME } from '../../common';
+import * as yaml from 'js-yaml';
 
 interface WorkflowsAppDeps {
   basename: string;
@@ -49,9 +50,19 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
     getCurrentUser();
   }, [services.security]);
 
+  const validateAndSetWorkflow = (workflow: string) => {
+    try {
+      yaml.load(workflow);
+      setIsValidWorkflow(true);
+    } catch (error) {
+      setIsValidWorkflow(false);
+    }
+    setWorkflow(workflow);
+  }
+
   // Use React hooks to manage state.
   const [stringWorkflow, setWorkflow] = useState<string>(
-    JSON.stringify(
+    yaml.dump(
       {
         id: 'example-workflow-1',
         name: 'Example Workflow 1',
@@ -109,9 +120,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
             },
           },
         ],
-      },
-      null,
-      4
+      }
     )
   );
 
@@ -119,7 +128,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
   const getWorkflowInputs = () => {
     const userEmail = currentUser?.email || 'workflow-user@gmail.com';
     const userName = currentUser?.username || 'workflow-user';
-    return JSON.stringify(
+    return yaml.dump(
       {
         event: {
           ruleName: 'Detect vulnerabilities',
@@ -128,12 +137,11 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
             userName,
           },
         },
-      },
-      null,
-      4
+      }
     );
   };
   const [workflowInputs, setWorkflowInputs] = useState<string>(getWorkflowInputs());
+  const [isValidWorkflow, setIsValidWorkflow] = useState<boolean>(true);
 
   // Update workflow inputs when current user changes
   useEffect(() => {
@@ -147,8 +155,8 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
     http
       .post('/api/workflows/run', {
         body: JSON.stringify({
-          workflow: JSON.parse(stringWorkflow),
-          inputs: JSON.parse(workflowInputs),
+          workflow: yaml.load(stringWorkflow),
+          inputs: yaml.load(workflowInputs),
         }),
       })
       .then((res: any) => {
@@ -157,7 +165,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
         // Use the core notifications service to display a success message.
         notifications.toasts.addSuccess(
           i18n.translate('workflowsExample.dataUpdated', {
-            defaultMessage: 'Data updated',
+            defaultMessage: 'Workflow Executed',
           })
         );
       });
@@ -212,13 +220,18 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                         }}
                       >
                         <CodeEditor
-                          languageId="json"
+                          languageId="yaml"
                           value={workflowInputs}
                           height={200}
-                          editorDidMount={() => {}}
+                          editorDidMount={() => { }}
                           onChange={setWorkflowInputs}
                           suggestionProvider={undefined}
                           dataTestSubj={'workflow-inputs-json-editor'}
+                          options={{
+                            readOnly: true,
+                            language: 'yaml',
+                          }}
+                          readOnlyMessage='You cannot edit the event sent to the workflow.'
                         />
                       </div>
                     </EuiFlexItem>
@@ -234,20 +247,23 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                         }}
                       >
                         <CodeEditor
-                          languageId="json"
+                          languageId="yaml"
                           value={stringWorkflow}
                           height={500}
-                          editorDidMount={() => {}}
-                          onChange={setWorkflow}
+                          editorDidMount={() => { }}
+                          onChange={validateAndSetWorkflow}
                           suggestionProvider={undefined}
                           dataTestSubj={'workflow-json-editor'}
+                          options={{
+                            language: 'yaml',
+                          }}
                         />
                       </div>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiButton type="submit" size="s" onClick={onClickHandler}>
+                  <EuiButton type="submit" size="s" onClick={onClickHandler} disabled={!isValidWorkflow}>
                     <FormattedMessage
                       id="workflowsExample.buttonText"
                       defaultMessage="Run workflow"
