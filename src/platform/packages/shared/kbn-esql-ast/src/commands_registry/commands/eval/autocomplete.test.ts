@@ -489,4 +489,107 @@ describe('EVAL Autocomplete', () => {
       ',',
     ]);
   });
+
+  describe('case', () => {
+    const allSuggestions = [
+      // With extra space after field name to open suggestions
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }, undefined, [
+        'case',
+      ]),
+    ];
+
+    const comparisonOperators = ['==', '!=', '>', '<', '>=', '<='];
+
+    test('first position', async () => {
+      await evalExpectSuggestions('from a | eval case(', allSuggestions);
+      await evalExpectSuggestions('from a | eval case(', allSuggestions);
+    });
+
+    test('suggests comparison operators after initial column', async () => {
+      // case( field /) suggest comparison operators at this point to converge to a boolean
+      await evalExpectSuggestions('from a | eval case( textField ', [...comparisonOperators, ',']);
+      await evalExpectSuggestions('from a | eval case( doubleField ', [
+        ...comparisonOperators,
+        ',',
+      ]);
+      await evalExpectSuggestions('from a | eval case( booleanField ', [
+        ...comparisonOperators,
+        ',',
+      ]);
+    });
+
+    test('after comparison operator', async () => {
+      const expectedFields = getFieldNamesByType(['keyword', 'text']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+      // case( field > /) suggest field/function of the same type of the right hand side to complete the boolean expression
+      await evalExpectSuggestions(
+        'from a | eval case( keywordField != ',
+        [
+          // Notice no extra space after field name
+          ...getFieldNamesByType(['keyword', 'text']),
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            ['keyword', 'text'],
+            { scalar: true },
+            undefined,
+            []
+          ),
+        ],
+        mockCallbacks
+      );
+
+      const expectedNumeric = getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedNumeric.map((name) => ({ label: name, text: name }))
+      );
+
+      const expectedNumericSuggestions = [
+        // Notice no extra space after field name
+        ...expectedNumeric,
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          ESQL_COMMON_NUMERIC_TYPES,
+          { scalar: true },
+          undefined,
+          []
+        ),
+      ];
+      await evalExpectSuggestions(
+        'from a | eval case( integerField != ',
+        expectedNumericSuggestions,
+        mockCallbacks
+      );
+      await evalExpectSuggestions(
+        'from a | eval case( integerField != ',
+        expectedNumericSuggestions,
+        mockCallbacks
+      );
+    });
+
+    test('suggestions for second position', async () => {
+      // case( field > 0, >) suggests fields like normal
+      await evalExpectSuggestions('from a | eval case( integerField != doubleField, ', [
+        // With extra space after field name to open suggestions
+        ...getFieldNamesByType('any'),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }, undefined, [
+          'case',
+        ]),
+      ]);
+
+      // case( multiple conditions ) suggests fields like normal
+      await evalExpectSuggestions(
+        'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", ',
+        [
+          // With extra space after field name to open suggestions
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }, undefined, [
+            'case',
+          ]),
+        ]
+      );
+    });
+  });
 });
