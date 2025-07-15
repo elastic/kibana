@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { asBigNumber } from '../../../../common/utils/formatters';
 
 export const TOGGLE_BUTTON_WIDTH = 20;
@@ -23,14 +24,25 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       justifyContent="center"
       responsive={false}
       css={{ position: 'relative', display: 'flex', width: `${TOGGLE_BUTTON_WIDTH}px` }}
+      onClick={(e: any) => {
+        e.stopPropagation();
+        onClick();
+      }}
     >
       <EuiFlexItem grow={false}>
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div
-          onClick={(e: any) => {
-            e.stopPropagation();
-            onClick();
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault(); // Prevent scroll if Space is pressed
+              onClick();
+            }
           }}
+          tabIndex={0}
+          role="button"
+          aria-label={i18n.translate('xpack.apm.toggleAccordionButton.expandAccordionButton', {
+            defaultMessage: 'Expand/collapse accordion',
+          })}
         >
           <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
         </div>
