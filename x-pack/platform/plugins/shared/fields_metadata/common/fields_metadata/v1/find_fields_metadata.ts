@@ -10,7 +10,7 @@ import { either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import { ANY_DATASET } from '../common';
 import { FetchFieldsMetadataError } from '../errors';
-import { FieldAttribute, fieldAttributeRT, FieldName, fieldsMetadataDictionaryRT } from '../types';
+import { FieldAttribute, fieldAttributeRT, FieldName, partialFieldMetadataPlainRT } from '../types';
 
 const baseFindFieldsMetadataRequestQueryRT = rt.exact(
   rt.partial({
@@ -43,7 +43,7 @@ export const findFieldsMetadataRequestQueryRT = new rt.Type(
 );
 
 export const findFieldsMetadataResponsePayloadRT = rt.type({
-  fields: fieldsMetadataDictionaryRT,
+  fields: rt.record(rt.string, partialFieldMetadataPlainRT),
 });
 
 export type FindFieldsMetadataRequestQuery =
