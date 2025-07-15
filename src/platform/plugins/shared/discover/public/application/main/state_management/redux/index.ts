@@ -74,9 +74,11 @@ export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors'
 export {
   type RuntimeStateManager,
   type CombinedRuntimeState,
+  type InitialUnifiedHistogramLayoutProps,
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  selectRestorableTabRuntimeHistogramLayoutProps,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,

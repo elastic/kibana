@@ -108,6 +108,7 @@ export class CasePlugin
       taskManager: plugins.taskManager,
       logger: this.logger,
       core,
+      analyticsConfig: this.caseConfig.analytics,
     });
 
     this.securityPluginSetup = plugins.security;
@@ -141,14 +142,6 @@ export class CasePlugin
     }
 
     if (plugins.taskManager) {
-      if (this.caseConfig.incrementalId.enabled) {
-        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
-          plugins.taskManager,
-          this.caseConfig.incrementalId,
-          this.logger
-        );
-      }
-
       if (plugins.usageCollection) {
         createCasesTelemetry({
           core,
@@ -157,6 +150,15 @@ export class CasePlugin
           logger: this.logger,
           kibanaVersion: this.kibanaVersion,
         });
+      }
+
+      if (this.caseConfig.incrementalId.enabled) {
+        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
+          plugins.taskManager,
+          this.caseConfig.incrementalId,
+          this.logger,
+          plugins.usageCollection
+        );
       }
     }
 
@@ -224,6 +226,7 @@ export class CasePlugin
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
       }
+
       if (this.caseConfig.analytics.index?.enabled) {
         scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
         createCasesAnalyticsIndexes({
