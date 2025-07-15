@@ -53,7 +53,9 @@ const toLabel = (section: SectionGroup): string => {
 };
 
 const getTimeSection = (updatedAt: string): SectionGroup => {
-  const diffDays = moment().diff(moment(updatedAt), 'days');
+  const updatedMoment = moment(updatedAt, moment.ISO_8601);
+  // `diff` truncates the result to an integer
+  const diffDays = moment().diff(updatedMoment, 'days');
   if (diffDays === 0) {
     return SectionGroup.Today;
   } else if (diffDays === 1) {
@@ -97,13 +99,13 @@ export const groupConversationsByTime = (conversations: Conversation[]): TimeSec
     [SectionGroup.Older]: [],
   };
   conversations.forEach((conversation) => {
-    const section = getTimeSection(conversation.updatedAt);
+    const section = getTimeSection(conversation.updated_at);
     groups[section].push(conversation);
   });
 
-  // Sort conversations within each group by updatedAt (most recent first)
+  // Sort conversations within each group by updated_at (most recent first)
   Object.values(groups).forEach((section) => {
-    section.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    section.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
   });
 
   return orderedSections
