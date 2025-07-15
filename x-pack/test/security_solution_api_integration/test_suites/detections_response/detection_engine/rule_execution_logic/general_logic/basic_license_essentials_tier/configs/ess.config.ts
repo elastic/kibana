@@ -12,6 +12,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../../../../config/ess/config.base.basic')
   );
 
+  console.log('**config**', JSON.stringify(functionalConfig.getAll(), null, 2));
+
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
