@@ -84,8 +84,8 @@ describe('deanonymize', () => {
 
   describe('multiple entities offset regression', () => {
     it('keeps second entity indices correct after first replacement', () => {
-      const name = 'Arturo';
-      const city = 'Barcelona';
+      const name = 'Jorge';
+      const city = 'Mission Viejo';
 
       const nameMask = createMask('PER', name);
       const cityMask = createMask('LOC', city);
