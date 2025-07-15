@@ -5,44 +5,8 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
-import {
-  SynthtraceClientsManager,
-  createLogger,
-  LogLevel,
-  ApmSynthtraceEsClient,
-} from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-
-export const getSynthtraceClient = async ({
-  kibanaUrl,
-  esClient,
-}: {
-  kibanaUrl: string;
-  esClient: Client;
-}) => {
-  const clientManager = new SynthtraceClientsManager({
-    client: esClient,
-    logger: createLogger(LogLevel.info),
-    refreshAfterIndex: true,
-  });
-
-  const { apmEsClient } = clientManager.getClients({
-    clients: ['apmEsClient'],
-    kibana: {
-      target: kibanaUrl,
-      logger: createLogger(LogLevel.debug),
-    },
-  });
-
-  await clientManager.initFleetPackageForClient({
-    clients: {
-      apmEsClient,
-    },
-  });
-
-  return apmEsClient;
-};
 
 export const dataConfig = {
   rate: 10,

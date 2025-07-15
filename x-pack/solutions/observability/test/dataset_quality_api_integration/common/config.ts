@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  LogLevel,
-  LogsSynthtraceEsClient,
-  SyntheticsSynthtraceEsClient,
-  createLogger,
-} from '@kbn/apm-synthtrace';
+import { LogsSynthtraceEsClient, SyntheticsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { createDatasetQualityUsers } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users';
 import {
   DATASET_QUALITY_TEST_PASSWORD,
@@ -137,18 +132,21 @@ export function createTestConfig(
         ...services,
         datasetQualityFtrConfig: () => config,
         registry: RegistryProvider,
-        logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-          new LogsSynthtraceEsClient({
-            client: context.getService('es'),
-            logger: createLogger(LogLevel.info),
-            refreshAfterIndex: true,
-          }),
-        syntheticsSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
-          new SyntheticsSynthtraceEsClient({
-            client: context.getService('es'),
-            logger: createLogger(LogLevel.info),
-            refreshAfterIndex: true,
-          }),
+        logSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
+          const synthtraceClient = context.getService('synthtrace');
+
+          const { logsEsClient } = synthtraceClient.getClients(['logsEsClient']);
+
+          return logsEsClient;
+        },
+
+        syntheticsSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
+          const synthtraceClient = context.getService('synthtrace');
+
+          const { syntheticsEsClient } = synthtraceClient.getClients(['syntheticsEsClient']);
+
+          return syntheticsEsClient;
+        },
         datasetQualityApiClient: async (_: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);

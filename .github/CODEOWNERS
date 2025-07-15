@@ -1465,6 +1465,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-ux-logs-team
 
 # Infra Monitoring tests
+/x-pack/test/common/services/synthtrace.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/api_integration/services/index.ts @elastic/obs-ux-infra_services-team
@@ -1536,8 +1537,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # APM
 /x-pack/test/stack_functional_integration/apps/apm @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-/x-pack/test/common/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-/x-pack/platform/test/api_integration/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-ux-infra_services-team
@@ -2182,7 +2181,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional_with_es_ssl/config.base.ts @elastic/response-ops # Assigned per https://github.com/elastic/kibana/pull/197070
 /x-pack/platform/test/functional_with_es_ssl/lib/alert_api_actions.ts @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/lib/get_test_data.ts @elastic/response-ops
-/x-pack/platform/test/functional_with_es_ssl/lib/apm_es_client.ts @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/page_objects/index.ts @elastic/response-ops # Assigned per git blame
 /x-pack/platform/test/functional_with_es_ssl/page_objects/triggers_actions_ui_page.ts @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/page_objects/rule_details.ts @elastic/response-ops
@@ -2303,6 +2301,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
 /src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-management
 /src/platform/test/functional/services/management @elastic/kibana-management
+/src/platform/test/functional/services/synthtrace/sythtrace.ts  @elastic/kibana-management
 /x-pack/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/test/functional/apps/ingest_pipelines @elastic/kibana-management
 /x-pack/test/functional/apps/home @elastic/kibana-management
