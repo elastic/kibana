@@ -17,27 +17,9 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { EsqlToolFieldTypes } from '@kbn/onechat-common';
 import { useOnechatToolsTags } from '../../../../hooks/use_tools';
-import { OnechatEsqlEditorField } from './esql_editor_field';
-
-export interface OnechatEsqlParam {
-  name: string;
-  type: EsqlToolFieldTypes;
-  description: string;
-}
-
-type EsqlParamFormData = OnechatEsqlParam & {
-  warning?: string;
-};
-
-export interface OnechatEsqlToolFormData {
-  name: string;
-  description: string;
-  esql: string;
-  tags: string[];
-  params: EsqlParamFormData[];
-}
+import { OnechatEsqlEditorField } from './components/esql_editor_field';
+import { OnechatEsqlToolFormData } from './types/esql_tool_form_types';
 
 export interface OnechatEsqlToolFormProps {
   formId: string;

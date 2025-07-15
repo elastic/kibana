@@ -26,8 +26,9 @@ import React, { useCallback } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useOnechatCreateTool } from '../../../hooks/use_tools';
 import { transformEsqlFormData } from '../../../utils/transform_esql_form_data';
-import { OnechatEsqlToolForm, OnechatEsqlToolFormData } from './form/esql_tool_form';
-import { useEsqlToolFormValidationResolver } from './form/esql_tool_form_validation';
+import { OnechatEsqlToolForm } from './form/esql_tool_form';
+import { useEsqlToolFormValidationResolver } from './form/validation/esql_tool_form_validation';
+import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
 
 const flyoutBodyClass = (euiTheme: EuiThemeComputed) =>
   css`

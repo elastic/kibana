@@ -11,8 +11,8 @@ import { EsqlToolFieldType, idRegexp, isReservedToolId } from '@kbn/onechat-comm
 import { z } from '@kbn/zod';
 import { useCallback } from 'react';
 import { Resolver } from 'react-hook-form';
-import { extractEsqlParams } from '../../../../utils/extract_esql_params';
-import { OnechatEsqlToolFormData } from './esql_tool_form';
+import { extractEsqlParams } from '../../../../../utils/extract_esql_params';
+import { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
 
 const i18nMessages = {
   name: {
