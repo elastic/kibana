@@ -32,7 +32,6 @@ disabled:
   - x-pack/platform/test/cloud_integration/config.ts
   - x-pack/platform/test/load/config.ts
   - x-pack/platform/test/plugin_api_perf/config.ts
-  - x-pack/test/screenshot_creation/config.ts
   - x-pack/platform/test/screenshot_creation/config.ts
   - x-pack/platform/test/fleet_packages/config.ts
 

@@ -14,6 +14,9 @@ disabled:
   # QA suites that are run out-of-band
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts
 
+  # Configs that exist but weren't running in CI when this file was introduced
+  - x-pack/solutions/security/test/screenshot_creation/config.ts
+
   # Cypress configs, for now these are still run manually
   - x-pack/solutions/security/test/defend_workflows_cypress/cli_config.ts
   - x-pack/solutions/security/test/defend_workflows_cypress/config.ts

@@ -39,8 +39,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
       await ml.testResources.resetKibanaAnnouncements();
     });
 
-    loadTestFile(require.resolve('./observability_alerting'));
-    loadTestFile(require.resolve('./observability_cases'));
     loadTestFile(require.resolve('./security_cases'));
   });
 }
