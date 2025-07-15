@@ -2162,10 +2162,10 @@
     semver "^7.6.3"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.0.0.tgz#dba9f302c3a611440c88d7c34371a86e6f2285ae"
-  integrity sha512-AIhCyMfRNz80CdKZEllVW4VgqfXQgv3wE875lt228MAmwd3tAwNh0mROp8++kWb0WJoLAYW4vypw873AMWqyEw==
+"@elastic/eslint-plugin-eui@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.1.0.tgz#20296c12b3f79623217699a42d500e336b7e470f"
+  integrity sha512-xDTSJTkI7i9+PreDaaMU/I607aoVkWmVSJsXNj29iHhuNDhT+a2nZoE7FFVt51XaJe/LhbGM2xUaLBJeGEg92A==
 
 "@elastic/eui-amsterdam@npm:@elastic/eui@105.0.0-amsterdam.0":
   version "105.0.0-amsterdam.0"
@@ -5257,10 +5257,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations@link:x-pack/solutions/observability/packages/kbn-custom-integrations":
-  version "0.0.0"
-  uid ""
-
 "@kbn/cypress-config@link:src/platform/packages/shared/kbn-cypress-config":
   version "0.0.0"
   uid ""
@@ -6077,6 +6073,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ingest-pipelines-shared@link:x-pack/platform/packages/shared/ingest-pipelines":
+  version "0.0.0"
+  uid ""
+
 "@kbn/input-control-vis-plugin@link:src/platform/plugins/private/input_control_vis":
   version "0.0.0"
   uid ""
@@ -6766,6 +6766,10 @@
   uid ""
 
 "@kbn/presentation-util-plugin@link:src/platform/plugins/shared/presentation_util":
+  version "0.0.0"
+  uid ""
+
+"@kbn/presentation-util@link:src/platform/packages/shared/presentation/presentation_util":
   version "0.0.0"
   uid ""
 

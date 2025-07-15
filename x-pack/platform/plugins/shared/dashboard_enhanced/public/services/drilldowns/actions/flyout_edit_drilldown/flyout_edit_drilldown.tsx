@@ -6,13 +6,9 @@
  */
 
 import React from 'react';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import {
-  tracksOverlays,
-  type PresentationContainer,
-  type TracksOverlays,
-} from '@kbn/presentation-containers';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type PresentationContainer } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   apiCanAccessViewMode,
   apiHasSupportedTriggers,
@@ -22,6 +18,7 @@ import {
   type HasUniqueId,
   type HasParentApi,
   type HasSupportedTriggers,
+  apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
@@ -29,15 +26,16 @@ import {
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
   DRILLDOWN_ACTION_GROUP,
-  DRILLDOWN_MAX_WIDTH,
   ensureNestedTriggers,
 } from '../drilldown_shared';
+import { coreServices, uiActionsEnhancedServices } from '../../../kibana_services';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
@@ -47,69 +45,51 @@ export interface FlyoutEditDrilldownParams {
 
 export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
   Required<HasDynamicActions> &
-  HasParentApi<Partial<PresentationContainer & TracksOverlays>> &
+  HasParentApi<Partial<PresentationContainer>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
 
 const isApiCompatible = (api: unknown | null): api is FlyoutEditDrilldownActionApi =>
   apiHasDynamicActions(api) && apiCanAccessViewMode(api) && apiHasSupportedTriggers(api);
 
-export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
-  public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
-  public readonly id = OPEN_FLYOUT_EDIT_DRILLDOWN;
-  public order = 10;
-  public grouping = [DRILLDOWN_ACTION_GROUP];
-
-  constructor(protected readonly params: FlyoutEditDrilldownParams) {}
-
-  public getDisplayName() {
-    return txtDisplayName;
-  }
-
-  public getIconType() {
-    return 'list';
-  }
-
-  public readonly MenuItem = MenuItem as any;
-
-  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+export const flyoutEditDrilldownAction: ActionDefinition<EmbeddableApiContext> = {
+  id: OPEN_FLYOUT_EDIT_DRILLDOWN,
+  type: OPEN_FLYOUT_EDIT_DRILLDOWN,
+  order: 10,
+  getIconType: () => 'list',
+  grouping: [DRILLDOWN_ACTION_GROUP],
+  getDisplayName: () => txtDisplayName,
+  MenuItem: MenuItem as any,
+  isCompatible: async ({ embeddable }) => {
     if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'edit') return false;
     return (embeddable.dynamicActionsState$.getValue()?.dynamicActions.events ?? []).length > 0;
-  }
-
-  public async execute({ embeddable }: EmbeddableApiContext) {
+  },
+  execute: async ({ embeddable }) => {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const { core, plugins } = this.params.start();
-
-    const templates = createDrilldownTemplatesFromSiblings(embeddable);
-    const overlayTracker = tracksOverlays(embeddable.parentApi) ? embeddable.parentApi : undefined;
-    const close = () => {
-      if (overlayTracker) overlayTracker.clearOverlays();
-      handle.close();
-    };
-
-    const handle = core.overlays.openFlyout(
-      toMountPoint(
-        <plugins.uiActionsEnhanced.DrilldownManager
-          initialRoute={'/manage'}
-          dynamicActionManager={embeddable.enhancements.dynamicActions}
-          triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
-          placeContext={{ embeddable }}
-          templates={templates}
-          onClose={close}
-        />,
-        core
-      ),
-      {
-        maxWidth: DRILLDOWN_MAX_WIDTH,
-        ownFocus: true,
+    openLazyFlyout({
+      core: coreServices,
+      parentApi: embeddable.parentApi,
+      loadContent: async ({ closeFlyout }) => {
+        const templates = createDrilldownTemplatesFromSiblings(embeddable);
+        return (
+          <uiActionsEnhancedServices.DrilldownManager
+            initialRoute={'/manage'}
+            dynamicActionManager={embeddable.enhancements.dynamicActions}
+            triggers={[
+              ...ensureNestedTriggers(embeddable.supportedTriggers()),
+              CONTEXT_MENU_TRIGGER,
+            ]}
+            placeContext={{ embeddable }}
+            templates={templates}
+            onClose={closeFlyout}
+          />
+        );
+      },
+      flyoutProps: {
         'data-test-subj': 'editDrilldownFlyout',
-        onClose: () => {
-          close();
-        },
-      }
-    );
-
-    overlayTracker?.openOverlay(handle);
-  }
-}
+        'aria-labelledby': 'drilldownFlyoutTitleAriaId',
+      },
+      uuid: apiHasUniqueId(embeddable) ? embeddable.uuid : undefined,
+    });
+  },
+};

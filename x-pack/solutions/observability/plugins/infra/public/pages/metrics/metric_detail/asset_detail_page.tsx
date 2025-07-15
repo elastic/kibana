@@ -18,8 +18,8 @@ export const AssetDetailPage = () => {
 
   return (
     <AssetDetails
-      assetId={nodeId}
-      assetType={nodeType}
+      entityId={nodeId}
+      entityType={nodeType}
       tabs={getAssetDetailsTabs(nodeType)}
       renderMode={{
         mode: 'page',
