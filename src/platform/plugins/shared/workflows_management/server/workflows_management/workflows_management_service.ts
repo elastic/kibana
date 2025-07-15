@@ -1,22 +1,34 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  WorkflowExecutionEngineModel,
+  WorkflowListModel,
+  WorkflowModel,
+  WorkflowStepExecution,
+} from '@kbn/workflows';
 import { getWorkflow } from './lib/get_workflow';
-import { WorkflowListModel, WorkflowModel } from '@kbn/workflows';
+import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { createWorkflow } from './lib/create_workflow';
 import { GetWorkflowsParams } from './workflows_management_api';
-import { searchWorkflows } from './lib/search_workflows';
+import { searchWorkflows, searchStepExecutions } from './lib/search_workflows';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
   private logger: Logger;
   private workflowIndex: string;
+  private workflowsExecutionIndex: string;
+  private stepsExecutionIndex: string;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
     logger: Logger,
-    workflowIndex: string
+    workflowIndex: string,
+    workflowsExecutionIndex: string,
+    stepsExecutionIndex: string
   ) {
     this.logger = logger;
     this.workflowIndex = workflowIndex;
+    this.stepsExecutionIndex = stepsExecutionIndex;
+    this.workflowsExecutionIndex = workflowsExecutionIndex;
     this.initialize(esClientPromise);
   }
 
@@ -45,6 +57,29 @@ export class WorkflowsService {
       logger: this.logger,
       workflowIndex: this.workflowIndex,
       _full: params._full,
+    });
+  }
+
+  public async searchStepExecutions(params: {
+    workflowExecutionId: string;
+  }): Promise<WorkflowStepExecution[]> {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client not initialized');
+    }
+    return await searchStepExecutions({
+      esClient: this.esClient,
+      logger: this.logger,
+      stepsExecutionIndex: this.stepsExecutionIndex,
+      workflowExecutionId: params.workflowExecutionId,
+    });
+  }
+
+  public getWorkflowExecution(id: string): Promise<WorkflowExecutionEngineModel | null> {
+    return getWorkflowExecution({
+      esClient: this.esClient,
+      logger: this.logger,
+      workflowExecutionIndex: this.workflowsExecutionIndex,
+      workflowExecutionId: id,
     });
   }
 

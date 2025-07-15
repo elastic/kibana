@@ -27,7 +27,7 @@ export class ConnectorExecutor {
       throw new Error(`Connector "${connectorName}" not found`);
     }
 
-    provider.action(inputs);
+    await provider.action(inputs);
   }
 
   private async runConnector(

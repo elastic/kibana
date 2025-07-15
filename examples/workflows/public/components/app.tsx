@@ -8,19 +8,16 @@ import {
   EuiButton,
   EuiPageTemplate,
   EuiTitle,
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
-
 } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
+import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import { css } from '@emotion/react';
-import { WorkflowStatus } from '@kbn/workflows';
 import { CodeEditor } from '@kbn/code-editor';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_NAME } from '../../common';
 
 interface WorkflowsAppDeps {
@@ -58,7 +55,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
       {
         id: 'example-workflow-1',
         name: 'Example Workflow 1',
-        status: WorkflowStatus.ACTIVE,
+        status: 'active',
         triggers: [
           {
             id: 'detection-rule',
@@ -69,7 +66,24 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
         ],
         steps: [
           {
-            id: 'step1',
+            id: 'step-with-console-log-1',
+            connectorType: 'console',
+            connectorName: 'console',
+            inputs: {
+              message: 'Step 1 executed "{{event.ruleName}}"',
+            },
+          },
+          {
+            id: 'step-with-slow-console',
+            connectorName: 'slow-console',
+            connectorType: 'console',
+            inputs: {
+              message: 'Step 2 executed "{{event.additionalData.userName}}"',
+            },
+          },
+          {
+            id: 'step-with-slack-connector',
+            needs: ['step1', 'step2'],
             connectorType: 'slack-connector',
             connectorName: 'slack_keep',
             inputs: {
@@ -78,24 +92,22 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
             },
           },
           {
-            id: 'step2',
-            needs: ['step1'],
-            connectorType: 'slack-connector',
-            connectorName: 'slack_keep',
+            id: 'step-with-console-log-2',
+            needs: ['step3'],
+            connectorName: 'console',
+            connectorType: 'console',
             inputs: {
-              message:
-                'Message from step 2: And this is the second step at {{ now() }}',
+              message: 'Message from step 2: And this is the second step at {{ now() }}',
             },
           },
-          // {
-          //   id: 'step4',
-          //   needs: ['step3'],
-          //   connectorName: 'console',
-          //   connectorType: 'console',
-          //   inputs: {
-          //     message: 'Step 2 executed!',
-          //   },
-          // },
+          {
+            id: 'step-with-5-seconds-delay',
+            connectorName: 'delay',
+            connectorType: 'delay',
+            inputs: {
+              delay: 5000,
+            },
+          },
         ],
       },
       null,
@@ -113,7 +125,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
           ruleName: 'Detect vulnerabilities',
           additionalData: {
             user: userEmail,
-            userName: userName,
+            userName,
           },
         },
       },
@@ -121,13 +133,14 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
       4
     );
   };
-
   const [workflowInputs, setWorkflowInputs] = useState<string>(getWorkflowInputs());
 
   // Update workflow inputs when current user changes
   useEffect(() => {
     setWorkflowInputs(getWorkflowInputs());
   }, [currentUser]);
+
+  const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(null);
 
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
@@ -138,7 +151,9 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
           inputs: JSON.parse(workflowInputs),
         }),
       })
-      .then((res) => {
+      .then((res: any) => {
+        console.log('Workflow run response:', res);
+        setWorkflowExecutionId(res.workflowExecutionId);
         // Use the core notifications service to display a success message.
         notifications.toasts.addSuccess(
           i18n.translate('workflowsExample.dataUpdated', {
@@ -166,7 +181,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                 </h1>
               </EuiTitle>
             </EuiPageTemplate.Header>
-            <EuiPageTemplate.Section>
+            <EuiPageTemplate.Section restrictWidth={false}>
               <EuiTitle>
                 <h2>
                   <FormattedMessage
@@ -177,64 +192,73 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
               </EuiTitle>
               <EuiFlexGroup
                 gutterSize="l"
-                direction="column"
+                direction="row"
                 css={{
                   position: 'relative',
                 }}
                 responsive={false}
               >
                 <EuiFlexItem
-                  className="ESQLEditor"
                   css={css`
-                    max-width: 100%;
+                    max-width: 1000px;
                     position: relative;
                   `}
                 >
-                  <div
-                    css={{
-                      border: `1px solid ${theme.euiTheme.colors.borderBaseFormsColorSwatch}`,
-                    }}
-                  >
-                    <CodeEditor
-                      languageId="json"
-                      value={workflowInputs}
-                      height={200}
-                      editorDidMount={() => { }}
-                      onChange={setWorkflowInputs}
-                      suggestionProvider={undefined}
-                      dataTestSubj={'workflow-inputs-json-editor'}
-                      readOnlyMessage='You cannot edit the event sent to the workflow.'
-                      options={{
-                        readOnly: true,
-                      }}
-                    />
-                  </div>
+                  <EuiFlexGroup direction="column" gutterSize="l">
+                    <EuiFlexItem>
+                      <div
+                        css={{
+                          border: `1px solid ${theme.euiTheme.colors.borderBaseFormsColorSwatch}`,
+                        }}
+                      >
+                        <CodeEditor
+                          languageId="json"
+                          value={workflowInputs}
+                          height={200}
+                          editorDidMount={() => {}}
+                          onChange={setWorkflowInputs}
+                          suggestionProvider={undefined}
+                          dataTestSubj={'workflow-inputs-json-editor'}
+                        />
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      css={css`
+                        max-width: 100%;
+                        position: relative;
+                      `}
+                    >
+                      <div
+                        css={{
+                          border: `1px solid ${theme.euiTheme.colors.borderBaseFormsColorSwatch}`,
+                        }}
+                      >
+                        <CodeEditor
+                          languageId="json"
+                          value={stringWorkflow}
+                          height={500}
+                          editorDidMount={() => {}}
+                          onChange={setWorkflow}
+                          suggestionProvider={undefined}
+                          dataTestSubj={'workflow-json-editor'}
+                        />
+                      </div>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
-                <div
-                  css={{
-                    border: `1px solid ${theme.euiTheme.colors.borderBaseFormsColorSwatch}`,
-                  }}
-                >
-                  <CodeEditor
-                    languageId="json"
-                    value={stringWorkflow}
-                    height={500}
-                    editorDidMount={() => { }}
-                    onChange={setWorkflow}
-                    suggestionProvider={undefined}
-                    dataTestSubj={'workflow-json-editor'}
-                  />
-                </div>
+                <EuiFlexItem>
+                  <EuiButton type="submit" size="s" onClick={onClickHandler}>
+                    <FormattedMessage
+                      id="workflowsExample.buttonText"
+                      defaultMessage="Run workflow"
+                      ignoreTag
+                    />
+                  </EuiButton>
+                  {workflowExecutionId && (
+                    <WorkflowExecution workflowExecutionId={workflowExecutionId} />
+                  )}
+                </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiText>
-                <EuiButton type="submit" size="s" onClick={onClickHandler}>
-                  <FormattedMessage
-                    id="workflowsExample.buttonText"
-                    defaultMessage="Run workflow"
-                    ignoreTag
-                  />
-                </EuiButton>
-              </EuiText>
             </EuiPageTemplate.Section>
           </EuiPageTemplate>
         </>

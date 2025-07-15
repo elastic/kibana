@@ -32,9 +32,13 @@ export function defineRoutes(
         const { workflow, inputs } = request.body;
         const workflowsManagement = await getWorkflowManager();
 
-        await workflowsManagement.runWorkflow(workflow, inputs);
+        const workflowExecutionId = await workflowsManagement.runWorkflow(workflow, inputs);
 
-        return response.ok();
+        return response.ok({
+          body: {
+            workflowExecutionId,
+          },
+        });
       } catch (error) {
         return response.customError({
           statusCode: 500,

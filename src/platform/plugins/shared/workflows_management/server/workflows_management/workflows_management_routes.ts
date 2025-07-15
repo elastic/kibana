@@ -64,4 +64,43 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       }
     }
   );
+  router.get(
+    {
+      path: '/api/workflowExecution/{workflowExecutionId}',
+      security: {
+        authz: {
+          requiredPrivileges: ['all'],
+        },
+      },
+      validate: {
+        params: schema.object({
+          workflowExecutionId: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { workflowExecutionId } = request.params;
+        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId);
+
+        if (!workflowExecution) {
+          return response.notFound({
+            body: `Workflow execution with ID ${workflowExecutionId} not found`,
+          });
+        }
+
+        return response.ok({
+          body: workflowExecution,
+        });
+      } catch (error) {
+        console.error(error);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
 }

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -5,14 +14,14 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import { Client } from '@elastic/elasticsearch';
+import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
 import { defineRoutes } from './workflows_management/workflows_management_routes';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
-import { Client } from '@elastic/elasticsearch';
 import type { WorkflowsExecutionEnginePluginStartDeps } from './types';
 import { SchedulerService } from './scheduler/scheduler_service';
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
@@ -42,7 +51,9 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.workflowsService = new WorkflowsService(
       Promise.resolve(this.esClient),
       this.logger,
-      '.workflows'
+      '.workflows',
+      '.workflow-executions',
+      '.workflow-step-executions'
     );
     const api = new WorkflowsManagementApi(this.workflowsService);
 

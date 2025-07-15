@@ -7,6 +7,7 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
+  WorkflowExecution,
   WorkflowExecutionEngineModel,
   WorkflowStepExecution,
 } from '@kbn/workflows';
@@ -54,6 +55,22 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, any>
     ) => {
       const workflowRunId = context['workflowRunId'];
+      const workflowCreatedAt = new Date();
+      const workflowStartedAt = new Date();
+      await this.esClient.index({
+        index: '.workflow-executions',
+        id: workflowRunId,
+        refresh: true,
+        document: {
+          id: workflowRunId,
+          triggers: workflow.triggers,
+          steps: workflow.steps,
+          status: ExecutionStatus.RUNNING,
+          createdAt: workflowCreatedAt,
+          startedAt: workflowStartedAt,
+        } as WorkflowExecution,
+      });
+
       const stepRunner = new StepRunner(
         new ConnectorExecutor(
           context.connectorCredentials,
@@ -73,7 +90,7 @@ export class WorkflowsExecutionEnginePlugin
         const stepStartedAt = new Date();
 
         await this.esClient.index({
-          index: 'workflow-step-executions',
+          index: '.workflow-step-executions',
           id: workflowExecutionId,
           refresh: true,
           document: {
@@ -101,7 +118,7 @@ export class WorkflowsExecutionEnginePlugin
         const executionTimeMs = completedAt.getTime() - stepStartedAt.getTime();
 
         await this.esClient.update({
-          index: 'workflow-step-executions',
+          index: '.workflow-step-executions',
           id: workflowExecutionId,
           refresh: true,
           doc: {
@@ -113,6 +130,17 @@ export class WorkflowsExecutionEnginePlugin
           } as WorkflowStepExecution,
         });
       }
+
+      await this.esClient.update({
+        index: '.workflow-executions',
+        id: workflowRunId,
+        refresh: true,
+        doc: {
+          status: ExecutionStatus.COMPLETED,
+          finishedAt: new Date(),
+          duration: new Date().getTime() - workflowStartedAt.getTime(),
+        } as WorkflowExecution,
+      });
     };
 
     return {

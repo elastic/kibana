@@ -1,12 +1,19 @@
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EsWorkflowSchema, WorkflowListModel } from '@kbn/workflows';
+import { EsWorkflowSchema, WorkflowListModel, WorkflowStepExecution } from '@kbn/workflows';
 
 type SearchWorkflowsParams = {
   esClient: ElasticsearchClient;
   logger: Logger;
   workflowIndex: string;
   _full?: boolean;
+};
+
+type SearchStepExectionsParams = {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  stepsExecutionIndex: string;
+  workflowExecutionId: string;
 };
 
 export const searchWorkflows = async ({
@@ -31,6 +38,30 @@ export const searchWorkflows = async ({
     }
 
     return transformToWorkflowListItemModel(response);
+  } catch (error) {
+    logger.error(`Failed to search workflows: ${error}`);
+    throw error;
+  }
+};
+
+export const searchStepExecutions = async ({
+  esClient,
+  logger,
+  stepsExecutionIndex,
+  workflowExecutionId,
+}: SearchStepExectionsParams): Promise<WorkflowStepExecution[]> => {
+  try {
+    logger.info(`Searching workflows in index ${stepsExecutionIndex}`);
+    const response = await esClient.search<WorkflowStepExecution>({
+      index: stepsExecutionIndex,
+      query: { match: { workflowRunId: workflowExecutionId } },
+    });
+
+    logger.info(
+      `Found ${response.hits.hits.length} workflows, ${response.hits.hits.map((hit) => hit._id)}`
+    );
+
+    return response.hits.hits.map((hit) => hit._source as WorkflowStepExecution);
   } catch (error) {
     logger.error(`Failed to search workflows: ${error}`);
     throw error;
