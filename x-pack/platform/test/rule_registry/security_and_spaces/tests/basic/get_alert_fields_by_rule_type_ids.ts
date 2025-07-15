@@ -30,9 +30,6 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const TEST_URL = '/internal/rac/alerts/fields';
-  const es = getService('es');
-  const config = getService('config');
-  const retryTimeout = config.get('timeouts.try');
 
   const createEsQueryRule = async (
     index: string,
