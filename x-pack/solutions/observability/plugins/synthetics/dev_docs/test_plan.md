@@ -30,28 +30,32 @@ Oblt-cli will provide kibana.yml configuration that can be in `config/kibana.dev
    - Create SLO
    - Disable monitor (all locations)
    - Disable status alerts (all locations)
+   - Add to dashboard
 
 4. Use the search bar to filter the monitors
 5. Test the `Up`, `Down`, `Disabled` and `Pending` filters.
 6. Test the `Type`, `Location`, `Tags` and `Frequency` filters.
-7. Check that the Monitors status panel correctly shows the Up, Down and Disabled monitors.
-8. In the monitors status panel click on the 3 dots icon and test the `Add to dashboard` functionality.
-9. Make sure the `Errors` and `Alerts` panels are visible.
-10. Select `All permitted spaces` in the Spaces dropdown and make sure all monitors are shown. To test this make sure you are part of another space and that space contains at least 1 monitor.
-11. Test the `Add to dashboard` button.
-12. Make sure the `Sort by` dropdown works as expected.
-13. Make sure the `Group by` dropdown works as expected.
+7. For the `Location` and `Tags` filters make sure the `Use logical AND` option works as expected.
+8. Check that the Monitors status panel correctly shows the Up, Down and Disabled monitors.
+9. In the monitors status panel click on the 3 dots icon and test the `Add to dashboard` functionality.
+10. Make sure the `Errors` and `Alerts` panels are visible.
+11. Select `All permitted spaces` in the Spaces dropdown and make sure all monitors are shown. To test this make sure you are part of another space and that space contains at least 1 monitor.
+12. Test the `Add to dashboard` button.
+13. Make sure the `Sort by` dropdown works as expected.
+14. Make sure the `Group by` dropdown works as expected.
+15. Make sure the buttons to switch between `card view` and `compact view` work as expected.
 
 ### Management
 
 1. Use the search bar to filter the monitors
 2. Test the `Type`, `Location`, `Tags` and `Frequency` filters.
-3. Make sure the `Summary` and `Last 30 days` panels are visible.
-4. On the `Last 30 days` panel hover over the number of test runs and click on `Inspect`, make sure the flyout opens.
-5. On the `Last 30 days` panel hover over the graph and click on `Inspect`, make sure the flyout opens.
-6. Test enabling/disabling one of the monitors with the toggle on the Configuration tile.
-7. Test the `Edit`, `Clone`, `Delete` and `Disable status alerts` actions on the Configuration tile.
-8. Select `All permitted spaces` in the Spaces dropdown and make sure all monitors are shown. To test this make sure you are part of another space and that space contains at least 1 monitor.
+3. For the `Location` and `Tags` filters make sure the `Use logical AND` option works as expected.
+4. Make sure the `Summary` and `Last 30 days` panels are visible.
+5. On the `Last 30 days` panel hover over the number of test runs and click on `Inspect`, make sure the flyout opens.
+6. On the `Last 30 days` panel hover over the graph and click on `Inspect`, make sure the flyout opens.
+7. Test enabling/disabling one of the monitors with the toggle on the Configuration tile.
+8. Test the `Edit`, `Clone`, `Delete` and `Disable status alerts` actions on the Configuration tile.
+9. Select `All permitted spaces` in the Spaces dropdown and make sure all monitors are shown. To test this make sure you are part of another space and that space contains at least 1 monitor.
 
 ### Monitor detail page
 
@@ -82,7 +86,7 @@ To get access to this page from the `Overview` tab click on one of the monitors 
    - Overview
    - Failed tests
    - Errors
-   - Failed tests by step
+   - Failed tests by step (visible only if it's a journey/page type of monitor)
 
 8. Click on the `Alerts` tab.
 
@@ -116,3 +120,35 @@ SYNTHETICS_API_KEY=${API_KEY} npm run push
 ### TLS certificates
 
 1. Check that the `TLS certificates` under `Synthetics` are visible.
+
+### Edit private location
+
+1. From a non-default space create a private location. In the `Spaces` dropdown be sure `* All Spaces` is selected.
+2. Change the location name.
+3. Change the location tags.
+4. Confirm that `Agent policy` and `Spaces` fields are disabled and not editable.
+5. Still in the non-default space, create a monitor that uses this private location.
+6. Switch to the default space and create another monitor that uses the same private location.
+7. Return to the non-default space and rename the private location again.
+8. Verify that the updated location name appears in both monitors (the one in the default space and the one in the non-default space).
+9. Open Fleet → Agent policies, select the agent policy for this private location, and check that the integration policies now show the new location name.
+
+### Multi space monitors
+
+1. In the default space create a new monitor. Under `Advanced options` → `Kibana spaces`, select both the default space and the non-default space.
+2. Go to `Management` view; under the `Spaces` column confirm avatars for both spaces are shown.
+3. Switch to the non-default space and confirm the monitor is listed there as well.
+4. From the non-default space delete the multi-space monitor.
+5. Create another multi space monitor, this time in `Advanced options` → `Kibana spaces` choose `* All spaces`.
+6. In Management view, the `Spaces` column should now show a single avatar with `*`.
+7. Create a new space and verify that this monitor automatically appears in the new space.
+
+### Maintenance Windows
+
+1. In the default space start creating a monitor. Under `Advanced options` → `Maintenance windows` click `Create`.
+2. Create a maintenance window.
+3. Back in the monitor fly-out, select the newly created maintenance window and save the monitor.
+4. On the `Overview` page, the monitor card should display a `pause` icon.
+5. Hover over the `pause` icon; a tooltip should explain that the monitor is paused due to the maintenance window.
+6. Go to `Maintenance windows`, edit the window so it is no longer active.
+7. Return to the `Overview` page; the `pause` icon should disappear and the monitor should resume running.

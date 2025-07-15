@@ -5257,10 +5257,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/custom-integrations@link:x-pack/solutions/observability/packages/kbn-custom-integrations":
-  version "0.0.0"
-  uid ""
-
 "@kbn/cypress-config@link:src/platform/packages/shared/kbn-cypress-config":
   version "0.0.0"
   uid ""
@@ -6077,6 +6073,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ingest-pipelines-shared@link:x-pack/platform/packages/shared/ingest-pipelines":
+  version "0.0.0"
+  uid ""
+
 "@kbn/input-control-vis-plugin@link:src/platform/plugins/private/input_control_vis":
   version "0.0.0"
   uid ""
@@ -6766,6 +6766,10 @@
   uid ""
 
 "@kbn/presentation-util-plugin@link:src/platform/plugins/shared/presentation_util":
+  version "0.0.0"
+  uid ""
+
+"@kbn/presentation-util@link:src/platform/packages/shared/presentation/presentation_util":
   version "0.0.0"
   uid ""
 
