@@ -142,10 +142,10 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   if (noResults && !showFilePreview) {
     content = (
-      <div>
+      <>
         {content}
         <EmptyPrompt />
-      </div>
+      </>
     );
   } else if (showFilePreview) {
     content = <FilesPreview />;

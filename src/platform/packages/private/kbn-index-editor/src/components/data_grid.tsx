@@ -41,6 +41,7 @@ interface ESQLDataGridProps {
 const DEFAULT_INITIAL_ROW_HEIGHT = 2;
 const DEFAULT_ROWS_PER_PAGE = 10;
 const ROWS_PER_PAGE_OPTIONS = [10, 25];
+const MAX_COLUMN_PLACEHOLDERS = 4;
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [sortOrder, setSortOrder] = useState<SortOrder[]>([]);
@@ -110,7 +111,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     const preservedOrder = intersection(activeColumns, currentColumnNames);
     const newColumns = difference(currentColumnNames, preservedOrder);
 
-    const missingPlaceholders = 4 - props.columns.length;
+    const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - props.columns.length;
     const addColumnPlaceholders =
       missingPlaceholders > 0
         ? times(missingPlaceholders, (idx) => `${COLUMN_PLACEHOLDER_PREFIX}-${idx}`)
