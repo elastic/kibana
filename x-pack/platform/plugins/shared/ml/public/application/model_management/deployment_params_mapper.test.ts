@@ -660,7 +660,6 @@ describe('DeploymentParamsMapper', () => {
             deployment_id: 'test-deployment',
             priority: 'normal',
             threads_per_allocation: 16,
-            // todo check
             number_of_allocations: 6249,
           },
         });
