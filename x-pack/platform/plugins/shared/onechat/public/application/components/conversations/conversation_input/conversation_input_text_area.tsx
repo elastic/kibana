@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, keys, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiTextArea, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
@@ -13,6 +13,20 @@ import React, { useEffect, useRef } from 'react';
 const inputContainerStyles = css`
   display: flex;
   flex-direction: column;
+  .euiFormControlLayout--euiTextArea,
+  .euiFormControlLayout__childrenWrapper {
+    height: 100%;
+  }
+`;
+const textareaStyles = css`
+  height: 100%;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  &:focus:focus-visible {
+    outline: none;
+    background-image: none;
+  }
 `;
 
 interface ConversationInputTextAreaProps {
@@ -26,19 +40,6 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   setMessage,
   handleSubmit,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const textareaStyles = css`
-    flex-grow: 1;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    resize: none;
-    &:focus:focus-visible {
-      outline: none;
-    }
-    background-color: ${euiTheme.components.forms.background};
-    color: ${euiTheme.colors.textParagraph};
-  `;
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     setTimeout(() => {
@@ -47,7 +48,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   }, []);
   return (
     <EuiFlexItem css={inputContainerStyles}>
-      <textarea
+      <EuiTextArea
         name={i18n.translate('xpack.onechat.conversationInputForm.textArea.name', {
           defaultMessage: 'Conversation input',
         })}
@@ -66,7 +67,10 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
         placeholder={i18n.translate('xpack.onechat.conversationInputForm.placeholder', {
           defaultMessage: 'Ask anything',
         })}
-        ref={textAreaRef}
+        rows={1}
+        inputRef={textAreaRef}
+        fullWidth
+        resize="none"
       />
     </EuiFlexItem>
   );
