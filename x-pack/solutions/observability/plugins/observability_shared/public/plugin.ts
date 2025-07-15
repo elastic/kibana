@@ -14,7 +14,6 @@ import type {
 } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
@@ -48,14 +47,12 @@ import {
   DependencyOverviewLocator,
   DependencyOverviewLocatorDefinition,
 } from '../common/locators/apm/dependency_overview_locator';
-
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesPublicStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
 }
