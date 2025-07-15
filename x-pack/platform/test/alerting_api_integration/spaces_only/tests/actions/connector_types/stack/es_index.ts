@@ -14,7 +14,6 @@ const ES_TEST_DATASTREAM_PREFIX = 'functional-test-connectors-ds';
 const ES_TEST_DATASTREAM_PATTERN_NAME = `${ES_TEST_DATASTREAM_PREFIX}-*`;
 const ES_TEST_DATASTREAM_INDEX_NAME = `${ES_TEST_DATASTREAM_PREFIX}-00001`;
 
-// eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
   const es: Client = getService('es');
   const supertest = getService('supertest');

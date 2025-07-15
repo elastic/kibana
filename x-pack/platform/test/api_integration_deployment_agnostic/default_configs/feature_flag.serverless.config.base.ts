@@ -17,7 +17,7 @@ import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 import { updateKbnServerArguments } from './helpers';
 
-interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
+interface CreateTestConfigOptions<T> {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];
   kbnServerArgs?: string[];
@@ -81,7 +81,7 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const svlSharedConfig = await readConfigFile(
-      require.resolve('@kbn/test-suites-serverless/shared/config.base')
+      require.resolve('../../serverless/config.base.ts')
     );
 
     return {
