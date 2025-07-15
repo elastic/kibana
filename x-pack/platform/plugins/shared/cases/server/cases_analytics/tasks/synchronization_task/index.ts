@@ -13,6 +13,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { ConfigType } from '../../../config';
 import { ANALYTICS_SYNCHRONIZATION_TASK_TYPE } from '../../../../common/constants';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSynchronizationTaskFactory } from './synchronization_task_factory';
@@ -23,10 +24,12 @@ export function registerCAISynchronizationTask({
   taskManager,
   logger,
   core,
+  analyticsConfig,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
+  analyticsConfig: ConfigType['analytics'];
 }) {
   const getESClient = async (): Promise<ElasticsearchClient> => {
     const [{ elasticsearch }] = await core.getStartServices();
@@ -37,9 +40,11 @@ export function registerCAISynchronizationTask({
     [ANALYTICS_SYNCHRONIZATION_TASK_TYPE]: {
       title: 'Synchronization for the cases analytics index',
       createTaskRunner: (context: RunContext) => {
-        return new AnalyticsIndexSynchronizationTaskFactory({ getESClient, logger }).create(
-          context
-        );
+        return new AnalyticsIndexSynchronizationTaskFactory({
+          getESClient,
+          logger,
+          analyticsConfig,
+        }).create(context);
       },
     },
   });
