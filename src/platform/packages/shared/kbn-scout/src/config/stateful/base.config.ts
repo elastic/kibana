@@ -196,6 +196,8 @@ export const defaultConfig: ScoutServerConfig = {
         basic: { 'cloud-basic': { order: 1 } },
       })}`,
       `--server.publicBaseUrl=${kbnUrl}`,
+      // Allow dynamic config overrides in tests
+      `--coreApp.allowDynamicConfigOverrides=true`,
     ],
   },
 };
