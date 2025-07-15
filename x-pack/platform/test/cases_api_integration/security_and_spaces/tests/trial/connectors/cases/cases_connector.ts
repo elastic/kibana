@@ -64,7 +64,6 @@ import {
 } from '../../../../../common/users';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');

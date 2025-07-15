@@ -14,6 +14,9 @@ export const isEntityNode = (node: NodeViewModel) =>
   node.shape === 'diamond' ||
   node.shape === 'hexagon';
 
+export const isStackedLabel = (node: NodeViewModel): boolean =>
+  !(node.shape === 'label' && Boolean(node.parentId));
+
 /**
  * Type guard: Returns true if node.documentsData is a non-empty array.
  * This only narrows node.documentsData to a non-empty array, not to a specific document type.

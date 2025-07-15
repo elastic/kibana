@@ -15,6 +15,7 @@ export const genericEntityEngineDescription: EntityDescription = {
   entityType: 'generic',
   version: GENERIC_DEFINITION_VERSION,
   identityField: GENERIC_IDENTITY_FIELD,
+  identityFieldMapping: { type: 'keyword' },
   settings: {
     timestampField: '@timestamp',
   },
