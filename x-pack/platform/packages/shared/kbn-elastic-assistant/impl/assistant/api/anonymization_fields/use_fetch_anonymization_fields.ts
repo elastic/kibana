@@ -21,7 +21,7 @@ export interface UseFetchAnonymizationFieldsParams {
   sortOrder?: 'asc' | 'desc';
   signal?: AbortSignal;
   filter?: string;
-  all?: boolean; // If true, fetch all anonymization fields additionally, otherwise fetch only the provided page
+  all?: boolean; // If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
 }
 
 export interface FetchAnonymizationFields {

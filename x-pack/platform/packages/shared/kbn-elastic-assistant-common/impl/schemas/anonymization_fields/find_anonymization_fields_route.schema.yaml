@@ -67,7 +67,7 @@ paths:
           example: 20
         - name: 'all_data'
           in: query
-          description: If true, fetch all anonymization fields additionally, otherwise fetch only the provided page
+          description: If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
           required: false
           schema:
             type: boolean

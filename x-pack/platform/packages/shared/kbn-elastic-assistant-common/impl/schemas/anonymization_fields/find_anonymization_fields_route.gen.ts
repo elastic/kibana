@@ -60,7 +60,7 @@ export const FindAnonymizationFieldsRequestQuery = z.object({
    */
   per_page: z.coerce.number().int().min(0).optional().default(20),
   /**
-   * If true, fetch all anonymization fields additionally, otherwise fetch only the provided page
+   * If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
    */
   all_data: BooleanFromString.optional(),
 });
