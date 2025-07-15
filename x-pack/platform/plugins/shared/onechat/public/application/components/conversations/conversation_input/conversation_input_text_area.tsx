@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, keys } from '@elastic/eui';
+import { EuiFlexItem, keys, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
@@ -13,16 +13,6 @@ import React, { useEffect, useRef } from 'react';
 const inputContainerStyles = css`
   display: flex;
   flex-direction: column;
-`;
-const textareaStyles = css`
-  flex-grow: 1;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  resize: none;
-  &:focus:focus-visible {
-    outline: none;
-  }
 `;
 
 interface ConversationInputTextAreaProps {
@@ -36,6 +26,19 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   setMessage,
   handleSubmit,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const textareaStyles = css`
+    flex-grow: 1;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    resize: none;
+    &:focus:focus-visible {
+      outline: none;
+    }
+    background-color: ${euiTheme.components.forms.background};
+    color: ${euiTheme.colors.textParagraph};
+  `;
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     setTimeout(() => {
