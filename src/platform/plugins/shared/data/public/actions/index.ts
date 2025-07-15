@@ -16,18 +16,18 @@ export const actions = {
     const { createFiltersFromValueClickAction } = await import(
       './filters/create_filters_from_value_click'
     );
-    return await createFiltersFromValueClickAction(context);
+    return createFiltersFromValueClickAction(context);
   },
   createFiltersFromRangeSelectAction: async (context: RangeSelectDataContext) => {
     const { createFiltersFromRangeSelectAction } = await import(
       './filters/create_filters_from_range_select'
     );
-    return await createFiltersFromRangeSelectAction(context);
+    return createFiltersFromRangeSelectAction(context);
   },
   createFiltersFromMultiValueClickAction: async (context: MultiValueClickDataContext) => {
     const { createFiltersFromMultiValueClickAction } = await import(
       './filters/create_filters_from_multi_value_click'
     );
-    return await createFiltersFromMultiValueClickAction(context);
+    return createFiltersFromMultiValueClickAction(context);
   },
 };
