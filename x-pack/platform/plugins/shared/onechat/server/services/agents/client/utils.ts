@@ -34,41 +34,38 @@ export async function validateToolSelection({
 }: ValidateToolSelectionParams): Promise<string[]> {
   const errors: string[] = [];
   const allTools = await toolRegistry.list({ request });
-  const allProviders = new Set(allTools.map((t: InternalToolDefinition) => t.type));
+  const allToolTypes = new Set(allTools.map((t: InternalToolDefinition) => t.type));
 
   for (const selection of toolSelection) {
     const { type, tool_ids: toolIds } = selection;
-    if (!type) {
-      // If provider is not specified, check for ambiguity
-      for (const toolId of toolIds) {
-        if (toolId === '*') continue;
-        const matchingTools = allTools.filter((t: InternalToolDefinition) => t.id === toolId);
-        if (matchingTools.length > 1) {
-          const matchingProviders = Array.from(
-            new Set(matchingTools.map((t: InternalToolDefinition) => t.type))
-          );
-          errors.push(
-            `Tool id '${toolId}' is ambiguous. Please specify a provider. Matching providers: [${matchingProviders.join(
-              ', '
-            )}]`
-          );
+
+    for (const toolId of toolIds) {
+      if (toolId === '*') {
+        // Wildcard selection - check if tool type exists
+        if (type && !allToolTypes.has(type)) {
+          errors.push(`Tool type '${type}' does not exist.`);
         }
-        if (matchingTools.length === 0) {
-          errors.push(`Tool id '${toolId}' does not exist in any provider.`);
-        }
-      }
-    } else {
-      // Provider specified
-      if (!allProviders.has(type)) {
-        errors.push(`Provider '${type}' does not exist.`);
-        continue;
-      }
-      // Check each tool exists for the provider
-      for (const toolId of toolIds) {
-        if (toolId === '*') continue;
-        const exists = await toolRegistry.has(toolId);
-        if (!exists) {
-          errors.push(`Tool id '${toolId}' does not exist for provider '${type}'.`);
+      } else {
+        // Specific tool selection
+        if (type) {
+          // Tool type specified - first check if the type exists
+          if (!allToolTypes.has(type)) {
+            errors.push(`Tool type '${type}' does not exist.`);
+          } else {
+            // Type exists, now check if tool exists and belongs to that type
+            const tool = allTools.find((t: InternalToolDefinition) => t.id === toolId);
+            if (!tool) {
+              errors.push(`Tool id '${toolId}' does not exist.`);
+            } else if (tool.type !== type) {
+              errors.push(`Tool id '${toolId}' belongs to type '${tool.type}', not '${type}'.`);
+            }
+          }
+        } else {
+          // No tool type specified - check if tool exists globally
+          const exists = await toolRegistry.has(toolId);
+          if (!exists) {
+            errors.push(`Tool id '${toolId}' does not exist.`);
+          }
         }
       }
     }

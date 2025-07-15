@@ -82,6 +82,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   return (
     <div>
       {Object.entries(toolsByType).map(([type, typeTools]) => {
+        const toolType = type as ToolType;
         const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
           {
             field: 'id',
@@ -93,7 +94,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                   <EuiCheckbox
                     id={`tool-${tool.id}`}
                     checked={isToolSelected(tool, selectedTools)}
-                    onChange={() => handleToggleTool(tool.id, type as ToolType)}
+                    onChange={() => handleToggleTool(tool.id, toolType)}
                     disabled={disabled}
                   />
                 </EuiFlexItem>
@@ -143,7 +144,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                     </EuiText>
                   }
                   checked={isAllToolsSelectedForType(type, typeTools, selectedTools)}
-                  onChange={() => handleToggleTypeTools(type as ToolType)}
+                  onChange={() => handleToggleTypeTools(toolType)}
                   disabled={disabled}
                 />
               </EuiFlexItem>
