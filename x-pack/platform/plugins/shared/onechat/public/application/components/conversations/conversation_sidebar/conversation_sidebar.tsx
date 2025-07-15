@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Conversation } from '@kbn/onechat-common';
 import { ConversationSections } from './conversation_sections';
 
-const sidebarStyles = css`
-  height: 100%;
-  overflow-y: auto;
-`;
 const loadingStyles = css`
   align-self: center;
   justify-content: center;
@@ -30,9 +26,12 @@ export const ConversationSidebar: React.FC<ConversationsSidebarProps> = ({
   conversations,
   isLoading,
 }) => {
+  const scrollStyles = css`
+    ${useEuiOverflowScroll('y')}
+  `;
   return (
     <EuiFlexGroup
-      css={sidebarStyles}
+      css={scrollStyles}
       direction="column"
       gutterSize="l"
       aria-label={i18n.translate('xpack.onechat.conversationSidebar.conversations', {

@@ -28,6 +28,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
   const sidebarStyles = css`
     ${backgroundStyles}
     padding: ${euiTheme.size.base};
+    max-block-size: calc(var(--kbn-application--content-height));
   `;
   const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
