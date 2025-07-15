@@ -121,7 +121,7 @@ IMPORTANT: The 7.17.29 release contains fixes for potential security vulnerabili
 When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
 
 *Workaround* +
-
+To avoid this issue, don't upgrade {kib} to one of the affected versions, or upgrade to a higher version, when available.
 
 ====
 // end::known-issue-227976[]
