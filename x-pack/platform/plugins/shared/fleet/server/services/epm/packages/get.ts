@@ -214,9 +214,6 @@ function filterOutExcludedDataStreamTypes(
         pkg.data_streams?.some((dataStream: any) => {
           return !excludeDataStreamTypes.includes(dataStream.type);
         });
-      // if (!shouldInclude) {
-      //   console.log('Excluding package:', pkg.name);
-      // }
       return shouldInclude;
     });
   }
@@ -596,9 +593,6 @@ function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | 
           const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
             input.type.includes(excludedType)
           );
-          // if (!shouldInclude) {
-          //   console.log('Excluding input type: ' + input.type + " for policy template: " + policyTemplate.name);
-          // }
           return shouldInclude;
         });
         acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
