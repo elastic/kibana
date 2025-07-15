@@ -116,9 +116,9 @@
     "@kbn/alerts-ui-shared",
     "@kbn/core-lifecycle-server",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/observability-schema",
     "@kbn/field-formats-plugin",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/page-attachment-schema"
   ],
   "exclude": ["target/**/*"]
 }
