@@ -46,7 +46,8 @@ export const registerCollector: RegisterCollector = ({
     return;
   }
 
-  const collector = usageCollection.makeUsageCollector<UsageData>({
+  // THIS IS A FAKE CHANGE TO TEST FLAKY TESTS IN THE PIPELINE
+  const securitySolutionCollector = usageCollection.makeUsageCollector<UsageData>({
     type: 'security_solution',
     schema: {
       detectionMetrics: {
@@ -350,5 +351,5 @@ export const registerCollector: RegisterCollector = ({
     },
   });
 
-  usageCollection.registerCollector(collector);
+  usageCollection.registerCollector(securitySolutionCollector);
 };
