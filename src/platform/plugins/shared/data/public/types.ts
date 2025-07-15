@@ -25,9 +25,11 @@ import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
 import { NowProviderPublicContract } from './now_provider';
-import { MultiValueClickDataContext } from './actions/filters/create_filters_from_multi_value_click';
-import { RangeSelectDataContext } from './actions/filters/create_filters_from_range_select';
-import { ValueClickDataContext } from './actions/filters/create_filters_from_value_click';
+import type {
+  MultiValueClickDataContext,
+  RangeSelectDataContext,
+  ValueClickDataContext,
+} from './actions/filters';
 
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;

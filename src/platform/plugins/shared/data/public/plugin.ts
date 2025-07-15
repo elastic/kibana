@@ -40,7 +40,11 @@ import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import { NowProvider, NowProviderInternalContract } from './now_provider';
 import { getAggsFormats, DatatableUtilitiesService } from '../common';
-import { actions } from './actions';
+import type {
+  MultiValueClickDataContext,
+  RangeSelectDataContext,
+  ValueClickDataContext,
+} from './actions/filters';
 
 export class DataPublicPlugin
   implements
@@ -161,7 +165,7 @@ export class DataPublicPlugin
     setSearchService(search);
 
     uiActions.addTriggerActionAsync('SELECT_RANGE_TRIGGER', 'ACTION_SELECT_RANGE', async () => {
-      const { createSelectRangeActionDefinition } = await import('./actions/select_range_action');
+      const { createSelectRangeActionDefinition } = await import('./actions');
       const rangeSelectAction = createSelectRangeActionDefinition(() => ({
         uiActions,
       }));
@@ -169,7 +173,7 @@ export class DataPublicPlugin
     });
 
     uiActions.addTriggerActionAsync('VALUE_CLICK_TRIGGER', 'ACTION_VALUE_CLICK', async () => {
-      const { createValueClickActionDefinition } = await import('./actions/value_click_action');
+      const { createValueClickActionDefinition } = await import('./actions');
       const valueClickAction = createValueClickActionDefinition(() => ({
         uiActions,
       }));
@@ -180,9 +184,7 @@ export class DataPublicPlugin
       'MULTI_VALUE_CLICK_TRIGGER',
       'ACTION_MULTI_VALUE_CLICK',
       async () => {
-        const { createMultiValueClickActionDefinition } = await import(
-          './actions/multi_value_click_action'
-        );
+        const { createMultiValueClickActionDefinition } = await import('./actions');
         const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
           query,
         }));
@@ -192,7 +194,20 @@ export class DataPublicPlugin
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
-      actions,
+      actions: {
+        createFiltersFromValueClickAction: async (context: ValueClickDataContext) => {
+          const { createFiltersFromValueClickAction } = await import('./actions/filters');
+          return createFiltersFromValueClickAction(context);
+        },
+        createFiltersFromRangeSelectAction: async (context: RangeSelectDataContext) => {
+          const { createFiltersFromRangeSelectAction } = await import('./actions/filters');
+          return createFiltersFromRangeSelectAction(context);
+        },
+        createFiltersFromMultiValueClickAction: async (context: MultiValueClickDataContext) => {
+          const { createFiltersFromMultiValueClickAction } = await import('./actions/filters');
+          return createFiltersFromMultiValueClickAction(context);
+        },
+      },
       datatableUtilities,
       fieldFormats,
       indexPatterns: dataViews,
