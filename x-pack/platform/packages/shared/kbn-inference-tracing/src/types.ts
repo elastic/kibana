@@ -32,6 +32,8 @@ export enum ElasticGenAIAttributes {
   Tools = 'elastic.llm.tools',
   ToolChoice = 'elastic.llm.toolChoice',
   AgentId = 'elastic.agent.id',
+  AgentMode = 'elastic.agent.mode',
+  AgentConversationId = 'elastic.agent.conversationId',
   AgentConfig = 'elastic.agent.config',
 }
 
@@ -56,6 +58,8 @@ export interface GenAISemConvAttributes {
   [ElasticGenAIAttributes.ToolChoice]?: string;
   [ElasticGenAIAttributes.AgentId]?: string;
   [ElasticGenAIAttributes.AgentConfig]?: string;
+  [ElasticGenAIAttributes.AgentConversationId]?: string;
+  [ElasticGenAIAttributes.AgentMode]?: string;
 }
 
 interface GenAISemConvEvent<

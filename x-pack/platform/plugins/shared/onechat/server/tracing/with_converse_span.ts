@@ -6,37 +6,43 @@
  */
 
 import { Span } from '@opentelemetry/api';
+import { Observable, tap } from 'rxjs';
 import { safeJsonStringify } from '@kbn/std';
 import { withInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
-import type { AgentDefinition } from '@kbn/onechat-common';
-import type { AgentHandlerReturn } from '@kbn/onechat-server';
+import { AgentMode, ChatEvent, isRoundCompleteEvent } from '@kbn/onechat-common';
 
 interface WithConverseSpanOptions {
-  agent: AgentDefinition;
+  agentId: string;
+  mode: AgentMode;
+  conversationId: string | undefined;
 }
 
 export function withConverseSpan(
-  { agent }: WithConverseSpanOptions,
-  cb: (span?: Span) => Promise<AgentHandlerReturn>
-): Promise<AgentHandlerReturn> {
-  const { id: agentId, configuration } = agent;
+  { agentId, conversationId, mode }: WithConverseSpanOptions,
+  cb: (span?: Span) => Observable<ChatEvent>
+): Observable<ChatEvent> {
   return withInferenceSpan(
     {
       name: 'converse',
       [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
       [ElasticGenAIAttributes.AgentId]: agentId,
-      [ElasticGenAIAttributes.AgentConfig]: safeJsonStringify(configuration),
+      [ElasticGenAIAttributes.AgentConversationId]: conversationId,
+      [ElasticGenAIAttributes.AgentMode]: mode,
     },
     (span) => {
       if (!span) {
         return cb();
       }
 
-      const res = cb(span);
-      res.then((agentReturn) => {
-        span.setAttribute('output.value', safeJsonStringify(agentReturn) ?? 'unknown');
-      });
-      return res;
+      return cb(span).pipe(
+        tap({
+          next: (event) => {
+            if (isRoundCompleteEvent(event)) {
+              span.setAttribute('output.value', safeJsonStringify(event.data) ?? 'unknown');
+            }
+          },
+        })
+      );
     }
   );
 }
