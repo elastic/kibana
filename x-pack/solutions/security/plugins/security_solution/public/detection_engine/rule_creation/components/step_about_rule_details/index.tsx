@@ -30,8 +30,22 @@ import * as i18n from './translations';
 import { fullHeight } from './styles';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { RuleFieldName } from '../../../rule_management/components/rule_details/rule_field_name';
-import { useRuleCustomizationsContext } from '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 
+const detailsOption: EuiButtonGroupOptionProps = {
+  id: 'details',
+  label: i18n.ABOUT_PANEL_DETAILS_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-details',
+};
+const notesOption: EuiButtonGroupOptionProps = {
+  id: 'notes',
+  label: i18n.ABOUT_PANEL_NOTES_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-notes',
+};
+const setupOption: EuiButtonGroupOptionProps = {
+  id: 'setup',
+  label: i18n.ABOUT_PANEL_SETUP_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-setup',
+};
 interface StepPanelProps {
   stepData: AboutStepRule | null;
   stepDataDetails: AboutStepRuleDetails | null;
@@ -47,49 +61,12 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
 }) => {
   const [selectedToggleOption, setToggleOption] = useState('details');
   const [aboutPanelHeight, setAboutPanelHeight] = useState(0);
-  const {
-    state: { modifiedFields },
-  } = useRuleCustomizationsContext();
-
-  const isNoteFieldModified = useMemo(() => modifiedFields.has('note'), [modifiedFields]);
-  const isSetupFieldModified = useMemo(() => modifiedFields.has('setup'), [modifiedFields]);
 
   const onResize = useCallback(
     (e: { height: number; width: number }) => {
       setAboutPanelHeight(e.height);
     },
     [setAboutPanelHeight]
-  );
-
-  const detailsOption: EuiButtonGroupOptionProps = useMemo(
-    () => ({
-      id: 'details',
-      label: i18n.ABOUT_PANEL_DETAILS_TAB,
-      'data-test-subj': 'stepAboutDetailsToggle-details',
-    }),
-    []
-  );
-
-  const notesOption: EuiButtonGroupOptionProps = useMemo(
-    () => ({
-      id: 'notes',
-      label: i18n.ABOUT_PANEL_NOTES_TAB,
-      'data-test-subj': 'stepAboutDetailsToggle-notes',
-      iconType: isNoteFieldModified ? 'indexEdit' : undefined,
-      toolTipContent: isNoteFieldModified ? i18n.CUSTOMIZED_FIELD_TAB_TOOLTIP : undefined,
-    }),
-    [isNoteFieldModified]
-  );
-
-  const setupOption: EuiButtonGroupOptionProps = useMemo(
-    () => ({
-      id: 'setup',
-      label: i18n.ABOUT_PANEL_SETUP_TAB,
-      'data-test-subj': 'stepAboutDetailsToggle-setup',
-      iconType: isSetupFieldModified ? 'indexEdit' : undefined,
-      toolTipContent: isSetupFieldModified ? i18n.CUSTOMIZED_FIELD_TAB_TOOLTIP : undefined,
-    }),
-    [isSetupFieldModified]
   );
 
   const toggleOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
@@ -100,7 +77,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       ...(notesExist ? [notesOption] : []),
       ...(setupExists ? [setupOption] : []),
     ];
-  }, [detailsOption, notesOption, setupOption, stepDataDetails?.note, stepDataDetails?.setup]);
+  }, [stepDataDetails?.note, stepDataDetails?.setup]);
 
   return (
     <EuiPanel
