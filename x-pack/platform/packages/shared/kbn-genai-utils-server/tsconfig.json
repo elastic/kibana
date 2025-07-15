@@ -19,7 +19,6 @@
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/genai-utils-common",
-    "@kbn/inference-common",
     "@kbn/traced-es-client",
   ]
 }
