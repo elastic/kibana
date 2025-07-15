@@ -137,16 +137,15 @@
     "@kbn/response-ops-rule-params",
     "@kbn/scout-info",
     "@kbn/inference-common",
-    "@kbn/aiops-change-point-detection",
     "@kbn/apm-sources-access-plugin",
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/core-chrome-browser",
     "@kbn/apm-sources-access-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/core-provider-plugin",
+    "@kbn/management-settings-ids",
   ]
 }
