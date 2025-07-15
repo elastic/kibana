@@ -141,6 +141,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
       indexPatterns={selectedPatterns}
       jobNameById={jobNameById}
       scopeId={SourcererScopeName.default}
+      isFlyoutOpen={true}
     />
   ) : (
     <EmptyPrompt />

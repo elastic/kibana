@@ -124,5 +124,18 @@ describe('fetchActionRequestById() utility', () => {
         'Action [123] not found'
       );
     });
+
+    it('should not validate action against spaces if `bypassSpaceValidation` is true', async () => {
+      (
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).mockResolvedValue(undefined);
+      await fetchActionRequestById(endpointServiceMock, 'default', '123', {
+        bypassSpaceValidation: true,
+      });
+
+      expect(
+        endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+      ).not.toHaveBeenCalled();
+    });
   });
 });

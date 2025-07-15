@@ -75,6 +75,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   // hence - it is the only place where we should update the url param for the data view selection.
   const handleChangeDataView = useCallback(
     (id: string, indexPattern: string = '') => {
+      browserFieldsManager.removeFromCache(scope);
       selectDataView({ id, scope });
 
       if (isDefaultSourcerer) {
@@ -111,6 +112,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       }
 
       const dataViewInstance = await data.dataViews.get(dataViewId);
+      // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
+      data.dataViews.clearInstanceCache(dataViewId);
+      browserFieldsManager.removeFromCache(scope);
 
       closeFieldEditor.current = await dataViewFieldEditor.openEditor({
         ctx: {
@@ -126,7 +130,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         },
       });
     },
-    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
+    [dataViewId, data.dataViews, scope, dataViewFieldEditor, handleChangeDataView]
   );
 
   /**

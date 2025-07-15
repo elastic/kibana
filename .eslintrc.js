@@ -776,14 +776,15 @@ module.exports = {
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
-        'x-pack/platform/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
+        'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/platform/test/*api_integration*/**/*',
         'x-pack/platform/test/*/*config.*ts',
         'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,deployment_agnostic,fixtures}/**/*',
         'x-pack/solutions/*/test/**/*config.*ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
-        'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/platform/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
@@ -2113,7 +2114,7 @@ module.exports = {
         'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 1,
@@ -2310,6 +2311,83 @@ module.exports = {
                 name: '@kbn/cypress-test-helper',
                 message:
                   "Import from a sub-path (e.g. '@kbn/cypress-test-helper/src/utils'). Cypress uses Webpack, which requires direct file imports to avoid parse errors.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: [
+        'src/platform/plugins/**/ui_tests/**/*.ts',
+        'x-pack/platform/**/plugins/**/ui_tests/**/*.ts',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@playwright/test',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+              {
+                name: 'playwright',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/observability/plugins/**/ui_tests/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/scout',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: 'playwright',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/security/plugins/**/ui_tests/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/scout',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: 'playwright',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
               },
             ],
           },

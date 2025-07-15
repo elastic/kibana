@@ -21,6 +21,7 @@ import { Readable } from 'stream';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -631,5 +632,52 @@ describe('EndpointActionsClient', () => {
         ).not.toHaveBeenCalled();
       }
     );
+
+    it('should create failed action request for automated response actions', async () => {
+      classConstructorOptions.isAutomated = true;
+      // @ts-expect-error mocking this for testing purposes
+      endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
+        isValid: false,
+        valid: [],
+        invalid: ['invalid-id'],
+        hosts: [{ agent: { id: 'invalid-id', name: '' }, host: { hostname: '' } }],
+      });
+
+      await endpointActionsClient.isolate(
+        responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+      );
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            agent: { id: [], policy: [] },
+            tags: [ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted],
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should return action details for failed automated response actions even when no valid agents', async () => {
+      classConstructorOptions.isAutomated = true;
+      // @ts-expect-error mocking this for testing purposes
+      endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
+        isValid: false,
+        valid: [],
+        invalid: ['invalid-id'],
+        hosts: [{ agent: { id: 'invalid-id', name: '' }, host: { hostname: '' } }],
+      });
+
+      await endpointActionsClient.isolate(
+        responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+      );
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        { bypassSpaceValidation: true }
+      );
+    });
   });
 });

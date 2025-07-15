@@ -16,9 +16,9 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
   Walker,
+  isList,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
-import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {

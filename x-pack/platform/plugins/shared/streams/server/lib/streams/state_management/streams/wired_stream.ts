@@ -6,7 +6,12 @@
  */
 
 import { isNotFoundError } from '@kbn/es-errors';
-import { IngestStreamLifecycle, Streams, isInheritLifecycle } from '@kbn/streams-schema';
+import {
+  IngestStreamLifecycle,
+  Streams,
+  findInheritedLifecycle,
+  isInheritLifecycle,
+} from '@kbn/streams-schema';
 import {
   getAncestors,
   getAncestorsAndSelf,
@@ -437,6 +442,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+    const ancestors = await this.dependencies.streamsClient.getAncestors(this._definition.name);
+    const lifecycle = findInheritedLifecycle(this._definition, ancestors);
+
     return [
       {
         type: 'upsert_component_template',
@@ -474,7 +482,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'update_lifecycle',
         request: {
           name: this._definition.name,
-          lifecycle: this.getLifecycle(),
+          lifecycle,
         },
       },
       {

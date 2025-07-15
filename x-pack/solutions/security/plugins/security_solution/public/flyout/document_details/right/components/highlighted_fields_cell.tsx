@@ -19,7 +19,8 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
-import { hasPreview, PreviewLink } from '../../../shared/components/preview_link';
+import { isFlyoutLink } from '../../../shared/utils/link_utils';
+import { PreviewLink } from '../../../shared/components/preview_link';
 
 export interface HighlightedFieldsCellProps {
   /**
@@ -80,7 +81,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
               key={`${i}-${value}`}
               data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
             >
-              {showPreview && hasPreview(field) ? (
+              {showPreview && isFlyoutLink({ field, scopeId }) ? (
                 <PreviewLink
                   field={field}
                   value={value}

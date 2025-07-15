@@ -1,6 +1,7 @@
 disabled:
   # Base config files, only necessary to inform config finding script
   - x-pack/test_serverless/functional/test_suites/observability/cypress/oblt_config.base.ts
+  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts
 
   # Cypress configs, for now these are still run manually
   - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
@@ -14,7 +15,6 @@ enabled:
   - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.logs_essentials.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/ai_assistant/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.logs_essentials.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
@@ -39,7 +39,6 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.telemetry.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts

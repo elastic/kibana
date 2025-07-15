@@ -125,5 +125,7 @@
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
