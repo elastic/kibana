@@ -28,6 +28,30 @@ type SavedObjectToItemReturn<T> =
       error: Error;
     };
 
+const transformKibanaSavedObjectMeta = (oldMeta: {
+  searchSourceJSON?: string;
+}): { searchSource?: SearchSourceObject } => {
+  if (!oldMeta.searchSourceJSON) {
+    return {};
+  }
+
+  try {
+    const parsedSearchSource = JSON.parse(oldMeta.searchSourceJSON);
+    return {
+      searchSource: {
+        type: parsedSearchSource.type,
+        query: parsedSearchSource.query,
+        filter: parsedSearchSource.filter,
+        sort: parsedSearchSource.sort,
+        // Add other properties as needed
+      },
+    };
+  } catch (error) {
+    console.error('Failed to parse searchSourceJSON:', error);
+    return {};
+  }
+};
+
 export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
@@ -71,24 +95,38 @@ export function savedObjectToItem(
       ? references?.filter((reference) => allowedReferences.includes(reference.type))
       : references;
 
+    const attributesOut = allowedAttributes
+      ? pick(dashboardState, allowedAttributes)
+      : dashboardState;
+
     return {
       item: {
-        id,
-        type,
-        updatedAt,
-        updatedBy,
-        createdAt,
-        createdBy,
-        attributes: allowedAttributes ? pick(dashboardState, allowedAttributes) : dashboardState,
-        error,
-        namespaces,
-        references: referencesOut,
-        version,
-        managed,
+        data: {
+          ...attributesOut,
+          // error,
+          title: attributesOut.title || '',
+          description: attributesOut.description || '',
+          spaces: namespaces,
+          references: referencesOut,
+          kibanaSavedObjectMeta: attributesOut.kibanaSavedObjectMeta || {},
+          timeRestore: attributesOut.timeRestore || false,
+          panels: attributesOut.panels || [],
+          options: attributesOut.options || {},
+          // version,
+          // managed,
+        },
+        meta: {
+          id,
+          type,
+          updatedAt,
+          updatedBy,
+          createdAt,
+          createdBy,
+        },
       },
       error: null,
     };
   } catch (e) {
-    return { item: null, error: e };
+    return { item: { data: {}, meta: {} }, error: e };
   }
 }

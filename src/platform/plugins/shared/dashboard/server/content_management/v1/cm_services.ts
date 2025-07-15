@@ -319,25 +319,6 @@ const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
   ),
 });
 
-export const dashboardItemSchema = schema.object(
-  {
-    id: schema.string(),
-    type: schema.string(),
-    version: schema.maybe(schema.string()),
-    createdAt: schema.maybe(schema.string()),
-    updatedAt: schema.maybe(schema.string()),
-    createdBy: schema.maybe(schema.string()),
-    updatedBy: schema.maybe(schema.string()),
-    managed: schema.maybe(schema.boolean()),
-    error: schema.maybe(apiError),
-    attributes: dashboardAttributesSchemaResponse,
-    references: schema.arrayOf(referenceSchema),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    originId: schema.maybe(schema.string()),
-  },
-  { unknowns: 'allow' }
-);
-
 export const dashboardResponseMetaSchema = schema.object({
   id: schema.string(),
   type: schema.string(),
@@ -346,10 +327,6 @@ export const dashboardResponseMetaSchema = schema.object({
   updatedBy: schema.maybe(schema.string()),
   createdBy: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
-});
-
-export const dashboardSearchResultsSchema = dashboardItemSchema.extends({
-  attributes: searchResultsAttributesSchema,
 });
 
 export const dashboardSearchOptionsSchema = schema.maybe(
@@ -386,9 +363,21 @@ export const dashboardUpdateOptionsSchema = schema.object({
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
 
+export const dashboardCreateResultSchema = schema.object(
+  {
+    data: dashboardAttributesSchema,
+    meta: dashboardResponseMetaSchema,
+  },
+  { unknowns: 'allow' }
+);
+
+export const dashboardItemSchema = dashboardCreateResultSchema.extends({
+  error: schema.maybe(apiError),
+});
+
 export const dashboardGetResultSchema = schema.object(
   {
-    item: dashboardItemSchema,
+    data: dashboardItemSchema,
     meta: schema.object(
       {
         outcome: schema.oneOf([
@@ -410,13 +399,9 @@ export const dashboardGetResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const dashboardCreateResultSchema = schema.object(
-  {
-    data: dashboardAttributesSchema,
-    meta: dashboardResponseMetaSchema,
-  },
-  { unknowns: 'forbid' }
-);
+export const dashboardSearchResultsSchema = dashboardItemSchema.extends({
+  attributes: searchResultsAttributesSchema,
+});
 
 export const serviceDefinition: ServicesDefinition = {
   get: {

@@ -20,6 +20,10 @@ export function transformDashboardOut(
   references?: SavedObjectReference[],
   getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
+  console.log(
+    'transformDashboardOut called with attributes:---',
+    JSON.stringify(attributes, null, 2)
+  );
   const {
     controlGroupInput,
     description,

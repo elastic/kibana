@@ -274,20 +274,24 @@ export class DashboardStorage {
       soAttributes,
       { ...optionsToLatest, references: soReferences }
     );
-
     const { item, error: itemError } = savedObjectToItem(savedObject, false, {
       getTagNamesFromReferences: (references: SavedObjectReference[]) =>
         this.getTagNamesFromReferences(references, allTags),
     });
+    console.log('savedObject---', JSON.stringify(item));
+
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
 
-    const validationError = transforms.create.out.result.validate({ item });
+    const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {
+        console.log('validationError 1---', validationError);
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
+        console.log('validationError 2---', validationError);
+
         this.logger.warn(`Invalid response. ${validationError.message}`);
       }
     }

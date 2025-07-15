@@ -93,14 +93,12 @@ export function registerAPIRoutes({
       },
     },
     async (ctx, req, res) => {
-      console.log('Create route called---------', JSON.stringify(req.body, null, 2));
       const { id } = req.params;
       const { references, spaces: initialNamespaces, ...attributes } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, LATEST_VERSION);
       let result;
-      console.log('title----------', attributes.title);
       try {
         ({ result } = await client.create(attributes, {
           id,
@@ -123,7 +121,7 @@ export function registerAPIRoutes({
         return res.badRequest({ body: e });
       }
 
-      return res.ok({ body: result });
+      return res.ok({ body: result.item });
     }
   );
 
