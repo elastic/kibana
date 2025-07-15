@@ -8,10 +8,10 @@
 import { setupTestUsers } from '../test_users';
 
 export default function loadTests({ loadTestFile, getService }) {
-  describe('Agents', () => {
+  describe('Event Ingested', () => {
     before(async () => {
       await setupTestUsers(getService('security'));
     });
-    loadTestFile(require.resolve('./status'));
+    loadTestFile(require.resolve('./use_event_ingested'));
   });
 }
