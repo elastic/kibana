@@ -15,6 +15,7 @@ import {
   assertNewConversation,
   closeAssistant,
   createAndTitleConversation,
+  createOpenAIConnector,
   openAssistant,
   selectConnector,
   selectConversation,
@@ -63,12 +64,18 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });
-  // On serverless we provide deafult .inference `Elastic LLM` connector
+  // On serverless we provide default .inference `Elastic LLM` connector
   describe('No connectors or conversations exist', { tags: ['@skipInServerless'] }, () => {
     it('Shows welcome setup when no connectors or conversations exist', () => {
       visitGetStartedPage();
       openAssistant();
       assertNewConversation(true, 'New chat');
+    });
+    it('Creating a new connector from welcome setup automatically sets the connector for the conversation', () => {
+      visitGetStartedPage();
+      openAssistant();
+      createOpenAIConnector('My OpenAI Connector');
+      assertConnectorSelected('My OpenAI Connector');
     });
   });
   describe('When no conversations exist but connectors do exist, show empty convo', () => {

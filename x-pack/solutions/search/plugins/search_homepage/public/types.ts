@@ -7,6 +7,7 @@
 
 import type { ComponentProps, FC } from 'react';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -47,6 +48,7 @@ export interface SearchHomepageAppPluginStartDependencies {
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
   cloud?: CloudStart;
+  searchNavigation?: SearchNavigationPluginStart;
 }
 
 export interface SearchHomepageServicesContextDeps {

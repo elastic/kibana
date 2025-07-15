@@ -131,6 +131,10 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "@kbn/test-suites-xpack-platform",
+              "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/public/plugin.ts"
             }
           ],
           "children": [
@@ -3577,16 +3581,12 @@
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/rule_executor.test_helpers.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts"
+                "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -3615,6 +3615,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
               },
               {
                 "plugin": "slo",

@@ -90,7 +90,8 @@ export const getRenderCellValueFn = ({
       } else {
         setCellProps({ style: undefined });
       }
-    }, [ctx, row, setCellProps, anchorColor]);
+      // re-apply styles if `columnId` changes, e.g. when reordering columns in the grid
+    }, [ctx, row, setCellProps, anchorColor, columnId]);
 
     if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;

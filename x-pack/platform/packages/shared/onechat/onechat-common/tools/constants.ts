@@ -8,7 +8,7 @@
 /**
  * Ids of built-in onechat tools
  */
-export const BuiltinToolIds = {
+export const builtinToolIds = {
   indexExplorer: 'index_explorer',
   relevanceSearch: 'relevance_search',
   naturalLanguageSearch: 'nl_search',
@@ -20,10 +20,12 @@ export const BuiltinToolIds = {
   researcherAgent: 'researcher_agent',
 };
 
+export const builtInToolIdPrefix = '.';
+
 /**
  * Common set of tags used for platform tools.
  */
-export const BuiltinTags = {
+export const builtinTags = {
   /**
    * Tag associated to tools related to data retrieval
    */

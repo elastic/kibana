@@ -21,7 +21,6 @@
     "@kbn/inference-plugin",
     "@kbn/onechat-server",
     "@kbn/core-http-server",
-    "@kbn/core-http-server-mocks",
     "@kbn/onechat-common",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-security-server",
@@ -46,6 +45,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-application-common",
     "@kbn/core-application-browser",
-    "@kbn/core-ui-settings-server"
+    "@kbn/core-ui-settings-server",
+    "@kbn/utility-types",
   ]
 }

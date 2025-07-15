@@ -8,14 +8,14 @@
 /**
  * UI Setting ID for enabling / disabling the MCP server
  */
-export const ONECHAT_MCP_SERVER_UI_SETTING_ID = 'onechat:mcpServer:enabled';
+export const ONECHAT_MCP_SERVER_UI_SETTING_ID = 'onechat:mcp:enabled';
 
 /**
- * UI Setting ID for enabling / disabling the onechat plugin UI
+ * UI Setting ID for enabling / disabling the onechat UI
  */
 export const ONECHAT_UI_SETTING_ID = 'onechat:ui:enabled';
 
 /**
- * UI Setting ID for enabling / disabling the tools UI
+ * UI Setting ID for enabling / disabling the onechat public APIs.
  */
-export const ONECHAT_TOOLS_UI_SETTING_ID = 'onechat:tools:enabled';
+export const ONECHAT_API_SETTING_ID = 'onechat:api:enabled';

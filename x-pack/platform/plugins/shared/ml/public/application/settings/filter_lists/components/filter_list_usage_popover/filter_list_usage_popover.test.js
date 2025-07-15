@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { FilterListUsagePopover } from './filter_list_usage_popover';
-
-function prepareDetectorsTest() {
-  const props = {
-    entityType: 'detector',
-    entityValues: ['mean responsetime', 'max responsetime', 'count'],
-  };
-
-  const wrapper = shallow(<FilterListUsagePopover {...props} />);
-
-  return { wrapper };
-}
 
 describe('FilterListUsagePopover', () => {
   test('renders the popover for 1 job', () => {
@@ -28,21 +18,37 @@ describe('FilterListUsagePopover', () => {
       entityValues: ['farequote'],
     };
 
-    const component = shallow(<FilterListUsagePopover {...props} />);
-
-    expect(component).toMatchSnapshot();
+    const { container } = render(<FilterListUsagePopover {...props} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('renders the popover for 2 detectors', () => {
-    const test = prepareDetectorsTest();
-    expect(test.wrapper).toMatchSnapshot();
+    const detectorProps = {
+      entityType: 'detector',
+      entityValues: ['mean responsetime', 'max responsetime', 'count'],
+    };
+    const { container } = render(<FilterListUsagePopover {...detectorProps} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  test('opens the popover onButtonClick', () => {
-    const test = prepareDetectorsTest();
-    const instance = test.wrapper.instance();
-    instance.onButtonClick();
-    test.wrapper.update();
-    expect(test.wrapper).toMatchSnapshot();
+  test('opens the popover on button click', async () => {
+    const detectorProps = {
+      entityType: 'detector',
+      entityValues: ['mean responsetime', 'max responsetime', 'count'],
+    };
+    const { getByRole, queryByText, getByText } = render(
+      <FilterListUsagePopover {...detectorProps} />
+    );
+
+    // Popover should be closed initially
+    expect(queryByText('mean responsetime')).not.toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(getByRole('button'));
+
+    // Verify popover content is visible without using snapshots
+    expect(getByText('mean responsetime')).toBeInTheDocument();
+    expect(getByText('max responsetime')).toBeInTheDocument();
+    expect(getByText('count')).toBeInTheDocument();
   });
 });

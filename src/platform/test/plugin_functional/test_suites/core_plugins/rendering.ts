@@ -256,7 +256,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (string?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|chat?)',
+        'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.onboarding.default_solution (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',
@@ -380,7 +381,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
-        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
         /**
          * Rule form V2 feature flags
          */

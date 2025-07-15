@@ -140,7 +140,10 @@ export async function updateSearchSource(
   const timeField = await index.getTimeField();
 
   if (!timeField) {
-    throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);
+    throw createTaskRunError(
+      new Error(`Data view with ID ${index.id} no longer contains a time field.`),
+      TaskErrorSource.USER
+    );
   }
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);

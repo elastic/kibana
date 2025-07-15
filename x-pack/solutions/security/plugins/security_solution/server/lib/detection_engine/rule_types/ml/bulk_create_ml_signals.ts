@@ -13,7 +13,7 @@ import type { Anomaly } from '../../../machine_learning';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { MachineLearningRuleParams } from '../../rule_schema';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
 interface EcsAnomaly extends Anomaly {
   '@timestamp': string;
@@ -65,7 +65,7 @@ export const bulkCreateMlSignals = async ({
   sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
   anomalyHits: Array<estypes.SearchHit<Anomaly>>;
   services: SecurityRuleServices;
-}): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
+}): Promise<GenericBulkCreateResponse<DetectionAlertLatest>> => {
   const ecsResults = transformAnomalyResultsToEcs(anomalyHits);
 
   const wrappedDocs = wrapHits(sharedParams, ecsResults, buildReasonMessageForMlAlert);
