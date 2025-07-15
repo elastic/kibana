@@ -116,6 +116,9 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private query?: Query;
   private filters?: Filter[];
   private searchSessionId?: string;
+  /**
+   * @deprecated See https://github.com/elastic/kibana/issues/200272
+   */
   private syncColors?: boolean;
   private syncTooltips?: boolean;
   private syncCursor?: boolean;

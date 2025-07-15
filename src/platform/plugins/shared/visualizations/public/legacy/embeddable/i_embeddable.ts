@@ -52,6 +52,8 @@ export interface EmbeddableInput {
 
   /**
    * Flag whether colors should be synced with other panels
+   *
+   * @deprecated See https://github.com/elastic/kibana/issues/200272
    */
   syncColors?: boolean;
 

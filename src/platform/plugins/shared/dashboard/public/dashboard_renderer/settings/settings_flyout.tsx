@@ -27,10 +27,12 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { type FunctionInterpolation, css } from '@emotion/react';
 import { DashboardSettings } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
@@ -41,6 +43,11 @@ interface DashboardSettingsProps {
 }
 
 const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
+
+const topRowStyles: FunctionInterpolation<UseEuiTheme> = ({ euiTheme }) =>
+  css`
+    margin-block-start: ${euiTheme.size.base};
+  `;
 
 export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => {
   const dashboardApi = useDashboardApi();
@@ -267,7 +274,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
             )}
           >
             <>
-              <EuiFormRow>
+              <EuiFormRow css={[topRowStyles]}>
                 <EuiSwitch
                   label={
                     <EuiText size="s">
@@ -278,27 +285,11 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
                         }
                       )}{' '}
                       <EuiIconTip
-                        color="subdued"
+                        color="warning"
                         content={
                           <FormattedMessage
-                            id="dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchHelp"
-                            defaultMessage="Only valid for legacy {default} and {compatibility} palettes"
-                            values={{
-                              default: (
-                                <strong>
-                                  {i18n.translate('dashboard.palettes.defaultPaletteLabel', {
-                                    defaultMessage: 'Default',
-                                  })}
-                                </strong>
-                              ),
-                              compatibility: (
-                                <strong>
-                                  {i18n.translate('dashboard.palettes.kibanaPaletteLabel', {
-                                    defaultMessage: 'Compatibility',
-                                  })}
-                                </strong>
-                              ),
-                            }}
+                            id="dashboard.embeddableApi.showSettings.flyout.form.syncColors.deprecated"
+                            defaultMessage="This setting is deprecated and will not be supported in a future version."
                           />
                         }
                         iconProps={{
@@ -306,7 +297,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
                         }}
                         position="top"
                         size="s"
-                        type="question"
+                        type="warning"
                       />
                     </EuiText>
                   }
