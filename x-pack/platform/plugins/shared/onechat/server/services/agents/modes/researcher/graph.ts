@@ -85,10 +85,12 @@ export interface ResearchGoal {
 export const createResearcherAgentGraph = async ({
   chatModel,
   tools,
+  customInstructions,
   logger: log,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
+  customInstructions?: string;
   logger: Logger;
 }) => {
   const stringify = (obj: unknown) => JSON.stringify(obj, null, 2);
@@ -102,7 +104,7 @@ export const createResearcherAgentGraph = async ({
     });
 
     const response = await researchGoalModel.invoke(
-      getIdentifyResearchGoalPrompt({ discussion: state.initialMessages })
+      getIdentifyResearchGoalPrompt({ discussion: state.initialMessages, customInstructions })
     );
 
     const toolCalls = extractToolCalls(response);
@@ -161,7 +163,7 @@ export const createResearcherAgentGraph = async ({
       chatModel,
       tools,
       logger: log,
-      systemPrompt: '',
+      noPrompt: true,
     });
 
     const { addedMessages } = await executorAgent.invoke(
@@ -169,6 +171,7 @@ export const createResearcherAgentGraph = async ({
         initialMessages: getExecutionPrompt({
           currentResearchGoal: nextItem,
           backlog: state.backlog,
+          customInstructions,
         }),
       },
       { tags: ['executor_agent'], metadata: { graphName: 'executor_agent' } }
@@ -230,6 +233,7 @@ export const createResearcherAgentGraph = async ({
         backlog: state.backlog,
         maxFollowUpQuestions: 3,
         remainingCycles: state.remainingCycles - 1,
+        customInstructions,
       })
     );
 
@@ -267,6 +271,7 @@ export const createResearcherAgentGraph = async ({
       getAnswerPrompt({
         userQuery: state.mainResearchGoal,
         backlog: state.backlog,
+        customInstructions,
       })
     );
 

@@ -6,7 +6,7 @@
  */
 
 import rison from '@kbn/rison';
-import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
+import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 
 export const PLUGIN_ID = 'lens';
