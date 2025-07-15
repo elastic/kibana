@@ -8,6 +8,7 @@
     "@kbn/core",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
+    "@kbn/std",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/config-schema",
