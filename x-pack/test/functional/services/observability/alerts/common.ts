@@ -306,14 +306,16 @@ export function ObservabilityAlertsCommonProvider({
     await testSubjects.click(buttonSubject);
   };
 
-  const alertDataIsBeingLoaded = async () => {
-    return testSubjects.existOrFail('events-container-loading-true');
+  const selectAlertStatusFilter = async (alertStatus: AlertStatus) => {
+    await testSubjects.click('optionsList-control-0');
+    await testSubjects.click(`optionsList-control-selection-${alertStatus}`);
+    await testSubjects.click('optionsList-control-0');
   };
 
   const alertDataHasLoaded = async () => {
     await retry.waitFor(
       'Alert Table is loaded',
-      async () => await testSubjects.exists('events-container-loading-false', { timeout: 2500 })
+      async () => await testSubjects.exists('alertsTableIsLoaded', { timeout: 2500 })
     );
   };
 
@@ -439,7 +441,6 @@ export function ObservabilityAlertsCommonProvider({
     setWorkflowStatusFilter,
     getWorkflowStatusFilterValue,
     setAlertStatusFilter,
-    alertDataIsBeingLoaded,
     alertDataHasLoaded,
     submitQuery,
     typeInQueryBar,
@@ -457,5 +458,6 @@ export function ObservabilityAlertsCommonProvider({
     navigateToAlertDetails,
     createDataView,
     deleteDataView,
+    selectAlertStatusFilter
   };
 }
