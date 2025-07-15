@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import {
+  CasesDeepLinkId,
+  CasesPublicStart,
+  getCasesDeepLinks,
+  CasesPublicSetup,
+} from '@kbn/cases-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -137,6 +142,7 @@ export interface ObservabilityPublicPluginsSetup {
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
+  cases?: CasesPublicSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -218,21 +224,6 @@ export class Plugin
         },
       ],
     },
-    getCasesDeepLinks({
-      basePath: CASES_PATH,
-      extend: {
-        [CasesDeepLinkId.cases]: {
-          order: 8003,
-          visibleIn: [],
-        },
-        [CasesDeepLinkId.casesCreate]: {
-          visibleIn: [],
-        },
-        [CasesDeepLinkId.casesConfigure]: {
-          visibleIn: [],
-        },
-      },
-    }),
   ];
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
@@ -243,6 +234,25 @@ export class Plugin
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
+    if (pluginsSetup.cases) {
+      this.deepLinks.push(
+        getCasesDeepLinks({
+          basePath: CASES_PATH,
+          extend: {
+            [CasesDeepLinkId.cases]: {
+              order: 8003,
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesCreate]: {
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesConfigure]: {
+              visibleIn: [],
+            },
+          },
+        })
+      );
+    }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();

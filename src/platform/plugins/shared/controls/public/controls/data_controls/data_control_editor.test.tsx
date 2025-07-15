@@ -85,6 +85,7 @@ describe('Data control editor', () => {
     const controlEditor = render(
       <I18nProvider>
         <DataControlEditor
+          ariaLabelledBy="control-editor-title-input"
           onCancel={() => {}}
           onSave={() => {}}
           controlGroupApi={controlGroupApi}
