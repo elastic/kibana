@@ -71,8 +71,8 @@ describe('TS Validation', () => {
 
       test('errors on unknown index', () => {
         tsExpectErrors(`TS index, missingIndex`, ['Unknown index [missingIndex]']);
-        tsExpectErrors(`TS average()`, ['Unknown index [average()]']);
-        tsExpectErrors(`TS custom_function()`, ['Unknown index [custom_function()]']);
+        tsExpectErrors(`TS average()`, ['Unknown index [average]']);
+        tsExpectErrors(`TS custom_function()`, ['Unknown index [custom_function]']);
         tsExpectErrors(`TS indexes*`, ['Unknown index [indexes*]']);
         tsExpectErrors('TS numberField', ['Unknown index [numberField]']);
         tsExpectErrors('TS policy', ['Unknown index [policy]']);
