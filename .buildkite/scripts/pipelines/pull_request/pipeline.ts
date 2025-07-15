@@ -124,7 +124,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/slo_plugin_e2e.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
@@ -178,7 +177,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-security')
+      GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
     } else if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {

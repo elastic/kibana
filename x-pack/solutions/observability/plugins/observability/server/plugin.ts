@@ -104,18 +104,6 @@ export class ObservabilityPlugin
 
     core.pricing.registerProductFeatures(OBSERVABILITY_TIERED_FEATURES);
 
-    if (config.annotations.enabled) {
-      annotationsApiPromise = bootstrapAnnotations({
-        core,
-        index: config.annotations.index,
-        context: this.initContext,
-      }).catch((err) => {
-        const logger = this.initContext.logger.get('annotations');
-        logger.warn(err);
-        throw err;
-      });
-    }
-
     const { ruleDataService } = plugins.ruleRegistry;
 
     core.savedObjects.registerType(threshold);
@@ -126,6 +114,21 @@ export class ObservabilityPlugin
     });
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
+      const isCompleteOverviewEnabled = coreStart.pricing.isFeatureAvailable(
+        'observability:complete_overview'
+      );
+
+      if (config.annotations.enabled && isCompleteOverviewEnabled) {
+        annotationsApiPromise = bootstrapAnnotations({
+          core,
+          index: config.annotations.index,
+          context: this.initContext,
+        }).catch((err) => {
+          const logger = this.initContext.logger.get('annotations');
+          logger.warn(err);
+          throw err;
+        });
+      }
       registerRoutes({
         core,
         dependencies: {
@@ -165,6 +168,7 @@ export class ObservabilityPlugin
       },
       alertDetailsContextualInsightsService,
       alertsLocator,
+      managedOtlpServiceUrl: config.managedOtlpServiceUrl,
     };
   }
 

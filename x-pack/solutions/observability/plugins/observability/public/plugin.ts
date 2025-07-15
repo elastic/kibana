@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import {
+  CasesDeepLinkId,
+  CasesPublicStart,
+  getCasesDeepLinks,
+  CasesPublicSetup,
+} from '@kbn/cases-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
@@ -95,6 +100,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
   unsafe: {
@@ -133,10 +139,11 @@ export interface ObservabilityPublicPluginsSetup {
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
+  cases?: CasesPublicSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  cases: CasesPublicStart;
+  cases?: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -190,6 +197,7 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+  private telemetry: TelemetryService;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -213,33 +221,40 @@ export class Plugin
         },
       ],
     },
-    getCasesDeepLinks({
-      basePath: CASES_PATH,
-      extend: {
-        [CasesDeepLinkId.cases]: {
-          order: 8003,
-          visibleIn: [],
-        },
-        [CasesDeepLinkId.casesCreate]: {
-          visibleIn: [],
-        },
-        [CasesDeepLinkId.casesConfigure]: {
-          visibleIn: [],
-        },
-      },
-    }),
   ];
 
-  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
+    this.telemetry = new TelemetryService();
+  }
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
+    if (pluginsSetup.cases) {
+      this.deepLinks.push(
+        getCasesDeepLinks({
+          basePath: CASES_PATH,
+          extend: {
+            [CasesDeepLinkId.cases]: {
+              order: 8003,
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesCreate]: {
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesConfigure]: {
+              visibleIn: [],
+            },
+          },
+        })
+      );
+    }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
+    this.telemetry.setup(coreSetup.analytics);
 
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
@@ -271,7 +286,12 @@ export class Plugin
         kibanaVersion,
         observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        telemetryClient: this.telemetry.start(coreStart.analytics),
+        plugins: {
+          ...pluginsStart,
+          ruleTypeRegistry,
+          actionTypeRegistry,
+        },
         usageCollection: pluginsSetup.usageCollection,
         isServerless: !!pluginsStart.serverless,
       });
@@ -411,7 +431,7 @@ export class Plugin
                 }));
 
               const casesLink: NavigationEntry[] = otherLinks
-                .filter((link) => link.id === 'cases')
+                .filter((link) => link.id === 'cases' && pluginsStart.cases)
                 .map((link) => ({
                   app: observabilityAppId,
                   label: link.title,
@@ -455,6 +475,7 @@ export class Plugin
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
+      pricing: coreStart.pricing,
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {

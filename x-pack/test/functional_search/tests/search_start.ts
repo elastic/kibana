@@ -46,6 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Clean up space created
       await cleanUp();
       await deleteAllTestIndices();
+      await searchStart.clearSkipEmptyStateStorageFlag();
     });
 
     describe('Developer rights', function () {
@@ -117,18 +118,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await searchStart.expectAnalyzeLogsIntegrationLink();
         await searchStart.expectCreateO11ySpaceBtn();
       });
+
       it('should have close button', async () => {
         await searchStart.expectToBeOnStartPage();
         await searchStart.expectCloseCreateIndexButtonExists();
         await searchStart.clickCloseCreateIndexButton();
-        await searchStart.expectToBeOnIndexListPage();
+        await searchStart.expectToBeOnSearchHomepagePage();
       });
 
       it('should have skip button', async () => {
         await searchStart.expectToBeOnStartPage();
         await searchStart.expectSkipButtonExists();
         await searchStart.clickSkipButton();
-        await searchStart.expectToBeOnIndexListPage();
+        await searchStart.expectToBeOnSearchHomepagePage();
       });
     });
   });

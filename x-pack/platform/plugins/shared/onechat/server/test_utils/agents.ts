@@ -5,82 +5,41 @@
  * 2.0.
  */
 
-import { AgentType } from '@kbn/onechat-common';
-import type {
-  AgentRegistry,
-  AgentDefinition,
-  ConversationalAgentHandlerFn,
-  AgentProvider,
-} from '@kbn/onechat-server';
-import type { AgentsServiceStart, InternalAgentRegistry } from '../services/agents';
-import type { AgentProfileClient } from '../services/agents/profiles';
+import { AgentType, AgentDefinition } from '@kbn/onechat-common';
+import type { AgentsServiceStart } from '../services/agents';
+import type { AgentClient } from '../services/agents/client';
 
-export type AgentProviderMock = jest.Mocked<AgentProvider> & {
-  id: string;
-};
-export type AgentRegistryMock = jest.Mocked<AgentRegistry>;
-export type InternalAgentRegistryMock = jest.Mocked<InternalAgentRegistry>;
-export type AgentsServiceStartMock = AgentsServiceStart & {
-  registry: InternalAgentRegistryMock;
-};
+export type MockedAgent = jest.Mocked<AgentDefinition>;
+export type AgentsServiceStartMock = jest.Mocked<AgentsServiceStart>;
+export type AgentClientMock = jest.Mocked<AgentClient>;
 
-export type MockedAgent = Omit<AgentDefinition, 'handler'> & {
-  handler: jest.MockedFn<ConversationalAgentHandlerFn>;
-  providerId: string;
-};
-export type AgentProfileClientMock = jest.Mocked<AgentProfileClient>;
-
-export const createMockedAgentProfileClient = (): AgentProfileClientMock => {
+export const createMockedAgentClient = (): AgentClientMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     list: jest.fn(),
+    delete: jest.fn(),
   };
 };
 
-export const createMockedAgent = (parts: Partial<MockedAgent> = {}): MockedAgent => {
+export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedAgent => {
   return {
-    type: AgentType.conversational,
+    type: AgentType.chat,
     id: 'test_agent',
-    providerId: 'provider_id',
+    name: 'Test Agent',
     description: 'My test agent',
-    handler: jest.fn().mockReturnValue({ result: 'result' }),
+    configuration: {
+      tools: [],
+    },
     ...parts,
-  };
-};
-
-export const createAgentProviderMock = (id = 'test_provider'): AgentProviderMock => {
-  return {
-    id,
-    has: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-  };
-};
-
-export const createAgentRegistryMock = (): AgentRegistryMock => {
-  return {
-    has: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-  };
-};
-
-export const createInternalAgentRegistryMock = (): InternalAgentRegistryMock => {
-  return {
-    has: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-    asPublicRegistry: jest.fn().mockImplementation(() => createAgentRegistryMock()),
   };
 };
 
 export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
-    registry: createInternalAgentRegistryMock(),
     execute: jest.fn(),
-    getProfileClient: jest.fn().mockImplementation(createMockedAgentProfileClient),
+    getScopedClient: jest.fn().mockImplementation(() => createMockedAgentClient()),
   };
 };

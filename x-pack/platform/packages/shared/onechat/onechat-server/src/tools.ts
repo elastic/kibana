@@ -10,29 +10,18 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  ToolDescriptor,
-  ToolDescriptorMeta,
-  ToolIdentifier,
-  PlainIdToolIdentifier,
-  FieldTypes,
-} from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
 
 /**
- * Subset of {@link ToolDescriptorMeta} that can be defined during tool registration.
- */
-export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'providerId'>>;
-
-/**
  * Onechat tool, as registered by built-in tool providers.
  */
-export interface RegisteredTool<
+export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
-> extends Omit<ToolDescriptor, 'meta'> {
+> extends Omit<ToolDefinition, 'type' | 'configuration'> {
   /**
    * Tool's input schema, defined as a zod schema.
    */
@@ -41,122 +30,24 @@ export interface RegisteredTool<
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>, RunOutput>;
-  /**
-   * Optional set of metadata for this tool.
-   */
-  meta?: RegisteredToolMeta;
-}
-
-/**
- * Onechat tool, as registered by built-in tool providers.
- */
-export interface EsqlToolDefinition extends ToolDescriptor {
-  /**
-   * The ESQL Tool name.
-   */
-  name: string;
-
-  /**
-   * The ESQL query to be executed.
-   */
-  query: string;
-
-  /**
-   * Parameters that can be used in the query.
-   * Each parameter has a key identifier and metadata about its type and usage.
-   */
-  params: Record<
-    string,
-    {
-      /**
-       * The data types of the parameter. Must be one of these
-       */
-      type: FieldTypes;
-
-      /**
-       * Description of the parameter's purpose or expected values.
-       */
-      description: string;
-    }
-  >;
-}
-
-export interface EsqlTool<RunInput extends ZodObject<any> = ZodObject<any>, RunOutput = unknown>
-  extends RegisteredTool<RunInput, RunOutput> {
-  /**
-   * The ESQL id to be executed.
-   */
-  id: string;
-
-  /**
-   * The ESQL Tool name.
-   */
-  name: string;
-
-  /**
-   * The ESQL tool description to be executed.
-   */
-  description: string;
-
-  /**
-   * The ESQL query to be executed.
-   */
-  query: string;
-
-  /**
-   * Parameters that can be used in the query.
-   * Each parameter has a key identifier and metadata about its type and usage.
-   */
-  params: Record<
-    string,
-    {
-      /**
-       * The data type of the parameter.
-       */
-      type: FieldTypes;
-
-      /**
-       * Description of the parameter's purpose or expected values.
-       */
-      description: string;
-    }
-  >;
-}
-
-/**
- * Tool provider interface, as registered by API consumers.
- */
-export interface RegisteredToolProvider {
-  /**
-   * Check if a tool is available in the provider.
-   */
-  has(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<boolean>;
-  /**
-   * Retrieve a tool based on its identifier.
-   * If not found,the provider should throw a {@link OnechatToolNotFoundError}
-   */
-  get(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<RegisteredTool>;
-  /**
-   * List all tools present in the provider.
-   */
-  list(options: { request: KibanaRequest }): Promise<RegisteredTool[]>;
 }
 
 /**
  * Onechat tool, as exposed by the onechat tool registry.
  */
 export interface ExecutableTool<
-  RunInput extends ZodObject<any> = ZodObject<any>,
-  RunOutput = unknown
-> extends ToolDescriptor {
+  TConfig extends object = {},
+  TSchema extends ZodObject<any> = ZodObject<any>,
+  TResult = unknown
+> extends ToolDefinition<TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.
    */
-  schema: RunInput;
+  schema: TSchema;
   /**
    * Run handler that can be used to execute the tool.
    */
-  execute: ExecutableToolHandlerFn<z.infer<RunInput>, RunOutput>;
+  execute: ExecutableToolHandlerFn<z.infer<TSchema>, TResult>;
 }
 
 /**
@@ -175,12 +66,19 @@ export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult =
 ) => Promise<RunToolReturn<TResult>>;
 
 /**
- * Tool handler function for {@link RegisteredTool} handlers.
+ * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
+ */
+export interface ToolHandlerReturn<T = unknown> {
+  result: T;
+}
+
+/**
+ * Tool handler function for {@link BuiltinToolDefinition} handlers.
  */
 export type ToolHandlerFn<
   TParams extends Record<string, unknown> = Record<string, unknown>,
   RunOutput = unknown
-> = (args: TParams, context: ToolHandlerContext) => MaybePromise<RunOutput>;
+> = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<RunOutput>>;
 
 /**
  * Scoped context which can be used during tool execution to access
@@ -244,7 +142,7 @@ export interface ToolProvider {
  * Options for {@link ToolProvider.has}
  */
 export interface ToolProviderHasOptions {
-  toolId: ToolIdentifier;
+  toolId: string;
   request: KibanaRequest;
 }
 
@@ -252,7 +150,7 @@ export interface ToolProviderHasOptions {
  * Options for {@link ToolProvider.get}
  */
 export interface ToolProviderGetOptions {
-  toolId: ToolIdentifier;
+  toolId: string;
   request: KibanaRequest;
 }
 

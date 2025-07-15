@@ -216,8 +216,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Graph Visualization feature within the Security Solution.`,
         }
       ),
       type: 'boolean',
@@ -226,6 +225,7 @@ export const initUiSettings = (
       requiresPageReload: true,
       schema: schema.boolean(),
       solution: 'security',
+      technicalPreview: true,
     },
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
@@ -234,8 +234,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
         }
       ),
       type: 'boolean',
@@ -243,6 +242,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      technicalPreview: true,
     },
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
@@ -251,8 +251,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Cloud Connector experience within the Security Solution. When enabled, you can access the new Cloud Connector feature through the setting up an Agentless CSPM or Asset Inventory Integration.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Cloud Connector experience within the Security Solution. When enabled, you can access the new Cloud Connector feature through the setting up an Agentless CSPM or Asset Inventory Integration.`,
         }
       ),
       type: 'boolean',
@@ -260,6 +259,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      technicalPreview: true,
     },
     [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.rulesTableRefresh', {
