@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import { tracksOverlays } from '@kbn/presentation-containers';
+import { tracksOverlays } from '@kbn/presentation-util';
 import {
   EmbeddableApiContext,
   getTitle,

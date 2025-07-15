@@ -14,7 +14,7 @@ import { StatefulTopN } from '../../../common/components/top_n';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 export const TopValuesPopover = React.memo(() => {
@@ -25,10 +25,9 @@ export const TopValuesPopover = React.memo(() => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataViewSpec } = useDataViewSpec(sourcererScope);
+  const { dataView: experimentalDataView } = useDataView(sourcererScope);
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const {
@@ -57,7 +56,8 @@ export const TopValuesPopover = React.memo(() => {
         field={data.fieldName}
         scopeId={data.scopeId}
         toggleTopN={onClose}
-        dataViewSpec={sourcererDataView}
+        dataView={experimentalDataView}
+        dataViewSpec={oldSourcererDataView}
         browserFields={browserFields}
       />
     </EuiWrappingPopover>
