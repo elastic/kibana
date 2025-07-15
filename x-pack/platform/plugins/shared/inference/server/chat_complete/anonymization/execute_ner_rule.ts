@@ -93,12 +93,12 @@ export async function executeNerRule({
               try {
                 const docs = batch.map((text) => ({ text_field: text }));
 
+                span?.setAttribute('input.value', JSON.stringify(docs));
                 const response = await esClient.ml.inferTrainedModel({
                   model_id: rule.modelId,
                   docs,
                 });
 
-                span?.setAttribute('input.value', JSON.stringify(docs));
                 span?.setAttribute('output.value', JSON.stringify(response.inference_results));
 
                 return response.inference_results;
