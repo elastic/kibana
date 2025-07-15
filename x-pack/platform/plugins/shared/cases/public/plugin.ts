@@ -111,6 +111,7 @@ export class CasesUiPlugin
             kibanaVersion,
             externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry,
+            isServerless: !!pluginsStart.serverless,
           });
         },
       });
@@ -150,6 +151,7 @@ export class CasesUiPlugin
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       getFilesClient: plugins.files.filesClientFactory.asScoped,
+      isServerless: !!plugins.serverless,
     });
 
     registerActions(
@@ -157,6 +159,7 @@ export class CasesUiPlugin
         externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
         getFilesClient: plugins.files.filesClientFactory.asScoped,
+        isServerless: !!plugins.serverless,
       },
       {
         core,
@@ -165,7 +168,6 @@ export class CasesUiPlugin
         storage: this.storage,
       }
     );
-
     return {
       api: createClientAPI({ http: core.http }),
       ui: {
@@ -175,6 +177,7 @@ export class CasesUiPlugin
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
+            isServerless: !!plugins.serverless,
           }),
         getCasesContext,
         getRecentCases: (props) =>
