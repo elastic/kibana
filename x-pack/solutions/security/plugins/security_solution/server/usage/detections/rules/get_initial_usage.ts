@@ -79,6 +79,8 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
   esql: getInitialFeatureTypeUsage(),
   esql_custom: getInitialFeatureTypeUsage(),
   elastic_total: getInitialFeatureTypeUsage(),
+  elastic_customized_total: getInitialFeatureTypeUsage(),
+  elastic_noncustomized_total: getInitialFeatureTypeUsage(),
   custom_total: getInitialFeatureTypeUsage(),
 });
 
