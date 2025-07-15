@@ -136,8 +136,6 @@ export function OverviewPage() {
 
   const [isDataAssistantFlyoutVisible, setIsDataAssistantFlyoutVisible] = useState(false);
 
-  const [isGuidedSetupTourVisible, setGuidedSetupTourVisible] = useState(false);
-
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useDatePickerContext();
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>(
@@ -194,16 +192,6 @@ export function OverviewPage() {
     );
   }, [relativeEnd, relativeStart]);
 
-  const handleCloseGuidedSetupTour = () => {
-    setGuidedSetupTourVisible(false);
-  };
-
-  const handleGuidedSetupClick = useCallback(() => {
-    handleCloseGuidedSetupTour();
-
-    setIsDataAssistantFlyoutVisible(true);
-  }, []);
-
   if (hasAnyData === undefined) {
     return <LoadingObservability />;
   }
@@ -215,14 +203,7 @@ export function OverviewPage() {
         pageTitle: i18n.translate('xpack.observability.overview.pageTitle', {
           defaultMessage: 'Overview',
         }),
-        rightSideItems: [
-          <HeaderActions
-            showTour={isGuidedSetupTourVisible}
-            onGuidedSetupClick={handleGuidedSetupClick}
-            onTourDismiss={handleCloseGuidedSetupTour}
-            onTimeRangeRefresh={handleTimeRangeRefresh}
-          />,
-        ],
+        rightSideItems: [<HeaderActions onTimeRangeRefresh={handleTimeRangeRefresh} />],
         rightSideGroupProps: {
           responsive: true,
         },
