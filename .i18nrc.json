@@ -92,6 +92,7 @@
     "links": "src/platform/plugins/private/links",
     "newsfeed": "src/platform/plugins/shared/newsfeed",
     "presentationUtil": "src/platform/plugins/shared/presentation_util",
+    "presentationUtils": "src/platform/packages/shared/presentation/presentation_util",
     "randomSampling": "x-pack/platform/packages/private/kbn-random-sampling",
     "reactPackages": ["src/platform/packages/shared/react", "src/platform/packages/private/react"],
     "esqlEditor": "src/platform/packages/private/kbn-esql-editor",
