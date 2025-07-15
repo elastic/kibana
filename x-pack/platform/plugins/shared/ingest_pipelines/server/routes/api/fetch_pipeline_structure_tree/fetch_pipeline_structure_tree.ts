@@ -6,31 +6,25 @@
  */
 
 import { asyncForEach } from '@kbn/std';
+import { PipelineTreeNode, MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Processor } from '../../../../common/types';
-
-export interface PipelineTreeNode {
-  pipelineName: string;
-  isManaged: boolean;
-  isDeprecated: boolean;
-  children: PipelineTreeNode[];
-}
 
 export const fetchPipelineStructureTree = async (
   client: IScopedClusterClient,
   rootPipelineName: string,
   level: number = 1
-) => {
+): Promise<PipelineTreeNode> => {
   const rootPipeline = await client.asCurrentUser.ingest.getPipeline({
     id: rootPipelineName,
   });
   const pipelineNode: PipelineTreeNode = {
     pipelineName: rootPipelineName,
     isManaged: Boolean(rootPipeline?._meta?.managed === true),
-    isDeprecated: false,
+    isDeprecated: Boolean(rootPipeline?.deprecated === true),
     children: [],
   };
-  if (level === 6) {
+  if (level === MAX_TREE_LEVEL + 1) {
     return pipelineNode;
   }
   const processorPipelines =

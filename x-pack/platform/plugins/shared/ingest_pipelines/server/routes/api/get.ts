@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { fetchPipelineStructureTree } from './fetch_pipeline_structure_tree';
 import { deserializePipelines } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
@@ -102,15 +103,10 @@ export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDepen
       const { name } = req.params;
 
       try {
-        const pipelines = deserializePipelines(
-          await clusterClient.asCurrentUser.ingest.getPipeline({
-            id: name,
-          })
-        );
+        const pipelineStructureTree = fetchPipelineStructureTree(clusterClient, name);
         return res.ok({
           body: {
-            ...pipelines!.find((pipeline) => pipeline.name),
-            name,
+            pipelineStructureTree,
           },
         });
       } catch (error) {
