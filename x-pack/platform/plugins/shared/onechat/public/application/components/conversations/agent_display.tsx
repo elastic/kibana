@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiBadge } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useOnechatAgentById } from '../../hooks/agents/use_agent_by_id';
 
 interface AgentDisplayProps {
@@ -20,5 +20,9 @@ export const AgentDisplay: React.FC<AgentDisplayProps> = ({ selectedAgentId }) =
     return <EuiLoadingSpinner size="m" />;
   }
 
-  return <EuiBadge>{agent?.name}</EuiBadge>;
+  return (
+    <EuiText color="subdued" size="s">
+      {agent?.name}
+    </EuiText>
+  );
 };

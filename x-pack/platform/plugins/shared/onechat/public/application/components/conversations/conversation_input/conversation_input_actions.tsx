@@ -49,7 +49,7 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
               defaultMessage: 'Submit',
             })}
             data-test-subj="onechatAppConversationInputFormSubmitButton"
-            iconType="kqlFunction"
+            iconType="sortUp"
             display="fill"
             size="m"
             disabled={submitDisabled}
