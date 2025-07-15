@@ -15,7 +15,6 @@ import { getUrlPrefix } from '../../../../../../common/lib';
 
 const API_URI = 'internal/triggers_actions_ui/data/_fields';
 
-// eslint-disable-next-line import/no-default-export
 export default function fieldsEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
