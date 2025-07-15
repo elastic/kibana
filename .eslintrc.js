@@ -1976,7 +1976,7 @@ module.exports = {
         'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 1,
