@@ -169,6 +169,7 @@ export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
   'securitySolution:enableAssetInventory' as const;
 export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =
   'securitySolution:enableCloudConnector' as const;
+export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

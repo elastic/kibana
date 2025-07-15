@@ -1345,6 +1345,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/api_integration/test_suites/observability/config.logs_essentials.ts @elastic/observability-ui @elastic/appex-qa
 /x-pack/test_serverless/api_integration/test_suites/observability/index.logs_essentials.ts @elastic/observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/logs_essentials_only @elastic/observability-ui
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.logs_essentials.index.ts @elastic/observability-ui
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts @elastic/observability-ui
 
 ### Observability Plugins
 
@@ -1355,6 +1357,15 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test/functional/es_archives/observability/ai_assistant @elastic/obs-ai-assistant
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant @elastic/obs-ai-assistant
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts @elastic/obs-ai-assistant
+/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/obs-ai-assistant
+/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts @elastic/obs-ai-assistant
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-assistant
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts  @elastic/obs-ai-assistant
+/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant_local.index.ts  @elastic/obs-ai-assistant
+/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts  @elastic/obs-ai-assistant
+
 # Infra Obs
 ## This plugin mostly contains the codebase for the infra services, but also includes some code for the Logs UI app.
 ## To keep @elastic/obs-ux-logs-team as codeowner of the plugin manifest without requiring a review for all the other code changes
@@ -1367,7 +1378,15 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ## infra/{common,docs,public,server}/{sub-folders}/ -> @elastic/obs-ux-infra_services-team
 # obs-ux-infra_services-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/apm/ @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.index.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.index.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/infra/ @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.index.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.index.ts @elastic/obs-ux-infra_services-team
+/x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/page_objects/asset_details.ts @elastic/obs-ux-infra_services-team # Assigned per https://github.com/elastic/kibana/pull/200157/files/c83fae62151fe634342c498aca69b686b739fe45#r1842202022
 /x-pack/test/functional/page_objects/infra_* @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/es_archives/infra @elastic/obs-ux-infra_services-team
@@ -1463,6 +1482,12 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/api_integration/deployment_agnostic/services/alerting_api @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/slo_api @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics/ @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.synthetics.index.ts @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.synthetics.index.ts @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.synthetics.serverless.config.ts @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.index.ts @elastic/obs-ux-management-team
+/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.synthetics.stateful.config.ts @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/synthetics_monitors @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/services/synthetics_private_location @elastic/obs-ux-management-team
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/incident_management/ @elastic/obs-ux-management-team
@@ -1569,6 +1594,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # Streams
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-program-team
+/x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-program-team
 /x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team
 
 ### END Observability Plugins
@@ -1862,7 +1889,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-es/src/stateful_resources/roles.yml @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/README.md @elastic/appex-qa
-/x-pack/test/api_integration/deployment_agnostic/*configs/ @elastic/appex-qa
+/x-pack/platform/test/api_integration_deployment_agnostic/*configs/ @elastic/appex-qa
 /x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 /x-pack/platform/test/api_integration_deployment_agnostic/ @elastic/appex-qa
 /x-pack/platform/test/kibana.jsonc @elastic/appex-qa
@@ -1881,6 +1908,16 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/solutions/security/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/solutions/security/test/api_integration/services/index.ts @elastic/appex-qa
 /x-pack/solutions/security/test/alerting_api_integration/ftr_provider_context.d.ts @elastic/appex-qa
+<<<<<<< HEAD
+=======
+/x-pack/test/apm_api_integration  @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/common/utils/observability  @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/common/utils/uptime  @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.index.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts @elastic/appex-qa # temporarily due to SKA tests relocation
+>>>>>>> 47077ef8587 ([ska] relocate deployment-agnostic platform tests (#223534))
 /x-pack/platform/test/serverless @elastic/appex-qa
 
 # Core
@@ -1966,8 +2003,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/api_integration/apis/status @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/stats @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/kibana/stats @elastic/kibana-core
-/x-pack/test/api_integration/deployment_agnostic/apis/core/ @elastic/kibana-core
-/x-pack/test/api_integration/deployment_agnostic/apis/saved_objects_management/ @elastic/kibana-core
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/core/ @elastic/kibana-core
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
@@ -2246,7 +2283,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/functional/apps/saved_objects_management @elastic/kibana-management
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
 /src/platform/test/api_integration/apis/console/*.ts @elastic/kibana-management
-/x-pack/test/api_integration/deployment_agnostic/apis/console/ @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/console/ @elastic/kibana-management
 /src/platform/test/accessibility/apps/management.ts @elastic/kibana-management
 /src/platform/test/accessibility/apps/console.ts @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
@@ -2273,8 +2310,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test_serverless/functional/test_suites/common/dev_tools/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/grok_debugger/ @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/management/ @elastic/kibana-management
-/x-pack/test/api_integration/deployment_agnostic/apis/management/ @elastic/kibana-management
-/x-pack/test/api_integration/deployment_agnostic/apis/painless_lab/ @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/management/ @elastic/kibana-management
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/painless_lab/ @elastic/kibana-management
 /x-pack/test/functional/apps/rollup_job/ @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/grok_debugger @elastic/kibana-management
 /x-pack/test/accessibility/apps/group1/advanced_settings.ts @elastic/kibana-management
