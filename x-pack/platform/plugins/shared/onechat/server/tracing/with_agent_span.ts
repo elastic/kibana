@@ -33,9 +33,11 @@ export function withAgentSpan(
       }
 
       const res = cb(span);
-      res.then((agentReturn) => {
-        span.setAttribute('output.value', safeJsonStringify(agentReturn) ?? 'unknown');
-      });
+      res
+        .then((agentReturn) => {
+          span.setAttribute('output.value', safeJsonStringify(agentReturn) ?? 'unknown');
+        })
+        .catch((e) => {});
       return res;
     }
   );

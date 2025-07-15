@@ -35,7 +35,7 @@ import {
   isOnechatError,
   createInternalError,
 } from '@kbn/onechat-common';
-import { withConverseSpan } from '../../tracing';
+import { withConverseSpan, getCurrentTraceId } from '../../tracing';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -195,13 +195,21 @@ class ChatServiceImpl implements ChatService {
           return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
             catchError((err) => {
               this.logger.error(`Error executing agent: ${err.stack}`);
-              return throwError(() =>
-                isOnechatError(err)
-                  ? err
-                  : createInternalError(`Error executing agent: ${err.message}`, {
-                      statusCode: 500,
-                    })
-              );
+              return throwError(() => {
+                const traceId = getCurrentTraceId();
+                if (isOnechatError(err)) {
+                  err.meta = {
+                    ...err.meta,
+                    traceId,
+                  };
+                  return err;
+                } else {
+                  return createInternalError(`Error executing agent: ${err.message}`, {
+                    statusCode: 500,
+                    traceId,
+                  });
+                }
+              });
             }),
             shareReplay()
           );
