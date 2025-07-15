@@ -460,7 +460,7 @@ Nothing special is required on the client side.  Any call made through
 
 Every response message received is already deanonymized. When masking has occurred, the payload will additionally contain:
 
-* `deanonymized_input` – array of the initial and previous user/system messages (conversation history) that were sent to the model
+* `deanonymized_input` – array of the initial and previous messages (conversation history) that were sent to the model
 * `deanonymized_output` – the assistant reply with original text restored
 
 Each message inside `deanonymized_input` or `deanonymized_output` carries its own `deanonymizations` array listing every replacement that was made.  This structured data can be stored and leveraged by UI components to visually highlight masked/unmasked segments in chat transcripts.
