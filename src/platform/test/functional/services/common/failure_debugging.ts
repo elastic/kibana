@@ -53,7 +53,9 @@ export async function FailureDebuggingProvider({ getService }: FtrProviderContex
     const name = FtrScreenshotFilename.create(test.fullTitle(), { ext: false });
     const hasOpenWindow = await browser.hasOpenWindow();
     if (hasOpenWindow) {
-      await Promise.all([screenshots.takeForFailure(name), logCurrentUrl(), savePageHtml(name)]);
+      await savePageHtml(name);
+      await screenshots.takeForFailure(name);
+      // await Promise.all([screenshots.takeForFailure(name), logCurrentUrl(), savePageHtml(name)]);
     } else {
       log.error('Browser is closed, no artifacts were captured for the failure');
     }
