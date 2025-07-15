@@ -25,7 +25,7 @@ import {
 } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { css } from '@emotion/react';
-import { LensDocument } from '../persistence';
+import type { LensDocument } from '../persistence';
 import {
   Datasource,
   Visualization,
