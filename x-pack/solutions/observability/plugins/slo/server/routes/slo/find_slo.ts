@@ -19,6 +19,7 @@ export const findSLORoute = createSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
+
   params: findSLOParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
