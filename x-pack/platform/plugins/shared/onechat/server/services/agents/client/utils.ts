@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createBadRequestError } from '@kbn/onechat-common';
+import { allToolsSelectionWildcard, createBadRequestError } from '@kbn/onechat-common';
 import type { ToolSelection } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ToolRegistry } from '../../tools';
@@ -40,7 +40,7 @@ export async function validateToolSelection({
     const { type, tool_ids: toolIds } = selection;
 
     for (const toolId of toolIds) {
-      if (toolId === '*') {
+      if (toolId === allToolsSelectionWildcard) {
         // Wildcard selection - check if tool type exists
         if (type && !allToolTypes.has(type)) {
           errors.push(`Tool type '${type}' does not exist.`);
