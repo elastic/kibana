@@ -43,10 +43,10 @@ ALWAYS use this tool to generate ES|QL queries and never generate ES|QL any othe
     },
   },
   {
-    promptId: 'AskAboutEsqlTool',
+    promptId: 'AskAboutESQLTool',
     promptGroupId,
     prompt: {
-      default: `You MUST use the "AskAboutEsqlTool" function when the user:
+      default: `You MUST use the "AskAboutESQLTool" function when the user:
 - asks for help with ES|QL
 - asks about ES|QL syntax
 - asks for ES|QL examples
