@@ -7,8 +7,8 @@
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import type { State } from '../common/store';
 
-// Define the shape of the announcement state
 export interface AnnouncementState {
   screenReaderMessage: string;
 }
@@ -18,7 +18,6 @@ const initialAnnouncementState: AnnouncementState = {
   screenReaderMessage: '',
 };
 
-// Create the announcements slice
 const announcementSlice = createSlice({
   name: 'announcement',
   initialState: initialAnnouncementState,
@@ -32,6 +31,7 @@ const announcementSlice = createSlice({
   },
 });
 
-// Export the generated action and reducer
 export const { setScreenReaderMessage } = announcementSlice.actions;
 export const announcementReducer = announcementSlice.reducer;
+
+export const selectAnnouncement = (state: State): AnnouncementState => state.announcement;

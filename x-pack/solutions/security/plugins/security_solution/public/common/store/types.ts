@@ -27,6 +27,7 @@ import type { SecuritySolutionDiscoverState } from './discover/model';
 import type { AnalyzerState } from '../../resolver/types';
 import type { NotesState } from '../../notes/store/notes.slice';
 import type { RootState as DataViewManagerState } from '../../data_view_manager/redux/reducer';
+import type { AnnouncementState } from '../../a11y_announcements/a11y_announcements.slice';
 
 export type State = HostsPluginState &
   UsersPluginState &
@@ -41,7 +42,9 @@ export type State = HostsPluginState &
     discover: SecuritySolutionDiscoverState;
   } & DataTableState &
   GroupState &
-  AnalyzerState & { notes: NotesState } & DataViewManagerState;
+  AnalyzerState & { notes: NotesState } & DataViewManagerState & {
+    announcement: AnnouncementState;
+  };
 /**
  * The Redux store type for the Security app.
  */
