@@ -19,16 +19,7 @@ That API receive the inbound request as parameter.
 
 Example, by default it will check with the default ELSER model:
 ```ts
-if (await llmTasksStart.retrieveDocumentationAvailable()) {
-  // task is available
-} else {
-  // task is not available
-}
-```
-To check if documentation is available fora different Inference ID:
-
-```ts
-if (await llmTasksStart.retrieveDocumentationAvailable({inferenceId})) {
+if (await llmTasksStart.retrieveDocumentationAvailable({ inferenceId })) {
   // task is available
 } else {
   // task is not available

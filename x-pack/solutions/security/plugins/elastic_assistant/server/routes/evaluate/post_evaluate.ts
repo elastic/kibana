@@ -30,6 +30,7 @@ import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
@@ -176,7 +177,9 @@ export const postEvaluateRoute = (
 
           const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
-            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable({
+              inferenceId: defaultInferenceEndpoints.ELSER,
+            })) ?? false;
 
           const { featureFlags } = await context.core;
           const inferenceChatModelEnabled = await featureFlags.getBooleanValue(
