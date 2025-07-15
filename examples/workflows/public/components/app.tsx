@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { StepExecutions } from '@kbn/workflows-management-plugin/public';
+import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { PLUGIN_NAME } from '../../common';
@@ -220,7 +220,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                     />
                   </EuiButton>
                   {workflowExecutionId && (
-                    <StepExecutions workflowExecutionId={workflowExecutionId} />
+                    <WorkflowExecution workflowExecutionId={workflowExecutionId} />
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>

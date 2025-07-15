@@ -52,6 +52,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       Promise.resolve(this.esClient),
       this.logger,
       '.workflows',
+      '.workflow-executions',
       '.workflow-step-executions'
     );
     const api = new WorkflowsManagementApi(this.workflowsService);

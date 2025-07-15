@@ -66,7 +66,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   );
   router.get(
     {
-      path: '/api/workflowRun/{workflowExecutionId}/stepExecutions',
+      path: '/api/workflowExecution/{workflowExecutionId}',
       security: {
         authz: {
           requiredPrivileges: ['all'],
@@ -81,9 +81,16 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        const stepExecutions: any = await api.getStepExecutions(workflowExecutionId);
+        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId);
+
+        if (!workflowExecution) {
+          return response.notFound({
+            body: `Workflow execution with ID ${workflowExecutionId} not found`,
+          });
+        }
+
         return response.ok({
-          body: stepExecutions,
+          body: workflowExecution,
         });
       } catch (error) {
         console.error(error);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowListModel, WorkflowModel } from '@kbn/workflows';
+import { WorkflowListModel, WorkflowModel, WorkflowExecutionModel } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
@@ -32,7 +32,25 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.getWorkflow(id);
   }
 
-  public async getStepExecutions(workflowExecutionId: string): Promise<any> {
-    return await this.workflowsService.searchStepExecutions({ workflowExecutionId });
+  public async getWorkflowExecution(
+    workflowExecutionId: string
+  ): Promise<WorkflowExecutionModel | null> {
+    const workflowExecution = await this.workflowsService.getWorkflowExecution(workflowExecutionId);
+
+    if (!workflowExecution) {
+      return null;
+    }
+
+    const stepExecutions = await this.workflowsService.searchStepExecutions({
+      workflowExecutionId,
+    });
+
+    return {
+      id: workflowExecution.id,
+      status: workflowExecution.status,
+      startedAt: workflowExecution.startedAt,
+      finishedAt: workflowExecution.finishedAt,
+      stepExecutions,
+    };
   }
 }
