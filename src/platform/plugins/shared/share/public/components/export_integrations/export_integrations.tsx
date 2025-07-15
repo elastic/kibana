@@ -260,6 +260,13 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     'integration',
     'exportDerivatives'
   );
+  const availableExportDerivatives = useMemo(
+    () =>
+      exportDerivatives.filter((exportDerivative) =>
+        exportDerivative.config.shouldRender?.({ availableExportItems: exportIntegrations })
+      ) ?? true,
+    [exportDerivatives, exportIntegrations]
+  );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const selectionOptions = useRef({ export: exportIntegrations, exportDerivatives });
   const [selectedMenuItemMeta, setSelectedMenuItemMeta] = useState<{
@@ -365,11 +372,11 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             </EuiToolTip>
           ))}
         </EuiListGroup>
-        {Boolean(exportDerivatives.length) && (
+        {Boolean(availableExportDerivatives.length) && (
           <React.Fragment>
             <EuiHorizontalRule margin="xs" />
             <EuiFlexGroup direction="column" gutterSize="s">
-              {exportDerivatives.map((exportDerivative) => {
+              {availableExportDerivatives.map((exportDerivative) => {
                 return (
                   <EuiFlexItem key={exportDerivative.id}>
                     {exportDerivative.config.label({

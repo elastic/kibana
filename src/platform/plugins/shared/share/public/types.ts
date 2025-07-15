@@ -185,6 +185,11 @@ export interface ExportShareDerivatives
       flyoutRef: React.RefObject<HTMLDivElement>;
     }>;
     flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
+    shouldRender?: ({
+      availableExportItems,
+    }: {
+      availableExportItems: ExportShareConfig[];
+    }) => boolean;
   }> {
   groupId: 'exportDerivatives';
 }
