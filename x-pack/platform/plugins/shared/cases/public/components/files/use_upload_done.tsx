@@ -15,13 +15,13 @@ export const useUploadDone = function ({
   onSuccess,
   onFailure,
 }: {
-  caseId?: string;
+  caseId: string;
   onSuccess: () => void;
   onFailure: (error: Error) => void;
 }): (chosenFiles: DoneNotification[] | undefined) => Promise<void> {
   return useCallback(
     async (chosenFiles: DoneNotification[] | undefined) => {
-      if (!chosenFiles || chosenFiles.length === 0 || !caseId) {
+      if (!chosenFiles || chosenFiles.length === 0) {
         onFailure(new Error(translations.FAILED_UPLOAD));
         return;
       }

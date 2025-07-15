@@ -17,7 +17,7 @@ import { type EditorBaseProps, type MarkdownEditorRef } from './types';
 
 interface PastableMarkdownEditorProps extends EditorBaseProps {
   field: FieldHook<string>;
-  caseId?: string;
+  caseId: string;
 }
 
 const PastableMarkdownEditorComponent = forwardRef<MarkdownEditorRef, PastableMarkdownEditorProps>(

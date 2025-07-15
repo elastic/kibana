@@ -116,7 +116,7 @@ export const MarkdownEditorForm = React.memo(
             label={field.label}
             labelAppend={field.labelAppend}
           >
-            {hasFilesContext ? (
+            {hasFilesContext && caseId ? (
               <PastableMarkdownEditor
                 {...editorBaseProps}
                 ref={ref}

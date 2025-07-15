@@ -19,7 +19,7 @@ import { SUPPORTED_PASTE_MIME_TYPES } from './constants';
 interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
   field: FieldHook<string>;
-  caseId?: string;
+  caseId: string;
   owner: string;
   fileKindId: string;
   setErrors: React.Dispatch<React.SetStateAction<Array<string | Error>>>;
