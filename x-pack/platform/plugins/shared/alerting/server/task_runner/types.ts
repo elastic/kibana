@@ -65,7 +65,6 @@ export interface RuleTaskRunResult {
 
 export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({
   state: {},
-  monitoring: undefined,
   schedule: undefined,
   shouldDeleteTask: true,
 });
