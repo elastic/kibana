@@ -20,7 +20,7 @@ const highlightMissingParams = ({
   model: monaco.editor.ITextModel;
   params: OnechatEsqlParam[];
 }) => {
-  const definedParams = new Set(params.map((p) => p.name));
+  const definedParams = new Set(params.map((param) => param.name));
   const paramMatches = extractEsqlParamMatches(model.getValue());
   const markers: monaco.editor.IMarkerData[] = [];
 
@@ -101,14 +101,14 @@ const setupCompletionProvider = ({
 
       const suggestions: monaco.languages.CompletionItem[] =
         params
-          .filter((p) => p.name && `?${p.name}`.startsWith(current))
-          .map((p) => ({
+          .filter((param) => param.name && `?${param.name}`.startsWith(current))
+          .map((param) => ({
             label: {
-              label: `?${p.name}`,
-              description: p.description,
+              label: `?${param.name}`,
+              description: param.description,
             },
             kind: monaco.languages.CompletionItemKind.Variable,
-            insertText: `?${p.name}`,
+            insertText: `?${param.name}`,
             range,
           })) ?? [];
 
