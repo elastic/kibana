@@ -1,6 +1,6 @@
 # TO_BOOLEAN
 
-The TO_BOOLEAN function converts an input value into a boolean value.
+Converts an input value to a boolean value. A string value of `true` will be case-insensitively converted to the Boolean `true`. For anything else, including the empty string, the function will return `false`. The numerical value of `0` will be converted to `false`, and anything else will be converted to `true`.
 
 ## Syntax
 
@@ -8,18 +8,21 @@ The TO_BOOLEAN function converts an input value into a boolean value.
 
 ### Parameters
 
-#### field
+#### `field`
 
-The input value. This can be a single or multi-valued column or an expression.
+The input value to be converted. This can be a single- or multi-valued column or an expression.
 
 ## Examples
-
-The following example demonstrates the use of the TO_BOOLEAN function:
 
 ```esql
 ROW str = ["true", "TRuE", "false", "", "yes", "1"]
 | EVAL bool = TO_BOOLEAN(str)
 ```
+
+This example converts a multi-valued string column into boolean values. For instance:
+- `"true"` and `"TRuE"` are converted to `true`.
+- `"false"`, `""` (empty string), and other non-`true` strings are converted to `false`.
+- `"1"` is converted to `true`.
 
 ```esql
 ROW num = [0, 1, 2, -1]
