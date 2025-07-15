@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -136,8 +135,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
-
-      after(async () => browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY));
 
       it('renders the correct page title', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
