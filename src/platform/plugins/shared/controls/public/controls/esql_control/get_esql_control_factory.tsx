@@ -13,8 +13,8 @@ import { BehaviorSubject, merge } from 'rxjs';
 import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
 import { apiPublishesESQLVariables, type ESQLControlState } from '@kbn/esql-types';
-import { useBatchedPublishingSubjects, apiHasParentApi } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlApi } from './types';
 import { ControlFactory } from '../types';
@@ -42,11 +42,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         controlGroupApi.controlFetch$(uuid)
       );
 
-      const closeOverlay = () => {
-        if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-          controlGroupApi.parentApi.clearOverlays();
-        }
-      };
       const onSaveControl = (updatedState: ESQLControlState) => {
         controlGroupApi?.replacePanel(uuid, {
           panelType: 'esqlControl',
@@ -54,7 +49,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             rawState: updatedState,
           },
         });
-        closeOverlay();
       };
 
       function serializeState() {
@@ -106,7 +100,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               controlType: initialState.controlType,
               esqlVariables: variablesInParent,
               onSaveControl,
-              onCancelControl: closeOverlay,
               initialState: state,
             });
           } catch (e) {
