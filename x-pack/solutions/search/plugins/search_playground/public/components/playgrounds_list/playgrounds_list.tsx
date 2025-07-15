@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { CriteriaWithPagination, EuiButton } from '@elastic/eui';
+import {
+  CriteriaWithPagination,
+  EuiButton,
+  EuiImage,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +29,7 @@ import { PlaygroundsListLoading } from './playgrounds_list_loading';
 import { PlaygroundsListEmptyState } from './playgrounds_list_empty_state';
 import { PlaygroundsTable, PlaygroundsTableProps } from './playgrounds_table';
 import { PlaygroundListObject } from '../../types';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 function PlaygroundListObjectFieldToSortField(field: string): 'updated_at' {
   // SO Index does not currently allow sorting on name, update this when we update SO index settings
@@ -49,6 +58,7 @@ export const PlaygroundsList = () => {
     sortOrder: 'desc',
   });
   const { application } = useKibana().services;
+  const assetBasePath = useAssetBasePath();
   const { data, isLoading, isError, error } = usePlaygroundsList(playgroundQuery);
   const onNewPlayground = useCallback(() => {
     application.navigateToApp(PLUGIN_ID, { path: SEARCH_PLAYGROUND_CHAT_PATH });
@@ -78,28 +88,47 @@ export const PlaygroundsList = () => {
 
   return (
     <>
-      <KibanaPageTemplate.Header
-        pageTitle={i18n.translate('xpack.searchPlayground.playgroundsList.page.title', {
-          defaultMessage: 'Playground',
-        })}
-        description={i18n.translate('xpack.searchPlayground.playgroundsList.page.description', {
-          defaultMessage: 'Use your data to experiment with RAG applications',
-        })}
-        rightSideItems={[
-          <EuiButton
-            data-test-subj="newPlaygroundButton"
-            fill
-            iconType="plusInCircle"
-            fullWidth={false}
-            onClick={onNewPlayground}
-          >
-            <FormattedMessage
-              id="xpack.searchPlayground.playgroundsList.page.cta.text"
-              defaultMessage="New Playground"
-            />
-          </EuiButton>,
-        ]}
-      />
+      <KibanaPageTemplate.Header>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={1}>
+            <EuiFlexGroup direction="column">
+              <EuiTitle size="l">
+                <h1>
+                  {i18n.translate('xpack.searchPlayground.playgroundsList.page.title', {
+                    defaultMessage: 'Playground',
+                  })}
+                </h1>
+              </EuiTitle>
+              <EuiText>
+                <p>
+                  {i18n.translate('xpack.searchPlayground.playgroundsList.page.description', {
+                    defaultMessage: 'Use your data to experiment with RAG applications',
+                  })}
+                </p>
+              </EuiText>
+              <EuiFlexItem>
+                <span>
+                  <EuiButton
+                    data-test-subj="newPlaygroundButton"
+                    fill
+                    iconType="plusInCircle"
+                    fullWidth={false}
+                    onClick={onNewPlayground}
+                  >
+                    <FormattedMessage
+                      id="xpack.searchPlayground.playgroundsList.page.cta.text"
+                      defaultMessage="New Playground"
+                    />
+                  </EuiButton>
+                </span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            <EuiImage size="l" src={`${assetBasePath}/placeholder_playground_hero.png`} alt="" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section color="plain">
         <PlaygroundsTable
           playgroundsData={data}

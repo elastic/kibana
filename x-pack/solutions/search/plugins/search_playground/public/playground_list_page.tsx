@@ -14,7 +14,7 @@ import { usePlaygroundBreadcrumbs } from './hooks/use_playground_breadcrumbs';
 export const PlaygroundsListPage = () => {
   usePlaygroundBreadcrumbs();
   return (
-    <SearchPlaygroundPageTemplate data-test-subj="playgroundsListPage">
+    <SearchPlaygroundPageTemplate restrictWidth data-test-subj="playgroundsListPage">
       <PlaygroundsList />
     </SearchPlaygroundPageTemplate>
   );
