@@ -14,5 +14,4 @@ export * from './use_health_check';
 export * from './use_load_alerting_framework_health';
 export * from './use_get_rule_types_permissions';
 export * from './use_load_ui_health';
-export * from './use_alerts_new_api_data_view';
 export * from './use_fetch_alerts_fields_new_api';
