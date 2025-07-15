@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-lexer grammar Rrf;
-
-DEV_RRF : {this.isDevVersion()}? 'rrf' -> pushMode(EXPRESSION_MODE);
+export { sloDataFixture } from './slo_data';
+export type { SloDataFixture } from './slo_data';
