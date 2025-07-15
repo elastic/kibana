@@ -52,11 +52,13 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
       try {
         let locatorParams: undefined | LocatorParams;
 
-        const { jobId, scheduledReportId } = parse(window.location.search);
+        const { jobId, scheduledReportId, page, perPage } = parse(window.location.search);
 
         if (scheduledReportId) {
           const scheduledReport = await apiClient.getScheduledReportInfo(
-            scheduledReportId as string
+            scheduledReportId as string,
+            parseInt(page as string, 10),
+            parseInt(perPage as string, 10)
           );
 
           locatorParams = (scheduledReport?.payload as BaseParamsV2)?.locatorParams?.[0];

@@ -12,23 +12,25 @@ import {
   EuiPageHeader,
   EuiHorizontalRule,
   EuiButton,
+  EuiLoadingSpinner,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
-import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
-import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
+import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
+import { RiskScoreEnableSection } from '../components/risk_score_management/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
-import { RiskScoreUsefulLinksSection } from '../components/risk_score_useful_links_section';
-import { RiskScoreConfigurationSection } from '../components/risk_score_configuration_section';
+import { RiskScoreUsefulLinksSection } from '../components/risk_score_management/risk_score_useful_links_section';
+import { RiskScoreConfigurationSection } from '../components/risk_score_management/risk_score_configuration_section';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useScheduleNowRiskEngineMutation } from '../api/hooks/use_schedule_now_risk_engine_mutation';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
-import { getEntityAnalyticsRiskScorePageStyles } from '../components/risk_score_page_styles';
-import { useRiskEngineSettings } from '../api/hooks/use_risk_engine_settings';
+import { getEntityAnalyticsRiskScorePageStyles } from '../components/risk_score_management/risk_score_page_styles';
+import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
+import { RiskScoreSaveBar } from '../components/risk_score_management/risk_score_save_bar';
 
 const TEN_SECONDS = 10000;
 
@@ -36,26 +38,31 @@ export const EntityAnalyticsManagementPage = () => {
   const { euiTheme } = useEuiTheme();
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const privileges = useMissingRiskEnginePrivileges();
-  const { data: riskEngineSettings } = useRiskEngineSettings();
-  const includeClosedAlerts = riskEngineSettings?.includeClosedAlerts ?? false;
-  const from = riskEngineSettings?.range?.start ?? 'now-30d';
-  const to = riskEngineSettings?.range?.end || 'now';
+  const {
+    savedRiskEngineSettings,
+    selectedRiskEngineSettings,
+    selectedSettingsMatchSavedSettings,
+    resetSelectedSettings,
+    saveSelectedSettingsMutation,
+    setSelectedDateSetting,
+    toggleSelectedClosedAlertsSetting,
+    isLoadingRiskEngineSettings,
+  } = useConfigurableRiskEngineSettings();
   const { data: riskEngineStatus } = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
     structuralSharing: false, // Force the component to rerender after every Risk Engine Status API call
   });
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
   const runEngineEnabled = currentRiskEngineStatus === 'ENABLED';
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingRunRiskEngine, setIsLoadingRunRiskEngine] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
 
   const handleRunEngineClick = async () => {
-    setIsLoading(true);
+    setIsLoadingRunRiskEngine(true);
     try {
       scheduleNowRiskEngine();
-
-      if (!isLoading) {
+      if (!isLoadingRunRiskEngine) {
         addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
       }
     } catch (error) {
@@ -63,7 +70,7 @@ export const EntityAnalyticsManagementPage = () => {
         title: i18n.RISK_SCORE_ENGINE_RUN_FAILURE,
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingRunRiskEngine(false);
     }
   };
 
@@ -95,24 +102,18 @@ export const EntityAnalyticsManagementPage = () => {
 
             {/* Controls Section */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                {/* Run Engine Section */}
+              <EuiFlexGroup justifyContent={'center'} alignItems="center" gutterSize="m">
                 {runEngineEnabled && (
                   <>
-                    {/* Run Engine Button */}
                     <EuiButton
                       size="s"
                       iconType="play"
-                      isLoading={isLoading}
+                      isLoading={isLoadingRunRiskEngine}
                       onClick={handleRunEngineClick}
                     >
                       {i18n.RUN_RISK_SCORE_ENGINE}
                     </EuiButton>
-
-                    {/* Vertical Line */}
                     <styles.VerticalSeparator />
-
-                    {/* Countdown Text */}
                     <div>
                       <EuiText size="s" color="subdued">
                         {countDownText}
@@ -120,11 +121,11 @@ export const EntityAnalyticsManagementPage = () => {
                     </div>
                   </>
                 )}
-
-                {/* Risk Score Enable Section */}
-                <div>
-                  <RiskScoreEnableSection privileges={privileges} />
-                </div>
+                <RiskScoreEnableSection
+                  selectedSettingsMatchSavedSettings={selectedSettingsMatchSavedSettings}
+                  saveSelectedSettingsMutation={saveSelectedSettingsMutation}
+                  privileges={privileges}
+                />
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -133,24 +134,36 @@ export const EntityAnalyticsManagementPage = () => {
 
       <EuiHorizontalRule />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-        <EuiFlexItem grow={2}>
-          <RiskScoreConfigurationSection
-            includeClosedAlerts={includeClosedAlerts}
-            from={from}
-            to={to}
-          />
-          <EuiHorizontalRule />
-          <RiskScoreUsefulLinksSection />
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <RiskScorePreviewSection
-            privileges={privileges}
-            includeClosedAlerts={includeClosedAlerts}
-            from={from}
-            to={to}
-          />
-        </EuiFlexItem>
+        {!selectedRiskEngineSettings && <EuiLoadingSpinner size="m" />}
+        {selectedRiskEngineSettings && (
+          <>
+            <EuiFlexItem grow={2}>
+              <RiskScoreConfigurationSection
+                selectedRiskEngineSettings={selectedRiskEngineSettings}
+                setSelectedDateSetting={setSelectedDateSetting}
+                toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
+              />
+              <EuiHorizontalRule />
+              <RiskScoreUsefulLinksSection />
+            </EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <RiskScorePreviewSection
+                privileges={privileges}
+                includeClosedAlerts={selectedRiskEngineSettings.includeClosedAlerts}
+                from={selectedRiskEngineSettings.range.start}
+                to={selectedRiskEngineSettings.range.end}
+              />
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
+      {savedRiskEngineSettings && !selectedSettingsMatchSavedSettings && (
+        <RiskScoreSaveBar
+          resetSelectedSettings={resetSelectedSettings}
+          saveSelectedSettings={saveSelectedSettingsMutation.mutateAsync}
+          isLoading={isLoadingRiskEngineSettings || saveSelectedSettingsMutation.isLoading}
+        />
+      )}
     </>
   );
 };

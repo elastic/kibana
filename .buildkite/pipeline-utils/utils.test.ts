@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-unused-expressions */
-
-import { expect } from 'chai';
 import { getKibanaDir, getVersionsFile } from './utils';
 import fs from 'fs';
 
@@ -19,8 +16,8 @@ describe('getKibanaDir', () => {
   it('should return the kibana directory', () => {
     const kibanaDir = getKibanaDir();
 
-    expect(kibanaDir).to.be.ok;
-    expect(fs.existsSync(kibanaDir)).to.be.true;
+    expect(kibanaDir).toBeTruthy();
+    expect(fs.existsSync(kibanaDir)).toBe(true);
   });
 });
 
@@ -28,18 +25,18 @@ describe('getVersionsFile', () => {
   it('should return the versions file', () => {
     const versionsFile = getVersionsFile();
 
-    expect(versionsFile).to.be.ok;
-    expect(versionsFile.versions).to.be.an('array');
+    expect(versionsFile).toBeTruthy();
+    expect(versionsFile.versions).toBeInstanceOf(Array);
   });
 
   it('should correctly find prevMajor and prevMinor versions', () => {
     const versionsFile = getVersionsFile();
 
-    expect(versionsFile.prevMajors).to.be.an('array');
-    expect(versionsFile.prevMajors.length).to.eql(1);
-    expect(versionsFile.prevMajors[0].branch).to.eql('7.17');
+    expect(versionsFile.prevMajors).toBeInstanceOf(Array);
+    expect(versionsFile.prevMajors.length).toEqual(1);
+    expect(versionsFile.prevMajors[0].branch).toEqual('7.17');
 
-    expect(versionsFile.prevMinors).to.be.an('array');
+    expect(versionsFile.prevMinors).toBeInstanceOf(Array);
   });
 
   // TODO: write more tests with mocking...
