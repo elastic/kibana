@@ -71,8 +71,8 @@ describe('FROM Validation', () => {
 
       test('errors on unknown index', () => {
         fromExpectErrors(`FROM index, missingIndex`, ['Unknown index [missingIndex]']);
-        fromExpectErrors(`from average()`, ['Unknown index [average()]']);
-        fromExpectErrors(`fRom custom_function()`, ['Unknown index [custom_function()]']);
+        fromExpectErrors(`from average()`, ['Unknown index [average]']);
+        fromExpectErrors(`fRom custom_function()`, ['Unknown index [custom_function]']);
         fromExpectErrors(`FROM indexes*`, ['Unknown index [indexes*]']);
         fromExpectErrors('from numberField', ['Unknown index [numberField]']);
         fromExpectErrors('FROM policy', ['Unknown index [policy]']);
