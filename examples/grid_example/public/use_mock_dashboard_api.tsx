@@ -93,7 +93,7 @@ export const useMockDashboardApi = ({
           currentPanel.gridData.y = currentPanel.gridData.y + DEFAULT_PANEL_HEIGHT;
           otherPanels[id] = currentPanel;
         }
-        const newId = v4();
+        const newId = panelPackage.maybePanelId ?? v4();
         mockDashboardApi.panels$.next({
           ...otherPanels,
           [newId]: {
