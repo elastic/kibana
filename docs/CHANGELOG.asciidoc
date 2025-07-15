@@ -108,6 +108,25 @@ The 7.17.29 release includes the following fixes.
 IMPORTANT: The 7.17.29 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory for more details].
 
 [float]
+[[known-issues-v7.17.29]]
+=== Known issues
+
+// tag::known-issue-227976[]
+.Dashboard Copy link doesn't work when sharing from a space other than the default space
+[%collapsible]
+====
+**This issue is resolved in version 7.17.30** ({kibana-pull}227625[#227625]).
+
+*Details* +
+When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
+
+*Workaround* +
+To avoid this issue, don't upgrade {kib} to one of the affected versions, or upgrade to a higher version that includes a fix for it.
+
+====
+// end::known-issue-227976[]
+
+[float]
 [[fixes-v7.17.29]]
 === Fixes
 Elastic Observability solution::
