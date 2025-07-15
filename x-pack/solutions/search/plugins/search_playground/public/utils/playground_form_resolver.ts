@@ -29,11 +29,26 @@ export const playgroundFormResolver: Resolver<PlaygroundForm> = async (values) =
   } else if (!values[PlaygroundFormFields.question].trim()) {
     errors[PlaygroundFormFields.question] = REQUIRED_ERROR;
   }
+
   const userQueryError = validateUserElasticsearchQuery(
     values[PlaygroundFormFields.userElasticsearchQuery]
   );
   if (userQueryError) {
     errors[PlaygroundFormFields.userElasticsearchQuery] = userQueryError;
+  }
+
+  if (!values[PlaygroundFormFields.indices] || values[PlaygroundFormFields.indices].length === 0) {
+    errors[PlaygroundFormFields.indices] = REQUIRED_ERROR;
+  } else {
+    const queryFieldsCount = Object.values(values[PlaygroundFormFields.queryFields]).reduce(
+      (count, indexQueryFields) => count + (indexQueryFields?.length || 0),
+      0
+    );
+    if (queryFieldsCount === 0) {
+      errors[PlaygroundFormFields.queryFields] = {
+        [values[PlaygroundFormFields.indices][0]]: REQUIRED_ERROR,
+      };
+    }
   }
 
   if (hasErrors(errors)) {
