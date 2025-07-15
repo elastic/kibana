@@ -458,6 +458,6 @@ export function ObservabilityAlertsCommonProvider({
     navigateToAlertDetails,
     createDataView,
     deleteDataView,
-    selectAlertStatusFilter
+    selectAlertStatusFilter,
   };
 }
