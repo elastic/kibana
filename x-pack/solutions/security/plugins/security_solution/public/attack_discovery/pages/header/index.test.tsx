@@ -47,6 +47,7 @@ describe('Actions', () => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,
+      isAssistantVisible: true,
     });
 
     mockUseKibana.mockReturnValue({

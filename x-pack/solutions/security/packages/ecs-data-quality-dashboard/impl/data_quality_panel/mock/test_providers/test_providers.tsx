@@ -60,6 +60,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
     isStarterPromptsEnabled: true,
+    isAssistantVisible: true,
   };
   const queryClient = new QueryClient({
     defaultOptions: {

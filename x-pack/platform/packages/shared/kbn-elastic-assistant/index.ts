@@ -191,6 +191,8 @@ export interface UseAssistantAvailability {
   hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
+  // True when the Assistant is visible, i.e. the Assistant is available and the Assistant is visible in the UI
+  isAssistantVisible: boolean;
   // When true, the Assistant is hidden and unavailable
   hasAssistantPrivilege: boolean;
   // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
