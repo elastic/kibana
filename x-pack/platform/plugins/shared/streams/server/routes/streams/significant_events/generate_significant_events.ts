@@ -7,7 +7,6 @@
 
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import { Logger } from '@kbn/core/server';
-import { highlightPatternFromRegex } from '@kbn/genai-utils-common';
 import { getLogPatterns } from '@kbn/genai-utils-server';
 import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
@@ -15,7 +14,8 @@ import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
 import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
-import { KQL_GUIDE } from './kql_guide';
+import KQL_GUIDE from './prompts/kql_guide.text';
+import INSTRUCTION from './prompts/generate_queries_instruction.text';
 
 const LOOKBACK_DAYS = 7;
 
@@ -94,56 +94,8 @@ export async function generateSignificantEventDefinitions({
     });
   }
 
-  const instruction = `
-You are an expert log analyst tasked with generating KQL (Kibana Query Language) queries to identify significant events in some Elasticsearch logs. 
-Your goal is to create monitoring queries that detect unusual patterns, errors, and operational issues.
-
-## Your Task
-Generate KQL queries that identify **operationally significant patterns** - events that indicate:
-1. **System health issues** (errors, timeouts, capacity problems)
-2. **Security concerns** (suspicious traffic, attack patterns)
-3. **Performance anomalies** (unusual response codes, slow responses)
-4. **Operational events** (deployments, configuration changes, service restarts)
-
-## Query Requirements
-
-### DO Generate Queries For:
-- **Error conditions**: 5xx status codes, connection failures, timeouts
-- **Security patterns**: Suspicious user agents, unusual request patterns, potential attacks
-- **Performance issues**: High response times, resource exhaustion messages
-- **Operational events**: Service startup/shutdown, configuration reloads
-- **Capacity warnings**: Rate limiting, queue full, max connections reached
-- **Bot/crawler anomalies**: Unusual bot behavior, unexpected crawling patterns
-
-### DO NOT Generate Queries For:
-- Normal successful requests (2xx, 3xx status codes for regular traffic)
-- Standard user agent patterns from legitimate browsers
-- Routine operational logs without significance
-- High-volume patterns that are part of normal operations
-
-### Query Style Guidelines:
-- **Prefer exact matches** over wildcards when possible
-- **Use specific field targeting**: \`message:"exact phrase"\` rather than broad searches
-- **Keep queries focused**: Each query should target one specific pattern
-- **Make queries actionable**: Include enough context to understand what the pattern indicates
-
-## Analysis Process
-1. **Examine the log patterns** provided
-2. **Identify anomalous or significant events** that deviate from normal web traffic
-3. **Focus on operational significance** - patterns that indicate system health, security, or performance issues
-4. **Create targeted queries** that can be used for alerting and monitoring
-5. **Prioritize high-value, low-noise patterns** that provide actionable insights
-
-## Example Query Patterns to Consider:
-- HTTP 5xx errors: \`message:"\" 5*"\`
-- Bot detection failures: \`message:"GoogleBot" and message:"POST"\`
-- Suspicious endpoint access: \`message:"/api/admin" or message:"/api/config"\`
-- Connection issues: \`message:"Connection refused" or message:"Connection timeout"\`
-- Rate limiting: \`message:"rate limit" or message:"too many requests"\`
-`;
-
   const chunks = [
-    instruction,
+    INSTRUCTION,
     KQL_GUIDE,
     logPatterns
       ? `## Log patterns
@@ -166,8 +118,7 @@ Following is the list of fields found in the dataset with their types, count and
 
 ${JSON.stringify(short)}
     `,
-    `
-Remember: The goal is to create a focused set of queries that help operators 
+    `Remember: The goal is to create a focused set of queries that help operators 
 quickly identify when something unusual or problematic is happening in the system.
 Quality over quantity - aim for queries that have high signal-to-noise ratio.
     `,
@@ -284,25 +235,27 @@ Quality over quantity - aim for queries that have high signal-to-noise ratio.
     id: 'verify_kql_queries',
     connectorId,
     input: [
-      instruction,
-      `You've previously generated some queries. I've ran those queries
-      to get the count for each. The total count of documents for the
-      given time period is ${totalCount}. Based on these document counts,
-      select the queries that you consider relevant.
-      
-      ## Queries
+      INSTRUCTION,
+      `You've previously generated KQL queries to identify significant operational patterns. 
+I've executed those queries and obtained document counts for each. 
+Now I need you to analyze these results and prioritize the most operationally relevant queries.
 
-      ${JSON.stringify(
-        queriesWithShortIds.map(({ shortId, kql, title, count }) => {
-          return {
-            id: shortId,
-            kql,
-            title,
-            count,
-          };
-        })
-      )}
-      `,
+## Analysis Context
+- Total documents in time period: ${totalCount}
+- Lookback period: ${LOOKBACK_DAYS} days
+- Goal: Identify queries that provide the best signal-to-noise ratio for operational monitoring
+
+## Queries
+${JSON.stringify(
+  queriesWithShortIds.map(({ shortId, kql, title, count }) => {
+    return {
+      id: shortId,
+      kql,
+      title,
+      count,
+    };
+  })
+)}`,
     ].join('\n\n'),
     schema: {
       type: 'object',
