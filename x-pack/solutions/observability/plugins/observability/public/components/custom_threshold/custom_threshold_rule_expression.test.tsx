@@ -276,7 +276,7 @@ describe('Expression', () => {
   });
 
   it('should show an error message when searchSource throws an error', async () => {
-    const errorMessage = 'Error in searchSource create';
+    const errorMessage = 'Error fetching search sourceCould not locate that data view (id: )';
     const kibanaMock = kibanaStartMock.startContract();
     useKibanaMock.mockReturnValue({
       ...kibanaMock,
