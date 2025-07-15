@@ -2818,7 +2818,7 @@
         "label": "CreateListItemSchema",
         "description": [],
         "signature": [
-          "{ list_id: string; value: string; } & { id?: string | undefined; meta?: { [key: string]: unknown; } | undefined; refresh?: \"true\" | \"false\" | \"wait_for\" | undefined; }"
+          "{ list_id: string; value: string; } & { id?: string | undefined; meta?: { [key: string]: unknown; } | undefined; refresh?: \"false\" | \"true\" | \"wait_for\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_item_schema/index.ts",
         "deprecated": false,
@@ -2833,7 +2833,7 @@
         "label": "CreateListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ list_id: string; value: string; id: string | undefined; meta: { [key: string]: unknown; } | undefined; refresh: \"true\" | \"false\" | \"wait_for\" | undefined; }"
+          "{ list_id: string; value: string; id: string | undefined; meta: { [key: string]: unknown; } | undefined; refresh: \"false\" | \"true\" | \"wait_for\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_item_schema/index.ts",
         "deprecated": false,
@@ -3058,7 +3058,7 @@
         "label": "DeleteListItemSchema",
         "description": [],
         "signature": [
-          "{ value: string | undefined; } & { id?: string | undefined; list_id?: string | undefined; refresh?: \"true\" | \"false\" | undefined; }"
+          "{ value: string | undefined; } & { id?: string | undefined; list_id?: string | undefined; refresh?: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/delete_list_item_schema/index.ts",
         "deprecated": false,
@@ -3073,7 +3073,7 @@
         "label": "DeleteListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ value: string | undefined; id: string | undefined; list_id: string | undefined; refresh: \"true\" | \"false\" | undefined; }"
+          "{ value: string | undefined; id: string | undefined; list_id: string | undefined; refresh: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/delete_list_item_schema/index.ts",
         "deprecated": false,
@@ -3178,7 +3178,7 @@
         "label": "DuplicateExceptionListQuerySchema",
         "description": [],
         "signature": [
-          "{ list_id: string; namespace_type: \"single\" | \"agnostic\" | undefined; include_expired_exceptions: \"true\" | \"false\" | undefined; }"
+          "{ list_id: string; namespace_type: \"single\" | \"agnostic\" | undefined; include_expired_exceptions: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/duplicate_exception_list_query_schema/index.ts",
         "deprecated": false,
@@ -3193,7 +3193,7 @@
         "label": "DuplicateExceptionListQuerySchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ list_id: string; namespace_type: \"single\" | \"agnostic\"; include_expired_exceptions: \"true\" | \"false\" | undefined; }, \"namespace_type\"> & { namespace_type: \"single\" | \"agnostic\"; }"
+          "Omit<{ list_id: string; namespace_type: \"single\" | \"agnostic\"; include_expired_exceptions: \"false\" | \"true\" | undefined; }, \"namespace_type\"> & { namespace_type: \"single\" | \"agnostic\"; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/duplicate_exception_list_query_schema/index.ts",
         "deprecated": false,
@@ -3523,7 +3523,7 @@
         "label": "ExportExceptionListQuerySchema",
         "description": [],
         "signature": [
-          "{ id: string; list_id: string; namespace_type: \"single\" | \"agnostic\" | undefined; include_expired_exceptions: \"true\" | \"false\" | undefined; }"
+          "{ id: string; list_id: string; namespace_type: \"single\" | \"agnostic\" | undefined; include_expired_exceptions: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/export_exception_list_query_schema/index.ts",
         "deprecated": false,
@@ -4033,7 +4033,7 @@
         "label": "ImportListItemQuerySchema",
         "description": [],
         "signature": [
-          "{ deserializer: string | undefined; list_id: string | undefined; serializer: string | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh: \"true\" | \"false\" | \"wait_for\" | undefined; }"
+          "{ deserializer: string | undefined; list_id: string | undefined; serializer: string | undefined; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh: \"false\" | \"true\" | \"wait_for\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/import_list_item_query_schema/index.ts",
         "deprecated": false,
@@ -4048,7 +4048,7 @@
         "label": "ImportListItemQuerySchemaEncoded",
         "description": [],
         "signature": [
-          "{ deserializer?: string | undefined; list_id?: string | undefined; serializer?: string | undefined; type?: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh?: \"true\" | \"false\" | \"wait_for\" | undefined; }"
+          "{ deserializer?: string | undefined; list_id?: string | undefined; serializer?: string | undefined; type?: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\" | undefined; refresh?: \"false\" | \"true\" | \"wait_for\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/import_list_item_query_schema/index.ts",
         "deprecated": false,
@@ -4693,7 +4693,7 @@
         "label": "PatchListItemSchema",
         "description": [],
         "signature": [
-          "{ id: string; } & { _version?: string | undefined; meta?: { [key: string]: unknown; } | undefined; value?: string | undefined; refresh?: \"true\" | \"false\" | undefined; }"
+          "{ id: string; } & { _version?: string | undefined; meta?: { [key: string]: unknown; } | undefined; value?: string | undefined; refresh?: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/patch_list_item_schema/index.ts",
         "deprecated": false,
@@ -4708,7 +4708,7 @@
         "label": "PatchListItemSchemaDecoded",
         "description": [],
         "signature": [
-          "{ id: string; _version: string | undefined; meta: { [key: string]: unknown; } | undefined; value: string | undefined; refresh: \"true\" | \"false\" | undefined; }"
+          "{ id: string; _version: string | undefined; meta: { [key: string]: unknown; } | undefined; value: string | undefined; refresh: \"false\" | \"true\" | undefined; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/request/patch_list_item_schema/index.ts",
         "deprecated": false,
@@ -4963,7 +4963,7 @@
         "label": "Refresh",
         "description": [],
         "signature": [
-          "\"true\" | \"false\""
+          "\"false\" | \"true\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/common/refresh/index.ts",
         "deprecated": false,
@@ -4978,7 +4978,7 @@
         "label": "RefreshWithWaitFor",
         "description": [],
         "signature": [
-          "\"true\" | \"false\" | \"wait_for\""
+          "\"false\" | \"true\" | \"wait_for\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/common/refresh/index.ts",
         "deprecated": false,
