@@ -5,99 +5,34 @@
  * 2.0.
  */
 
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { DefaultEvaluators } from '@kbn/evals';
-import { KibanaPhoenixClient } from '@kbn/evals/src/kibana_phoenix_client/client';
-import { EvaluationDataset } from '@kbn/evals/src/types';
 import moment from 'moment';
-import { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
-import { evaluate } from '../../src/evaluate';
+import { evaluate as base } from '../../src/evaluate';
+import { EvaluateEsqlDataset, createEvaluateEsqlDataset } from './evaluate_esql_dataset';
 
-interface EsqlExample extends Example {
-  input: {
-    question: string;
-  };
-  output: {
-    expected?: string;
-    criteria?: string[];
-    execute?: boolean;
-  };
-}
-
-async function evaluateEsqlDataset({
-  dataset: { name, description, examples },
-  chatClient,
-  evaluators,
-  phoenixClient,
-}: {
-  dataset: {
-    name: string;
-    description: string;
-    examples: EsqlExample[];
-  };
-  chatClient: ObservabilityAIAssistantEvaluationChatClient;
-  evaluators: DefaultEvaluators;
-  phoenixClient: KibanaPhoenixClient;
-}) {
-  const dataset = {
-    name,
-    description,
-    examples,
-  } satisfies EvaluationDataset;
-
-  await phoenixClient.runExperiment(
-    {
-      dataset,
-      task: async ({ input }) => {
-        const response = await chatClient.complete({
-          messages: input.question,
-        });
-
-        return {
-          errors: response.errors,
-          messages: response.messages,
-        };
-      },
+const evaluate = base.extend<
+  {
+    evaluateEsqlDataset: EvaluateEsqlDataset;
+  },
+  {}
+>({
+  evaluateEsqlDataset: [
+    ({ chatClient, evaluators, phoenixClient }, use) => {
+      use(
+        createEvaluateEsqlDataset({
+          chatClient,
+          evaluators,
+          phoenixClient,
+        })
+      );
     },
-    [
-      {
-        name: 'esql-evaluator',
-        kind: 'LLM',
-        evaluate: async ({ input, output, expected, metadata }) => {
-          const result = await evaluators
-            .criteria([
-              ...(expected.expected
-                ? [
-                    `Returns a ES|QL query that is functionally equivalent to:
-      ${expected.expected}. It's OK if the created column names are slightly different, as long as the expected end result is the same.`,
-                  ]
-                : []),
-              ...(expected.execute
-                ? ['The query successfully executed without an error']
-                : ['The query was not executed, it was only explained']),
-              ...[],
-            ])
-            .evaluate({
-              input,
-              expected,
-              output,
-              metadata,
-            });
-
-          return result;
-        },
-      },
-    ]
-  );
-}
+    { scope: 'test' },
+  ],
+});
 
 evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
-  evaluate('without data', async ({ chatClient, evaluators, phoenixClient }) => {
+  evaluate('without data', async ({ evaluateEsqlDataset }) => {
     await evaluateEsqlDataset({
-      chatClient,
-      evaluators,
-      phoenixClient,
       dataset: {
         name: 'esql: without data',
         description: 'ES|QL query generation without any data or mappings',
@@ -193,7 +128,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         });
       });
 
-      evaluate('queries', async ({ phoenixClient, evaluators, chatClient }) => {
+      evaluate('queries', async ({ evaluateEsqlDataset }) => {
         await evaluateEsqlDataset({
           dataset: {
             name: 'esql: with packetbeat data',
@@ -215,9 +150,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
             ],
           },
-          chatClient,
-          evaluators,
-          phoenixClient,
         });
       });
 
@@ -260,11 +192,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         });
       });
 
-      evaluate('queries', async ({ phoenixClient, evaluators, chatClient }) => {
+      evaluate('queries', async ({ evaluateEsqlDataset }) => {
         await evaluateEsqlDataset({
-          phoenixClient,
-          chatClient,
-          evaluators,
           dataset: {
             name: 'esql: with `employees` data',
             description: 'ES|QL questions with `employees` data + mappings',
@@ -370,11 +299,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       );
     });
 
-    evaluate('queries', async ({ evaluators, chatClient, phoenixClient }) => {
+    evaluate('queries', async ({ evaluateEsqlDataset }) => {
       await evaluateEsqlDataset({
-        evaluators,
-        chatClient,
-        phoenixClient,
         dataset: {
           name: 'esql: with apm data',
           description: 'ES|QL examples for APM data',
@@ -467,7 +393,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate('SPL queries', async ({ chatClient, evaluators, phoenixClient }) => {
+  evaluate('SPL queries', async ({ evaluateEsqlDataset }) => {
     await evaluateEsqlDataset({
       dataset: {
         name: 'esql: from SPL',
@@ -475,7 +401,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         examples: [
           {
             input: {
-              question: `can you convert this SPL query to ESQL? index=network_firewall "SYN Timeout" | stats count by dest`,
+              question: `What would this SPL query look like in ES|QL? index=network_firewall "SYN Timeout" | stats count by dest`,
             },
             output: {
               expected: `FROM network_firewall
@@ -487,7 +413,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
           },
           {
             input: {
-              question: `can you convert this SPL query to ESQL? index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
+              question: `What would this SPL query look like in ES|QL? index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
             },
             output: {
               expected: `from prod_web
@@ -502,7 +428,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
           },
           {
             input: {
-              question: `can you convert this SPL query to ESQL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
+              question: `What would this SPL query look like in ES|QL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
             },
             output: {
               expected: `FROM prod_web
@@ -521,9 +447,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
           },
         ],
       },
-      chatClient,
-      evaluators,
-      phoenixClient,
     });
   });
 });

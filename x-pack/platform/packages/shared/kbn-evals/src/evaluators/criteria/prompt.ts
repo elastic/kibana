@@ -49,6 +49,10 @@ export const LlmCriteriaEvaluationPrompt = createPrompt({
                     type: 'string',
                     description: 'The unique identifier of the criterion.',
                   },
+                  reason: {
+                    type: 'string',
+                    description: 'Briefly explain the reasoning behind your judgement',
+                  },
                   result: {
                     type: 'string',
                     description: 'Outcome of evaluating the criterion.',

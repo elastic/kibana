@@ -10,6 +10,8 @@
 import { test as base } from '@playwright/test';
 import { KbnClient, SamlSessionManager } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
+import { Flags, getFlags } from '@kbn/dev-cli-runner';
+import { pickLevelFromFlags } from '@kbn/tooling-log';
 import {
   createKbnUrl,
   getEsClient,
@@ -17,7 +19,6 @@ import {
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
-  getLogger,
   ScoutLogger,
   createElasticsearchCustomRole,
   createCustomRole,
@@ -56,16 +57,25 @@ export const coreWorkerFixtures = base.extend<
     esClient: Client;
     kbnClient: KbnClient;
     samlAuth: SamlAuth;
+    flags: Flags;
   }
 >({
   // Provides a scoped logger instance for each worker to use in fixtures and tests.
   // For parallel workers logger context is matching worker index+1, e.g. '[scout-worker-1]', '[scout-worker-2]', etc.
+  flags: [
+    ({}, use) => {
+      const flags = getFlags(process.argv.slice(2));
+      use(flags);
+    },
+    { scope: 'worker' },
+  ],
   log: [
-    ({}, use, workerInfo) => {
+    ({ flags }, use, workerInfo) => {
       const workersCount = workerInfo.config.workers;
       const loggerContext =
         workersCount === 1 ? 'scout-worker' : `scout-worker-${workerInfo.parallelIndex + 1}`;
-      use(getLogger(loggerContext));
+
+      use(new ScoutLogger(loggerContext, pickLevelFromFlags(flags)));
     },
     { scope: 'worker' },
   ],

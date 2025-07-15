@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import { LogLevel, ToolingLog } from '@kbn/tooling-log';
 
 export class ScoutLogger extends ToolingLog {
-  constructor(workerContext: string) {
-    super({ level: 'verbose', writeTo: process.stdout }, { context: workerContext });
+  constructor(workerContext: string, level: LogLevel) {
+    super({ level, writeTo: process.stdout }, { context: workerContext });
     this.serviceLoaded('logger');
   }
 
@@ -29,19 +29,4 @@ export class ScoutLogger extends ToolingLog {
   public serviceMessage(name: string, message: string) {
     this.debug(`[${name}] ${message}`);
   }
-}
-
-const loggerInstances = new Map<string, ScoutLogger>();
-
-/**
- * Singleton logger instance for specific worker to share across the Scout components
- * @param workerContext logger context, e.g. `scout-worker-1`; default is `scout`
- * @returns {ScoutLogger} logger instance
- */
-export function getLogger(workerContext: string = 'scout'): ScoutLogger {
-  if (!loggerInstances.has(workerContext)) {
-    loggerInstances.set(workerContext, new ScoutLogger(workerContext));
-  }
-
-  return loggerInstances.get(workerContext)!;
 }

@@ -66,20 +66,20 @@ export function createCriteriaEvaluator({
           },
         });
 
-        const results = uniqBy(
+        const evaluations = uniqBy(
           response.toolCalls.flatMap((toolCall) => toolCall.function.arguments.criteria),
           (criterion) => criterion.id
         );
 
-        return results.map((result) => {
-          const criterion = criteriaById.get(result.id);
+        return evaluations.map((evaluation) => {
+          const criterion = criteriaById.get(evaluation.id);
           if (!criterion) {
-            throw new Error(`Could not find criterion for id "${result.id}"`);
+            throw new Error(`Could not find criterion for id "${evaluation.id}"`);
           }
 
           return {
-            ...criterion,
-            result: result.result,
+            criterion,
+            evaluation,
           };
         });
       }
@@ -100,19 +100,26 @@ export function createCriteriaEvaluator({
 
       const maxScore = sumBy(structuredCriteria, (criterion) => criterion.score);
 
-      const successful = results.filter((result) => result.result === 'PASS');
-      const failed = results.filter((result) => result.result === 'FAIL');
-      const notApplicable = results.filter((result) => result.result === 'N/A');
+      const successful = results.filter(({ evaluation }) => evaluation.result === 'PASS');
+      const failed = results.filter(({ evaluation }) => evaluation.result === 'FAIL');
+      const notApplicable = results.filter(({ evaluation }) => evaluation.result === 'N/A');
 
-      const totalScore = sumBy(successful.concat(notApplicable), (result) => result.score);
+      const totalScore = sumBy(
+        successful.concat(notApplicable),
+        ({ criterion }) => criterion.score
+      );
 
       return {
-        explanation: null,
+        explanation: results
+          .map(({ evaluation }) => {
+            return `- ${evaluation.id}: ${evaluation.reason ?? 'No explanation given'}`;
+          })
+          .join('\n'),
         label: null,
         metadata: {
-          successful: sumBy(successful, (result) => result.score),
-          failed: sumBy(failed, (result) => result.score),
-          not_applicable: sumBy(notApplicable, (result) => result.score),
+          successful: sumBy(successful, ({ criterion }) => criterion.score),
+          failed: sumBy(failed, ({ criterion }) => criterion.score),
+          not_applicable: sumBy(notApplicable, ({ criterion }) => criterion.score),
         },
         score: normalize(totalScore / maxScore),
       };
