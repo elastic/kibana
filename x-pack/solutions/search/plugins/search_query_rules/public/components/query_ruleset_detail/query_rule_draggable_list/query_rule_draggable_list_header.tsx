@@ -27,9 +27,9 @@ export const QueryRuleDraggableListHeader: React.FC<QueryRuleDraggableListHeader
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup css={DraggableListHeader(euiTheme)}>
+    <EuiFlexGroup css={DraggableListHeader(euiTheme)} responsive={false}>
       <EuiFlexItem grow={7}>
-        <EuiFlexGroup direction="row" alignItems="center" gutterSize="l">
+        <EuiFlexGroup direction="row" alignItems="center" gutterSize="l" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
               <EuiText size="xs">

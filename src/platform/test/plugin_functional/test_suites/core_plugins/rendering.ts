@@ -202,7 +202,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'vis_type_vislib.readOnly (boolean?|never)',
         'vis_type_xy.readOnly (boolean?|never)',
         'vis_type_vega.enableExternalUrls (boolean?)',
-        'xpack.actions.email.domain_allowlist (array)',
+        'xpack.actions.email.domain_allowlist (array?)',
+        'xpack.actions.email.services.enabled (array?)',
+        'xpack.actions.webhook.ssl.pfx.enabled (boolean?)',
         'xpack.apm.serviceMapEnabled (boolean?)',
         'xpack.apm.ui.enabled (boolean?)',
         'xpack.apm.ui.maxTraceItems (number?)',
@@ -224,6 +226,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.maxSize (number?)',
         'xpack.cases.markdownPlugins.lens (boolean?)',
         'xpack.cases.stack.enabled (boolean?)',
+        'xpack.cases.incrementalId.enabled (boolean?)',
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
@@ -253,7 +256,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (string?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|chat?)',
+        'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.onboarding.default_solution (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',
@@ -270,6 +274,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number?)',
         'xpack.fleet.integrationsHomeOverride (string?)',
         'xpack.fleet.prereleaseEnabledByDefault (boolean?)',
+        'xpack.fleet.hideDashboards (boolean?)',
         'xpack.global_search.search_timeout (duration?)',
         'xpack.global_search_bar.input_max_limit (number?)',
         'xpack.graph.canEditDrillDownUrls (boolean?)',
@@ -293,6 +298,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (boolean?)',
         // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.infra.featureFlags.profilingEnabled (boolean?)',
+        'xpack.infra.featureFlags.hostOtelEnabled (boolean?)',
 
         'xpack.index_management.enableIndexActions (boolean?|never)',
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
@@ -302,6 +308,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.editableIndexSettings (all?|limited?|never)',
         'xpack.index_management.enableMappingsSourceFieldSection (boolean?|never)',
         'xpack.index_management.dev.enableSemanticText (boolean?)',
+        'xpack.intercepts.enabled (boolean?)',
         'xpack.license_management.ui.enabled (boolean?)',
         'xpack.maps.preserveDrawingBuffer (boolean?)',
         'xpack.maps.showMapsInspectorAdapter (boolean?)',
@@ -375,7 +382,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
-        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
         /**
          * Rule form V2 feature flags
          */

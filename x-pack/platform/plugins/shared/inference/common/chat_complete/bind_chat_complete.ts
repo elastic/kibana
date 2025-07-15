@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ChatCompleteAPI,
-  ChatCompleteOptions,
-  BoundChatCompleteAPI,
-  BoundChatCompleteOptions,
-  UnboundChatCompleteOptions,
-  ToolOptions,
-} from '@kbn/inference-common';
+import type { ChatCompleteAPI, BoundChatCompleteAPI } from '@kbn/inference-common';
+import { BoundOptions, bindApi } from '@kbn/inference-common';
 
 /**
  * Bind chatComplete to the provided parameters,
@@ -20,19 +14,9 @@ import type {
  */
 export function bindChatComplete(
   chatComplete: ChatCompleteAPI,
-  boundParams: BoundChatCompleteOptions
+  boundParams: BoundOptions
 ): BoundChatCompleteAPI;
-export function bindChatComplete(
-  chatComplete: ChatCompleteAPI,
-  boundParams: BoundChatCompleteOptions
-) {
-  const { connectorId, functionCalling } = boundParams;
-  return (unboundParams: UnboundChatCompleteOptions<ToolOptions, boolean>) => {
-    const params: ChatCompleteOptions<ToolOptions, boolean> = {
-      ...unboundParams,
-      connectorId,
-      functionCalling,
-    };
-    return chatComplete(params);
-  };
+
+export function bindChatComplete(chatComplete: ChatCompleteAPI, boundParams: BoundOptions) {
+  return bindApi(chatComplete, boundParams);
 }

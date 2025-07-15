@@ -9,9 +9,11 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { PlaygroundOverview } from './playground_overview';
+import { SavedPlaygroundPage } from './saved_playground';
 
 import {
   ROOT_PATH,
+  SAVED_PLAYGROUND_PATH,
   SEARCH_PLAYGROUND_CHAT_PATH,
   SEARCH_PLAYGROUND_NOT_FOUND,
   SEARCH_PLAYGROUND_SEARCH_PATH,
@@ -27,6 +29,9 @@ export const PlaygroundRouter: React.FC = () => {
       <Redirect exact from={ROOT_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
       {!isSearchModeEnabled && (
         <Redirect from={SEARCH_PLAYGROUND_SEARCH_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
+      )}
+      {isSearchModeEnabled && (
+        <Route path={SAVED_PLAYGROUND_PATH} component={SavedPlaygroundPage} />
       )}
       <Route exact path={SEARCH_PLAYGROUND_NOT_FOUND} component={PlaygroundRouteNotFound} />
       <Route path={`/:pageMode/:viewMode?`} component={PlaygroundOverview} />

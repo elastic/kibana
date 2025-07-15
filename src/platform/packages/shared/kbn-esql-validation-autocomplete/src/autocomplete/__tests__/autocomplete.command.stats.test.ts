@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { FieldType, FunctionReturnType, Location } from '../../definitions/types';
-import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
-import { getDateHistogramCompletionItem } from '../commands/stats/util';
-import { allStarConstant } from '../complete_items';
+
+import {
+  FunctionDefinitionTypes,
+  getDateHistogramCompletionItem,
+  allStarConstant,
+  ESQL_NUMBER_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
+  FieldType,
+  FunctionReturnType,
+} from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { roundParameterTypes } from './constants';
 import {
   setup,
@@ -82,7 +90,7 @@ describe('autocomplete.suggest', () => {
       });
 
       test('on assignment expression, shows all agg and eval functions', async () => {
-        await assertSuggestions('from a | stats a=/', [
+        await assertSuggestions('from a | stats a= /', [
           ...allAggFunctions,
           ...allGroupingFunctions,
           ...allEvalFunctions,
@@ -94,6 +102,50 @@ describe('autocomplete.suggest', () => {
       });
 
       test('on function left paren', async () => {
+        // set the test functions to include a time series agg function
+        // to ensure it is suggested in the stats command
+        // this is a workaround for the fact that the time series agg functions
+        // are on snapshots atm, remove when they are on tech preview
+        setTestFunctions([
+          {
+            type: FunctionDefinitionTypes.TIME_SERIES_AGG,
+            name: 'func',
+            description: '',
+            signatures: [
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'counter_double',
+                    optional: false,
+                  },
+                ],
+                returnType: 'double',
+              },
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'counter_integer',
+                    optional: false,
+                  },
+                ],
+                returnType: 'double',
+              },
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'counter_long',
+                    optional: false,
+                  },
+                ],
+                returnType: 'double',
+              },
+            ],
+            locationsAvailable: [Location.STATS_TIMESERIES],
+          },
+        ]);
         await assertSuggestions('from a | stats by bucket(/', [
           ...getFieldNamesByType([...ESQL_COMMON_NUMERIC_TYPES, 'date', 'date_nanos']).map(
             (field) => `${field}, `
@@ -145,6 +197,10 @@ describe('autocomplete.suggest', () => {
           ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
             scalar: true,
           }),
+        ]);
+        await assertSuggestions('TS a | stats avg(/', [
+          ...getFieldNamesByType(AVG_TYPES),
+          'FUNC($0)',
         ]);
         await assertSuggestions('from a | stats round(avg(/', [
           ...getFieldNamesByType(AVG_TYPES),
@@ -245,12 +301,10 @@ describe('autocomplete.suggest', () => {
 
         it('suggests after operator', async () => {
           await assertSuggestions('FROM a | STATS MIN(b) WHERE keywordField != /', [
-            ...getFieldNamesByType(['boolean', 'text', 'keyword']),
-            ...getFunctionSignaturesByReturnType(
-              Location.STATS_WHERE,
-              ['boolean', 'text', 'keyword'],
-              { scalar: true }
-            ),
+            ...getFieldNamesByType(['text', 'keyword']),
+            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, ['text', 'keyword'], {
+              scalar: true,
+            }),
           ]);
         });
 
@@ -479,10 +533,14 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(
           'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
           [
-            ...getLiteralsByType('time_literal'),
-            ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'date_period'], {
-              scalar: true,
-            }),
+            ...getLiteralsByType('time_duration'),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              ['integer', 'date_period', 'time_duration'],
+              {
+                scalar: true,
+              }
+            ),
           ]
         );
       });

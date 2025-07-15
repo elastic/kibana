@@ -79,6 +79,8 @@ const renderComponent = async () => {
 const getBooleanValueMock = jest.fn();
 
 describe('EditForm', () => {
+  const mockTriggersActionsUi = triggersActionsUiMock.createStart();
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -92,9 +94,7 @@ describe('EditForm', () => {
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
-        triggersActionsUi: {
-          ...triggersActionsUiMock.createStart(),
-        },
+        triggersActionsUi: mockTriggersActionsUi,
         uiSettings: {
           get: jest.fn(),
         },
@@ -177,5 +177,21 @@ describe('EditForm', () => {
     await renderComponent();
 
     expect(onChangeMock).toHaveBeenCalled();
+  });
+
+  it('should override default action frequency to `for each alert` instead of `summary of alerts`', async () => {
+    mockTriggersActionsUi.getActionForm = jest.fn();
+
+    await renderComponent();
+
+    expect(mockTriggersActionsUi.getActionForm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        defaultRuleFrequency: {
+          notifyWhen: 'onActiveAlert',
+          summary: false,
+          throttle: null,
+        },
+      })
+    );
   });
 });

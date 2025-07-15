@@ -28,7 +28,6 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { AppCategory } from '@kbn/core-application-common';
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
-import type { OnIsLockedUpdate } from './types';
 import {
   createEuiListItem,
   createRecentNavLink,
@@ -81,7 +80,6 @@ interface Props {
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
-  onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
@@ -104,7 +102,6 @@ export function CollapsibleNav({
   isNavOpen,
   homeHref,
   storage = window.localStorage,
-  onIsLockedUpdate,
   closeNav,
   navigateToApp,
   navigateToUrl,

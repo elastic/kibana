@@ -61,7 +61,7 @@ const InstalledIntegrationsInfoCallout: React.FC = () => (
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
     })}
-    iconType="iInCircle"
+    iconType="info"
   >
     <p>
       <FormattedMessage

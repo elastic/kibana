@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types_old';
@@ -37,12 +38,17 @@ export interface ScoreTrendDoc {
   score_by_benchmark_id: ScoreByBenchmarkId;
 }
 
-export type Trends = Array<{
+export type TrendsDetails = Array<{
   timestamp: string;
   summary: Stats;
   clusters: Record<string, Stats>;
   benchmarks: Record<string, Stats>;
 }>;
+
+export interface Trends {
+  trends: TrendsDetails;
+  namespaces: string[];
+}
 export interface ScoreTrendAggregateResponse {
   by_namespace: {
     buckets: Array<{
@@ -114,7 +120,7 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate): SearchReq
   },
 });
 
-export const formatTrends = (scoreTrendDocs: ScoreTrendDoc[]): Trends => {
+export const formatTrends = (scoreTrendDocs: ScoreTrendDoc[]): TrendsDetails => {
   return scoreTrendDocs.map((data) => {
     return {
       timestamp: data['@timestamp'],
@@ -163,7 +169,8 @@ export const formatTrends = (scoreTrendDocs: ScoreTrendDoc[]): Trends => {
 export const getTrends = async (
   esClient: ElasticsearchClient,
   policyTemplate: PosturePolicyTemplate,
-  logger: Logger
+  logger: Logger,
+  namespace: string = DEFAULT_NAMESPACE_STRING
 ): Promise<Trends> => {
   try {
     const trendsQueryResult = await esClient.search<unknown, ScoreTrendAggregateResponse>(
@@ -174,20 +181,28 @@ export const getTrends = async (
 
     const scoreTrendDocs =
       trendsQueryResult.aggregations.by_namespace.buckets.map((bucket) => {
-        const namespace = bucket.key;
+        const namespaceKey = bucket.key;
         const documents = bucket.all_scores?.hits?.hits?.map((hit) => hit._source) || [];
-        return { [namespace]: { documents } };
+        return { [namespaceKey]: { documents } };
       }) ?? [];
 
-    if (!scoreTrendDocs.length) return []; // No trends data available
-    const result = Object.fromEntries(
+    if (!scoreTrendDocs.length) return { trends: [], namespaces: [] }; // No trends data available
+
+    const namespacedData = Object.fromEntries(
       scoreTrendDocs.map((entry) => {
         const [key, value] = Object.entries(entry)[0];
         return [key, value.documents];
       })
     );
 
-    return formatTrends(result.default); // Return the trends for the default namespace until namespace support will be visible to users.
+    const namespaceKeys = Object.keys(namespacedData);
+
+    if (!namespacedData[namespace]) {
+      logger.warn(`Namespace '${namespace}' not found in trend results.`);
+      return { trends: [], namespaces: namespaceKeys };
+    }
+
+    return { trends: formatTrends(namespacedData[namespace]), namespaces: namespaceKeys };
   } catch (err) {
     logger.error(`Failed to fetch trendlines data ${err.message}`);
     logger.error(err);

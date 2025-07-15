@@ -15,6 +15,7 @@ const cache: Record<string, Record<string, string>> = {};
 export async function getNodeShasums(log: ToolingLog, nodeVersion: string, variant: string | null) {
   let variantPath = '';
   if (variant === 'pointer-compression') variantPath = 'node-pointer-compression/';
+  if (variant === 'glibc-217') variantPath = 'node-glibc-217/';
   const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${variantPath}dist/v${nodeVersion}/SHASUMS256.txt`;
 
   if (cache[url]) {

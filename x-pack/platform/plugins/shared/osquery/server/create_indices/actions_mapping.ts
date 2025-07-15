@@ -23,6 +23,9 @@ export const actionsMapping: MappingTypeMapping = {
       type: 'keyword',
       ignore_above: 1024,
     },
+    space_id: {
+      type: 'keyword',
+    },
     data: {
       properties: {
         query: {

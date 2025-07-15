@@ -358,7 +358,8 @@ class AgentPolicyService {
 
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],
-    agentPolicy: NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy
+    agentPolicy: NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy,
+    requestSpaceId?: string
   ): Promise<NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy> {
     const logger = this.getLogger('runExternalCallbacks');
     try {
@@ -387,21 +388,21 @@ class AgentPolicyService {
           }
           if (externalCallbackType === 'agentPolicyPostUpdate') {
             result = await (callback as PostAgentPolicyPostUpdateCallback)(
-              newAgentPolicy as AgentPolicy
+              newAgentPolicy as AgentPolicy,
+              requestSpaceId
             );
             updatedNewAgentPolicy = result;
           }
         }
         newAgentPolicy = updatedNewAgentPolicy;
       }
+      logger.debug(`Running of external callbacks for [${externalCallbackType}] done`);
       return newAgentPolicy;
     } catch (error) {
       logger.error(`Error running external callbacks for [${externalCallbackType}]`);
       logger.error(error);
       throw error;
     }
-
-    logger.debug(`Running of external callbacks for [${externalCallbackType}] done`);
   }
 
   public async create(
@@ -446,6 +447,11 @@ class AgentPolicyService {
     }
 
     this.checkAgentless(agentPolicy);
+
+    if (agentPolicy.supports_agentless && !agentPolicy.fleet_server_host_id) {
+      const { fleetServerId } = agentlessAgentService.getDefaultSettings();
+      agentPolicy.fleet_server_host_id = fleetServerId;
+    }
 
     await this.requireUniqueName(soClient, agentPolicy);
     await validatePolicyNamespaceForSpace({
@@ -828,6 +834,7 @@ class AgentPolicyService {
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipValidation?: boolean;
       bumpRevision?: boolean;
+      requestSpaceId?: string;
     }
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('update');
@@ -897,7 +904,6 @@ class AgentPolicyService {
         force: options?.force,
       });
     }
-
     return this._update(soClient, esClient, id, agentPolicy, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
@@ -906,7 +912,8 @@ class AgentPolicyService {
       .then((updatedAgentPolicy) => {
         return this.runExternalCallbacks(
           'agentPolicyPostUpdate',
-          updatedAgentPolicy
+          updatedAgentPolicy,
+          options?.requestSpaceId ?? DEFAULT_SPACE_ID
         ) as unknown as AgentPolicy;
       })
       .then((response) => {

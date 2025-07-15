@@ -16,7 +16,7 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
-import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
+import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
@@ -64,15 +64,18 @@ jest.mock(
   })
 );
 
+const mockSecurityCapabilities = [`${SECURITY_FEATURE_ID}.show`];
+
 jest.mock('../../common/links', () => ({
-  useLinkInfo: jest.fn().mockReturnValue({
-    capabilities: ['siemV2.show'],
-    globalNavPosition: 4,
-    globalSearchKeywords: ['Attack discovery'],
-    id: 'attack_discovery',
-    path: '/attack_discovery',
-    title: 'Attack discovery',
-  }),
+  useLinkInfo: () =>
+    jest.fn().mockReturnValue({
+      capabilities: mockSecurityCapabilities,
+      globalNavPosition: 4,
+      globalSearchKeywords: ['Attack discovery'],
+      id: 'attack_discovery',
+      path: '/attack_discovery',
+      title: 'Attack discovery',
+    }),
 }));
 
 jest.mock('./use_attack_discovery', () => ({
@@ -108,85 +111,87 @@ const mockDataViewsService = {
 
 const mockUpselling = new UpsellingService();
 
+const mockUseKibanaReturnValue = {
+  services: {
+    application: {
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+      },
+      navigateToUrl: jest.fn(),
+    },
+    cases: {
+      helpers: {
+        canUseCases: jest.fn().mockReturnValue({
+          all: true,
+          connectors: true,
+          create: true,
+          delete: true,
+          push: true,
+          read: true,
+          settings: true,
+          update: true,
+        }),
+      },
+      hooks: {
+        useCasesAddToExistingCase: jest.fn(),
+        useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+        useCasesAddToNewCaseFlyout: jest.fn(),
+      },
+      ui: { getCasesContext: mockCasesContext },
+    },
+    data: {
+      query: {
+        filterManager: mockFilterManager,
+      },
+    },
+    dataViews: mockDataViewsService,
+    docLinks: {
+      links: {
+        [SECURITY_FEATURE_ID]: {
+          privileges: 'link',
+        },
+      },
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockReturnValue(false), // legacy view enabled
+    },
+    notifications: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    }),
+    sessionView: {
+      getSessionView: jest.fn(() => <div />),
+    },
+    storage: {
+      get: jest.fn(),
+      set: jest.fn(),
+    },
+    theme: {
+      getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+    },
+    timelines: { ...mockTimelines },
+    triggersActionsUi: {
+      alertsTableConfigurationRegistry: {},
+      getAlertsStateTable: () => <></>,
+    },
+    uiSettings: {
+      get: jest.fn(),
+    },
+  },
+};
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
   return {
     ...original,
-    useKibana: () => ({
-      services: {
-        application: {
-          capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
-          },
-          navigateToUrl: jest.fn(),
-        },
-        cases: {
-          helpers: {
-            canUseCases: jest.fn().mockReturnValue({
-              all: true,
-              connectors: true,
-              create: true,
-              delete: true,
-              push: true,
-              read: true,
-              settings: true,
-              update: true,
-            }),
-          },
-          hooks: {
-            useCasesAddToExistingCase: jest.fn(),
-            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
-            useCasesAddToNewCaseFlyout: jest.fn(),
-          },
-          ui: { getCasesContext: mockCasesContext },
-        },
-        data: {
-          query: {
-            filterManager: mockFilterManager,
-          },
-        },
-        dataViews: mockDataViewsService,
-        docLinks: {
-          links: {
-            siemV2: {
-              privileges: 'link',
-            },
-          },
-        },
-        featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false), // legacy view enabled
-        },
-        notifications: jest.fn().mockReturnValue({
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
-          addWarning: jest.fn(),
-          remove: jest.fn(),
-        }),
-        sessionView: {
-          getSessionView: jest.fn(() => <div />),
-        },
-        storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-        },
-        theme: {
-          getTheme: jest.fn().mockReturnValue({ darkMode: false }),
-        },
-        timelines: { ...mockTimelines },
-        triggersActionsUi: {
-          alertsTableConfigurationRegistry: {},
-          getAlertsStateTable: () => <></>,
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
     useUiSetting$: jest.fn().mockReturnValue([]),

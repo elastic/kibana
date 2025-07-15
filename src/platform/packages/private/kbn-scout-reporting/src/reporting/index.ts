@@ -12,6 +12,7 @@ import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
 
 export * from './report';
+export * from './stats';
 
 // Playwright event-based reporting
 export const scoutPlaywrightReporter = (

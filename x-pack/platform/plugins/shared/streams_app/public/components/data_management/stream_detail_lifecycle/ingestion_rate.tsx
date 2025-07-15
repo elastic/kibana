@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import React from 'react';
-import { capitalize } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { PhaseName, Streams, isIlmLifecycle } from '@kbn/streams-schema';
+import { AreaSeries, Axis, BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiIconTip,
   EuiText,
 } from '@elastic/eui';
-import { AreaSeries, Axis, BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { TimeState } from '@kbn/es-query';
-import { DataStreamStats } from './hooks/use_data_stream_stats';
-import { formatBytes } from './helpers/format_bytes';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { useIngestionRate, useIngestionRatePerTier } from './hooks/use_ingestion_rate';
-import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
+import { i18n } from '@kbn/i18n';
+import { PhaseName, Streams, isIlmLifecycle } from '@kbn/streams-schema';
+import { capitalize } from 'lodash';
+import moment from 'moment';
+import React from 'react';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { formatBytes } from './helpers/format_bytes';
+import { DataStreamStats } from './hooks/use_data_stream_stats';
+import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
+import { useIngestionRate, useIngestionRatePerTier } from './hooks/use_ingestion_rate';
 
 export function IngestionRate({
   definition,
@@ -153,16 +153,7 @@ function ChartAreaSeries({
         />
       </Chart>
 
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow>
-          <EuiText size="xs">
-            <b>
-              {toLegendFormat(ingestionRate.start)} - {toLegendFormat(ingestionRate.end)} (interval:{' '}
-              {ingestionRate.interval})
-            </b>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Legend interval={ingestionRate.interval} />
     </>
   );
 }
@@ -223,20 +214,24 @@ function ChartBarSeries({
         />
       </Chart>
 
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow>
-          <EuiText size="xs">
-            <b>
-              {toLegendFormat(ingestionRate.start)} - {toLegendFormat(ingestionRate.end)} (interval:{' '}
-              {ingestionRate.interval})
-            </b>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Legend interval={ingestionRate.interval} />
     </>
   );
 }
 
-function toLegendFormat(date: moment.Moment) {
-  return date.format('MMM DD, YYYY @ HH:mm:ss');
+function Legend({ interval }: { interval: string }) {
+  return (
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow>
+        <EuiText size="xs">
+          <b>
+            {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateLegend', {
+              defaultMessage: 'per {interval}',
+              values: { interval },
+            })}
+          </b>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 }

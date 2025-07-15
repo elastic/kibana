@@ -1,12 +1,5 @@
 {
   "knn_search": {
-    "url_params": {
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "routing": ""
-    },
     "methods": [
       "GET",
       "POST"

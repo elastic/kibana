@@ -81,9 +81,13 @@ export const syncEditedMonitorBulk = async ({
         [ConfigKey.MONITOR_QUERY_ID]:
           monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
       } as unknown as MonitorFields,
+      soType: decryptedPreviousMonitor.type,
     }));
     const [editedMonitorSavedObjects, editSyncResponse] = await Promise.all([
-      monitorConfigRepository.bulkUpdate({ monitors: data }),
+      monitorConfigRepository.bulkUpdate({
+        monitors: data,
+        namespace: spaceId !== routeContext.spaceId ? spaceId : undefined,
+      }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
     ]);
 
@@ -119,7 +123,6 @@ export const syncEditedMonitorBulk = async ({
       editedMonitors: editedMonitorSavedObjects?.saved_objects,
     };
   } catch (e) {
-    server.logger.error(`Unable to update Synthetics monitors, ${e.message}`);
     await rollbackCompletely({ routeContext, monitorsToUpdate });
     throw e;
   }
@@ -138,10 +141,13 @@ export const rollbackCompletely = async ({
       monitors: monitorsToUpdate.map(({ decryptedPreviousMonitor }) => ({
         id: decryptedPreviousMonitor.id,
         attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
+        soType: decryptedPreviousMonitor.type,
       })),
     });
-  } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitors edit ${e.message} `);
+  } catch (error) {
+    server.logger.error(`Unable to rollback Synthetics monitors edit, Error: ${error.message}`, {
+      error,
+    });
   }
 };
 
@@ -183,13 +189,17 @@ export const rollbackFailedUpdates = async ({
       .map(({ decryptedPreviousMonitor }) => ({
         id: decryptedPreviousMonitor.id,
         attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
+        soType: decryptedPreviousMonitor.type,
       }));
 
     if (monitorsToRevert.length > 0) {
       await monitorConfigRepository.bulkUpdate({ monitors: monitorsToRevert });
     }
     return failedConfigs;
-  } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitor failed updates, ${e.message} `);
+  } catch (error) {
+    server.logger.error(
+      `Unable to rollback Synthetics monitor failed updates, Error: ${error.message}`,
+      { error }
+    );
   }
 };

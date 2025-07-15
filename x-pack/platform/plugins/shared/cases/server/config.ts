@@ -6,8 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
+import {
+  DEFAULT_TASK_INTERVAL_MINUTES,
+  DEFAULT_TASK_START_DELAY_MINUTES,
+} from '../common/constants/incremental_id';
 
 export const ConfigSchema = schema.object({
   markdownPlugins: schema.object({
@@ -23,6 +27,35 @@ export const ConfigSchema = schema.object({
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  incrementalId: schema.object({
+    /**
+     * Whether the incremental id service should be enabled
+     */
+    enabled: schema.boolean({ defaultValue: false }),
+    /**
+     * The interval that the task should be scheduled at
+     */
+    taskIntervalMinutes: schema.number({
+      defaultValue: DEFAULT_TASK_INTERVAL_MINUTES,
+      min: 5,
+    }),
+    /**
+     * The initial delay the task will be started with
+     */
+    taskStartDelayMinutes: schema.number({
+      defaultValue: DEFAULT_TASK_START_DELAY_MINUTES,
+      min: 1,
+    }),
+  }),
+  analytics: schema.object({
+    index: schema.object({
+      enabled: offeringBasedSchema({
+        serverless: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: true }),
+      }),
+    }),
+  }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

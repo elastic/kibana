@@ -48,7 +48,9 @@ export const cleanTestMonitors = async (params: Record<string, any>) => {
   const server = getService('kibanaServer');
 
   try {
-    await server.savedObjects.clean({ types: ['synthetics-monitor'] });
+    await server.savedObjects.clean({
+      types: ['synthetics-monitor', 'synthetics-monitor-multi-space'],
+    });
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);

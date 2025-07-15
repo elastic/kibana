@@ -14,7 +14,6 @@ export {
   KnowledgeBaseState,
 } from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
-export { FunctionVisibility } from './functions/function_visibility';
 export {
   VISUALIZE_ESQL_USER_INTENTIONS,
   VisualizeESQLUserIntention,

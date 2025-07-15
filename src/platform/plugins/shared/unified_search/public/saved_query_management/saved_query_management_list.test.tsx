@@ -18,6 +18,7 @@ import {
 } from './saved_query_management_list';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { EuiThemeProvider } from '@elastic/eui';
 
 describe('Saved query management list component', () => {
   const startMock = coreMock.createStart();
@@ -44,9 +45,11 @@ describe('Saved query management list component', () => {
 
     return (
       <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <SavedQueryManagementList {...testProps} />
-        </KibanaContextProvider>
+        <EuiThemeProvider>
+          <KibanaContextProvider services={services}>
+            <SavedQueryManagementList {...testProps} />
+          </KibanaContextProvider>
+        </EuiThemeProvider>
       </I18nProvider>
     );
   };

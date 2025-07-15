@@ -220,12 +220,26 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async expectChatWindowLoaded() {
         expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be(null);
-        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(true);
-        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(true);
-
-        expect(await testSubjects.isEnabled('regenerateActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('clearChatActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('sendQuestionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.equal(
+          true,
+          'dataSourceActionButton isEnabled should be true'
+        );
+        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.equal(
+          true,
+          'viewCodeActionButton isEnabled should be true'
+        );
+        expect(await testSubjects.isEnabled('regenerateActionButton')).to.equal(
+          false,
+          'regenerateActionButton isEnabled should be false'
+        );
+        expect(await testSubjects.isEnabled('clearChatActionButton')).to.equal(
+          false,
+          'clearChatActionButton isEnabled should be false'
+        );
+        expect(await testSubjects.isEnabled('sendQuestionButton')).to.equal(
+          false,
+          'sendQuestionButton isEnabled should be false'
+        );
 
         await testSubjects.existOrFail('questionInput');
         const model = await testSubjects.find('summarizationModelSelect');
@@ -429,17 +443,29 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const modeSelectedValue = await testSubjects.getAttribute(mode, 'aria-pressed');
         expect(modeSelectedValue).to.be('true');
       },
-      async selectPageMode(mode: 'chatMode' | 'queryMode') {
+      async selectPageMode(mode: 'chatMode' | 'queryMode', playgroundId?: string) {
         await testSubjects.existOrFail(mode);
         await testSubjects.click(mode);
         switch (mode) {
           case 'queryMode':
-            expect(await browser.getCurrentUrl()).contain('/app/search_playground/search/query');
+            expect(await browser.getCurrentUrl()).contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search/query`
+                : '/app/search_playground/search/query'
+            );
             break;
           case 'chatMode':
             const url = await browser.getCurrentUrl();
-            expect(url).contain('/app/search_playground/search');
-            expect(url).not.contain('/app/search_playground/search/query');
+            expect(url).contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search`
+                : '/app/search_playground/search'
+            );
+            expect(url).not.contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search/query`
+                : '/app/search_playground/search/query'
+            );
             break;
         }
       },
@@ -538,6 +564,54 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const editorViewDiv = await codeEditor.findByClassName('view-lines');
         const queryResponse = await editorViewDiv.getVisibleText();
         expect(queryResponse).to.contain(text);
+      },
+    },
+    SavedPlaygroundPage: {
+      async expectPlaygroundNameHeader(name: string) {
+        await testSubjects.existOrFail('playgroundName');
+        const nameTitle = await testSubjects.find('playgroundName');
+        expect(await nameTitle.getVisibleText()).to.be(name);
+      },
+      async clickEditPlaygroundNameButton() {
+        await testSubjects.existOrFail('edit-playground-name-button');
+        await testSubjects.click('edit-playground-name-button');
+        await testSubjects.existOrFail('edit-playground-name-modal');
+      },
+      async setPlaygroundNameInEditModal(name: string) {
+        await testSubjects.existOrFail('edit-playground-name-modal');
+        await testSubjects.existOrFail('searchPlaygroundEditPlaygroundNameModalFieldText');
+        const nameInput = await testSubjects.find(
+          'searchPlaygroundEditPlaygroundNameModalFieldText'
+        );
+        await nameInput.clearValueWithKeyboard();
+        await nameInput.type(name);
+      },
+      async savePlaygroundNameInModal() {
+        await testSubjects.existOrFail('edit-playground-name-modal');
+        await testSubjects.existOrFail('searchPlaygroundEditPlaygroundNameModalSaveButton');
+        await testSubjects.click('searchPlaygroundEditPlaygroundNameModalSaveButton');
+        await testSubjects.missingOrFail('edit-playground-name-modal');
+      },
+      async expectUnSavedChangesBadegeExists() {
+        await testSubjects.existOrFail('playground-unsaved-changes-badge');
+      },
+      async expectUnSavedChangesBadegeNotExists() {
+        await testSubjects.missingOrFail('playground-unsaved-changes-badge');
+      },
+      async expectSavedPlaygroundButtonToExist() {
+        await testSubjects.existOrFail('saved-playground-save-button');
+      },
+      async expectSavedPlaygroundButtonToBeEnabled() {
+        await testSubjects.existOrFail('saved-playground-save-button');
+        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.be(true);
+      },
+      async expectSavedPlaygroundButtonToBeDisabled() {
+        await testSubjects.existOrFail('saved-playground-save-button');
+        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.be(false);
+      },
+      async clickSavedPlaygroundSaveButton() {
+        await testSubjects.existOrFail('saved-playground-save-button');
+        await testSubjects.click('saved-playground-save-button');
       },
     },
   };

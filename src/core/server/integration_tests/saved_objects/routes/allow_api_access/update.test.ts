@@ -14,15 +14,17 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
+import {
+  createHiddenTypeVariants,
+  setupServer,
+  SetupServerReturn,
+} from '@kbn/core-test-helpers-test-utils';
 import {
   registerUpdateRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { deprecationMock, setupConfig } from '../routes_test_utils';
-
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const testTypes = [
   { name: 'index-pattern', hide: false },
@@ -32,13 +34,13 @@ const testTypes = [
 
 describe('PUT /api/saved_objects/{type}/{id?} with allowApiAccess true', () => {
   let server: SetupServerReturn['server'];
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
   beforeEach(async () => {
-    ({ server, httpSetup, handlerContext } = await setupServer());
+    ({ server, createRouter, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
 
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
@@ -47,8 +49,7 @@ describe('PUT /api/saved_objects/{type}/{id?} with allowApiAccess true', () => {
         .find((fullTest) => fullTest.name === typename);
     });
 
-    const router =
-      httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+    const router = createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsUpdate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
@@ -73,7 +74,7 @@ describe('PUT /api/saved_objects/{type}/{id?} with allowApiAccess true', () => {
   });
 
   it('returns with status 200 for types hidden from the HTTP APIs', async () => {
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .put('/api/saved_objects/hidden-from-http/hiddenId')
       .send({
         attributes: { title: 'does not matter' },

@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { Pagination } from './types';
+export { APIRoutes, type PlaygroundSavedObject } from './types';
+export { SearchPlaygroundMutationKeys } from './query_keys';
 
 export const PLUGIN_ID = 'searchPlayground';
 export const PLUGIN_NAME = i18n.translate('xpack.searchPlayground.plugin.name', {
@@ -34,3 +36,5 @@ export enum ROUTE_VERSIONS {
 }
 
 export const PLAYGROUND_SAVED_OBJECT_TYPE = 'search_playground';
+
+export const DEFAULT_CONTEXT_DOCUMENTS = 3;

@@ -10,17 +10,22 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import type { SerializedStyles } from '@emotion/react';
 import { useHelpPopoverStyles } from './help_popover_styles';
 
-export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> = ({ onClick }) => {
+export const HelpPopoverButton: FC<{
+  onClick: EuiLinkButtonProps['onClick'];
+  styles?: SerializedStyles;
+}> = ({ onClick, styles }) => {
   return (
     <EuiButtonIcon
       size="s"
-      iconType="help"
+      iconType="question"
       aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
         defaultMessage: 'Help',
       })}
       onClick={onClick}
+      css={styles}
     />
   );
 };
@@ -28,12 +33,14 @@ export const HelpPopoverButton: FC<{ onClick: EuiLinkButtonProps['onClick'] }> =
 interface HelpPopoverProps {
   anchorPosition?: EuiPopoverProps['anchorPosition'];
   title?: string;
+  buttonCss?: SerializedStyles;
 }
 
 export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
   anchorPosition,
   children,
   title,
+  buttonCss,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { helpPopoverPanel, helpPopoverContent } = useHelpPopoverStyles();
@@ -41,7 +48,12 @@ export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
-      button={<HelpPopoverButton onClick={setIsPopoverOpen.bind(null, !isPopoverOpen)} />}
+      button={
+        <HelpPopoverButton
+          onClick={setIsPopoverOpen.bind(null, !isPopoverOpen)}
+          styles={buttonCss}
+        />
+      }
       closePopover={setIsPopoverOpen.bind(null, false)}
       isOpen={isPopoverOpen}
       ownFocus

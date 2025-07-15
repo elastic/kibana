@@ -67,6 +67,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
 }) => {
   const {
     core: { application, http },
+    config: { enforceAdaptiveAllocations },
     services: {
       notificationService: { toasts },
     },
@@ -251,7 +252,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         </EuiPanel>
       </EuiContextMenuPanel>
       <EuiHorizontalRule margin="none" />
-      <EuiContextMenuItem icon={<EuiIcon type="help" color="primary" />} size="m">
+      <EuiContextMenuItem icon={<EuiIcon type="question" color="primary" />} size="m">
         <EuiLink
           href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
           target="_blank"
@@ -281,6 +282,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 toasts={toasts}
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
+                enforceAdaptiveAllocations={enforceAdaptiveAllocations}
               />
             </Suspense>
           ) : null}

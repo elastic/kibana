@@ -20,6 +20,7 @@ import { RunActionResponseSchema, StreamingResponseSchema } from '../../../commo
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const DEFAULT_OTHER_OPENAI_MODEL = 'local-model';
 
@@ -620,6 +621,24 @@ describe('OpenAIConnector', () => {
         await expect(
           connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector)
         ).rejects.toThrow('API Error');
+      });
+
+      it('marks 429 errors as user errors', async () => {
+        expect.assertions(1);
+
+        mockCreate.mockImplementationOnce(() => {
+          const error = new Error('API Error');
+          // @ts-expect-error - adding status to error
+          error.status = 429;
+
+          throw error;
+        });
+
+        try {
+          await connector.invokeAsyncIterator(sampleOpenAiBody, connectorUsageCollector);
+        } catch (error) {
+          expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+        }
       });
     });
     describe('getResponseErrorMessage', () => {

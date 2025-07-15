@@ -71,7 +71,10 @@ export const useSearchPreview = ({
   const {
     services: { http },
   } = useKibana();
-  const { getValues } = useFormContext<PlaygroundForm>();
+  const {
+    getValues,
+    formState: { errors: formErrors },
+  } = useFormContext<PlaygroundForm>();
   const indices = getValues(PlaygroundFormFields.indices);
   const elasticsearchQuery = getValues(PlaygroundFormFields.elasticsearchQuery);
   const queryFn = () => {
@@ -79,7 +82,7 @@ export const useSearchPreview = ({
     const elasticsearchQueryBody = elasticsearchQueryObject(
       formData[PlaygroundFormFields.elasticsearchQuery],
       formData[PlaygroundFormFields.userElasticsearchQuery],
-      formData[PlaygroundFormFields.userElasticsearchQueryValidations]
+      formErrors[PlaygroundFormFields.userElasticsearchQuery]
     );
     return fetchSearchResults({
       query,

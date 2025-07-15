@@ -22,6 +22,7 @@ import {
 import { useChangeCspRuleState } from './use_change_csp_rule_state';
 import userEvent from '@testing-library/user-event';
 import { RULES_TABLE } from './test_subjects';
+import { SECURITY_FEATURE_ID } from '../../test/constants';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +42,7 @@ const getWrapper =
         ...coreStart.application,
         capabilities: {
           ...coreStart.application.capabilities,
-          siemV2: { crud: canUpdate },
+          [SECURITY_FEATURE_ID]: { crud: canUpdate },
         },
       },
     };

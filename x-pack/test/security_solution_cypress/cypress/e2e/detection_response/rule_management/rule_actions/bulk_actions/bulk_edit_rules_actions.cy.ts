@@ -73,7 +73,8 @@ const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
 // https://github.com/elastic/kibana/issues/179958
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/227885
+describe.skip(
   'Detection rules, bulk edit of rule actions',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

@@ -12,7 +12,9 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
+import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -50,7 +52,8 @@ const listQueriesRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { assetClient, streamsClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
     await streamsClient.ensureStream(params.path.name);
 
     const {
@@ -88,11 +91,12 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, queryClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
+    await assertEnterpriseLicense(licensing);
 
     await streamsClient.ensureStream(streamName);
     await queryClient.upsert(streamName, {
@@ -131,13 +135,22 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, queryClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing, assetClient } = await getScopedClients({
+      request,
+    });
+    await assertEnterpriseLicense(licensing);
 
     const {
       path: { queryId, name: streamName },
     } = params;
 
     await streamsClient.ensureStream(streamName);
+
+    const queryLink = await assetClient.bulkGetByIds(streamName, 'query', [queryId]);
+    if (queryLink.length === 0) {
+      throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
+    }
+
     await queryClient.delete(streamName, queryId);
 
     return {
@@ -179,7 +192,8 @@ const bulkQueriesRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, queryClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
 
     const {
       path: { name: streamName },

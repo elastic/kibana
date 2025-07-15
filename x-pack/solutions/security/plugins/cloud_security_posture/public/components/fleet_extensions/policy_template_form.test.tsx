@@ -59,6 +59,7 @@ import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscrip
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 import * as KibanaHook from '../../common/hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -122,6 +123,7 @@ describe('<CspPolicyTemplateForm />', () => {
     packageInfo = {} as PackageInfo,
     isAgentlessEnabled,
     integrationToEnable,
+    defaultSetupTechnology = SetupTechnology.AGENT_BASED,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
@@ -129,6 +131,7 @@ describe('<CspPolicyTemplateForm />', () => {
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
     isAgentlessEnabled?: boolean;
     integrationToEnable?: string;
+    defaultSetupTechnology?: SetupTechnology;
   }) => {
     const { AppWrapper: FleetAppWrapper } = createFleetTestRendererMock();
     return (
@@ -153,6 +156,7 @@ describe('<CspPolicyTemplateForm />', () => {
               isEditPage={false}
               isAgentlessEnabled={isAgentlessEnabled}
               integrationToEnable={integrationToEnable}
+              defaultSetupTechnology={defaultSetupTechnology}
             />
           )}
         </TestProvider>
@@ -1622,17 +1626,19 @@ describe('<CspPolicyTemplateForm />', () => {
       }
     });
 
-    it('should render setup technology selector for AWS and allow to select cloud connectors', async () => {
+    it('should render setup technology selector for AWS and allow to select cloud connectors in ess aws environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
-            csp: 'aws',
-            cloudId: 'mock-cloud-id',
-            deploymentId: 'mock-deployment-id',
-            serverless: { projectId: '' },
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
+            deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
+            isServerlessEnabled: false,
+            cloudHost: 'eu-west-1.aws.qa.elastic.cloud',
+            serverless: {},
           },
           uiSettings: {
             get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
@@ -1640,29 +1646,20 @@ describe('<CspPolicyTemplateForm />', () => {
         },
       } as any);
 
-      const { getByTestId, getByLabelText } = render(
+      const { getByTestId } = render(
         <WrappedComponent
-          newPolicy={newPackagePolicy}
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
           isAgentlessEnabled={true}
-          packageInfo={getAwsPackageInfoMock() as PackageInfo}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
         />
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
-      screen.logTestingPlaygroundURL();
 
       // default state
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
-
-      expect(
-        getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUDFORMATION)
-      ).toBeInTheDocument();
-      expect(getByTestId(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL)).toBeInTheDocument();
-
-      // select agent-based and check for cloudformation option
-      await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByLabelText(/agentless/i);
-      await userEvent.click(agentlessOption);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
       const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
@@ -1674,6 +1671,259 @@ describe('<CspPolicyTemplateForm />', () => {
         expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
           expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+
+    it('should render setup technology selector for AWS and hide cloud connectors in ess gcp environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
+            deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
+            isCloudEnabled: true,
+            isServerlessEnabled: false,
+            cloudHost: 'eu-west-1.gcp.qa.elastic.cloud',
+            serverless: {},
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(2);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+    it('should render setup technology selector for AWS and hide cloud connectors in ess azure environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
+            deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
+            isCloudEnabled: true,
+            isServerlessEnabled: false,
+            cloudHost: 'eu-west-1.azure.qa.elastic.cloud',
+            serverless: {},
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(2);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+
+    it('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId: undefined,
+            deploymentUrl: undefined,
+            isCloudEnabled: true,
+            isServerlessEnabled: true,
+            cloudHost: 'us-east-1.aws.elastic.cloud',
+            serverless: {
+              projectId: 'project-xyz123',
+              projectName: 'cloudconnectoraws',
+              projectType: 'security',
+            },
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(3);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+
+    it('should render setup technology selector for AWS and should hide cloud connectors in serverless gcp environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId: undefined,
+            deploymentUrl: undefined,
+            isCloudEnabled: true,
+            isServerlessEnabled: true,
+            cloudHost: 'us-east-1.gcp.elastic.cloud',
+            serverless: {
+              projectId: 'project-xyz123',
+              projectName: 'cloudconnectoraws',
+              projectType: 'security',
+            },
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(2);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+        );
+      });
+    });
+
+    it('should render setup technology selector for AWS and should hide cloud connectors in serverless azure environment', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
+        services: {
+          cloud: {
+            cloudId: undefined,
+            deploymentUrl: undefined,
+            isCloudEnabled: true,
+            isServerlessEnabled: true,
+            cloudHost: 'us-east-1.azure.elastic.cloud',
+            serverless: {
+              projectId: 'project-xyz123',
+              projectName: 'cloudconnectoraws',
+              projectType: 'security',
+            },
+          },
+          uiSettings: {
+            get: (key: string) => key === SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+          },
+        },
+      } as any);
+
+      const { getByTestId } = render(
+        <WrappedComponent
+          newPolicy={{ ...newPackagePolicy, supports_agentless: true }}
+          isAgentlessEnabled={true}
+          packageInfo={{ ...getAwsPackageInfoMock(), version: '2.0.0-preview01' } as PackageInfo}
+          defaultSetupTechnology={SetupTechnology.AGENTLESS}
+        />
+      );
+      const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+
+      // default state
+      expect(setupTechnologySelector).toBeInTheDocument();
+      expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
+      expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
+
+      const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const options: HTMLOptionElement[] = within(awsCredentialsTypeSelector).getAllByRole(
+        'option'
+      );
+      const optionValues = options.map((option) => option.value);
+
+      await waitFor(() => {
+        expect(options).toHaveLength(2);
+        expect(optionValues).toEqual(
+          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
         );
       });
     });

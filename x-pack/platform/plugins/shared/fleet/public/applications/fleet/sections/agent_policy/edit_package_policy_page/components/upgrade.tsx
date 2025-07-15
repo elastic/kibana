@@ -53,7 +53,7 @@ const HasNewSecretsCallOut = ({ newSecrets }: { newSecrets: RegistryVarsEntry[] 
         defaultMessage: 'New secrets added',
       })}
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
     >
       <FormattedMessage
         id="xpack.fleet.upgradePackagePolicy.statusCallout.hasNewSecrets"

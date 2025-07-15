@@ -13,7 +13,6 @@
     "requiredPlugins": [
       "aiops",
       "alerting",
-      "cases",
       "charts",
       "data",
       "dataViews",
@@ -38,7 +37,6 @@
       "visTypeTimeseries",
       "apmDataAccess",
       "logsDataAccess",
-      "entityManager",
       "fieldsMetadata"
     ],
     "optionalPlugins": [

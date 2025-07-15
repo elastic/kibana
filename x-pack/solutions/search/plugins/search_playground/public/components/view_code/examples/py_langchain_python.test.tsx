@@ -26,7 +26,11 @@ describe('LangchainPythonExmaple component', () => {
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
     const { container } = render(
-      <LangchainPythonExmaple formValues={formValues} clientDetails={clientDetails} />
+      <LangchainPythonExmaple
+        formValues={formValues}
+        formErrors={{}}
+        clientDetails={clientDetails}
+      />
     );
 
     expect(container.firstChild?.textContent).toMatchSnapshot();
@@ -47,7 +51,11 @@ describe('LangchainPythonExmaple component', () => {
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
     const { container } = render(
-      <LangchainPythonExmaple formValues={formValues} clientDetails={clientDetails} />
+      <LangchainPythonExmaple
+        formValues={formValues}
+        formErrors={{}}
+        clientDetails={clientDetails}
+      />
     );
 
     expect(container.firstChild?.textContent).toMatchSnapshot();

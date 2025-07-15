@@ -13,8 +13,11 @@ const _allowedExperimentalValues = {
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: false,
-  installedIntegrationsTabularUI: false,
+  installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
+  enableAgentMigrations: false,
+  enablePackageRollback: false,
+  enableAutoInstallContentPackages: false,
 };
 
 /**
