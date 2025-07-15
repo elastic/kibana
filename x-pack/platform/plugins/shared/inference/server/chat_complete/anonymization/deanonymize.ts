@@ -30,6 +30,21 @@ export function deanonymize<TMessage extends Message>(
         const start = index;
         const end = start + entity.value.length;
 
+        // If we later replace a mask that occurs *before* an already-stored
+        // entity, that entity’s coordinates shift by the length delta between
+        // mask and value.  Because we iterate right-to-left (to handle nested
+        // masks), we must correct existing ranges before we store the new one.
+
+        const lengthDelta = entity.value.length - entity.mask.length; // usually negative
+
+        // Adjust previously stored ranges that start after the current mask.
+        deanonymizations.forEach((d) => {
+          if (d.start > start) {
+            d.start += lengthDelta;
+            d.end += lengthDelta;
+          }
+        });
+
         deanonymizations.push({ start, end, entity });
 
         // Replace the mask with the original value

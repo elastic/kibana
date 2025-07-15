@@ -271,4 +271,52 @@ describe('deanonymizeMessage', () => {
       expect.arrayContaining(expectedDeanonymizations)
     );
   });
+
+  it('correctly maps deanonymizations when a single message contains multiple entities', async () => {
+    const name = 'Jorge';
+    const city = 'Mission Viejo';
+
+    const nameMask = createMask('PER', name);
+    const cityMask = createMask('LOC', city);
+
+    const anonymizations: Anonymization[] = [
+      { entity: { class_name: 'PER', value: name, mask: nameMask }, rule: { type: 'NER' } },
+      { entity: { class_name: 'LOC', value: city, mask: cityMask }, rule: { type: 'NER' } },
+    ];
+
+    const originalUserMsg: UserMessage = {
+      role: MessageRole.User,
+      content: `${nameMask} is from ${cityMask}`,
+    };
+
+    const anonymizationOutput: AnonymizationOutput = {
+      messages: [originalUserMsg],
+      anonymizations,
+    } as AnonymizationOutput;
+
+    const chunk = chunkEvent(originalUserMsg.content as string);
+    const msg = messageEvent(originalUserMsg.content as string);
+
+    const [chunkOut, msgOut] = await lastValueFrom(
+      from([chunk, msg]).pipe(deanonymizeMessage(anonymizationOutput), toArray())
+    );
+
+    const expectedContent = `${name} is from ${city}`;
+    expect(chunkOut.content).toBe(expectedContent);
+    expect(msgOut.content).toBe(expectedContent);
+
+    // Offsets
+    const nameStart = 0;
+    const nameEnd = name.length;
+    const cityStart = expectedContent.indexOf(city);
+    const cityEnd = cityStart + city.length;
+
+    const deanonymizations = msgOut.deanonymized_output!.deanonymizations;
+    expect(deanonymizations).toEqual(
+      expect.arrayContaining([
+        { start: nameStart, end: nameEnd, entity: anonymizations[0].entity },
+        { start: cityStart, end: cityEnd, entity: anonymizations[1].entity },
+      ])
+    );
+  });
 });

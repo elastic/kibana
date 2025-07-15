@@ -82,6 +82,45 @@ describe('deanonymize', () => {
     });
   });
 
+  describe('multiple entities offset regression', () => {
+    it('keeps second entity indices correct after first replacement', () => {
+      const name = 'Arturo';
+      const city = 'Barcelona';
+
+      const nameMask = createMask('PER', name);
+      const cityMask = createMask('LOC', city);
+
+      const anonymizations: Anonymization[] = [
+        { entity: { class_name: 'PER', value: name, mask: nameMask }, rule: { type: 'NER' } },
+        { entity: { class_name: 'LOC', value: city, mask: cityMask }, rule: { type: 'NER' } },
+      ];
+
+      const originalMsg: UserMessage = {
+        role: MessageRole.User,
+        content: `${nameMask} is from ${cityMask}`,
+      };
+
+      const { message: deanonymized, deanonymizations } = deanonymize(originalMsg, anonymizations);
+
+      // content restored
+      const expectedContent = `${name} is from ${city}`;
+      expect(deanonymized.content).toBe(expectedContent);
+
+      // offsets must point to correct substrings
+      const nameStart = 0;
+      const nameEnd = name.length;
+      const cityStart = expectedContent.indexOf(city);
+      const cityEnd = cityStart + city.length;
+
+      expect(deanonymizations).toEqual(
+        expect.arrayContaining([
+          { start: nameStart, end: nameEnd, entity: anonymizations[0].entity },
+          { start: cityStart, end: cityEnd, entity: anonymizations[1].entity },
+        ])
+      );
+    });
+  });
+
   it('handles no anonymizations gracefully (returns identical message)', () => {
     const msg: Message = { role: MessageRole.User, content: 'Nothing to change' } as any;
     const { message: result, deanonymizations } = deanonymize(msg, []);
