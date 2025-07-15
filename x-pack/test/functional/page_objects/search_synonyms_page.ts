@@ -10,6 +10,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   return {
     SynonymsGetStartedPage: {
@@ -21,7 +23,11 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           'searchSynonymsCreateSynonymsSetModalForceWrite',
       },
       async expectSynonymsGetStartedPageComponentsToExist() {
-        await testSubjects.existOrFail(this.TEST_IDS.GET_STARTED_BUTTON);
+        // check if exists, refresh and check again for 10 seconds
+        await retry.tryForTime(10000, async () => {
+          await testSubjects.existOrFail(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 });
+          browser.refresh();
+        });
       },
       async clickCreateSynonymsSetButton() {
         await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);

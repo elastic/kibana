@@ -19,11 +19,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const browser = getService('browser');
   const es = getService('es');
-  const kibanaServer = getService('kibanaServer');
 
   describe('Serverless Synonyms Overview', function () {
     before(async () => {
-      await kibanaServer.uiSettings.update({ 'searchSynonyms:synonymsEnabled': 'true' });
       await pageObjects.svlCommonPage.loginWithRole('developer');
     });
     beforeEach(async () => {
@@ -31,8 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         deepLinkId: 'searchSynonyms',
       });
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/216661
-    describe.skip('Synonyms get started Page', () => {
+    describe('Synonyms get started Page', () => {
       it('is loaded successfully', async () => {
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.expectSynonymsGetStartedPageComponentsToExist();
       });
@@ -40,7 +37,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickCreateSynonymsSetButton();
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.setSynonymsSetName('test-synonyms');
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickSaveButton();
-        await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectEmptyPromptToExist();
+        // Verify that the synonyms set detail page is displayed
+        await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectSynonymsSetDetailPageNavigated(
+          'test-synonyms'
+        );
         await es.transport.request({
           path: '_synonyms/test-synonyms',
           method: 'DELETE',
