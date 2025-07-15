@@ -191,7 +191,7 @@ xpack.screenshotting.networkPolicy:
 ```
 
 ```yaml
-# Only allow requests to https://placeholder.com
+# Only allow HTTPS requests to <placeholder>.com
 xpack.screenshotting.networkPolicy:
   rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ]
 ```
@@ -199,7 +199,7 @@ xpack.screenshotting.networkPolicy:
 A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
 
 ```yaml
-# Denies requests from http://placeholder.com, but anything else is allowed.
+# Denies requests from <EXAMPLE_URL>, but anything else is allowed.
 xpack.screenshotting.networkPolicy:
   rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
 ```
@@ -207,10 +207,10 @@ xpack.screenshotting.networkPolicy:
 A network policy can be composed of multiple rules:
 
 ```yaml
-# Allow any request to http://placeholder.com but for any other host, https is required
+# Allow any HTTP request to <placeholder>.com but for any other host, https is required
 xpack.screenshotting.networkPolicy
   rules: [
-    { allow: true, host: "placeholder.com", protocol: "http:" },
+    { allow: true, host: "<placeholder>.com", protocol: "http:" },
     { allow: true, protocol: "https:" },
   ]
 ```

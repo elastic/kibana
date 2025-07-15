@@ -97,7 +97,7 @@ This will overwrite the remote branch with what you have locally. You’re done!
 
 ```shell
 ! [rejected] name-of-your-branch -> name-of-your-branch (non-fast-forward)
-error: failed to push some refs to 'https://github.com/YourGitHubHandle/kibana.git'
+error: failed to push some refs to 'https://github.com/<YourGitHubHandle>/kibana.git'
 hint: Updates were rejected because the tip of your current branch is behind
 hint: its remote counterpart. Integrate the remote changes (e.g.
 hint: 'git pull ...') before pushing again.
