@@ -69,11 +69,10 @@ export const getCellValueRenderer =
     }
 
     const onEditStartHandler = () => {
-      if (!columns.some((col) => col.id === columnId)) {
-        // If the column is not defined, do not allow editing
-        return;
+      const columnExists = columns.some((col) => col.id === columnId);
+      if (columnExists) {
+        onEditStart({ row: rowIndex, col: columnId });
       }
-      onEditStart({ row: rowIndex, col: columnId });
     };
 
     return (
