@@ -16,6 +16,5 @@ export default function spacesApp({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create_edit_space'));
     loadTestFile(require.resolve('./spaces_grid'));
     loadTestFile(require.resolve('./solution_tour'));
-    loadTestFile(require.resolve('./dashboard_link_share'));
   });
 }

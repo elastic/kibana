@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function sharingFromSpace({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
+  const browser = getService('browser');
   const { dashboard, common, share, security, spaceSelector } = getPageObjects([
     'dashboard',
     'common',
@@ -20,7 +22,7 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
 
   const spaceId = 'another-space';
 
-  describe('Dashboard link share', () => {
+  describe('Dashboard Custom Space share', () => {
     before(async () => {
       await spacesService.create({
         id: spaceId,
@@ -67,9 +69,20 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('should copy the dashboard url without errors', async () => {
+    it('should copy the dashboard url', async () => {
       await share.openShareModalItem('link');
-      expect(await share.getSharedUrl()).to.contain(`/s/${spaceId}/`);
+      const shareUrl = await share.getSharedUrl();
+      expect(shareUrl).to.contain(`/s/${spaceId}/`);
+      await browser.openNewTab();
+      await browser.navigateTo(shareUrl);
+      await dashboard.expectOnDashboard('few panels');
+      // need to make sure there aren't extra tabs or it will impact future test suites
+      // close any new tabs that were opened
+      const windowHandlers = await browser.getAllWindowHandles();
+      if (windowHandlers.length > 1) {
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(windowHandlers[0]);
+      }
     });
   });
 }
