@@ -21,7 +21,7 @@ export function SettingsTab() {
 
   return (
     <EuiPanel hasBorder grow={false}>
-      {productDocBase ? <ProductDocEntry /> : undefined}
+      {productDocBase ? <ProductDocEntry knowledgeBase={knowledgeBase} /> : undefined}
 
       {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
         <ChangeKbModel knowledgeBase={knowledgeBase} />

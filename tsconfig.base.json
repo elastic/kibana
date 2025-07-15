@@ -1494,6 +1494,8 @@
       "@kbn/presentation-panel-plugin/*": ["src/platform/plugins/private/presentation_panel/*"],
       "@kbn/presentation-publishing": ["src/platform/packages/shared/presentation/presentation_publishing"],
       "@kbn/presentation-publishing/*": ["src/platform/packages/shared/presentation/presentation_publishing/*"],
+      "@kbn/presentation-util": ["src/platform/packages/shared/presentation/presentation_util"],
+      "@kbn/presentation-util/*": ["src/platform/packages/shared/presentation/presentation_util/*"],
       "@kbn/presentation-util-plugin": ["src/platform/plugins/shared/presentation_util"],
       "@kbn/presentation-util-plugin/*": ["src/platform/plugins/shared/presentation_util/*"],
       "@kbn/product-doc-artifact-builder": ["x-pack/packages/ai-infra/product-doc-artifact-builder"],
