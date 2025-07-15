@@ -51,8 +51,10 @@ export const Conversation: React.FC<{}> = () => {
       responsive={false}
     >
       {hasActiveConversation ? (
-        <EuiFlexItem ref={scrollContainerRef} grow css={scrollContainerStyles}>
-          <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
+        <EuiFlexItem grow css={scrollContainerStyles}>
+          <div ref={scrollContainerRef}>
+            <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
+          </div>
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow>
