@@ -12,6 +12,7 @@ import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/te
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services as baseServices } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+import { DETECTION_ENGINE_APM_CONFIG } from './apm_config';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -90,6 +91,20 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         env: {
           ELASTICSEARCH_USERNAME: kbnTestConfig.getUrlParts(kibanaTestUser).username,
+          ELASTIC_APM_ACTIVE: DETECTION_ENGINE_APM_CONFIG.active,
+          ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: DETECTION_ENGINE_APM_CONFIG.contextPropagationOnly,
+          ELASTIC_APM_ENVIRONMENT: DETECTION_ENGINE_APM_CONFIG.environment,
+          ELASTIC_APM_TRANSACTION_SAMPLE_RATE: DETECTION_ENGINE_APM_CONFIG.transactionSampleRate,
+          ELASTIC_APM_SERVER_URL: DETECTION_ENGINE_APM_CONFIG.serverUrl,
+          ELASTIC_APM_SECRET_TOKEN: DETECTION_ENGINE_APM_CONFIG.secretToken,
+          ELASTIC_APM_CAPTURE_BODY: DETECTION_ENGINE_APM_CONFIG.captureBody,
+          ELASTIC_APM_CAPTURE_HEADERS: DETECTION_ENGINE_APM_CONFIG.captureRequestHeaders,
+          ELASTIC_APM_LONG_FIELD_MAX_LENGTH: DETECTION_ENGINE_APM_CONFIG.longFieldMaxLength,
+          ELASTIC_APM_GLOBAL_LABELS: Object.entries({
+            ...DETECTION_ENGINE_APM_CONFIG.globalLabels,
+          })
+            .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
+            .join(','),
         },
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
