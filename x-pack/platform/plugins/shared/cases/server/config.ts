@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import {
   DEFAULT_TASK_INTERVAL_MINUTES,
@@ -49,7 +49,10 @@ export const ConfigSchema = schema.object({
   }),
   analytics: schema.object({
     index: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: offeringBasedSchema({
+        serverless: schema.boolean({ defaultValue: false }),
+        traditional: schema.boolean({ defaultValue: true }),
+      }),
     }),
   }),
 });
