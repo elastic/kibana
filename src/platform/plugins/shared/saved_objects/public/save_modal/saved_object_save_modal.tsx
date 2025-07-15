@@ -46,7 +46,7 @@ export interface OnSaveProps {
 }
 
 interface Props {
-  onSave: (props: OnSaveProps) => void;
+  onSave: (props: OnSaveProps) => Promise<void>;
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
@@ -265,18 +265,17 @@ class SavedObjectSaveModalComponent extends React.Component<
       isLoading: true,
     });
 
-    await this.props.onSave({
-      newTitle: this.state.title,
-      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-      newDescription: this.state.visualizationDescription,
-    });
-
-    // Reset isLoading to false after save completes so the save button can be used again in case save error
-    this.setState({
-      isLoading: false,
-    });
+    try {
+      await this.props.onSave({
+        newTitle: this.state.title,
+        newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
+        isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
+        onTitleDuplicate: this.onTitleDuplicate,
+        newDescription: this.state.visualizationDescription,
+      });
+    } finally {
+      this.setState({ isLoading: false });
+    }
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

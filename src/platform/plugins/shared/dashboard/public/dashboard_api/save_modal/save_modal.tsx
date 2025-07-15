@@ -26,7 +26,7 @@ interface DashboardSaveModalProps {
     newTimeRestore,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
-  }: DashboardSaveOptions) => void;
+  }: DashboardSaveOptions) => Promise<void>;
   onClose: () => void;
   title: string;
   description: string;
@@ -60,8 +60,14 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
-    ({ newTitle, newDescription, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-      onSave({
+    async ({
+      newTitle,
+      newDescription,
+      newCopyOnSave,
+      isTitleDuplicateConfirmed,
+      onTitleDuplicate,
+    }) => {
+      await onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
