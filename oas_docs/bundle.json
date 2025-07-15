@@ -42432,7 +42432,8 @@
           }
         },
         "summary": "Get space settings",
-        "tags": []
+        "tags": [],
+        "x-state": "Generally available; added in 9.1.0"
       },
       "put": {
         "description": "[Required authorization] Route required privileges: fleet-settings-all.",
@@ -42503,7 +42504,8 @@
           }
         },
         "summary": "Create space settings",
-        "tags": []
+        "tags": [],
+        "x-state": "Generally available; added in 9.1.0"
       }
     },
     "/api/fleet/uninstall_tokens": {
