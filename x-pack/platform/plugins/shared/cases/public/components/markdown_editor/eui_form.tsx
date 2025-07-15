@@ -17,14 +17,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from '../../common/translations';
-import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
 import { type MarkdownEditorRef } from './types';
-import { PastableMarkdownEditor } from './pastable_editor';
+import { CommentEditor } from './comment_editor';
 
 /* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
@@ -41,18 +39,6 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   disabledUiPlugins?: string[];
   initialValue?: string;
 };
-
-/**
- * It is not guaranteed that downstream consumers of cases will have
- * defined a files context. This hook tests if the context is defined.
- */
-function useHasFilesContext(): boolean {
-  try {
-    return !!useFilesContext();
-  } catch {
-    return false;
-  }
-}
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
@@ -72,9 +58,6 @@ export const MarkdownEditorForm = React.memo(
       },
       ref
     ) => {
-      // if there is no files context, we don't supply the paste functionality to the comment editor
-      const hasFilesContext = useHasFilesContext();
-
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
       const { hasConflicts } = useMarkdownSessionStorage({
         field,
@@ -97,13 +80,6 @@ export const MarkdownEditorForm = React.memo(
         [id, field.value, caseTitle, caseTags]
       );
 
-      const editorBaseProps = {
-        ariaLabel: idAria,
-        'data-test-subj': dataTestSubj,
-        editorId: id,
-        disabledUiPlugins,
-      };
-
       return (
         <CommentEditorContext.Provider value={commentEditorContextValue}>
           <EuiFormRow
@@ -116,21 +92,17 @@ export const MarkdownEditorForm = React.memo(
             label={field.label}
             labelAppend={field.labelAppend}
           >
-            {hasFilesContext && caseId ? (
-              <PastableMarkdownEditor
-                {...editorBaseProps}
-                ref={ref}
-                field={field}
-                caseId={caseId}
-              />
-            ) : (
-              <MarkdownEditor
-                {...editorBaseProps}
-                ref={ref}
-                onChange={field.setValue}
-                value={field.value}
-              />
-            )}
+            <CommentEditor
+              ariaLabel={idAria}
+              data-test-subj={dataTestSubj}
+              editorId={id}
+              disabledUiPlugins={disabledUiPlugins}
+              field={field}
+              caseId={caseId}
+              ref={ref}
+              onChange={field.setValue}
+              value={field.value}
+            />
           </EuiFormRow>
           {bottomRightContent && (
             <EuiFlexGroup
