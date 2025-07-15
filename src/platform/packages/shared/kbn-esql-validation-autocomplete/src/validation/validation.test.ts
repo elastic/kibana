@@ -323,7 +323,8 @@ describe('validation logic', () => {
           const { expectErrors } = await setup();
 
           await expectErrors(`from index (metadata _id)`, [
-            "SyntaxError: mismatched input '(metadata' expecting <EOF>",
+            "SyntaxError: extraneous input ')' expecting <EOF>",
+            "SyntaxError: token recognition error at: '('",
           ]);
         });
 
@@ -525,7 +526,7 @@ describe('validation logic', () => {
 
     describe('enrich', () => {
       testErrorsAndWarnings(`from a_index | enrich`, [
-        "SyntaxError: missing ENRICH_POLICY_NAME at '<EOF>'",
+        "SyntaxError: missing {ENRICH_POLICY_NAME, QUOTED_STRING} at '<EOF>'",
       ]);
       testErrorsAndWarnings(`from a_index | enrich _:`, [
         "SyntaxError: token recognition error at: ':'",
