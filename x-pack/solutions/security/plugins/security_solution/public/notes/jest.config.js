@@ -16,4 +16,7 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/notes/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/notes/test/setup.ts',
+  ],
 };
