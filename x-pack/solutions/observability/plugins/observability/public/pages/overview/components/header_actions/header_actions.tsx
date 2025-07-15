@@ -11,11 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DatePicker } from '../date_picker/date_picker';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 
-export interface HeaderActionsProps {
-  onTimeRangeRefresh: () => void;
-}
-
-export function HeaderActions({ onTimeRangeRefresh }: HeaderActionsProps) {
+export function HeaderActions() {
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
 
   return (
@@ -27,7 +23,6 @@ export function HeaderActions({ onTimeRangeRefresh }: HeaderActionsProps) {
           refreshInterval={refreshInterval}
           refreshPaused={refreshPaused}
           width="auto"
-          onTimeRangeRefresh={onTimeRangeRefresh}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

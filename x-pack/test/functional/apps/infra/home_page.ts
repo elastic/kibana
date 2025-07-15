@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -136,6 +137,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.waitForLoading();
       });
 
+      after(async () => browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY));
+
       it('renders the correct page title', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -150,6 +153,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.waitForLoading();
 
         await pageObjects.infraHome.ensureInventoryFeedbackLinkIsVisible();
+      });
+
+      it('renders the kubernetes tour component and allows user to dismiss it without seeing it again', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const kubernetesTourText =
+          'Click here to see your infrastructure in different ways, including Kubernetes pods.';
+        const ensureKubernetesTourVisible =
+          await pageObjects.infraHome.ensureKubernetesTourIsVisible();
+
+        expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
+
+        // Persist after refresh
+        await browser.refresh();
+        await pageObjects.infraHome.waitForLoading();
+
+        expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
+
+        await pageObjects.infraHome.clickDismissKubernetesTourButton();
+
+        await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        });
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
