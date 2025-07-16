@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { FieldsConfiguration } from './types/types';
 import { FieldType } from './types/types';
 
@@ -28,6 +31,46 @@ export enum ServiceProviderKeys {
   voyageai = 'voyageai',
   watsonxai = 'watsonxai',
 }
+
+export const gemini = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
+  defaultMessage: 'Google Gemini',
+});
+
+const DOCUMENTATION = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.gemini.documentation',
+  {
+    defaultMessage: 'documentation',
+  }
+);
+
+export const GEMINI_REGION_DOC_LINK = (
+  <EuiLink
+    data-test-subj="gemini-vertexai-api-doc"
+    href="https://cloud.google.com/vertex-ai/docs/reference/rest#rest_endpoints"
+    target="_blank"
+  >
+    {`${gemini} ${DOCUMENTATION}`}
+  </EuiLink>
+);
+
+export const GEMINI_PROJECT_ID_DOC_LINK = (
+  <EuiLink
+    data-test-subj="gemini-api-doc"
+    href="https://cloud.google.com/vertex-ai/docs/start/cloud-environment"
+    target="_blank"
+  >
+    {`${gemini} ${DOCUMENTATION}`}
+  </EuiLink>
+);
+
+export const serviceProviderLinkComponents: Partial<
+  Record<ServiceProviderKeys, Record<string, React.ReactNode>>
+> = {
+  [ServiceProviderKeys.googlevertexai]: {
+    location: GEMINI_REGION_DOC_LINK,
+    project_id: GEMINI_PROJECT_ID_DOC_LINK,
+  },
+};
 
 export const DEFAULT_TASK_TYPE = 'completion';
 export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
