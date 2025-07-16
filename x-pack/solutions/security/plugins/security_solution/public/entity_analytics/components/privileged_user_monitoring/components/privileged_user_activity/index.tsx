@@ -80,21 +80,21 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
       },
     };
 
-   let discoverAppPath;
+    let discoverAppPath;
     try {
       const encodedAppState = encode(appState);
-      discoverAppPath = `#/?_a=${encodedAppState}`;            
+      discoverAppPath = `#/?_a=${encodedAppState}`;
     } catch (error) {
-      addWarning(error, { title: ERROR_ENCODING_ESQL_QUERY});
-      discoverAppPath = '#/';            
+      addWarning(error, { title: ERROR_ENCODING_ESQL_QUERY });
+      discoverAppPath = '#/';
     }
-    
-      return {
-        discoverUrl: getAppUrl({
-          appId: 'discover',
-          path: discoverAppPath,
-        }),
-      };
+
+    return {
+      discoverUrl: getAppUrl({
+        appId: 'discover',
+        path: discoverAppPath,
+      }),
+    };
   }, [generateTableQuery, getAppUrl]);
 
   return (
