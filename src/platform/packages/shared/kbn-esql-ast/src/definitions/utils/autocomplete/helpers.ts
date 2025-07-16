@@ -24,7 +24,7 @@ import {
   isLiteralDateItem,
   compareTypesWithLiterals,
 } from '../literals';
-import { SINGLE_TICK_REGEX, DOUBLE_BACKTICK, EDITOR_MARKER } from '../../../parser/constants';
+import { EDITOR_MARKER } from '../../constants';
 import {
   type SupportedDataType,
   isParameterType,
@@ -60,9 +60,7 @@ export const shouldBeQuotedText = (
 };
 
 export const getSafeInsertText = (text: string, options: { dashSupported?: boolean } = {}) => {
-  return shouldBeQuotedText(text, options)
-    ? `\`${text.replace(SINGLE_TICK_REGEX, DOUBLE_BACKTICK)}\``
-    : text;
+  return shouldBeQuotedText(text, options) ? `\`${text.replace(/`/g, '``')}\`` : text;
 };
 
 export const buildUserDefinedColumnsDefinitions = (
