@@ -2,9 +2,9 @@
 // in order to lint typescript files with eslint.
 // Some IDEs could not be running eslint with the correct extensions yet
 // as this package was moved from typescript-eslint-parser to @typescript-eslint/parser
-require('@kbn/babel-register').install();
+// require('@kbn/babel-register').install();
 
-const { REPO_ROOT } = require('@kbn/repo-info');
+// const { REPO_ROOT } = require('@kbn/repo-info');
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
 // The current implementation excluded all the variables matching the regexp.
