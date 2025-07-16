@@ -59,7 +59,6 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     hasUpdateAIAssistantAnonymization: true,
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
-    isStarterPromptsEnabled: true,
     isAssistantVisible: true,
   };
   const queryClient = new QueryClient({
