@@ -10,6 +10,7 @@ disabled:
   #FTR configs
   - x-pack/solutions/observability/plugins/uptime/e2e/config.ts
   - x-pack/solutions/observability/test/api_integration/config.ts
+  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts
   - x-pack/solutions/observability/test/functional/config.base.ts
 
   # Elastic Synthetics configs
