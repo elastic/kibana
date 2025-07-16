@@ -10,10 +10,8 @@
 import { camelCase } from 'lodash';
 import {
   TRIGGER_SUGGESTION_COMMAND,
-  timeUnitsToSuggest,
   fieldTypes,
   FieldType,
-  SupportedDataType,
   FunctionParameterType,
   FunctionReturnType,
   FunctionDefinitionTypes,
@@ -40,16 +38,6 @@ import {
   editorExtensions,
   inferenceEndpoints,
 } from '../../__tests__/helpers';
-
-export interface Integration {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams: Array<{
-    name: string;
-    title?: string;
-  }>;
-}
 
 export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
 
@@ -102,18 +90,6 @@ export const indexes = (
     })
   )
 );
-
-export const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({
-  name,
-  hidden: false,
-  title: `integration-${name}`,
-  dataStreams: [
-    {
-      name: `${name}-1`,
-      title: `integration-${name}-1`,
-    },
-  ],
-}));
 
 export const policies = [
   {
@@ -266,15 +242,6 @@ export function getFieldNamesByType(
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
-export function getLiteralsByType(_type: SupportedDataType | SupportedDataType[]) {
-  const type = Array.isArray(_type) ? _type : [_type];
-  if (type.includes('time_duration')) {
-    // return only singular
-    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
-  }
-  return [];
-}
-
 export function createCustomCallbackMocks(
   /**
    * Columns that will come from Elasticsearch since the last command
@@ -351,15 +318,6 @@ export type AssertSuggestionsFn = (
   opts?: SuggestOptions
 ) => Promise<void>;
 
-export type AssertSuggestionOrderFn = (
-  // query to test
-  query: string,
-  // field name to check the order of
-  fieldName: string,
-  // expected order of the field
-  order: string
-) => Promise<void>;
-
 export type SuggestFn = (query: string, opts?: SuggestOptions) => Promise<ISuggestionItem[]>;
 
 export const setup = async (caret = '/') => {
@@ -406,25 +364,10 @@ export const setup = async (caret = '/') => {
     }
   };
 
-  const assertSuggestionsOrder: AssertSuggestionOrderFn = async (query, fieldName, order) => {
-    try {
-      const result = await suggest(query);
-      const resultField = result.find((s) => s.text === fieldName);
-      expect(resultField).toBeDefined();
-      expect(resultField?.sortText).toBeDefined();
-      expect(resultField?.sortText).toEqual(order);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`Failed query\n-------------\n${query}`);
-      throw error;
-    }
-  };
-
   return {
     callbacks,
     suggest,
     assertSuggestions,
-    assertSuggestionsOrder,
   };
 };
 
