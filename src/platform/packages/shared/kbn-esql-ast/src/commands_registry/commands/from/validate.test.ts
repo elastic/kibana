@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../definitions/utils/test_mocks';
+import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
-import { expectErrors } from '../../../definitions/utils/test_functions';
+import { expectErrors } from '../../../__tests__/validation';
 import { METADATA_FIELDS } from '../../options/metadata';
 
 const fromExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
@@ -71,8 +71,8 @@ describe('FROM Validation', () => {
 
       test('errors on unknown index', () => {
         fromExpectErrors(`FROM index, missingIndex`, ['Unknown index [missingIndex]']);
-        fromExpectErrors(`from average()`, ['Unknown index [average()]']);
-        fromExpectErrors(`fRom custom_function()`, ['Unknown index [custom_function()]']);
+        fromExpectErrors(`from average()`, ['Unknown index [average]']);
+        fromExpectErrors(`fRom custom_function()`, ['Unknown index [custom_function]']);
         fromExpectErrors(`FROM indexes*`, ['Unknown index [indexes*]']);
         fromExpectErrors('from numberField', ['Unknown index [numberField]']);
         fromExpectErrors('FROM policy', ['Unknown index [policy]']);
