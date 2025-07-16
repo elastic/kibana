@@ -14,7 +14,7 @@ import { CreateFlyout } from '.';
 import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
-import { TestProviders } from '../../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
 
@@ -124,6 +124,63 @@ describe('CreateFlyout', () => {
     await waitFor(() => {
       expect(defaultProps.onClose).toHaveBeenCalled();
     });
+  });
+
+  describe('confirmation modal', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <CreateFlyout {...defaultProps} />
+        </TestProviders>
+      );
+
+      // Simulate unsaved changes:
+      const input = screen.getByTestId('alertsRange');
+      fireEvent.change(input, { target: { value: 'changed' } });
+
+      // Click the close button to trigger the confirmation modal
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and close is clicked', () => {
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+
+    it('calls onClose when discard is clicked in confirmation modal', () => {
+      fireEvent.click(screen.getByTestId('discardChanges'));
+
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+
+    it('closes the confirmation modal when cancel is clicked', () => {
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not call createAttackDiscoverySchedule if a connector is not found', async () => {
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [],
+    });
+    const mutateAsync = jest.fn();
+    (useCreateAttackDiscoverySchedule as jest.Mock).mockReturnValue({
+      isLoading: false,
+      mutateAsync,
+    });
+    await act(async () => {
+      render(
+        <TestProviders>
+          <CreateFlyout {...defaultProps} />
+        </TestProviders>
+      );
+    });
+
+    // Simulate save
+    fireEvent.click(screen.getByTestId('save'));
+
+    expect(mutateAsync).not.toHaveBeenCalled();
   });
 
   describe('schedule form', () => {

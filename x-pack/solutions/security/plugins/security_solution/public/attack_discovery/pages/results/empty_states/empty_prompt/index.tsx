@@ -31,7 +31,7 @@ interface Props {
   attackDiscoveriesCount: number;
   isDisabled?: boolean;
   isLoading: boolean;
-  onGenerate: () => void;
+  onGenerate: (overrideConnectorId?: string) => void;
 }
 
 const EmptyPromptComponent: React.FC<Props> = ({

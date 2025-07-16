@@ -49,7 +49,7 @@ const EMPTY_QUERY = '';
 interface Props {
   aiConnectors: AIConnector[] | undefined;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
-  onGenerate: () => Promise<void>;
+  onGenerate: (overrideConnectorId?: string) => Promise<void>;
   onToggleShowAnonymized: () => void;
   showAnonymized: boolean;
 }

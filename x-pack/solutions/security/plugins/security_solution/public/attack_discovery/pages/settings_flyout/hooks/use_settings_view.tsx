@@ -6,22 +6,28 @@
  */
 
 import { FilterManager } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { DEFAULT_STACK_BY_FIELD } from '..';
 import { AlertSelection } from '../alert_selection';
 import { AlertSelectionOld } from '../alert_selection/alert_selection_old';
 import { useKibana } from '../../../../common/lib/kibana';
+import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
+import { parseFilterQuery } from '../parse_filter_query';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
 import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
@@ -34,6 +40,15 @@ export interface UseSettingsView {
 interface Props {
   connectorId: string | undefined;
   onConnectorIdSelected: (connectorId: string) => void;
+  onGenerate?: (
+    overrideConnectorId?: string,
+    overrideOptions?: {
+      overrideEnd?: string;
+      overrideFilter?: Record<string, unknown>;
+      overrideSize?: number;
+      overrideStart?: string;
+    }
+  ) => void;
   onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
   onSettingsReset?: () => void;
   onSettingsSave?: () => void;
@@ -45,6 +60,7 @@ interface Props {
 export const useSettingsView = ({
   connectorId,
   onConnectorIdSelected,
+  onGenerate,
   onSettingsReset,
   onSettingsSave,
   onSettingsChanged,
@@ -56,10 +72,23 @@ export const useSettingsView = ({
   const { uiSettings } = useKibana().services;
   const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+  const { dataView: experimentalDataView } = useDataView();
 
   const [alertSummaryStackBy0, setAlertSummaryStackBy0] = useState<string>(DEFAULT_STACK_BY_FIELD);
+
   const [alertsPreviewStackBy0, setAlertsPreviewStackBy0] =
     useState<string>(DEFAULT_STACK_BY_FIELD);
+  const [localConnectorId, setLocalConnectorId] = useState<string | undefined>(connectorId);
+
+  // Sync local connector ID with prop changes
+  useEffect(() => {
+    setLocalConnectorId(connectorId);
+  }, [connectorId]);
+
+  const handleLocalConnectorIdChange = useCallback((newConnectorId: string) => {
+    setLocalConnectorId(newConnectorId);
+  }, []);
 
   const settingsView = useMemo(
     () =>
@@ -67,9 +96,9 @@ export const useSettingsView = ({
         <AlertSelection
           alertsPreviewStackBy0={alertsPreviewStackBy0}
           alertSummaryStackBy0={alertSummaryStackBy0}
-          connectorId={connectorId}
+          connectorId={localConnectorId}
           filterManager={filterManager.current}
-          onConnectorIdSelected={onConnectorIdSelected}
+          onConnectorIdSelected={handleLocalConnectorIdChange}
           onSettingsChanged={onSettingsChanged}
           setAlertsPreviewStackBy0={setAlertsPreviewStackBy0}
           setAlertSummaryStackBy0={setAlertSummaryStackBy0}
@@ -94,8 +123,8 @@ export const useSettingsView = ({
     [
       alertSummaryStackBy0,
       alertsPreviewStackBy0,
-      connectorId,
-      onConnectorIdSelected,
+      localConnectorId,
+      handleLocalConnectorIdChange,
       onSettingsChanged,
       attackDiscoveryAlertsEnabled,
       settings,
@@ -130,28 +159,122 @@ export const useSettingsView = ({
     };
   }, [onSettingsChanged, settings]);
 
+  const onSaveAndRun = useCallback(() => {
+    if (localConnectorId && localConnectorId !== connectorId) {
+      onConnectorIdSelected(localConnectorId);
+    }
+    onSettingsSave?.();
+
+    // Convert settings to filter query for overrides
+    const [filterQuery, kqlError] = convertToBuildEsQuery({
+      config: getEsQueryConfig(uiSettings),
+      dataViewSpec: oldSourcererDataView,
+      dataView: experimentalDataView,
+      queries: [settings.query],
+      filters: settings.filters,
+    });
+
+    const overrideFilter = parseFilterQuery({ filterQuery, kqlError });
+
+    // Pass the localConnectorId and settings overrides to ensure we use the selected values
+    onGenerate?.(localConnectorId, {
+      overrideEnd: settings.end,
+      overrideFilter,
+      overrideSize: settings.size,
+      overrideStart: settings.start,
+    });
+  }, [
+    connectorId,
+    localConnectorId,
+    onConnectorIdSelected,
+    onGenerate,
+    onSettingsSave,
+    settings,
+    uiSettings,
+    oldSourcererDataView,
+    experimentalDataView,
+  ]);
+
+  const handleSave = useCallback(() => {
+    if (localConnectorId && localConnectorId !== connectorId) {
+      onConnectorIdSelected(localConnectorId);
+    }
+    onSettingsSave?.();
+  }, [connectorId, localConnectorId, onConnectorIdSelected, onSettingsSave]);
+
   const actionButtons = useMemo(() => {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup
+        alignItems="center"
+        css={css`
+          gap: 16px;
+        `}
+        gutterSize="none"
+        responsive={false}
+      >
         <EuiFlexItem
           css={css`
             margin-right: ${euiTheme.size.s};
           `}
           grow={false}
         >
-          <EuiButtonEmpty data-test-subj="reset" flush="both" onClick={onSettingsReset} size="s">
+          <EuiButtonEmpty data-test-subj="reset" flush="both" onClick={onSettingsReset} size="m">
             {i18n.RESET}
           </EuiButtonEmpty>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton data-test-subj="save" fill onClick={onSettingsSave} size="s">
-            {i18n.SAVE}
-          </EuiButton>
+          <EuiToolTip
+            content={localConnectorId == null ? i18n.SELECT_A_CONNECTOR_TO_SAVE : undefined}
+            position="top"
+          >
+            <EuiButton
+              color="primary"
+              css={css`
+                min-inline-size: 80px;
+                width: 80px;
+              `}
+              data-test-subj="save"
+              isDisabled={localConnectorId == null}
+              onClick={handleSave}
+              size="m"
+            >
+              {i18n.SAVE}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
+
+        {attackDiscoveryAlertsEnabled && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={
+                localConnectorId == null ? i18n.SELECT_A_CONNECTOR_TO_SAVE_AND_RUN : undefined
+              }
+              position="top"
+            >
+              <EuiButton
+                data-test-subj="saveAndRun"
+                isDisabled={localConnectorId == null}
+                fill
+                iconType="play"
+                onClick={onSaveAndRun}
+                size="m"
+              >
+                {i18n.SAVE_AND_RUN}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
-  }, [euiTheme.size.s, onSettingsReset, onSettingsSave]);
+  }, [
+    attackDiscoveryAlertsEnabled,
+    euiTheme.size.s,
+    handleSave,
+    localConnectorId,
+    onSaveAndRun,
+    onSettingsReset,
+  ]);
 
   return { settingsView, actionButtons };
 };

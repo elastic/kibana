@@ -38,7 +38,7 @@ interface Props {
   isLoadingPost: boolean;
   loadingConnectorId: string | null;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
-  onGenerate: () => Promise<void>;
+  onGenerate: (overrideConnectorId?: string) => Promise<void>;
   onToggleShowAnonymized: () => void;
   selectedConnectorAttackDiscoveries: AttackDiscovery[];
   selectedConnectorLastUpdated: Date | null;

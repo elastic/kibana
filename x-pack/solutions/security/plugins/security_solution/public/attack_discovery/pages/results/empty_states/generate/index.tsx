@@ -13,7 +13,7 @@ import * as i18n from '../empty_prompt/translations';
 interface Props {
   isDisabled?: boolean;
   isLoading: boolean;
-  onGenerate: () => void;
+  onGenerate: (overrideConnectorId?: string) => void;
 }
 
 const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, onGenerate }) => {
@@ -24,7 +24,12 @@ const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, onG
       content={disabled ? i18n.SELECT_A_CONNECTOR : null}
       data-test-subj="generateTooltip"
     >
-      <EuiButton color="primary" data-test-subj="generate" disabled={disabled} onClick={onGenerate}>
+      <EuiButton
+        color="primary"
+        data-test-subj="generate"
+        disabled={disabled}
+        onClick={() => onGenerate()}
+      >
         {i18n.GENERATE}
       </EuiButton>
     </EuiToolTip>

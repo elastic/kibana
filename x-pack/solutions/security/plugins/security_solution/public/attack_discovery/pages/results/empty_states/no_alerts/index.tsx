@@ -22,7 +22,7 @@ import { Generate } from '../generate';
 interface Props {
   isDisabled: boolean;
   isLoading: boolean;
-  onGenerate: () => void;
+  onGenerate: (overrideConnectorId?: string) => void;
 }
 
 const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate }) => {
