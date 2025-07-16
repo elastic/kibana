@@ -20,7 +20,9 @@ jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../timelines/containers/details');
 jest.mock('./use_get_fields_data');
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => true,
+}));
 
 const eventId = 'eventId';
 const indexName = 'indexName';
@@ -61,7 +63,10 @@ describe('useEventDetails', () => {
 
     hookResult = renderHook(() => useEventDetails({ eventId, indexName }));
 
-    expect(hookResult.result.current.browserFields).toEqual({});
+    // Check if returned value is an object literal
+    expect(Object.getPrototypeOf(hookResult.result.current.browserFields)).toEqual(
+      Object.prototype
+    );
     expect(hookResult.result.current.dataAsNestedObject).toEqual({});
     expect(hookResult.result.current.dataFormattedForFieldBrowser).toEqual([]);
     expect(hookResult.result.current.getFieldsData('test')).toEqual('test');
