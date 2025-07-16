@@ -91,6 +91,11 @@ describe('STATS Validation', () => {
         statsExpectErrors('from a_index | STATS abs( doubleField + sum( doubleField )) ', [
           'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(doubleField+sum(doubleField))]',
         ]);
+        // This is a valid expression as it is an operation on two aggregation functions
+        statsExpectErrors(
+          'from a_index | STATS sum(doubleField) / (min(doubleField) + max(doubleField))  ',
+          []
+        );
       });
 
       test('errors on each aggregation field, which does not contain at least one agg function', () => {
