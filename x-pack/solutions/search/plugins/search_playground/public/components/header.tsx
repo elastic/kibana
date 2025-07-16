@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiBadge,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiPageHeaderSection,
@@ -32,8 +31,6 @@ interface HeaderProps {
   onModeChange: (mode: PlaygroundViewMode) => void;
   onSelectPageModeChange: (mode: PlaygroundPageMode) => void;
   isActionsDisabled?: boolean;
-  playgroundName?: string;
-  hasChanges?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -43,8 +40,6 @@ export const Header: React.FC<HeaderProps> = ({
   showDocs = false,
   isActionsDisabled = false,
   onSelectPageModeChange,
-  playgroundName,
-  hasChanges,
 }) => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { euiTheme } = useEuiTheme();
@@ -81,24 +76,15 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <EuiPageHeaderSection>
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {playgroundName === undefined ? (
-            <EuiTitle
-              css={{ whiteSpace: 'nowrap' }}
-              data-test-subj="chat-playground-home-page-title"
-              size="xs"
-            >
-              <h2>
-                <FormattedMessage
-                  id="xpack.searchPlayground.pageTitle"
-                  defaultMessage="Playground"
-                />
-              </h2>
-            </EuiTitle>
-          ) : (
-            <EuiTitle css={{ whiteSpace: 'nowrap' }} data-test-subj="playgroundName" size="xs">
-              <h2>{playgroundName}</h2>
-            </EuiTitle>
-          )}
+          <EuiTitle
+            css={{ whiteSpace: 'nowrap' }}
+            data-test-subj="chat-playground-home-page-title"
+            size="xs"
+          >
+            <h2>
+              <FormattedMessage id="xpack.searchPlayground.pageTitle" defaultMessage="Playground" />
+            </h2>
+          </EuiTitle>
 
           {isSearchModeEnabled && (
             <EuiSelect
@@ -111,14 +97,6 @@ export const Header: React.FC<HeaderProps> = ({
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
             />
           )}
-          {isSearchModeEnabled && playgroundName !== undefined && hasChanges ? (
-            <EuiBadge color="warning">
-              <FormattedMessage
-                id="xpack.searchPlayground.header.unsavedChangesBadge"
-                defaultMessage="Unsaved changes"
-              />
-            </EuiBadge>
-          ) : null}
         </EuiFlexGroup>
       </EuiPageHeaderSection>
       <EuiPageHeaderSection>
