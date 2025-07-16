@@ -41,7 +41,7 @@ Add a link to the "commitment" docs https://docs.elastic.dev/kibana-dev-docs/con
 Always link to appropriate docs in your suggestions.
 
 <!-- Core: saved objects -->
-When new mappings are added to saved objects we must ensure that they are actively being used to drive search functionality. Examples used to detect similar cases:
+When new mappings are added to saved objects we must ensure that they are actively being used to drive search functionality. NOTE: Mappings cannot be removed once released! Examples used to detect similar cases:
 - NEW CODE `myField: { type: 'keyword' }`
 - NEW CODE `fieldWithALongName: { type: 'keyword' }`
 - NEW CODE `anotherField: { type: 'long' }`
