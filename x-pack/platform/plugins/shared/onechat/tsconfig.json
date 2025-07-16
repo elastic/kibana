@@ -49,5 +49,7 @@
     "@kbn/utility-types",
     "@kbn/inference-tracing",
     "@kbn/std",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-utils",
   ]
 }
