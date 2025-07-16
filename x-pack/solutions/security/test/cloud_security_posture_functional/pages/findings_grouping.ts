@@ -148,8 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return requestedBenchmarkRules.map((item) => item.attributes);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/220357
-  describe.skip('Findings Page - Grouping', function () {
+  describe('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
 
