@@ -124,11 +124,22 @@ describe('Serialization utils', () => {
         serializeDynamicActions: jest.fn(),
       });
 
+      const attributes = toSavedSearchAttributes(
+        savedSearch,
+        searchSource.serialize().searchSourceJSON
+      );
+
       expect(serializedState).toEqual({
         rawState: {
           type: 'search',
           attributes: {
-            ...toSavedSearchAttributes(savedSearch, searchSource.serialize().searchSourceJSON),
+            ...attributes,
+            tabs: [
+              {
+                ...attributes.tabs![0]!,
+                id: expect.any(String),
+              },
+            ],
             references: mockedSavedSearchAttributes.references,
           },
         },

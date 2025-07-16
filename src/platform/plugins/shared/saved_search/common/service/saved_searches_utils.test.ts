@@ -88,6 +88,7 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": Object {},
           "sort": Array [],
+          "tabs": undefined,
           "tags": Array [
             "tags-1",
             "tags-2",
@@ -119,41 +120,39 @@ describe('saved_searches_utils', () => {
         managed: false,
       };
 
-      expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
-        Object {
-          "breakdownField": undefined,
-          "columns": Array [
-            "c",
-            "d",
-          ],
-          "density": undefined,
-          "description": "description",
-          "grid": Object {},
-          "headerRowHeight": undefined,
-          "hideAggregatedPreview": undefined,
-          "hideChart": true,
-          "isTextBasedQuery": true,
-          "kibanaSavedObjectMeta": Object {
-            "searchSourceJSON": "{}",
+      const result = toSavedSearchAttributes(savedSearch, '{}');
+      expect(result).toEqual({
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+        title: 'title',
+        sort: [['a', 'asc']],
+        columns: ['c', 'd'],
+        description: 'description',
+        grid: {},
+        hideChart: true,
+        isTextBasedQuery: true,
+        usesAdHocDataView: false,
+        timeRestore: false,
+        tabs: [
+          {
+            id: expect.any(String),
+            label: 'Untitled',
+            attributes: {
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: '{}',
+              },
+              sort: [['a', 'asc']],
+              columns: ['c', 'd'],
+              grid: {},
+              hideChart: true,
+              isTextBasedQuery: true,
+              usesAdHocDataView: false,
+              timeRestore: false,
+            },
           },
-          "refreshInterval": undefined,
-          "rowHeight": undefined,
-          "rowsPerPage": undefined,
-          "sampleSize": undefined,
-          "sort": Array [
-            Array [
-              "a",
-              "asc",
-            ],
-          ],
-          "timeRange": undefined,
-          "timeRestore": false,
-          "title": "title",
-          "usesAdHocDataView": false,
-          "viewMode": undefined,
-          "visContext": undefined,
-        }
-      `);
+        ],
+      });
     });
   });
 });

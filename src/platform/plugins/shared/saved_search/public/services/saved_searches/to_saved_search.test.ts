@@ -100,6 +100,7 @@ describe('toSavedSearch', () => {
             "desc",
           ],
         ],
+        "tabs": undefined,
         "tags": undefined,
         "timeRange": undefined,
         "timeRestore": undefined,
