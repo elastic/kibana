@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/gen-ai-settings-plugin",
-  "owner": ["@elastic/obs-ai-assistant"],
+  "owner": ["@elastic/appex-ai-infra"],
   "group": "platform",
   "visibility": "private",
   "plugin": {
@@ -9,7 +9,7 @@
     "browser": true,
     "server": true,
     "configPath": ["genAiSettings"],
-    "requiredPlugins": ["management", "observabilityAIAssistant"],
+    "requiredPlugins": ["management"],
     "optionalPlugins": ["spaces"],
     "requiredBundles": ["kibanaReact"]
   }

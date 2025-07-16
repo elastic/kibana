@@ -23,10 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
+
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { useEnabledFeatures } from '../contexts/serverless_context';
 import { GoToSpacesButton } from './go_to_spaces_button';
+import { getConnectorsManagementHref } from '../utils/connectors';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -127,7 +128,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                     iconType="popout"
                     iconSide="right"
                     data-test-subj="genAiSettingsGoToConnectorsButton"
-                    href={getConnectorsManagementHref(http!)}
+                    href={getConnectorsManagementHref(http)}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
