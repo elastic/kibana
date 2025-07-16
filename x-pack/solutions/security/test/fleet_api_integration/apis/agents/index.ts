@@ -6,8 +6,9 @@
  */
 
 import { setupTestUsers } from '../test_users';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
-export default function loadTests({ loadTestFile, getService }) {
+export default function loadTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Agents', () => {
     before(async () => {
       await setupTestUsers(getService('security'));
