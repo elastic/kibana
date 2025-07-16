@@ -50,7 +50,6 @@ export const AddDocumentsCodeExample = ({
   const [selectedLanguage, setSelectedLanguage] =
     useState<AvailableLanguages>(getDefaultCodingLanguage);
   const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples } = useWorkflow();
-
   const selectedCodeExamples = ingestExamples[selectedLanguage];
   const codeSampleMappings = indexHasMappings ? mappingProperties : ingestExamples.defaultMapping;
   const onSelectLanguage = useCallback(
@@ -71,7 +70,7 @@ export const AddDocumentsCodeExample = ({
   const { search } = useLocation();
   React.useEffect(() => {
     const workflowFromQuery = new URLSearchParams(search).get('workflow');
-    if (workflowFromQuery && workflowFromQuery !== selectedWorkflowId) {
+    if (workflowFromQuery) {
       setSelectedWorkflowId(workflowFromQuery as WorkflowId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
