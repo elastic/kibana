@@ -90,7 +90,7 @@ export const Footer = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap>
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
                 <EuiButton
