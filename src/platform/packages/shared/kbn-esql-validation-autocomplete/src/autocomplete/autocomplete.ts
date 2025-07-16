@@ -20,9 +20,7 @@ import {
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
 import {
   getControlSuggestionIfSupported,
-  getSuggestionsToRightOfOperatorExpression,
   buildFieldsDefinitionsWithMetadata,
-  getExpressionType,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import {
@@ -39,7 +37,6 @@ import { getAstContext } from '../shared/context';
 import { getFieldsByTypeHelper, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getQueryForFields, correctQuerySyntax } from './helper';
-import { getLocationFromCommandOrOptionName } from '../shared/types';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 import { getCommandContext } from './get_command_context';
 
@@ -224,26 +221,6 @@ async function getSuggestionsWithinCommandExpression(
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
   const references = { fields: fieldsMap, userDefinedColumns: anyUserDefinedColumns };
-
-  // For now, we don't suggest for expressions within any function besides CASE
-  // e.g. CASE(field != /)
-  //
-  // So, it is handled as a special branch...
-  if (
-    astContext.containingFunction?.name === 'case' &&
-    !Array.isArray(astContext.node) &&
-    astContext.node?.type === 'function' &&
-    astContext.node?.subtype === 'binary-expression'
-  ) {
-    return await getSuggestionsToRightOfOperatorExpression({
-      queryText: innerText,
-      location: getLocationFromCommandOrOptionName(astContext.command.name),
-      rootOperator: astContext.node,
-      getExpressionType: (expression) =>
-        getExpressionType(expression, references.fields, references.userDefinedColumns),
-      getColumnsByType,
-    });
-  }
 
   const getSuggestedUserDefinedColumnName = (extraFieldNames?: string[]) => {
     if (!extraFieldNames?.length) {
