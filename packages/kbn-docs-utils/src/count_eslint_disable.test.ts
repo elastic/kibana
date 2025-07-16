@@ -34,7 +34,7 @@ describe('countEslintDisableLines', () => {
     expect(counts).toMatchInlineSnapshot(`
       Object {
         "eslintDisableFileCount": 3,
-        "eslintDisableLineCount": 8,
+        "eslintDisableLineCount": 9,
       }
     `);
   });

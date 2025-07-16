@@ -127,39 +127,39 @@ const getExportNamesDeep = (
   for (const statement of sourceFile.statements) {
     // export function xyz() ...
     if (ts.isFunctionDeclaration(statement) && statement.name && hasExportMod(statement)) {
-      exportSet.add(assumeAllTypes ? 'type' : 'value', statement.name.getText());
+      exportSet.add(assumeAllTypes ? 'type' : 'value', statement.name.escapedText);
       continue;
     }
 
     // export const/let foo = ...
     if (ts.isVariableStatement(statement) && hasExportMod(statement)) {
       for (const dec of statement.declarationList.declarations) {
-        exportSet.add(assumeAllTypes ? 'type' : 'value', dec.name.getText());
+        exportSet.add(assumeAllTypes ? 'type' : 'value', dec.name.escapedText);
       }
       continue;
     }
 
     // export class xyc
     if (ts.isClassDeclaration(statement) && statement.name && hasExportMod(statement)) {
-      exportSet.add(assumeAllTypes ? 'type' : 'value', statement.name.getText());
+      exportSet.add(assumeAllTypes ? 'type' : 'value', statement.name.escapedText);
       continue;
     }
 
     // export interface Foo {...}
     if (ts.isInterfaceDeclaration(statement) && hasExportMod(statement)) {
-      exportSet.add('type', statement.name.getText());
+      exportSet.add('type', statement.name.escapedText);
       continue;
     }
 
     // export type Foo = ...
     if (ts.isTypeAliasDeclaration(statement) && hasExportMod(statement)) {
-      exportSet.add('type', statement.name.getText());
+      exportSet.add('type', statement.name.escapedText);
       continue;
     }
 
     // export enum ...
     if (ts.isEnumDeclaration(statement) && hasExportMod(statement)) {
-      exportSet.add(assumeAllTypes ? 'type' : 'value', statement.name.getText());
+      exportSet.add(assumeAllTypes ? 'type' : 'value', statement.name.escapedText);
       continue;
     }
 
@@ -187,7 +187,7 @@ const getExportNamesDeep = (
 
       // export * as foo from './foo'
       if (ts.isNamespaceExport(clause)) {
-        exportSet.add(types ? 'type' : 'value', clause.name.getText());
+        exportSet.add(types ? 'type' : 'value', clause.name.escapedText);
         continue;
       }
 
@@ -195,7 +195,7 @@ const getExportNamesDeep = (
       // export { foo as x } from 'other'
       // export { default as foo } from 'other'
       for (const e of clause.elements) {
-        exportSet.add(types ? 'type' : 'value', e.name.getText());
+        exportSet.add(types ? 'type' : 'value', e.name.escapedText);
       }
       continue;
     }

@@ -41,12 +41,22 @@ module.exports = {
         /** @type Parser */
         const parser = (path) => {
           const code = Fs.readFileSync(path, 'utf-8');
-          const result = tsEstree.parseAndGenerateServices(code, {
-            ...context.parserOptions,
-            comment: false,
-            filePath: path,
+          const sourceFile = ts.createSourceFile(
+            path,
+            code,
+            ts.ScriptTarget.ESNext,
+            true,
+            ts.ScriptKind.TS
+          );
+
+          const program = ts.createProgram([path], {
+            allowJs: true,
+            target: ts.ScriptTarget.ESNext,
+            module: ts.ModuleKind.CommonJS,
           });
-          return result.services.program.getSourceFile(path);
+
+          // Use this instead of result.services.program.getSourceFile(path)
+          return program.getSourceFile(path);
         };
 
         const exportSet = getExportNamesDeep(parser, context.getFilename(), tsnode);
