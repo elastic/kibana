@@ -144,6 +144,7 @@ export const getCasesConnectorAdapter = ({
         maximumCasesToOpen,
         templateId: params.subActionParams.templateId,
         internallyManagedAlerts,
+        isGeneratedByAssistant: null,
       };
 
       return { subAction: 'run', subActionParams };

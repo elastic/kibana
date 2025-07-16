@@ -63,5 +63,19 @@ describe('User actions', () => {
         right: defaultRequest,
       });
     });
+
+    test.each([undefined, null, false, true])(
+      'has expected attributes in request if the `isGeneratedByAssistant` is %s',
+      (isGeneratedByAssistant) => {
+        const query = UserActionsRt.decode([
+          { ...defaultRequest[0], is_generated_by_assistant: isGeneratedByAssistant },
+        ]);
+
+        expect(query).toStrictEqual({
+          _tag: 'Right',
+          right: [{ ...defaultRequest[0], is_generated_by_assistant: isGeneratedByAssistant }],
+        });
+      }
+    );
   });
 });

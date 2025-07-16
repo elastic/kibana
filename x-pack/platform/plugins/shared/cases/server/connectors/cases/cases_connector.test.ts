@@ -39,6 +39,7 @@ describe('CasesConnector', () => {
   };
   const groupedAlerts = null;
   const internallyManagedAlerts = false;
+  const isGeneratedByAssistant = null;
 
   const owner = 'cases';
   const timeWindow = '7d';
@@ -97,6 +98,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       internallyManagedAlerts,
+      isGeneratedByAssistant,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -120,6 +122,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       internallyManagedAlerts,
+      isGeneratedByAssistant,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -133,6 +136,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       internallyManagedAlerts,
+      isGeneratedByAssistant,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -148,6 +152,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       internallyManagedAlerts,
+      isGeneratedByAssistant,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -168,6 +173,7 @@ describe('CasesConnector', () => {
         rule,
         timeWindow,
         internallyManagedAlerts,
+        isGeneratedByAssistant,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -191,6 +197,7 @@ describe('CasesConnector', () => {
         rule,
         timeWindow,
         internallyManagedAlerts,
+        isGeneratedByAssistant,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -214,6 +221,7 @@ describe('CasesConnector', () => {
         rule,
         timeWindow,
         internallyManagedAlerts,
+        isGeneratedByAssistant,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -239,6 +247,7 @@ describe('CasesConnector', () => {
         rule,
         timeWindow,
         internallyManagedAlerts,
+        isGeneratedByAssistant,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -264,6 +273,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       internallyManagedAlerts,
+      isGeneratedByAssistant,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -288,6 +298,7 @@ describe('CasesConnector', () => {
         rule,
         timeWindow,
         internallyManagedAlerts,
+        isGeneratedByAssistant,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -311,6 +322,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       internallyManagedAlerts,
+      isGeneratedByAssistant,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
