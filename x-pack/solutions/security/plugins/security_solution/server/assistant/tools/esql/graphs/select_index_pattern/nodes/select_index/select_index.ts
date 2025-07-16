@@ -36,7 +36,7 @@ export const getSelectIndexPattern = () => {
 
     // Sort the candidate index patterns based on the order of shortlisted index patterns
     // This ensures that the most relevant index pattern (as decided by the LLM) is selected first
-    const sortedShortlistedIndexPatterns = state.shortlistedIndexPatterns
+    const sortedShortlistedIndexPatterns = state.shortlistedIndexPatterns;
     const sortedCandidateIndexPatterns = candidateIndexPatterns.sort(
       (a, b) =>
         sortedShortlistedIndexPatterns.indexOf(a.indexPattern) -

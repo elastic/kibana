@@ -39,6 +39,6 @@ export const getFieldDescriptors = ({ esClient }: { esClient: ElasticsearchClien
           fieldDescriptors: [],
         },
       });
-    };
-  }
+    }
+  };
 };
