@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { errors as EsErrors } from '@elastic/elasticsearch';
+import { errors, type errors as EsErrors } from '@elastic/elasticsearch';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
@@ -134,7 +134,15 @@ export class AnalyticsIndex {
         await this.updateIndexMapping();
       }
     } catch (error) {
-      this.handleError('Failed to create the index.', error);
+      const isIndexAlreadyExistsError =
+        error instanceof errors.ResponseError &&
+        error.body.error.type === 'resource_already_exists_exception';
+
+      if (isIndexAlreadyExistsError) {
+        this.logDebug(`Index ${this.indexName} already exists. Skipping creation.`);
+      } else {
+        this.handleError('Failed to create the index.', error);
+      }
     }
   }
 
