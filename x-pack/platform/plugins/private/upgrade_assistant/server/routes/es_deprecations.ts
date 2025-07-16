@@ -21,7 +21,6 @@ export function registerESDeprecationRoutes({
   log,
   current,
 }: RouteDependencies) {
-  // reindexingService: ReindexingService
   router.get(
     {
       path: `${API_BASE_PATH}/es_deprecations`,
@@ -44,7 +43,7 @@ export function registerESDeprecationRoutes({
           dataSourceExclusions,
         });
         // this shouldn't need to happen - deal with later, not sure what is interesting
-        /*
+        /* TODO
         const asCurrentUser = client.asCurrentUser;
         const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser, log);
         const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
