@@ -5649,10 +5649,10 @@
         "children": [
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.AssetDetailsLocatorParams.assetType",
+            "id": "def-common.AssetDetailsLocatorParams.entityType",
             "type": "string",
             "tags": [],
-            "label": "assetType",
+            "label": "entityType",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,
@@ -5660,10 +5660,10 @@
           },
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.AssetDetailsLocatorParams.assetId",
+            "id": "def-common.AssetDetailsLocatorParams.entityId",
             "type": "string",
             "tags": [],
-            "label": "assetId",
+            "label": "entityId",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,
@@ -6557,10 +6557,10 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.SupportedAssetTypes",
+        "id": "def-common.SupportedEntityTypes",
         "type": "Enum",
         "tags": [],
-        "label": "SupportedAssetTypes",
+        "label": "SupportedEntityTypes",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
         "deprecated": false,

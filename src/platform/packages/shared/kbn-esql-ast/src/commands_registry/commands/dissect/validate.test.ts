@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { validate } from './validate';
-import { expectErrors } from '../../../definitions/utils/test_functions';
-import { mockContext } from '../../../definitions/utils/test_mocks';
+import { expectErrors } from '../../../__tests__/validation';
+import { mockContext } from '../../../__tests__/context_fixtures';
 
 const dissectExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'dissect', validate);
