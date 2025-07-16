@@ -619,6 +619,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     async function fetchLicense() {
       try {
         const ls = await kibana.services?.esql?.getLicense();
+        console.log('Fetched license', ls);
         if (!isEqual(license, ls)) {
           setLicense(ls);
         }
