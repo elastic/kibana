@@ -47,7 +47,7 @@ spec:
             IMAGES_CONFIG: kibana/image_cache.tpl.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
           message: Builds Kibana VM base image daily
-        weekly kibana fips image build:
+        daily kibana fips image build:
           branch: main
           cronline: '0 4 * * *'
           env:
