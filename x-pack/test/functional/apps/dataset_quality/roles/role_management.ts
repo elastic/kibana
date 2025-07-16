@@ -23,6 +23,36 @@ const datasetQualityRoles = {
       },
     ],
   },
+  canManageRules: {
+    elasticsearch: {
+      cluster: ['monitor'],
+    },
+    kibana: [
+      {
+        feature: {
+          dataQuality: ['minimal_all', 'manage_rules'],
+          discover: ['all'],
+          fleet: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+  canManageAlerts: {
+    elasticsearch: {
+      cluster: ['monitor'],
+    },
+    kibana: [
+      {
+        feature: {
+          dataQuality: ['minimal_all', 'manage_alerts'],
+          discover: ['all'],
+          fleet: ['read'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
   noAccess: {
     elasticsearch: {
       cluster: ['monitor'],
