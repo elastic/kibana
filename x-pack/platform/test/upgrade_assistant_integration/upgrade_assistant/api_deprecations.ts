@@ -14,7 +14,7 @@ import type {
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
 import { USAGE_COUNTERS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
   return (
