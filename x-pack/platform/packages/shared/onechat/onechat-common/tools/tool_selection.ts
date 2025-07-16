@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { PlainIdToolIdentifier, ToolDescriptor } from './tools';
+import type { ToolDefinition, ToolType } from './definition';
+
+export type ToolSelectionRelevantFields = Pick<ToolDefinition, 'id' | 'type' | 'tags'>;
 
 /**
  * "all tools" wildcard which can be used for {@link ByIdsToolSelection}
@@ -40,11 +42,11 @@ export interface ByIdsToolSelection {
   /**
    * The id of the provider to select tools from
    */
-  type?: string;
+  type?: ToolType;
   /**
    * List of individual tool ids to select.
    */
-  tool_ids: PlainIdToolIdentifier[];
+  tool_ids: string[];
 }
 
 /**
@@ -64,7 +66,7 @@ export const isByIdsToolSelection = (
 /**
  * Returns all tools matching ay least one of the provided tool selection.
  */
-export const filterToolsBySelection = <TType extends ToolDescriptor>(
+export const filterToolsBySelection = <TType extends ToolSelectionRelevantFields>(
   tools: TType[],
   toolSelection: ToolSelection[]
 ): TType[] => {
@@ -76,9 +78,12 @@ export const filterToolsBySelection = <TType extends ToolDescriptor>(
 /**
  * Returns true if the given tool descriptor matches the provided tool selection.
  */
-export const toolMatchSelection = (tool: ToolDescriptor, toolSelection: ToolSelection): boolean => {
+export const toolMatchSelection = (
+  tool: ToolSelectionRelevantFields,
+  toolSelection: ToolSelection
+): boolean => {
   if (isByIdsToolSelection(toolSelection)) {
-    if (toolSelection.type && toolSelection.type !== tool.meta.providerId) {
+    if (toolSelection.type && toolSelection.type !== tool.type) {
       return false;
     }
     if (toolSelection.tool_ids.includes(allToolsSelectionWildcard)) {

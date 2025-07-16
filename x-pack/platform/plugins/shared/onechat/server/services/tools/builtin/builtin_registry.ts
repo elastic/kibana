@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  OnechatErrorUtils,
-  type PlainIdToolIdentifier,
-  toSerializedToolIdentifier,
-  builtinToolProviderId,
-} from '@kbn/onechat-common';
-import type { RegisteredTool } from '@kbn/onechat-server';
-import type { RegisteredToolProviderWithId } from '../types';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { isBuiltinToolId } from '../utils';
 
-export interface BuiltinToolRegistry extends RegisteredToolProviderWithId {
-  register(tool: RegisteredTool): void;
+export interface BuiltinToolRegistry {
+  register(tool: BuiltinToolDefinition<any, any>): void;
+  has(toolId: string): boolean;
+  get(toolId: string): BuiltinToolDefinition | undefined;
+  list(): BuiltinToolDefinition[];
 }
 
 export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {
@@ -24,40 +20,31 @@ export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {
 };
 
 class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
-  public readonly id = builtinToolProviderId;
-
-  private tools: Map<string, RegisteredTool> = new Map();
+  private tools: Map<string, BuiltinToolDefinition> = new Map();
 
   constructor() {}
 
-  register(tool: RegisteredTool) {
+  register(tool: BuiltinToolDefinition) {
     if (this.tools.has(tool.id)) {
       throw new Error(`Tool with id ${tool.id} already registered`);
+    }
+    if (!isBuiltinToolId(tool.id)) {
+      throw new Error(
+        `Invalid id: "${tool.id}". Built-in tool ids must start with a dot and only contains alphanumeric characters, hyphens, and underscores.`
+      );
     }
     this.tools.set(tool.id, tool);
   }
 
-  async has(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<boolean> {
-    const { toolId } = options;
+  has(toolId: string): boolean {
     return this.tools.has(toolId);
   }
 
-  async get(options: {
-    toolId: PlainIdToolIdentifier;
-    request: KibanaRequest;
-  }): Promise<RegisteredTool> {
-    const { toolId } = options;
-
-    if (this.tools.has(toolId)) {
-      return this.tools.get(toolId)!;
-    }
-
-    throw OnechatErrorUtils.createToolNotFoundError({
-      toolId: toSerializedToolIdentifier(toolId),
-    });
+  get(toolId: string) {
+    return this.tools.get(toolId);
   }
 
-  async list(options: { request: KibanaRequest }): Promise<RegisteredTool[]> {
+  list() {
     return [...this.tools.values()];
   }
 }

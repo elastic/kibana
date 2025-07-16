@@ -16,14 +16,16 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   // SHOW INFO /
-  if (/INFO\s+$/i.test(query)) {
+  if (/INFO\s+$/i.test(innerText)) {
     return [{ ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
   }
   // SHOW LOLZ /
-  else if (/SHOW\s+\S+\s+$/i.test(query)) {
+  else if (/SHOW\s+\S+\s+$/i.test(innerText)) {
     return [];
   }
   // SHOW /
