@@ -33,9 +33,12 @@ async function getFileContent(path: string, ref: string) {
 }
 
 async function getDependenciesDiff() {
-  const oldDeps = await getFileContent('package.json', process.env.GITHUB_PR_MERGE_BASE!);
+  const oldPackageJson = await getFileContent('package.json', process.env.GITHUB_PR_MERGE_BASE!);
   const headSha = execSync('git rev-parse HEAD').toString().trim();
-  const newDeps = await getFileContent('package.json', headSha);
+  const newPackageJson = await getFileContent('package.json', headSha);
+
+  const oldDeps = { ...oldPackageJson.dependencies, ...oldPackageJson.devDependencies };
+  const newDeps = { ...newPackageJson.dependencies, ...newPackageJson.devDependencies };
 
   const newPackages: Record<string, string> = {};
 
