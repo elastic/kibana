@@ -10,7 +10,7 @@
     "server/**/*",
     "typings/**/*",
     "../../../../../typings/**/*",
-    "ui_tests/**/*"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/rule-data-utils",
@@ -129,7 +129,7 @@
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
     "@kbn/apm-synthtrace-client",
-    "@kbn/scout-oblt"
+    "@kbn/scout-oblt",
   ],
   "exclude": ["target/**/*"]
 }
