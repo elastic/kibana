@@ -16,8 +16,6 @@ import {
 } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
-import { isAxiosError } from 'axios';
-import { v5 } from 'uuid';
 import { HttpHandler } from '@kbn/core/public';
 import { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getPhoenixConfig } from './utils/get_phoenix_config';
@@ -27,6 +25,7 @@ import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
+import { createConnectorFixture } from './utils/create_connector_fixture';
 
 /**
  * Test type for evaluations. Loads an inference client and a
@@ -40,6 +39,7 @@ export const evaluate = base.extend<
     evaluators: DefaultEvaluators;
     fetch: HttpHandler;
     connector: AvailableConnectorWithId;
+    evaluationConnector: AvailableConnectorWithId;
   }
 >({
   fetch: [
@@ -51,56 +51,23 @@ export const evaluate = base.extend<
     },
     { scope: 'worker' },
   ],
+  evaluationConnector: [
+    async ({ fetch, log }, use, testInfo) => {
+      const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
+        .connector;
+
+      await createConnectorFixture({ predefinedConnector, fetch, log, use });
+    },
+    {
+      scope: 'worker',
+    },
+  ],
   connector: [
     async ({ fetch, log }, use, testInfo) => {
       const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
         .connector;
 
-      // When running locally, the connectors we read from kibana.yml
-      // are not configured in the kibana instance, so we install the
-      // one for this test run. only UUIDs are allowed for non-preconfigured
-      // connectors, so we generate a seeded uuid using the preconfigured
-      // connector id.
-      const connectorIdAsUuid = v5(predefinedConnector.id, v5.DNS);
-
-      const connectorWithUuid = {
-        ...predefinedConnector,
-        id: connectorIdAsUuid,
-      };
-
-      async function deleteConnector() {
-        await fetch({
-          path: `/api/actions/connector/${connectorIdAsUuid}`,
-          method: 'DELETE',
-        }).catch((error) => {
-          if (isAxiosError(error) && error.status === 404) {
-            return;
-          }
-          throw error;
-        });
-      }
-
-      log.info(`Deleting existing connector`);
-
-      await deleteConnector();
-
-      log.info(`Creating connector`);
-
-      await fetch({
-        path: `/api/actions/connector/${connectorWithUuid.id}`,
-        method: 'POST',
-        body: JSON.stringify({
-          config: connectorWithUuid.config,
-          connector_type_id: connectorWithUuid.actionTypeId,
-          name: connectorWithUuid.name,
-          secrets: connectorWithUuid.secrets,
-        }),
-      });
-
-      await use(connectorWithUuid);
-
-      // teardown
-      await deleteConnector();
+      await createConnectorFixture({ predefinedConnector, fetch, log, use });
     },
     {
       scope: 'worker',
@@ -160,11 +127,15 @@ export const evaluate = base.extend<
     },
   ],
   evaluators: [
-    async ({ log, inferenceClient }, use) => {
+    async ({ log, inferenceClient, evaluationConnector }, use) => {
+      const evaluatorInferenceClient = inferenceClient.bindTo({
+        connectorId: evaluationConnector.id,
+      });
+
       const evaluators: DefaultEvaluators = {
         criteria: (criteria) => {
           return createCriteriaEvaluator({
-            inferenceClient,
+            inferenceClient: evaluatorInferenceClient,
             criteria,
             log,
           });

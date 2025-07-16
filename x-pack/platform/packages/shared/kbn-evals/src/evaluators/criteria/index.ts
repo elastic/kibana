@@ -111,8 +111,8 @@ export function createCriteriaEvaluator({
 
       return {
         explanation: results
-          .map(({ evaluation }) => {
-            return `- ${evaluation.id}: ${evaluation.reason ?? 'No explanation given'}`;
+          .map(({ evaluation, criterion }) => {
+            return `"${criterion.id}": ${evaluation.reason ?? 'No explanation given'}`;
           })
           .join('\n'),
         label: null,

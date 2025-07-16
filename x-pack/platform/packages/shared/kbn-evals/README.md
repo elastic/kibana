@@ -22,7 +22,7 @@ This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages
 // my_eval.test.ts
 import { evaluate } from '@kbn/evals';
 
-evaluate('the model should answer truthfully', async ({ inferenceClient }) => {
+evaluate('the model should answer truthfully', async ({ inferenceClient, phoenixClient }) => {
   const dataset = {
     name: 'my-dataset',
     description: 'my-description',

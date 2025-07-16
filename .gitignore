@@ -157,6 +157,9 @@ role_users.json
 # ignore Scout temp directory
 .scout
 
+# Playwright
+**/test-results/last-run.json
+
 .devcontainer/.env
 
 # Ignore temporary files in oas_docs
