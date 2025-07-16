@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { RoleCredentials } from '../../../shared/services';
 import { testHasEmbeddedConsole } from './embedded_console';
@@ -20,6 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   const es = getService('es');
+  const browser = getService('browser');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   const deleteAllTestIndices = async () => {
@@ -86,7 +88,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
           await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
           await testSubjects.click('createSemanticOptimizedIndexButton');
-          await pageObjects.svlSearchHomePage.expectToBeOnCreateIndexPage();
+          expect(await browser.getCurrentUrl()).contain(
+            'app/elasticsearch/indices/create?workflow=semantic'
+          );
         });
 
         it('renders Keyword Search content', async () => {
@@ -95,7 +99,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('aiSearchCapabilities-item-keyword');
           await testSubjects.existOrFail('createKeywordIndexButton');
           await testSubjects.click('createKeywordIndexButton');
-          await pageObjects.svlSearchHomePage.expectToBeOnCreateIndexPage();
+          expect(await browser.getCurrentUrl()).contain(
+            'app/elasticsearch/indices/create?workflow=keyword'
+          );
         });
       });
 

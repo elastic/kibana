@@ -137,7 +137,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
             await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
             await testSubjects.click('createSemanticOptimizedIndexButton');
-            expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
+            expect(await browser.getCurrentUrl()).contain(
+              'app/elasticsearch/indices/create?workflow=semantic'
+            );
           });
 
           it('renders Vector Search content', async () => {
@@ -146,7 +148,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await testSubjects.click('aiSearchCapabilities-item-vector');
             await testSubjects.existOrFail('createVectorIndexButton');
             await testSubjects.click('createVectorIndexButton');
-            expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
+            expect(await browser.getCurrentUrl()).contain(
+              'app/elasticsearch/indices/create?workflow=vector'
+            );
           });
         });
 
