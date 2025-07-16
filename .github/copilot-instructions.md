@@ -17,6 +17,10 @@ HTTP API paths should be snake case. Examples you should use to detect violation
   should be `path: '/internal/my_path'`
 - this `const API_BASE_PATH = '/api/myPath'`
   should be `const API_BASE_PATH = '/api/my_path'`
+- this `path: '/api/myPath/_action'`
+  should be `path: '/api/my_path/_action'`
+- this `${API_BASE_PATH}/api/my-domain/_bulkUpdate`
+  should be `${API_BASE_PATH}/api/myDomain/_bulk_update`
 Add a link "path" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#path in suggestions
 
 Changing HTTP API `access` from `internal` to `public` should be done with care as this API must be maintained for an extended time period and well documented. Examples you should use to detect:
