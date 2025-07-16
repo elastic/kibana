@@ -14,9 +14,9 @@ import {
   isIdentifier,
   isTimeInterval,
 } from '../../../ast/is';
-import { validateFunction } from './function_validation';
-import { validateOption } from './option_validation';
-import { validateColumnForCommand } from './column_validation';
+import { validateFunction } from './function';
+import { validateOption } from './option';
+import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
 import { getMessageFromId } from '../errors';
 import { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
