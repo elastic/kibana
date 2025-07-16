@@ -14,7 +14,6 @@ import type { AssigneesColumnProps } from './assignees_column';
 import { AssigneesColumn } from './assignees_column';
 import { renderWithTestingProviders } from '../../common/mock';
 
-// Failing: See https://github.com/elastic/kibana/issues/192674
 describe('AssigneesColumn', () => {
   const defaultProps: AssigneesColumnProps = {
     assignees: userProfiles,
