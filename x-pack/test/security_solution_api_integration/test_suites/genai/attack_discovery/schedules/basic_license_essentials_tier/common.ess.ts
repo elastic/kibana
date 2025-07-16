@@ -22,7 +22,7 @@ const getScheduleMissingLicenseError = () => {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
-  describe('@ess @serverless @brokenInServerless Attack Discovery Schedules', () => {
+  describe('@ess Basic checks', () => {
     before(async () => {
       await enableAttackDiscoverySchedulesFeature(supertest);
     });

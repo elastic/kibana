@@ -9,6 +9,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('GenAI - Attack Discovery Schedules APIs', function () {
-    loadTestFile(require.resolve('./common'));
+    loadTestFile(require.resolve('./common.ess.ts'));
   });
 }
