@@ -74,19 +74,20 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
   const cleanupEventLog = async () => {
     log.info(`Cleaning up event log`);
+    const numToDelete = await es.search<IValidatedEvent>({
+      index: '.kibana-event-log*',
+      query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+    });
+    log.info(`Found ${numToDelete.hits.hits.length} event log entries to delete`);
+    let numDeleted = 0;
     await retry.try(async () => {
-      await es.deleteByQuery({
+      const results = await es.deleteByQuery({
         index: '.kibana-event-log*',
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
         conflicts: 'proceed',
       });
-      await es.indices.refresh({ index: '.kibana-event-log*' });
-      const anyLeft = await es.search<IValidatedEvent>({
-        index: '.kibana-event-log*',
-        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
-      });
-      log.info(`Found anyLeft hits ${JSON.stringify(anyLeft.hits.hits)}`);
-      expect(anyLeft.hits.hits.length).to.eql(0);
+      numDeleted += results.deleted ?? 0;
+      expect(numDeleted).to.eql(numToDelete.hits.hits.length);
     });
   };
 
@@ -214,6 +215,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
+      await cleanupEventLog();
       await es.deleteByQuery({
         index: '.internal.alerts-*',
         query: { match_all: {} },
@@ -286,7 +288,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -352,7 +353,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -418,7 +418,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -482,7 +481,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -546,7 +544,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -612,7 +609,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -676,7 +672,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -740,7 +735,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -806,7 +800,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -870,7 +863,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -934,7 +926,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1000,7 +991,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1066,7 +1056,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1132,7 +1121,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1198,7 +1186,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1331,7 +1318,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 expectedAlerts.map((a) => a.space1.id),
                 deletedAlerts.map((a) => a.space1.id)
               );
-              await cleanupEventLog();
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1427,8 +1413,6 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             expect(alerts.hits.hits.findIndex((a) => a._id === alertId)).to.be.greaterThan(-1);
           });
         });
-
-        await cleanupEventLog();
       });
     });
 
