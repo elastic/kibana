@@ -10,6 +10,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EsWorkflow } from '@kbn/workflows';
 import { getWorkflow } from './get_workflow';
+import { hasScheduledTriggers } from '../../lib/schedule_utils';
 
 interface UpdateWorkflowParams {
   esClient: ElasticsearchClient;
@@ -17,6 +18,8 @@ interface UpdateWorkflowParams {
   workflowIndex: string;
   workflowId: string;
   workflow: Partial<EsWorkflow>;
+  taskScheduler?: any; // Will be properly typed when we integrate it
+  spaceId?: string;
 }
 
 export const updateWorkflow = async ({
@@ -25,6 +28,8 @@ export const updateWorkflow = async ({
   workflowIndex,
   workflowId,
   workflow,
+  taskScheduler,
+  spaceId = 'default',
 }: UpdateWorkflowParams) => {
   const document = transformToUpdateScheme(workflow);
 
@@ -36,14 +41,35 @@ export const updateWorkflow = async ({
       refresh: 'wait_for',
     });
 
-    const createdWorkflow = await getWorkflow({
+    const updatedWorkflow = await getWorkflow({
       esClient,
       logger,
       workflowIndex,
       workflowId: response._id,
     });
 
-    return createdWorkflow;
+    // Update scheduled tasks if the workflow has scheduled triggers
+    if (taskScheduler && updatedWorkflow && hasScheduledTriggers(updatedWorkflow.triggers)) {
+      try {
+        await taskScheduler.updateWorkflowTasks(updatedWorkflow, spaceId);
+        logger.info(`Updated scheduled tasks for workflow ${workflowId}`);
+      } catch (taskError) {
+        logger.error(`Failed to update scheduled tasks for workflow ${workflowId}: ${taskError}`);
+        // Don't fail the workflow update if task scheduling fails
+        // The workflow can still be updated and tasks can be scheduled later
+      }
+    } else if (taskScheduler && updatedWorkflow) {
+      // If the workflow no longer has scheduled triggers, unschedule existing tasks
+      try {
+        await taskScheduler.unscheduleWorkflowTasks(workflowId);
+        logger.info(`Unscheduled tasks for workflow ${workflowId} (no scheduled triggers)`);
+      } catch (taskError) {
+        logger.error(`Failed to unschedule tasks for workflow ${workflowId}: ${taskError}`);
+        // Don't fail the workflow update if task unscheduling fails
+      }
+    }
+
+    return updatedWorkflow;
   } catch (error) {
     logger.error(`Failed to update workflow: ${error}`);
     throw error;

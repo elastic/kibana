@@ -30,9 +30,11 @@ import { searchWorkflows } from './lib/search_workflows';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
 import { getYamlStringFromJSON, parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
+  private taskScheduler: WorkflowTaskScheduler | null = null;
   private logger: Logger;
   private workflowIndex: string;
   private workflowsExecutionIndex: string;
@@ -50,6 +52,10 @@ export class WorkflowsService {
     this.stepsExecutionIndex = stepsExecutionIndex;
     this.workflowsExecutionIndex = workflowsExecutionIndex;
     this.initialize(esClientPromise);
+  }
+
+  public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
+    this.taskScheduler = taskScheduler;
   }
 
   private async initialize(esClientPromise: Promise<ElasticsearchClient>) {
@@ -120,6 +126,8 @@ export class WorkflowsService {
       logger: this.logger,
       workflowIndex: this.workflowIndex,
       workflow,
+      taskScheduler: this.taskScheduler || undefined,
+      spaceId: 'default', // TODO: Get from context
     });
   }
 
@@ -139,6 +147,7 @@ export class WorkflowsService {
           workflowIndex: this.workflowIndex,
           workflowId: id,
           workflow,
+          taskScheduler: this.taskScheduler || undefined,
         });
       }
       const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
@@ -148,6 +157,7 @@ export class WorkflowsService {
         workflowIndex: this.workflowIndex,
         workflowId: id,
         workflow: { ...updatedWorkflow, yaml: workflow.yaml },
+        taskScheduler: this.taskScheduler || undefined,
       });
     }
     return await updateWorkflow({
@@ -156,6 +166,8 @@ export class WorkflowsService {
       workflowIndex: this.workflowIndex,
       workflowId: id,
       workflow,
+      taskScheduler: this.taskScheduler || undefined,
+      spaceId: 'default', // TODO: Get from context
     });
   }
 
@@ -168,6 +180,7 @@ export class WorkflowsService {
       logger: this.logger,
       workflowIndex: this.workflowIndex,
       workflowIds,
+      taskScheduler: this.taskScheduler || undefined,
     });
   }
 

@@ -14,6 +14,7 @@ interface DeleteWorkflowsParams {
   logger: Logger;
   workflowIndex: string;
   workflowIds: string[];
+  taskScheduler?: any; // Will be properly typed when we integrate it
 }
 
 export const deleteWorkflows = async ({
@@ -21,8 +22,22 @@ export const deleteWorkflows = async ({
   logger,
   workflowIndex,
   workflowIds,
+  taskScheduler,
 }: DeleteWorkflowsParams) => {
   try {
+    // Unschedule tasks for all workflows being deleted
+    if (taskScheduler) {
+      for (const workflowId of workflowIds) {
+        try {
+          await taskScheduler.unscheduleWorkflowTasks(workflowId);
+          logger.info(`Unscheduled tasks for deleted workflow ${workflowId}`);
+        } catch (taskError) {
+          logger.error(`Failed to unschedule tasks for deleted workflow ${workflowId}: ${taskError}`);
+          // Don't fail the deletion if task unscheduling fails
+        }
+      }
+    }
+
     const response = await esClient.deleteByQuery({
       index: workflowIndex,
       query: {

@@ -29,6 +29,8 @@ import { WorkflowsManagementApi } from './workflows_management/workflows_managem
 import { WorkflowsService } from './workflows_management/workflows_management_service';
 import type { WorkflowsExecutionEnginePluginStartDeps } from './types';
 import { SchedulerService } from './scheduler/scheduler_service';
+import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
+import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import {
   WORKFLOWS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
@@ -45,6 +47,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   private readonly logger: Logger;
   private workflowsService: WorkflowsService | null = null;
   private schedulerService: SchedulerService | null = null;
+  private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
   // TODO: replace with esClient promise from core
@@ -62,6 +65,30 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+
+    // Register workflow task definition
+    if (plugins.taskManager) {
+      plugins.taskManager.registerTaskDefinitions({
+        'workflow:scheduled': {
+          title: 'Scheduled Workflow Execution',
+          description: 'Executes workflows on a scheduled basis',
+          timeout: '5m',
+          maxAttempts: 3,
+          createTaskRunner: ({ taskInstance }) => {
+            // This will be properly initialized in the start method
+            return {
+              async run() {
+                // This is a placeholder - the real task runner will be set up in start()
+                return { state: {} };
+              },
+              async cancel() {
+                // Placeholder cancel function
+              },
+            };
+          },
+        },
+      });
+    }
 
     plugins.features?.registerKibanaFeature({
       id: 'workflowsManagement',
@@ -244,6 +271,17 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.logger.info('Workflows Management: Start');
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
+
+    // Initialize workflow task scheduler
+    this.workflowTaskScheduler = new WorkflowTaskScheduler(
+      this.logger,
+      plugins.taskManager
+    );
+
+    // Set task scheduler in workflows service
+    if (this.workflowsService) {
+      this.workflowsService.setTaskScheduler(this.workflowTaskScheduler);
+    }
 
     const actionsTypes = plugins.actions.getAllTypes();
     console.log('actionsTypes', actionsTypes);
