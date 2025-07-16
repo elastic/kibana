@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
@@ -37,6 +38,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -193,6 +195,29 @@ const bulkDeleteWithOCC = async (
 
   for (const { id, attributes } of rulesToDelete) {
     await untrackRuleAlerts(context, id, attributes as RawRule);
+  }
+
+  const ruleIds = rulesToDelete.map((rule) => rule.id);
+  try {
+    const eventLogClient = await context.getEventLogClient();
+    await pMap(
+      ruleIds,
+      (ruleId) =>
+        softDeleteGaps({
+          ruleId,
+          logger: context.logger,
+          eventLogClient,
+          eventLogger: context.eventLogger,
+        }),
+      {
+        concurrency: 10,
+      }
+    );
+  } catch (error) {
+    // Failing to soft delete gaps should not block the rule deletion
+    context.logger.error(
+      `delete(): Failed to soft delete gaps for rules: ${ruleIds.join(',')}: ${error.message}`
+    );
   }
 
   const result = await withSpan(

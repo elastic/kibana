@@ -19,7 +19,7 @@ const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic MCP Server
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
-const MCP_SERVER_PATH = '/api/mcp';
+const MCP_SERVER_PATH = '/api/chat/mcp';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -64,7 +64,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 
             const { tools: toolService } = getInternalServices();
 
-            const registry = toolService.registry.asScopedPublicRegistry({ request });
+            const registry = await toolService.getRegistry({ request });
             const tools = await registry.list({});
 
             // Expose tools scoped to the request
@@ -74,7 +74,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
                 tool.description,
                 tool.schema.shape,
                 async (args: { [x: string]: any }) => {
-                  const toolResult = await tool.execute({ toolParams: args });
+                  const toolResult = await registry.execute({ toolId: tool.id, toolParams: args });
                   return {
                     content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
                   };
