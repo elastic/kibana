@@ -9,12 +9,16 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  CreateWorkflowRequest,
-  WorkflowExecution,
-  WorkflowExecutionListModel,
-  WorkflowListModel,
-  WorkflowModel,
-  WorkflowStepExecution,
+  transformEsWorkflowToYamlJson,
+  transformWorkflowYamlJsontoEsWorkflow,
+  WorkflowExecutionDto,
+  WorkflowListDto,
+} from '@kbn/workflows';
+import {
+  CreateWorkflowCommand,
+  EsWorkflow,
+  WorkflowDetailDto,
+  WorkflowExecutionListDto,
 } from '@kbn/workflows';
 import { updateWorkflow } from './lib/update_workflow';
 import { deleteWorkflows } from './lib/delete_workflows';
@@ -23,8 +27,9 @@ import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { createWorkflow } from './lib/create_workflow';
 import { GetWorkflowsParams } from './workflows_management_api';
 import { searchWorkflows } from './lib/search_workflows';
-import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
+import { getYamlStringFromJSON, parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -63,11 +68,10 @@ export class WorkflowsService {
     this.logger.debug(`Workflow index ${this.workflowIndex} exists`);
   }
 
-  public async searchWorkflows(params: GetWorkflowsParams): Promise<WorkflowListModel> {
+  public async searchWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
-    console.log('searchWorkflows aaaaa', params);
     return await searchWorkflows({
       esClient: this.esClient,
       logger: this.logger,
@@ -77,30 +81,20 @@ export class WorkflowsService {
     });
   }
 
-  public async searchStepExecutions(params: {
-    workflowExecutionId: string;
-  }): Promise<WorkflowStepExecution[]> {
+  public async getWorkflowExecution(id: string): Promise<WorkflowExecutionDto | null> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
-    return await searchStepExecutions({
-      esClient: this.esClient,
-      logger: this.logger,
-      stepsExecutionIndex: this.stepsExecutionIndex,
-      workflowExecutionId: params.workflowExecutionId,
-    });
-  }
-
-  public getWorkflowExecution(id: string): Promise<WorkflowExecution | null> {
-    return getWorkflowExecution({
+    return await getWorkflowExecution({
       esClient: this.esClient,
       logger: this.logger,
       workflowExecutionIndex: this.workflowsExecutionIndex,
+      stepsExecutionIndex: this.stepsExecutionIndex,
       workflowExecutionId: id,
     });
   }
 
-  public async getWorkflow(id: string): Promise<WorkflowModel | null> {
+  public async getWorkflow(id: string): Promise<WorkflowDetailDto | null> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -112,9 +106,14 @@ export class WorkflowsService {
     });
   }
 
-  public async createWorkflow(workflow: CreateWorkflowRequest): Promise<WorkflowModel> {
+  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
+    }
+    if (!workflow.yaml) {
+      // If the yaml is not provided, transform workflow object to yaml
+      const yamlObject = transformEsWorkflowToYamlJson(workflow);
+      workflow.yaml = getYamlStringFromJSON(yamlObject);
     }
     return await createWorkflow({
       esClient: this.esClient,
@@ -126,10 +125,30 @@ export class WorkflowsService {
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<WorkflowModel>
-  ): Promise<WorkflowModel> {
+    workflow: Partial<EsWorkflow>
+  ): Promise<WorkflowDetailDto> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
+    }
+    if (workflow.yaml) {
+      const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+      if (!parsedYaml.success) {
+        return await updateWorkflow({
+          esClient: this.esClient,
+          logger: this.logger,
+          workflowIndex: this.workflowIndex,
+          workflowId: id,
+          workflow,
+        });
+      }
+      const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+      return await updateWorkflow({
+        esClient: this.esClient,
+        logger: this.logger,
+        workflowIndex: this.workflowIndex,
+        workflowId: id,
+        workflow: { ...updatedWorkflow, yaml: workflow.yaml },
+      });
     }
     return await updateWorkflow({
       esClient: this.esClient,
@@ -154,7 +173,7 @@ export class WorkflowsService {
 
   public async searchWorkflowExecutions(params: {
     workflowId: string;
-  }): Promise<WorkflowExecutionListModel> {
+  }): Promise<WorkflowExecutionListDto> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }

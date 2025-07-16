@@ -8,13 +8,13 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WorkflowExecutionListModel } from '@kbn/workflows';
+import { WorkflowExecutionListDto } from '@kbn/workflows';
 import { useQuery } from '@tanstack/react-query';
 
 export function useWorkflowExecutions(workflowId: string | null) {
   const { http } = useKibana().services;
 
-  return useQuery<WorkflowExecutionListModel>({
+  return useQuery<WorkflowExecutionListDto>({
     queryKey: ['workflows', workflowId, 'executions'],
     queryFn: () =>
       http!.get(`/api/workflowExecutions`, {

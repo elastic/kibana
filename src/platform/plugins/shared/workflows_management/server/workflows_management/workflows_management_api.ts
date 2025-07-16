@@ -8,11 +8,13 @@
  */
 
 import {
-  CreateWorkflowRequest,
-  WorkflowListModel,
-  WorkflowModel,
-  WorkflowExecutionModel,
-  WorkflowExecutionListModel,
+  CreateWorkflowCommand,
+  WorkflowListDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionListDto,
+  WorkflowDetailDto,
+  EsWorkflow,
+  WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
 import { SchedulerService } from '../scheduler/scheduler_service';
@@ -34,22 +36,22 @@ export class WorkflowsManagementApi {
     this.schedulerService = schedulerService;
   }
 
-  public async getWorkflows(params: GetWorkflowsParams): Promise<WorkflowListModel> {
+  public async getWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
     return await this.workflowsService.searchWorkflows(params);
   }
 
-  public async getWorkflow(id: string): Promise<WorkflowModel | null> {
+  public async getWorkflow(id: string): Promise<WorkflowDetailDto | null> {
     return await this.workflowsService.getWorkflow(id);
   }
 
-  public async createWorkflow(workflow: CreateWorkflowRequest): Promise<WorkflowModel> {
+  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
     return await this.workflowsService.createWorkflow(workflow);
   }
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<WorkflowModel>
-  ): Promise<WorkflowModel> {
+    workflow: Partial<EsWorkflow>
+  ): Promise<WorkflowDetailDto> {
     return await this.workflowsService.updateWorkflow(id, workflow);
   }
 
@@ -57,14 +59,17 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.deleteWorkflows(workflowIds);
   }
 
-  public async runWorkflow(workflow: WorkflowModel, inputs: Record<string, any>): Promise<string> {
+  public async runWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    inputs: Record<string, any>
+  ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
     return await this.schedulerService.runWorkflow(workflow, inputs);
   }
 
-  public async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecutionListModel> {
+  public async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecutionListDto> {
     return await this.workflowsService.searchWorkflowExecutions({
       workflowId,
     });
@@ -72,24 +77,7 @@ export class WorkflowsManagementApi {
 
   public async getWorkflowExecution(
     workflowExecutionId: string
-  ): Promise<WorkflowExecutionModel | null> {
-    const workflowExecution = await this.workflowsService.getWorkflowExecution(workflowExecutionId);
-
-    if (!workflowExecution) {
-      return null;
-    }
-
-    const stepExecutions = await this.workflowsService.searchStepExecutions({
-      workflowExecutionId,
-    });
-
-    return {
-      id: workflowExecution.id,
-      status: workflowExecution.status,
-      startedAt: workflowExecution.startedAt,
-      finishedAt: workflowExecution.finishedAt,
-      duration: workflowExecution.duration,
-      stepExecutions,
-    };
+  ): Promise<WorkflowExecutionDto | null> {
+    return await this.workflowsService.getWorkflowExecution(workflowExecutionId);
   }
 }

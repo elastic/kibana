@@ -9,7 +9,7 @@
 
 import { QueryDslQueryContainer, SearchResponse, Sort } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WorkflowExecutionListModel, WorkflowExecutionModel } from '@kbn/workflows';
+import { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
 
 interface SearchWorkflowExecutionsParams {
   esClient: ElasticsearchClient;
@@ -25,10 +25,10 @@ export const searchWorkflowExecutions = async ({
   workflowExecutionIndex,
   query,
   sort = [{ startedAt: 'desc' }],
-}: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListModel> => {
+}: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
-    logger.info(`Searching workflows in index ${workflowExecutionIndex}`);
-    const response = await esClient.search<WorkflowExecutionModel>({
+    logger.info(`Searching workflow executions in index ${workflowExecutionIndex}`);
+    const response = await esClient.search<EsWorkflowExecution>({
       index: workflowExecutionIndex,
       query,
       sort,
@@ -36,14 +36,26 @@ export const searchWorkflowExecutions = async ({
 
     return transformToWorkflowExecutionListModel(response);
   } catch (error) {
-    logger.error(`Failed to search workflows: ${error}`);
+    logger.error(`Failed to search workflow executions: ${error}`);
     throw error;
   }
 };
 
-function transformToWorkflowExecutionListModel(response: SearchResponse<WorkflowExecutionModel>) {
+function transformToWorkflowExecutionListModel(
+  response: SearchResponse<EsWorkflowExecution>
+): WorkflowExecutionListDto {
   return {
-    results: response.hits.hits.map((hit) => hit._source as WorkflowExecutionModel),
+    results: response.hits.hits.map((hit) => {
+      const workflowExecution = hit._source!;
+      return {
+        id: hit._id!,
+        status: workflowExecution.status,
+        startedAt: workflowExecution.startedAt,
+        finishedAt: workflowExecution.finishedAt,
+        duration: workflowExecution.duration,
+        workflowId: workflowExecution.workflowId,
+      };
+    }),
     _pagination: {
       limit: response.hits.hits.length,
       offset: 0,

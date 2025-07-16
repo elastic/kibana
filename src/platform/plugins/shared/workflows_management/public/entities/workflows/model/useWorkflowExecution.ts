@@ -8,13 +8,13 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WorkflowExecutionModel } from '@kbn/workflows';
+import { WorkflowExecutionDto } from '@kbn/workflows';
 import { useQuery } from '@tanstack/react-query';
 
 export function useWorkflowExecution(workflowExecutionId: string | null) {
   const { http } = useKibana().services;
 
-  return useQuery<WorkflowExecutionModel>({
+  return useQuery<WorkflowExecutionDto>({
     queryKey: ['stepExecutions', workflowExecutionId],
     queryFn: () => http!.get(`/api/workflowExecutions/${workflowExecutionId}`),
     enabled: workflowExecutionId !== null,

@@ -12,15 +12,22 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiPageHeader } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CreateWorkflowRequest, WorkflowModel, WorkflowStatus } from '@kbn/workflows';
+import { CreateWorkflowCommand, WorkflowStatus } from '@kbn/workflows';
 import { WorkflowList } from '../../features/workflow-list/ui';
 import { useWorkflows } from '../../entities/workflows/model/useWorkflows';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 
-const workflowTemplate: CreateWorkflowRequest = {
+const workflowTemplate: CreateWorkflowCommand = {
   name: 'New workflow',
   status: WorkflowStatus.DRAFT,
-  triggers: [],
+  triggers: [
+    {
+      id: 'manual',
+      type: 'manual',
+      enabled: true,
+      config: {},
+    },
+  ],
   steps: [
     {
       id: 'first-step',
@@ -31,10 +38,23 @@ const workflowTemplate: CreateWorkflowRequest = {
       },
     },
   ],
+  tags: [],
+  yaml: '',
+  // yaml: `
+  // name: New workflow
+  // enabled: false
+  // triggers:
+  //   - type: elastic.triggers.manual
+  // steps:
+  //   - name: first-step
+  //     type: console
+  //     with:
+  //       message: First step executed
+  // `,
 };
 
 export function WorkflowsPage() {
-  const { application, chrome } = useKibana().services;
+  const { application, chrome, notifications } = useKibana().services;
   const { refetch } = useWorkflows();
   const { createWorkflow } = useWorkflowActions();
 
@@ -51,9 +71,16 @@ export function WorkflowsPage() {
 
   const handleCreateWorkflow = () => {
     createWorkflow.mutate(workflowTemplate, {
-      onSuccess: (data: WorkflowModel) => {
+      onSuccess: (data) => {
         application!.navigateToUrl(application!.getUrlForApp('workflows', { path: `/${data.id}` }));
         refetch();
+      },
+      onError: (error) => {
+        notifications!.toasts.addError(error, {
+          title: i18n.translate('workflows.createWorkflowError', {
+            defaultMessage: 'Error creating workflow',
+          }),
+        });
       },
     });
   };

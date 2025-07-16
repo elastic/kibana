@@ -15,14 +15,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  Criteria,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { ExecutionStatus, WorkflowExecutionModel } from '@kbn/workflows';
+import { ExecutionStatus, EsWorkflowExecution } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
 import { WorkflowExecution } from '../../workflow-detail/ui/workflow-execution';
-import { StatusBadge } from '../../../shared/ui/StatusBadge';
+import { StatusBadge } from '../../../shared/ui/status_badge';
 
 export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
   const {
@@ -35,11 +34,11 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
     null
   );
 
-  const handleViewWorkflowExecution = (item: WorkflowExecutionModel) => {
+  const handleViewWorkflowExecution = (item: EsWorkflowExecution) => {
     setSelectedWorkflowExecutionId(item.id);
   };
 
-  const columns: Array<EuiBasicTableColumn<WorkflowExecutionModel>> = [
+  const columns: Array<EuiBasicTableColumn<EsWorkflowExecution>> = [
     {
       field: 'id',
       name: 'ID',

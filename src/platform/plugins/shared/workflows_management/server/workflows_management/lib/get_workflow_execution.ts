@@ -8,12 +8,14 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WorkflowExecution } from '@kbn/workflows/types/v1';
+import { EsWorkflowExecution, EsWorkflowStepExecution, WorkflowExecutionDto } from '@kbn/workflows';
+import { searchStepExecutions } from './search_step_executions';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   workflowExecutionIndex: string;
+  stepsExecutionIndex: string;
   workflowExecutionId: string;
 }
 
@@ -21,10 +23,11 @@ export const getWorkflowExecution = async ({
   esClient,
   logger,
   workflowExecutionIndex,
+  stepsExecutionIndex,
   workflowExecutionId,
-}: GetWorkflowExecutionParams): Promise<WorkflowExecution | null> => {
+}: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
   try {
-    const response = await esClient.search<WorkflowExecution>({
+    const response = await esClient.search<EsWorkflowExecution>({
       index: workflowExecutionIndex,
       query: {
         match: {
@@ -33,9 +36,32 @@ export const getWorkflowExecution = async ({
       },
     });
 
-    return response.hits.hits.map((hit) => hit._source)[0] ?? null;
+    const workflowExecution = response.hits.hits.map((hit) => hit._source)[0] ?? null;
+
+    if (!workflowExecution) {
+      return null;
+    }
+
+    const stepExecutions = await searchStepExecutions({
+      esClient,
+      logger,
+      stepsExecutionIndex,
+      workflowExecutionId,
+    });
+
+    return transformToWorkflowExecutionDetailDto(workflowExecution, stepExecutions);
   } catch (error) {
     logger.error(`Failed to get workflow: ${error}`);
     throw error;
   }
 };
+
+function transformToWorkflowExecutionDetailDto(
+  workflowExecution: EsWorkflowExecution,
+  stepExecutions: EsWorkflowStepExecution[]
+): WorkflowExecutionDto {
+  return {
+    ...workflowExecution,
+    stepExecutions,
+  };
+}

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
+import { WorkflowYaml } from '../spec/schema';
+
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
@@ -20,17 +23,17 @@ export enum ExecutionStatus {
   SKIPPED = 'skipped',
 }
 
-export interface WorkflowExecution {
+export interface EsWorkflowExecution {
   id: string;
   workflowId: string;
   status: ExecutionStatus;
+  triggers: EsWorkflowTrigger[];
+  steps: EsWorkflowStep[];
+  createdAt: string;
   error: string | null;
-  triggers: WorkflowTrigger[];
-  steps: WorkflowStep[];
-  createdAt: Date;
   createdBy: string;
-  startedAt: Date;
-  finishedAt: Date;
+  startedAt: string;
+  finishedAt: string;
   duration: number;
 }
 
@@ -46,22 +49,24 @@ export interface Provider {
   inputsDefinition: Record<string, ProviderInput>;
 }
 
-export interface WorkflowStep {
-  id: string;
-  connectorType: string;
-  connectorName: string;
-  inputs: Record<string, any>;
-  needs?: string[];
-}
+export const EsWorkflowStepSchema = z.object({
+  id: z.string(),
+  connectorType: z.string(),
+  connectorName: z.string(),
+  inputs: z.record(z.any()),
+  needs: z.array(z.string()).optional(),
+});
 
-export interface WorkflowStepExecution {
+export type EsWorkflowStep = z.infer<typeof EsWorkflowStepSchema>;
+
+export interface EsWorkflowStepExecution {
   id: string;
   stepId: string;
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;
-  startedAt: Date;
-  completedAt?: Date;
+  startedAt: string;
+  completedAt?: string;
   executionTimeMs?: number;
   error?: string;
   output?: Record<string, any>;
@@ -74,24 +79,14 @@ export enum WorkflowStatus {
   DELETED = 'deleted',
 }
 
-export interface WorkflowTrigger {
-  id: string;
-  type: 'manual' | 'schedule' | 'detection-rule';
-  enabled: boolean;
-  config?: Record<string, any>;
-}
+export const EsWorkflowTriggerSchema = z.object({
+  id: z.string(),
+  type: z.enum(['manual', 'schedule', 'detection-rule']),
+  enabled: z.boolean(),
+  config: z.record(z.any()).optional(),
+});
 
-export interface WorkflowNode {
-  id: string;
-  type: 'trigger' | 'step' | 'container' | 'switch';
-  config: Record<string, any>;
-  children: string[];
-  next: string;
-  position: { x: number; y: number };
-  color: string;
-  note: string;
-  workflowStepId: string;
-}
+export type EsWorkflowTrigger = z.infer<typeof EsWorkflowTriggerSchema>;
 
 export interface WorkflowExecutionHistoryModel {
   id: string;
@@ -109,19 +104,21 @@ export interface WorkflowExecutionLogModel {
   level: string;
 }
 
-export interface WorkflowExecutionModel {
+export interface WorkflowExecutionDto {
   id: string;
   status: ExecutionStatus;
-  startedAt: Date;
-  finishedAt: Date;
+  startedAt: string;
+  finishedAt: string;
   workflowId?: string;
   workflowName?: string;
-  stepExecutions: WorkflowStepExecution[];
+  stepExecutions: EsWorkflowStepExecution[];
   duration: number | null;
 }
 
-export interface WorkflowExecutionListModel {
-  results: WorkflowExecutionModel[];
+export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions'>;
+
+export interface WorkflowExecutionListDto {
+  results: WorkflowExecutionListItemDto[];
   _pagination: {
     offset: number;
     limit: number;
@@ -132,40 +129,59 @@ export interface WorkflowExecutionListModel {
 }
 
 // TODO: convert to actual elastic document spec
-export interface EsWorkflowSchema {
+
+export const EsWorkflowSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  status: z.nativeEnum(WorkflowStatus),
+  triggers: z.array(EsWorkflowTriggerSchema),
+  tags: z.array(z.string()),
+  steps: z.array(EsWorkflowStepSchema),
+  createdAt: z.date(),
+  createdBy: z.string(),
+  lastUpdatedAt: z.date(),
+  lastUpdatedBy: z.string(),
+  yaml: z.string(),
+});
+
+export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
+
+export const CreateWorkflowCommandSchema = EsWorkflowSchema.omit({
+  id: true,
+  createdAt: true,
+  createdBy: true,
+  lastUpdatedAt: true,
+  lastUpdatedBy: true,
+});
+
+export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
+
+export interface WorkflowDetailDto {
+  id: string;
+  name: string;
+  description?: string;
+  status: WorkflowStatus;
+  triggers: EsWorkflowTrigger[];
+  steps: EsWorkflowStep[];
+  createdAt: Date;
+  createdBy: string;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+  yaml: string;
+}
+
+export interface WorkflowListItemDto {
   id: string;
   name: string;
   description: string;
   status: WorkflowStatus;
-  triggers: WorkflowTrigger[];
-  tags: string[];
-  executions: WorkflowExecutionModel[];
+  triggers: EsWorkflowTrigger[];
+  createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
-  createdAt: string;
-  createdBy: string;
-  lastUpdatedAt: string;
-  lastUpdatedBy: string;
-  yaml: string;
-  steps: WorkflowStep[];
-  nodes: WorkflowNode[];
 }
 
-export interface CreateWorkflowRequest {
-  name: string;
-  description?: string;
-  status?: WorkflowStatus;
-  triggers?: WorkflowTrigger[];
-  steps?: WorkflowStep[];
-}
-
-export type WorkflowModel = EsWorkflowSchema;
-
-export type WorkflowListItemModel = Pick<
-  WorkflowModel,
-  'id' | 'name' | 'description' | 'status' | 'triggers' | 'tags' | 'history'
->;
-
-export interface WorkflowListModel {
+export interface WorkflowListDto {
   _pagination: {
     offset: number;
     limit: number;
@@ -173,10 +189,10 @@ export interface WorkflowListModel {
     next?: string;
     prev?: string;
   };
-  results: WorkflowListItemModel[];
+  results: WorkflowListItemDto[];
 }
 
 export type WorkflowExecutionEngineModel = Pick<
-  WorkflowModel,
+  EsWorkflow,
   'id' | 'name' | 'status' | 'triggers' | 'steps'
 >;

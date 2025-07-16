@@ -1,9 +1,18 @@
-import { z } from 'zod';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from '@kbn/zod';
 
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
-  maxAttempts: z.number().int().min(1).optional(),
-  timeoutSeconds: z.number().int().min(1).optional(),
+  'max-attempts': z.number().int().min(1).optional(),
+  'timeout-seconds': z.number().int().min(1).optional(),
 });
 
 export const TemplatingOptionsSchema = z.object({
@@ -59,60 +68,63 @@ export const WorkflowOnFailureSchema = z.object({
 });
 
 // Base step schema, with recursive steps property
-const BaseStepSchema: z.ZodType<any> = z.lazy(() =>
-  z.object({
-    name: z.string().min(1),
-    type: z.discriminatedUnion('type', [
-      ForEachStepSchema,
-      IfStepSchema,
-      AtomicStepSchema,
-      ParallelStepSchema,
-      MergeStepSchema,
-      ConnectorStepSchema,
-      // ...other step types
-    ]),
-    with: z.record(z.string(), z.any()).optional(),
-    if: z.string().optional(),
-    foreach: z.string().optional(),
-    // next: z.string().optional(),
-    onError: WorkflowOnFailureSchema.optional(),
-    timeout: z.number().optional(),
-  })
-);
-
-const ConnectorStepSchema = z.object({
-  type: z.string(),
-  name: z.string(),
-  connectorId: z.optional(z.string()), // http.request for example, doesn't need connectorId
-  // steps: z.array(BaseStepSchema), // TODO: do we need this?
+const BaseStepSchema = z.object({
+  name: z.string().min(1),
+  if: z.string().optional(),
+  foreach: z.string().optional(),
+  // next: z.string().optional(),
+  'on-failure': WorkflowOnFailureSchema.optional(),
+  timeout: z.number().optional(),
 });
 
+export const BaseConnectorStepSchema = BaseStepSchema.extend({
+  'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
+  with: z.record(z.string(), z.any()).optional(),
+});
 
-const ForEachStepSchema = z.object({
-  type: z.literal('forEach'),
-  name: z.string(),
+const ForEachStepSchema = BaseStepSchema.extend({
+  type: z.literal('foreach'),
   foreach: z.string(),
-  steps: z.array(BaseStepSchema),
+  steps: z.array(BaseStepSchema).min(1),
 });
 
-const IfStepSchema = z.object({
+export const getForEachStepSchema = (stepSchema: z.ZodType) => {
+  return BaseStepSchema.extend({
+    type: z.literal('foreach'),
+    foreach: z.string(),
+    steps: z.array(stepSchema).min(1),
+  });
+};
+
+const IfStepSchema = BaseStepSchema.extend({
   type: z.literal('if'),
-  name: z.string(),
   condition: z.string(),
   steps: z.array(BaseStepSchema),
   else: z.array(BaseStepSchema).optional(),
 });
 
-const AtomicStepSchema = z.object({
-  type: z.string(),
-  name: z.string(),
-  // ...other atomic fields
+export const getIfStepSchema = (stepSchema: z.ZodType) => {
+  return BaseStepSchema.extend({
+    type: z.literal('if'),
+    condition: z.string(),
+    steps: z.array(stepSchema).min(1),
+  });
+};
+
+const AtomicStepSchema = BaseStepSchema.extend({
+  type: z.literal('atomic'),
   steps: z.array(BaseStepSchema).optional(), // allow nesting even for atomic steps
 });
 
-const ParallelStepSchema = z.object({
+export const getAtomicStepSchema = (stepSchema: z.ZodType) => {
+  return BaseStepSchema.extend({
+    type: z.literal('atomic'),
+    steps: z.array(stepSchema).optional(), // allow nesting even for atomic steps
+  });
+};
+
+const ParallelStepSchema = BaseStepSchema.extend({
   type: z.literal('parallel'),
-  name: z.string(),
   branches: z.array(
     z.object({
       name: z.string(),
@@ -121,12 +133,26 @@ const ParallelStepSchema = z.object({
   ),
 });
 
-const MergeStepSchema = z.object({
+export const getParallelStepSchema = (stepSchema: z.ZodType) => {
+  return BaseStepSchema.extend({
+    type: z.literal('parallel'),
+    branches: z.array(z.object({ name: z.string(), steps: z.array(stepSchema) })),
+  });
+};
+
+const MergeStepSchema = BaseStepSchema.extend({
   type: z.literal('merge'),
-  name: z.string(),
   sources: z.array(z.string()), // references to branches or steps to merge
   steps: z.array(BaseStepSchema), // steps to run after merge
 });
+
+export const getMergeStepSchema = (stepSchema: z.ZodType) => {
+  return BaseStepSchema.extend({
+    type: z.literal('merge'),
+    sources: z.array(z.string()), // references to branches or steps to merge
+    steps: z.array(stepSchema), // steps to run after merge
+  });
+};
 
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
@@ -179,16 +205,33 @@ export const WorkflowConstsSchema = z.record(
   ])
 );
 
+const StepSchema = z.lazy(() =>
+  z.discriminatedUnion('type', [
+    ForEachStepSchema,
+    IfStepSchema,
+    AtomicStepSchema,
+    ParallelStepSchema,
+    MergeStepSchema,
+    // ConnectorStepSchema,
+  ])
+);
+
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   settings: WorkflowSettingsSchema.optional(),
   enabled: z.boolean().default(true),
+  tags: z.array(z.string()).optional(),
   triggers: z.array(TriggerSchema).min(1),
   inputs: z.array(WorkflowInputSchema).optional(),
   consts: WorkflowConstsSchema.optional(),
-  steps: z.array(BaseStepSchema).min(1),
+  steps: z.array(StepSchema).min(1),
 });
 
-export type Workflow = z.infer<typeof WorkflowSchema>;
+export const WorkflowYamlSchema = z.object({
+  version: z.literal('1').default('1').describe('The version of the workflow schema'),
+  workflow: WorkflowSchema,
+});
+
+export type WorkflowYaml = z.infer<typeof WorkflowYamlSchema>;

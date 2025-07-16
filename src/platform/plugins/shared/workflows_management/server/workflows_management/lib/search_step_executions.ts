@@ -8,7 +8,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WorkflowStepExecution } from '@kbn/workflows';
+import { EsWorkflowStepExecution } from '@kbn/workflows';
 
 interface SearchStepExectionsParams {
   esClient: ElasticsearchClient;
@@ -22,10 +22,10 @@ export const searchStepExecutions = async ({
   logger,
   stepsExecutionIndex,
   workflowExecutionId,
-}: SearchStepExectionsParams): Promise<WorkflowStepExecution[]> => {
+}: SearchStepExectionsParams): Promise<EsWorkflowStepExecution[]> => {
   try {
     logger.info(`Searching workflows in index ${stepsExecutionIndex}`);
-    const response = await esClient.search<WorkflowStepExecution>({
+    const response = await esClient.search<EsWorkflowStepExecution>({
       index: stepsExecutionIndex,
       query: { match: { workflowRunId: workflowExecutionId } },
       sort: 'startedAt:dsc',
@@ -35,7 +35,7 @@ export const searchStepExecutions = async ({
       `Found ${response.hits.hits.length} workflows, ${response.hits.hits.map((hit) => hit._id)}`
     );
 
-    return response.hits.hits.map((hit) => hit._source as WorkflowStepExecution);
+    return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
   } catch (error) {
     logger.error(`Failed to search workflows: ${error}`);
     throw error;

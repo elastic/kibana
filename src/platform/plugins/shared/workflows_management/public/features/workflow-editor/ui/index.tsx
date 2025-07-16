@@ -8,23 +8,34 @@
  */
 
 import React from 'react';
-import { CodeEditor } from '@kbn/code-editor';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { WorkflowYAMLEditor } from '../../../widgets/workflow-yaml-editor/ui';
 
 interface WorkflowEditorProps {
+  workflowId: string;
   value: string;
   onChange: (value: string) => void;
   hasChanges: boolean;
 }
 
-export function WorkflowEditor({ value, onChange, hasChanges }: WorkflowEditorProps) {
+export function WorkflowEditor({ workflowId, value, onChange, hasChanges }: WorkflowEditorProps) {
   const { euiTheme } = useEuiTheme();
+
+  // useEffect(() => {
+  //   monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+  //     validate: true,
+  //     allowComments: true,
+  //     schemas: [{ uri: 'workflow.json', schema: jsonSchema, fileMatch: ['*'] }],
+  //   });
+  // }, []);
+
   return (
     <EuiFlexGroup
       direction="column"
       css={{
         border: '1px solid lightgray',
         borderRadius: '4px',
+        height: 'calc(100vh - 300px)',
       }}
       gutterSize="none"
     >
@@ -73,14 +84,12 @@ export function WorkflowEditor({ value, onChange, hasChanges }: WorkflowEditorPr
           </div>
         )}
       </EuiFlexItem>
-      <EuiFlexItem>
-        <CodeEditor
-          languageId="json"
+      <EuiFlexItem css={{ flex: 1, minHeight: 0, height: '100%' }}>
+        <WorkflowYAMLEditor
+          workflowId={workflowId}
+          filename={`${workflowId}.yaml`}
           value={value}
-          height={800}
-          onChange={onChange}
-          suggestionProvider={undefined}
-          dataTestSubj={'workflow-json-editor'}
+          onChange={(value) => onChange(value ?? '')}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { Link } from 'react-router-dom';
 import { Chart, BarSeries, ScaleType, Settings } from '@elastic/charts';
-import { ExecutionStatus, WorkflowListItemModel } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowListItemDto } from '@kbn/workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
 import { useWorkflowActions } from '../../../entities/workflows/model/useWorkflowActions';
@@ -35,7 +35,7 @@ export function WorkflowList() {
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows();
   const { deleteWorkflows, runWorkflow } = useWorkflowActions();
 
-  const [selectedItems, setSelectedItems] = useState<WorkflowListItemModel[]>([]);
+  const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
 
   const deleteSelectedWorkflows = () => {
     if (selectedItems.length === 0) {
@@ -51,7 +51,7 @@ export function WorkflowList() {
     setSelectedItems([]);
   };
 
-  const handleRunWorkflow = (item: WorkflowListItemModel) => {
+  const handleRunWorkflow = (item: WorkflowListItemDto) => {
     runWorkflow.mutate(
       { id: item.id, inputs: {} },
       {
@@ -70,7 +70,7 @@ export function WorkflowList() {
     );
   };
 
-  const handleDeleteWorkflow = (item: WorkflowListItemModel) => {
+  const handleDeleteWorkflow = (item: WorkflowListItemDto) => {
     const confirmed = window.confirm(`Are you sure you want to delete ${item.name}?`);
     if (!confirmed) {
       return;
@@ -78,7 +78,7 @@ export function WorkflowList() {
     deleteWorkflows.mutate({ ids: [item.id] });
   };
 
-  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemModel>>>(
+  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
       {
         field: 'name',

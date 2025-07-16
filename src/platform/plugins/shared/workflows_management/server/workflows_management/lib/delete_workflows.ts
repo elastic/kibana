@@ -30,6 +30,7 @@ export const deleteWorkflows = async ({
           values: workflowIds,
         },
       },
+      refresh: true,
     });
 
     return response;
