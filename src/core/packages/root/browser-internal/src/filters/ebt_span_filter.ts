@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const ignorePaths = ['/kibana-browser', '/ebt_local_shipper'];
+const ignorePaths = ['/kibana-browser'];
 
 // Copied from @elastic/apm-rum/src/common/types.ts
 export type FilterFn = (payload: Payload) => Payload | boolean | void;

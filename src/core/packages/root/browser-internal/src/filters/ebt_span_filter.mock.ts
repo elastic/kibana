@@ -7,65 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockedEbtLocalShipperPayload = {
-  transactions: [
-    {
-      id: 'abd1cc2716f35cd4',
-      trace_id: 'e0a417ddd0297dcc7f3376b307467fee',
-      name: 'POST /internal/telemetry/ebt_local_shipper',
-      type: 'http-request',
-      duration: 30,
-      context: {
-        page: {
-          referer: '',
-          url: 'http://localhost:5601/kibana/app/observability/alerts?_a=(controlConfigs:!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.status,hideActionBar:!t,selectedOptions:!(),title:Status),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.rule.name,hideActionBar:!f,selectedOptions:!(),title:Rule),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.group.value,hideActionBar:!f,selectedOptions:!(),title:Group),(exclude:!f,existsSelected:!f,fieldName:tags,hideActionBar:!f,selectedOptions:!(),title:Tags)),filters:!(),groupings:!(none),kuery:%27%27,rangeFrom:now-24h,rangeTo:now)',
-        },
-      },
-      marks: {
-        agent: {},
-      },
-      spans: [
-        {
-          id: 'dbbd0b78e910f443',
-          transaction_id: 'df7f0ecbba0ca943',
-          parent_id: 'df7f0ecbba0ca943',
-          trace_id: 'fa657d10bf4417ff28125399cc1cea40',
-          name: 'POST http://localhost:5601/kibana/internal/telemetry/ebt_local_shipper',
-          type: 'external',
-          subtype: 'http',
-          start: 0,
-          duration: 51,
-          context: {
-            http: {
-              method: 'POST',
-              url: 'http://localhost:5601/kibana/internal/telemetry/ebt_local_shipper',
-              status_code: 200,
-            },
-            destination: {
-              service: {
-                resource: 'localhost:5601',
-                name: 'N/A',
-                type: 'N/A',
-              },
-              address: 'localhost',
-              port: 5601,
-            },
-          },
-          outcome: 'success',
-          sample_rate: 1,
-        },
-      ],
-      span_count: {
-        started: 1,
-      },
-      sampled: true,
-      sample_rate: 1,
-      outcome: 'success',
-    },
-  ],
-  errors: [],
-};
-
 export const mockedKibanaBrowserPayload = {
   transactions: [
     {
@@ -208,27 +149,5 @@ export const mockedRandomTransactionPayload = {
       sample_rate: 1,
     },
   ],
-  errors: [
-    {
-      id: 'b4616551eafcae6daca722d46b6134f9',
-      culprit: '(inline script)',
-      exception: {
-        message: 'ResizeObserver loop completed with undelivered notifications.',
-        stacktrace: [],
-      },
-      context: {
-        page: {
-          referer: '',
-          url: 'http://localhost:5601/kibana/app/observability/alerts?_a=(controlConfigs:!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.status,hideActionBar:!t,selectedOptions:!(),title:Status),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.rule.name,hideActionBar:!f,selectedOptions:!(),title:Rule),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.group.value,hideActionBar:!f,selectedOptions:!(),title:Group),(exclude:!f,existsSelected:!f,fieldName:tags,hideActionBar:!f,selectedOptions:!(),title:Tags)),filters:!(),groupings:!(none),kuery:%27%27,rangeFrom:now-24h,rangeTo:now)',
-        },
-      },
-      trace_id: '2fbc9d0d6959e8fb7745374c04af34e1',
-      parent_id: 'e143873960387c24',
-      transaction_id: 'e143873960387c24',
-      transaction: {
-        type: 'route-change',
-        sampled: true,
-      },
-    },
-  ],
+  errors: [],
 };

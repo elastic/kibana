@@ -9,27 +9,9 @@
 
 import _ from 'lodash';
 import { ebtSpanFilter, type Payload } from './ebt_span_filter';
-import {
-  mockedEbtLocalShipperPayload,
-  mockedKibanaBrowserPayload,
-  mockedRandomTransactionPayload,
-} from './ebt_span_filter.mock';
+import { mockedKibanaBrowserPayload, mockedRandomTransactionPayload } from './ebt_span_filter.mock';
 
 describe('ebtSpanFilter', () => {
-  it('filters ebt local shipper spans out', () => {
-    const payload: Payload = _.cloneDeep(mockedEbtLocalShipperPayload);
-    const result = ebtSpanFilter(payload);
-    expect(result).toEqual({
-      ...mockedEbtLocalShipperPayload,
-      transactions: [
-        {
-          ...payload.transactions[0],
-          spans: [],
-        },
-      ],
-    });
-  });
-
   it('filters ebt kibana browser spans out', () => {
     const payload: Payload = _.cloneDeep(mockedKibanaBrowserPayload);
     const result = ebtSpanFilter(payload);
