@@ -253,6 +253,26 @@ describe('PolicySelector component', () => {
       expect(queryByTestId(endpointPolicyTestId)).toBeNull();
       expect(queryByTestId(nonEndpontPolicyTestId)).toBeNull();
     });
+
+    it('should not trigger selection when clicking View policy link', async () => {
+      const { getByTestId } = await render();
+
+      // Verify policy is not initially selected
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '0 of 2 selected'
+      );
+
+      // Click on the View policy link
+      act(() => {
+        fireEvent.click(getByTestId(endpointPolicyTestId));
+      });
+
+      // Policy should still not be selected after clicking the link
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '0 of 2 selected'
+      );
+      expect(props.onChange).not.toHaveBeenCalled();
+    });
   });
 
   describe('and when the "Selected" policies button is clicked', () => {
