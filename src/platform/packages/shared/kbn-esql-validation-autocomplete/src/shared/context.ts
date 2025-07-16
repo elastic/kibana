@@ -21,7 +21,7 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/utils/constants';
 import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
 import { within } from './helpers';

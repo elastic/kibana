@@ -17,7 +17,7 @@ import {
   getCommandAutocompleteDefinitions,
   ESQL_VARIABLES_PREFIX,
 } from '@kbn/esql-ast';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/utils/constants';
 import {
   getControlSuggestionIfSupported,
   getSuggestionsToRightOfOperatorExpression,
