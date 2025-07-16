@@ -65,20 +65,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['tag', 'visualization'] });
 
       await kibanaServer.importExport.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json'
       );
       await esArchiver.loadIfNeeded(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json'
       );
       // clean up after test suite
       await kibanaServer.savedObjects.clean({ types: ['tag', 'visualization'] });
       await esArchiver.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
     });
 
