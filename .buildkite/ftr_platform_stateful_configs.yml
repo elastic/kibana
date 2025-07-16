@@ -271,7 +271,6 @@ enabled:
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/platform/test/functional_cloud/config.ts
   - x-pack/platform/test/functional_cloud/saml.config.ts
-  - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/test/plugin_functional/config.ts

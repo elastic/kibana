@@ -1605,7 +1605,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # Observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
-/x-pack/test/functional_solution_sidenav/tests/observability_sidenav.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/functional_solution_sidenav/ @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/page_objects/observability_page.ts @elastic/observability-ui
 /x-pack/test_serverless/**/test_suites/observability/config.ts @elastic/observability-ui
 
@@ -2252,7 +2252,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/platform/test/functional/fixtures/kbn_archiver/ccs @elastic/search-kibana
 /src/platform/test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
 /src/platform/test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
-/x-pack/test/functional_solution_sidenav/tests/search_sidenav.ts @elastic/search-kibana
+/x-pack/solutions/search/functional_solution_sidenav/ @elastic/search-kibana
 /x-pack/platform/test/functional/services/search_sessions.ts @elastic/search-kibana
 /x-pack/platform/test/functional/page_objects/search_sessions_management_page.ts @elastic/search-kibana
 /x-pack/test/functional/page_objects/search_* @elastic/search-kibana
@@ -2378,7 +2378,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/security_solution_ftr @elastic/security-solution
 /x-pack/test/functional/es_archives/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
-/x-pack/test/functional_solution_sidenav/tests/security_sidenav.ts @elastic/security-solution
+/x-pack/solutions/security/test/functional_solution_sidenav/ @elastic/security-solution
 /x-pack/test/common/utils/security_solution/index.ts @elastic/security-solution
 /x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 /x-pack/test/common/services/security_solution @elastic/security-solution
@@ -2907,10 +2907,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overview @elastic/appex-sharedux
-/x-pack/test/functional_solution_sidenav/config.ts @elastic/appex-sharedux
-/x-pack/test/functional_solution_sidenav/ftr_provider_context.ts @elastic/appex-sharedux
-/x-pack/test/functional_solution_sidenav/services.ts @elastic/appex-sharedux
-/x-pack/test/functional_solution_sidenav/index.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional_cloud @elastic/appex-sharedux
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux

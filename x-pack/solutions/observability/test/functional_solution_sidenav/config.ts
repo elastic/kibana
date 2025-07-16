@@ -6,6 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { pageObjects, services } from './ftr_provider_context';
 
 /**
  * NOTE: The solution view is currently only available in the cloud environment.
@@ -13,10 +14,14 @@ import { FtrConfigProviderContext } from '@kbn/test';
  */
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
+  const functionalConfig = await readConfigFile(
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
+  );
 
   return {
     ...functionalConfig.getAll(),
+    services,
+    pageObjects,
     testFiles: [require.resolve('.')],
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
