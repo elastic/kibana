@@ -22,7 +22,6 @@ import {
   DATE_WITH_POD_DATA_TO,
 } from './constants';
 import { generateDockerContainersData, generateHostData, generatePodsData } from './helpers';
-import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
 
 const DATE_WITHOUT_DATA = '10/09/2018 10:00:00 PM';
 
@@ -52,7 +51,6 @@ const HOSTS = [
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
-  const esClient = getService('es');
   const pageObjects = getPageObjects([
     'common',
     'header',
@@ -63,6 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const synthtraceClient = getService('synthtrace');
 
   const returnTo = async (path: string, timeout = 2000) =>
     retry.waitForWithTimeout('returned to inventory', timeout, async () => {
@@ -77,7 +76,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let synthEsClient: InfraSynthtraceEsClient;
 
     before(async () => {
-      synthEsClient = await getInfraSynthtraceEsClient(esClient);
+      const clients = await synthtraceClient.getClients(['infraEsClient']);
+      synthEsClient = clients.infraEsClient;
+
       await kibanaServer.savedObjects.cleanStandardList();
       return synthEsClient.clean();
     });

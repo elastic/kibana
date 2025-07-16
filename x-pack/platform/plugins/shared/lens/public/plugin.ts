@@ -120,9 +120,7 @@ import type {
   VisualizationMap,
 } from './types';
 import { lensVisTypeAlias } from './vis_type_alias';
-import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { inAppEmbeddableEditTrigger } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
-
 import type {
   LensEmbeddableStartServices,
   LensSerializedState,
@@ -136,7 +134,7 @@ import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_dril
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
-import { LensDocument } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
   LATEST_VERSION,
@@ -690,13 +688,6 @@ export class LensPlugin {
     );
 
     // Allows the Lens embeddable to easily open the inline editing flyout
-    // });
-    // embeddable inline edit panel action
-    // startDependencies.uiActions.addTriggerAction(
-    //   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
-    //   editLensEmbeddableAction
-    // );
-
     startDependencies.uiActions.addTriggerActionAsync(
       IN_APP_EMBEDDABLE_EDIT_TRIGGER,
       ACTION_EDIT_LENS_EMBEDDABLE,
@@ -733,13 +724,19 @@ export class LensPlugin {
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
-      startDependencies.uiActions.addTriggerAction(
+      startDependencies.uiActions.addTriggerActionAsync(
         CONTEXT_MENU_TRIGGER,
-        createOpenInDiscoverAction(
-          discoverLocator,
-          startDependencies.dataViews,
-          this.hasDiscoverAccess
-        )
+        'ACTION_OPEN_IN_DISCOVER',
+        async () => {
+          const { createOpenInDiscoverAction } = await import(
+            './trigger_actions/open_in_discover_action'
+          );
+          return createOpenInDiscoverAction(
+            discoverLocator,
+            startDependencies.dataViews,
+            this.hasDiscoverAccess
+          );
+        }
       );
     }
 
