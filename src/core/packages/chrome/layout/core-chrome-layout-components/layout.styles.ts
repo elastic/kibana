@@ -20,16 +20,15 @@ const cssProp = css`
   display: grid;
 
   grid-template-areas:
-    'banner banner banner banner banner'
-    'navigation navigationPanel header sidebarPanel sidebar'
-    'navigation navigationPanel application sidebarPanel sidebar'
-    'footer footer footer footer footer';
+    'banner banner banner banner'
+    'navigation header sidebarPanel sidebar'
+    'navigation application sidebarPanel sidebar'
+    'footer footer footer footer';
 `;
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.
 export const useLayoutStyles = (layoutState: LayoutState) => {
   const {
-    navigationPanelWidth,
     navigationWidth,
     sidebarPanelWidth,
     sidebarWidth,
@@ -41,7 +40,6 @@ export const useLayoutStyles = (layoutState: LayoutState) => {
   const style = {
     gridTemplateColumns: `
       ${navigationWidth}px
-      ${navigationPanelWidth}px
       1fr
       ${sidebarPanelWidth}px
       ${sidebarWidth}px
