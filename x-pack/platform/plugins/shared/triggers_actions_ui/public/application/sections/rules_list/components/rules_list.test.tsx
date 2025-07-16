@@ -217,7 +217,7 @@ describe('Update Api Key', () => {
 
   it('Have the option to update API key', async () => {
     bulkUpdateAPIKey.mockResolvedValueOnce({ errors: [], total: 1, rules: [], skipped: [] });
-    const s = renderWithProviders(<RulesList />);
+    renderWithProviders(<RulesList />);
 
     expect(await screen.findByText('test rule ok')).toBeInTheDocument();
 
