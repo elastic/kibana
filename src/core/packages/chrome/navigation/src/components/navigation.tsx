@@ -163,6 +163,7 @@ export const Navigation = ({
                               key={item.id}
                               iconType={item.iconType}
                               isCurrent={isCurrent}
+                              isCollapsed={isCollapsed}
                               href={item.href}
                               hasSubmenu={hasSubItems}
                               submenuPanelId={hasSubItems ? `submenu-${item.id}` : undefined}
