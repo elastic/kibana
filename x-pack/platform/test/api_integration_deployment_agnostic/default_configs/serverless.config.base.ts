@@ -122,6 +122,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
+          'xpack.security.authc.native_roles.enabled=true',
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
