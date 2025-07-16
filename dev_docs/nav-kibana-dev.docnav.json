@@ -47,6 +47,12 @@
           "id": "kibStyleGuide"
         },
         {
+          "id": "kibHttpApiGuidelines"
+        },
+        {
+          "id": "kibHttpApiTfGuidelines"
+        },
+        {
           "id": "ktRFCProcess"
         },
         {

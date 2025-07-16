@@ -54,7 +54,7 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
                 <EuiSpacer size="m" />
                 <CardCallOut
                   color="primary"
-                  icon="iInCircle"
+                  icon="info"
                   text={i18n.ATTACK_DISCOVERY_CARD_CALLOUT_INTEGRATIONS_TEXT}
                   action={
                     <EuiLink onClick={expandIntegrationsCard}>

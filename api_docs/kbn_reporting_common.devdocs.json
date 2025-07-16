@@ -1383,6 +1383,21 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_MANAGEMENT_SCHEDULES",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_MANAGEMENT_SCHEDULES",
+        "description": [],
+        "signature": [
+          "\"/app/management/insightsAndAlerting/reporting/schedules\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES",
         "type": "Array",
         "tags": [],
@@ -1420,6 +1435,21 @@
         "description": [],
         "signature": [
           "\"__REPORTING_REDIRECT_LOCATOR_STORE_KEY__\""
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.SCHEDULED_REPORT_VALID_LICENSES",
+        "type": "Array",
+        "tags": [],
+        "label": "SCHEDULED_REPORT_VALID_LICENSES",
+        "description": [],
+        "signature": [
+          "(\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
         ],
         "path": "src/platform/packages/private/kbn-reporting/common/constants.ts",
         "deprecated": false,

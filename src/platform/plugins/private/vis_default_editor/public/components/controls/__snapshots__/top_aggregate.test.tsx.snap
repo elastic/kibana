@@ -15,7 +15,7 @@ exports[`TopAggregateParamEditor should init with the default set of props 1`] =
       <EuiIconTip
         content="Choose a strategy for combining multiple hits or a multi-valued field into a single metric."
         position="right"
-        type="questionInCircle"
+        type="question"
       />
     </React.Fragment>
   }

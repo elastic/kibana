@@ -411,6 +411,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async toggleShowFullDatasetNames() {
+      await find.waitForDeletedByCssSelector('.euiToolTipPopover', 5 * 1000);
       return find.clickByCssSelector(selectors.showFullDatasetNamesSwitch);
     },
 
@@ -473,12 +474,16 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       ].filter((item) => !excludeKeys.includes(item.key));
 
       const kpiTexts = await Promise.all(
-        kpiTitleAndKeys.map(async ({ title, key }) => ({
-          key,
-          value: await testSubjects.getVisibleText(
-            `${testSubjectSelectors.datasetQualityDetailsSummaryKpiValue}-${title}`
-          ),
-        }))
+        kpiTitleAndKeys.map(async ({ title, key }) => {
+          const selector = `${testSubjectSelectors.datasetQualityDetailsSummaryKpiValue}-${title}`;
+
+          const exists = await testSubjects.exists(selector);
+          if (!exists) {
+            return { key, value: undefined } as { key: string; value: string | undefined };
+          }
+
+          return { key, value: await testSubjects.getVisibleText(selector) };
+        })
       );
 
       return kpiTexts.reduce(
@@ -490,10 +495,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
-    /**
-     * Selects a breakdown field from the unified histogram breakdown selector
-     * @param fieldText The text of the field to select. Use 'No breakdown' to clear the selection
-     */
     async selectBreakdownField(fieldText: string) {
       return euiSelectable.searchAndSelectOption(
         testSubjectSelectors.unifiedHistogramBreakdownSelectorButton,
@@ -532,10 +533,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      // Check if 'title' attribute is "Expand" or "Collapse"
       const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
 
-      // Open if collapsed
       if (isCollapsed) {
         await fieldExpandButton.click();
       }
@@ -563,10 +562,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      // Check if 'title' attribute is "Expand" or "Collapse"
       const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
 
-      // Open if collapsed
       if (isCollapsed) {
         await fieldExpandButton.click();
       }

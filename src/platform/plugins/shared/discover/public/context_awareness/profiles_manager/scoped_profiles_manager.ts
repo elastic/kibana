@@ -24,17 +24,18 @@ import type {
   DocumentProfileService,
 } from '../profiles/document_profile';
 import type { RootContext } from '../profiles/root_profile';
-import type { DiscoverEBTManager } from '../../plugin_imports/discover_ebt_manager';
+import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import { logResolutionError } from './utils';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { ContextualProfileLevel } from './consts';
+import { recordHasContext } from './record_has_context';
 
 interface SerializedDataSourceProfileParams {
   dataViewId: string | undefined;
   esqlQuery: string | undefined;
 }
 
-interface DataTableRecordWithContext extends DataTableRecord {
+export interface DataTableRecordWithContext extends DataTableRecord {
   context: ContextWithProfileId<DocumentContext>;
 }
 
@@ -60,7 +61,7 @@ export class ScopedProfilesManager {
     private readonly getRootProfile: () => AppliedProfile,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    private readonly ebtManager: DiscoverEBTManager
+    private readonly scopedEbtManager: ScopedDiscoverEBTManager
   ) {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
     this.dataSourceProfile = dataSourceProfileService.getProfile({
@@ -143,7 +144,7 @@ export class ScopedProfilesManager {
           }
         }
 
-        this.ebtManager.trackContextualProfileResolvedEvent({
+        this.scopedEbtManager.trackContextualProfileResolvedEvent({
           contextLevel: ContextualProfileLevel.documentLevel,
           profileId: context.profileId,
         });
@@ -181,22 +182,29 @@ export class ScopedProfilesManager {
     );
   }
 
+  public getContexts() {
+    return {
+      rootContext: this.rootContext$.getValue(),
+      dataSourceContext: this.dataSourceContext$.getValue(),
+    };
+  }
+
   /**
    * Tracks the active profiles in the EBT context
    */
   private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
     const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
 
-    this.ebtManager.trackContextualProfileResolvedEvent({
+    this.scopedEbtManager.trackContextualProfileResolvedEvent({
       contextLevel: ContextualProfileLevel.rootLevel,
       profileId: rootContextProfileId,
     });
-    this.ebtManager.trackContextualProfileResolvedEvent({
+    this.scopedEbtManager.trackContextualProfileResolvedEvent({
       contextLevel: ContextualProfileLevel.dataSourceLevel,
       profileId: dataSourceContextProfileId,
     });
 
-    this.ebtManager.updateProfilesContextWith(dscProfiles);
+    this.scopedEbtManager.updateProfilesContextWith(dscProfiles);
   }
 }
 
@@ -213,10 +221,4 @@ const serializeDataSourceProfileParams = (
         ? params.query.esql
         : undefined,
   };
-};
-
-const recordHasContext = (
-  record: DataTableRecord | undefined
-): record is DataTableRecordWithContext => {
-  return Boolean(record && 'context' in record);
 };

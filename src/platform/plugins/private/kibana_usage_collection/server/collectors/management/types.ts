@@ -49,7 +49,9 @@ export interface UsageStats {
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
-  'onechat:mcpServer:enabled': boolean;
+  'onechat:mcp:enabled': boolean;
+  'onechat:ui:enabled': boolean;
+  'onechat:api:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -151,7 +153,6 @@ export interface UsageStats {
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
-  'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
@@ -171,4 +172,5 @@ export interface UsageStats {
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
   'observability:enableStreamsUI': boolean;
+  'observability:streamsEnableSignificantEvents': boolean;
 }

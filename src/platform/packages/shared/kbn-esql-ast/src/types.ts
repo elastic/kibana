@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
+ */
 export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand =
   | ESQLCommand
-  | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
@@ -92,10 +94,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   commandType?: string;
 
   args: ESQLAstItem[];
-}
-
-export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
-  sources: ESQLSource[];
 }
 
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
@@ -225,7 +223,8 @@ export type BinaryExpressionOperator =
   | BinaryExpressionRenameOperator
   | BinaryExpressionWhereOperator
   | BinaryExpressionMatchOperator
-  | BinaryExpressionIn;
+  | BinaryExpressionIn
+  | BinaryExpressionLogical;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
@@ -235,6 +234,7 @@ export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
 export type BinaryExpressionMatchOperator = ':';
 export type BinaryExpressionIn = 'in' | 'not in';
+export type BinaryExpressionLogical = 'and' | 'or';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =

@@ -311,7 +311,7 @@
         "label": "Duration",
         "description": [],
         "signature": [
-          "({ duration, parent }: ",
+          "({ duration, parent, size = 's', showTooltip = false }: ",
           {
             "pluginId": "@kbn/apm-ui-shared",
             "scope": "public",
@@ -330,7 +330,7 @@
             "id": "def-public.Duration.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ duration, parent }",
+            "label": "{ duration, parent, size = 's', showTooltip = false }",
             "description": [],
             "signature": [
               {
@@ -358,7 +358,7 @@
         "label": "DurationDistributionChart",
         "description": [],
         "signature": [
-          "({\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n}: DurationDistributionChartProps) => React.JSX.Element"
+          "({\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n  isOtelData = false,\n}: DurationDistributionChartProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
         "deprecated": false,
@@ -369,7 +369,7 @@
             "id": "def-public.DurationDistributionChart.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n}",
+            "label": "{\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  dataTestSubPrefix,\n  showAxisTitle = true,\n  showLegend = true,\n  isOtelData = false,\n}",
             "description": [],
             "signature": [
               "DurationDistributionChartProps"
@@ -497,6 +497,87 @@
       },
       {
         "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.getSpanIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "getSpanIcon",
+        "description": [],
+        "signature": [
+          "(type: string | undefined, subtype: string | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/get_span_icon.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.getSpanIcon.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/get_span_icon.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.getSpanIcon.$2",
+            "type": "string",
+            "tags": [],
+            "label": "subtype",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/get_span_icon.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.HttpStatusCode",
+        "type": "Function",
+        "tags": [],
+        "label": "HttpStatusCode",
+        "description": [],
+        "signature": [
+          "({ code, showTooltip = false }: HttpStatusCodeProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/http_status_code/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.HttpStatusCode.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ code, showTooltip = false }",
+            "description": [],
+            "signature": [
+              "HttpStatusCodeProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/http_status_code/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
         "id": "def-public.replaceHistogramZerosWithMinimumDomainValue",
         "type": "Function",
         "tags": [],
@@ -553,13 +634,87 @@
       },
       {
         "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.SpanIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "SpanIcon",
+        "description": [],
+        "signature": [
+          "({ type, subtype, size = 'l', ...props }: Props) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.SpanIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ type, subtype, size = 'l', ...props }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.Timestamp",
+        "type": "Function",
+        "tags": [],
+        "label": "Timestamp",
+        "description": [],
+        "signature": [
+          "({\n  timestamp,\n  renderMode = 'inline',\n  timeUnit = 'milliseconds',\n  size = 's',\n}: TimestampProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/timestamp/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.Timestamp.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  timestamp,\n  renderMode = 'inline',\n  timeUnit = 'milliseconds',\n  size = 's',\n}",
+            "description": [],
+            "signature": [
+              "TimestampProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/timestamp/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
         "id": "def-public.toMicroseconds",
         "type": "Function",
         "tags": [],
         "label": "toMicroseconds",
         "description": [],
         "signature": [
-          "(value: number, timeUnit: TimeUnit) => number"
+          "(value: number, timeUnit: ",
+          {
+            "pluginId": "@kbn/apm-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnApmUiSharedPluginApi",
+            "section": "def-public.TimeUnit",
+            "text": "TimeUnit"
+          },
+          ") => number"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
         "deprecated": false,
@@ -588,7 +743,13 @@
             "label": "timeUnit",
             "description": [],
             "signature": [
-              "TimeUnit"
+              {
+                "pluginId": "@kbn/apm-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnApmUiSharedPluginApi",
+                "section": "def-public.TimeUnit",
+                "text": "TimeUnit"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
             "deprecated": false,
@@ -711,7 +872,35 @@
             "label": "parent",
             "description": [],
             "signature": [
-              "{ duration?: number | undefined; type: \"transaction\" | \"trace\"; loading: boolean; } | undefined"
+              "{ duration?: number | undefined; type: \"transaction\" | \"trace\"; loading?: boolean | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.DurationProps.size",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "\"m\" | \"s\" | \"xs\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.DurationProps.showTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showTooltip",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
             "deprecated": false,
@@ -776,6 +965,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.TimeUnit",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeUnit",
+        "description": [],
+        "signature": [
+          "\"hours\" | \"minutes\" | \"seconds\" | \"milliseconds\""
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -15,7 +15,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('navigation', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
-      await svlObltNavigation.navigateToLandingPage();
+      await svlObltNavigation.navigateToDiscoverPage();
+    });
+
+    it('shows the alerts entry', async () => {
+      await svlCommonNavigation.expectExists();
+
+      await svlCommonNavigation.sidenav.expectLinkExists({
+        deepLinkId: 'observability-overview:alerts',
+      });
     });
 
     it('does not show the SLO entry', async () => {
@@ -24,6 +32,19 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.expectLinkMissing({
         deepLinkId: 'slo',
       });
+    });
+
+    it('does not show the Cases entry', async () => {
+      await svlCommonNavigation.expectExists();
+      await svlCommonNavigation.sidenav.expectLinkMissing({
+        deepLinkId: 'observability-overview:cases',
+      });
+    });
+
+    it('shows 404 when loading cases', async () => {
+      await svlCommonNavigation.expectExists();
+      await svlObltNavigation.navigateToObsCases();
+      await svlObltNavigation.expectNotFoundPage();
     });
   });
 }

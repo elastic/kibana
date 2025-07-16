@@ -12,51 +12,41 @@ import { Global, css } from '@emotion/react';
 import { useLayoutState } from './layout_state_context';
 
 /**
- * Sets up global CSS for the layout using the CSS variables (custom properties) approach.
- * This enables dynamic theming and consistent styling across the application by defining reusable variables at the global scope.
+ * Defines global CSS variables for layout structure using custom properties.
  *
- * @remarks
- * The following CSS variables are defined:
+ * The following CSS variables are set and updated dynamically:
  *
  * Banner:
- *   --kbn-layout--banner-top
- *   --kbn-layout--banner-left
- *   --kbn-layout--banner-height
- *   --kbn-layout--banner-width
+ *   --kbn-layout--banner-[top|left|height|width]
  *
  * Header:
- *   --kbn-layout--header-top
- *   --kbn-layout--header-left
- *   --kbn-layout--header-height
- *   --kbn-layout--header-width
- *
- * Navigation:
- *   --kbn-layout--navigation-top
- *   --kbn-layout--navigation-height
- *   --kbn-layout--navigation-width
- *   --kbn-layout--navigation-panel-width
- *
- * Sidebar:
- *   --kbn-layout--sidebar-top
- *   --kbn-layout--sidebar-height
- *   --kbn-layout--sidebar-width
- *   --kbn-layout--sidebar-panel-width
- *
- * Application:
- *   --kbn-layout--application-top
- *   --kbn-layout--application-bottom
- *   --kbn-layout--application-left
- *   --kbn-layout--application-right
- *   --kbn-layout--application-height
- *   --kbn-layout--application-width
+ *   --kbn-layout--header-[top|left|right|height|width]
  *
  * Footer:
- *   --kbn-layout--footer-top
- *   --kbn-layout--footer-left
- *   --kbn-layout--footer-height
- *   --kbn-layout--footer-width
+ *   --kbn-layout--footer-[height|top|bottom|left|width]
  *
- * These variables are available globally for consistent layout styling and dynamic updates.
+ * Navigation:
+ *   --kbn-layout--navigation-[top|bottom|height|width|panel-width]
+ *
+ * Sidebar:
+ *   --kbn-layout--sidebar-[top|bottom|height|width|panel-width]
+ *
+ * Application:
+ *   --kbn-layout--application-[top|bottom|left|right|height|width]
+ *
+ * Application Top Bar:
+ *   --kbn-application--top-bar-[height|top|left|width|right|bottom]
+ *
+ * Application Bottom Bar:
+ *   --kbn-application--bottom-bar-[height|top|left|width|right|bottom]
+ *
+ * Application Content:
+ *   --kbn-application--content-[top|bottom|left|right|height|width]
+ *
+ * Common:
+ *   --kbn-layout--aboveFlyoutLevel
+ *
+ * These variables are globally available for consistent and dynamic layout styling.
  * @returns The rendered GlobalCSS component.
  */
 export const LayoutGlobalCSS = () => {
@@ -68,6 +58,8 @@ export const LayoutGlobalCSS = () => {
     navigationPanelWidth,
     sidebarWidth,
     sidebarPanelWidth,
+    applicationTopBarHeight,
+    applicationBottomBarHeight,
   } = useLayoutState();
 
   const banner = css`
@@ -80,23 +72,37 @@ export const LayoutGlobalCSS = () => {
   const header = css`
     --kbn-layout--header-top: var(--kbn-layout--banner-height);
     --kbn-layout--header-left: ${navigationWidth + navigationPanelWidth}px;
+    --kbn-layout--header-right: ${sidebarWidth + sidebarPanelWidth}px;
     --kbn-layout--header-height: ${headerHeight}px;
     --kbn-layout--header-width: calc(
-      100vw - var(--kbn-layout--sidebar-width) - var(--kbn-layout--sidebar-panel-width) -
-        var(--kbn-layout--header-left)
+      100vw - var(--kbn-layout--header-right) - var(--kbn-layout--header-left)
     );
   `;
 
+  const footer = css`
+    --kbn-layout--footer-height: ${footerHeight}px;
+    --kbn-layout--footer-top: calc(100vh - var(--kbn-layout--footer-height));
+    --kbn-layout--footer-bottom: 0px;
+    --kbn-layout--footer-left: 0px;
+    --kbn-layout--footer-width: 100vw;
+  `;
+
   const navigation = css`
-    --kbn-layout--navigation-top: ${bannerHeight}px;
-    --kbn-layout--navigation-height: calc(100vh - var(--kbn-layout--navigation-top));
+    --kbn-layout--navigation-top: var(--kbn-layout--header-top);
+    --kbn-layout--navigation-bottom: var(--kbn-layout--footer-height);
+    --kbn-layout--navigation-height: calc(
+      100vh - var(--kbn-layout--navigation-top) - var(--kbn-layout--navigation-bottom)
+    );
     --kbn-layout--navigation-width: ${navigationWidth}px;
     --kbn-layout--navigation-panel-width: ${navigationPanelWidth}px;
   `;
 
   const sidebar = css`
-    --kbn-layout--sidebar-top: ${bannerHeight}px;
-    --kbn-layout--sidebar-height: calc(100vh - var(--kbn-layout--sidebar-top));
+    --kbn-layout--sidebar-top: var(--kbn-layout--header-top);
+    --kbn-layout--sidebar-bottom: var(--kbn-layout--footer-height);
+    --kbn-layout--sidebar-height: calc(
+      100vh - var(--kbn-layout--sidebar-top) - var(--kbn-layout--sidebar-bottom)
+    );
     --kbn-layout--sidebar-width: ${sidebarWidth}px;
     --kbn-layout--sidebar-panel-width: ${sidebarPanelWidth}px;
   `;
@@ -115,11 +121,52 @@ export const LayoutGlobalCSS = () => {
     );
   `;
 
-  const footer = css`
-    --kbn-layout--footer-top: calc(100vh - var(--kbn-layout--footer-height));
-    --kbn-layout--footer-left: ${navigationWidth + navigationPanelWidth}px;
-    --kbn-layout--footer-height: ${footerHeight}px;
-    --kbn-layout--footer-width: var(--kbn-layout--application-width);
+  const applicationTopBar = css`
+    --kbn-application--top-bar-height: ${applicationTopBarHeight}px;
+    --kbn-application--top-bar-top: var(--kbn-layout--application-top);
+    --kbn-application--top-bar-left: var(--kbn-layout--application-left);
+    --kbn-application--top-bar-width: var(--kbn-layout--application-width);
+    --kbn-application--top-bar-right: var(--kbn-layout--application-right);
+    --kbn-application--top-bar-bottom: calc(
+      var(--kbn-layout--application-top) + var(--kbn-application--top-bar-height)
+    );
+  `;
+
+  const applicationBottomBar = css`
+    --kbn-application--bottom-bar-height: ${applicationBottomBarHeight}px;
+    --kbn-application--bottom-bar-top: calc(
+      var(--kbn-layout--application-bottom) - var(--kbn-application--bottom-bar-height)
+    );
+    --kbn-application--bottom-bar-left: var(--kbn-layout--application-left);
+    --kbn-application--bottom-bar-width: var(--kbn-layout--application-width);
+    --kbn-application--bottom-bar-right: var(--kbn-layout--application-right);
+    --kbn-application--bottom-bar-bottom: var(--kbn-layout--application-bottom);
+  `;
+
+  // The application content is the main area where the application renders its content.
+  // It is not a slot, but it is styled to ensure it fits within the layout.
+  // It is positioned inside application area and takes the full heigh available minus that application top and bottom bars.
+  const applicationContent = css`
+    --kbn-application--content-top: calc(
+      var(--kbn-layout--application-top) + var(--kbn-application--top-bar-height)
+    );
+    --kbn-application--content-bottom: calc(
+      var(--kbn-layout--application-bottom) - var(--kbn-application--bottom-bar-height)
+    );
+    --kbn-application--content-left: var(--kbn-layout--application-left);
+    --kbn-application--content-right: var(--kbn-layout--application-right);
+    --kbn-application--content-height: calc(
+      var(--kbn-layout--application-height) - var(--kbn-application--top-bar-height) -
+        var(--kbn-application--bottom-bar-height)
+    );
+    --kbn-application--content-width: var(--kbn-layout--application-width);
+  `;
+
+  // we want to place layout slots (like sidebar) on top of eui's flyouts (1000),
+  // so that when they are open, they are animating from under the sidebars
+  // this part of EUI flyout workaround and should be gone with https://github.com/elastic/eui/issues/8820
+  const common = css`
+    --kbn-layout--aboveFlyoutLevel: 1050;
   `;
 
   const styles = css`
@@ -129,7 +176,11 @@ export const LayoutGlobalCSS = () => {
       ${navigation}
       ${sidebar}
       ${application}
+      ${applicationTopBar}
+      ${applicationBottomBar}
+      ${applicationContent}
       ${footer}
+      ${common}
     }
   `;
 

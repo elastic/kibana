@@ -462,7 +462,7 @@ FROM employees
       label: i18n.translate('languageDocumentation.documentationESQL.lookupJoin', {
         defaultMessage: 'LOOKUP JOIN',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab={true}
@@ -795,5 +795,6 @@ Refer to **Operators** for an overview of the supported operators.
 
 export { functions as scalarFunctions } from './generated/scalar_functions';
 export { functions as aggregationFunctions } from './generated/aggregation_functions';
+export { functions as timeseriesAggregationFunctions } from './generated/timeseries_aggregation_functions';
 export { functions as groupingFunctions } from './generated/grouping_functions';
 export { functions as operators } from './generated/operators';

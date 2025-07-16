@@ -71,7 +71,7 @@ export const LimitOptions = ({ limit, onChange }: Props) => {
             )}
             data-test-subj="hostsViewLimitOptionsButton"
           >
-            <EuiIcon type="iInCircle" />
+            <EuiIcon type="info" />
           </button>
         </EuiToolTip>
       </EuiFlexItem>

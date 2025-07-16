@@ -329,10 +329,46 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - status
+                  status:
+                    oneOf:
+                      - $ref: '#/components/schemas/EngineStatus'
+                      - enum:
+                          - not_found
+                        type: string
+                required:
+                  - status
           description: Successful response
       summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/privileges:
+    get:
+      description: >-
+        Check if the current user has all required permissions for Privilege
+        Monitoring
+      operationId: PrivMonPrivileges
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                has_all_required: true
+                privileges:
+                  elasticsearch:
+                    index:
+                      .entity_analytics.monitoring.user-default:
+                        read: true
+              schema:
+                $ref: '#/components/schemas/EntityAnalyticsPrivileges'
+          description: Successful response
+      summary: Run a privileges check on Privilege Monitoring
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
@@ -561,6 +597,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -583,12 +620,18 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: >-
                     The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: >-
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -691,7 +734,7 @@ paths:
     post:
       operationId: InitEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine.
           in: path
           name: entityType
           required: true
@@ -709,6 +752,7 @@ paths:
                   pattern: '[smdh]$'
                   type: string
                 docsPerSecond:
+                  default: -1
                   description: The number of documents per second to process.
                   type: integer
                 enrichPolicyExecutionInterval:
@@ -727,12 +771,18 @@ paths:
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
-                  default: 24h
+                  default: 3h
                   description: >-
                     The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
+                maxPageSearchSize:
+                  default: 500
+                  description: >-
+                    The initial page size to use for the composite aggregation
+                    of each checkpoint.
+                  type: integer
                 timeout:
                   default: 180s
                   description: The timeout for initializing the aggregating transform.
@@ -1408,6 +1458,40 @@ components:
         - $ref: '#/components/schemas/HostEntity'
         - $ref: '#/components/schemas/ServiceEntity'
         - $ref: '#/components/schemas/GenericEntity'
+    EntityAnalyticsPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        has_read_permissions:
+          type: boolean
+        has_write_permissions:
+          type: boolean
+        privileges:
+          type: object
+          properties:
+            elasticsearch:
+              type: object
+              properties:
+                cluster:
+                  additionalProperties:
+                    type: boolean
+                  type: object
+                index:
+                  additionalProperties:
+                    additionalProperties:
+                      type: boolean
+                    type: object
+                  type: object
+            kibana:
+              additionalProperties:
+                type: boolean
+              type: object
+          required:
+            - elasticsearch
+      required:
+        - has_all_required
+        - privileges
     EntityRiskLevels:
       enum:
         - Unknown

@@ -260,13 +260,30 @@ import type {
 } from './entity_analytics/entity_store/status.gen';
 import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
 import type {
+  CreatePrivilegesImportIndexRequestBodyInput,
+  CreatePrivilegesImportIndexResponse,
+} from './entity_analytics/monitoring/create_index.gen';
+import type {
   SearchPrivilegesIndicesRequestQueryInput,
   SearchPrivilegesIndicesResponse,
 } from './entity_analytics/monitoring/search_indices.gen';
 import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
 import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
+import type {
+  CreateEntitySourceRequestBodyInput,
+  CreateEntitySourceResponse,
+  DeleteEntitySourceRequestParamsInput,
+  GetEntitySourceRequestParamsInput,
+  GetEntitySourceResponse,
+  ListEntitySourcesRequestQueryInput,
+  ListEntitySourcesResponse,
+  UpdateEntitySourceRequestParamsInput,
+  UpdateEntitySourceRequestBodyInput,
+  UpdateEntitySourceResponse,
+} from './entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
 import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
+import type { PrivMonPrivilegesResponse } from './entity_analytics/privilege_monitoring/privileges.gen';
 import type {
   CreatePrivMonUserRequestBodyInput,
   CreatePrivMonUserResponse,
@@ -623,6 +640,32 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async createEntitySource(props: CreateEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateEntitySource`);
+    return this.kbnClient
+      .request<CreateEntitySourceResponse>({
+        path: '/api/entity_analytics/monitoring/entity_source',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createPrivilegesImportIndex(props: CreatePrivilegesImportIndexProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreatePrivilegesImportIndex`);
+    return this.kbnClient
+      .request<CreatePrivilegesImportIndexResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async createPrivMonUser(props: CreatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivMonUser`);
     return this.kbnClient
@@ -810,6 +853,18 @@ For detailed information on Kibana actions and alerting, and additional API call
         method: 'DELETE',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteEntitySource(props: DeleteEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntitySource`);
+    return this.kbnClient
+      .request({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1386,6 +1441,18 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getEntitySource(props: GetEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntitySource`);
+    return this.kbnClient
+      .request<GetEntitySourceResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
     return this.kbnClient
@@ -1939,6 +2006,20 @@ providing you with the most current and effective threat detection capabilities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async listEntitySources(props: ListEntitySourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListEntitySources`);
+    return this.kbnClient
+      .request<ListEntitySourcesResponse>({
+        path: '/api/entity_analytics/monitoring/entity_source/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async listPrivMonUsers(props: ListPrivMonUsersProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
     return this.kbnClient
@@ -2099,6 +2180,21 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
     return this.kbnClient
       .request<PrivMonHealthResponse>({
         path: '/api/entity_analytics/monitoring/privileges/health',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Check if the current user has all required permissions for Privilege Monitoring
+   */
+  async privMonPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
+    return this.kbnClient
+      .request<PrivMonPrivilegesResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/privileges',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2479,6 +2575,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async updateEntitySource(props: UpdateEntitySourceProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
+    return this.kbnClient
+      .request<UpdateEntitySourceResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async updatePrivMonUser(props: UpdatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdatePrivMonUser`);
     return this.kbnClient
@@ -2615,6 +2724,12 @@ export interface CreateAlertsMigrationProps {
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
 }
+export interface CreateEntitySourceProps {
+  body: CreateEntitySourceRequestBodyInput;
+}
+export interface CreatePrivilegesImportIndexProps {
+  body: CreatePrivilegesImportIndexRequestBodyInput;
+}
 export interface CreatePrivMonUserProps {
   body: CreatePrivMonUserRequestBodyInput;
 }
@@ -2641,6 +2756,9 @@ export interface DeleteAssetCriticalityRecordProps {
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
+}
+export interface DeleteEntitySourceProps {
+  params: DeleteEntitySourceRequestParamsInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
@@ -2735,6 +2853,9 @@ export interface GetEndpointSuggestionsProps {
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
 }
+export interface GetEntitySourceProps {
+  params: GetEntitySourceRequestParamsInput;
+}
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
 }
@@ -2814,6 +2935,9 @@ export interface InternalUploadAssetCriticalityRecordsProps {
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
 }
+export interface ListEntitySourcesProps {
+  query: ListEntitySourcesRequestQueryInput;
+}
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;
 }
@@ -2891,6 +3015,10 @@ export interface SuggestUserProfilesProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UpdateEntitySourceProps {
+  params: UpdateEntitySourceRequestParamsInput;
+  body: UpdateEntitySourceRequestBodyInput;
 }
 export interface UpdatePrivMonUserProps {
   params: UpdatePrivMonUserRequestParamsInput;

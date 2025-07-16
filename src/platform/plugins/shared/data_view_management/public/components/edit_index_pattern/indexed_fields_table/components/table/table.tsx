@@ -233,7 +233,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
       <span>
         &nbsp;
         <EuiIconTip
-          type="questionInCircle"
+          type="question"
           color="primary"
           aria-label={additionalInfoAriaLabel}
           content={field.info.map((info: string, i: number) => (

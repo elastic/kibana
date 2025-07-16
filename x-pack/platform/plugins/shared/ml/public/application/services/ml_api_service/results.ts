@@ -12,6 +12,7 @@ import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { MlEntityField, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml-anomaly-utils';
 import { type InfluencersFilterQuery, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 
+import type { SeverityThreshold } from '../../../../common/types/anomalies';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   GetStoppedPartitionResult,
@@ -40,7 +41,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     criteriaFields: string[],
     influencers: MlEntityField[],
     aggregationInterval: string,
-    threshold: number,
+    threshold: SeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     dateFormatTz: string,
@@ -187,7 +188,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomalyCharts$(
     jobIds: string[],
     influencers: MlEntityField[],
-    threshold: number,
+    threshold: SeverityThreshold[],
     earliestMs: number,
     latestMs: number,
     timeBounds: { min?: number; max?: number },

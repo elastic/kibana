@@ -80,6 +80,12 @@ export interface DocLinks {
     readonly auditdModule: string;
     readonly systemModule: string;
   };
+  readonly searchHomepage: {
+    readonly visitSearchLabs: string;
+    readonly notebooksExamples: string;
+    readonly customerEngineerRequestForm: string;
+    readonly elasticCommunity: string;
+  };
   readonly metricbeat: {
     readonly base: string;
     readonly configure: string;
@@ -283,6 +289,7 @@ export interface DocLinks {
     readonly gapsTable: string;
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
+    readonly ingestDataToSecurity: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -293,6 +300,8 @@ export interface DocLinks {
   };
   readonly securitySolution: {
     readonly aiAssistant: string;
+    readonly cloudSecurityPosture: string;
+    readonly installElasticDefend: string;
     readonly artifactControl: string;
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
@@ -322,12 +331,14 @@ export interface DocLinks {
     readonly createDetectionRules: string;
     readonly updatePrebuiltDetectionRules: string;
     readonly prebuiltRuleCustomizationPromoBlog: string;
+    readonly resolvePrebuiltRuleConflicts: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
+      readonly privilegedUserMonitoring: string;
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;

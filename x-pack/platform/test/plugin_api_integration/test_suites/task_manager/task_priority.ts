@@ -125,6 +125,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+      // Timeout added here to ensure all tasks are claimed and therefore deleted
+      // for the next test case
+      await new Promise((r) => setTimeout(r, 10000));
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
     it('should claim low priority tasks if there is capacity', async () => {
@@ -142,6 +146,13 @@ export default function ({ getService }: FtrProviderContext) {
       }
       tasksToSchedule.push(
         scheduleTask({
+          taskType: 'normalLongRunningPriorityTask',
+          schedule: { interval: `1d` },
+          params: {},
+        })
+      );
+      tasksToSchedule.push(
+        scheduleTask({
           taskType: 'lowPriorityTask',
           schedule: { interval: `1d` },
           params: {},
@@ -151,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
-        expect(tasks.length).to.eql(6);
+        expect(tasks.length).to.eql(7);
 
         const taskIds = tasks.map((task) => task.id);
         const taskDocs: RawDoc[] = [];
@@ -164,6 +175,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(
           taskDocs.findIndex((taskDoc) => taskDoc._source.taskType === 'lowPriorityTask')
+        ).to.be.greaterThan(-1);
+        expect(
+          taskDocs.findIndex(
+            (taskDoc) => taskDoc._source.taskType === 'normalLongRunningPriorityTask'
+          )
         ).to.be.greaterThan(-1);
       });
     });
@@ -189,6 +205,61 @@ export default function ({ getService }: FtrProviderContext) {
           params: {},
         })
       );
+
+      // schedule a normal long running priority task
+      tasksToSchedule.push(
+        scheduleTask({
+          taskType: 'normalLongRunningPriorityTask',
+          schedule: { interval: `1s` },
+          params: {},
+        })
+      );
+      const scheduledTasks = await Promise.all(tasksToSchedule);
+
+      // make sure all tasks get created
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(tasks.length).to.eql(12);
+
+        const taskIds = tasks.map((task) => task.id);
+        scheduledTasks.forEach((scheduledTask) => {
+          expect(taskIds).to.contain(scheduledTask.id);
+        });
+      });
+
+      // wait for 30 seconds to let the multiple task claiming cycles run
+      await new Promise((r) => setTimeout(r, 30000));
+
+      const lowPriorityDocs: RawDoc[] = await historyDocs({ taskType: 'lowPriorityTask' });
+      expect(lowPriorityDocs.length).to.eql(0);
+      const normalLongRunningDocs: RawDoc[] = await historyDocs({
+        taskType: 'normalLongRunningPriorityTask',
+      });
+      expect(normalLongRunningDocs.length).to.eql(0);
+    });
+
+    it('should not claim low priority tasks when there is no capacity due to normal long running tasks', async () => {
+      // schedule a bunch of normal priority tasks that run frequently
+      const tasksToSchedule = [];
+      for (let i = 0; i < 10; i++) {
+        tasksToSchedule.push(
+          scheduleTask({
+            taskType: 'normalLongRunningPriorityTask',
+            schedule: { interval: `1s` },
+            params: {},
+          })
+        );
+      }
+
+      // schedule a low priority task
+      tasksToSchedule.push(
+        scheduleTask({
+          taskType: 'lowPriorityTask',
+          schedule: { interval: `1s` },
+          params: {},
+        })
+      );
+
       const scheduledTasks = await Promise.all(tasksToSchedule);
 
       // make sure all tasks get created
@@ -205,8 +276,8 @@ export default function ({ getService }: FtrProviderContext) {
       // wait for 30 seconds to let the multiple task claiming cycles run
       await new Promise((r) => setTimeout(r, 30000));
 
-      const docs: RawDoc[] = await historyDocs({ taskType: 'lowPriorityTask' });
-      expect(docs.length).to.eql(0);
+      const lowPriorityDocs: RawDoc[] = await historyDocs({ taskType: 'lowPriorityTask' });
+      expect(lowPriorityDocs.length).to.eql(0);
     });
   });
 }

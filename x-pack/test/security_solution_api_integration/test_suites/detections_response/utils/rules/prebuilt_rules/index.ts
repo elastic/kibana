@@ -12,7 +12,7 @@ export * from './get_installed_rules';
 export * from './get_prebuilt_rules_and_timelines_status';
 export * from './get_prebuilt_rules_status';
 export * from './get_prebuilt_rules_fleet_package';
-export * from './install_fleet_package_by_url';
+export * from './install_fleet_package';
 export * from './install_mock_prebuilt_rules';
 export * from './install_prebuilt_rules_and_timelines';
 export * from './install_prebuilt_rules_fleet_package';

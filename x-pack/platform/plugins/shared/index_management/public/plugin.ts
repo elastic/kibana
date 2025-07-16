@@ -71,6 +71,7 @@ export class IndexMgmtUIPlugin
     enableTogglingDataRetention: boolean;
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
+    enforceAdaptiveAllocations: boolean;
   };
   private canUseSyntheticSource: boolean = false;
   private licensingSubscription?: Subscription;
@@ -107,6 +108,7 @@ export class IndexMgmtUIPlugin
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
       enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
+      enforceAdaptiveAllocations: ctx.env.packageInfo.buildFlavor === 'serverless',
     };
   }
 

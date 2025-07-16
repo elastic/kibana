@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
-import { flattenMappings } from './utils';
+import { flattenMappings, MappingField } from './utils';
 import { getIndexMappings, performMatchSearch, PerformMatchSearchResponse } from './steps';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
@@ -29,8 +29,9 @@ export const relevanceSearch = async ({
   esClient: ElasticsearchClient;
 }): Promise<RelevanceSearchResponse> => {
   let selectedIndex = index;
-  let selectedFields = fields;
+  let selectedFields: MappingField[] = [];
 
+  // if no index was specified, we use the index explorer to select the best one
   if (!selectedIndex) {
     const { indices } = await indexExplorer({
       query: term,
@@ -43,17 +44,20 @@ export const relevanceSearch = async ({
     selectedIndex = indices[0].indexName;
   }
 
-  if (!fields.length) {
-    const mappings = await getIndexMappings({
-      indices: [selectedIndex],
-      esClient,
-    });
-
-    const flattenedFields = flattenMappings(mappings[selectedIndex]);
-
+  const mappings = await getIndexMappings({
+    indices: [selectedIndex],
+    esClient,
+  });
+  const flattenedFields = flattenMappings(mappings[selectedIndex]);
+  if (fields.length) {
     selectedFields = flattenedFields
-      .filter((field) => field.type === 'text' || field.type === 'semantic_text')
-      .map((field) => field.path);
+      .filter((field) => fields.includes(field.path))
+      .filter((field) => field.type === 'text' || field.type === 'semantic_text');
+  }
+  if (selectedFields.length === 0) {
+    selectedFields = flattenedFields.filter(
+      (field) => field.type === 'text' || field.type === 'semantic_text'
+    );
   }
 
   return performMatchSearch({

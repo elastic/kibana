@@ -488,7 +488,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           </EuiText>
           <EuiSpacer size="s" />
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             size="s"
             title={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmCallout',

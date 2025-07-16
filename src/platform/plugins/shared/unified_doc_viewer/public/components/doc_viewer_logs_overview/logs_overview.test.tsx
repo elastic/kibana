@@ -122,16 +122,10 @@ const buildHit = (fields: Record<string, unknown> = {}, customIndex: string = DA
 
 const fullHit = buildHit();
 
-const getCustomUnifedDocViewerServices = (params?: {
-  showApm: boolean;
-  entityCentricExperienceEnabled?: boolean;
-}) => ({
+const getCustomUnifedDocViewerServices = (params?: { showApm: boolean }) => ({
   core: {
     application: {
       capabilities: { apm: { show: params?.showApm || false } },
-    },
-    uiSettings: {
-      get: () => params?.entityCentricExperienceEnabled || false,
     },
   },
   share: {
@@ -357,40 +351,13 @@ describe('LogsOverview with accordion state', () => {
 
 describe('LogsOverview with APM links', () => {
   describe('Highlights section', () => {
-    describe('When APM and Entity centric experience are enabled', () => {
+    describe('When APM is enabled', () => {
       beforeEach(() => {
         setUnifiedDocViewerServices(
           merge(
             mockUnifiedDocViewerServices,
             getCustomUnifedDocViewerServices({
               showApm: true,
-              entityCentricExperienceEnabled: true,
-            })
-          )
-        );
-        renderLogsOverview();
-      });
-      it('should render service name link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewServiceNameHighlightLink')
-        ).toBeInTheDocument();
-      });
-
-      it('should render trace id link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
-        ).toBeInTheDocument();
-      });
-    });
-
-    describe('When APM is enabled and Entity centric experience is disabled', () => {
-      beforeEach(() => {
-        setUnifiedDocViewerServices(
-          merge(
-            mockUnifiedDocViewerServices,
-            getCustomUnifedDocViewerServices({
-              showApm: true,
-              entityCentricExperienceEnabled: false,
             })
           )
         );
@@ -406,32 +373,6 @@ describe('LogsOverview with APM links', () => {
         expect(
           screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
         ).toBeInTheDocument();
-      });
-    });
-
-    describe('When APM is disabled and Entity centric experience is enabled', () => {
-      beforeEach(() => {
-        setUnifiedDocViewerServices(
-          merge(
-            mockUnifiedDocViewerServices,
-            getCustomUnifedDocViewerServices({
-              showApm: false,
-              entityCentricExperienceEnabled: true,
-            })
-          )
-        );
-        renderLogsOverview();
-      });
-      it('should not render service name link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewServiceNameHighlightLink')
-        ).not.toBeInTheDocument();
-      });
-
-      it('should not render trace id link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
-        ).not.toBeInTheDocument();
       });
     });
   });

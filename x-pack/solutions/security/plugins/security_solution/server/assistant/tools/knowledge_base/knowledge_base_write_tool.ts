@@ -8,16 +8,15 @@
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import type { AIAssistantKnowledgeBaseDataClient } from '@kbn/elastic-assistant-plugin/server/ai_assistant_data_clients/knowledge_base';
 import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import type { KnowledgeBaseEntryCreateProps } from '@kbn/elastic-assistant-common';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
-export interface KnowledgeBaseWriteToolParams extends AssistantToolParams {
-  kbDataClient: AIAssistantKnowledgeBaseDataClient;
-  telemetry: AnalyticsServiceSetup;
-}
+export type KnowledgeBaseWriteToolParams = Require<
+  AssistantToolParams,
+  'kbDataClient' | 'telemetry'
+>;
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -35,7 +34,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
     const { isEnabledKnowledgeBase, kbDataClient } = params;
     return isEnabledKnowledgeBase && kbDataClient != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { telemetry, kbDataClient, logger } = params as KnowledgeBaseWriteToolParams;

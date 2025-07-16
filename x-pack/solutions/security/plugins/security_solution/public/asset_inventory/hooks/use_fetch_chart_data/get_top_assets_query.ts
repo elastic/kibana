@@ -8,6 +8,7 @@
 import { ASSET_FIELDS } from '../../constants';
 import type { UseTopAssetsOptions } from './types';
 import { getMultiFieldsSort } from '../fetch_utils';
+import { addEmptyDataFilterQuery } from '../../utils/add_empty_data_filter';
 
 export const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions, indexPattern?: string) => {
   if (!indexPattern) {
@@ -54,7 +55,7 @@ export const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions, indexPat
         filter: [...(query?.bool?.filter ?? [])],
         should: [...(query?.bool?.should ?? [])],
         must: [...(query?.bool?.must ?? [])],
-        must_not: [...(query?.bool?.must_not ?? [])],
+        must_not: addEmptyDataFilterQuery([...(query?.bool?.must_not ?? [])]),
       },
     },
     sort: getMultiFieldsSort(sort),

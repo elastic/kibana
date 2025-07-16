@@ -49,6 +49,7 @@ import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   PerformKnowledgeBaseEntryBulkActionRequestBody,
   PostEvaluateRequestBodyInput,
+  ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
@@ -165,6 +166,13 @@ export const getCurrentUserPromptsRequest = () =>
   requestMock.create({
     method: 'get',
     path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
+  });
+
+export const getCurrentUserSecurityAIPromptsRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
+    query: { prompt_group_id: 'aiAssistant', prompt_ids: ['systemPrompt'] },
   });
 
 export const getCurrentUserAlertSummaryRequest = () =>
