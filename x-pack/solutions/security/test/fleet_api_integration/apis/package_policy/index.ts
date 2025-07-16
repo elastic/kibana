@@ -6,12 +6,14 @@
  */
 
 import { setupTestUsers } from '../test_users';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
-export default function loadTests({ loadTestFile, getService }) {
-  describe('EPM Endpoints', () => {
+export default function loadTests({ loadTestFile, getService }: FtrProviderContext) {
+  describe('Package policies', () => {
     before(async () => {
       await setupTestUsers(getService('security'));
     });
+    loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./get'));
   });
 }
