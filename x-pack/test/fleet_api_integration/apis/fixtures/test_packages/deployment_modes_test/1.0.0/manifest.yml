@@ -49,7 +49,7 @@ policy_templates:
         description: AWS S3 access logs
         deployment_modes: ["agentless"]
   - name: default_only
-    title: Default Only Template  
+    title: Default Only Template
     description: Template that only supports default deployment
     deployment_modes:
       default:

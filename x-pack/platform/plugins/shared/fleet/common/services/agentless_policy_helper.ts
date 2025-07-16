@@ -90,8 +90,7 @@ export const isOnlyAgentlessPolicyTemplate = (policyTemplate: RegistryPolicyTemp
 
 /*
  * Check if an input is allowed for a specific deployment mode based on its deployment_modes property.
- * If deployment_modes is not specified, the input is allowed for all deployment modes.
- * For backward compatibility, if deployment_modes is not present, also check the blocklist.
+ * If deployment_modes is not present, check against the input type blocklist instead.
  */
 export function isInputAllowedForDeploymentMode(
   input: Pick<NewPackagePolicyInput, 'type' | 'policy_template'>,
