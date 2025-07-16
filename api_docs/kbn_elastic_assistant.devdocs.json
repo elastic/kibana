@@ -1393,6 +1393,17 @@
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.isAssistantVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAssistantVisible",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.AssistantAvailability.hasAssistantPrivilege",
             "type": "boolean",
             "tags": [],
@@ -1441,17 +1452,6 @@
             "type": "boolean",
             "tags": [],
             "label": "hasManageGlobalKnowledgeBase",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.AssistantAvailability.isStarterPromptsEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isStarterPromptsEnabled",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2762,6 +2762,17 @@
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.UseAssistantAvailability.isAssistantVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAssistantVisible",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.UseAssistantAvailability.hasAssistantPrivilege",
             "type": "boolean",
             "tags": [],
@@ -2810,17 +2821,6 @@
             "type": "boolean",
             "tags": [],
             "label": "hasManageGlobalKnowledgeBase",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/elastic-assistant",
-            "id": "def-public.UseAssistantAvailability.isStarterPromptsEnabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "isStarterPromptsEnabled",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
             "deprecated": false,

@@ -29,6 +29,7 @@ export const DataActionButton: React.FC = () => {
         onClick={handleShowFlyout}
         disabled={!selectedIndices?.length}
         data-test-subj="dataSourceActionButton"
+        color="text"
       >
         <FormattedMessage id="xpack.searchPlayground.dataActionButton" defaultMessage="Data" />
       </EuiButton>
