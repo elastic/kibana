@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import { EDITOR_MARKER } from '../../../definitions/utils/constants';
+import { EDITOR_MARKER } from '../../../definitions/constants';
 import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
 import {
   pipeCompleteItem,

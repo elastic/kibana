@@ -22,7 +22,7 @@ import {
 } from '../../../types';
 import { isColumn, isFunctionExpression } from '../../../ast/is';
 import { getExpressionType } from '../expressions';
-import { EDITOR_MARKER } from '../constants';
+import { EDITOR_MARKER } from '../../constants';
 import { fuzzySearch } from '../shared';
 
 function addToUserDefinedColumnOccurrences(
