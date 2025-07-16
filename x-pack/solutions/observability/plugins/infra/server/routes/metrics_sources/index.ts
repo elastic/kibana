@@ -16,8 +16,6 @@ import {
   METRICSET_MODULE,
   METRIC_SCHEMA_ECS,
   METRIC_SCHEMA_SEMCONV,
-  OTEL_RECEIVER_DATASET_VALUE,
-  SYSTEM_INTEGRATION,
 } from '../../../common/constants';
 import {
   getHasDataQueryParamsRT,
@@ -37,17 +35,11 @@ import {
 import type { InfraSource } from '../../lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import { integrationNameByEntityType } from '../../lib/sources/constants';
 
 const defaultStatus = {
   metricIndicesExist: false,
   remoteClustersExist: false,
-};
-
-const integrationNameBySource: Record<string, { beats: string; otel: string }> = {
-  host: {
-    beats: SYSTEM_INTEGRATION,
-    otel: OTEL_RECEIVER_DATASET_VALUE,
-  },
 };
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
@@ -223,7 +215,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const { dataSource: integration } = request.query;
+        const { entityType: integration } = request.query;
 
         const infraMetricsClient = await getInfraMetricsClient({
           request,
@@ -231,7 +223,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const source = integration ? integrationNameBySource[integration] : undefined;
+        const source = integration ? integrationNameByEntityType[integration] : undefined;
 
         const hasDataResponse = await infraMetricsClient.search({
           track_total_hits: true,
@@ -289,7 +281,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           libs,
           context,
         });
-        const source = integrationNameBySource[dataSource];
+        const source = integrationNameByEntityType[dataSource];
 
         const [ecsResponse, otelResponse] = (
           await infraMetricsClient.msearch([

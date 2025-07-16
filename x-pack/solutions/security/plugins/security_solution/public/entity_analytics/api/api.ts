@@ -16,6 +16,7 @@ import type { CreatePrivilegesImportIndexResponse } from '../../../common/api/en
 import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import {
+  getPrivmonMonitoringSourceByIdUrl,
   PRIVMON_PUBLIC_INIT,
   PRIVMON_USER_PUBLIC_CSV_UPLOAD_URL,
 } from '../../../common/entity_analytics/privileged_user_monitoring/constants';
@@ -266,11 +267,10 @@ export const useEntityAnalyticsRoutes = () => {
      * Update a data source for privilege monitoring engine
      */
     const updatePrivMonMonitoredIndices = async (id: string, indexPattern: string | undefined) =>
-      http.fetch<UpdateEntitySourceResponse>('/api/entity_analytics/monitoring/entity_source', {
+      http.fetch<UpdateEntitySourceResponse>(getPrivmonMonitoringSourceByIdUrl(id), {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
         body: JSON.stringify({
-          id,
           type: 'index',
           name: ENTITY_SOURCE_NAME,
           indexPattern,
@@ -279,6 +279,13 @@ export const useEntityAnalyticsRoutes = () => {
 
     /**
      * Create asset criticality
+    /**
+     *
+     *
+     * @param {(Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'> & {
+     *         refresh?: 'wait_for';
+     *       })} params
+     * @return {*}  {Promise<AssetCriticalityRecord>}
      */
     const createAssetCriticality = async (
       params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'> & {
