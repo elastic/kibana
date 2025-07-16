@@ -8,7 +8,6 @@
 import { compact } from 'lodash';
 import dedent from 'dedent';
 import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
-import { FunctionVisibility } from '../../common';
 import { ChatFunctionClient } from '../service/chat_function_client';
 
 export const GET_DATA_ON_SCREEN_FUNCTION_NAME = 'get_data_on_screen';
@@ -27,7 +26,6 @@ export function registerGetDataOnScreenFunction(
     {
       name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
       description: `Retrieve the structured data of content currently visible on the user's screen. Use this tool to understand what the user is viewing at this moment to provide more accurate and context-aware responses to their questions.`,
-      visibility: FunctionVisibility.All,
       parameters: {
         type: 'object',
         properties: {

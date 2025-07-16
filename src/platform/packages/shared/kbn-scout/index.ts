@@ -31,6 +31,7 @@ export type {
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  SynthtraceFixture,
 } from './src/playwright';
 
 export type {

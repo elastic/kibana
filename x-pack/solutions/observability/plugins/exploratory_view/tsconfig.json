@@ -45,7 +45,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/expressions-plugin",
     "@kbn/ebt-tools",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
   ],
   "exclude": ["target/**/*"]
 }

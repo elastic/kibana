@@ -68,6 +68,54 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.createIsNarrowSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "createIsNarrowSchema",
+        "description": [],
+        "signature": [
+          "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends Zod.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, Zod.input<TNarrowSchema>>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.createIsNarrowSchema.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "_base",
+            "description": [],
+            "signature": [
+              "TBaseSchema"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.createIsNarrowSchema.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "narrow",
+            "description": [],
+            "signature": [
+              "TNarrowSchema"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.findInheritedLifecycle",
         "type": "Function",
         "tags": [],
@@ -373,6 +421,95 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getIndexPatternsForStream",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexPatternsForStream",
+        "description": [],
+        "signature": [
+          "(stream: T) => T extends ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Streams",
+            "text": "Streams"
+          },
+          ".all.Definition ? string[] : undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/hierarchy_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getIndexPatternsForStream.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "stream",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/hierarchy_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getIndexPatternsForStream",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexPatternsForStream",
+        "description": [],
+        "signature": [
+          "(stream: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.Streams",
+            "text": "Streams"
+          },
+          ".all.Definition | undefined) => string[] | undefined"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/hierarchy_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getIndexPatternsForStream.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stream",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.Streams",
+                "text": "Streams"
+              },
+              ".all.Definition | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/hierarchy_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2384,7 +2521,13 @@
             "label": "lifecycle",
             "description": [],
             "signature": [
-              "IngestStreamLifecycleDSL",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycleDSL",
+                "text": "IngestStreamLifecycleDSL"
+              },
               " | ",
               {
                 "pluginId": "@kbn/streams-schema",
@@ -2394,7 +2537,13 @@
                 "text": "IngestStreamLifecycleILM"
               },
               " | ",
-              "IngestStreamLifecycleInherit"
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.IngestStreamLifecycleInherit",
+                "text": "IngestStreamLifecycleInherit"
+              }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/base.ts",
             "deprecated": false,
@@ -2426,6 +2575,62 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IngestStreamLifecycleDisabled",
+        "type": "Interface",
+        "tags": [],
+        "label": "IngestStreamLifecycleDisabled",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IngestStreamLifecycleDisabled.disabled",
+            "type": "Object",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IngestStreamLifecycleDSL",
+        "type": "Interface",
+        "tags": [],
+        "label": "IngestStreamLifecycleDSL",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IngestStreamLifecycleDSL.dsl",
+            "type": "Object",
+            "tags": [],
+            "label": "dsl",
+            "description": [],
+            "signature": [
+              "{ data_retention?: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.IngestStreamLifecycleILM",
         "type": "Interface",
         "tags": [],
@@ -2444,6 +2649,34 @@
             "description": [],
             "signature": [
               "{ policy: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.IngestStreamLifecycleInherit",
+        "type": "Interface",
+        "tags": [],
+        "label": "IngestStreamLifecycleInherit",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.IngestStreamLifecycleInherit.inherit",
+            "type": "Object",
+            "tags": [],
+            "label": "inherit",
+            "description": [],
+            "signature": [
+              "{}"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
             "deprecated": false,
@@ -3148,6 +3381,44 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.StreamQueryKql",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamQueryKql",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          },
+          " extends StreamQueryBase"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.StreamQueryKql.kql",
+            "type": "Object",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "signature": [
+              "{ query: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.UnaryFilterCondition",
         "type": "Interface",
         "tags": [],
@@ -3622,7 +3893,13 @@
         "label": "IngestStreamLifecycle",
         "description": [],
         "signature": [
-          "IngestStreamLifecycleDSL",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamLifecycleDSL",
+            "text": "IngestStreamLifecycleDSL"
+          },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
@@ -3632,7 +3909,13 @@
             "text": "IngestStreamLifecycleILM"
           },
           " | ",
-          "IngestStreamLifecycleInherit"
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamLifecycleInherit",
+            "text": "IngestStreamLifecycleInherit"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
         "deprecated": false,
@@ -3679,6 +3962,21 @@
           "string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/namespaced_ecs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.MAX_NESTING_LEVEL",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_NESTING_LEVEL",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4026,13 +4324,34 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.SignificantEventsPreviewResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SignificantEventsPreviewResponse",
+        "description": [],
+        "signature": [
+          "{ kql: { query: string; }; occurrences: { date: string; count: number; }[]; change_points: { type: Partial<Record<ChangePointsType, Partial<{ p_value: number; r_value: number; change_point: number; trend: string; }>>>; }; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.SignificantEventsResponse",
         "type": "Type",
         "tags": [],
         "label": "SignificantEventsResponse",
         "description": [],
         "signature": [
-          "StreamQueryKql",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          },
           " & { occurrences: { date: string; count: number; }[]; change_points: { type: Partial<Record<ChangePointsType, Partial<{ p_value: number; r_value: number; change_point: number; trend: string; }>>>; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events/index.ts",
@@ -4048,7 +4367,13 @@
         "label": "StreamQuery",
         "description": [],
         "signature": [
-          "StreamQueryKql"
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
         "deprecated": false,
@@ -4111,7 +4436,13 @@
           " | ",
           "IngestStreamLifecycleError",
           " | ",
-          "IngestStreamLifecycleDisabled"
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.IngestStreamLifecycleDisabled",
+            "text": "IngestStreamLifecycleDisabled"
+          }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
         "deprecated": false,
@@ -4530,6 +4861,37 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.streamQueryKqlSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "streamQueryKqlSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.streamQuerySchema",
         "type": "Object",
         "tags": [],
@@ -4537,9 +4899,21 @@
         "description": [],
         "signature": [
           "Zod.ZodType<",
-          "StreamQueryKql",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          },
           ", Zod.ZodTypeDef, ",
-          "StreamQueryKql",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamQueryKql",
+            "text": "StreamQueryKql"
+          },
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
@@ -4609,7 +4983,7 @@
         "label": "upsertStreamQueryRequestSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ title: Zod.ZodEffects<Zod.ZodString, string, string>; kql: Zod.ZodObject<{ query: Zod.ZodEffects<Zod.ZodString, string, string>; }, \"strip\", Zod.ZodTypeAny, { query: string; }, { query: string; }>; }, \"strip\", Zod.ZodTypeAny, { title: string; kql: { query: string; }; }, { title: string; kql: { query: string; }; }>"
+          "Zod.ZodObject<{ title: Zod.ZodEffects<Zod.ZodString, string, string>; kql: Zod.ZodObject<{ query: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { query: string; }, { query: string; }>; }, \"strip\", Zod.ZodTypeAny, { title: string; kql: { query: string; }; }, { title: string; kql: { query: string; }; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/queries/index.ts",
         "deprecated": false,

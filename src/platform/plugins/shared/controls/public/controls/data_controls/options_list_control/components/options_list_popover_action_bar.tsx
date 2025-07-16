@@ -88,6 +88,7 @@ export const OptionsListPopoverActionBar = ({
     allowExpensiveQueries,
     availableOptions = [],
     dataLoading,
+    singleSelect,
   ] = useBatchedPublishingSubjects(
     componentApi.searchTechnique$,
     componentApi.searchStringValid$,
@@ -97,7 +98,8 @@ export const OptionsListPopoverActionBar = ({
     componentApi.fieldName$,
     componentApi.parentApi.allowExpensiveQueries$,
     componentApi.availableOptions$,
-    componentApi.dataLoading$
+    componentApi.dataLoading$,
+    componentApi.singleSelect$
   );
 
   const compatibleSearchTechniques = useMemo(() => {
@@ -188,38 +190,40 @@ export const OptionsListPopoverActionBar = ({
               </EuiFlexItem>
             </>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                hasTooManyOptions
-                  ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
-                  : undefined
-              }
-            >
-              <EuiCheckbox
-                checked={areAllSelected}
-                id={`optionsList-control-selectAll-checkbox-${componentApi.uuid}`}
-                // indeterminate={selectedOptions.length > 0 && !areAllSelected}
-                disabled={isBulkSelectDisabled}
-                data-test-subj="optionsList-control-selectAll"
-                onChange={() => {
-                  if (areAllSelected) {
-                    handleBulkAction(componentApi.deselectAll);
-                    setAllSelected(false);
-                  } else {
-                    handleBulkAction(componentApi.selectAll);
-                    setAllSelected(true);
-                  }
-                }}
-                css={styles.selectAllCheckbox}
-                label={
-                  <EuiText size="xs">
-                    {OptionsListStrings.popover.getSelectAllButtonLabel()}
-                  </EuiText>
+          {!singleSelect && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  hasTooManyOptions
+                    ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
+                    : undefined
                 }
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
+              >
+                <EuiCheckbox
+                  checked={areAllSelected}
+                  id={`optionsList-control-selectAll-checkbox-${componentApi.uuid}`}
+                  // indeterminate={selectedOptions.length > 0 && !areAllSelected}
+                  disabled={isBulkSelectDisabled}
+                  data-test-subj="optionsList-control-selectAll"
+                  onChange={() => {
+                    if (areAllSelected) {
+                      handleBulkAction(componentApi.deselectAll);
+                      setAllSelected(false);
+                    } else {
+                      handleBulkAction(componentApi.selectAll);
+                      setAllSelected(true);
+                    }
+                  }}
+                  css={styles.selectAllCheckbox}
+                  label={
+                    <EuiText size="xs">
+                      {OptionsListStrings.popover.getSelectAllButtonLabel()}
+                    </EuiText>
+                  }
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={true}>
             <EuiFlexGroup
               gutterSize="xs"
@@ -235,6 +239,7 @@ export const OptionsListPopoverActionBar = ({
                       ? OptionsListStrings.popover.getAllOptionsButtonTitle()
                       : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
                   }
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     size="xs"

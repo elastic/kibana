@@ -13,7 +13,6 @@
     "requiredPlugins": [
       "aiops",
       "alerting",
-      "cases",
       "charts",
       "data",
       "dataViews",
@@ -42,6 +41,7 @@
     ],
     "optionalPlugins": [
       "spaces",
+      "cases",
       "ml",
       "home",
       "osquery",

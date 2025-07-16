@@ -147,7 +147,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
   SearchBarInjectedDeps;
 
-interface State<QT extends Query | AggregateQuery = Query> {
+export interface SearchBarState<QT extends Query | AggregateQuery = Query> {
   isFiltersVisible: boolean;
   openQueryBarMenu: boolean;
   showSavedQueryPopover: boolean;
@@ -157,9 +157,9 @@ interface State<QT extends Query | AggregateQuery = Query> {
   dateRangeTo: string;
 }
 
-class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends Component<
+export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends Component<
   SearchBarProps<QT> & WithEuiThemeProps,
-  State<QT | Query>
+  SearchBarState<QT | Query>
 > {
   public static defaultProps = {
     showQueryMenu: true,
@@ -177,7 +177,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
 
   public static getDerivedStateFromProps(
     nextProps: SearchBarProps,
-    prevState: State<AggregateQuery | Query>
+    prevState: SearchBarState<AggregateQuery | Query>
   ) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
@@ -204,7 +204,13 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         query: '',
         language: nextProps.query.language,
       };
-    } else if (nextProps.query && !isOfQueryType(nextProps.query)) {
+    } else if (
+      nextProps.query &&
+      isOfAggregateQueryType(nextProps.query) &&
+      nextProps.query.esql !== get(prevState, 'currentProps.query.esql')
+    ) {
+      // this code is just overriding the query with a new one in case the query has changed in props
+      // without the props check it would override any edits to the query, if e.g. results were returned and isLoading switches from true to false
       nextQuery = nextProps.query;
     }
 
@@ -248,14 +254,9 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   /*
    Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
 
-    1. Each app doesn't have to maintain its own "draft" value if it wants to put off updating the query in app state
-    until the user manually submits their changes. Most apps have watches on the query value in app state so we don't
-    want to trigger those on every keypress. Also, some apps (e.g. dashboard) already juggle multiple query values,
-    each with slightly different semantics and I'd rather not add yet another variable to the mix.
-
-    2. Changes to the local component state won't trigger an Angular digest cycle. Triggering digest cycles on every
-    keypress has been a major source of performance issues for us in previous implementations of the query bar.
-    See https://github.com/elastic/kibana/issues/14086
+   Each app doesn't have to maintain its own "draft" value if it wants to put off updating the query in app state
+   until the user manually submits their changes. Some apps have watches on the query value in app state so we don't
+   want to trigger those on every keypress.
   */
   public state = {
     isFiltersVisible: true,
@@ -265,7 +266,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
-  } as State<QT>;
+  } as SearchBarState<QT>;
 
   public isDirty = () => {
     if (!this.props.showDatePicker && this.state.query && this.props.query) {

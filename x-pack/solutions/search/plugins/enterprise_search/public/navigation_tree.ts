@@ -13,6 +13,7 @@ import type {
   NodeDefinition,
   EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -71,7 +72,7 @@ export const getNavigationTreeDefinition = ({
 }): AddSolutionNavigationArg => {
   return {
     dataTestSubj: 'searchSideNav',
-    homePage: 'enterpriseSearch',
+    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -89,7 +90,7 @@ export const getNavigationTreeDefinition = ({
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
                     );
                   },
-                  link: 'enterpriseSearch',
+                  link: SEARCH_HOMEPAGE,
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
                     defaultMessage: 'Home',
                   }),

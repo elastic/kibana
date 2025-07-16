@@ -43,6 +43,7 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -216,8 +217,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Graph Visualization feature within the Security Solution.`,
         }
       ),
       type: 'boolean',
@@ -226,6 +226,7 @@ export const initUiSettings = (
       requiresPageReload: true,
       schema: schema.boolean(),
       solution: 'security',
+      technicalPreview: true,
     },
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
@@ -234,8 +235,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
         }
       ),
       type: 'boolean',
@@ -243,6 +243,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      technicalPreview: true,
     },
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
@@ -251,8 +252,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Cloud Connector experience within the Security Solution. When enabled, you can access the new Cloud Connector feature through the setting up an Agentless CSPM or Asset Inventory Integration.`,
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+          defaultMessage: `Enable the Cloud Connector experience within the Security Solution. When enabled, you can access the new Cloud Connector feature through the setting up an Agentless CSPM or Asset Inventory Integration.`,
         }
       ),
       type: 'boolean',
@@ -260,6 +260,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      technicalPreview: true,
     },
     [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.rulesTableRefresh', {
@@ -399,6 +400,32 @@ export const initUiSettings = (
       requiresPageReload: false,
       solution: 'security',
     },
+    ...(experimentalFeatures.privilegedUserMonitoringDisabled
+      ? {}
+      : {
+          [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
+              {
+                defaultMessage: 'Privileged user monitoring',
+              }
+            ),
+            value: false,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
+              {
+                defaultMessage:
+                  '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
+              }
+            ),
+            type: 'boolean',
+            category: [APP_ID],
+            requiresPageReload: true,
+            schema: schema.boolean(),
+            solution: 'security',
+          },
+        }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
+import type { EntityTypes } from '../../../../common/http_api/shared/entity_type';
 import type { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
 import { NoRemoteCluster } from '../../empty_states';
 import { SourceErrorPage } from '../../source_error_page';
@@ -20,11 +21,11 @@ import { getNoDataConfig } from './no_data_config';
 
 export const InfraPageTemplate = ({
   'data-test-subj': _dataTestSubj,
-  dataAvailabilityModules,
+  dataSourceAvailability,
   onboardingFlow,
   ...pageTemplateProps
 }: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
-  dataAvailabilityModules?: string[];
+  dataSourceAvailability?: EntityTypes;
   onboardingFlow?: OnboardingFlow;
 }) => {
   const {
@@ -48,11 +49,11 @@ export const InfraPageTemplate = ({
       return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
         method: 'GET',
         query: {
-          modules: dataAvailabilityModules,
+          source: dataSourceAvailability,
         },
       });
     },
-    [onboardingFlow, dataAvailabilityModules]
+    [onboardingFlow, dataSourceAvailability]
   );
 
   const hasData = !!data?.hasData;
