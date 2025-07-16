@@ -268,8 +268,11 @@ export const PolicySelector = memo<PolicySelectorProps>(
     }, [additionalListItems, selectedPolicyIds.length]);
 
     const totalItems: number = useMemo(() => {
-      return (policyListResponse?.total ?? 0) + additionalListItems?.length ?? 0;
-    }, [additionalListItems?.length, policyListResponse?.total]);
+      return (
+        (policyListResponse?.total ?? 0) +
+          (additionalListItems ?? []).filter((item) => !item.isGroupLabel).length ?? 0
+      );
+    }, [additionalListItems, policyListResponse?.total]);
 
     // @ts-expect-error EUI does not seem to have correctly types the `windowProps` which come from React-Window `FixedSizeList` component
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
@@ -355,17 +358,18 @@ export const PolicySelector = memo<PolicySelectorProps>(
                 disabled: isDisabled,
                 ...additionalItem,
                 'data-type': 'customItem',
-                prepend: useCheckbox ? (
-                  <EuiCheckbox
-                    id={htmlIdGenerator()()}
-                    onChange={NOOP}
-                    checked={additionalItem.checked === 'on'}
-                    disabled={additionalItem.disabled ?? isDisabled}
-                    data-test-subj={getTestId(
-                      `${additionalItem['data-test-subj'] ?? 'additionalItem'}-checkbox`
-                    )}
-                  />
-                ) : null,
+                prepend:
+                  useCheckbox && !additionalItem.isGroupLabel ? (
+                    <EuiCheckbox
+                      id={htmlIdGenerator()()}
+                      onChange={NOOP}
+                      checked={additionalItem.checked === 'on'}
+                      disabled={additionalItem.disabled ?? isDisabled}
+                      data-test-subj={getTestId(
+                        `${additionalItem['data-test-subj'] ?? 'additionalItem'}-checkbox`
+                      )}
+                    />
+                  ) : null,
               } as unknown as EuiSelectableOption<OptionPolicyData>;
             })
         );
