@@ -651,5 +651,212 @@ export default function ({ getService }: FtrProviderContext) {
         await security.role.delete(roleName);
       }
     });
+
+    it('project monitors - cannot update project monitors when user does not have access to a space in multi space use case', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_limited_space`;
+      const password = `${username}-password`;
+      const SPACE_ID_1 = `test-space-1-${uuidv4()}`;
+      const SPACE_ID_2 = `test-space-2-${uuidv4()}`;
+      const SPACE_NAME_1 = `test-space-name-1-${uuidv4()}`;
+      const SPACE_NAME_2 = `test-space-name-2-${uuidv4()}`;
+
+      await kibanaServer.spaces.create({ id: SPACE_ID_1, name: SPACE_NAME_1 });
+      await kibanaServer.spaces.create({ id: SPACE_ID_2, name: SPACE_NAME_2 });
+
+      try {
+        // Give user access to only SPACE_ID_1
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: [SPACE_ID_1],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+
+        // Try to add a monitor to both spaces, but user only has access to one
+        const multiSpaceMonitor = {
+          ...projectMonitors.monitors[0],
+          spaces: [SPACE_ID_1, SPACE_ID_2],
+        };
+
+        const resp = await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID_1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: [multiSpaceMonitor] });
+
+        expect([403, 404]).to.contain(resp.status);
+        expect([
+          `Kibana space does not exist, Error: Unauthorized to get ${SPACE_ID_2} space`,
+          'You do not have sufficient permissions to update monitors in all required spaces.',
+        ]).to.contain(resp.body.message);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID_1);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+        await kibanaServer.spaces.delete(SPACE_ID_1);
+        await kibanaServer.spaces.delete(SPACE_ID_2);
+      }
+    });
+
+    it('project monitors - cannot update project monitors when user does not have access to all spaces using * in spaces', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_limited_space_star`;
+      const password = `${username}-password`;
+      const SPACE_ID_1 = `test-space-1-${uuidv4()}`;
+      const SPACE_ID_2 = `test-space-2-${uuidv4()}`;
+      const SPACE_NAME_1 = `test-space-name-1-${uuidv4()}`;
+      const SPACE_NAME_2 = `test-space-name-2-${uuidv4()}`;
+
+      await kibanaServer.spaces.create({ id: SPACE_ID_1, name: SPACE_NAME_1 });
+      await kibanaServer.spaces.create({ id: SPACE_ID_2, name: SPACE_NAME_2 });
+
+      try {
+        // Give user access to only SPACE_ID_1
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: [SPACE_ID_1],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+
+        // Try to add a monitor to all spaces using '*', but user only has access to one
+        const multiSpaceMonitor = {
+          ...projectMonitors.monitors[0],
+          spaces: ['*'],
+        };
+
+        const resp = await supertestWithoutAuth
+          .put(
+            `/s/${SPACE_ID_1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: [multiSpaceMonitor] });
+
+        expect([403, 404]).to.contain(resp.status);
+        const msg = resp.body.message || '';
+        const isPermissionError = msg.includes(
+          'You do not have sufficient permissions to update monitors in all required spaces'
+        );
+        const isUnauthorizedSpaceError =
+          msg.includes('Kibana space does not exist') || msg.includes('Unauthorized to get');
+        expect(isPermissionError || isUnauthorizedSpaceError).to.be(true);
+      } finally {
+        await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID_1);
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+        await kibanaServer.spaces.delete(SPACE_ID_1);
+        await kibanaServer.spaces.delete(SPACE_ID_2);
+      }
+    });
+
+    it('project monitors - user with access to all spaces can specify * in spaces and monitor is created in all spaces', async () => {
+      const project = `test-project-${uuidv4()}`;
+      const username = 'admin';
+      const roleName = `synthetics_admin_all_spaces`;
+      const password = `${username}-password`;
+      const SPACE_ID_1 = `test-space-1-${uuidv4()}`;
+      const SPACE_ID_2 = `test-space-2-${uuidv4()}`;
+      const SPACE_NAME_1 = `test-space-name-1-${uuidv4()}`;
+      const SPACE_NAME_2 = `test-space-name-2-${uuidv4()}`;
+
+      await kibanaServer.spaces.create({ id: SPACE_ID_1, name: SPACE_NAME_1 });
+      await kibanaServer.spaces.create({ id: SPACE_ID_2, name: SPACE_NAME_2 });
+
+      try {
+        // Give user access to all spaces
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+
+        // Use a monitor with spaces: ['*']
+        const monitorId = uuidv4();
+        const monitor = {
+          ...httpProjectMonitors.monitors[1],
+          id: monitorId,
+          name: `All spaces Monitor ${monitorId}`,
+          spaces: ['*'],
+        };
+
+        // Create monitor in SPACE_ID_1 context
+        const { body } = await supertest
+          .put(
+            `/s/${SPACE_ID_1}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: [monitor] })
+          .expect(200);
+
+        expect(body).eql({
+          updatedMonitors: [],
+          createdMonitors: [monitorId],
+          failedMonitors: [],
+        });
+
+        // Use savedObjects client to verify monitor is created in all spaces
+        const soRes = await kibanaServer.savedObjects.find({
+          type: syntheticsMonitorSavedObjectType,
+        });
+
+        // Get all available spaces
+
+        // Find the monitor
+        const found = soRes.saved_objects.find(
+          (obj: any) => obj.attributes.journey_id === monitorId
+        );
+        expect(found).not.to.be(undefined);
+        expect(found?.namespaces).to.eql('*');
+        expect(found?.attributes.name).to.eql(monitor.name);
+      } finally {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+        await kibanaServer.spaces.delete(SPACE_ID_1);
+        await kibanaServer.spaces.delete(SPACE_ID_2);
+      }
+    });
   });
 }

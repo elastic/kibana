@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
@@ -78,6 +79,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       const [spaceId, permissionError] = await Promise.all([
         validProjectMultiSpace(routeContext, monitors),
         validatePermissions(routeContext, monitors),
+        validMultiSpacePrivileges(routeContext, monitors),
       ]);
 
       if (permissionError) {
@@ -115,7 +117,12 @@ const validProjectMultiSpace = async (routeContext: RouteContext, monitors: Proj
   const { response } = routeContext;
   const spaceId = await validateSpaceId(routeContext);
 
-  const spacesList = new Set(monitors.map((monitor) => monitor.spaces ?? []).flat());
+  const spacesList = new Set(
+    monitors
+      .map((monitor) => monitor.spaces ?? [])
+      .flat()
+      .filter((sp) => sp !== ALL_SPACES_ID)
+  );
   if ((spacesList.size === 1 && spacesList.has(DEFAULT_SPACE_ID)) || spacesList.size === 0) {
     return spaceId;
   }
@@ -157,6 +164,36 @@ const validProjectMultiSpace = async (routeContext: RouteContext, monitors: Proj
     }
   }
   return spaceId;
+};
+
+const validMultiSpacePrivileges = async (
+  routeContext: RouteContext,
+  monitors: ProjectMonitor[]
+) => {
+  const { spaceId, request, response, server } = routeContext;
+  const spacesList = monitors.flatMap((monitor) => monitor.spaces ?? []);
+  if (spacesList.length === 0 || (spacesList.length === 1 && spacesList[0] === spaceId)) {
+    // If there are no spaces or only the current space, no need to check privileges
+    return;
+  }
+
+  const checkSavedObjectsPrivileges =
+    server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
+
+  const { hasAllRequested } = await checkSavedObjectsPrivileges(
+    'saved_object:synthetics-monitor/bulk_update',
+    spacesList
+  );
+  if (!hasAllRequested) {
+    throw response.forbidden({
+      body: {
+        message: i18n.translate('xpack.synthetics.addMonitor.forbidden', {
+          defaultMessage:
+            'You do not have sufficient permissions to update monitors in all required spaces.',
+        }),
+      },
+    });
+  }
 };
 
 export const validatePermissions = async (
