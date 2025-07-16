@@ -56,7 +56,6 @@ import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { getUsersDetailsPageFilters } from './helpers';
-import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
