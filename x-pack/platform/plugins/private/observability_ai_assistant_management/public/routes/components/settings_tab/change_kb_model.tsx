@@ -32,6 +32,7 @@ import {
   useKibana,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
+import { getMappedInferenceId } from '@kbn/observability-ai-assistant-management-plugin/public/helpers/inference_utils';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
@@ -45,12 +46,9 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     endpoints: inferenceEndpoints,
   });
 
-  const currentlyDeployedInferenceId = useMemo(() => {
-    if (knowledgeBase.status.value?.currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
-      return ELSER_ON_ML_NODE_INFERENCE_ID;
-    }
-    return knowledgeBase.status.value?.currentInferenceId;
-  }, [knowledgeBase.status.value?.currentInferenceId]);
+  const currentlyDeployedInferenceId = getMappedInferenceId(
+    knowledgeBase.status.value?.currentInferenceId
+  );
 
   const { installProductDoc } = useGetProductDoc(currentlyDeployedInferenceId);
 
