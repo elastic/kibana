@@ -387,13 +387,18 @@ export const dashboardUpdateOptionsSchema = schema.object({
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
 
-export const dashboardCreateResultSchema = schema.object(
-  {
+export const dashboardCreateResultSchema = schema.oneOf([
+  schema.object({
     data: dashboardAttributesSchema,
     meta: dashboardResponseMetaSchema,
-  },
-  { unknowns: 'allow' }
-);
+    error: schema.never(),
+  }),
+  schema.object({
+    data: schema.never(),
+    meta: schema.never(),
+    error: apiError,
+  })
+ ]);
 
 export const dashboardItemSchema = dashboardCreateResultSchema;
 
