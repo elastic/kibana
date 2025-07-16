@@ -585,9 +585,11 @@ export class CstToAstConverter {
       for (const fieldCtx of fields.aggField_list()) {
         if (fieldCtx.getText() === '') continue;
 
-        const node = this.fromAggField(fieldCtx);
+        const field = this.fromAggField(fieldCtx);
 
-        command.args.push(node);
+        if (field) {
+          command.args.push(field);
+        }
       }
     }
 
@@ -603,6 +605,10 @@ export class CstToAstConverter {
   private fromAggField(ctx: cst.AggFieldContext) {
     const fieldCtx = ctx.field();
     const field = this.fromField(fieldCtx);
+
+    if (!field) {
+      return;
+    }
 
     const booleanExpression = ctx.booleanExpression();
 
@@ -1958,8 +1964,12 @@ export class CstToAstConverter {
     }
 
     try {
-      for (const field of ctx.field_list()) {
-        fields.push(this.fromField(field));
+      for (const fieldCtx of ctx.field_list()) {
+        const field = this.fromField(fieldCtx);
+
+        if (field) {
+          fields.push(field as any);
+        }
       }
     } catch (e) {
       // do nothing
@@ -1977,7 +1987,11 @@ export class CstToAstConverter {
 
     try {
       for (const aggField of ctx.aggField_list()) {
-        fields.push(this.fromField(aggField.field()));
+        const field = this.fromField(aggField.field());
+
+        if (field) {
+          fields.push(field);
+        }
       }
     } catch (e) {
       // do nothing
@@ -1986,7 +2000,7 @@ export class CstToAstConverter {
     return fields;
   }
 
-  private fromField(ctx: cst.FieldContext): ast.ESQLAstField {
+  private fromField(ctx: cst.FieldContext): ast.ESQLAstField | undefined {
     // TODO: Just checking on `ctx.qualifiedName()` should be enough and we
     //     should dereference `ctx.qualifiedName()` only once.
     if (ctx.qualifiedName() && ctx.ASSIGN()) {
@@ -2011,7 +2025,11 @@ export class CstToAstConverter {
       return assignment;
     }
 
-    return this.collectBooleanExpression(ctx.booleanExpression())[0]! as ast.ESQLAstField;
+    // The boolean expression parsing might result into no fields, this
+    // happens when ANTLR continues to try to parse and invalid query.
+    return this.collectBooleanExpression(ctx.booleanExpression())[0]! as
+      | ast.ESQLAstField
+      | undefined;
   }
 
   // --------------------------------------------------- expression: "function"
