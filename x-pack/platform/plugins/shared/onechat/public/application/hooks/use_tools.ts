@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/onechat-common';
+import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { CreateToolPayload } from '../../../common/http_api/tools';
-import { useOnechatServices } from './use_onechat_service';
 import { queryKeys } from '../query_keys';
+import { useOnechatServices } from './use_onechat_service';
 
 export const useOnechatTools = () => {
   const { toolsService } = useOnechatServices();
@@ -41,16 +41,24 @@ export const useOnechatEsqlTools = () => {
   return { tools: esqlTools, ...rest };
 };
 
-export const useOnechatCreateTool = () => {
+export const useOnechatCreateTool = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: (tool: ToolDefinitionWithSchema) => void;
+  onError?: (error: Error) => void;
+}) => {
   const queryClient = useQueryClient();
   const { toolsService } = useOnechatServices();
 
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isLoading } = useMutation({
     mutationFn: (tool: CreateToolPayload) => toolsService.create(tool),
+    onSuccess,
+    onError,
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
   });
 
-  return { createTool: mutateAsync };
+  return { createTool: mutateAsync, isLoading };
 };
 
 export const useOnechatToolsTags = () => {

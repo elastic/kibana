@@ -150,7 +150,7 @@ export const OnechatEsqlTools: React.FC = () => {
       <OnechatCreateEsqlToolFlyout
         isOpen={isFlyoutOpen}
         onClose={handleCloseFlyout}
-        onSave={() => {
+        onSuccess={() => {
           handleCloseFlyout();
           addSuccessToast({
             title: i18n.translate('xpack.onechat.tools.esqlToolCreationSuccessToast', {
