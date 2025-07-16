@@ -1935,6 +1935,11 @@ export class CstToAstConverter {
     return node;
   }
 
+  /**
+   * @todo Parsing should not depend on ANTLR token constants. Those constants
+   *     change all the time, and this code will break (maybe is already broken).
+   *     Rethink this method.
+   */
   private getQuotedText(ctx: antlr.ParserRuleContext) {
     return [27 /* esql_parser.QUOTED_STRING */, 69 /* esql_parser.QUOTED_IDENTIFIER */]
       .map((keyCode) => ctx.getToken(keyCode, 0))
@@ -1982,16 +1987,28 @@ export class CstToAstConverter {
   }
 
   private fromField(ctx: cst.FieldContext): ast.ESQLAstField {
+    // TODO: Just checking on `ctx.qualifiedName()` should be enough and we
+    //     should dereference `ctx.qualifiedName()` only once.
     if (ctx.qualifiedName() && ctx.ASSIGN()) {
-      const fn = this.createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
+      // TODO: use binary expression construction method.
+      const assignment = this.createFunction(
+        ctx.ASSIGN()!.getText(),
+        ctx,
+        undefined,
+        'binary-expression'
+      ) as ast.ESQLBinaryExpression;
 
-      fn.args.push(
+      assignment.args.push(
         this.toColumn(ctx.qualifiedName()!),
+        // TODO: The second argument here is an array, should be a single item.
         this.collectBooleanExpression(ctx.booleanExpression())
       );
-      fn.location = this.computeLocationExtends(fn);
 
-      return fn;
+      // TODO: Avoid using `computeLocationExtends` here. Location should be computed
+      //       without that function, and we should eventually remove it.
+      assignment.location = this.computeLocationExtends(assignment);
+
+      return assignment;
     }
 
     return this.collectBooleanExpression(ctx.booleanExpression())[0]! as ast.ESQLAstField;
@@ -1999,6 +2016,32 @@ export class CstToAstConverter {
 
   // --------------------------------------------------- expression: "function"
 
+  // TODO: Rename to `toFunction` or similar.
+  private createFunction<Subtype extends ast.FunctionSubtype>(
+    name: string,
+    ctx: antlr.ParserRuleContext,
+    customPosition?: ast.ESQLLocation,
+    subtype?: Subtype,
+    args: ast.ESQLAstItem[] = [],
+    incomplete?: boolean
+  ): ast.ESQLFunction<Subtype> {
+    const node: ast.ESQLFunction<Subtype> = {
+      type: 'function',
+      name,
+      text: ctx.getText(),
+      location: customPosition ?? getPosition(ctx.start, ctx.stop),
+      args,
+      incomplete: Boolean(ctx.exception) || !!incomplete,
+    };
+
+    if (subtype) {
+      node.subtype = subtype;
+    }
+
+    return node;
+  }
+
+  // TODO: Rename to `toFunctionCall` or similar.
   private createFunctionCall(ctx: cst.FunctionContext): ast.ESQLFunctionCallExpression {
     const functionExpressionCtx = ctx.functionExpression();
     const functionName = functionExpressionCtx.functionName();
@@ -2025,28 +2068,7 @@ export class CstToAstConverter {
     return node;
   }
 
-  private createFunction<Subtype extends ast.FunctionSubtype>(
-    name: string,
-    ctx: antlr.ParserRuleContext,
-    customPosition?: ast.ESQLLocation,
-    subtype?: Subtype,
-    args: ast.ESQLAstItem[] = [],
-    incomplete?: boolean
-  ): ast.ESQLFunction<Subtype> {
-    const node: ast.ESQLFunction<Subtype> = {
-      type: 'function',
-      name,
-      text: ctx.getText(),
-      location: customPosition ?? getPosition(ctx.start, ctx.stop),
-      args,
-      incomplete: Boolean(ctx.exception) || !!incomplete,
-    };
-    if (subtype) {
-      node.subtype = subtype;
-    }
-    return node;
-  }
-
+  // TODO: Rename to `toBinaryExpression` or similar.
   private createBinaryExpression(
     operator: ast.BinaryExpressionOperator,
     ctx: antlr.ParserRuleContext,
