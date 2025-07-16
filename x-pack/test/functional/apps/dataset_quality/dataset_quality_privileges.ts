@@ -8,6 +8,10 @@
 import expect from '@kbn/expect';
 import { DatasetQualityFtrProviderContext } from './config';
 import { datasetNames, defaultNamespace, getInitialTestLogs, getLogsForDataset } from './data';
+import {
+  createDatasetQualityUserWithRole,
+  deleteDatasetQualityUserWithRole,
+} from './roles/role_management';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -43,17 +47,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         // Index logs for synth-* and apache.access datasets
         await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
 
-        await createDatasetQualityUserWithRole(security, 'dataset_quality_no_read', [], false);
+        await createDatasetQualityUserWithRole(security, 'noAccess', []);
 
         // Logout in order to re-login with a different user
         await PageObjects.security.forceLogout();
-        await PageObjects.security.login(
-          'dataset_quality_no_read',
-          'dataset_quality_no_read-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await PageObjects.security.login('noAccess', 'noAccess-password', {
+          expectSpaceSelector: false,
+        });
 
         await PageObjects.datasetQuality.navigateTo();
       });
@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Cleanup the user and role
         await PageObjects.security.forceLogout();
-        await deleteDatasetQualityUserWithRole(security, 'dataset_quality_no_read');
+        await deleteDatasetQualityUserWithRole(security, 'noAccess');
       });
 
       it('shows empty state as user cannot read any dataset', async () => {
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     describe('User can read logs-*', () => {
       before(async () => {
-        await createDatasetQualityUserWithRole(security, 'dataset_quality_limited_user', [
+        await createDatasetQualityUserWithRole(security, 'fullAccess', [
           { names: ['logs-*'], privileges: ['read', 'view_index_metadata'] },
           { names: ['logs-synth*'], privileges: ['read'] }, // No monitor privilege
           { names: ['logs-apache*'], privileges: ['monitor'] },
@@ -85,19 +85,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         // Logout in order to re-login with a different user
         await PageObjects.security.forceLogout();
-        await PageObjects.security.login(
-          'dataset_quality_limited_user',
-          'dataset_quality_limited_user-password',
-          {
-            expectSpaceSelector: false,
-          }
-        );
+        await PageObjects.security.login('fullAccess', 'fullAccess-password', {
+          expectSpaceSelector: false,
+        });
       });
 
       after(async () => {
         // Cleanup the user and role
         await PageObjects.security.forceLogout();
-        await deleteDatasetQualityUserWithRole(security, 'dataset_quality_limited_user');
+        await deleteDatasetQualityUserWithRole(security, 'fullAccess');
       });
 
       describe('User cannot monitor any data stream', () => {
@@ -200,46 +196,4 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
   });
-}
-
-async function createDatasetQualityUserWithRole(
-  security: ReturnType<DatasetQualityFtrProviderContext['getService']>,
-  username: string,
-  indices: Array<{ names: string[]; privileges: string[] }>,
-  hasDataQualityPrivileges = true
-) {
-  const role = `${username}-role`;
-  const password = `${username}-password`;
-  const name = `${username}-name`;
-
-  await security.role.create(role, {
-    elasticsearch: {
-      cluster: ['monitor'],
-      indices,
-    },
-    kibana: [
-      {
-        feature: {
-          dataQuality: [hasDataQualityPrivileges ? 'all' : 'none'],
-          discover: ['all'],
-          fleet: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  });
-
-  return security.user.create(username, {
-    password,
-    roles: [role],
-    full_name: name,
-  });
-}
-
-async function deleteDatasetQualityUserWithRole(
-  security: ReturnType<DatasetQualityFtrProviderContext['getService']>,
-  username: string
-) {
-  await security.user.delete(username);
-  await security.role.delete(`${username}-role`);
 }
