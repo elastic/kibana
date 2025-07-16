@@ -159,6 +159,32 @@ export const panelGridDataSchema = schema.object({
   ),
 });
 
+export const panelsSettings = {
+  panelConfig: schema.object(
+    {},
+    {
+      unknowns: 'allow',
+    }
+  ),
+  type: schema.string({ meta: { description: 'The embeddable type' } }),
+  panelRefName: schema.maybe(schema.string()),
+  gridData: panelGridDataSchema,
+  panelIndex: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique ID of the panel.' },
+    })
+  ),
+  version: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+        deprecated: true,
+      },
+    })
+  ),
+};
+
 export const panelSchema = schema.object({
   panelConfig: schema.object(
     {},
@@ -201,6 +227,34 @@ export const sectionSchema = schema.object({
     defaultValue: [],
   }),
 });
+
+const dashboardCreationResponsePanels = {
+  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
+  panels: schema.arrayOf(
+    schema.oneOf([
+      panelSchema.extends({
+        panelIndex: schema.string(),
+        gridData: panelGridDataSchema.extends({
+          i: schema.string(),
+        }),
+      }),
+      sectionSchema.extends({
+        gridData: sectionGridDataSchema.extends({
+          i: schema.string(),
+        }),
+        panels: schema.arrayOf(
+          panelSchema.extends({
+            panelIndex: schema.string(),
+            gridData: panelGridDataSchema.extends({
+              i: schema.string(),
+            }),
+          })
+        ),
+      }),
+    ]),
+    { defaultValue: [] }
+  ),
+};
 
 export const optionsSchema = schema.maybe(
   schema.object({
@@ -295,11 +349,6 @@ export const dashboardRequestAttributes = {
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
 
-export const dashboardAttributes = {
-  ...searchResultsAttributes,
-  ...dashboardRequestAttributes,
-};
-
 export const referenceSchema = schema.object(
   {
     name: schema.string(),
@@ -309,39 +358,28 @@ export const referenceSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const dashboardAttributesSchema = schema.object({
-  ...dashboardAttributes,
+export const dashboardCreateRequestAttributesSchema = schema.object({
+  ...searchResultsAttributes,
+  ...dashboardRequestAttributes,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends({
-  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
-  panels: schema.arrayOf(
-    schema.oneOf([
-      panelSchema.extends({
-        panelIndex: schema.string(),
-        gridData: panelGridDataSchema.extends({
-          i: schema.string(),
-        }),
-      }),
-      sectionSchema.extends({
-        gridData: sectionGridDataSchema.extends({
-          i: schema.string(),
-        }),
-        panels: schema.arrayOf(
-          panelSchema.extends({
-            panelIndex: schema.string(),
-            gridData: panelGridDataSchema.extends({
-              i: schema.string(),
-            }),
-          })
-        ),
-      }),
-    ]),
-    { defaultValue: [] }
-  ),
+export const dashboardAttributesSchema = schema.object({
+  ...searchResultsAttributes,
+  ...dashboardRequestAttributes,
+  version: schema.string(),
+  references: schema.maybe(schema.arrayOf(referenceSchema)),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
+
+export const dashboardAttributesSchemaResponsePanels = schema.object(
+  dashboardCreationResponsePanels
+);
+
+export const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends(
+  dashboardCreationResponsePanels
+);
 
 export const dashboardResponseMetaSchema = schema.object({
   id: schema.string(),
@@ -389,16 +427,16 @@ export const dashboardUpdateOptionsSchema = schema.object({
 
 export const dashboardCreateResultSchema = schema.oneOf([
   schema.object({
-    data: dashboardAttributesSchema,
+    data: dashboardAttributesSchemaResponse,
     meta: dashboardResponseMetaSchema,
-    error: schema.never(),
   }),
-  schema.object({
-    data: schema.never(),
-    meta: schema.never(),
-    error: apiError,
-  })
- ]);
+  schema.object(
+    {
+      error: apiError,
+    },
+    { unknowns: 'allow' }
+  ),
+]);
 
 export const dashboardItemSchema = dashboardCreateResultSchema;
 
@@ -426,9 +464,7 @@ export const dashboardGetResultSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const dashboardSearchResultsSchema = dashboardItemSchema.extends({
-  attributes: searchResultsAttributesSchema,
-});
+export const dashboardSearchResultsSchema = dashboardItemSchema;
 
 export const serviceDefinition: ServicesDefinition = {
   get: {

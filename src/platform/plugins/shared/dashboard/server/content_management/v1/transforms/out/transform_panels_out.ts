@@ -52,7 +52,7 @@ function transformPanelProperties(
     version,
   }: SavedDashboardPanel,
   references?: SavedObjectReference[]
-) {
+): DashboardPanel {
   const { sectionId, ...rest } = gridData; // drop section ID, if it exists
 
   const matchingReference =

@@ -75,12 +75,22 @@ export function savedObjectToItem(
       ? pick(dashboardState, allowedAttributes)
       : dashboardState;
 
+    if (error) {
+      return {
+        item: {
+          error,
+        },
+        error: null,
+      };
+    }
+
     return {
       item: {
         data: {
           ...attributesOut,
           references: referencesOut,
           spaces: namespaces,
+          version,
         },
         meta: {
           id,
@@ -89,19 +99,14 @@ export function savedObjectToItem(
           updatedBy,
           createdAt,
           createdBy,
+          managed,
         },
       },
       error: null,
     };
   } catch (e) {
     return {
-      item: {
-        data: {},
-        meta: {
-          id,
-          type,
-        },
-      },
+      item: null,
       error: e,
     };
   }

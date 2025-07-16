@@ -15,14 +15,12 @@ import {
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { WithRequiredProperty } from '@kbn/utility-types';
 import {
   dashboardItemSchema,
   panelGridDataSchema,
   panelSchema,
   sectionSchema,
-  dashboardAttributesSchema,
   dashboardCreateOptionsSchema,
   dashboardCreateResultSchema,
   dashboardGetResultSchema,
@@ -30,6 +28,7 @@ import {
   dashboardSearchResultsSchema,
   dashboardUpdateOptionsSchema,
   optionsSchema,
+  dashboardAttributesSchemaResponse,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
@@ -44,15 +43,15 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
 };
 export type DashboardSection = TypeOf<typeof sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
-export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
+export type DashboardAttributes = Omit<
+  TypeOf<typeof dashboardAttributesSchemaResponse>,
+  'panels'
+> & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
 
 export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
-export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
-  attributes: Partial<DashboardAttributes>;
-  references: SavedObjectReference[] | undefined;
-};
+export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'>;
 
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 

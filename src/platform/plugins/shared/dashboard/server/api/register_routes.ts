@@ -23,6 +23,7 @@ import {
   referenceSchema,
   DashboardItem,
 } from '../content_management/v1';
+import { dashboardCreateRequestAttributesSchema } from '../content_management/v1/cm_services';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -84,7 +85,7 @@ export function registerAPIRoutes({
               })
             ),
           }),
-          body: dashboardAttributesSchema,
+          body: dashboardCreateRequestAttributesSchema,
         },
         response: {
           200: {
