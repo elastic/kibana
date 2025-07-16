@@ -8,7 +8,7 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import { GetPricingResponse, type ProductFeaturesRegistry } from '@kbn/core-pricing-common';
+import type { GetPricingResponse, ProductFeaturesRegistry } from '@kbn/core-pricing-common';
 import type { PricingConfigType } from '../pricing_config';
 
 export function registerPricingRoutes(

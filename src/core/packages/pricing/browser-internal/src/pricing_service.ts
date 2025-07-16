@@ -10,8 +10,8 @@
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { GetPricingResponse } from '@kbn/core-pricing-common';
 import { PricingTiersClient, ProductFeaturesRegistry } from '@kbn/core-pricing-common';
-import { PricingServiceStart } from '@kbn/core-pricing-browser';
-import { CoreService } from '@kbn/core-base-browser-internal';
+import type { PricingServiceStart } from '@kbn/core-pricing-browser';
+import type { CoreService } from '@kbn/core-base-browser-internal';
 
 interface StartDeps {
   http: InternalHttpStart;
