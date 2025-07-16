@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const DEFAULT_TASK_INTERVAL_MINUTES = 10;
-export const DEFAULT_TASK_START_DELAY_MINUTES = 10;
+export const ADD_TO_EXISTING_CASE_ACTION_ID = 'embeddable_addToExistingCase';
