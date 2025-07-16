@@ -265,22 +265,20 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
       <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
         <FlyoutPanels.Content>
-          <FlyoutPanels.Header>
-            <EuiTitle data-test-subj="flyoutTitle">
-              <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
-            </EuiTitle>
-            {showManagementLink && editData && editData.id && (
-              <EuiLink
-                href={application.getUrlForApp('management', {
-                  path: `/kibana/dataViews/dataView/${editData.id}`,
-                })}
-              >
-                {i18n.translate('indexPatternEditor.goToManagementPage', {
-                  defaultMessage: 'Manage settings and view field details',
-                })}
-              </EuiLink>
-            )}
-          </FlyoutPanels.Header>
+          <EuiTitle data-test-subj="flyoutTitle">
+            <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
+          </EuiTitle>
+          {showManagementLink && editData && editData.id && (
+            <EuiLink
+              href={application.getUrlForApp('management', {
+                path: `/kibana/dataViews/dataView/${editData.id}`,
+              })}
+            >
+              {i18n.translate('indexPatternEditor.goToManagementPage', {
+                defaultMessage: 'Manage settings and view field details',
+              })}
+            </EuiLink>
+          )}
           <Form
             form={form}
             css={styles.patternEditorForm}
