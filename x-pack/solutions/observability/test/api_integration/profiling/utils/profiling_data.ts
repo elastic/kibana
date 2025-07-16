@@ -71,6 +71,10 @@ export async function cleanUpProfilingData({
 
 export async function setupProfiling(bettertest: BetterTest, logger: ToolingLog) {
   const log = logWithTimer(logger);
+  // await bettertest({
+  //   method: 'post',
+  //   pathname: '/api/fleet/setup',
+  // });
   const response = await bettertest<ProfilingStatus>({
     method: 'get',
     pathname: profilingRoutePaths.HasSetupESResources,

@@ -79,7 +79,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Collector integration is not installed', () => {
       let collectorId: string | undefined;
       before(async () => {
-        await retry.try(async () => {
+        await retry.tryForTime(240000, async () => {
           await setupProfiling(bettertest, logger);
         });
         const response = await getProfilingPackagePolicyIds(bettertest);
@@ -143,7 +143,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Symbolizer integration is not installed', () => {
       let symbolizerId: string | undefined;
       before(async () => {
-        await retry.try(async () => {
+        await retry.tryForTime(240000, async () => {
           await setupProfiling(bettertest, logger);
         });
         const response = await getProfilingPackagePolicyIds(bettertest);
@@ -204,64 +204,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
     });
 
-    describe.skip('APM integration is not installed', () => {
-      before(async () => {
-        await retry.try(async () => {
-          await setupProfiling(bettertest, logger);
-          await deletePackagePolicy(bettertest, 'elastic-cloud-apm');
-        });
-      });
-
-      describe('Admin user', () => {
-        let statusCheck: ProfilingStatus;
-        before(async () => {
-          const response = await profilingApiClient.adminUser({
-            endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-          });
-          statusCheck = response.body;
-        });
-        it(`has been set up`, async () => {
-          expect(statusCheck.has_setup).to.be(true);
-        });
-
-        it(`does not have data`, async () => {
-          expect(statusCheck.has_data).to.be(false);
-        });
-
-        it(`does not have pre 8.9.1 data`, async () => {
-          expect(statusCheck.pre_8_9_1_data).to.be(false);
-        });
-      });
-
-      describe('Viewer user', () => {
-        let statusCheck: ProfilingStatus;
-        before(async () => {
-          const response = await profilingApiClient.readUser({
-            endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-          });
-          statusCheck = response.body;
-        });
-        it(`has been set up`, async () => {
-          expect(statusCheck.has_setup).to.be(true);
-        });
-
-        it(`does not have data`, async () => {
-          expect(statusCheck.has_data).to.be(false);
-        });
-
-        it(`does not have pre 8.9.1 data`, async () => {
-          expect(statusCheck.pre_8_9_1_data).to.be(false);
-        });
-
-        it(`does not have required role to fully check profiling status `, async () => {
-          expect(statusCheck.has_required_role).to.be(false);
-        });
-      });
-    });
-
     describe('Profiling is set up', () => {
       before(async () => {
-        await retry.try(async () => {
+        await retry.tryForTime(240000, async () => {
           await setupProfiling(bettertest, logger);
         });
       });
@@ -316,7 +261,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('with data', () => {
         before(async () => {
-          await retry.try(async () => {
+          await retry.tryForTime(240000, async () => {
             await loadProfilingData(es, logger);
           });
         });
@@ -364,6 +309,60 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
           it(`does not have required role to fully check profiling status `, async () => {
             expect(statusCheck.has_required_role).to.be(false);
           });
+        });
+      });
+    });
+
+    describe('APM integration is not installed', () => {
+      before(async () => {
+        await retry.tryForTime(240000, async () => {
+          await setupProfiling(bettertest, logger);
+        });
+      });
+
+      describe('Admin user', () => {
+        let statusCheck: ProfilingStatus;
+        before(async () => {
+          const response = await profilingApiClient.adminUser({
+            endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+          });
+          statusCheck = response.body;
+        });
+        it(`has been set up`, async () => {
+          expect(statusCheck.has_setup).to.be(true);
+        });
+
+        it(`has data`, async () => {
+          expect(statusCheck.has_data).to.be(true);
+        });
+
+        it(`does not have pre 8.9.1 data`, async () => {
+          expect(statusCheck.pre_8_9_1_data).to.be(false);
+        });
+      });
+
+      describe('Viewer user', () => {
+        let statusCheck: ProfilingStatus;
+        before(async () => {
+          const response = await profilingApiClient.readUser({
+            endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
+          });
+          statusCheck = response.body;
+        });
+        it(`has been set up`, async () => {
+          expect(statusCheck.has_setup).to.be(true);
+        });
+
+        it(`has data`, async () => {
+          expect(statusCheck.has_data).to.be(true);
+        });
+
+        it(`does not have pre 8.9.1 data`, async () => {
+          expect(statusCheck.pre_8_9_1_data).to.be(false);
+        });
+
+        it(`does not have required role to fully check profiling status `, async () => {
+          expect(statusCheck.has_required_role).to.be(false);
         });
       });
     });

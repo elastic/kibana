@@ -116,7 +116,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
   registry.when('Profiling feature controls', { config: 'cloud' }, () => {
     before(async () => {
-      await retry.try(async () => {
+      await retry.tryForTime(240000, async () => {
         await setupProfiling(bettertest, log);
       });
     });
