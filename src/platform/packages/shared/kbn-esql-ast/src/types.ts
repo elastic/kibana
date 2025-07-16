@@ -46,13 +46,13 @@ export type ESQLSingleAstItem =
  * Also, a field can be specified as a parameter.
  *
  * ```
- * STATS this.is.a.nested.field
- * STATS new_field = 123
- * STATS ?param
- * STATS ?param = 123
+ * EVAL this.is.a.nested.field
+ * EVAL new_field = 123
+ * EVAL ?param
+ * EVAL ?param = 123
  * ```
  */
-export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
