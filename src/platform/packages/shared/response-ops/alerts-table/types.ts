@@ -96,8 +96,12 @@ type UseCasesAddToExistingCaseModal = (
 export interface Ecs {
   _id: string;
   _index?: string;
-  signal?: any;
-  kibana?: any;
+  signal?: {
+    [x: string]: any;
+  };
+  kibana?: {
+    alert: any;
+  };
 }
 
 /**
