@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useState, KeyboardEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAddColumnName } from '../hooks/use_add_column_name';
@@ -37,7 +30,11 @@ export const AddColumnHeader = () => {
   if (isEditing) {
     return (
       <EuiForm component="form" onSubmit={onSubmit}>
-        <EuiToolTip position="top" content={validationError}>
+        <EuiToolTip
+          position="top"
+          content={validationError}
+          anchorProps={{ css: { width: '100%' } }}
+        >
           <EuiFieldText
             value={columnName}
             autoFocus
@@ -53,6 +50,7 @@ export const AddColumnHeader = () => {
               setIsEditing(false);
             }}
             onKeyDown={(e: KeyboardEvent) => {
+              e.stopPropagation();
               if (e.key === 'Escape') {
                 setIsEditing(false);
               }
@@ -64,29 +62,26 @@ export const AddColumnHeader = () => {
   }
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      css={{ height: euiTheme.size.xl, width: '100%' }}
-      justifyContent="center"
-      alignItems="center"
+    <EuiButtonEmpty
+      css={{
+        color: euiTheme.colors.textSubdued,
+        width: '100%',
+      }}
+      flush="left"
+      contentProps={{
+        css: {
+          justifyContent: 'left',
+        },
+      }}
+      onClick={() => setIsEditing(true)}
+      onKeyDown={(e: KeyboardEvent) => {
+        if (e.key === 'Enter') setIsEditing(true);
+      }}
     >
-      <EuiFlexItem
-        tabIndex={0}
-        css={{
-          color: euiTheme.colors.textSubdued,
-          cursor: 'pointer',
-          width: '100%',
-        }}
-        onClick={() => setIsEditing(true)}
-        onKeyDown={(e: KeyboardEvent) => {
-          if (e.key === 'Enter') setIsEditing(true);
-        }}
-      >
-        <FormattedMessage
-          id="indexEditor.flyout.grid.columnHeader.default"
-          defaultMessage="Add a field…"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <FormattedMessage
+        id="indexEditor.flyout.grid.columnHeader.default"
+        defaultMessage="Add a field…"
+      />
+    </EuiButtonEmpty>
   );
 };

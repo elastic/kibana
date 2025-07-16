@@ -251,9 +251,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           }
           .custom-column--placeholder {
             padding: 0;
-            &:after {
-              display: none;
-            }
           }
         `}
       />
