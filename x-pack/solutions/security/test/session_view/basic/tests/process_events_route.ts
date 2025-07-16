@@ -11,6 +11,13 @@ import {
   CURRENT_API_VERSION,
 } from '@kbn/session-view-plugin/common/constants';
 import { User } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
+import {
+  superUser,
+  globalRead,
+  secOnlyReadSpacesAll,
+  obsOnlySpacesAll,
+  noKibanaPrivileges,
+} from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/users';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_PAGE_SIZE = 400;
@@ -20,15 +27,6 @@ const ALERTS_IN_FIRST_PAGE = 8;
 // There are a number of uid_change, session_id_change events in the mock data
 // which session view does not use atm.
 const MOCK_TOTAL_PROCESS_EVENTS = 419;
-
-import {
-  superUser,
-  globalRead,
-  secOnlyReadSpacesAll,
-  obsOnlySpacesAll,
-  noKibanaPrivileges,
-} from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/users';
-
 const MOCK_INDEX = 'logs-endpoint.events.process*';
 const MOCK_SESSION_START_TIME = '2022-05-08T13:44:00.13Z';
 const MOCK_SESSION_ENTITY_ID =
