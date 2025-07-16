@@ -8,7 +8,7 @@ import { buildGapsFilter } from './build_gaps_filter';
 import { gapStatus } from '../../../common/constants/gap_status';
 
 const BASE_GAPS_FILTER =
-  'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:*';
+  'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true';
 
 describe('buildGapsFilter', () => {
   it('should build base filter when no params provided', () => {
