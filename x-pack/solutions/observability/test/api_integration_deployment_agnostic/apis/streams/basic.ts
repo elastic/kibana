@@ -14,6 +14,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
+  createStreamsRepositoryViewerClient,
 } from './helpers/repository_client';
 import {
   disableStreams,
@@ -29,6 +30,7 @@ import {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
+  let viewerApiClient: StreamsSupertestRepositoryClient;
   const config = getService('config');
   const isServerless = !!config.get('serverless');
   const esClient = getService('es');
@@ -64,12 +66,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Basic functionality', () => {
     async function getEnabled() {
-      const response = await apiClient.fetch('GET /api/streams/_status').expect(200);
+      const response = await viewerApiClient.fetch('GET /api/streams/_status').expect(200);
       return response.body.enabled;
     }
 
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+      viewerApiClient = await createStreamsRepositoryViewerClient(roleScopedSupertest);
     });
 
     describe('initially', () => {
@@ -681,6 +684,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect((response as any).message).to.contain(
           `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
         );
+      });
+
+      it('does not allow super deeply nested streams', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          dashboards: [],
+          queries: [],
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: { fields: {}, routing: [] },
+            },
+          },
+        };
+
+        await putStream(apiClient, 'logs.super.duper.hyper.deeply.nested.streamname', body, 400);
       });
     });
   });
