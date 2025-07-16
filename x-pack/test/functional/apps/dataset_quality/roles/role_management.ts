@@ -11,6 +11,12 @@ const datasetQualityRoles = {
   fullAccess: {
     elasticsearch: {
       cluster: ['monitor'],
+      indices: [
+        {
+          names: ['logs-*'],
+          privileges: ['all'],
+        },
+      ],
     },
     kibana: [
       {
@@ -26,6 +32,12 @@ const datasetQualityRoles = {
   canManageRules: {
     elasticsearch: {
       cluster: ['monitor'],
+      indices: [
+        {
+          names: ['logs-*'],
+          privileges: ['all'],
+        },
+      ],
     },
     kibana: [
       {
@@ -41,6 +53,12 @@ const datasetQualityRoles = {
   canManageAlerts: {
     elasticsearch: {
       cluster: ['monitor'],
+      indices: [
+        {
+          names: ['logs-*'],
+          privileges: ['all'],
+        },
+      ],
     },
     kibana: [
       {
@@ -56,6 +74,7 @@ const datasetQualityRoles = {
   noAccess: {
     elasticsearch: {
       cluster: ['monitor'],
+      indices: [],
     },
     kibana: [
       {
@@ -71,10 +90,15 @@ const datasetQualityRoles = {
 };
 
 const getDatasetQualityRole = (
-  indices: Array<{ names: string[]; privileges: string[] }>,
-  roleType: keyof typeof datasetQualityRoles
+  roleType: keyof typeof datasetQualityRoles,
+  indices?: Array<{ names: string[]; privileges: string[] }>
 ) => {
   const role = datasetQualityRoles[roleType];
+
+  if (!indices) {
+    return role;
+  }
+
   return {
     ...role,
     elasticsearch: {
@@ -87,13 +111,13 @@ const getDatasetQualityRole = (
 export async function createDatasetQualityUserWithRole(
   security: ReturnType<DatasetQualityFtrProviderContext['getService']>,
   username: keyof typeof datasetQualityRoles,
-  indices: Array<{ names: string[]; privileges: string[] }>
+  indices?: Array<{ names: string[]; privileges: string[] }>
 ) {
   const role = `${username}-role`;
   const password = `${username}-password`;
   const name = `${username}-name`;
 
-  await security.role.create(role, getDatasetQualityRole(indices, username));
+  await security.role.create(role, getDatasetQualityRole(username, indices));
 
   return security.user.create(username, {
     password,

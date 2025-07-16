@@ -40,9 +40,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         // Index logs for synth-* and apache.access datasets
         await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
 
-        await createDatasetQualityUserWithRole(security, 'canManageAlerts', [
-          { names: ['logs-*'], privileges: ['all'] },
-        ]);
+        await createDatasetQualityUserWithRole(security, 'canManageAlerts');
 
         // Logout in order to re-login with a different user
         await PageObjects.security.forceLogout();
@@ -70,9 +68,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     describe('User can create rules', () => {
       before(async () => {
-        await createDatasetQualityUserWithRole(security, 'canManageRules', [
-          { names: ['logs-*'], privileges: ['all'] },
-        ]);
+        // Index logs for synth-* and apache.access datasets
+        await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
+
+        await createDatasetQualityUserWithRole(security, 'canManageRules');
 
         // Logout in order to re-login with a different user
         await PageObjects.security.forceLogout();
@@ -84,6 +83,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       after(async () => {
+        await synthtrace.clean();
+
         // Cleanup the user and role
         await PageObjects.security.forceLogout();
         await deleteDatasetQualityUserWithRole(security, 'canManageRules');

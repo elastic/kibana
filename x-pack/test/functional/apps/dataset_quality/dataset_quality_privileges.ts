@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         // Index logs for synth-* and apache.access datasets
         await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
 
-        await createDatasetQualityUserWithRole(security, 'noAccess', []);
+        await createDatasetQualityUserWithRole(security, 'noAccess');
 
         // Logout in order to re-login with a different user
         await PageObjects.security.forceLogout();
