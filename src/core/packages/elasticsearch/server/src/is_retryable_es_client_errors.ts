@@ -9,9 +9,7 @@
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
-const retryResponseStatuses = [
-  401, // AuthorizationException
-  403, // AuthenticationException
+const DEFAULT_RETRY_STATUS_CODES = [
   408, // RequestTimeout
   410, // Gone
   429, // TooManyRequests -> ES circuit breaker
@@ -21,20 +19,32 @@ const retryResponseStatuses = [
 
 /**
  * Returns true if the given elasticsearch error should be retried
- * by retry-based resiliency systems such as the SO migration, false otherwise.
+ *
+ * Retryable errors include:
+ * - NoLivingConnectionsError
+ * - ConnectionError
+ * - TimeoutError
+ * - ResponseError with status codes:
+ *   - 408 RequestTimeout
+ *   - 410 Gone
+ *   - 429 TooManyRequests (ES circuit breaker)
+ *   - 503 ServiceUnavailable
+ *   - 504 GatewayTimeout
+ *   - OR custom status codes if provided
+ * @param e The error to check
+ * @param customRetryStatusCodes Custom response status codes to consider as retryable
+ * @returns true if the error is retryable, false otherwise
  */
-export const isRetryableEsClientError = (e: EsErrors.ElasticsearchClientError): boolean => {
+export const isRetryableEsClientError = (
+  e: EsErrors.ElasticsearchClientError,
+  customRetryStatusCodes?: number[]
+): boolean => {
   if (
     e instanceof EsErrors.NoLivingConnectionsError ||
     e instanceof EsErrors.ConnectionError ||
     e instanceof EsErrors.TimeoutError ||
     (e instanceof EsErrors.ResponseError &&
-      (retryResponseStatuses.includes(e?.statusCode!) ||
-        // ES returns a 400 Bad Request when trying to close or delete an
-        // index while snapshots are in progress. This should have been a 503
-        // so once https://github.com/elastic/elasticsearch/issues/65883 is
-        // fixed we can remove this.
-        e?.body?.error?.type === 'snapshot_in_progress_exception'))
+      (customRetryStatusCodes ?? DEFAULT_RETRY_STATUS_CODES).includes(e?.statusCode!))
   ) {
     return true;
   }

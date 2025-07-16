@@ -9,7 +9,7 @@
 
 export const isRetryableEsClientErrorMock = jest.fn();
 
-jest.doMock('./retryable_es_client_errors', () => {
+jest.doMock('@kbn/core-elasticsearch-server', () => {
   return {
     isRetryableEsClientError: isRetryableEsClientErrorMock,
   };
