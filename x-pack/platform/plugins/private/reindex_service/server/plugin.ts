@@ -50,7 +50,6 @@ export class ReindexServiceServerPlugin implements Plugin {
     this.logger = logger.get();
     // used by worker and passed to routes
     this.credentialStore = credentialStoreFactory(this.logger);
-    // versionService.setup(env.packageInfo.version);
     this.version = new Version();
     this.version.setup(env.packageInfo.version);
   }
@@ -85,6 +84,15 @@ export class ReindexServiceServerPlugin implements Plugin {
     { security }: PluginsStart
   ) {
     this.securityPluginStart = security;
+
+    // The ReindexWorker uses a map of request headers that contain the authentication credentials
+    // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
+    // want to expose these credentials to any unauthenticated users. We also want to avoid any need
+    // to add a user for a special index just for upgrading. This in-memory cache allows us to
+    // process jobs without the browser staying on the page, but will require that jobs go into
+    // a paused state if no Kibana nodes have the required credentials.
+
+    // The ReindexWorker will use the credentials stored in the cache to reindex the data
 
     this.reindexWorker = createReindexWorker({
       credentialStore: this.credentialStore,
