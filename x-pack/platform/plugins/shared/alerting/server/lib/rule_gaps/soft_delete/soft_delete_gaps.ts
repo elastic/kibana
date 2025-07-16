@@ -26,11 +26,11 @@ interface SoftDeleteGapsParams {
 export const softDeleteGaps = async (params: SoftDeleteGapsParams) => {
   const { ruleId, logger, eventLogClient, eventLogger } = params;
 
-  if (!eventLogger) {
-    throw new Error('Event logger is required');
-  }
-
   try {
+    if (!eventLogger) {
+      throw new Error('Event logger is required');
+    }
+
     const alertingEventLogger = new AlertingEventLogger(eventLogger);
     let hasErrors = false;
 

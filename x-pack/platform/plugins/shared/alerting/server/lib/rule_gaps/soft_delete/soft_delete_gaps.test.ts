@@ -83,7 +83,7 @@ describe('softDeleteGaps', () => {
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        `Failed to disable gaps for rule test-rule-id: Some gaps failed to disable`
+        `Failed to soft delete gaps for rule test-rule-id: Some gaps failed to soft delete`
       );
     });
   });

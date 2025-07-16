@@ -107,14 +107,19 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     })
   );
 
-  const eventLogClient = await context.getEventLogClient();
+  try {
+    const eventLogClient = await context.getEventLogClient();
 
-  await softDeleteGaps({
-    ruleId: id,
-    logger: context.logger,
-    eventLogClient,
-    eventLogger: context.eventLogger,
-  });
+    await softDeleteGaps({
+      ruleId: id,
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    });
+  } catch (error) {
+    // Failing to soft delete gaps should not block the rule deletion
+    context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
+  }
 
   const removeResult = await deleteRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,

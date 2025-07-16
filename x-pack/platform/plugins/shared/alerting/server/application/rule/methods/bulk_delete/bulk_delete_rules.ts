@@ -197,20 +197,28 @@ const bulkDeleteWithOCC = async (
     await untrackRuleAlerts(context, id, attributes as RawRule);
   }
 
-  const eventLogClient = await context.getEventLogClient();
-  await pMap(
-    rulesToDelete.map((rule) => rule.id),
-    (ruleId) =>
-      softDeleteGaps({
-        ruleId,
-        logger: context.logger,
-        eventLogClient,
-        eventLogger: context.eventLogger,
-      }),
-    {
-      concurrency: 10,
-    }
-  );
+  const ruleIds = rulesToDelete.map((rule) => rule.id);
+  try {
+    const eventLogClient = await context.getEventLogClient();
+    await pMap(
+      ruleIds,
+      (ruleId) =>
+        softDeleteGaps({
+          ruleId,
+          logger: context.logger,
+          eventLogClient,
+          eventLogger: context.eventLogger,
+        }),
+      {
+        concurrency: 10,
+      }
+    );
+  } catch (error) {
+    // Failing to soft delete gaps should not block the rule deletion
+    context.logger.error(
+      `delete(): Failed to soft delete gaps for rules: ${ruleIds.join(',')}: ${error.message}`
+    );
+  }
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
