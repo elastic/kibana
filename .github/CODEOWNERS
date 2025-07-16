@@ -975,6 +975,7 @@ x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assist
 x-pack/platform/plugins/shared/onechat @elastic/workchat-eng
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
+x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-kibana
 x-pack/platform/plugins/shared/saved_objects_tagging @elastic/appex-sharedux
 x-pack/platform/plugins/shared/screenshotting @elastic/kibana-reporting-services
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
@@ -1523,7 +1524,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/common/services/ingest_manager.ts @elastic/fleet # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859018893
 /x-pack/test/functional/es_archives/fleet @elastic/fleet
 /x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
-/x-pack/test/fleet_api_integration @elastic/fleet
+/x-pack/solutions/security/test/fleet_api_integration @elastic/fleet
 /x-pack/platform/test/fleet_api_integration @elastic/fleet
 /x-pack/platform/test/fleet_packages @elastic/fleet
 /x-pack/platform/test/fleet_tasks @elastic/fleet
@@ -2200,8 +2201,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 /x-pack/platform/test/functional_with_es_ssl/platform/plugins/shared/cases @elastic/kibana-cases
 /x-pack/platform/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
-/x-pack/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
-/x-pack/test/screenshot_creation/ @elastic/response-ops
+/x-pack/solutions/observability/test/screenshot_creation/ @elastic/response-ops
+/x-pack/solutions/security/test/screenshot_creation/ @elastic/response-ops
 /x-pack/test/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_triggers_actions_ui_page.ts @elastic/response-ops
@@ -2313,7 +2314,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
-/x-pack/test/upgrade_assistant_integration @elastic/kibana-management
+/x-pack/platform/test/upgrade_assistant_integration @elastic/kibana-management
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/*.ts @elastic/kibana-management
 /src/platform/test/functional/page_objects/embedded_console.ts @elastic/kibana-management
