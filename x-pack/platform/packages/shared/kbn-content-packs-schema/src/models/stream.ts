@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export * from './archive';
-export * from './saved_object';
-export * from './fields';
-export * from './stream';
+import { Streams } from '@kbn/streams-schema';
+
+export const PARENT_STREAM_ID = '__parent__';
+
+export type ContentPackStream = {
+  type: 'stream';
+  id: string;
+  stream: Streams.WiredStream.Definition;
+};

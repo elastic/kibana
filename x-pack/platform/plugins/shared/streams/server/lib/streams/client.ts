@@ -29,6 +29,7 @@ import { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
+import { StreamChange } from './state_management/types';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -279,6 +280,15 @@ export class StreamsClient {
       acknowledged: true,
       result: result.changes.created.includes(name) ? 'created' : 'updated',
     };
+  }
+
+  async bulkChanges(changes: StreamChange[]) {
+    await State.attemptChanges(changes, {
+      ...this.dependencies,
+      streamsClient: this,
+    });
+
+    return { acknowledged: true };
   }
 
   /**

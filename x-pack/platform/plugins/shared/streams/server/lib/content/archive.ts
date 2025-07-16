@@ -12,6 +12,8 @@ import {
   ContentPackEntry,
   ContentPackManifest,
   ContentPackSavedObject,
+  ContentPackStream,
+  SUPPORTED_ENTRY_TYPE,
   SUPPORTED_SAVED_OBJECT_TYPE,
   contentPackManifestSchema,
   getEntryTypeByFile,
@@ -19,6 +21,7 @@ import {
   isSupportedFile,
   isSupportedReferenceType,
 } from '@kbn/content-packs-schema';
+import { Streams } from '@kbn/streams-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import { Readable } from 'stream';
@@ -59,13 +62,23 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
       switch (type) {
         case 'dashboard':
         case 'index-pattern':
-        case 'lens':
+        case 'lens': {
           const subDir = SUPPORTED_SAVED_OBJECT_TYPE[object.type];
           zip.addFile(
             path.join(rootDir, 'kibana', subDir, `${object.id}.json`),
             Buffer.from(JSON.stringify(object, null, 2))
           );
           return;
+        }
+
+        case 'stream': {
+          const subDir = SUPPORTED_ENTRY_TYPE.stream;
+          zip.addFile(
+            path.join(rootDir, subDir, `${object.stream.name}.json`),
+            Buffer.from(JSON.stringify(object.stream, null, 2))
+          );
+          return;
+        }
 
         default:
           missingEntryTypeImpl(type);
@@ -128,6 +141,18 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
 
         case 'dashboard':
           return resolveDashboard(rootDir, zip, entry);
+
+        case 'stream':
+          return readEntry(entry).then((data) => {
+            const stream = JSON.parse(data.toString()) as Streams.all.Definition;
+            if (!Streams.all.Definition.is(stream)) {
+              throw new InvalidContentPackError(
+                `Invalid stream definition in entry [${entry.entryName}]`
+              );
+            }
+
+            return { type: 'stream', id: stream.name, stream } as ContentPackStream;
+          });
 
         default:
           missingEntryTypeImpl(type);

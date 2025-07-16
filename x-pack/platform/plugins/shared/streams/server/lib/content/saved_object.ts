@@ -19,7 +19,7 @@ import {
 import { compact, uniqBy } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 
-export function prepareForExport({
+export function prepareSOForExport({
   savedObjects,
   source,
   replacedPatterns = [],
@@ -48,7 +48,7 @@ export function prepareForExport({
   });
 }
 
-export function prepareForImport({
+export function prepareSOForImport({
   savedObjects,
   include,
   target,
