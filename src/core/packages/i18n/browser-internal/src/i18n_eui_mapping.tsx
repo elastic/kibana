@@ -16,6 +16,10 @@ interface EuiValues {
 
 export const getEuiContextMapping = (): EuiTokensObject => {
   return {
+    'euiColorPicker.selectedColorLabel': undefined,
+    'euiHue.ariaRoleDescription': undefined,
+    'euiHue.ariaValueText': undefined,
+    'euiSaturation.roleDescription': undefined,
     'euiAccordionChildrenLoading.message': i18n.translate(
       'core.euiAccordionChildrenLoading.message',
       {
