@@ -30,14 +30,19 @@ interface WorkflowProps {
   featureBullets: string[];
   buttonLabel: string;
   dataTestSubj: string;
+  workflow: string;
 }
 
-export const AISearchWorkflow = ({ capability }: { capability: WorkflowProps }) => {
+interface AISearchWorkflowProps {
+  capability: WorkflowProps;
+}
+
+export const AISearchWorkflow = ({ capability }: AISearchWorkflowProps) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const { share } = useKibana().services;
   const createIndexUrl = share?.url.locators
     .get('SEARCH_CREATE_INDEX')
-    ?.useUrl({ workflow: 'vector' });
+    ?.useUrl({ workflow: capability.workflow });
 
   return (
     <EuiPanel color="transparent" paddingSize="s">
