@@ -18,12 +18,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('maps integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json'
       );
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json'
       );
       await kibanaServer.savedObjects.clean({ types: ['tag'] });
     });

@@ -39,12 +39,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('saved objects management integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json'
       );
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json'
       );
     });
 

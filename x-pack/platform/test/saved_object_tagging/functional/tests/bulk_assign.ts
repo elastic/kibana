@@ -20,14 +20,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     beforeEach(async () => {
       assignFlyout = tagManagementPage.assignFlyout;
       await kibanaServer.importExport.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json'
       );
       await tagManagementPage.navigateTo();
     });
 
     afterEach(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json'
       );
     });
 

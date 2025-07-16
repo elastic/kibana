@@ -16,13 +16,13 @@ export default function ({ getService }: FtrProviderContext) {
   describe('POST /api/saved_objects_tagging/tags/create', () => {
     beforeEach(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
       );
     });
 
     afterEach(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
       );
     });
 
