@@ -84,7 +84,7 @@ export function createChatCompleteCallbackApi({
       abortSignal,
       stream,
       maxRetries = 3,
-      retryConfiguration = { retryOn: 'all' },
+      retryConfiguration = {},
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
