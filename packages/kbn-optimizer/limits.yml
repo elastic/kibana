@@ -25,7 +25,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
-  dashboardEnhanced: 12500
+  dashboardEnhanced: 31882
   data: 453742
   dataQuality: 10387
   datasetQuality: 27203
@@ -44,7 +44,7 @@ pageLoadAssetSize:
   embeddable: 18810
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
-  enterpriseSearch: 38494
+  enterpriseSearch: 54683
   esql: 10370
   esqlDataGrid: 10209
   esUiShared: 100338
@@ -73,7 +73,7 @@ pageLoadAssetSize:
   grokdebugger: 5484
   guidedOnboarding: 26999
   home: 13710
-  imageEmbeddable: 6000
+  imageEmbeddable: 21386
   indexLifecycleManagement: 29870
   indexManagement: 35861
   inference: 10368
@@ -165,7 +165,7 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 200384
   transform: 22722
-  triggersActionsUi: 110000
+  triggersActionsUi: 129667
   uiActions: 24712
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513
