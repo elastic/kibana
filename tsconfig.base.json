@@ -1632,6 +1632,8 @@
       "@kbn/safer-lodash-set/*": ["src/platform/packages/shared/kbn-safer-lodash-set/*"],
       "@kbn/saml-provider-plugin": ["x-pack/test/security_api_integration/plugins/saml_provider"],
       "@kbn/saml-provider-plugin/*": ["x-pack/test/security_api_integration/plugins/saml_provider/*"],
+      "@kbn/sample-data-ingest": ["x-pack/platform/plugins/shared/sample_data_ingest"],
+      "@kbn/sample-data-ingest/*": ["x-pack/platform/plugins/shared/sample_data_ingest/*"],
       "@kbn/sample-log-parser": ["x-pack/platform/packages/shared/kbn-sample-parser"],
       "@kbn/sample-log-parser/*": ["x-pack/platform/packages/shared/kbn-sample-parser/*"],
       "@kbn/sample-task-plugin": ["x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin"],
