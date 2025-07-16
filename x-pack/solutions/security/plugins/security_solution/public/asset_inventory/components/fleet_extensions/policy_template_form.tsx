@@ -16,7 +16,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NamespaceComboBox, SetupTechnology } from '@kbn/fleet-plugin/public';
+import {
+  NamespaceComboBox,
+  SetupTechnology,
+  SetupTechnologySelector,
+} from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   type NewPackagePolicyInput,
@@ -34,7 +38,6 @@ import {
   getDefaultCloudCredentialsType,
   getCloudConnectorRemoteRoleTemplate,
 } from './utils';
-import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { PolicyTemplateInputSelector, PolicyTemplateVarsForm } from './policy_template_selectors';
 import type { AssetInput, NewPackagePolicyAssetInput } from './types';
@@ -318,6 +321,8 @@ export const CloudAssetInventoryPolicyTemplateForm =
             <SetupTechnologySelector
               disabled={isEditPage}
               setupTechnology={setupTechnology}
+              useDescribedFormGroup={false}
+              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
               onSetupTechnologyChange={(value) => {
                 updateSetupTechnology(value);
                 updatePolicy(

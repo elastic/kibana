@@ -84,7 +84,7 @@ import { PostInstallCloudFormationModal } from './components/cloud_security_post
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
-import { SetupTechnologySelector } from './components/setup_technology_selector';
+import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
@@ -456,13 +456,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             submitAttempted={formState === 'INVALID'}
           />
 
-          {/* TODO move SetupTechnologySelector out of extensionView */}
-          {!extensionView && !hideAgentlessSelector && isAgentlessIntegration(packageInfo) && (
+          {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
+          {!hideAgentlessSelector && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
-              onSetupTechnologyChange={(value) => {
+              onSetupTechnologyChange={(value: SetupTechnology) => {
                 handleSetupTechnologyChange(value);
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);

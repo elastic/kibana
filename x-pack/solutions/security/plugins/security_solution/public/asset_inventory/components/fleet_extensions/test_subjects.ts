@@ -18,11 +18,6 @@ export const CAI_AWS_OPTION_TEST_SUBJ = 'caiAwsTestId';
 export const CAI_GCP_OPTION_TEST_SUBJ = 'caiGcpTestId';
 export const CAI_AZURE_OPTION_TEST_SUBJ = 'caiAzureTestId';
 
-export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
-export const SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_TEST_SUBJ =
-  'setup-technology-selector-agentless-radio';
-export const SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_TEST_SUBJ =
-  'setup-technology-selector-agentbased-radio';
 export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
 export const CAI_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
   TENANT_ID: 'caiAzureTenantId',
