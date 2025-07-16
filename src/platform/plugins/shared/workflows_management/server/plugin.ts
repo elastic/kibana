@@ -7,28 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
+  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { Client } from '@elastic/elasticsearch';
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { i18n } from '@kbn/i18n';
+import type {
+  WorkflowsManagementPluginServerDependenciesSetup,
+  WorkflowsPluginSetup,
+  WorkflowsPluginStart,
+} from './types';
 import { defineRoutes } from './workflows_management/workflows_management_routes';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
 import type { WorkflowsExecutionEnginePluginStartDeps } from './types';
 import { SchedulerService } from './scheduler/scheduler_service';
 import {
-  WORKFLOWS_EXECU,
-  WORKFLOWS_STEP_EXECUTIONS_INDEXTIONS_INDEX,
   WORKFLOWS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../common';
+
+/**
+ * The order of appearance in the feature privilege page
+ * under the management section.
+ */
+const FEATURE_ORDER = 3000;
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
@@ -49,8 +60,164 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+
+    plugins.features?.registerKibanaFeature({
+      id: 'workflowsManagement',
+      name: i18n.translate(
+        'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementFeatureName',
+        {
+          defaultMessage: 'Workflows Management',
+        }
+      ),
+      category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: [],
+      order: FEATURE_ORDER,
+      management: {
+        kibana: ['workflowsManagement'],
+      },
+      privileges: {
+        all: {
+          app: [],
+          api: [],
+          management: {
+            kibana: ['workflowsManagement'],
+          },
+          savedObject: {
+            all: ['workflows', 'workflow_executions'],
+            read: [],
+          },
+          ui: ['create', 'update', 'delete', 'read', 'execute'],
+        },
+        read: {
+          app: [],
+          api: [],
+          management: {
+            kibana: ['workflowsManagement'],
+          },
+          savedObject: {
+            all: [],
+            read: ['workflows', 'workflow_executions'],
+          },
+          ui: ['read'],
+        },
+      },
+      subFeatures: [
+        {
+          name: i18n.translate(
+            'platform.plugins.shared.workflows_management.featureRegistry.workflowsManagementSubFeatureName',
+            {
+              defaultMessage: 'Workflows Actions',
+            }
+          ),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  api: ['workflow:create'],
+                  id: 'workflow_create',
+                  name: i18n.translate(
+                    'platform.plugins.shared.workflows_management.featureRegistry.createWorkflowSubFeaturePrivilege',
+                    {
+                      defaultMessage: 'Create',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['workflow'],
+                    read: [],
+                  },
+                  ui: ['createWorkflow'],
+                },
+                {
+                  api: ['workflow:update'],
+                  id: 'workflow_update',
+                  name: i18n.translate(
+                    'platform.plugins.shared.workflows_management.featureRegistry.updateWorkflowSubFeaturePrivilege',
+                    {
+                      defaultMessage: 'Update',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['workflow'],
+                    read: [],
+                  },
+                  ui: ['updateWorkflow'],
+                },
+                {
+                  api: ['workflow:delete'],
+                  id: 'workflow_delete',
+                  name: i18n.translate(
+                    'platform.plugins.shared.workflows_management.featureRegistry.deleteWorkflowSubFeaturePrivilege',
+                    {
+                      defaultMessage: 'Delete',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['workflow'],
+                    read: [],
+                  },
+                  ui: ['deleteWorkflow'],
+                },
+                {
+                  api: ['workflow:execute'],
+                  id: 'workflow_execute',
+                  name: i18n.translate(
+                    'platform.plugins.shared.workflows_management.featureRegistry.executeWorkflowSubFeaturePrivilege',
+                    {
+                      defaultMessage: 'Execute',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['workflow_execution'],
+                    read: ['workflow'],
+                  },
+                  ui: ['executeWorkflow'],
+                },
+                {
+                  api: ['workflow:read'],
+                  id: 'workflow_read',
+                  name: i18n.translate(
+                    'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowSubFeaturePrivilege',
+                    {
+                      defaultMessage: 'Read',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    read: ['workflow'],
+                    all: [],
+                  },
+                  ui: ['readWorkflow'],
+                },
+                {
+                  api: ['workflow_execution:read'],
+                  id: 'workflow_execution_read',
+                  name: i18n.translate(
+                    'platform.plugins.shared.workflows_management.featureRegistry.readWorkflowExecutionSubFeaturePrivilege',
+                    {
+                      defaultMessage: 'Read Workflow Execution',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    read: ['workflow_execution'],
+                    all: [],
+                  },
+                  ui: ['readWorkflowExecution'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
 
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter();
@@ -74,7 +241,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   }
 
   public start(core: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
-    this.logger.debug('Workflows Management: Start');
+    this.logger.info('Workflows Management: Start');
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 

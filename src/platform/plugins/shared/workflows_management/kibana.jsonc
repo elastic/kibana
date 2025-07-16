@@ -14,7 +14,9 @@
       "navigation",
       "taskManager",
       "actions",
-      "workflowsExecutionEngine"
+      "workflowsExecutionEngine",
+      "features",
+      "security"
     ]
   }
 }
