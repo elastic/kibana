@@ -109,6 +109,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
+          'xpack.security.authc.native_roles.enabled=true',
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
           ...esServerArgsFromController[options.serverlessProject],
           ...(options.tier && options.tier === 'oblt_logs_essentials'
@@ -122,7 +123,6 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
-          'xpack.security.authc.native_roles.enabled=true',
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
