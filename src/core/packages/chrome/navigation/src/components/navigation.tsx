@@ -18,6 +18,8 @@ import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 
+const FOOTER_ITEM_LIMIT = 5;
+
 interface NavigationProps {
   isCollapsed: boolean;
   items: NavigationStructure;
@@ -250,7 +252,7 @@ export const Navigation = ({
         </SideNav.PrimaryMenu>
 
         <SideNav.Footer isCollapsed={isCollapsed}>
-          {items.footerItems.map((item) => (
+          {items.footerItems.slice(0, FOOTER_ITEM_LIMIT).map((item) => (
             <SideNav.Popover
               key={item.id}
               isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
