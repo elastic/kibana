@@ -51,7 +51,6 @@ export function initializeIntegrations(
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
-    | 'mountInlineFlyout'
   > &
     HasSerializableState;
 } {

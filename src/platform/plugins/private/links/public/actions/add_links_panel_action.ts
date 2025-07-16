@@ -17,10 +17,12 @@ import {
   apiPublishesTitle,
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi, LinksSerializedState } from '../types';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
-import { openEditorFlyout } from '../editor/open_editor_flyout';
+import { coreServices } from '../services/kibana_services';
+import { getEditorFlyout } from '../editor/get_editor_flyout';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 import { createLinksSavedObjectRef } from '../lib/saved_object_ref_utils';
 
@@ -34,38 +36,49 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   id: ADD_LINKS_PANEL_ACTION_ID,
   getIconType: () => APP_ICON,
   order: 10,
-  isCompatible: async ({ embeddable }) => {
-    return isParentApiCompatible(embeddable);
-  },
+  isCompatible: async ({ embeddable }) => isParentApiCompatible(embeddable),
   execute: async ({ embeddable }) => {
     if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
-    const runtimeState = await openEditorFlyout({
-      parentDashboard: embeddable,
-    });
-    if (!runtimeState) return;
 
-    function serializeState() {
-      if (!runtimeState) return;
+    openLazyFlyout({
+      core: coreServices,
+      parentApi: embeddable,
+      loadContent: async ({ closeFlyout }) => {
+        return await getEditorFlyout({
+          parentDashboard: embeddable,
+          closeFlyout,
+          onCompleteEdit: async (runtimeState) => {
+            if (!runtimeState) return;
 
-      if (runtimeState.savedObjectId !== undefined) {
-        return {
-          rawState: {},
-          references: [createLinksSavedObjectRef(runtimeState.savedObjectId)],
-        };
-      }
+            function serializeState() {
+              if (!runtimeState) return;
 
-      const { attributes, references } = serializeLinksAttributes(runtimeState);
-      return {
-        rawState: {
-          attributes,
-        },
-        references,
-      };
-    }
+              if (runtimeState.savedObjectId !== undefined) {
+                return {
+                  rawState: {},
+                  references: [createLinksSavedObjectRef(runtimeState.savedObjectId)],
+                };
+              }
 
-    await embeddable.addNewPanel<LinksSerializedState>({
-      panelType: CONTENT_ID,
-      serializedState: serializeState(),
+              const { attributes, references } = serializeLinksAttributes(runtimeState);
+              return {
+                rawState: {
+                  attributes,
+                },
+                references,
+              };
+            }
+
+            await embeddable.addNewPanel<LinksSerializedState>({
+              panelType: CONTENT_ID,
+              serializedState: serializeState(),
+            });
+          },
+        });
+      },
+      flyoutProps: {
+        'data-test-subj': 'links--panelEditor--flyout',
+      },
     });
   },
   grouping: [ADD_PANEL_ANNOTATION_GROUP],
