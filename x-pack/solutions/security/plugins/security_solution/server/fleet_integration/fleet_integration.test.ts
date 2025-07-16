@@ -772,7 +772,14 @@ describe('Fleet integrations', () => {
           date: moment.utc().subtract(1, 'day').format('YYYY-MM-DD'), // Correct date
         },
         {
-          date: moment.utc().subtract(18, 'months').add(1, 'day').format('YYYY-MM-DD'),
+          // Test exact cutoff boundary with buffer to prevent flakiness around midnight
+          // Add 30 minutes buffer to account for time elapsed between test setup and API call
+          date: moment
+            .utc()
+            .add(30, 'minutes')
+            .subtract(18, 'months')
+            .add(1, 'day')
+            .format('YYYY-MM-DD'),
         },
       ])(
         'should return bad request for invalid endpoint package policy global manifest values',
