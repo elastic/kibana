@@ -337,16 +337,16 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   }, [navigateToApp, ruleId]);
 
   const {
-    actions: { setCustomizationsRule: setBaseVersionRule },
+    actions: { setCustomizationsRule },
   } = useRuleCustomizationsContext();
 
   // persist rule until refresh is complete
   useEffect(() => {
     if (maybeRule != null) {
       setRule(maybeRule);
-      setBaseVersionRule(maybeRule);
+      setCustomizationsRule(maybeRule);
     }
-  }, [maybeRule, setBaseVersionRule]);
+  }, [maybeRule, setCustomizationsRule]);
 
   useLegacyUrlRedirect({ rule, spacesApi });
 
