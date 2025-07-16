@@ -10,6 +10,7 @@
     "server": true,
     "configPath": ["genAiSettings"],
     "requiredPlugins": ["management", "observabilityAIAssistant"],
+    "optionalPlugins": ["spaces"],
     "requiredBundles": ["kibanaReact"]
   }
 }

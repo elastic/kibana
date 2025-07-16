@@ -13,6 +13,15 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+
+export interface GenAiSettingsStartDeps {
+  spaces?: SpacesPluginStart;
+}
+
+export interface GenAiSettingsSetupDeps {
+  management: ManagementSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GenAiSettingsPluginSetup {}
@@ -20,20 +29,13 @@ export interface GenAiSettingsPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GenAiSettingsPluginStart {}
 
-export interface SetupDependencies {
-  management: ManagementSetup;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDependencies {}
-
 export class GenAiSettingsPlugin
   implements
     Plugin<
       GenAiSettingsPluginSetup,
       GenAiSettingsPluginStart,
-      SetupDependencies,
-      StartDependencies
+      GenAiSettingsSetupDeps,
+      GenAiSettingsStartDeps
     >
 {
   private isServerless: boolean = false;
@@ -43,8 +45,8 @@ export class GenAiSettingsPlugin
   }
 
   public setup(
-    core: CoreSetup<StartDependencies, GenAiSettingsPluginStart>,
-    { management }: SetupDependencies
+    core: CoreSetup<GenAiSettingsStartDeps, GenAiSettingsPluginStart>,
+    { management }: GenAiSettingsSetupDeps
   ): GenAiSettingsPluginSetup {
     management.sections.section.ai.registerApp({
       id: 'genAiSettings',
@@ -63,7 +65,6 @@ export class GenAiSettingsPlugin
         });
       },
     });
-
     return {};
   }
 

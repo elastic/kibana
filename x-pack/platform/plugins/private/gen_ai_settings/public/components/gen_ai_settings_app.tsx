@@ -26,35 +26,19 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { useEnabledFeatures } from '../contexts/serverless_context';
+import { GoToSpacesButton } from './go_to_spaces_button';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   coreStart: CoreStart;
 }
 
-const GoToSpacesButton = ({ getUrlForSpaces }: { getUrlForSpaces: () => string }) => {
-  return (
-    <EuiButton
-      iconType="popout"
-      iconSide="right"
-      data-test-subj="genAiSettingsGoToSpacesButton"
-      href={getUrlForSpaces()}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {i18n.translate('genAiSettings.goToSpacesButtonLabel', {
-        defaultMessage: 'Go to spaces',
-      })}
-    </EuiButton>
-  );
-};
-
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   setBreadcrumbs,
   coreStart,
 }) => {
   const { application, http, docLinks } = coreStart;
-  const { showSpacesIntegration } = useEnabledFeatures();
+  const { showSpacesIntegration, isSolutionView } = useEnabledFeatures();
 
   useEffect(() => {
     setBreadcrumbs([
@@ -66,12 +50,14 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
     ]);
   }, [setBreadcrumbs]);
 
-  const getUrlForSpaces = () => {
+  const getUrlForSpaces = (toPermissionsTab: boolean = false) => {
     const basePath = http.basePath.get();
     const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
 
+    const path = `/kibana/spaces/edit/${spaceId}${toPermissionsTab ? '/roles' : ''}`;
+
     return application.getUrlForApp('management', {
-      path: `/kibana/spaces/edit/${spaceId}`,
+      path,
     });
   };
 
@@ -168,18 +154,43 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
               }
               description={
                 <p>
-                  <FormattedMessage
-                    id="genAiSettings.showAIAssistantDescriptionLabel"
-                    defaultMessage="Enable or disable AI-powered features in the {spaces} settings."
-                    values={{
-                      spaces: <strong>Spaces</strong>,
-                    }}
-                  />
+                  {isSolutionView ? (
+                    <FormattedMessage
+                      id="genAiSettings.solutionViewDescriptionLabel"
+                      defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."
+                      values={{
+                        permissionsTab: <strong>Permissions tab</strong>,
+                        spaces: <strong>Spaces</strong>,
+                        rolesLink: (
+                          <EuiLink
+                            href={application.getUrlForApp('management', {
+                              path: '/security/roles',
+                            })}
+                          >
+                            {i18n.translate('genAiSettings.rolesLink', {
+                              defaultMessage: 'Stack Management > Roles',
+                            })}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="genAiSettings.showAIAssistantDescriptionLabel"
+                      defaultMessage="Enable or disable AI-powered features in the {spaces} settings."
+                      values={{
+                        spaces: <strong>Spaces</strong>,
+                      }}
+                    />
+                  )}
                 </p>
               }
             >
               <EuiFormRow fullWidth>
-                <GoToSpacesButton getUrlForSpaces={getUrlForSpaces} />
+                <GoToSpacesButton
+                  getUrlForSpaces={getUrlForSpaces}
+                  navigateToPermissions={isSolutionView}
+                />
               </EuiFormRow>
             </EuiDescribedFormGroup>
           )}
