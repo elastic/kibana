@@ -6,7 +6,6 @@
  */
 
 import { validateThresholdBase } from '../../../../../utils/request_validation/threshold';
-import type { Threshold } from '../../../model';
 import type { PatchRuleRequestBody } from './patch_rule_route.gen';
 
 /**
