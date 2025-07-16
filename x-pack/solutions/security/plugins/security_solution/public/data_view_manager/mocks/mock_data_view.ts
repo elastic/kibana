@@ -7,7 +7,7 @@
 
 import { DataView } from '@kbn/data-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
 export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFormatsMock) =>
@@ -41,7 +41,10 @@ export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFor
         },
       },
     },
-    fieldFormats,
+    fieldFormats: {
+      ...fieldFormats,
+      getDefaultInstance: () => ({ toJSON: () => {} } as unknown as FieldFormat),
+    },
   });
 
 export const getMockDataViewWithMatchedIndices = (
