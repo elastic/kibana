@@ -17,13 +17,15 @@ import {
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 
-export function NewRulesCallout({ ruleTypeId }: { ruleTypeId?: string }) {
+export function EnhancedRulesCallout({ ruleTypeId }: { ruleTypeId?: string }) {
   const { http, application } = useKibana().services;
 
-  if (!ruleTypeId || !SHOW_NEW_RULES_CALLOUT_RULE_TYPES.includes(ruleTypeId)) return null;
+  if (!ruleTypeId || !SHOW_ENHANCED_RULES_CALLOUT_RULE_TYPES.includes(ruleTypeId)) return null;
 
-  const handleCreateRuleClick = (newRuleTypeId: string) => {
-    application.navigateToUrl(http.basePath.prepend(paths.observability.createRule(newRuleTypeId)));
+  const handleCreateRuleClick = (enhancedRuleTypeId: string) => {
+    application.navigateToUrl(
+      http.basePath.prepend(paths.observability.createRule(enhancedRuleTypeId))
+    );
   };
 
   return (
@@ -31,13 +33,13 @@ export function NewRulesCallout({ ruleTypeId }: { ruleTypeId?: string }) {
       <p>{CALLOUT_DESCRIPTION}</p>
       <EuiFlexGroup>
         <EuiButton
-          data-test-subj="newRulesCallout-createCTRRuleButton"
+          data-test-subj="enhancedRulesCallout-createCTRRuleButton"
           onClick={() => handleCreateRuleClick(OBSERVABILITY_THRESHOLD_RULE_TYPE_ID)}
         >
           {CREATE_CTR_RULE_LABEL}
         </EuiButton>
         <EuiButton
-          data-test-subj="newRulesCallout-createESQRuleButton"
+          data-test-subj="enhancedRulesCallout-createESQRuleButton"
           onClick={() => handleCreateRuleClick(ES_QUERY_ID)}
         >
           {CREATE_ESQ_RULE_LABEL}
@@ -47,25 +49,31 @@ export function NewRulesCallout({ ruleTypeId }: { ruleTypeId?: string }) {
   );
 }
 
-const SHOW_NEW_RULES_CALLOUT_RULE_TYPES = [
+const SHOW_ENHANCED_RULES_CALLOUT_RULE_TYPES = [
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
 ];
 
-const CALLOUT_TITLE = i18n.translate('xpack.observability.newRulesCallout.title', {
-  defaultMessage: 'Try our new rules instead',
+const CALLOUT_TITLE = i18n.translate('xpack.observability.enhancedRulesCallout.title', {
+  defaultMessage: 'Try our enhanced rules instead',
 });
 
-const CALLOUT_DESCRIPTION = i18n.translate('xpack.observability.newRulesCallout.description', {
+const CALLOUT_DESCRIPTION = i18n.translate('xpack.observability.enhancedRulesCallout.description', {
   defaultMessage:
     'Consider using the Custom threshold rule or Elasticsearch query rule, which offer more flexibility and customization options.',
 });
 
-const CREATE_CTR_RULE_LABEL = i18n.translate('xpack.observability.newRulesCallout.createCTRule', {
-  defaultMessage: 'Create Custom threshold rule',
-});
+const CREATE_CTR_RULE_LABEL = i18n.translate(
+  'xpack.observability.enhancedRulesCallout.createCTRule',
+  {
+    defaultMessage: 'Create Custom threshold rule',
+  }
+);
 
-const CREATE_ESQ_RULE_LABEL = i18n.translate('xpack.observability.newRulesCallout.createESQRule', {
-  defaultMessage: 'Create Elasticsearch query rule',
-});
+const CREATE_ESQ_RULE_LABEL = i18n.translate(
+  'xpack.observability.enhancedRulesCallout.createESQRule',
+  {
+    defaultMessage: 'Create Elasticsearch query rule',
+  }
+);
