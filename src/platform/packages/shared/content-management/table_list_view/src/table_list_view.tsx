@@ -48,6 +48,7 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
    */
   additionalRightSideActions?: ReactNode[];
   children?: ReactNode | undefined;
+  isServerSidePaginationAndSorting: boolean;
 };
 
 export const TableListView = <T extends UserContentCommonSchema>({
@@ -76,6 +77,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
   withoutPageTemplateWrapper,
   createdByEnabled,
   recentlyAccessed,
+  isServerSidePaginationAndSorting = false,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -125,6 +127,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
           setPageDataTestSubject={setPageDataTestSubject}
           createdByEnabled={createdByEnabled}
           recentlyAccessed={recentlyAccessed}
+          isServerSidePaginationAndSorting={isServerSidePaginationAndSorting}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

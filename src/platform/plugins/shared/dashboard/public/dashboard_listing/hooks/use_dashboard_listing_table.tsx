@@ -67,7 +67,7 @@ const toTableListViewSavedObject = (
 type DashboardListingViewTableProps = Omit<
   TableListViewTableProps<DashboardSavedObjectUserContent>,
   'tableCaption'
-> & { title: string };
+> & { title: string; isServerSidePaginationAndSorting: boolean };
 
 interface UseDashboardListingTableReturnType {
   hasInitialFetchReturned: boolean;
@@ -204,14 +204,16 @@ export const useDashboardListingTable = ({
       }: {
         references?: SavedObjectsFindOptionsReference[];
         referencesToExclude?: SavedObjectsFindOptionsReference[];
-      } = {}
+      } = {},
+      cursor?: string,
+      pageSize = listingLimit
     ) => {
       const searchStartTime = window.performance.now();
 
       return dashboardContentManagementService.findDashboards
         .search({
           search: searchTerm,
-          size: listingLimit,
+          size: pageSize,
           hasReference: references,
           hasNoReference: referencesToExclude,
           options: {
@@ -219,6 +221,7 @@ export const useDashboardListingTable = ({
             includeReferences: ['tag'],
             fields: ['title', 'description', 'timeRestore'],
           },
+          cursor,
         })
         .then(({ total, hits }) => {
           const searchEndTime = window.performance.now();
@@ -314,6 +317,7 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
       createdByEnabled: true,
       recentlyAccessed: getDashboardRecentlyAccessedService(),
+      isServerSidePaginationAndSorting: true,
     };
   }, [
     contentEditorValidators,

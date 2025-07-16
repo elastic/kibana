@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Dispatch, useCallback, useMemo } from 'react';
+import React, { Dispatch, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTableColumn,
@@ -22,6 +22,8 @@ import {
   useEuiTheme,
   EuiCode,
   EuiText,
+  EuiTablePagination,
+  EuiPaginationProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -82,6 +84,9 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
+  isServerSidePaginationAndSorting?: boolean;
+  totalItems: number;
+  onChangePage?: EuiPaginationProps['onPageClick'];
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -113,9 +118,32 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
   favoritesEnabled,
+  isServerSidePaginationAndSorting = false,
+  totalItems,
+  onChangePage,
 }: Props<T>) {
+  const [pageIndex, setPageIndex] = useState(pagination.pageIndex);
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
+
+  const pageCount = useMemo(() => {
+    return Math.ceil(totalItems / (pagination.pageSize ?? 10));
+  }, [totalItems, pagination.pageSize]);
+
+  const handlePageChange = (newPageIndex: number) => {
+    setPageIndex(newPageIndex);
+    onChangePage?.(newPageIndex);
+  };
+
+  const handleChangeItemsPerPage = useCallback(
+    (newPageSize: number) => {
+      onTableChange({
+        page: { index: 0, size: newPageSize },
+      });
+      setPageIndex(0);
+    },
+    [onTableChange]
+  );
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -364,13 +392,13 @@ export function Table<T extends UserContentCommonSchema>({
           itemId="id"
           items={visibleItems}
           columns={tableColumns}
-          pagination={pagination}
+          pagination={isServerSidePaginationAndSorting ? undefined : pagination}
           loading={isFetchingItems}
           message={noItemsMessage}
           selection={selection}
           search={search}
           executeQueryOptions={{ enabled: false }}
-          sorting={sorting}
+          sorting={sorting} // TODO: handle server-side sorting
           onChange={onTableChange}
           data-test-subj="itemsInMemTable"
           rowHeader="attributes.title"
@@ -378,6 +406,18 @@ export function Table<T extends UserContentCommonSchema>({
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
           childrenBetween={favoritesFilter}
         />
+        {/* TODO: Handle going over SAVED_OBJECTS_LIMIT_SETTING - display something? */}
+        {isServerSidePaginationAndSorting && (
+          <EuiTablePagination
+            pageCount={pageCount}
+            activePage={pageIndex}
+            itemsPerPage={pagination.pageSize}
+            itemsPerPageOptions={pagination.pageSizeOptions}
+            onChangePage={handlePageChange}
+            onChangeItemsPerPage={handleChangeItemsPerPage}
+            showPerPageOptions={true}
+          />
+        )}
       </TagFilterContextProvider>
     </UserFilterContextProvider>
   );

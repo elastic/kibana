@@ -105,7 +105,9 @@ export interface TableListViewTableProps<
     refs?: {
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
-    }
+    },
+    cursor?: string,
+    pageSize?: number
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
@@ -137,6 +139,7 @@ export interface TableListViewTableProps<
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
+  isServerSidePaginationAndSorting?: boolean;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -344,6 +347,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   setPageDataTestSubject,
   createdByEnabled = false,
   recentlyAccessed,
+  isServerSidePaginationAndSorting = false,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -454,53 +458,81 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     pagination: _pagination,
     tableSort,
     tableFilter,
+    totalItems,
   } = state;
 
   const showFetchError = Boolean(fetchError);
 
-  const fetchItems = useCallback(async () => {
-    dispatch({ type: 'onFetchItems' });
+  const fetchItems = useCallback(
+    async (cursor?: string) => {
+      dispatch({ type: 'onFetchItems' });
 
-    try {
-      const idx = ++fetchIdx.current;
+      try {
+        const idx = ++fetchIdx.current;
 
-      const {
-        searchQuery: searchQueryParsed,
-        references,
-        referencesToExclude,
-      } = searchQueryParser
-        ? await searchQueryParser(searchQuery.text)
-        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
+        const {
+          searchQuery: searchQueryParsed,
+          references,
+          referencesToExclude,
+        } = searchQueryParser
+          ? await searchQueryParser(searchQuery.text)
+          : {
+              searchQuery: searchQuery.text,
+              references: undefined,
+              referencesToExclude: undefined,
+            };
 
-      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
+        const response = await findItems(
+          searchQueryParsed,
+          { references, referencesToExclude },
+          cursor,
+          _pagination.pageSize
+        );
 
-      if (!isMounted.current) {
-        return;
-      }
-
-      if (idx === fetchIdx.current) {
-        // when recentlyAccessed is available, we sort the items by the recently accessed items
-        // then this sort will be used as the default sort for the table
-        if (recentlyAccessed && recentlyAccessed.get().length > 0) {
-          response.hits = sortByRecentlyAccessed(response.hits, recentlyAccessed.get());
+        if (!isMounted.current) {
+          return;
         }
 
-        dispatch({
-          type: 'onFetchItemsSuccess',
-          data: {
-            response,
-          },
-        });
+        if (idx === fetchIdx.current) {
+          // when recentlyAccessed is available, we sort the items by the recently accessed items
+          // then this sort will be used as the default sort for the table
+          if (recentlyAccessed && recentlyAccessed.get().length > 0) {
+            response.hits = sortByRecentlyAccessed(response.hits, recentlyAccessed.get());
+          }
 
-        onFetchSuccess();
+          dispatch({
+            type: 'onFetchItemsSuccess',
+            data: {
+              response,
+            },
+          });
+
+          onFetchSuccess();
+        }
+      } catch (err) {
+        dispatch({
+          type: 'onFetchItemsError',
+          data: err,
+        });
       }
-    } catch (err) {
-      dispatch({
-        type: 'onFetchItemsError',
-        data: err,
-      });
-    }
-  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, recentlyAccessed]);
+    },
+    [
+      searchQueryParser,
+      searchQuery.text,
+      findItems,
+      onFetchSuccess,
+      recentlyAccessed,
+      _pagination.pageSize,
+    ]
+  );
+
+  const onChangePage = useCallback(
+    async (pageIndex: number) => {
+      const cursor = pageIndex + 1;
+      await fetchItems(cursor.toString());
+    },
+    [fetchItems]
+  );
 
   const updateQuery = useCallback(
     (query: Query | null, error: SearchQueryError | null) => {
@@ -1207,6 +1239,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           clearTagSelection={clearTagSelection}
           createdByEnabled={createdByEnabled}
           favoritesEnabled={favoritesEnabled}
+          isServerSidePaginationAndSorting={isServerSidePaginationAndSorting}
+          totalItems={totalItems}
+          onChangePage={onChangePage}
         />
 
         {/* Delete modal */}

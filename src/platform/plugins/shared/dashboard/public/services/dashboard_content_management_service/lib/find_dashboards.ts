@@ -28,6 +28,7 @@ export interface SearchDashboardsArgs {
   hasReference?: SavedObjectsFindOptionsReference[];
   search: string;
   size: number;
+  cursor?: string;
 }
 
 export interface SearchDashboardsResponse {
@@ -40,6 +41,7 @@ export async function searchDashboards({
   hasReference,
   options,
   search,
+  cursor,
   size,
 }: SearchDashboardsArgs): Promise<SearchDashboardsResponse> {
   const {
@@ -50,6 +52,7 @@ export async function searchDashboards({
     query: {
       text: search ? `${search}*` : undefined,
       limit: size,
+      cursor: cursor ?? undefined,
       tags: {
         included: (hasReference ?? []).map(({ id }) => id),
         excluded: (hasNoReference ?? []).map(({ id }) => id),
