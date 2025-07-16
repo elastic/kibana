@@ -9,8 +9,8 @@ pageLoadAssetSize:
   banners: 21558
   bfetch: 16261
   canvas: 15210
-  cases: 153204
-  charts: 57681
+  cases: 180325
+  charts: 72940
   cloud: 8836
   cloudDataMigration: 5687
   cloudDefend: 20945
@@ -25,7 +25,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
-  dashboardEnhanced: 12500
+  dashboardEnhanced: 32168
   data: 453742
   dataQuality: 10387
   datasetQuality: 27203
@@ -47,7 +47,7 @@ pageLoadAssetSize:
   enterpriseSearch: 59094
   esql: 10370
   esqlDataGrid: 10209
-  esUiShared: 100338
+  esUiShared: 116884
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45177
@@ -61,19 +61,19 @@ pageLoadAssetSize:
   expressionXY: 45000
   features: 4341
   fieldFormats: 64634
-  fieldsMetadata: 4901
+  fieldsMetadata: 20169
   files: 6037
   filesManagement: 5270
   fileUpload: 16910
   fleet: 187942
   globalSearch: 6890
-  globalSearchBar: 26986
+  globalSearchBar: 46197
   globalSearchProviders: 4646
   graph: 10014
   grokdebugger: 5484
   guidedOnboarding: 26999
   home: 13710
-  imageEmbeddable: 6000
+  imageEmbeddable: 21450
   indexLifecycleManagement: 29870
   indexManagement: 35861
   inference: 10368
@@ -82,9 +82,9 @@ pageLoadAssetSize:
   inputControlVis: 9842
   inspector: 35060
   integrationAssistant: 21434
-  interactiveSetup: 42153
+  interactiveSetup: 73070
   kibanaOverview: 6339
-  kibanaReact: 25470
+  kibanaReact: 54762
   kibanaUsageCollection: 1736
   kibanaUtils: 62813
   kubernetesSecurity: 20543
@@ -102,9 +102,9 @@ pageLoadAssetSize:
   mapsEms: 6767
   metricsDataAccess: 67934
   ml: 89000
-  mockIdpPlugin: 7544
+  mockIdpPlugin: 23090
   monitoring: 28983
-  navigation: 13598
+  navigation: 32751
   newsfeed: 12371
   noDataPage: 1749
   observability: 107869
@@ -113,7 +113,7 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 6438
   observabilityLogsExplorer: 25634
   observabilityOnboarding: 12872
-  observabilityShared: 82382
+  observabilityShared: 115322
   osquery: 47588
   painlessLab: 24476
   presentationPanel: 11484
@@ -124,7 +124,7 @@ pageLoadAssetSize:
   reporting: 58600
   rollup: 12709
   runtimeFields: 11828
-  savedObjects: 11735
+  savedObjects: 30786
   savedObjectsFinder: 4319
   savedObjectsManagement: 22426
   savedObjectsTagging: 23144
@@ -147,7 +147,7 @@ pageLoadAssetSize:
   securitySolution: 106289
   securitySolutionEss: 34480
   securitySolutionServerless: 49663
-  serverless: 10682
+  serverless: 27520
   serverlessObservability: 47018
   serverlessSearch: 28909
   sessionView: 47938
@@ -166,7 +166,7 @@ pageLoadAssetSize:
   threatIntelligence: 25500
   timelines: 200384
   transform: 22722
-  triggersActionsUi: 110000
+  triggersActionsUi: 128964
   uiActions: 24712
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513
