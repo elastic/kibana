@@ -6,11 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  ToolIdentifier,
-  SerializedToolIdentifier,
-  SerializedAgentIdentifier,
-} from '@kbn/onechat-common';
 import type { ToolEventHandlerFn } from './events';
 import type { RunAgentFn, ScopedRunAgentFn } from '../agents/runner';
 
@@ -78,9 +73,9 @@ export interface RunContext {
  */
 export type RunContextStackEntry =
   /** tool invocation */
-  | { type: 'tool'; toolId: SerializedToolIdentifier }
+  | { type: 'tool'; toolId: string }
   /** agent invocation */
-  | { type: 'agent'; agentId: SerializedAgentIdentifier };
+  | { type: 'agent'; agentId: string };
 
 /**
  * Params for {@link RunToolFn}
@@ -89,7 +84,7 @@ export interface RunToolParams<TParams = Record<string, unknown>> {
   /**
    * ID of the tool to call.
    */
-  toolId: ToolIdentifier;
+  toolId: string;
   /**
    * Parameters to call the tool with.
    */
