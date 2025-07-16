@@ -93,6 +93,11 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     const artifactRestrictedPolicyIds = useArtifactRestrictedPolicyAssignments(item);
     const [selectedPolicyIds, setSelectedPolicyIds] = useState(getPolicyIdsFromArtifact(item));
 
+    const accessiblePolicyIds = useMemo(() => {
+      return selectedPolicyIds.filter(
+        (policyId) => !artifactRestrictedPolicyIds.policyIds.includes(policyId)
+      );
+    }, [artifactRestrictedPolicyIds.policyIds, selectedPolicyIds]);
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const selectedAssignmentType = useMemo(() => {
       if (isSpaceAwarenessEnabled) {
@@ -159,16 +164,20 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
 
     const handleOnPolicySelectChange = useCallback<PolicySelectorProps['onChange']>(
       (updatedSelectedPolicyIds) => {
-        setSelectedPolicyIds(updatedSelectedPolicyIds);
+        const artifactCompleteSelectedPolicyIds = updatedSelectedPolicyIds.concat(
+          ...artifactRestrictedPolicyIds.policyIds
+        );
+
+        setSelectedPolicyIds(artifactCompleteSelectedPolicyIds);
         onChange({
           ...item,
           tags: getTagsUpdatedBy(
             'policySelection',
-            updatedSelectedPolicyIds.map(buildPerPolicyTag)
+            artifactCompleteSelectedPolicyIds.map(buildPerPolicyTag)
           ),
         });
       },
-      [getTagsUpdatedBy, item, onChange]
+      [artifactRestrictedPolicyIds.policyIds, getTagsUpdatedBy, item, onChange]
     );
 
     const handleGlobalButtonChange = useCallback(
@@ -234,7 +243,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         {selectedAssignmentType === 'perPolicy' && (
           <EuiFormRow fullWidth>
             <PolicySelector
-              selectedPolicyIds={selectedPolicyIds}
+              selectedPolicyIds={accessiblePolicyIds}
               additionalListItems={unAccessiblePolicies}
               onChange={handleOnPolicySelectChange}
               data-test-subj={getTestId('policiesSelector')}
