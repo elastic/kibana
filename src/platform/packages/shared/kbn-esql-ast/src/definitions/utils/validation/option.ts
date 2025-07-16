@@ -9,8 +9,8 @@
 import type { ESQLCommand, ESQLCommandOption, ESQLMessage } from '../../../types';
 import { ICommandContext } from '../../../commands_registry/types';
 import { isColumn, isFunctionExpression } from '../../../ast/is';
-import { validateColumnForCommand } from './column_validation';
-import { validateFunction } from './function_validation';
+import { validateColumnForCommand } from './column';
+import { validateFunction } from './function';
 
 export function validateOption(
   option: ESQLCommandOption,

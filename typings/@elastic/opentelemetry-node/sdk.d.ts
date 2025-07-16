@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface EditorContext {
-  /** The actual char that triggered the suggestion (1 single char) */
-  triggerCharacter?: string;
-  /**
-   * monaco.editor.CompletionTriggerKind
-   *
-   * 0 is "Invoke" (user starts typing a word)
-   * 1 is "Trigger character" (user types a trigger character)
-   */
-  triggerKind: number;
+declare module '@elastic/opentelemetry-node/sdk' {
+  export * from '@elastic/opentelemetry-node/types/sdk';
 }
