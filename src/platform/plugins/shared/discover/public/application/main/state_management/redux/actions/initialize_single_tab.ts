@@ -69,12 +69,6 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       scopedProfilesManager$,
       scopedEbtManager$,
     } = selectTabRuntimeState(runtimeStateManager, tabId);
-    const tabState = selectTab(getState(), tabId);
-
-    let urlState = cleanupUrlState(
-      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
-      services.uiSettings
-    );
 
     /**
      * New tab initialization with the restored data if available
@@ -96,7 +90,10 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       );
     }
 
+    let tabInitialAppState: DiscoverAppState | undefined;
+
     if (TABS_ENABLED && !wasTabInitialized) {
+      const tabState = selectTab(getState(), tabId);
       const tabInitialGlobalState = tabState.initialGlobalState;
 
       if (tabInitialGlobalState?.filters) {
@@ -110,10 +107,8 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
         services.timefilter.setRefreshInterval(tabInitialGlobalState.refreshInterval);
       }
 
-      const tabInitialAppState = tabState.initialAppState;
-
-      if (tabInitialAppState) {
-        urlState = cloneDeep(tabInitialAppState);
+      if (tabState.initialAppState) {
+        tabInitialAppState = cloneDeep(tabState.initialAppState);
       }
     }
 
@@ -156,6 +151,13 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
             visContext: persistedTab.visContext,
           }
         : undefined;
+    const urlState = cleanupUrlState(
+      {
+        ...tabInitialAppState,
+        ...(defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY)),
+      },
+      services.uiSettings
+    );
     const initialQuery = urlState?.query ?? persistedTabSavedSearch?.searchSource.getField('query');
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
     const persistedTabDataView = persistedTabSavedSearch?.searchSource.getField('index');
