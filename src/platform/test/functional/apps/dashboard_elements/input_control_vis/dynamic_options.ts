@@ -69,7 +69,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.loadSavedVisualization('chained input control with dynamic options', {
           navigateToVisualize: false,
         });
-        await comboBox.set('listControlSelect0', 'win 7');
+        await comboBox.set('listControlSelect0', 'win 7'); 
+        await visEditor.inputControlSubmit();
       });
 
       it('should fetch new options when string field is filtered', async () => {
