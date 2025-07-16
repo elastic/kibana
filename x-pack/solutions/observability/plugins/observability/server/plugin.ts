@@ -26,6 +26,7 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import { getLogsFeature } from './features/logs_feature';
 import { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import {
@@ -98,6 +99,8 @@ export class ObservabilityPlugin
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
+    plugins.features.registerKibanaFeature(getLogsFeature());
+
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
     core.uiSettings.register(uiSettings);
@@ -168,6 +171,7 @@ export class ObservabilityPlugin
       },
       alertDetailsContextualInsightsService,
       alertsLocator,
+      managedOtlpServiceUrl: config.managedOtlpServiceUrl,
     };
   }
 

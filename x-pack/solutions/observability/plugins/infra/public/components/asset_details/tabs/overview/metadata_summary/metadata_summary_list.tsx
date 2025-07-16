@@ -31,12 +31,12 @@ import { Section } from '../../../components/section';
 interface MetadataSummaryProps {
   metadata?: InfraMetadata;
   loading: boolean;
-  assetType: InventoryItemType;
+  entityType: InventoryItemType;
 }
 interface MetadataSummaryWrapperProps {
   visibleMetadata: MetadataData[];
   loading: boolean;
-  assetType: InventoryItemType;
+  entityType: InventoryItemType;
 }
 
 export interface MetadataData {
@@ -118,7 +118,7 @@ const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataDat
 const MetadataSummaryListWrapper = ({
   loading: metadataLoading,
   visibleMetadata,
-  assetType,
+  entityType,
 }: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
 
@@ -166,7 +166,7 @@ const MetadataSummaryListWrapper = ({
       }
     >
       <>
-        <MetadataExplanationMessage assetType={assetType} />
+        <MetadataExplanationMessage entityType={entityType} />
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           {visibleMetadata
@@ -190,8 +190,8 @@ const MetadataSummaryListWrapper = ({
     </Section>
   );
 };
-export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSummaryProps) => {
-  switch (assetType) {
+export const MetadataSummaryList = ({ metadata, loading, entityType }: MetadataSummaryProps) => {
+  switch (entityType) {
     case 'host':
       return (
         <MetadataSummaryListWrapper
@@ -200,7 +200,7 @@ export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSu
             ...hostExtendedMetadata(metadata?.info),
           ]}
           loading={loading}
-          assetType={assetType}
+          entityType={entityType}
         />
       );
     case 'container':
@@ -211,12 +211,16 @@ export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSu
             ...containerExtendedMetadata(metadata?.info),
           ]}
           loading={loading}
-          assetType={assetType}
+          entityType={entityType}
         />
       );
     default:
       return (
-        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+        <MetadataSummaryListWrapper
+          visibleMetadata={[]}
+          loading={loading}
+          entityType={entityType}
+        />
       );
   }
 };
@@ -224,15 +228,15 @@ export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSu
 export const MetadataSummaryListCompact = ({
   metadata,
   loading,
-  assetType,
+  entityType,
 }: MetadataSummaryProps) => {
-  switch (assetType) {
+  switch (entityType) {
     case 'host':
       return (
         <MetadataSummaryListWrapper
           visibleMetadata={hostMetadataData(metadata?.info)}
           loading={loading}
-          assetType={assetType}
+          entityType={entityType}
         />
       );
     case 'container':
@@ -240,12 +244,16 @@ export const MetadataSummaryListCompact = ({
         <MetadataSummaryListWrapper
           visibleMetadata={containerMetadataData(metadata?.info)}
           loading={loading}
-          assetType={assetType}
+          entityType={entityType}
         />
       );
     default:
       return (
-        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+        <MetadataSummaryListWrapper
+          visibleMetadata={[]}
+          loading={loading}
+          entityType={entityType}
+        />
       );
   }
 };
