@@ -13,10 +13,10 @@ import type { Gap } from './gap';
 import type { GapStatus } from '../../../common/constants';
 import { gapStatus } from '../../../common/constants';
 
-interface ProcessAllGapsInTimeRangeParams<T> {
+interface ProcessAllRuleGapsParams<T> {
   ruleId: string;
-  start: string;
-  end: string;
+  start?: string;
+  end?: string;
   statuses?: GapStatus[];
   options?: {
     maxFetchedGaps?: number;
@@ -35,7 +35,7 @@ const DEFAULT_MAX_ITERATIONS = 10000;
 /**
  * Fetches all gaps using search_after pagination to process more than 10,000 gaps with stable sorting
  */
-export const processAllGapsInTimeRange = async <T>({
+export const processAllRuleGaps = async <T>({
   ruleId,
   start,
   end,
@@ -44,7 +44,7 @@ export const processAllGapsInTimeRange = async <T>({
   logger,
   eventLogClient,
   processGapsBatch,
-}: ProcessAllGapsInTimeRangeParams<T>): Promise<T[]> => {
+}: ProcessAllRuleGapsParams<T>): Promise<T[]> => {
   let searchAfter: SortResults[] | undefined;
   let pitId: string | undefined;
   let iterationCount = 0;
