@@ -40,6 +40,13 @@ export const getSortPos = (query: string, command: ESQLCommand): SortPosition | 
     return 'order_complete';
   }
 
+  // problem... nulls can come without an order modifier...
+  // SORT column NULLS /
+  // SORT column ASC NULLS /
+  // SORT column + column2 NULLS LAS
+  // SORT column + column2 ASC NULLS LAS
+  // SORT column IS NOT NULL
+  // SORT column IS NULL
   if (/(?:asc|desc)\s+(?:N?U?L?L?S? ?(FI?R?S?|LA?S?)?)$/i.test(query)) {
     return 'after_order';
   }
@@ -53,7 +60,7 @@ export const getSortPos = (query: string, command: ESQLCommand): SortPosition | 
   }
 };
 
-const sortModifierSuggestions = {
+export const sortModifierSuggestions = {
   ASC: {
     label: 'ASC',
     text: 'ASC',
@@ -95,7 +102,8 @@ export const getSuggestionsAfterCompleteExpression = (
   let sortCommandKeywordSuggestions = [
     sortModifierSuggestions.ASC,
     sortModifierSuggestions.DESC,
-    ...getNullsSuggestions(innerText),
+    sortModifierSuggestions.NULLS_FIRST,
+    sortModifierSuggestions.NULLS_LAST,
   ];
 
   const pipeSuggestion = { ...pipeCompleteItem, sortText: 'AAA' };
@@ -143,19 +151,35 @@ export const getSuggestionsAfterCompleteExpression = (
 
 const NULLS_REGEX = /(?<nulls>NU?L?L?S?\s+(FI?R?S?T?|LA?S?T?)?)$/i;
 
-export const getNullsSuggestions = (innerText: string): ISuggestionItem[] => {
+/**
+ * The nulls clauses are tricky because they contain whitespace.
+ *
+ * This function returns the overlap range between the end of the string
+ * and the start of any existing NULLS clause.
+ *
+ * This range needs to be applied to _all_ the suggestions that are returned
+ * in any context where the nulls clause is valid because Monaco needs to filter
+ * suggestions based on a full prefix.
+ *
+ * For example, if the user types "SORT column NULLS F", the suggestions
+ * will need to be filtered against the full "NULLS F" prefix instead of just "F".
+ *
+ * Otherwise, invalid suggestions like `FLOOR` could show up leading the user to
+ * "SORT column NULLS FLOOR" which is not valid.
+ *
+ * @param innerText
+ * @returns
+ */
+export const getNullsPrefixRange = (
+  innerText: string
+): { start: number; end: number } | undefined => {
   const matchResult = innerText.match(NULLS_REGEX);
   const nulls = matchResult?.groups?.nulls;
 
-  const rangeToReplace = nulls
+  return nulls
     ? {
         start: innerText.length - nulls.length,
         end: innerText.length,
       }
     : undefined;
-
-  return [
-    { ...sortModifierSuggestions.NULLS_FIRST, rangeToReplace },
-    { ...sortModifierSuggestions.NULLS_LAST, rangeToReplace },
-  ];
 };

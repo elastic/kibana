@@ -46,6 +46,12 @@ describe('SORT Autocomplete', () => {
     jest.clearAllMocks();
   });
 
+  // TODO
+  // test for replacement range in NULLS FIRST/LAST in all possible positions
+  //  including after whitespace... test that replacement range gets added to all suggestions
+  // test for suggestions right after a column name
+  // test for comma replacement range after whitespace
+
   describe('SORT <column> ...', () => {
     test('suggests column', async () => {
       await sortExpectSuggestions('from a | sort ', EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS);
