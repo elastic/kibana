@@ -943,6 +943,7 @@ x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
 x-pack/platform/plugins/shared/cases @elastic/response-ops @elastic/kibana-cases
+x-pack/platform/plugins/shared/case_suggestion_registry @elastic/obs-ux-management-team
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
