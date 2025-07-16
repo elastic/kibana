@@ -122,17 +122,9 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
-    // create default index source for privilege monitoring
-    const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
-      type: 'index',
-      managed: true,
-      indexPattern: defaultMonitoringUsersIndex,
-      name: 'default-monitoring-index',
-    });
-    this.log(
-      'debug',
-      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-    );
+
+    await this.createDefaultIndexSourceIfNotExists();
+
     try {
       this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await this.createIngestPipelineIfDoesNotExist();
@@ -733,4 +725,31 @@ export class PrivilegeMonitoringDataClient {
       query,
     });
   }
+
+  private createDefaultIndexSourceIfNotExists = async () => {
+    const DEFAULT_INDEX_SOURCE_NAME = 'default-monitoring-index';
+
+    const existingSources = await this.monitoringIndexSourceClient.find({
+      name: DEFAULT_INDEX_SOURCE_NAME,
+    });
+
+    if (existingSources.saved_objects.length > 0) {
+      this.log('info', 'Default index source already exists, skipping creation.');
+      return existingSources.saved_objects[0].attributes;
+    }
+
+    this.log('info', 'Creating default index source for privilege monitoring.');
+
+    const indexSource = this.monitoringIndexSourceClient.create({
+      type: 'index',
+      managed: true,
+      indexPattern: defaultMonitoringUsersIndex,
+      name: DEFAULT_INDEX_SOURCE_NAME,
+    });
+
+    this.log(
+      'debug',
+      `Created index source for privilege monitoring: ${JSON.stringify(indexSource)}`
+    );
+  };
 }
