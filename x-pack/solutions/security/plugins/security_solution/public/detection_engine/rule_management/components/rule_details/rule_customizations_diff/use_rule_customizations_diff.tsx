@@ -10,15 +10,15 @@ import { useBoolean } from '@kbn/react-hooks';
 import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import { useFetchPrebuiltRuleBaseVersionQuery } from '../../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
-import { PrebuiltRulesBaseVersionFlyout } from './base_version_flyout';
+import { RuleCustomizationsFlyout } from './rule_customizations_flyout';
 
-export const PREBUILT_RULE_BASE_VERSION_FLYOUT_ANCHOR = 'baseVersionPrebuiltRulePreview';
+export const PREBUILT_RULE_CUSTOMIZATIONS_FLYOUT_ANCHOR = 'PrebuiltRuleCustomizationsPreview';
 
-interface UsePrebuiltRulesViewBaseDiffProps {
+interface UseRuleCustomizationsDiffProps {
   rule: RuleResponse | null;
 }
 
-export const usePrebuiltRulesViewBaseDiff = ({ rule }: UsePrebuiltRulesViewBaseDiffProps) => {
+export const useRuleCustomizationsDiff = ({ rule }: UseRuleCustomizationsDiffProps) => {
   const [isFlyoutOpen, { off: closeFlyout, on: openFlyout }] = useBoolean(false);
   const [isReverting, { off: setRevertingFalse, on: setRevertingTrue }] = useBoolean(false);
 
@@ -47,9 +47,9 @@ export const usePrebuiltRulesViewBaseDiff = ({ rule }: UsePrebuiltRulesViewBaseD
   );
 
   return {
-    baseVersionFlyout:
+    ruleCustomizationsFlyout:
       isFlyoutOpen && !isLoading && data != null && doesBaseVersionExist ? (
-        <PrebuiltRulesBaseVersionFlyout
+        <RuleCustomizationsFlyout
           diff={data.diff}
           currentRule={data.current_version}
           baseRule={data.base_version}
