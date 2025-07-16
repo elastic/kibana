@@ -6,7 +6,7 @@ This endpoint returns a list of hosts and their metrics.
 
 ### Parameters:
 
-- type: asset type. 'host' is the only one supported now
+- type: entity type. 'host' is the only one supported now
 - metrics: list of metrics to be calculated and returned for each host
 - sourceId: sourceId to retrieve configuration such as index-pattern used to query the results
 - limit: max number of hosts - max 500
@@ -48,7 +48,7 @@ Response
 
 ```json
 {
-   "assetType": "host",
+   "entityType": "host",
    "nodes":[
       {
          "metadata":[
@@ -94,13 +94,13 @@ Response
 }
 ```
 
-## **POST /api/infra/{assetType}/count**
+## **POST /api/infra/{entityType}/count**
 
 This endpoint returns the count of the hosts monitored with the system integration.
 
 ### Parameters:
 
-- type: asset type. 'host' is the only one supported now
+- type: entity type. 'host' is the only one supported now
 - sourceId: sourceId to retrieve configuration such as index-pattern used to query the results
 - from: Start date
 - to: End date
@@ -137,5 +137,5 @@ curl --location -u elastic:changeme 'http://0.0.0.0:5601/ftw/api/infra/host/coun
 Response
 
 ```json
-{"assetType":"host","count":22}
+{"entityType":"host","count":22}
 ```

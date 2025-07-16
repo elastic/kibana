@@ -642,8 +642,6 @@ export class AdHocTaskRunner implements CancellableTask {
   }
 
   private async updateGapsAfterBackfillComplete() {
-    if (!this.shouldDeleteTask) return;
-
     if (this.scheduleToRunIndex < 0 || !this.adHocRange) return null;
 
     const fakeRequest = getFakeKibanaRequest(
