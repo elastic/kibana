@@ -119,3 +119,5 @@ export interface Conversation {
   updated_at: string;
   rounds: ConversationRound[];
 }
+
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
