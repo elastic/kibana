@@ -20,11 +20,7 @@ import {
   type ICommandContext,
   type ISuggestionItem,
 } from '../../types';
-import {
-  getSortPos,
-  getSuggestionsAfterCompleteExpression,
-  sortModifierSuggestions,
-} from './utils';
+import { getNullsSuggestions, getSortPos, getSuggestionsAfterCompleteExpression } from './utils';
 
 export async function autocomplete(
   query: string,
@@ -54,6 +50,7 @@ export async function autocomplete(
         advanceCursorInitially: false,
       });
     }
+
     case 'expression': {
       const expressionRoot = command.args[command.args.length - 1];
       if (!expressionRoot || Array.isArray(expressionRoot)) {
@@ -87,8 +84,7 @@ export async function autocomplete(
       return [
         { ...pipeCompleteItem, text: ' | ' },
         { ...commaCompleteItem, text: ', ' },
-        prependSpace(sortModifierSuggestions.NULLS_FIRST),
-        prependSpace(sortModifierSuggestions.NULLS_LAST),
+        ...getNullsSuggestions(innerText).map(prependSpace),
       ].map((suggestion) => ({
         ...suggestion,
         filterText: fragment,
@@ -97,14 +93,15 @@ export async function autocomplete(
         command: TRIGGER_SUGGESTION_COMMAND,
       }));
     }
+
     case 'after_order': {
       return [
-        sortModifierSuggestions.NULLS_FIRST,
-        sortModifierSuggestions.NULLS_LAST,
+        ...getNullsSuggestions(innerText),
         pipeCompleteItem,
         { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
       ];
     }
+
     case 'nulls_complete': {
       const { fragment, rangeToReplace } = getFragmentData(innerText);
 
@@ -119,12 +116,14 @@ export async function autocomplete(
         command: TRIGGER_SUGGESTION_COMMAND,
       }));
     }
+
     case 'after_nulls': {
       return [
         pipeCompleteItem,
         { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
       ];
     }
+
     default: {
       return [];
     }

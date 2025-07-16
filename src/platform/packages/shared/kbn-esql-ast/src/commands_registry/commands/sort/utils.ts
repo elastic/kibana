@@ -26,7 +26,34 @@ export type SortPosition =
   | 'nulls_complete'
   | 'after_nulls';
 
-export const sortModifierSuggestions = {
+export const getSortPos = (query: string, command: ESQLCommand): SortPosition | undefined => {
+  const lastArg = command.args[command.args.length - 1];
+  if (!lastArg || /,\s+$/.test(query)) {
+    return 'empty_expression';
+  }
+
+  if (!Array.isArray(lastArg) && lastArg.type !== 'order') {
+    return 'expression';
+  }
+
+  if (/(?:asc|desc)$/i.test(query)) {
+    return 'order_complete';
+  }
+
+  if (/(?:asc|desc)\s+(?:N?U?L?L?S? ?(FI?R?S?|LA?S?)?)$/i.test(query)) {
+    return 'after_order';
+  }
+
+  if (/(?:nulls\s+first|nulls\s+last)$/i.test(query)) {
+    return 'nulls_complete';
+  }
+
+  if (/(?:nulls\s+first|nulls\s+last)\s+$/i.test(query)) {
+    return 'after_nulls';
+  }
+};
+
+const sortModifierSuggestions = {
   ASC: {
     label: 'ASC',
     text: 'ASC',
@@ -61,33 +88,6 @@ export const sortModifierSuggestions = {
   } as ISuggestionItem,
 };
 
-export const getSortPos = (query: string, command: ESQLCommand): SortPosition | undefined => {
-  const lastArg = command.args[command.args.length - 1];
-  if (!lastArg || /,\s+$/.test(query)) {
-    return 'empty_expression';
-  }
-
-  if (!Array.isArray(lastArg) && lastArg.type !== 'order') {
-    return 'expression';
-  }
-
-  if (/(?:asc|desc)$/i.test(query)) {
-    return 'order_complete';
-  }
-
-  if (/(?:asc|desc)\s+$/i.test(query)) {
-    return 'after_order';
-  }
-
-  if (/(?:nulls\s+first|nulls\s+last)$/i.test(query)) {
-    return 'nulls_complete';
-  }
-
-  if (/(?:nulls\s+first|nulls\s+last)\s+$/i.test(query)) {
-    return 'after_nulls';
-  }
-};
-
 export const getSuggestionsAfterCompleteExpression = (
   innerText: string,
   expressionRoot: ESQLSingleAstItem | undefined
@@ -95,8 +95,7 @@ export const getSuggestionsAfterCompleteExpression = (
   let sortCommandKeywordSuggestions = [
     sortModifierSuggestions.ASC,
     sortModifierSuggestions.DESC,
-    sortModifierSuggestions.NULLS_FIRST,
-    sortModifierSuggestions.NULLS_LAST,
+    ...getNullsSuggestions(innerText),
   ];
 
   const pipeSuggestion = { ...pipeCompleteItem, sortText: 'AAA' };
@@ -107,14 +106,20 @@ export const getSuggestionsAfterCompleteExpression = (
     sortText: 'AAA',
   };
 
+  // does the query end with whitespace?
   if (/\s$/.test(innerText)) {
-    // comma needs to be sent back a column to replace the trailing space
+    // if so, comma needs to be sent back a column to replace the trailing space
     commaSuggestion.rangeToReplace = {
       start: innerText.length - 1,
       end: innerText.length,
     };
-  } else if (isColumn(expressionRoot)) {
-    // special case: cursor right after a column name
+  }
+  // special case: cursor right after a column name
+  else if (
+    isColumn(expressionRoot) &&
+    // this prevents the branch from being entered for something like "SORT column NULLS LA/"
+    /sort\s+\S+$/i.test(innerText)
+  ) {
     const { fragment, rangeToReplace } = getFragmentData(innerText);
 
     sortCommandKeywordSuggestions = sortCommandKeywordSuggestions.map((s) => ({
@@ -134,4 +139,23 @@ export const getSuggestionsAfterCompleteExpression = (
   }
 
   return [...sortCommandKeywordSuggestions, pipeSuggestion, commaSuggestion];
+};
+
+const NULLS_REGEX = /(?<nulls>NU?L?L?S?\s+(FI?R?S?T?|LA?S?T?)?)$/i;
+
+export const getNullsSuggestions = (innerText: string): ISuggestionItem[] => {
+  const matchResult = innerText.match(NULLS_REGEX);
+  const nulls = matchResult?.groups?.nulls;
+
+  const rangeToReplace = nulls
+    ? {
+        start: innerText.length - nulls.length,
+        end: innerText.length,
+      }
+    : undefined;
+
+  return [
+    { ...sortModifierSuggestions.NULLS_FIRST, rangeToReplace },
+    { ...sortModifierSuggestions.NULLS_LAST, rangeToReplace },
+  ];
 };
