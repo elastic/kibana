@@ -6,6 +6,8 @@
  */
 
 import React, { useState } from 'react';
+import { Streams } from '@kbn/streams-schema';
+import { ContentPackEntry, ContentPackManifest } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,24 +20,21 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ContentPackEntry, ContentPackManifest, PARENT_STREAM_ID } from '@kbn/content-packs-schema';
-import { Streams } from '@kbn/streams-schema';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { getFormattedError } from '../../../../util/errors';
-import { ContentPackObjectsList } from './objects_list';
+import { useKibana } from '../../../hooks/use_kibana';
+import { ContentPackObjectsList } from './content_pack_objects_list';
 import { importContent, previewContent } from './requests';
-import { ContentPackMetadata } from './metadata';
+import { ContentPackMetadata } from './content_pack_manifest';
+import { getFormattedError } from '../../../util/errors';
 
-export function ImportFlyout({
-  onClose,
+export function ImportContentPackFlyout({
   definition,
   onImport,
+  onClose,
 }: {
+  definition: Streams.ingest.all.GetResponse;
   onClose: () => void;
-  definition: Streams.WiredStream.GetResponse;
   onImport: () => void;
 }) {
   const {
@@ -45,10 +44,9 @@ export function ImportFlyout({
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
-  const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<{
-    dashboards: string[];
-    stream: string[];
-  }>({ dashboards: [], stream: [] });
+  const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
+    []
+  );
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
   return (
@@ -56,7 +54,7 @@ export function ImportFlyout({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>
-            {i18n.translate('xpack.streams.importFlyout.title', {
+            {i18n.translate('xpack.streams.streamDetailDashboard.importContent', {
               defaultMessage: 'Import content pack',
             })}
           </h2>
@@ -67,9 +65,7 @@ export function ImportFlyout({
         <EuiFilePicker
           id={'streams-content-import'}
           multiple={false}
-          initialPromptText={i18n.translate('xpack.streams.importFlyout.selectFile', {
-            defaultMessage: 'Select a streams content file',
-          })}
+          initialPromptText="Select a streams content file"
           fullWidth
           onChange={async (files) => {
             if (files?.length) {
@@ -77,7 +73,6 @@ export function ImportFlyout({
               if (!archiveFile) return;
 
               setFile(archiveFile);
-              setIsLoading(true);
 
               try {
                 const contentPackParsed = await previewContent({
@@ -91,23 +86,16 @@ export function ImportFlyout({
                   version: contentPackParsed.version,
                   description: contentPackParsed.description,
                 });
-
-                const streamEntries = contentPackParsed.entries.filter(
-                  (entry: ContentPackEntry) =>
-                    entry.type === 'stream' && entry.stream?.name !== PARENT_STREAM_ID
-                );
-
-                setContentPackObjects(streamEntries);
+                setContentPackObjects(contentPackParsed.entries);
               } catch (err) {
                 setFile(null);
+
                 notifications.toasts.addError(err, {
                   title: i18n.translate('xpack.streams.failedToPreviewContentError', {
                     defaultMessage: 'Failed to preview content pack',
                   }),
                   toastMessage: getFormattedError(err).message,
                 });
-              } finally {
-                setIsLoading(false);
               }
             } else {
               setFile(null);
@@ -116,48 +104,16 @@ export function ImportFlyout({
           display={'large'}
         />
 
-        {isLoading && (
-          <>
-            <EuiSpacer />
-            <EuiText>
-              <p>Loading content pack...</p>
-            </EuiText>
-          </>
-        )}
-
         {file && manifest ? (
           <>
             <EuiSpacer />
-            <ContentPackMetadata readonly manifest={manifest} />
+            <ContentPackMetadata manifest={manifest} readonly={true} />
             <EuiSpacer />
 
-            {definition && contentPackObjects.length > 0 ? (
-              <>
-                <EuiText>
-                  <h3>
-                    {i18n.translate('xpack.streams.importFlyout.streamObjects', {
-                      defaultMessage: 'Stream Objects',
-                    })}
-                  </h3>
-                </EuiText>
-                <EuiSpacer size="s" />
-                <ContentPackObjectsList
-                  definition={definition}
-                  objects={contentPackObjects}
-                  onSelectionChange={(objects) => {
-                    setSelectedContentPackObjects(objects);
-                  }}
-                />
-              </>
-            ) : (
-              <EuiText color="danger">
-                <p>
-                  {i18n.translate('xpack.streams.importFlyout.noStreamObjects', {
-                    defaultMessage: 'No stream objects found in content pack',
-                  })}
-                </p>
-              </EuiText>
-            )}
+            <ContentPackObjectsList
+              objects={contentPackObjects}
+              onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
+            />
           </>
         ) : null}
       </EuiFlyoutBody>
@@ -165,17 +121,13 @@ export function ImportFlyout({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
-              {i18n.translate('xpack.streams.cancelButton', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
+            <EuiButtonEmpty onClick={() => onClose()}>Cancel</EuiButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="streamsAppImportButton"
-              disabled={!file || contentPackObjects.length === 0}
+              data-test-subj="streamsAppModalFooterButton"
+              disabled={!file}
               isLoading={isLoading}
               fill
               onClick={async () => {
@@ -188,33 +140,26 @@ export function ImportFlyout({
                     http,
                     file,
                     definition,
-                    include: { objects: selectedContentPackObjects },
+                    include: { all: {} },
                   });
 
                   setIsLoading(false);
                   setContentPackObjects([]);
                   setFile(null);
-
-                  notifications.toasts.addSuccess({
-                    title: i18n.translate('xpack.streams.importSuccess', {
-                      defaultMessage: 'Content pack imported successfully',
-                    }),
-                  });
-
                   onImport();
                 } catch (err) {
+                  setIsLoading(false);
+
                   notifications.toasts.addError(err, {
                     title: i18n.translate('xpack.streams.failedToImportContentError', {
                       defaultMessage: 'Failed to import content pack',
                     }),
                     toastMessage: getFormattedError(err).message,
                   });
-                } finally {
-                  setIsLoading(false);
                 }
               }}
             >
-              {i18n.translate('xpack.streams.importFlyout.importButton', {
+              {i18n.translate('xpack.streams.importContentPackFlyout.importToStream', {
                 defaultMessage: 'Import to stream',
               })}
             </EuiButton>

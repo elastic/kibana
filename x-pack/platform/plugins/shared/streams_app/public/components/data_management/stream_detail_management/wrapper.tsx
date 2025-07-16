@@ -13,10 +13,12 @@ import { Streams } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
-import { ImportFlyout } from './content/import_flyout';
-import { ExportFlyout } from './content/export_flyout';
+import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
+import { ExportContentPackFlyout } from '../content/export_content_pack_flyout';
+import { ImportContentPackFlyout } from '../content/import_content_pack_flyout';
 
 export type ManagementTabs = Record<
   string,
@@ -39,6 +41,14 @@ export function Wrapper({
   const { definition, refresh: refreshDefinition } = useStreamDetail();
   const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
   const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
+  const {
+    core: { featureFlags },
+  } = useKibana();
+
+  const renderContentPackItems = featureFlags.getBooleanValue(
+    FeatureFlagStreamsContentPackUIEnabled,
+    false
+  );
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
@@ -87,7 +97,7 @@ export function Wrapper({
               {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
               <LifecycleBadge lifecycle={definition.effective_lifecycle} />
 
-              {Streams.WiredStream.GetResponse.is(definition) && (
+              {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
                 <>
                   <EuiButton
                     size="s"
@@ -122,14 +132,20 @@ export function Wrapper({
       />
       <StreamsAppPageTemplate.Body>{tabs[tab]?.content}</StreamsAppPageTemplate.Body>
 
-      {Streams.WiredStream.GetResponse.is(definition) && (
+      {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
         <>
           {isExportFlyoutOpen && (
-            <ExportFlyout onClose={() => setIsExportFlyoutOpen(false)} definition={definition} />
+            <ExportContentPackFlyout
+              onClose={() => setIsExportFlyoutOpen(false)}
+              definition={definition}
+              onExport={() => {
+                setIsExportFlyoutOpen(false);
+              }}
+            />
           )}
 
           {isImportFlyoutOpen && (
-            <ImportFlyout
+            <ImportContentPackFlyout
               onClose={() => setIsImportFlyoutOpen(false)}
               definition={definition}
               onImport={() => {
