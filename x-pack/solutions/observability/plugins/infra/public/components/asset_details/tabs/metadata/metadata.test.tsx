@@ -50,9 +50,9 @@ const renderHostMetadata = () =>
   render(
     <I18nProvider>
       <ContextProviders
-        assetType="host"
-        assetId="host-1"
-        assetName="host-1"
+        entityType="host"
+        entityId="host-1"
+        entityName="host-1"
         overrides={{
           metadata: {
             showActionsColumn: true,

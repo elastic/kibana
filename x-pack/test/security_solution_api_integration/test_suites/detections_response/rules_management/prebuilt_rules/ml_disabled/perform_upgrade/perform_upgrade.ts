@@ -22,8 +22,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const config = getService('config');
-  const basic = config.get('esTestCluster.license') === 'basic';
   const deps = {
     es,
     supertest,
@@ -39,9 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
     const ruleId = 'ml-rule';
 
     describe('ALL_RULES mode', function () {
-      if (basic) {
-        this.tags('skipFIPS');
-      }
+      this.tags('skipFIPS');
 
       it('silently skips ML rules in ALL_RULES mode', async () => {
         await setUpRuleUpgrade({
@@ -76,9 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('SPECIFIC_RULES mode', function () {
       describe(`doesn't upgrade`, function () {
-        if (basic) {
-          this.tags('skipFIPS');
-        }
+        this.tags('skipFIPS');
 
         it(`if target is an ML rule`, async () => {
           await createMlRuleThroughAlertingEndpoint(supertest, {
