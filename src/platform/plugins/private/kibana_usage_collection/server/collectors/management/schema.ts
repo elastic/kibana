@@ -656,12 +656,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
-  'cases:incrementalIdDisplay:enabled': {
-    type: 'boolean',
-    _meta: {
-      description: 'Display the incremental id of a case in the relevant pages',
-    },
-  },
   'observability:enableStreamsUI': {
     type: 'boolean',
     _meta: {
