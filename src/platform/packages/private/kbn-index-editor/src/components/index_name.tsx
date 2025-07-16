@@ -32,7 +32,7 @@ export const IndexName: FC = () => {
 
   const isIndexCreated = useObservable<boolean>(
     indexUpdateService.indexCreated$,
-    indexUpdateService.getIndexCreated()
+    indexUpdateService.isIndexCreated()
   );
 
   const {

@@ -29,7 +29,10 @@ export interface FlyoutFooterProps {
 export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClose }) => {
   const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
-  const isIndexCreated = useObservable(indexUpdateService.indexCreated$, false);
+  const isIndexCreated = useObservable(
+    indexUpdateService.indexCreated$,
+    indexUpdateService.isIndexCreated()
+  );
   const docsPendingToBeSaved = useObservable(indexUpdateService.savingDocs$, new Map());
 
   const { uploadStatus, onImportClick, canImport } = useFileUploadContext();

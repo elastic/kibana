@@ -87,7 +87,7 @@ export class IndexUpdateService {
   public setIndexCreated(created: boolean) {
     this._indexCrated$.next(created);
   }
-  public getIndexCreated(): boolean {
+  public isIndexCreated(): boolean {
     return this._indexCrated$.getValue();
   }
 
@@ -152,7 +152,7 @@ export class IndexUpdateService {
 
   // Observable to track the number of milliseconds left to allow undo of the last change
   public readonly undoTimer$: Observable<number> = this.actions$.pipe(
-    skipWhile(() => !this.getIndexCreated()),
+    skipWhile(() => !this.isIndexCreated()),
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
@@ -255,7 +255,7 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
-          skipWhile(() => !this.getIndexCreated()),
+          skipWhile(() => !this.isIndexCreated()),
           tap((updates) => {
             this._isSaving$.next(updates.length > 0);
           }),
@@ -325,7 +325,7 @@ export class IndexUpdateService {
         this._refreshSubject$,
       ])
         .pipe(
-          skipWhile(() => !this.getIndexCreated()),
+          skipWhile(() => !this.isIndexCreated()),
           tap(() => {
             this._isFetching$.next(true);
           }),

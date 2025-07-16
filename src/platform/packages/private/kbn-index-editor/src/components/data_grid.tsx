@@ -64,7 +64,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
 
-  const isIndexCreated = useObservable(indexUpdateService.indexCreated$, indexUpdateService.getIndexCreated());
+  const isIndexCreated = useObservable(
+    indexUpdateService.indexCreated$,
+    indexUpdateService.isIndexCreated()
+  );
 
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
