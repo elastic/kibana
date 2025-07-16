@@ -44,8 +44,9 @@ enabled:
   - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/solutions/observability/test/api_integration/profiling/cloud/config.ts
   - x-pack/test/functional/apps/apm/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/config.ts
   # stateful configs that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts
