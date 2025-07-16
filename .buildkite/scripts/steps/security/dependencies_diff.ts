@@ -99,7 +99,9 @@ async function main() {
     return;
   }
 
-  const updatedLines = [...existingLines, ...added].filter((line) => !removed.includes(line));
+  const updatedLines = [...new Set([...added, ...existingLines])].filter(
+    (line) => !removed.includes(line)
+  );
 
   await writeFile(filePath, updatedLines.join('\n') + '\n');
 }
