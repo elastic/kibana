@@ -200,6 +200,7 @@ export class ApmConfiguration {
     }
 
     if (process.env.ELASTIC_APM_API_KEY) {
+      console.log('### API key is still set, to ', process.env.ELASTIC_APM_API_KEY);
       config.apiKey = process.env.ELASTIC_APM_API_KEY;
     }
 
