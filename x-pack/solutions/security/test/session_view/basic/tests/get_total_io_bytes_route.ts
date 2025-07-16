@@ -18,7 +18,6 @@ const MOCK_SESSION_ENTITY_ID =
   'MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==';
 const MOCK_TOTAL_BYTES = 8192; // sum of total_captured_bytes field in io_events es archive
 
-// eslint-disable-next-line import/no-default-export
 export default function getTotalIOBytesTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

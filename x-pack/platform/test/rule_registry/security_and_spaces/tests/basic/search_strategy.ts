@@ -8,11 +8,11 @@ import expect from '@kbn/expect';
 
 import { ALERT_RULE_TYPE_ID, ALERT_START } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
-import { ObjectRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
-import { getAlwaysFiringInternalRule } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/alert_utils';
-import { getEventLog } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Client } from '@elastic/elasticsearch';
+import { ObjectRemover } from '../../../../alerting_api_integration/common/lib';
+import { getAlwaysFiringInternalRule } from '../../../../alerting_api_integration/common/lib/alert_utils';
+import { getEventLog } from '../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   obsOnlySpacesAll,

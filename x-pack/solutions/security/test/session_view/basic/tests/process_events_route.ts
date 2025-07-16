@@ -10,8 +10,8 @@ import {
   PROCESS_EVENTS_ROUTE,
   CURRENT_API_VERSION,
 } from '@kbn/session-view-plugin/common/constants';
+import { User } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { User } from '../../../rule_registry/common/lib/authentication/types';
 
 const MOCK_PAGE_SIZE = 400;
 const ALERTS_IN_FIRST_PAGE = 8;
@@ -27,7 +27,7 @@ import {
   secOnlyReadSpacesAll,
   obsOnlySpacesAll,
   noKibanaPrivileges,
-} from '../../../rule_registry/common/lib/authentication/users';
+} from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/users';
 
 const MOCK_INDEX = 'logs-endpoint.events.process*';
 const MOCK_SESSION_START_TIME = '2022-05-08T13:44:00.13Z';
@@ -41,7 +41,6 @@ interface TestCase {
   unauthorizedUsers: User[];
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function processEventsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

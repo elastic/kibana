@@ -278,10 +278,10 @@ enabled:
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_without_security.config.ts
-  - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
-  - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
-  - x-pack/test/rule_registry/spaces_only/config_basic.ts
-  - x-pack/test/rule_registry/spaces_only/config_trial.ts
+  - x-pack/platform/test/rule_registry/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/rule_registry/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
+  - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
@@ -322,7 +322,7 @@ enabled:
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
-  - x-pack/test/session_view/basic/config.ts
+  - x-pack/solutions/security/test/session_view/basic/config.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts

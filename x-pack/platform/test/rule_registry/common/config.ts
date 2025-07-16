@@ -11,7 +11,7 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
-import { getAllExternalServiceSimulatorPaths } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
+import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/lib/actions_simulations_utils';
 import { services } from './services';
 
 interface CreateTestConfigOptions {
@@ -88,10 +88,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths([
-            path.resolve(
-              __dirname,
-              '../../../platform/test/alerting_api_integration/common/plugins'
-            ),
+            path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
           ]),
           '--xpack.ruleRegistry.write.enabled=true',
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,

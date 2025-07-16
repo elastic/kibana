@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
-} from '../../../rule_registry/common/lib/authentication';
+} from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication';
 
 import {
   superUser,
@@ -17,11 +16,12 @@ import {
   secOnlyReadSpacesAll,
   obsOnlySpacesAll,
   noKibanaPrivileges,
-} from '../../../rule_registry/common/lib/authentication/users';
+} from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/users';
 
-import { noKibanaPrivileges as noKibanaPrivilegesRole } from '../../../rule_registry/common/lib/authentication/roles';
+import { noKibanaPrivileges as noKibanaPrivilegesRole } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/roles';
 
-import { Role } from '../../../rule_registry/common/lib/authentication/types';
+import { Role } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const globalReadRole: Role = {
   name: 'global_read',
@@ -95,7 +95,6 @@ const roles = [
   noKibanaPrivilegesRole,
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default function kubernetesSecurityApiIntegrationTests({
   loadTestFile,
   getService,

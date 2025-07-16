@@ -17,7 +17,6 @@ const MOCK_IO_EVENT_TOTAL = 8;
 const MOCK_CURSOR = '2022-05-08T13:44:35.570Z';
 const MOCK_PAGE_SIZE = 2;
 
-// eslint-disable-next-line import/no-default-export
 export default function ioEventsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
