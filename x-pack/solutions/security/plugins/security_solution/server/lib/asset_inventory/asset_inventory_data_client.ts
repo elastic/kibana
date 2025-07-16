@@ -216,10 +216,10 @@ export class AssetInventoryDataClient {
       return { status: ASSET_INVENTORY_STATUS.INACTIVE_FEATURE };
     }
 
-    // Determine the ready status based on the presence of documents in the Generic entity store engine
+    // Determine the ready status based on the presence of generic documents
     try {
       const hasGenericDocuments = await this.hasGenericDocuments(secSolutionContext);
-      // check if users doesn't have entity store privileges but generic documents are present
+      // check if users don't have entity store privileges but generic documents are present
       if (hasGenericDocuments) {
         try {
           await this.installAssetInventoryDataView(secSolutionContext);
