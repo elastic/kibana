@@ -189,13 +189,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             className: 'custom-column--placeholder',
           },
         });
-      } else {
-        acc[columnName] = ({ column }) => ({
-          ...column,
-          displayHeaderCellProps: {
-            className: 'custom-column',
-          },
-        });
       }
       return acc;
     }, {} as CustomGridColumnsConfiguration);
@@ -246,8 +239,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             width: 100%;
             display: block;
           }
-          .custom-column {
-            justify-content: center;
+          .euiDataGridHeaderCell {
+            align-items: center;
+            display: flex;
           }
           .custom-column--placeholder {
             padding: 0;
