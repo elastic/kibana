@@ -573,7 +573,7 @@ Here's an example configuration, which would likely reside in the `master` branc
         imageFamily: 'kibana-bk-dev-agents',
         machineType: 'n2-standard-1',
         diskType: 'pd-ssd',
-        diskSizeGb: 75
+        diskSizeGb: 85
       },
       {
         // ...
