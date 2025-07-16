@@ -56,17 +56,13 @@ export const bulkUpsertBatch =
                   ctx._source.labels.sources.add(params.source);
                 }
 
-                if (params.ea_label !== null && ctx._source.entity_analytics_monitoring == null) {
-                  ctx._source.entity_analytics_monitoring = new HashMap();
-                  ctx._source.entity_analytics_monitoring.labels = new ArrayList();
-                  ctx._source.entity_analytics_monitoring.labels.add(params.ea_label);
-                }
-
-                if (params.ea_label !== null && ctx._source.entity_analytics_monitoring != null) {
+                if (params.ea_label != null) {
+                  if (ctx._source.entity_analytics_monitoring == null) {
+                    ctx._source.entity_analytics_monitoring = new HashMap();
+                  }
                   if (ctx._source.entity_analytics_monitoring.labels == null) {
                     ctx._source.entity_analytics_monitoring.labels = new ArrayList();
                   }
-
                   if (!ctx._source.entity_analytics_monitoring.labels.contains(params.ea_label)) {
                     ctx._source.entity_analytics_monitoring.labels.add(params.ea_label);
                   }
