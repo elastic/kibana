@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TracksOverlays } from '@kbn/presentation-containers';
+import { TracksOverlays } from '@kbn/presentation-util';
 import { inspector } from '../../kibana_services';
 import { InspectPanelActionApi, InspectPanelAction } from './inspect_panel_action';
 
