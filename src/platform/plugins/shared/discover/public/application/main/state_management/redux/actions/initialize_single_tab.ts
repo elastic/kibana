@@ -10,6 +10,7 @@
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual } from 'lodash';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -121,9 +122,40 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
       .trackPerformanceEvent('discoverLoadSavedSearch');
 
     const { persistedDiscoverSession } = getState();
-    const persistedTabSavedSearch = persistedDiscoverSession?.id
-      ? await services.savedSearch.get(persistedDiscoverSession.id)
-      : undefined;
+    const persistedTab = persistedDiscoverSession?.tabs.find((tab) => tab.id === tabId);
+    const persistedTabSavedSearch: SavedSearch | undefined =
+      persistedDiscoverSession && persistedTab
+        ? {
+            id: persistedDiscoverSession.id,
+            title: persistedDiscoverSession.title,
+            description: persistedDiscoverSession.description,
+            tags: persistedDiscoverSession.tags,
+            managed: persistedDiscoverSession.managed,
+            references: persistedDiscoverSession.references,
+            sharingSavedObjectProps: persistedDiscoverSession.sharingSavedObjectProps,
+            sort: persistedTab.sort,
+            columns: persistedTab.columns,
+            grid: persistedTab.grid,
+            hideChart: persistedTab.hideChart,
+            isTextBasedQuery: persistedTab.isTextBasedQuery,
+            usesAdHocDataView: persistedTab.usesAdHocDataView,
+            searchSource: await services.data.search.searchSource.create(
+              persistedTab.serializedSearchSource
+            ),
+            viewMode: persistedTab.viewMode,
+            hideAggregatedPreview: persistedTab.hideAggregatedPreview,
+            rowHeight: persistedTab.rowHeight,
+            headerRowHeight: persistedTab.headerRowHeight,
+            timeRestore: persistedTab.timeRestore,
+            timeRange: persistedTab.timeRange,
+            refreshInterval: persistedTab.refreshInterval,
+            rowsPerPage: persistedTab.rowsPerPage,
+            sampleSize: persistedTab.sampleSize,
+            breakdownField: persistedTab.breakdownField,
+            density: persistedTab.density,
+            visContext: persistedTab.visContext,
+          }
+        : undefined;
     const initialQuery = urlState?.query ?? persistedTabSavedSearch?.searchSource.getField('query');
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
     const persistedTabDataView = persistedTabSavedSearch?.searchSource.getField('index');
