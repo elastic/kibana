@@ -185,32 +185,32 @@ If the headless Chromium browser is asked to send a request that violates the ne
 The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule. If no rules allow a request, the request is denied.
 
 ```yaml
-# Only allow requests to placeholder.com
+# Only allow requests to <placeholder-url>
 xpack.screenshotting.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com" } ]
+  rules: [ { allow: true, host: "<placeholder-url>" } ]
 ```
 
 ```yaml
-# Only allow HTTPS requests to <placeholder>.com
+# Only allow HTTPS requests to <placeholder-url>
 xpack.screenshotting.networkPolicy:
-  rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ]
+  rules: [ { allow: true, host: "<placeholder-url>", protocol: "https:" } ]
 ```
 
 A final `allow` rule with no host or protocol allows all requests that are not explicitly denied:
 
 ```yaml
-# Denies requests from <EXAMPLE_URL>, but anything else is allowed.
+# Denies requests from <http-placeholder-url>, but anything else is allowed.
 xpack.screenshotting.networkPolicy:
-  rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
+  rules: [{ allow: false, host: "<http-placeholder-url>", protocol: "http:" }, { allow: true }];
 ```
 
 A network policy can be composed of multiple rules:
 
 ```yaml
-# Allow any HTTP request to <placeholder>.com but for any other host, https is required
+# Allow any request to <http-placeholder-url> but for any other host, https is required
 xpack.screenshotting.networkPolicy
   rules: [
-    { allow: true, host: "<placeholder>.com", protocol: "http:" },
+    { allow: true, host: "<placeholder-url>", protocol: "http:" },
     { allow: true, protocol: "https:" },
   ]
 ```

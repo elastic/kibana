@@ -163,7 +163,7 @@ xpack.actions.preconfigured:
     name: preconfigured-d3security-connector-type
     actionTypeId: .d3security
     config:
-      url: <EXAMPLE_URL>/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents <1>
+      url: <example-url>/elasticsearch/VSOC/api/Data/Kibana/Security%20Operations/CreateEvents <1>
     secrets:
       token: superlongtoken <2>
 ```
