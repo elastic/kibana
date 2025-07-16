@@ -28,7 +28,7 @@ import { getEventsHistogramLensAttributes } from './lens_attributes/common/event
 import type { EuiThemeComputed } from '@elastic/eui';
 import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { defaultImplementation } from '@kbn/security-solution-plugin/public/data_view_manager/hooks/__mocks__/use_data_view';
+import { defaultImplementation } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
