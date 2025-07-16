@@ -1466,8 +1466,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
-^/src/platform/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
-^/src/platform/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
+/src/platform/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
+/src/platform/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 
 # Observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
@@ -1623,9 +1623,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
-/x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
-/x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
-/x-pack/platform/plugins/private/painless_lab/ui_tests # temporarily
+/x-pack/platform/plugins/shared/maps/test/scout @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
+/x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
 /x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
@@ -1794,6 +1795,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/apm_api_integration  @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test/common/utils/observability  @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test/common/utils/uptime  @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/platform/test/.gitignore @elastic/appex-qa
+/x-pack/solutions/**/test/.gitignore @elastic/appex-qa
 
 # Core
 ^/src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
