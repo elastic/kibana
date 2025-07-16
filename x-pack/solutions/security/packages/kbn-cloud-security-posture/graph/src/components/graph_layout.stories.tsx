@@ -538,14 +538,17 @@ const baseGraph: EnhancedNodeViewModel[] = [
 // Simplified asset data objects according to the new schema, containing only entityName
 const serverAssetData = {
   entityName: 'SIEM Windows Server',
+  entityType: 'AWS EC2 Instance',
 };
 
 const adminUserAssetData = {
   entityName: 'Admin User',
+  entityType: 'AWS IAM User',
 };
 
 const suspiciousUserAssetData = {
   entityName: 'Suspicious User',
+  entityType: 'AWS IAM User',
 };
 
 export const LargeGraph: Story = {
@@ -684,11 +687,13 @@ export const GraphWithAssetInventoryData: Story = {
           // First item - siem-windows node
           return {
             ...node,
+            // Set the label from entityName in asset data
+            label: serverAssetData.entityName,
+            icon: 'storage',
             documentsData: [
               {
                 id: node.id,
                 type: 'event' as 'event' | 'alert',
-                assetData: serverAssetData,
               },
             ],
           };
@@ -696,11 +701,13 @@ export const GraphWithAssetInventoryData: Story = {
           // Third item - user node
           return {
             ...node,
+            // Set the label from entityName in asset data
+            label: adminUserAssetData.entityName,
+            icon: 'user',
             documentsData: [
               {
                 id: node.id,
                 type: 'event' as 'event' | 'alert',
-                assetData: adminUserAssetData,
               },
             ],
           };
@@ -708,11 +715,13 @@ export const GraphWithAssetInventoryData: Story = {
           // Fifth item - hackeruser node
           return {
             ...node,
+            // Set the label from entityName in asset data
+            label: suspiciousUserAssetData.entityName,
+            icon: 'user',
             documentsData: [
               {
                 id: node.id,
                 type: 'event' as 'event' | 'alert',
-                assetData: suspiciousUserAssetData,
               },
             ],
           };

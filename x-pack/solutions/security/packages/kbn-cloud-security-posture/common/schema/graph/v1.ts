@@ -52,6 +52,7 @@ export const DOCUMENT_TYPE_ALERT = 'alert' as const;
 // Define entity data schema based on AssetProps interface from ../../types/assets.ts
 export const assetDataSchema = schema.object({
   entityName: schema.maybe(schema.string()),
+  entityType: schema.maybe(schema.string()),
 });
 
 export const nodeDocumentDataSchema = schema.object({
