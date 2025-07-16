@@ -35,7 +35,9 @@ interface WorkflowProps {
 export const AISearchWorkflow = ({ capability }: { capability: WorkflowProps }) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
   const { share } = useKibana().services;
-  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
+  const createIndexUrl = share?.url.locators
+    .get('SEARCH_CREATE_INDEX')
+    ?.useUrl({ workflow: 'vector' });
 
   return (
     <EuiPanel color="transparent" paddingSize="s">
