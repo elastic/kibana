@@ -109,11 +109,6 @@ describe('config validation', () => {
               "application/pdf",
             ],
           },
-          "incrementalId": Object {
-            "enabled": false,
-            "taskIntervalMinutes": 10,
-            "taskStartDelayMinutes": 10,
-          },
           "markdownPlugins": Object {
             "lens": true,
           },

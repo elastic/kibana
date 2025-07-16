@@ -26,7 +26,7 @@ interface Props {
 
 export function Functions({ kuery }: Props) {
   const { services } = useKibanaContextForPlugin();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const { isActiveTab } = useTabSwitcherContext();
   const { dateRange, getDateRangeInTimestamp } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
@@ -75,7 +75,7 @@ export function Functions({ kuery }: Props) {
   return (
     <>
       <ProfilingLinks
-        hostname={asset.name}
+        hostname={entity.name}
         from={dateRange.from}
         to={dateRange.to}
         profilingLinkLocator={profilingLinkLocator}

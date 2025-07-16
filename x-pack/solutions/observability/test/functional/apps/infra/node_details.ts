@@ -24,7 +24,6 @@ import {
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
 } from './constants';
-import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
 import {
   generateDockerContainersData,
   generateHostData,
@@ -78,9 +77,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const esClient = getService('es');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const synthtraceClient = getService('synthtrace');
+
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -105,13 +105,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   const navigateToNodeDetails = async (
-    assetId: string,
-    assetType: string,
+    entityId: string,
+    entityType: string,
     queryParams?: QueryParams
   ) => {
     await pageObjects.common.navigateToUrlWithBrowserHistory(
       'infraOps',
-      `/${NODE_DETAILS_PATH}/${assetType}/${assetId}`,
+      `/${NODE_DETAILS_PATH}/${entityType}/${entityId}`,
       `assetDetails=${getNodeDetailsUrl(queryParams)}`,
       {
         insertTimestamp: false,
@@ -134,7 +134,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
-      synthEsClient = await getInfraSynthtraceEsClient(esClient);
+      const clients = await synthtraceClient.getClients(['infraEsClient']);
+      synthEsClient = clients.infraEsClient;
+
       await kibanaServer.savedObjects.cleanStandardList();
       await browser.setWindowSize(1600, 1200);
 
