@@ -8,6 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { ApiMessageCode } from '../../types/graph/v1';
 
+export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
+
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
@@ -18,6 +20,19 @@ export const graphRequestSchema = schema.object({
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
+    indexPatterns: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          minLength: 1,
+          validate: (value) => {
+            if (!INDEX_PATTERN_REGEX.test(value)) {
+              return `Invalid index pattern: ${value}. Contains illegal characters.`;
+            }
+          },
+        }),
+        { minSize: 1 }
+      )
+    ),
     esQuery: schema.maybe(
       schema.object({
         bool: schema.object({
@@ -38,6 +53,11 @@ export const nodeDocumentDataSchema = schema.object({
   id: schema.string(),
   type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
   index: schema.maybe(schema.string()),
+  alert: schema.maybe(
+    schema.object({
+      ruleName: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const graphResponseSchema = () =>
@@ -91,6 +111,7 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('rectangle'),
       schema.literal('diamond'),
     ]),
+    tag: schema.maybe(schema.string()),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);

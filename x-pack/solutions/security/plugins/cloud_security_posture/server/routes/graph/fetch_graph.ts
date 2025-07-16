@@ -10,6 +10,7 @@ import {
   DOCUMENT_TYPE_ALERT,
   DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
@@ -20,6 +21,7 @@ export const fetchGraph = async ({
   end,
   originEventIds,
   showUnknownTarget,
+  indexPatterns,
   esQuery,
 }: {
   esClient: IScopedClusterClient;
@@ -28,10 +30,28 @@ export const fetchGraph = async ({
   end: string | number;
   originEventIds: OriginEventId[];
   showUnknownTarget: boolean;
+  indexPatterns: string[];
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
-  const query = `FROM logs-* METADATA _id, _index
+  // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
+  // Regex to match invalid characters in index patterns: upper case characters, \, /, ?, ", <, >, |, (space), #, or ,
+  indexPatterns.forEach((indexPattern, idx) => {
+    if (!INDEX_PATTERN_REGEX.test(indexPattern)) {
+      throw new Error(
+        `Invalid index pattern [${indexPattern}] at index ${idx}. Cannot contain characters \\, /, ?, ", <, >, |, (space character), #, or ,`
+      );
+    }
+  });
+
+  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
+  const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
+    indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
+  );
+
+  const query = `FROM ${indexPatterns
+    .filter((indexPattern) => indexPattern.length > 0)
+    .join(',')} METADATA _id, _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
@@ -44,20 +64,30 @@ export const fetchGraph = async ({
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false'
   }
+| EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
 // Aggregate document's data for popover expansion and metadata enhancements
 // We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
 // but it flattens the data and we lose the structure
-| EVAL docType = CASE (_index LIKE "*.alerts-security.alerts-*", "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
+| EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
 | EVAL docData = CONCAT("{",
     "\\"id\\":\\"", _id, "\\"",
     ",\\"type\\":\\"", docType, "\\"",
     ",\\"index\\":\\"", _index, "\\"",
   "}")
+    ${
+      // ESQL complains about missing field's mapping when we don't fetch from alerts index
+      alertsMappingsIncluded
+        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
+      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
+    "}"), ""),`
+        : ''
+    }
 | STATS badge = COUNT(*),
   docs = VALUES(docData),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
-  users = VALUES(related.user)
+  users = VALUES(related.user),
+  isAlert = MV_MAX(VALUES(isAlert))
     BY actorIds = actor.entity.id,
       action = event.action,
       targetIds = target.entity.id,

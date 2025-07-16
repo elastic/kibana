@@ -11,15 +11,16 @@ import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
 
-interface GraphContextServices {
+export interface GraphContextServices {
   logger: Logger;
   esClient: IScopedClusterClient;
 }
 
-interface GetGraphParams {
+export interface GetGraphParams {
   services: GraphContextServices;
   query: {
     originEventIds: OriginEventId[];
+    indexPatterns?: string[];
     spaceId?: string;
     start: string | number;
     end: string | number;
@@ -31,12 +32,16 @@ interface GetGraphParams {
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: { originEventIds, spaceId = 'default', start, end, esQuery },
+  query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
+  indexPatterns = indexPatterns ?? ['logs-*'];
+
   logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds.join(', ')}] in [spaceId: ${spaceId}]`
+    `Fetching graph for [originEventIds: ${originEventIds.join(
+      ', '
+    )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
   const results = await fetchGraph({
@@ -46,6 +51,7 @@ export const getGraph = async ({
     start,
     end,
     originEventIds,
+    indexPatterns,
     esQuery,
   });
 
