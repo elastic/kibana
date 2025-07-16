@@ -82,6 +82,26 @@ export async function fetchEsqlQuery({
     ruleResultService.setLastRunOutcomeMessage(warning);
   }
 
+  const isPartial = response.is_partial ?? false;
+
+  if (ruleResultService && isPartial) {
+    const warning = `The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.`;
+    const hasResults = results.esResult?.hits?.hits?.length > 0;
+
+    if (!isGroupAgg && !hasResults) {
+      // If this is not a grouped query (Alert per row) and there are no results, we fail the run
+      throw createTaskRunError(new Error(warning), TaskErrorSource.FRAMEWORK);
+    }
+
+    if (isGroupAgg || (!isGroupAgg && hasResults)) {
+      // For grouped queries (Alert per row) no matter if there are results or not.
+      // And the non-grouped queries (Alert if matches are found) if there are results,
+      // we show a warning instead of throwing an error.
+      ruleResultService.addLastRunWarning(warning);
+      ruleResultService.setLastRunOutcomeMessage(warning);
+    }
+  }
+
   const link = generateLink(params, discoverLocator, dateStart, dateEnd, spacePrefix);
 
   return {

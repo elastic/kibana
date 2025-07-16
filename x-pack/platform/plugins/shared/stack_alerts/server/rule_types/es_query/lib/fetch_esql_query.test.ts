@@ -62,6 +62,10 @@ describe('fetchEsqlQuery', () => {
     global.Date.now = jest.fn(() => fakeNow.getTime());
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('fetch', () => {
     it('should throw a user error when the error is a verification_exception error', async () => {
       const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -99,6 +103,219 @@ describe('fetchEsqlQuery', () => {
       } catch (e) {
         expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       }
+    });
+
+    it('should throw an error when is_partial is true but no results are returned and (Alert if matches are found) is selected', async () => {
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        columns: [], // no results
+        values: [],
+        is_partial: true, // is_partial is true
+      });
+
+      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+        results: {
+          esResult: {
+            _shards: { failed: 0, successful: 0, total: 0 },
+            aggregations: {},
+            hits: { hits: [] },
+            timed_out: false,
+            took: 0,
+          },
+          isCountAgg: false,
+          isGroupAgg: false,
+        },
+      });
+
+      await expect(
+        fetchEsqlQuery({
+          ruleId: 'testRuleId',
+          alertLimit: 1,
+          params: defaultParams,
+          services: {
+            logger,
+            scopedClusterClient,
+            // @ts-expect-error
+            share: {
+              url: {
+                locators: {
+                  get: jest.fn().mockReturnValue({
+                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+                },
+              },
+            } as SharePluginStart,
+            ruleResultService: mockRuleResultService,
+          },
+          spacePrefix: '',
+          dateStart: new Date().toISOString(),
+          dateEnd: new Date().toISOString(),
+        })
+      ).rejects.toThrow(
+        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.'
+      );
+
+      expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
+      expect(mockRuleResultService.setLastRunOutcomeMessage).not.toHaveBeenCalled();
+    });
+
+    it('should add a warning when is_partial is true and (Alert per row) is selected', async () => {
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        columns: [],
+        values: [],
+        is_partial: true, // is_partial is true
+      });
+
+      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+        results: {
+          esResult: {
+            _shards: { failed: 0, successful: 0, total: 0 },
+            aggregations: {},
+            hits: { hits: [] },
+            timed_out: false,
+            took: 0,
+          },
+          isCountAgg: false,
+          isGroupAgg: true,
+        },
+      });
+
+      await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: { ...defaultParams, groupBy: 'row' },
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+
+      const warning =
+        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.';
+      expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
+      expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
+    });
+
+    it('should add a warning when is_partial is true, has some results and (Alert if matches are found) is selected', async () => {
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        columns: [],
+        values: [],
+        is_partial: true, // is_partial is true
+      });
+
+      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+        results: {
+          esResult: {
+            _shards: { failed: 0, successful: 0, total: 0 },
+            aggregations: {},
+            hits: { hits: [{ foo: 'bar' }] }, // has data
+            timed_out: false,
+            took: 0,
+          },
+          isCountAgg: false,
+          isGroupAgg: true,
+        },
+      });
+
+      await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: defaultParams,
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+
+      const warning =
+        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.';
+      expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
+      expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
+    });
+
+    it('should not add a warning or throw when is_partial is false', async () => {
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        columns: [],
+        values: [],
+        is_partial: false, // is_partial is true
+      });
+
+      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+        results: {
+          esResult: {
+            _shards: { failed: 0, successful: 0, total: 0 },
+            aggregations: {},
+            hits: { hits: [{ foo: 'bar' }] }, // has data
+            timed_out: false,
+            took: 0,
+          },
+          isCountAgg: false,
+          isGroupAgg: true,
+        },
+      });
+
+      const result = await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: defaultParams,
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+
+      expect(result).toEqual({
+        index: null,
+        link: '/app/r?l=DISCOVER_APP_LOCATOR',
+        parsedResults: { results: [], truncated: false },
+      });
+      expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
+      expect(mockRuleResultService.setLastRunOutcomeMessage).not.toHaveBeenCalled();
     });
   });
 
@@ -289,6 +506,7 @@ describe('fetchEsqlQuery', () => {
       'The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: 1.2.0'
     );
   });
+
   describe('generateLink', () => {
     it('should generate a link', () => {
       const { dateStart, dateEnd } = getTimeRange();

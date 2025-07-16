@@ -48,6 +48,7 @@ const ESQL_DOCUMENT_ID = 'esql_query_document';
 export interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
+  is_partial?: boolean;
 }
 
 export const ALERT_ID_COLUMN = 'Alert ID';
