@@ -27,7 +27,10 @@ interface AddControlProps extends Partial<EuiButtonIconProps> {
 export const AddControl: FC<AddControlProps> = ({ onClick, ...rest }) => {
   const { isDisabled } = rest;
   return (
-    <EuiToolTip content={isDisabled ? ADD_CONTROLS_MAX_LIMIT : ADD_CONTROLS}>
+    <EuiToolTip
+      content={isDisabled ? ADD_CONTROLS_MAX_LIMIT : ADD_CONTROLS}
+      disableScreenReaderOutput
+    >
       <EuiButtonIcon
         size="s"
         iconSize="m"

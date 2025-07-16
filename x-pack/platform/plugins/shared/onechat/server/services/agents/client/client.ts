@@ -235,7 +235,7 @@ class AgentClientImpl implements AgentClient {
   // Agent tool selection validation helper
   private async validateAgentToolSelection(toolSelection: ToolSelection[]) {
     const errors = await validateToolSelection({
-      toolRegistry: this.toolsService.registry,
+      toolRegistry: await this.toolsService.getRegistry({ request: this.request }),
       request: this.request,
       toolSelection,
     });
