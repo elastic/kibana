@@ -85,7 +85,7 @@ export function getFunctionDefinition(name: string) {
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
   predicates: FunctionFilterPredicates | undefined,
-  license: ILicense | undefined
+  license?: ILicense
 ): FunctionDefinition[] => {
   if (!predicates) {
     return functions;

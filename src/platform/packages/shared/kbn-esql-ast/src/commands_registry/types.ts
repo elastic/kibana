@@ -125,7 +125,7 @@ export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
-  license: ILicense | undefined;
+  license?: ILicense;
 }
 
 export interface ICommandContext {

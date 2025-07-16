@@ -59,7 +59,7 @@ export interface ESQLCallbacks {
   getInferenceEndpoints?: (
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
-  getLicense: (() => Promise<ILicense | undefined>) | undefined;
+  getLicense?: () => Promise<ILicense | undefined>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

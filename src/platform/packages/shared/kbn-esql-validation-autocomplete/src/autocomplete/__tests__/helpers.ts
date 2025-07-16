@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import { camelCase } from 'lodash';
 import {
@@ -36,6 +37,7 @@ import {
   timeseriesIndices,
   editorExtensions,
   inferenceEndpoints,
+  mockLicense,
 } from '../../__tests__/helpers';
 
 export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
@@ -137,7 +139,8 @@ export function getFunctionSignaturesByReturnType(
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
-  option?: string
+  option?: string,
+  license: LicenseType = 'platinum'
 ): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -167,6 +170,18 @@ export function getFunctionSignaturesByReturnType(
 
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
+      const hasRestrictedSignature = signatures.some((signature) => signature.license);
+      if (hasRestrictedSignature) {
+        const availableSignatures = signatures.filter((signature) => {
+          if (!signature.license) return true;
+          return license === (signature.license.toLocaleLowerCase() as string);
+        });
+
+        if (availableSignatures.length === 0) {
+          return false;
+        }
+      }
+
       if (ignoreAsSuggestion) {
         return false;
       }
@@ -257,16 +272,19 @@ export function createCustomCallbackMocks(
     sourceIndices: string[];
     matchField: string;
     enrichFields: string[];
-  }>
-) {
+  }>,
+  customLicense?: ILicense
+): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
     fields.filter(({ type }) => !NOT_SUGGESTED_TYPES.includes(type));
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
+  const finalLicense = customLicense || mockLicense;
+
   return {
-    getColumnsFor: jest.fn(async ({ query }) => {
-      if (query === 'FROM join_index') {
+    getColumnsFor: jest.fn(async (params) => {
+      if (params?.query === 'FROM join_index') {
         return lookupIndexFields;
       }
 
@@ -286,6 +304,7 @@ export function createCustomCallbackMocks(
       return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
+    getLicense: jest.fn(async () => finalLicense || mockLicense),
   };
 }
 

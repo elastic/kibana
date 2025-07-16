@@ -125,7 +125,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
-  license: ILicense | undefined;
+  license?: ILicense;
 }) {
   const suggestions = [];
   const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);

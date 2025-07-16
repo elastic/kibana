@@ -12,6 +12,7 @@ import { camelCase } from 'lodash';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type { ILicense, LicenseCheckState } from '@kbn/licensing-plugin/common/types';
 import { ESQLCallbacks } from '../shared/types';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
@@ -125,6 +126,25 @@ export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
     task_type: 'completion',
   },
 ];
+
+export const mockLicense: ILicense = {
+  isActive: true,
+  signature: 'mock-signature',
+  isAvailable: true,
+  type: 'platinum',
+  toJSON: () => ({ isActive: true, signature: 'mock-signature', isAvailable: true }),
+  hasAtLeast: () => true,
+  getUnavailableReason: () => undefined,
+  check: () => ({
+    state: 'valid' as LicenseCheckState,
+    isValid: true,
+    message: 'Valid license',
+  }),
+  getFeature: () => ({
+    isAvailable: true,
+    isEnabled: true,
+  }),
+};
 
 export function getCallbackMocks(): ESQLCallbacks {
   return {
