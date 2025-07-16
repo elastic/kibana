@@ -22,7 +22,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -37,7 +37,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:hosts:runner:qa:serverless
         key: explore:hosts:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -51,7 +51,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless
         key: explore:network:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -65,7 +65,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
         key: explore:overview:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -79,7 +79,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless
         key: explore:users:runner:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4

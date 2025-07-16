@@ -6,7 +6,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
         key: test_defend_workflows
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
@@ -25,7 +25,7 @@ steps:
 #        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:artifacts:qa:serverless
 #        key: edr_workflows:artifacts:qa:serverless
 #        agents:
-#          image: family/kibana-ubuntu-2404
+#          image: family/kibana-ubuntu-2004
 #          imageProject: elastic-images-qa
 #          provider: gcp
 #          enableNestedVirtualization: true
@@ -40,7 +40,7 @@ steps:
 #        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:authentication:qa:serverless
 #        key: edr_workflows:authentication:qa:serverless
 #        agents:
-#          image: family/kibana-ubuntu-2404
+#          image: family/kibana-ubuntu-2004
 #          imageProject: elastic-images-qa
 #          provider: gcp
 #          enableNestedVirtualization: true
@@ -55,7 +55,7 @@ steps:
 #        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:metadata:qa:serverless
 #        key: edr_workflows:metadata:qa:serverless
 #        agents:
-#          image: family/kibana-ubuntu-2404
+#          image: family/kibana-ubuntu-2004
 #          imageProject: elastic-images-qa
 #          provider: gcp
 #          enableNestedVirtualization: true
@@ -70,7 +70,7 @@ steps:
 #        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:package:qa:serverless
 #        key: edr_workflows:package:qa:serverless
 #        agents:
-#          image: family/kibana-ubuntu-2404
+#          image: family/kibana-ubuntu-2004
 #          imageProject: elastic-images-qa
 #          provider: gcp
 #          enableNestedVirtualization: true
@@ -85,7 +85,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy_response:qa:serverless
         key: edr_workflows:policy_response:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
@@ -100,7 +100,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:resolver:qa:serverless
         key: edr_workflows:resolver:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
@@ -115,7 +115,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:response_actions:qa:serverless
         key: edr_workflows:response_actions:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
@@ -133,7 +133,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows_osquery.sh cypress:qa:serverless:run
         key: test_osquery_defend_workflows
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true

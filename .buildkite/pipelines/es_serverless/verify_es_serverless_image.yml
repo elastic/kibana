@@ -9,7 +9,7 @@
 # BUILDKITE_COMMIT: the commit hash of the kibana branch to test
 
 agents:
-  image: family/kibana-ubuntu-2404
+  image: family/kibana-ubuntu-2004
   imageProject: elastic-images-qa
   provider: gcp
   machineType: n2-standard-2
@@ -26,7 +26,7 @@ steps:
         key: pre-build
         timeout_in_minutes: 10
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-2
@@ -34,7 +34,7 @@ steps:
       - label: 'Build Kibana Distribution'
         command: .buildkite/scripts/steps/build_kibana.sh
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-8
@@ -66,7 +66,7 @@ steps:
         label: 'Serverless Entity Analytics - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -83,7 +83,7 @@ steps:
         label: 'Serverless Explore - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -100,7 +100,7 @@ steps:
         label: 'Serverless Investigations - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -117,7 +117,7 @@ steps:
         label: 'Serverless Rule Management - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -134,7 +134,7 @@ steps:
         label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -151,7 +151,7 @@ steps:
         label: 'Serverless Detection Engine - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -168,7 +168,7 @@ steps:
         label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -185,7 +185,7 @@ steps:
         label: 'Serverless AI Assistant - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -202,7 +202,7 @@ steps:
         label: 'Defend Workflows Cypress Tests on Serverless'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           enableNestedVirtualization: true
@@ -219,7 +219,7 @@ steps:
         label: 'Osquery Cypress Tests on Serverless'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4

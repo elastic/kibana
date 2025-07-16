@@ -3,7 +3,7 @@ steps:
     label: Grammar Sync
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -12,7 +12,7 @@ steps:
     label: Generate Function Metadata
     timeout_in_minutes: 15
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2

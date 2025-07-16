@@ -3,7 +3,7 @@ steps:
     label: Build ES Snapshot
     timeout_in_minutes: 30
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       localSsds: 1

@@ -16,7 +16,7 @@ steps:
         label: Comment missing labels
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           machineType: n2-standard-2
         timeout_in_minutes: 5
@@ -30,7 +30,7 @@ steps:
         timeout_in_minutes: 10
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           machineType: n2-standard-2
         retry:
@@ -46,7 +46,7 @@ steps:
         label: Comment with job URL
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           machineType: n2-standard-2
         timeout_in_minutes: 5
@@ -57,7 +57,7 @@ steps:
         label: Build Kibana Distribution
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           machineType: n2-standard-8
           preemptible: true
@@ -74,7 +74,7 @@ steps:
         label: 'Build and Deploy to Cloud'
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           machineType: n2-standard-2
           preemptible: true
@@ -95,7 +95,7 @@ steps:
         label: Comment with job URL
         agents:
           provider: gcp
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           machineType: n2-standard-2
         timeout_in_minutes: 5

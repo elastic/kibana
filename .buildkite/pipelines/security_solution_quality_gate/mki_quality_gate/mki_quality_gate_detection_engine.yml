@@ -8,7 +8,7 @@ steps:
         env:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -23,7 +23,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists_items:qa:serverless:release
         key: exception_lists_items:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -37,7 +37,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:lists:qa:serverless:release
         key: exception_lists:auth:lists:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -51,7 +51,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:common:qa:serverless:release
         key: exception_lists:auth:common:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -65,7 +65,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_lists:auth:items:qa:serverless
         key: exception_lists:auth:items:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -79,7 +79,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless:release
         key: lists_items:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -93,7 +93,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh user_roles:qa:serverless:release
         key: user_roles:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -107,7 +107,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh telemetry:qa:serverless:release
         key: telemetry:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -121,7 +121,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_workflows:essentials:qa:serverless:release
         key: exception_workflows:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -135,7 +135,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_date_types:essentials:qa:serverless:release
         key: exception_operators_date_types:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -149,7 +149,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_double:essentials:qa:serverless:release
         key: exception_operators_double:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -163,7 +163,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_float:essentials:qa:serverless:release
         key: exception_operators_float:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -177,7 +177,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_integer:essentials:qa:serverless:release
         key: exception_operators_integer:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -191,7 +191,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_keyword:essentials:qa:serverless:release
         key: exception_operators_keyword:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -205,7 +205,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_ips:essentials:qa:serverless:release
         key: exception_operators_ips:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -219,7 +219,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_long:essentials:qa:serverless:release
         key: exception_operators_long:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -233,7 +233,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh exception_operators_text:essentials:qa:serverless:release
         key: exception_operators_text:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -247,7 +247,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh actions:qa:serverless:release
         key: actions:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -261,7 +261,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:qa:serverless:release
         key: alerts:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -275,7 +275,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh alerts:essentials:qa:serverless:release
         key: alerts:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -289,7 +289,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:eql:qa:serverless:release
         key: rule_execution_logic:eql:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -303,7 +303,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:esql:qa:serverless:release
         key: rule_execution_logic:esql:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -317,7 +317,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:qa:serverless:release
         key: rule_execution_logic:general_logic:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -331,7 +331,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:general_logic:essentials:qa:serverless:release
         key: rule_execution_logic:general_logic:essentials:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -345,7 +345,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:indicator_match:qa:serverless:release
         key: rule_execution_logic:indicator_match:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -359,7 +359,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:machine_learning:qa:serverless:release
         key: rule_execution_logic:machine_learning:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -373,7 +373,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:new_terms:qa:serverless:release
         key: rule_execution_logic:new_terms:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -387,7 +387,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:query:qa:serverless:release
         key: rule_execution_logic:query:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -401,7 +401,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_execution_logic:threshold:qa:serverless:release
         key: rule_execution_logic:threshold:qa:serverless:release
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4

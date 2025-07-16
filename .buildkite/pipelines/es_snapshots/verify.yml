@@ -15,7 +15,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -25,7 +25,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
@@ -41,7 +41,7 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -60,7 +60,7 @@ steps:
     label: Trigger promotion
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -75,7 +75,7 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2

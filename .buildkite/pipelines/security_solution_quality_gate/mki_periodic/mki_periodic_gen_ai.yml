@@ -5,7 +5,7 @@ steps:
     env:
       BK_TEST_SUITE_KEY: "serverless-cypress-gen-ai"
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
@@ -21,7 +21,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:complete:qa:serverless
         key: nlp_cleanup_task:complete:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4
@@ -35,7 +35,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:essentials:qa:serverless
         key: nlp_cleanup_task:essentials:qa:serverless
         agents:
-          image: family/kibana-ubuntu-2404
+          image: family/kibana-ubuntu-2004
           imageProject: elastic-images-qa
           provider: gcp
           machineType: n2-standard-4

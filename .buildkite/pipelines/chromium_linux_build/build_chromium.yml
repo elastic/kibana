@@ -13,7 +13,7 @@ steps:
     label: Comment with job URL on issue
     agents:
       provider: gcp
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
     timeout_in_minutes: 5
@@ -24,7 +24,7 @@ steps:
     key: infer_chromium_version
     agents:
       provider: gcp
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
     timeout_in_minutes: 5
@@ -36,7 +36,7 @@ steps:
     env:
       DEBIAN_FRONTEND: noninteractive
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
       machineType: c2d-highcpu-112
@@ -53,7 +53,7 @@ steps:
       KIBANA_MACHINE_EMAIL: 42973632+kibanamachine@users.noreply.github.com
     agents:
       provider: gcp
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       machineType: n2-standard-2
     timeout_in_minutes: 30

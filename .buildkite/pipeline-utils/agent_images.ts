@@ -16,7 +16,7 @@ const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-qa';
 // constrain AgentImageConfig to the type that doesn't have the `queue` property
 const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
-  image: 'family/kibana-ubuntu-2404',
+  image: 'family/kibana-ubuntu-2004',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
 };
 

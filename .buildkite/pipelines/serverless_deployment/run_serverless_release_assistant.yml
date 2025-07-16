@@ -3,7 +3,7 @@
 ## Then kicks of the deployment to QA
 
 agents:
-  image: family/kibana-ubuntu-2404
+  image: family/kibana-ubuntu-2004
   imageProject: elastic-images-qa
   provider: gcp
   machineType: n2-standard-2
