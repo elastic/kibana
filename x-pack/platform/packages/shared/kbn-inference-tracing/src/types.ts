@@ -31,6 +31,10 @@ export enum ElasticGenAIAttributes {
   InferenceSpanKind = 'elastic.inference.span.kind',
   Tools = 'elastic.llm.tools',
   ToolChoice = 'elastic.llm.toolChoice',
+  AgentId = 'elastic.agent.id',
+  AgentMode = 'elastic.agent.mode',
+  AgentConversationId = 'elastic.agent.conversationId',
+  AgentConfig = 'elastic.agent.config',
 }
 
 export interface GenAISemConvAttributes {
@@ -47,11 +51,15 @@ export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIToolName]?: string;
   'input.value'?: any;
   'output.value'?: any;
-  [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'LLM' | 'TOOL';
+  [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'AGENT' | 'LLM' | 'TOOL';
   [ElasticGenAIAttributes.ToolDescription]?: string;
   [ElasticGenAIAttributes.ToolParameters]?: string;
   [ElasticGenAIAttributes.Tools]?: string;
   [ElasticGenAIAttributes.ToolChoice]?: string;
+  [ElasticGenAIAttributes.AgentId]?: string;
+  [ElasticGenAIAttributes.AgentConfig]?: string;
+  [ElasticGenAIAttributes.AgentConversationId]?: string;
+  [ElasticGenAIAttributes.AgentMode]?: string;
 }
 
 interface GenAISemConvEvent<
