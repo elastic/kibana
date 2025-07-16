@@ -11,12 +11,10 @@ import { EuiButtonGroup, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface QueryRuleTypeSelectorProps {
-  setIsFlyoutDirty: (isDirty: boolean) => void;
   onChange: (value: string) => void;
   selectedId: string;
 }
 export const QueryRuleTypeSelector: React.FC<QueryRuleTypeSelectorProps> = ({
-  setIsFlyoutDirty,
   onChange,
   selectedId,
 }) => (
@@ -54,7 +52,6 @@ export const QueryRuleTypeSelector: React.FC<QueryRuleTypeSelectorProps> = ({
       },
     ]}
     onChange={(id) => {
-      setIsFlyoutDirty(true);
       onChange(id);
     }}
     buttonSize="compressed"

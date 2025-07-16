@@ -1101,15 +1101,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; mountInlineFlyout: (Component: React.ComponentType<{}>, overlayTracker?: ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.TracksOverlays",
-            "text": "TracksOverlays"
-          },
-          " | undefined, options?: { dataTestSubj?: string | undefined; uuid?: string | undefined; container?: HTMLElement | null | undefined; } | undefined) => void; }"
+          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/type_guards.ts",
         "deprecated": false,
@@ -18109,15 +18101,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; mountInlineFlyout: (Component: React.ComponentType<{}>, overlayTracker?: ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.TracksOverlays",
-            "text": "TracksOverlays"
-          },
-          " | undefined, options?: { dataTestSubj?: string | undefined; uuid?: string | undefined; container?: HTMLElement | null | undefined; } | undefined) => void; }"
+          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -20265,15 +20249,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[]>; mountInlineFlyout: (Component: React.ComponentType<{}>, overlayTracker?: ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.TracksOverlays",
-            "text": "TracksOverlays"
-          },
-          " | undefined, options?: { dataTestSubj?: string | undefined; uuid?: string | undefined; container?: HTMLElement | null | undefined; } | undefined) => void; }"
+          "<object>[]>; getEditPanel?: ((options?: { closeFlyout?: (() => void) | undefined; showOnly?: boolean | undefined; } | undefined) => Promise<JSX.Element | undefined>) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/types.ts",
         "deprecated": false,
@@ -23949,7 +23925,38 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.PUBLIC_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "PUBLIC_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/lens\""
+        ],
+        "path": "x-pack/platform/plugins/shared/lens/server/api/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-server.PUBLIC_API_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "PUBLIC_API_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "x-pack/platform/plugins/shared/lens/server/api/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "lens",

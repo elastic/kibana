@@ -9,7 +9,7 @@
   "description": "Server APIs for the Elastic AI Assistant",
   "plugin": {
     "id": "elasticAssistant",
-    "browser": false,
+    "browser": true,
     "server": true,
     "configPath": [
       "xpack",
@@ -28,7 +28,16 @@
       "inference",
       "productDocBase",
       "spaces",
-      "security"
+      "security",
+      "stackConnectors",
+      "triggersActionsUi",
+      "elasticAssistantSharedState",
+      "aiAssistantManagementSelection",
+      "discover"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
     ]
   },
   "build": {

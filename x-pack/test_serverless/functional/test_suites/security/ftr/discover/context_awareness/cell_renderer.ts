@@ -6,10 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { ServerlessRoleName } from '../../../../../../shared/lib';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getDiscoverESQLState } from './utils';
-import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
+import { SECURITY_SOLUTION_DATA_VIEW, SECURITY_SOLUTION_INDEX_PATTERN } from '../../../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
@@ -18,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('cell renderer', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
+      await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
       await PageObjects.common.navigateToApp('security', {
         path: 'alerts',
       });
@@ -27,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('ES|QL mode', () => {
       it('should render alert workflow status badge', async () => {
         const state = getDiscoverESQLState(
-          `from ${SECURITY_SOLUTION_DATA_VIEW} | WHERE host.name == "siem-kibana" and event.kind != "signal"`
+          `from ${SECURITY_SOLUTION_INDEX_PATTERN} | WHERE host.name == "siem-kibana" and event.kind != "signal"`
         );
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,

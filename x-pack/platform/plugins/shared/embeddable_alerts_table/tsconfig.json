@@ -25,17 +25,16 @@
     "@kbn/response-ops-rules-apis",
     "@kbn/data-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/cases-plugin",
     "@kbn/licensing-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/rule-data-utils",
     "@kbn/response-ops-alerts-filters-form",
     "@kbn/i18n-react",
     "@kbn/alerting-types",
-    "@kbn/react-kibana-mount",
     "@kbn/es-query",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/presentation-util",
   ]
 }

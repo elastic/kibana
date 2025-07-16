@@ -37,6 +37,8 @@ describe('CasesConnector', () => {
     tags: ['rule', 'test'],
     ruleUrl: 'https://example.com/rules/rule-test-id',
   };
+  const groupedAlerts = null;
+  const internallyManagedAlerts = false;
 
   const owner = 'cases';
   const timeWindow = '7d';
@@ -89,10 +91,12 @@ describe('CasesConnector', () => {
   it('creates the CasesConnectorExecutor correctly', async () => {
     await connector.run({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
       groupingBy,
       owner,
       rule,
       timeWindow,
+      internallyManagedAlerts,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -110,10 +114,12 @@ describe('CasesConnector', () => {
   it('executes the CasesConnectorExecutor correctly', async () => {
     await connector.run({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
       groupingBy,
       owner,
       rule,
       timeWindow,
+      internallyManagedAlerts,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -121,10 +127,12 @@ describe('CasesConnector', () => {
 
     expect(mockExecute).toBeCalledWith({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
       groupingBy,
       owner,
       rule,
       timeWindow,
+      internallyManagedAlerts,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -134,10 +142,12 @@ describe('CasesConnector', () => {
   it('creates the cases client correctly', async () => {
     await connector.run({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
       groupingBy,
       owner,
       rule,
       timeWindow,
+      internallyManagedAlerts,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -152,10 +162,12 @@ describe('CasesConnector', () => {
     await expect(() =>
       connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
         groupingBy,
         owner,
         rule,
         timeWindow,
+        internallyManagedAlerts,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -173,10 +185,12 @@ describe('CasesConnector', () => {
     await expect(() =>
       connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
         groupingBy,
         owner,
         rule,
         timeWindow,
+        internallyManagedAlerts,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -194,10 +208,12 @@ describe('CasesConnector', () => {
     await expect(() =>
       connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
         groupingBy,
         owner,
         rule,
         timeWindow,
+        internallyManagedAlerts,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -217,10 +233,12 @@ describe('CasesConnector', () => {
     await expect(() =>
       connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
         groupingBy,
         owner,
         rule,
         timeWindow,
+        internallyManagedAlerts,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -240,10 +258,12 @@ describe('CasesConnector', () => {
 
     await connector.run({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
       groupingBy,
       owner,
       rule,
       timeWindow,
+      internallyManagedAlerts,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
@@ -262,10 +282,12 @@ describe('CasesConnector', () => {
     await expect(() =>
       connector.run({
         alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+        groupedAlerts,
         groupingBy,
         owner,
         rule,
         timeWindow,
+        internallyManagedAlerts,
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
@@ -283,10 +305,12 @@ describe('CasesConnector', () => {
   it('does not execute with no alerts', async () => {
     await connector.run({
       alerts: [],
+      groupedAlerts,
       groupingBy,
       owner,
       rule,
       timeWindow,
+      internallyManagedAlerts,
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,

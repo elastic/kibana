@@ -1,16 +1,20 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "scripts/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
+    {
+      "path": "../../../../../src/setup_node_env/tsconfig.json"
+    },
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
@@ -85,8 +89,11 @@
     "@kbn/logging",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-test-helpers-model-versions",
+    "@kbn/alerting-types",
+    "@kbn/elastic-assistant-common",
+    "@kbn/test",
+    "@kbn/dev-utils",
+    "@kbn/tooling-log"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

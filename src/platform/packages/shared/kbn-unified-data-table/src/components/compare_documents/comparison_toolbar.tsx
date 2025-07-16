@@ -32,7 +32,7 @@ export const renderComparisonToolbar = ({
         totalFields > comparisonFields.length ? (
           <EuiCallOut
             size="s"
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate('unifiedDataTable.comparisonMaxFieldsCallout', {
               defaultMessage:
                 'Comparison is limited to {comparisonFields} of {totalFields} fields.',

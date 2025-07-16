@@ -6,17 +6,14 @@
  */
 
 import { EuiBasicTable, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { sum } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAddFilter } from '../../../../../common/hooks/use_add_filter';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { RiskScoreFields } from '../../../../../../common/search_strategy';
-import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
+import { EntityType } from '../../../../../../common/search_strategy';
 import { ChartLabel } from '../../../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { DonutChart } from '../../../../../common/components/charts/donutchart';
 import { HeaderSection } from '../../../../../common/components/header_section';
@@ -25,6 +22,7 @@ import { SEVERITY_UI_SORT_ORDER } from '../../../../common';
 import { useRiskScoreFillColor } from '../../../risk_score_donut_chart/use_risk_score_fill_color';
 import { RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID } from '../../queries/risk_level_esql_query';
 import { useRiskLevelsPrivilegedUserQuery, useRiskLevelsTableColumns } from './hooks';
+import { EnableRiskScore } from '../../../enable_risk_score';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.title',
@@ -38,10 +36,11 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
   const { toggleStatus, setToggleStatus } = useQueryToggle(RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID);
   const { deleteQuery, setQuery } = useGlobalTime();
   const columns = useRiskLevelsTableColumns();
-  const { records, isLoading, refetch, inspect, isError } = useRiskLevelsPrivilegedUserQuery({
-    skip: !toggleStatus,
-    spaceId,
-  });
+  const { records, isLoading, refetch, inspect, isError, hasEngineBeenInstalled } =
+    useRiskLevelsPrivilegedUserQuery({
+      skip: !toggleStatus,
+      spaceId,
+    });
 
   const total = sum(records.map(({ count }) => count));
 
@@ -68,15 +67,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
     [severityTableData]
   );
 
-  const addFilter = useAddFilter();
-
-  const onDonutPartitionClicked = useCallback(
-    (level: string) => {
-      addFilter({ field: RiskScoreFields.userRisk, value: level });
-    },
-    [addFilter]
-  );
-
   useQueryInspector({
     deleteQuery,
     inspect,
@@ -85,6 +75,16 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
     queryId: RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID,
     loading: isLoading,
   });
+
+  const isDisabled = !hasEngineBeenInstalled && !isLoading;
+
+  if (isDisabled) {
+    return (
+      <EuiPanel hasBorder>
+        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />
+      </EuiPanel>
+    );
+  }
 
   return (
     <InspectButtonContainer>
@@ -98,14 +98,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
           title={TITLE}
           titleSize="s"
           outerDirection={'column'}
-        >
-          <SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.entityAnalytics}>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.tableTitle"
-              defaultMessage="View more in Risk Analytics"
-            />
-          </SecuritySolutionLinkAnchor>
-        </HeaderSection>
+        />
         {toggleStatus &&
           (isError ? (
             <div>
@@ -146,7 +139,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                   }
                   title={<ChartLabel count={total} />}
                   totalCount={total}
-                  onPartitionClick={onDonutPartitionClicked}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

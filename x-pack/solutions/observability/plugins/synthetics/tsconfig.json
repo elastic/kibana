@@ -115,7 +115,9 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/core-lifecycle-server",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/field-formats-plugin",
+    "@kbn/core-ui-settings-browser"
   ],
   "exclude": ["target/**/*"]
 }

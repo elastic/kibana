@@ -205,3 +205,12 @@ xpack.alerting.rules.run.ruleTypeOverrides:
     timeout: 5m
   - id: attack-discovery
     timeout: 10m
+
+# Experimental Security Solution features
+
+# These features are disabled in Serverless until fully tested
+xpack.securitySolution.enableExperimental:
+  - privilegedUserMonitoringDisabled
+
+# AI Assistant config
+aiAssistantManagementSelection.preferredAIAssistantType: 'security'

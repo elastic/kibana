@@ -1,7 +1,7 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
@@ -58,8 +58,15 @@
     "@kbn/notifications-plugin",
     "@kbn/spaces-utils",
     "@kbn/logging-mocks",
+    "@kbn/shared-ux-router",
+    "@kbn/controls-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/core-user-profile-browser",
+    "@kbn/core-ui-settings-common"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -9,7 +9,6 @@ import { ToolDefinition, isChatCompletionChunkEvent, isOutputEvent } from '@kbn/
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import {
-  FunctionVisibility,
   MessageAddEvent,
   MessageRole,
   StreamingChatResponseEventType,
@@ -49,25 +48,13 @@ export function registerQueryFunction({
   If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
 
   Even if the "${QUERY_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
-  even if it has been called before.
-
-  ${
-    availableFunctionNames.includes(VISUALIZE_QUERY_NAME)
-      ? `When the "${VISUALIZE_QUERY_NAME}" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "${VISUALIZE_QUERY_NAME}" function call with your own visualization attempt`
-      : ''
-  }
-
-  ${
-    availableFunctionNames.includes(EXECUTE_QUERY_NAME)
-      ? `If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
-      : ''
-  }`;
+  even if it has been called before.`;
   });
 
   functions.registerFunction(
     {
       name: EXECUTE_QUERY_NAME,
-      visibility: FunctionVisibility.Internal,
+      isInternal: true,
       description: `Execute a generated ES|QL query on behalf of the user. The results
         will be returned to you.
 
@@ -124,7 +111,6 @@ export function registerQueryFunction({
       convert queries from one language to another. Make sure you call one of
       the get_dataset functions first if you need index or field names. This
       function takes no input.`,
-      visibility: FunctionVisibility.All,
     },
     async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions
@@ -137,14 +123,16 @@ export function registerQueryFunction({
 
       const actions = functions.getActions();
 
+      const inferenceMessages = convertMessagesForInference(
+        // remove system message and query function request
+        messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
+        resources.logger
+      );
+
       const events$ = naturalLanguageToEsql({
         client: pluginsStart.inference.getClient({ request: resources.request }),
         connectorId,
-        messages: convertMessagesForInference(
-          // remove system message and query function request
-          messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
-          resources.logger
-        ),
+        messages: inferenceMessages,
         logger: resources.logger,
         tools: Object.fromEntries(
           [...actions, ...esqlFunctions].map((fn) => [
@@ -153,6 +141,12 @@ export function registerQueryFunction({
           ])
         ),
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        maxRetries: 0,
+        metadata: {
+          connectorTelemetry: {
+            pluginId: 'observability_ai_assistant',
+          },
+        },
       });
 
       const chatMessageId = v4();

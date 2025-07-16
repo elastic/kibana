@@ -109,7 +109,7 @@ describe('SyntheticsEsClient', () => {
           index: 'synthetics-*',
           ...mockSearchParams,
         },
-        { meta: true }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
       expect(result).toEqual({
         body: {},
@@ -137,7 +137,7 @@ describe('SyntheticsEsClient', () => {
           index: 'synthetics-*',
           ...mockSearchParams,
         },
-        { meta: true }
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
   });
@@ -150,7 +150,10 @@ describe('SyntheticsEsClient', () => {
 
       const result = await syntheticsEsClient.count(mockCountParams);
 
-      expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
+      expect(esClient.count).toHaveBeenCalledWith(mockCountParams, {
+        meta: true,
+        context: { loggingOptions: { loggerName: 'synthetics' } },
+      });
       expect(result).toEqual({
         indices: 'synthetics-*',
         result: {
@@ -173,7 +176,10 @@ describe('SyntheticsEsClient', () => {
       esClient.count.mockRejectedValueOnce(mockError);
 
       await expect(syntheticsEsClient.count(mockCountParams)).rejects.toThrow(mockError);
-      expect(esClient.count).toHaveBeenCalledWith(mockCountParams, { meta: true });
+      expect(esClient.count).toHaveBeenCalledWith(mockCountParams, {
+        meta: true,
+        context: { loggingOptions: { loggerName: 'synthetics' } },
+      });
     });
   });
 

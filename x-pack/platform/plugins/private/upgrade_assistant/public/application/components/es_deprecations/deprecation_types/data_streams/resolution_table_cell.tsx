@@ -197,7 +197,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
                 content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
               >
                 <EuiIcon
-                  type="iInCircle"
+                  type="info"
                   aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
                   size="s"
                 />

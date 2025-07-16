@@ -15,14 +15,20 @@ import type {
   CasesConnectorRunParamsSchema,
   CasesConnectorRuleActionParamsSchema,
   CasesConnectorParamsSchema,
+  CasesGroupedAlertsSchema,
 } from './schema';
 
+export interface CaseAlert {
+  _id: string;
+  _index: string;
+  [x: string]: unknown;
+}
 export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;
 export type CasesConnectorSecrets = TypeOf<typeof CasesConnectorSecretsSchema>;
 export type CasesConnectorRunParams = Omit<
   TypeOf<typeof CasesConnectorRunParamsSchema>,
   'alerts'
-> & { alerts: Array<{ _id: string; _index: string; [x: string]: unknown }> };
+> & { alerts: CaseAlert[] };
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
@@ -81,3 +87,4 @@ export type BulkUpdateOracleRecordRequest = Array<{
 
 export type CasesConnectorRuleActionParams = TypeOf<typeof CasesConnectorRuleActionParamsSchema>;
 export type CasesConnectorParams = TypeOf<typeof CasesConnectorParamsSchema>;
+export type CasesGroupedAlerts = TypeOf<typeof CasesGroupedAlertsSchema>;

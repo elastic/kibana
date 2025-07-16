@@ -39,7 +39,7 @@ export const InitEntityStoreRequestBody = z.object({
     .string()
     .regex(/[smdh]$/)
     .optional()
-    .default('24h'),
+    .default('3h'),
   /**
    * The timeout for initializing the aggregating transform.
    */
@@ -67,7 +67,11 @@ export const InitEntityStoreRequestBody = z.object({
   /**
    * The number of documents per second to process.
    */
-  docsPerSecond: z.number().int().optional(),
+  docsPerSecond: z.number().int().optional().default(-1),
+  /**
+   * The initial page size to use for the composite aggregation of each checkpoint.
+   */
+  maxPageSearchSize: z.number().int().optional().default(500),
 });
 export type InitEntityStoreRequestBodyInput = z.input<typeof InitEntityStoreRequestBody>;
 

@@ -69,7 +69,7 @@ export const UseRunQueryRuleset = ({
 
     const reducedCriteria = criteriaData.reduce<Record<string, any>>(
       (acc, { metadata, values }) => {
-        if (metadata && values !== undefined) acc[metadata] = values;
+        if (metadata && values !== undefined) acc[metadata] = values ? values[0] : '';
         return acc;
       },
       {}
@@ -85,12 +85,17 @@ export const UseRunQueryRuleset = ({
   }, [queryRulesetData]);
   // Example based on https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query#_example_request_2
   const TEST_QUERY_RULESET_API_SNIPPET = dedent`
+    # Get Query Ruleset
+    GET _query_rules/${rulesetId}
+
+
     # Query Rules Retriever Example
     # https://www.elastic.co/docs/reference/elasticsearch/rest-apis/retrievers#rule-retriever
     GET ${indices}/_search
     {
       "retriever": {
         "rule": {
+          // Update your criteria to test different results
           "match_criteria": ${matchCriteria},
           "ruleset_ids": [
             "${rulesetId}" // An array of one or more unique query ruleset IDs
@@ -98,9 +103,7 @@ export const UseRunQueryRuleset = ({
           "retriever": {
             "standard": {
               "query": {
-                "query_string": {
-                  "query": "pugs"
-                }
+                "match_all": {} // replace with your query
               }
             }
           }
@@ -111,6 +114,7 @@ export const UseRunQueryRuleset = ({
 
   return (
     <TryInConsoleButton
+      disabled={disabled}
       application={application}
       sharePlugin={share ?? undefined}
       consolePlugin={consolePlugin ?? undefined}

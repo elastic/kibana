@@ -164,7 +164,7 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   if (attributes.description) {
     label = (
       <>
-        {label} <EuiIcon type="iInCircle" color="subdued" size="s" />
+        {label} <EuiIcon type="info" color="subdued" size="s" />
       </>
     );
   }

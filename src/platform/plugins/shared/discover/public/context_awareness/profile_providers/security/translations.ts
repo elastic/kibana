@@ -54,3 +54,10 @@ export const reasonSectionTitle = i18n.translate(
     defaultMessage: 'Reason',
   }
 );
+
+export const ecsDescriptionLoadingAriaLable = i18n.translate(
+  'discover.profile.security.flyout.ecsDescriptionLoadingAriaLabel',
+  {
+    defaultMessage: 'Loading ECS description',
+  }
+);

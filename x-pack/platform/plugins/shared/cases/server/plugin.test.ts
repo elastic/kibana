@@ -25,10 +25,11 @@ import type { CasesServerSetupDependencies, CasesServerStartDependencies } from 
 
 function getConfig(overrides = {}) {
   return {
+    enabled: true,
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
-    analytics: {},
+    analytics: { index: { enabled: true } },
     ...overrides,
   };
 }
