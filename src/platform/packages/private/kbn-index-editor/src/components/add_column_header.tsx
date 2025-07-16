@@ -52,6 +52,11 @@ export const AddColumnHeader = () => {
             onBlur={() => {
               setIsEditing(false);
             }}
+            onKeyDown={(e: KeyboardEvent) => {
+              if (e.key === 'Escape') {
+                setIsEditing(false);
+              }
+            }}
           />
         </EuiToolTip>
       </EuiForm>
