@@ -18,7 +18,7 @@ HTTP API paths should be snake case. Examples you should use to detect violation
   should be `const API_BASE_PATH = '/api/my_path'`
 See "path" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#path
 
-Changing HTTP API `access` from `internal` to `public` should be done with care. Examples you should use to detect:
+Changing HTTP API `access` from `internal` to `public` should be done with care as this API must be maintained for an extended time period. Examples you should use to detect:
 - BEFORE `access: 'internal'`
   AFTER `access: 'public'`
 - BEFORE `const access = 'internal'`
