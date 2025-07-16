@@ -123,7 +123,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             </FileDropzone>
           </EuiFlyoutBody>
 
-          <FlyoutFooter indexUpdateService={deps.indexUpdateService} onClose={props.onClose} />
+          <FlyoutFooter onClose={props.onClose} />
         </FileUploadContext.Provider>
       </CellActionsProvider>
       <UnsavedChangesModal onClose={props.onClose} />

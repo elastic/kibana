@@ -520,13 +520,20 @@ export class IndexUpdateService {
   }
 
   public async createIndex() {
-    const updates = await firstValueFrom(this.bufferState$);
+    try {
+      this._isSaving$.next(true);
 
-    await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
-    await this.bulkUpdate(updates);
-    this.setIndexCreated(true);
-    this.actions$.next({ type: 'discard-unsaved-columns' });
+      const updates = await firstValueFrom(this.bufferState$);
 
-    // TODO: error management, should be done here or in the calling component?
+      await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+      await this.bulkUpdate(updates);
+
+      this.setIndexCreated(true);
+      this.actions$.next({ type: 'discard-unsaved-columns' });
+    } catch (error) {
+      throw error;
+    } finally {
+      this._isSaving$.next(false);
+    }
   }
 }
