@@ -64,7 +64,6 @@ import {
 } from '../../../../common/components/cell_actions';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
@@ -120,12 +119,12 @@ const NetworkDetailsComponent: React.FC = () => {
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
+  const indicesExist = newDataViewPickerEnabled
+    ? experimentalDataView.hasMatchedIndices()
+    : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
@@ -137,7 +136,9 @@ const NetworkDetailsComponent: React.FC = () => {
     try {
       return [
         buildEsQuery(
-          dataViewSpecToViewBase(sourcererDataView),
+          newDataViewPickerEnabled
+            ? experimentalDataView
+            : dataViewSpecToViewBase(oldSourcererDataView),
           [query],
           [...networkDetailsFilter, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -146,7 +147,15 @@ const NetworkDetailsComponent: React.FC = () => {
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, networkDetailsFilter, query, sourcererDataView, uiSettings]);
+  }, [
+    experimentalDataView,
+    globalFilters,
+    networkDetailsFilter,
+    newDataViewPickerEnabled,
+    oldSourcererDataView,
+    query,
+    uiSettings,
+  ]);
 
   const additionalFilters = useMemo(
     () => (rawFilteredQuery ? [rawFilteredQuery] : []),
@@ -190,8 +199,10 @@ const NetworkDetailsComponent: React.FC = () => {
   );
 
   const indexPattern = useMemo(() => {
-    return dataViewSpecToViewBase(sourcererDataView);
-  }, [sourcererDataView]);
+    return newDataViewPickerEnabled
+      ? experimentalDataView || { title: '', fields: [] }
+      : dataViewSpecToViewBase(oldSourcererDataView);
+  }, [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView]);
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -202,7 +213,10 @@ const NetworkDetailsComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
+            <SiemSearchBar
+              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              id={InputsModelId.global}
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
