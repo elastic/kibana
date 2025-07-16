@@ -165,5 +165,3 @@ export function readCliArgs(argv: string[]) {
     buildOptions,
   };
 }
-
-// fake commit
