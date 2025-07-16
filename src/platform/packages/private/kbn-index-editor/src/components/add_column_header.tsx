@@ -61,13 +61,13 @@ export const AddColumnHeader = () => {
   return (
     <EuiFlexGroup
       responsive={false}
-      style={{ height: euiTheme.size.xl, width: '100%' }}
+      css={{ height: euiTheme.size.xl, width: '100%' }}
       justifyContent="center"
       alignItems="center"
     >
       <EuiFlexItem
         tabIndex={0}
-        style={{
+        css={{
           color: euiTheme.colors.textSubdued,
           cursor: 'pointer',
           width: '100%',
