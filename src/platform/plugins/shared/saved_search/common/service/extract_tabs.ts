@@ -35,7 +35,7 @@ export const extractTabs = (
   const tabs = [
     {
       id: uuidv4(),
-      label: i18n.translate('discover.defaultTabLabel', {
+      label: i18n.translate('savedSearch.defaultTabLabel', {
         defaultMessage: 'Untitled',
       }),
       attributes: tabAttrs,
