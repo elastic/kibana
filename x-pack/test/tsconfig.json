@@ -94,7 +94,6 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
     "@kbn/saved-search-plugin",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-provider-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/core",
