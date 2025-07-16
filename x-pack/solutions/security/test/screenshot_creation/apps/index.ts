@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { toDescriptorWithSchema, toExecutableTool } from './tool_conversion';
-export { registryToProvider } from './registry_to_provider';
-export { ensureValidId, isBuiltinToolId } from './validation';
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('apps', function () {
+    loadTestFile(require.resolve('./response_ops_docs'));
+  });
+}
