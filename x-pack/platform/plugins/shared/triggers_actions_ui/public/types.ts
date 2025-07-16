@@ -235,6 +235,7 @@ export type RuleSnoozeSettings = Pick<
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
+  autoRecoverAlerts?: RuleType['autoRecoverAlerts'];
   index: number;
   actionsCount: number;
   isEditable: boolean;
@@ -400,6 +401,7 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+  enabledEmailServices: ActionsPublicPluginSetup['enabledEmailServices'];
   isWebhookSslWithPfxEnabled?: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
 }
 

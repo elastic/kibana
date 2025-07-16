@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Semver from 'semver';
+import { gt } from 'semver';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { assertValidModelVersion, modelVersionToVirtualVersion } from './conversion';
 
@@ -44,11 +44,16 @@ export const getLatestModelVersion = (type: SavedObjectsType): number => {
   }, 0);
 };
 
+/**
+ * Returns the latest registered migration version for the given type.
+ * @param type the saved object from which we want to retrieve the latest migration version
+ * @returns string the latest migration appearing in the migrations property, or 0.0.0 if no migrations defined.
+ */
 export const getLatestMigrationVersion = (type: SavedObjectsType): string => {
   const migrationMap =
     typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
   return Object.keys(migrationMap).reduce<string>((memo, current) => {
-    return Semver.gt(memo, current) ? memo : current;
+    return gt(memo, current) ? memo : current;
   }, '0.0.0');
 };
 
@@ -64,26 +69,39 @@ export const getModelVersionMapForTypes = (types: SavedObjectsType[]): ModelVers
 
 /**
  * Returns the current virtual version for the given type.
- * It will either be the latest model version if the type
- * already switched to using them (switchToModelVersionAt is set),
- * or the latest migration version for the type otherwise.
+ * It will either be:
+ * - if the type defines model versions => the latest model version
+ * - if the type does NOT define model versions =>
+ *   - the initialModelVersion aka 10.0.0 (if useModelVersionsOnly is set to true)
+ *   - the latest migration version for the type (if useModelVersionsOnly is set to false)
  */
-export const getCurrentVirtualVersion = (type: SavedObjectsType): string => {
-  if (type.switchToModelVersionAt) {
-    const modelVersion = getLatestModelVersion(type);
-    return modelVersionToVirtualVersion(modelVersion);
+export const getCurrentVirtualVersion = (
+  type: SavedObjectsType,
+  useModelVersionsOnly: boolean
+): string => {
+  if (type.modelVersions || useModelVersionsOnly) {
+    const versionNumber = getLatestModelVersion(type);
+    return modelVersionToVirtualVersion(versionNumber);
   } else {
     return getLatestMigrationVersion(type);
   }
 };
 
+export interface GetVirtualVersionMapParams {
+  types: SavedObjectsType[];
+  useModelVersionsOnly: boolean;
+}
+
 /**
  * Returns a map of virtual model version for the given types.
  * See {@link getCurrentVirtualVersion}
  */
-export const getVirtualVersionMap = (types: SavedObjectsType[]): VirtualVersionMap => {
+export const getVirtualVersionMap = ({
+  types,
+  useModelVersionsOnly,
+}: GetVirtualVersionMapParams): VirtualVersionMap => {
   return types.reduce<VirtualVersionMap>((versionMap, type) => {
-    versionMap[type.name] = getCurrentVirtualVersion(type);
+    versionMap[type.name] = getCurrentVirtualVersion(type, useModelVersionsOnly);
     return versionMap;
   }, {});
 };
@@ -106,17 +124,12 @@ export const getLatestMappingsVersionNumber = (type: SavedObjectsType): number =
 
 /**
  * Returns the latest model version that includes changes in the mappings, for the given type.
- * It will either be a model version if the type
- * already switched to using them (switchToModelVersionAt is set),
- * or the latest migration version for the type otherwise.
+ * It will either be a model version or the latest migration version
+ * if no changed were introduced after enforcing the switch to model versions.
  */
 export const getLatestMappingsModelVersion = (type: SavedObjectsType): string => {
-  if (type.switchToModelVersionAt) {
-    const modelVersion = getLatestMappingsVersionNumber(type);
-    return modelVersionToVirtualVersion(modelVersion);
-  } else {
-    return getLatestMigrationVersion(type);
-  }
+  const modelVersion = getLatestMappingsVersionNumber(type);
+  return modelVersionToVirtualVersion(modelVersion);
 };
 
 /**

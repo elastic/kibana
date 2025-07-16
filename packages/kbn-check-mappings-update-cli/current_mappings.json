@@ -1256,6 +1256,9 @@
         "dynamic": false,
         "properties": {}
       },
+      "previous_version": {
+        "type": "keyword"
+      },
       "verification_key_id": {
         "type": "keyword"
       },
@@ -1833,6 +1836,9 @@
         "properties": {}
       },
       "is_managed": {
+        "type": "boolean"
+      },
+      "latest_revision": {
         "type": "boolean"
       },
       "name": {
@@ -2438,6 +2444,9 @@
       "is_managed": {
         "type": "boolean"
       },
+      "latest_revision": {
+        "type": "boolean"
+      },
       "name": {
         "type": "keyword"
       },
@@ -3027,10 +3036,18 @@
       }
     }
   },
+  "privmon-api-key": {
+    "dynamic": false,
+    "properties": {
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
       "index_name": {
+        "type": "keyword"
+      },
+      "inference_id": {
         "type": "keyword"
       },
       "installation_status": {
@@ -3694,6 +3711,136 @@
     "properties": {}
   },
   "synthetics-monitor": {
+    "dynamic": false,
+    "properties": {
+      "alert": {
+        "properties": {
+          "status": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          },
+          "tls": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "config_id": {
+        "type": "keyword"
+      },
+      "custom_heartbeat_id": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "hash": {
+        "type": "keyword"
+      },
+      "hosts": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "journey_id": {
+        "type": "keyword"
+      },
+      "locations": {
+        "properties": {
+          "id": {
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            },
+            "ignore_above": 256,
+            "type": "keyword"
+          },
+          "label": {
+            "type": "text"
+          }
+        }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "origin": {
+        "type": "keyword"
+      },
+      "project_id": {
+        "fields": {
+          "text": {
+            "type": "text"
+          }
+        },
+        "type": "keyword"
+      },
+      "schedule": {
+        "properties": {
+          "number": {
+            "type": "integer"
+          }
+        }
+      },
+      "tags": {
+        "fields": {
+          "text": {
+            "type": "text"
+          }
+        },
+        "type": "keyword"
+      },
+      "throttling": {
+        "properties": {
+          "label": {
+            "type": "keyword"
+          }
+        }
+      },
+      "type": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "urls": {
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
+  },
+  "synthetics-monitor-multi-space": {
     "dynamic": false,
     "properties": {
       "alert": {

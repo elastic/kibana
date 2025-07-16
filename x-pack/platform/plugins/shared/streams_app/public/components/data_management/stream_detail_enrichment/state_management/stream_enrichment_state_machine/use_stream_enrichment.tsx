@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
+import { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
@@ -15,7 +16,11 @@ import {
 import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
-import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
+import {
+  PreviewDocsFilterOption,
+  SimulationActorSnapshot,
+  SimulationContext,
+} from '../simulation_state_machine';
 import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isGrokProcessor } from '../../utils';
 
@@ -23,7 +28,7 @@ const consoleInspector = createConsoleInspector();
 
 const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 
-export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
+export const useStreamEnrichmentSelector = StreamEnrichmentContext.useSelector;
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
 
@@ -49,6 +54,9 @@ export const useStreamEnrichmentEvents = () => {
       saveChanges: () => {
         service.send({ type: 'stream.update' });
       },
+      refreshSimulation: () => {
+        service.send({ type: 'simulation.refresh' });
+      },
       viewSimulationPreviewData: () => {
         service.send({ type: 'simulation.viewDataPreview' });
       },
@@ -63,6 +71,15 @@ export const useStreamEnrichmentEvents = () => {
       },
       unmapField: (fieldName: string) => {
         service.send({ type: 'simulation.fields.unmap', fieldName });
+      },
+      openDataSourcesManagement: () => {
+        service.send({ type: 'dataSources.openManagement' });
+      },
+      closeDataSourcesManagement: () => {
+        service.send({ type: 'dataSources.closeManagement' });
+      },
+      addDataSource: (dataSource: EnrichmentDataSource) => {
+        service.send({ type: 'dataSources.add', dataSource });
       },
       setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
         service.send({
@@ -81,6 +98,9 @@ export const useStreamEnrichmentEvents = () => {
           type: 'previewColumns.order',
           columns: columns.filter((col) => col.trim() !== ''),
         });
+      },
+      setPreviewColumnsSorting: (sorting: SimulationContext['previewColumnsSorting']) => {
+        service.send({ type: 'previewColumns.setSorting', sorting });
       },
     }),
     [service]
@@ -145,7 +165,7 @@ const ListenForDefinitionChanges = ({
 };
 
 export const useSimulatorRef = () => {
-  return useStreamsEnrichmentSelector((state) => state.context.simulatorRef);
+  return useStreamEnrichmentSelector((state) => state.context.simulatorRef);
 };
 
 export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {

@@ -165,14 +165,18 @@ export class AssetInventoryDataClient {
         }
       }
 
-      await installDataView(
-        secSolutionContext.getSpaceId(),
-        secSolutionContext.getDataViewsService(),
-        ASSET_INVENTORY_DATA_VIEW_NAME,
-        ASSET_INVENTORY_INDEX_PATTERN,
-        ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
-        logger
-      );
+      try {
+        await installDataView(
+          secSolutionContext.getSpaceId(),
+          secSolutionContext.getDataViewsService(),
+          ASSET_INVENTORY_DATA_VIEW_NAME,
+          ASSET_INVENTORY_INDEX_PATTERN,
+          ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
+          logger
+        );
+      } catch (error) {
+        logger.error(`Error installing asset inventory data view: ${error.message}`);
+      }
 
       logger.debug(`Enabled asset inventory`);
 

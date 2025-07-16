@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiCard,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
-  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -22,7 +19,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { IndexSelectorModal } from './select_index_modal';
-import { IntegrationCards } from './integrations_cards';
 import { UploadPrivilegedUsersModal } from './file_uploader/upload_privileged_users_modal';
 
 interface AddDataSourcePanelProps {
@@ -51,41 +47,12 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
         <p>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.description"
-            defaultMessage="To get started, define your privileged users by adding an integration with your organization’s user identities, select an index with the relevant data, or import your list of privileged users from a CSV file."
+            defaultMessage="To get started, define your privileged users by selecting an index with the relevant data, or importing your list of privileged users from a CSV file."
           />
         </p>
       </EuiText>
 
       <EuiSpacer size="xl" />
-      <Suspense
-        fallback={
-          <EuiFlexGrid gutterSize="l" columns={3}>
-            {Array.from({ length: 3 }).map((_, index) => (
-              <EuiFlexItem grow={1} key={index}>
-                <EuiSkeletonRectangle height="127px" width="100%" />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-        }
-      >
-        <IntegrationCards />
-      </Suspense>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" justifyContent="spaceAround" responsive={false}>
-        <EuiFlexItem grow={true}>
-          <EuiHorizontalRule size="full" margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.or"
-            defaultMessage="OR"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiHorizontalRule size="full" margin="none" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         <EuiFlexItem grow={1}>
           <EuiCard
@@ -107,7 +74,9 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             }
             onClick={showIndexModal}
           />
-          <IndexSelectorModal isOpen={isIndexModalOpen} onClose={hideIndexModal} />
+          {isIndexModalOpen && (
+            <IndexSelectorModal onClose={hideIndexModal} onImport={onComplete} />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiCard
@@ -124,7 +93,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             description={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.file.description"
-                defaultMessage="Import a list of privileged users from a CSV, TXT, or TSV file"
+                defaultMessage="Import a list of privileged users from a CSV file"
               />
             }
             onClick={showImportFileModal}

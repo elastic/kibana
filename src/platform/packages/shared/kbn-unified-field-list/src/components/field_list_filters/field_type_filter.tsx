@@ -274,7 +274,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                         <EuiFlexItem grow={false}>
                           <EuiIconTip
                             aria-label={getFieldTypeDescription(type)}
-                            type="questionInCircle"
+                            type="question"
                             color="subdued"
                             content={getFieldTypeDescription(type)}
                           />

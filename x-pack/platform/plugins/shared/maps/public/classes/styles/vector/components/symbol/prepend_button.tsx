@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { UseEuiTheme } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { SymbolIcon } from '../legend/symbol_icon';
 import { getIsDarkMode } from '../../../../../kibana_services';
 
@@ -18,7 +18,7 @@ const prependButtonStyles = {
 };
 
 export const PrependButton = ({ value, svg }: { value: string; svg: string }) => {
-  const styles = useMemoizedStyles(prependButtonStyles);
+  const styles = useMemoCss(prependButtonStyles);
   return (
     <SymbolIcon
       key={value}

@@ -236,5 +236,5 @@ export const RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES: Readonly<
   endpoint: ['endpoint'],
   sentinel_one: ['sentinel_one'],
   crowdstrike: ['crowdstrike'],
-  microsoft_defender_endpoint: ['microsoft_defender_endpoint'],
+  microsoft_defender_endpoint: ['microsoft_defender_endpoint', 'm365_defender'],
 });

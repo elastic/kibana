@@ -17,6 +17,7 @@ import { FieldDefinition, UnsavedFieldChange, SettingType } from '@kbn/managemen
 import { useFieldStyles } from '../field_row.styles';
 import { FieldTitleCustomIcon } from './icon_custom';
 import { FieldTitleUnsavedIcon } from './icon_unsaved';
+import { FieldTitleTechnicalPreviewBadge } from './technical_preview_badge';
 
 /**
  * Props for a {@link FieldTitle} component.
@@ -25,7 +26,7 @@ export interface TitleProps<T extends SettingType> {
   /** The {@link FieldDefinition} corresponding the setting. */
   field: Pick<
     FieldDefinition<T>,
-    'displayName' | 'savedValue' | 'isCustom' | 'id' | 'type' | 'isOverridden'
+    'displayName' | 'savedValue' | 'isCustom' | 'id' | 'type' | 'isOverridden' | 'technicalPreview'
   >;
   /** Emotion-based `css` for the root React element. */
   css?: Interpolation<Theme>;
@@ -50,16 +51,13 @@ export const FieldTitle = <T extends SettingType>({
   });
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false} css={cssFieldTitle}>
         <h3 {...props}>{field.displayName}</h3>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FieldTitleCustomIcon {...{ field }} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FieldTitleUnsavedIcon {...{ field, unsavedChange }} />
-      </EuiFlexItem>
+      <FieldTitleTechnicalPreviewBadge {...{ field }} />
+      <FieldTitleCustomIcon {...{ field }} />
+      <FieldTitleUnsavedIcon {...{ field, unsavedChange }} />
     </EuiFlexGroup>
   );
 };

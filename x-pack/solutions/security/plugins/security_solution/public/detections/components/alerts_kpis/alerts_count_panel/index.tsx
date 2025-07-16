@@ -15,7 +15,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
-import { FieldSelection } from '../../../../common/components/field_selection';
+import { FieldSelection } from '../common/field_selection';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';

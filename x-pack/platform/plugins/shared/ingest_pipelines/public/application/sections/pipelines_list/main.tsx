@@ -185,7 +185,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     >
       <EuiContextMenu
         initialPanelId={0}
-        data-test-subj="autoFollowPatternActionContextMenu"
         panels={[
           {
             id: 0,
@@ -213,7 +212,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     <EuiButtonEmpty
       href={services.documentation.getIngestNodeUrl()}
       target="_blank"
-      iconType="help"
+      iconType="question"
       data-test-subj="documentationLink"
     >
       <FormattedMessage

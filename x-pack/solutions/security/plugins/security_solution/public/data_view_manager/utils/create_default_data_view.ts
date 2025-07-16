@@ -13,6 +13,7 @@ import { initDataView } from '../../sourcerer/store/model';
 import { createSourcererDataView } from '../../sourcerer/containers/create_sourcerer_data_view';
 import {
   DEFAULT_DATA_VIEW_ID,
+  DEFAULT_ALERT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
 } from '../../../common/constants';
@@ -37,6 +38,7 @@ export const createDefaultDataView = async ({
 }: CreateDefaultDataViewDependencies) => {
   const configPatternList = uiSettings.get(DEFAULT_INDEX_KEY);
   let defaultDataView: SourcererModel['defaultDataView'];
+  let alertDataView: SourcererModel['alertDataView'];
   let kibanaDataViews: SourcererModel['kibanaDataViews'];
 
   let signal: { name: string | null; index_mapping_outdated: null | boolean } = {
@@ -48,6 +50,7 @@ export const createDefaultDataView = async ({
     return {
       kibanaDataViews: [],
       defaultDataView: { ...initDataView },
+      alertDataView: { ...initDataView },
       signal,
     };
   }
@@ -67,20 +70,24 @@ export const createDefaultDataView = async ({
       },
       dataViewService,
       dataViewId: `${DEFAULT_DATA_VIEW_ID}-${(await spaces?.getActiveSpace())?.id}`,
+      alertDataViewId: `${DEFAULT_ALERT_DATA_VIEW_ID}-${(await spaces?.getActiveSpace())?.id}`,
+      signalIndexName: signal.name ?? undefined,
     });
 
     if (sourcererDataView === undefined) {
       throw new Error('');
     }
     defaultDataView = { ...initDataView, ...sourcererDataView.defaultDataView };
+    alertDataView = { ...initDataView, ...sourcererDataView.alertDataView };
     kibanaDataViews = sourcererDataView.kibanaDataViews.map((dataView: KibanaDataView) => ({
       ...initDataView,
       ...dataView,
     }));
   } catch (error) {
     defaultDataView = { ...initDataView, error };
+    alertDataView = { ...initDataView, error };
     kibanaDataViews = [];
   }
 
-  return { kibanaDataViews, defaultDataView, signal };
+  return { kibanaDataViews, defaultDataView, alertDataView, signal };
 };

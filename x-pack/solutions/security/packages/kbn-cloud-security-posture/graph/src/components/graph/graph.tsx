@@ -15,7 +15,7 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import type { Edge, FitViewOptions, Node, ReactFlowInstance } from '@xyflow/react';
+import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
@@ -31,7 +31,7 @@ import {
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
+import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
 import { Controls } from '../controls/controls';
@@ -74,6 +74,10 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
+const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
+  duration: 200,
+};
+
 /**
  * Graph component renders a graph visualization using ReactFlow.
  * It takes nodes and edges as input and provides interactive controls
@@ -91,9 +95,7 @@ const edgeTypes = {
 export const Graph = memo<GraphProps>(
   ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
-    const fitViewRef = useRef<
-      ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
-    >(null);
+    const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
@@ -121,7 +123,7 @@ export const Graph = memo<GraphProps>(
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
-        window.requestAnimationFrame(() => xyflow.fitView());
+        xyflow.fitView();
         fitViewRef.current = xyflow.fitView;
 
         // When the graph is not initialized as interactive, we need to fit the view on resize
@@ -150,7 +152,7 @@ export const Graph = memo<GraphProps>(
           edgesFocusable={false}
           onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
           snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-          snapGrid={[1, 1]}
+          snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           proOptions={{ hideAttribution: true }}
@@ -165,7 +167,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls showCenter={false} />
+              <Controls fitViewOptions={fitViewOptions} showCenter={false} />
             </Panel>
           )}
           {children}

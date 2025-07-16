@@ -34,6 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       after(async () => {
         await deleteAllTestIndices();
+        await pageObjects.svlSearchElasticsearchStartPage.clearSkipEmptyStateStorageFlag();
       });
       beforeEach(async () => {
         await deleteAllTestIndices();
@@ -196,13 +197,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
         await pageObjects.svlSearchElasticsearchStartPage.expectCloseCreateIndexButtonExists();
         await pageObjects.svlSearchElasticsearchStartPage.clickCloseCreateIndexButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnSearchHomepagePage();
       });
       it('should have skip button', async () => {
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
         await pageObjects.svlSearchElasticsearchStartPage.expectSkipButtonExists();
         await pageObjects.svlSearchElasticsearchStartPage.clickSkipButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnSearchHomepagePage();
       });
     });
     describe('viewer', function () {

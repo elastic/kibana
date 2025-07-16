@@ -6,9 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
 import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
@@ -16,6 +14,43 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
+import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
+import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
+import {
+  isSuggestedDashboardsValidRuleTypeId,
+  SuggestedDashboardsValidRuleTypeIds,
+} from './helpers';
+
+// TS will make sure that if we add a new supported rule type id we had the corresponding function to get the relevant rule fields
+const getRelevantRuleFieldsMap: Record<
+  SuggestedDashboardsValidRuleTypeIds,
+  (ruleParams: { [key: string]: unknown }) => Set<string>
+> = {
+  [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: (customThresholdParams) => {
+    const relevantFields = new Set<string>();
+    const metrics = (customThresholdParams as CustomThresholdParams).criteria[0].metrics;
+    metrics.forEach((metric) => {
+      // The property "field" is of type string | never but it collapses to just string
+      // We should probably avoid typing field as never and just omit it from the type to avoid situations like this one
+      if ('field' in metric) relevantFields.add(metric.field);
+    });
+    return relevantFields;
+  },
+};
+
+const getRuleQueryIndexMap: Record<
+  SuggestedDashboardsValidRuleTypeIds,
+  (ruleParams: { [key: string]: unknown }) => string | null
+> = {
+  [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: (customThresholdParams) => {
+    const {
+      searchConfiguration: { index },
+    } = customThresholdParams as CustomThresholdParams;
+    if (typeof index === 'object') return (index as DataViewSpec)?.id || null;
+    if (typeof index === 'string') return index;
+    return null;
+  },
+};
 
 export class AlertData {
   constructor(private alert: Awaited<ReturnType<AlertsClient['get']>>) {}
@@ -30,21 +65,14 @@ export class AlertData {
 
   getRelevantRuleFields(): Set<string> {
     const ruleParameters = this.getRuleParameters();
-    const relevantFields = new Set<string>();
     if (!ruleParameters) {
       throw new Error('No rule parameters found');
     }
-    switch (this.getRuleTypeId()) {
-      case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as CustomThresholdParams;
-        const metrics = customThresholdParams.criteria[0].metrics;
-        metrics.forEach((metric) => {
-          relevantFields.add(metric.field);
-        });
-        return relevantFields;
-      default:
-        return relevantFields;
-    }
+    const ruleTypeId = this.getRuleTypeId();
+
+    return isSuggestedDashboardsValidRuleTypeId(ruleTypeId)
+      ? getRelevantRuleFieldsMap[ruleTypeId](ruleParameters)
+      : new Set<string>();
   }
 
   getRelevantAADFields(): string[] {
@@ -74,17 +102,10 @@ export class AlertData {
     if (!ruleParameters) {
       throw new Error('No rule parameters found');
     }
-    switch (ruleTypeId) {
-      case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as CustomThresholdParams;
-        if (typeof customThresholdParams.searchConfiguration.index === 'object')
-          return (customThresholdParams.searchConfiguration.index as DataViewSpec)?.id || null;
-        if (typeof customThresholdParams.searchConfiguration.index === 'string')
-          return customThresholdParams.searchConfiguration.index;
-        return null;
-      default:
-        return null;
-    }
+
+    return isSuggestedDashboardsValidRuleTypeId(ruleTypeId)
+      ? getRuleQueryIndexMap[ruleTypeId](ruleParameters)
+      : null;
   }
 
   getRuleTypeId(): string | undefined {

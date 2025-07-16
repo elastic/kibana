@@ -19,7 +19,6 @@ import {
   guideStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
 import { testGuideId } from '@kbn/guided-onboarding';
-import { websiteSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import {
@@ -135,11 +134,8 @@ export default function testPutState({ getService }: FtrProviderContext) {
     });
 
     it('updates any existing active guides to inactive', async () => {
-      // create an active guide and an inactive guide
-      await createGuides(kibanaServer, [
-        testGuideStep1ActiveState,
-        { ...testGuideNotActiveState, guideId: websiteSearchGuideId },
-      ]);
+      // create an active guide
+      await createGuides(kibanaServer, [testGuideStep1ActiveState]);
 
       // Create a new guide with isActive: true
       await supertest
@@ -160,12 +156,6 @@ export default function testPutState({ getService }: FtrProviderContext) {
         id: testGuideId,
       });
       expect(testGuideSO.attributes.isActive).to.eql(false);
-
-      const searchGuideSO = await kibanaServer.savedObjects.get({
-        type: guideStateSavedObjectsType,
-        id: websiteSearchGuideId,
-      });
-      expect(searchGuideSO.attributes.isActive).to.eql(false);
 
       const kubernetesGuide = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,

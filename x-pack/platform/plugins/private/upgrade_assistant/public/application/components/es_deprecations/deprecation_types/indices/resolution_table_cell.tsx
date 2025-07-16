@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -16,10 +17,36 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { ReindexStatus } from '../../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  ReindexAction,
+  ReindexStatus,
+} from '../../../../../../common/types';
 import { getReindexProgressLabel } from '../../../../lib/utils';
 import { LoadingState } from '../../../types';
 import { useIndexContext } from './context';
+
+type RecommendedActionType =
+  | 'unfreeze'
+  | 'isLargeIndex'
+  | 'isFollowerIndex'
+  | 'isReadonly'
+  | 'readonly'
+  | 'reindex'
+  | 'terminateReplication';
+
+const recommendedReadOnlyText = i18n.translate(
+  'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyText',
+  {
+    defaultMessage: 'Recommended: set to read-only',
+  }
+);
+const recommendedReindexText = i18n.translate(
+  'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexText',
+  {
+    defaultMessage: 'Recommended: reindex',
+  }
+);
 
 const i18nTexts = {
   reindexLoadingStatusText: i18n.translate(
@@ -52,69 +79,190 @@ const i18nTexts = {
       defaultMessage: 'Reindex status not available',
     }
   ),
-  reindexCanceledText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexCanceledText',
-    {
-      defaultMessage: 'Reindex cancelled',
-    }
-  ),
   reindexPausedText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indices.reindexPausedText',
     {
       defaultMessage: 'Reindex paused',
     }
   ),
-  reindexText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.reindexLabel', {
-    defaultMessage: 'Reindex',
-  }),
-  reindexFollowerIndexText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexLabel',
-    {
-      defaultMessage: 'Unfollow leader index',
-    }
-  ),
-  reindexTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexTooltipLabel',
-    {
-      defaultMessage: 'Resolve this issue by reindexing into a new, compatible index.',
-    }
-  ),
-  reindexFollowerIndexTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexTooltipLabel',
-    {
-      defaultMessage: 'Resolve this issue by terminating replication.',
-    }
-  ),
-  updateText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.updateLabel', {
-    defaultMessage: 'Update',
-  }),
   updateCompleteText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indices.updateCompleteText',
     {
       defaultMessage: 'Update complete',
     }
   ),
-  updateTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.updateTooltipLabel',
+  updateInProgressText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.updateInProgressText',
     {
-      defaultMessage:
-        'Resolve this issue by updating this index. This issue can be resolved automatically either by marking the index as read-only (recommended for large indices) or by reindexing into a new, compatible index.',
+      defaultMessage: 'Update in progress…',
     }
   ),
-  unfreezeText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.unfreezeLabel', {
-    defaultMessage: 'Unfreeze',
-  }),
-  unfreezeTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeTooltipLabel',
+  unfreezeCompleteText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeCompleteText',
     {
-      defaultMessage: 'Resolve this issue by unfreezing this index.',
+      defaultMessage: 'Index is unfrozen',
     }
   ),
+  unfreezeInProgressText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeInProgressText',
+    {
+      defaultMessage: 'Unfreezing index…',
+    }
+  ),
+  readOnlyCompleteText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.readOnlyCompleteText',
+    {
+      defaultMessage: 'Index is set to read-only',
+    }
+  ),
+  readOnlyInProgressText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.readOnlyInProgressText',
+    {
+      defaultMessage: 'Setting index to read-only…',
+    }
+  ),
+  recommendedActionTexts: {
+    isLargeIndex: {
+      text: recommendedReadOnlyText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonIsLargeIndex',
+        {
+          defaultMessage:
+            'This index is larger than 1GB. Reindexing large indices can take a long time. If you no longer need to update documents in this index (or add new ones), you might want to set it to read-only.',
+        }
+      ),
+    },
+    isFollowerIndex: {
+      text: recommendedReadOnlyText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonIsFollowerIndex',
+        {
+          defaultMessage:
+            'This index is a cross-cluster replication follower index, which should not be reindexed. You can set it to read-only or terminate the replication and convert it to a standard index.',
+        }
+      ),
+    },
+    readonly: {
+      text: recommendedReadOnlyText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonReadonly',
+        {
+          defaultMessage:
+            'Old indices can maintain compatibility with the next major version if they are set to read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to set it to a read-only index.',
+        }
+      ),
+    },
+    isReadonly: {
+      text: recommendedReindexText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexReasonReadonly',
+        {
+          defaultMessage: 'This index is read-only. You can still reindex it.',
+        }
+      ),
+    },
+    reindex: {
+      text: recommendedReindexText,
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReindexTooltipText',
+        {
+          defaultMessage:
+            'The reindex operation transforms an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed.',
+        }
+      ),
+    },
+    unfreeze: {
+      text: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedOptionUnfreezeText',
+        {
+          defaultMessage: 'Recommended: unfreeze',
+        }
+      ),
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedOptionReadonlyReasonFreeze',
+        {
+          defaultMessage:
+            'To ensure compatibility with the next major version, unfreeze is recommended. It will also be set to read-only.',
+        }
+      ),
+    },
+    terminateReplication: {
+      text: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedOptionTerminateReplicationText',
+        {
+          defaultMessage: 'Resolve manually',
+        }
+      ),
+      tooltipText: i18n.translate(
+        'xpack.upgradeAssistant.esDeprecations.indices.recommendedOptionTerminateReplicationReason',
+        {
+          defaultMessage:
+            'This index is a follower index that has already been set to read-only. You can terminate the replication and convert it to a standard index.',
+        }
+      ),
+    },
+  },
 };
 
-export const ReindexResolutionCell: React.FunctionComponent = () => {
-  const { reindexState, deprecation, updateIndexState } = useIndexContext();
+export const ReindexResolutionCell: React.FunctionComponent<{
+  deprecation: EnrichedDeprecationInfo;
+}> = ({ deprecation }) => {
+  const { reindexState, updateIndexState } = useIndexContext();
+  const { correctiveAction } = deprecation;
+
   const hasExistingAliases = reindexState.meta.aliases.length > 0;
+
+  const getRecommendedActionForUnfreezeAction = (): RecommendedActionType => {
+    // Unfreeze is always the Recommended action for frozen index
+    return 'unfreeze';
+  };
+
+  const getRecommendedActionForReindexingAction = (): RecommendedActionType => {
+    const { meta } = reindexState;
+    const { isReadonly, isFollowerIndex } = meta;
+    const { excludedActions = [], indexSizeInBytes = 0 } =
+      (deprecation.correctiveAction as ReindexAction) || {};
+
+    // Determine if the index is larger than 1GB
+    const isLargeIndex = indexSizeInBytes > 1073741824;
+    const readOnlyExcluded = excludedActions.includes('readOnly');
+    const reindexExcluded = excludedActions.includes('reindex');
+
+    // Follower index can only be reindexed
+    if (isFollowerIndex && !readOnlyExcluded && !isReadonly) {
+      return 'isFollowerIndex';
+    }
+    // Large index is always recommended to be set to read-only unless excluded or already read-only
+    if (isLargeIndex && !readOnlyExcluded && !isReadonly) {
+      return 'isLargeIndex';
+    }
+    // Follower index but already read-only, manual fix
+    if (isFollowerIndex && isReadonly) {
+      return 'terminateReplication';
+    }
+    // If it's already read-only and not excluded from reindexing, recommend reindexing unless it's a follower index
+    if (isReadonly && !reindexExcluded && !isFollowerIndex) {
+      return 'isReadonly';
+    }
+    // If reindexing is excluded and read-only is not, recommend setting it to read-only
+    if (reindexExcluded && !readOnlyExcluded && !isReadonly) {
+      return 'readonly';
+    }
+    // Default: reindex
+    return 'reindex';
+  };
+
+  const recommendedAction =
+    correctiveAction?.type === 'unfreeze'
+      ? getRecommendedActionForUnfreezeAction()
+      : getRecommendedActionForReindexingAction();
+
+  const updateAction =
+    deprecation.correctiveAction?.type === 'unfreeze'
+      ? 'unfreeze'
+      : deprecation.correctiveAction?.type === 'reindex'
+      ? 'readOnly'
+      : 'update';
 
   if (reindexState.loadingState === LoadingState.Loading) {
     return (
@@ -123,7 +271,9 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.reindexLoadingStatusText}</EuiText>
+          <EuiText size="s" color="subdued">
+            <em>{i18nTexts.reindexLoadingStatusText}</em>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -137,13 +287,15 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              {i18nTexts.reindexInProgressText}{' '}
-              {getReindexProgressLabel(
-                reindexState.reindexTaskPercComplete,
-                reindexState.lastCompletedStep,
-                hasExistingAliases
-              )}
+            <EuiText size="s" color="subdued">
+              <em>
+                {i18nTexts.reindexInProgressText}{' '}
+                {getReindexProgressLabel(
+                  reindexState.reindexTaskPercComplete,
+                  reindexState.lastCompletedStep,
+                  hasExistingAliases
+                )}
+              </em>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -152,7 +304,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="check" color="success" />
+            <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexCompleteText}</EuiText>
@@ -164,7 +316,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="warning" color="danger" />
+              <EuiIcon type="warningFilled" color="danger" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
@@ -177,7 +329,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
+            <EuiIcon type="warningFilled" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexFetchFailedText}</EuiText>
@@ -188,7 +340,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
+            <EuiIcon type="warningFilled" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexPausedText}</EuiText>
@@ -198,67 +350,50 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
   }
 
   switch (updateIndexState.status) {
+    case 'inProgress':
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <em>{i18nTexts[`${updateAction}InProgressText`]}</em>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
     case 'complete':
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="check" color="success" />
+            <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.updateCompleteText}</EuiText>
+            <EuiText size="s">{i18nTexts[`${updateAction}CompleteText`]}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
   }
 
-  // reindex status "not started"
-  return deprecation.correctiveAction?.type === 'unfreeze' ? (
-    <EuiToolTip position="top" content={i18nTexts.unfreezeTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.unfreezeText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  ) : reindexState.meta.isReadonly ? (
-    <>
-      {reindexState.meta.isFollowerIndex ? (
-        <EuiToolTip position="top" content={i18nTexts.reindexFollowerIndexTooltipLabel}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="indexSettings" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.reindexFollowerIndexText}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiToolTip>
-      ) : (
-        <EuiToolTip position="top" content={i18nTexts.reindexTooltipLabel}>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="indexSettings" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{i18nTexts.reindexText}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiToolTip>
-      )}
-    </>
-  ) : (
-    <EuiToolTip position="top" content={i18nTexts.updateTooltipLabel}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.updateText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
+  if (recommendedAction) {
+    return (
+      <EuiText size="s" color="subdued">
+        <em>
+          {i18nTexts.recommendedActionTexts[recommendedAction].text}{' '}
+          <EuiToolTip
+            position="top"
+            content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+          >
+            <EuiIcon
+              type="info"
+              aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+              size="s"
+            />
+          </EuiToolTip>
+        </em>
+      </EuiText>
+    );
+  }
+  return <></>;
 };

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isInsideTripleQuotes } from './autocomplete_utils';
+export { checkForTripleQuotesAndQueries, unescapeInvalidChars } from './autocomplete_utils';

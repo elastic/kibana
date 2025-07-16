@@ -8,28 +8,69 @@
  */
 
 /**
- * This function determines whether the given text ends with unclosed triple quotes
- * and whether it ends with an unclosed triple-quotes query ("query": """...)
+ * This function takes a Console text up to the current position and determines whether
+ * the current position is inside triple quotes, triple-quote or single-quote query,
+ * and the start index of the current query.
  * @param text The text up to the current position
  */
-export const isInsideTripleQuotes = (
+export const checkForTripleQuotesAndQueries = (
   text: string
-): { insideTripleQuotes: boolean; insideQuery: boolean } => {
+): {
+  insideTripleQuotes: boolean;
+  insideSingleQuotesQuery: boolean;
+  insideTripleQuotesQuery: boolean;
+  queryIndex: number;
+} => {
+  let insideSingleQuotes = false;
   let insideTripleQuotes = false;
-  let isCurrentTripleQuoteQuery = false;
+
+  let insideSingleQuotesQuery = false;
+  let insideTripleQuotesQuery = false;
+
+  let currentQueryStartIndex = -1;
   let i = 0;
 
   while (i < text.length) {
     if (text.startsWith('"""', i)) {
       insideTripleQuotes = !insideTripleQuotes;
       if (insideTripleQuotes) {
-        isCurrentTripleQuoteQuery = /.*"query"\s*:\s*/.test(text.slice(0, i));
+        insideTripleQuotesQuery = /.*"query"\s*:\s*$/.test(text.slice(0, i));
+        if (insideTripleQuotesQuery) {
+          currentQueryStartIndex = i + 3;
+        }
+      } else {
+        insideTripleQuotesQuery = false;
+        currentQueryStartIndex = -1;
       }
       i += 3; // Skip the triple quotes
+    } else if (text.at(i) === '"' && text.at(i - 1) !== '\\') {
+      insideSingleQuotes = !insideSingleQuotes;
+      if (insideSingleQuotes) {
+        insideSingleQuotesQuery = /.*"query"\s*:\s*$/.test(text.slice(0, i));
+        if (insideSingleQuotesQuery) {
+          currentQueryStartIndex = i + 1;
+        }
+      } else {
+        insideSingleQuotesQuery = false;
+        currentQueryStartIndex = -1;
+      }
+      i++;
     } else {
       i++;
     }
   }
 
-  return { insideTripleQuotes, insideQuery: insideTripleQuotes && isCurrentTripleQuoteQuery };
+  return {
+    insideTripleQuotes,
+    insideSingleQuotesQuery,
+    insideTripleQuotesQuery,
+    queryIndex: currentQueryStartIndex,
+  };
+};
+
+/**
+ * This function unescapes chars that are invalid in a Console string.
+ */
+export const unescapeInvalidChars = (str: string): string => {
+  return str.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
 };

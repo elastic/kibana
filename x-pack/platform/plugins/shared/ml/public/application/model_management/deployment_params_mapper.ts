@@ -75,7 +75,7 @@ export class DeploymentParamsMapper {
    * Gets the min allowed number of allocations.
    * - 0 for serverless and ESS with enabled autoscaling.
    * - 1 otherwise
-   * @private
+   * @internal
    */
   private get minAllowedNumberOfAllocation(): number {
     return !this.showNodeInfo || this.cloudInfo.isMlAutoscalingEnabled ? 0 : 1;
@@ -133,7 +133,7 @@ export class DeploymentParamsMapper {
   /**
    * Returns allocation values accounting for the number of threads per allocation.
    * @param params
-   * @private
+   * @internal
    */
   private getAllocationsParams(
     params: DeploymentParamsUI

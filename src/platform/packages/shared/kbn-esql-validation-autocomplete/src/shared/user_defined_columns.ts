@@ -7,11 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import {
+  ESQLAst,
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  isColumn,
+  isFunctionExpression,
+} from '@kbn/esql-ast';
+import { getExpressionType } from '@kbn/esql-ast/src/definitions/utils';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
-import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../validation/types';
-import { EDITOR_MARKER } from './constants';
-import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
+import type {
+  ESQLUserDefinedColumn,
+  ESQLFieldWithMetadata,
+} from '@kbn/esql-ast/src/commands_registry/types';
 
 function addToUserDefinedColumnOccurrences(
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
@@ -30,7 +40,7 @@ function addToUserDefinedColumns(
   fields: Map<string, ESQLFieldWithMetadata>,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
 ) {
-  if (isColumnItem(oldArg) && isColumnItem(newArg)) {
+  if (isColumn(oldArg) && isColumn(newArg)) {
     const newUserDefinedColumn: ESQLUserDefinedColumn = {
       name: newArg.parts.join('.'),
       type: 'double' /* fallback to number */,
@@ -73,7 +83,7 @@ function addUserDefinedColumnFromAssignment(
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
   fields: Map<string, ESQLFieldWithMetadata>
 ) {
-  if (isColumnItem(assignOperation.args[0])) {
+  if (isColumn(assignOperation.args[0])) {
     const rightHandSideArgType = getExpressionType(
       assignOperation.args[1],
       fields,
@@ -119,17 +129,6 @@ export function collectUserDefinedColumns(
       // TODO - add these as userDefinedColumns
     })
     .on('visitExpression', (_ctx) => {}) // required for the types :shrug:
-    .on('visitRenameExpression', (ctx) => {
-      let oldArg;
-      let newArg;
-      // oldArg AS newArg vs newArg = oldArg
-      if (ctx.node.name === 'as') {
-        [oldArg, newArg] = ctx.node.args;
-      } else {
-        [newArg, oldArg] = ctx.node.args;
-      }
-      addToUserDefinedColumns(oldArg, newArg, fields, userDefinedColumns);
-    })
     .on('visitFunctionCallExpression', (ctx) => {
       const node = ctx.node;
 
@@ -138,7 +137,10 @@ export function collectUserDefinedColumns(
         return;
       }
 
-      if (node.name === '=') {
+      if (node.name === 'as') {
+        const [oldArg, newArg] = ctx.node.args;
+        addToUserDefinedColumns(oldArg, newArg, fields, userDefinedColumns);
+      } else if (node.name === '=') {
         addUserDefinedColumnFromAssignment(node, userDefinedColumns, fields);
       } else {
         addUserDefinedColumnFromExpression(node, queryString, userDefinedColumns, fields);
@@ -149,7 +151,7 @@ export function collectUserDefinedColumns(
         return [...ctx.visitArguments()];
       } else if (ctx.node.name === 'with') {
         for (const assignFn of ctx.node.args) {
-          if (isFunctionItem(assignFn)) {
+          if (isFunctionExpression(assignFn)) {
             const [newArg, oldArg] = assignFn?.args || [];
             // TODO why is oldArg an array?
             if (Array.isArray(oldArg)) {

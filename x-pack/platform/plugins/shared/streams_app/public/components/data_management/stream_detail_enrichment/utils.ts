@@ -15,8 +15,9 @@ import {
   getProcessorType,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
-import { isEmpty, mapValues, omit, countBy, orderBy } from 'lodash';
+import { EnrichmentDataSource } from '../../../../common/url_schema';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
@@ -25,6 +26,7 @@ import {
   WithUIAttributes,
   DateFormState,
   ManualIngestPipelineFormState,
+  EnrichmentDataSourceWithUIAttributes,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -42,6 +44,12 @@ export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
+}
+interface RecalcColumnWidthsParams {
+  columnId: string;
+  width: number | undefined; // undefined -> reset width
+  prevWidths: Record<string, number | undefined>;
+  visibleColumns: string[];
 }
 
 const PRIORITIZED_CONTENT_FIELDS = [
@@ -315,7 +323,8 @@ export const isManualIngestPipelineJsonProcessor =
 export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();
-const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
+
+const processorToUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
   processor: TProcessorDefinition
 ): ProcessorDefinitionWithUIAttributes => ({
   id: createId(),
@@ -323,12 +332,14 @@ const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
   ...processor,
 });
 
-const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
+const processorToAPIDefinition = (
+  processor: ProcessorDefinitionWithUIAttributes
+): ProcessorDefinition => {
   const { id, type, ...processorConfig } = processor;
   return processorConfig;
 };
 
-const toSimulateDefinition = (
+const processorToSimulateDefinition = (
   processor: ProcessorDefinitionWithUIAttributes
 ): ProcessorDefinitionWithId => {
   const { type, ...processorConfig } = processor;
@@ -336,7 +347,47 @@ const toSimulateDefinition = (
 };
 
 export const processorConverter = {
-  toAPIDefinition,
-  toSimulateDefinition,
-  toUIDefinition,
+  toAPIDefinition: processorToAPIDefinition,
+  toSimulateDefinition: processorToSimulateDefinition,
+  toUIDefinition: processorToUIDefinition,
+};
+
+const dataSourceToUIDefinition = <TEnrichementDataSource extends EnrichmentDataSource>(
+  dataSource: TEnrichementDataSource
+): EnrichmentDataSourceWithUIAttributes => ({
+  id: createId(),
+  ...dataSource,
+});
+
+const dataSourceToUrlSchema = (
+  dataSourceWithUIAttributes: EnrichmentDataSourceWithUIAttributes
+): EnrichmentDataSource => {
+  const { id, ...dataSource } = dataSourceWithUIAttributes;
+  return dataSource;
+};
+
+export const dataSourceConverter = {
+  toUIDefinition: dataSourceToUIDefinition,
+  toUrlSchema: dataSourceToUrlSchema,
+};
+
+export const recalcColumnWidths = ({
+  columnId,
+  width,
+  prevWidths,
+  visibleColumns,
+}: RecalcColumnWidthsParams): Record<string, number | undefined> => {
+  const next = { ...prevWidths };
+  if (width === undefined) {
+    delete next[columnId];
+  } else {
+    next[columnId] = width;
+  }
+
+  const allExplicit = visibleColumns.every((c) => next[c] !== undefined);
+  if (allExplicit) {
+    delete next[visibleColumns[visibleColumns.length - 1]];
+  }
+
+  return next;
 };

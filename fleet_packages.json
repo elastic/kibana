@@ -34,7 +34,7 @@
   },
   {
     "name": "endpoint",
-    "version": "9.0.2"
+    "version": "9.1.0"
   },
   {
     "name": "fleet_server",
@@ -52,10 +52,15 @@
   },
   {
     "name": "synthetics",
-    "version": "1.4.1"
+    "version": "1.4.2"
   },
   {
     "name": "security_detection_engine",
-    "version": "9.0.6"
+    "version": "9.1.1"
+  },
+  {
+    "name": "security_ai_prompts",
+    "version": "0.0.5",
+    "allowSyncToPrerelease": true
   }
 ]

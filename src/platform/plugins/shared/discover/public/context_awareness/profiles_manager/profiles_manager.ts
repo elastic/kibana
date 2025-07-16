@@ -17,7 +17,7 @@ import type {
   RootContext,
 } from '../profiles';
 import type { ContextWithProfileId } from '../profile_service';
-import type { DiscoverEBTManager } from '../../plugin_imports/discover_ebt_manager';
+import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import type { AppliedProfile } from '../composable_profile';
 import { logResolutionError } from './utils';
 import { ScopedProfilesManager } from './scoped_profiles_manager';
@@ -51,8 +51,7 @@ export class ProfilesManager {
   constructor(
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
-    private readonly documentProfileService: DocumentProfileService,
-    private readonly ebtManager: DiscoverEBTManager
+    private readonly documentProfileService: DocumentProfileService
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.rootProfile = rootProfileService.getProfile({ context: this.rootContext$.getValue() });
@@ -110,13 +109,17 @@ export class ProfilesManager {
    * Creates a profiles manager instance scoped to a single tab with a shared root context
    * @returns The scoped profiles manager
    */
-  public createScopedProfilesManager() {
+  public createScopedProfilesManager({
+    scopedEbtManager,
+  }: {
+    scopedEbtManager: ScopedDiscoverEBTManager;
+  }) {
     return new ScopedProfilesManager(
       this.rootContext$,
       () => this.rootProfile,
       this.dataSourceProfileService,
       this.documentProfileService,
-      this.ebtManager
+      scopedEbtManager
     );
   }
 }

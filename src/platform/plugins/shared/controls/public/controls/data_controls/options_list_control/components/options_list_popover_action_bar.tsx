@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
+  EuiCheckbox,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,12 +24,16 @@ import {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
+
+import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 import { OptionsListStrings } from '../options_list_strings';
+import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE, MAX_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -51,6 +56,15 @@ const optionsListPopoverStyles = {
     height: ${euiTheme.size.base};
     border-right: ${euiTheme.border.thin};
   `,
+  selectAllCheckbox: ({ euiTheme }: UseEuiTheme) => css`
+    .euiCheckbox__square {
+      margin-block-start: 0;
+    }
+    .euiCheckbox__label {
+      align-items: center;
+      padding-inline-start: ${euiTheme.size.xs};
+    }
+  `,
 };
 
 export const OptionsListPopoverActionBar = ({
@@ -58,6 +72,7 @@ export const OptionsListPopoverActionBar = ({
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
   const { componentApi, displaySettings } = useOptionsListContext();
+  const [areAllSelected, setAllSelected] = useState<boolean>(false);
 
   // Using useStateFromPublishingSubject instead of useBatchedPublishingSubjects
   // to avoid debouncing input value
@@ -66,17 +81,25 @@ export const OptionsListPopoverActionBar = ({
   const [
     searchTechnique,
     searchStringValid,
-    invalidSelections,
+    selectedOptions = [],
     totalCardinality,
     field,
+    fieldName,
     allowExpensiveQueries,
+    availableOptions = [],
+    dataLoading,
+    singleSelect,
   ] = useBatchedPublishingSubjects(
     componentApi.searchTechnique$,
     componentApi.searchStringValid$,
-    componentApi.invalidSelections$,
+    componentApi.selectedOptions$,
     componentApi.totalCardinality$,
     componentApi.field$,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.fieldName$,
+    componentApi.parentApi.allowExpensiveQueries$,
+    componentApi.availableOptions$,
+    componentApi.dataLoading$,
+    componentApi.singleSelect$
   );
 
   const compatibleSearchTechniques = useMemo(() => {
@@ -89,7 +112,43 @@ export const OptionsListPopoverActionBar = ({
     [searchTechnique, compatibleSearchTechniques]
   );
 
-  const styles = useMemoizedStyles(optionsListPopoverStyles);
+  const loadMoreOptions = useCallback(async (): Promise<OptionsListSuggestions | undefined> => {
+    componentApi.setRequestSize(Math.min(totalCardinality, MAX_OPTIONS_LIST_REQUEST_SIZE));
+    componentApi.loadMoreSubject.next(); // trigger refetch with loadMoreSubject
+    return lastValueFrom(componentApi.availableOptions$.pipe(take(2)));
+  }, [componentApi, totalCardinality]);
+
+  const hasNoOptions = availableOptions.length < 1;
+  const hasTooManyOptions = showOnlySelected
+    ? selectedOptions.length > MAX_OPTIONS_LIST_BULK_SELECT_SIZE
+    : totalCardinality > MAX_OPTIONS_LIST_BULK_SELECT_SIZE;
+
+  const isBulkSelectDisabled = dataLoading || hasNoOptions || hasTooManyOptions || showOnlySelected;
+
+  const handleBulkAction = useCallback(
+    async (bulkAction: (keys: string[]) => void) => {
+      bulkAction(availableOptions.map(({ value }) => value as string));
+
+      if (totalCardinality > availableOptions.length) {
+        const newAvailableOptions = (await loadMoreOptions()) ?? [];
+        bulkAction(newAvailableOptions.map(({ value }) => value as string));
+      }
+    },
+    [availableOptions, loadMoreOptions, totalCardinality]
+  );
+
+  useEffect(() => {
+    if (availableOptions.some(({ value }) => !selectedOptions.includes(value as string))) {
+      if (areAllSelected) {
+        setAllSelected(false);
+      }
+    } else {
+      if (!areAllSelected) {
+        setAllSelected(true);
+      }
+    }
+  }, [availableOptions, selectedOptions, areAllSelected]);
+  const styles = useMemoCss(optionsListPopoverStyles);
 
   return (
     <div className="optionsList__actions" css={styles.actions}>
@@ -108,6 +167,7 @@ export const OptionsListPopoverActionBar = ({
             placeholder={OptionsListStrings.popover.getSearchPlaceholder(
               allowExpensiveQueries ? defaultSearchTechnique : 'exact'
             )}
+            aria-label={OptionsListStrings.popover.getSearchAriaLabel(fieldName)}
           />
         </EuiFormRow>
       )}
@@ -119,25 +179,50 @@ export const OptionsListPopoverActionBar = ({
           responsive={false}
         >
           {allowExpensiveQueries && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
-                {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
-              </EuiText>
-            </EuiFlexItem>
-          )}
-          {invalidSelections && invalidSelections.size > 0 && (
             <>
-              {allowExpensiveQueries && (
-                <EuiFlexItem grow={false}>
-                  <div css={styles.borderDiv} />
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.size)}
+                <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
+                  {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
                 </EuiText>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div css={styles.borderDiv} />
+              </EuiFlexItem>
             </>
+          )}
+          {!singleSelect && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  hasTooManyOptions
+                    ? OptionsListStrings.popover.getMaximumBulkSelectionTooltip()
+                    : undefined
+                }
+              >
+                <EuiCheckbox
+                  checked={areAllSelected}
+                  id={`optionsList-control-selectAll-checkbox-${componentApi.uuid}`}
+                  // indeterminate={selectedOptions.length > 0 && !areAllSelected}
+                  disabled={isBulkSelectDisabled}
+                  data-test-subj="optionsList-control-selectAll"
+                  onChange={() => {
+                    if (areAllSelected) {
+                      handleBulkAction(componentApi.deselectAll);
+                      setAllSelected(false);
+                    } else {
+                      handleBulkAction(componentApi.selectAll);
+                      setAllSelected(true);
+                    }
+                  }}
+                  css={styles.selectAllCheckbox}
+                  label={
+                    <EuiText size="xs">
+                      {OptionsListStrings.popover.getSelectAllButtonLabel()}
+                    </EuiText>
+                  }
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           )}
           <EuiFlexItem grow={true}>
             <EuiFlexGroup
@@ -154,6 +239,7 @@ export const OptionsListPopoverActionBar = ({
                       ? OptionsListStrings.popover.getAllOptionsButtonTitle()
                       : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
                   }
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     size="xs"

@@ -118,14 +118,9 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     return BaseDataGenerator.toEsSearchResponse([]);
   });
 
-  esClient.indices.getFieldMapping.mockResolvedValue({
+  esClient.indices.getMapping.mockResolvedValue({
     '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
-      mappings: {
-        'agent.policy.integrationPolicyId': {
-          full_name: 'agent.policy.elasticAgentId',
-          mapping: { elasticAgentId: { type: 'keyword', ignore_above: 1024 } },
-        },
-      },
+      mappings: { properties: {} },
     },
   });
 

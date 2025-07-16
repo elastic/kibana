@@ -428,7 +428,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                   <EuiCallOut
                     size="s"
                     color="warning"
-                    iconType="iInCircle"
+                    iconType="info"
                     data-test-subj="privilege-conflict-callout"
                     title={i18n.translate(
                       'xpack.spaces.management.spaceDetails.roles.assign.privilegeConflictMsg.title',
@@ -449,7 +449,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                   <EuiCallOut
                     size="s"
                     color="primary"
-                    iconType="iInCircle"
+                    iconType="info"
                     data-test-subj="privilege-info-callout"
                     title={i18n.translate(
                       'xpack.spaces.management.spaceDetails.roles.assign.privilegeCombinationMsg.title',

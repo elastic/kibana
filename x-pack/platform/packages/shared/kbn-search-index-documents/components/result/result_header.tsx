@@ -52,7 +52,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
     <EuiButtonIcon
       display="empty"
       size="xs"
-      iconType="iInCircle"
+      iconType="info"
       color="primary"
       onClick={() => setPopoverIsOpen(!popoverIsOpen)}
       aria-label={i18n.translate(

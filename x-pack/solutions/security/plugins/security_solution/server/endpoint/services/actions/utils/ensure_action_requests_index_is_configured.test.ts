@@ -18,9 +18,9 @@ describe('ensureActionRequestsIndexIsConfigured()', () => {
     endpointServiceMock = createMockEndpointAppContextService();
     esClientMock = endpointServiceMock.getInternalEsClient() as ElasticsearchClientMock;
 
-    esClientMock.indices.getFieldMapping.mockResolvedValue({
+    esClientMock.indices.getMapping.mockResolvedValue({
       '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
-        mappings: {},
+        mappings: { properties: {} },
       },
     });
 
@@ -105,17 +105,23 @@ describe('ensureActionRequestsIndexIsConfigured()', () => {
             },
           },
           originSpaceId: { ignore_above: 1024, type: 'keyword' },
+          tags: { type: 'keyword', ignore_above: 1024 },
         },
       });
     });
 
     it('should not add mappings to DS index if they already exist', async () => {
-      esClientMock.indices.getFieldMapping.mockResolvedValue({
+      esClientMock.indices.getMapping.mockResolvedValue({
         '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
           mappings: {
-            'agent.policy.integrationPolicyId': {
-              full_name: 'agent.policy.elasticAgentId',
-              mapping: { elasticAgentId: { type: 'keyword', ignore_above: 1024 } },
+            properties: {
+              tags: { type: 'keyword' },
+              originSpaceId: { ignore_above: 1024, type: 'keyword' },
+              agent: {
+                properties: {
+                  policy: {},
+                },
+              },
             },
           },
         },
@@ -152,13 +158,14 @@ describe('ensureActionRequestsIndexIsConfigured()', () => {
                 },
               },
               originSpaceId: { ignore_above: 1024, type: 'keyword' },
+              tags: { type: 'keyword', ignore_above: 1024 },
             },
           },
         },
       });
     });
 
-    it('should now add mappings to index component template if they already exists', async () => {
+    it('should not add mappings to index component template if they already exists', async () => {
       esClientMock.cluster.getComponentTemplate.mockResolvedValue({
         component_templates: [
           {
@@ -169,8 +176,9 @@ describe('ensureActionRequestsIndexIsConfigured()', () => {
                 mappings: {
                   dynamic: false,
                   properties: {
-                    agent: { properties: {} },
+                    agent: { properties: { policy: {} } },
                     originSpaceId: { ignore_above: 1024, type: 'keyword' },
+                    tags: { type: 'keyword' },
                   },
                 },
               },

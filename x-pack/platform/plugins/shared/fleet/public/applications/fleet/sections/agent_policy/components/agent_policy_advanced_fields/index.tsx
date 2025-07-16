@@ -165,7 +165,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               {!policyHasElasticDefend && (
                 <span data-test-subj="tamperMissingIntegrationTooltip">
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={i18n.translate(
                       'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
@@ -325,7 +325,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 ),
                 tooltip: !userHasAccessToAllPolicySpaces && (
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={i18n.translate('xpack.fleet.agentPolicyForm.spaceTooltip', {
                       defaultMessage: 'Access to all policy spaces is required for edit.',
@@ -458,7 +458,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       }
                     )}
                     position="right"
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                   />
                 </>
@@ -481,7 +481,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       }
                     )}
                     position="right"
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                   />
                 </>

@@ -16,6 +16,8 @@ const _allowedExperimentalValues = {
   installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
   enableAgentMigrations: false,
+  enablePackageRollback: false,
+  enableAutoInstallContentPackages: false,
 };
 
 /**

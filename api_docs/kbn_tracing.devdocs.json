@@ -293,15 +293,15 @@
         "signature": [
           "({\n  tracingConfig,\n  apmConfig,\n}: { tracingConfig?: ",
           {
-            "pluginId": "@kbn/telemetry-config",
+            "pluginId": "@kbn/tracing-config",
             "scope": "common",
-            "docId": "kibKbnTelemetryConfigPluginApi",
+            "docId": "kibKbnTracingConfigPluginApi",
             "section": "def-common.TracingConfig",
             "text": "TracingConfig"
           },
-          " | undefined; apmConfig: ",
+          " | undefined; apmConfig?: ",
           "AgentConfigOptions",
-          "; }) => () => Promise<void>"
+          " | undefined; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
         "deprecated": false,
@@ -327,9 +327,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/telemetry-config",
+                    "pluginId": "@kbn/tracing-config",
                     "scope": "common",
-                    "docId": "kibKbnTelemetryConfigPluginApi",
+                    "docId": "kibKbnTracingConfigPluginApi",
                     "section": "def-common.TracingConfig",
                     "text": "TracingConfig"
                   },
@@ -347,7 +347,8 @@
                 "label": "apmConfig",
                 "description": [],
                 "signature": [
-                  "AgentConfigOptions"
+                  "AgentConfigOptions",
+                  " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
                 "deprecated": false,

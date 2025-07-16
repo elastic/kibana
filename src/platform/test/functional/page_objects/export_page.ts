@@ -24,7 +24,7 @@ export class ExportPageObject extends FtrService {
   }
 
   async isExportPopoverOpen() {
-    return await this.testSubjects.exists('exportPopover');
+    return await this.testSubjects.exists('exportPopoverPanel');
   }
 
   async isPopoverItemEnabled(label: string) {

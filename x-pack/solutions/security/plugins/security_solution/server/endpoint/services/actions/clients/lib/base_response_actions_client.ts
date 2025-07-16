@@ -15,6 +15,8 @@ import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { ResponseActionRequestTag } from '../../constants';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { getUnExpiredActionsEsQuery } from '../../utils/fetch_space_ids_with_maybe_pending_actions';
 import { catchAndWrapError } from '../../../../utils';
 import {
@@ -165,6 +167,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
     command: ResponseActionsApiCommandNames;
     actionId?: string;
+    tags?: ResponseActionRequestTag[];
   };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
@@ -220,7 +223,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   /**
    * Ensures that the Action Request Index is setup correctly (ex. has required mappings)
-   * @private
+   * @internal
    */
   private async ensureActionRequestsIndexIsConfigured(): Promise<void> {
     this.log.debug(`checking index [${ENDPOINT_ACTIONS_INDEX}] is configured as expected`);
@@ -450,12 +453,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   /**
    * Returns the action details for a given response action id
    * @param actionId
+   * @param bypassSpaceValidation
    * @protected
    */
   protected async fetchActionDetails<T extends ActionDetails = ActionDetails>(
-    actionId: string
+    actionId: string,
+    /**
+     * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
+     * USE IT CAREFULLY!
+     */
+    bypassSpaceValidation: boolean = false
   ): Promise<T> {
-    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId);
+    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId, {
+      bypassSpaceValidation,
+    });
   }
 
   /**
@@ -609,11 +620,30 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.notifyUsage(actionRequest.command);
 
+    const actionId = actionRequest.actionId || uuidv4();
+    const tags = actionRequest.tags ?? [];
+
+    // With automated response action, it's possible to reach this point and not have any `endpoint_ids`
+    // defined in the action. That's because with automated response actions we always create an
+    // action request, even when there is a failure - like if the agent was un-enrolled in between
+    // the event sent and the detection engine processing that event.
+    const agentPolicyInfo =
+      isSpacesEnabled && actionRequest.endpoint_ids.length
+        ? await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids)
+        : [];
+
+    if (isSpacesEnabled && agentPolicyInfo.length === 0) {
+      tags.push(ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted);
+    }
+
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
 
       // Add the `originSpaceId` property to the document if spaces is enabled
       ...(isSpacesEnabled ? { originSpaceId: this.options.spaceId } : {}),
+
+      // Add `tags` property to the document if spaces is enabled
+      ...(isSpacesEnabled ? { tags } : {}),
 
       // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
       // It will be removed once we enable the feature and delete the feature flag checks.
@@ -621,14 +651,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       agent: {
         id: actionRequest.endpoint_ids,
         // add the `policy` info if space awareness is enabled
-        ...(isSpacesEnabled
-          ? {
-              policy: await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids),
-            }
-          : {}),
+        ...(isSpacesEnabled ? { policy: agentPolicyInfo } : {}),
       },
       EndpointActions: {
-        action_id: actionRequest.actionId || uuidv4(),
+        action_id: actionId,
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
         input_type: this.agentType,

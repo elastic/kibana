@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
-// eslint-disable-next-line import/no-default-export
 export default function connectorsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Connectors', () => {
     before(async () => {
@@ -44,6 +43,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/thehive'));
     loadTestFile(require.resolve('./connector_types/bedrock'));
     loadTestFile(require.resolve('./connector_types/gemini'));
+    loadTestFile(require.resolve('./connector_types/xsoar'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));

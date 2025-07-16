@@ -131,6 +131,10 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/es_query/index.ts"
+            },
+            {
+              "plugin": "@kbn/test-suites-xpack-platform",
+              "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/public/plugin.ts"
             }
           ],
           "children": [
@@ -1213,6 +1217,39 @@
               ", unknown>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/alerts_client/lib/sanitize_bulk_response.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.shouldCreateAlertsInAllSpaces",
+        "type": "Function",
+        "tags": [],
+        "label": "shouldCreateAlertsInAllSpaces",
+        "description": [],
+        "signature": [
+          "({ ruleTypeId, ruleTypeAlertDef, logger, }: ShouldCreateAlertsInAllSpacesOpts) => boolean"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/server/alerts_client/lib/should_create_alerts_in_all_spaces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.shouldCreateAlertsInAllSpaces.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  ruleTypeId,\n  ruleTypeAlertDef,\n  logger,\n}",
+            "description": [],
+            "signature": [
+              "ShouldCreateAlertsInAllSpacesOpts"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/alerts_client/lib/should_create_alerts_in_all_spaces.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2643,6 +2680,22 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.dangerouslyCreateAlertsInAllSpaces",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dangerouslyCreateAlertsInAllSpaces",
+            "description": [
+              "\nOptional flag to indicate that these alerts should not be space aware. When set\nto true, alerts for this rule type will be created with the `*` space id."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.IRuleTypeAlerts.secondaryAlias",
             "type": "string",
             "tags": [],
@@ -3528,16 +3581,12 @@
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/rule_executor.test_helpers.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
-                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts"
+                "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/server/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -3566,6 +3615,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
               },
               {
                 "plugin": "slo",
@@ -4265,6 +4322,53 @@
             "signature": [
               "GetViewInAppRelativeUrlFn",
               "<Params> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleType.priority",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "priority",
+            "description": [
+              "\nTask priority allowing for tasks to be ran at lower priority (NormalLongRunning vs Normal), defaults to\nnormal priority."
+            ],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskPriority",
+                "text": "TaskPriority"
+              },
+              ".NormalLongRunning | ",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskPriority",
+                "text": "TaskPriority"
+              },
+              ".Normal | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleType.internallyManaged",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "internallyManaged",
+            "description": [
+              "\nIndicates that the rule type is managed internally by a Kibana plugin.\nAlerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "deprecated": false,
@@ -4970,7 +5074,7 @@
           "BulkFillGapsByRuleIdsOptions",
           ") => Promise<",
           "BulkFillGapsByRuleIdsResult",
-          ">; getRuleIdsWithGaps: (params: Readonly<{ statuses?: string[] | undefined; } & { start: string; end: string; }>) => Promise<Readonly<{} & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{} & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; }"
+          ">; getRuleIdsWithGaps: (params: Readonly<{ statuses?: string[] | undefined; hasUnfilledIntervals?: boolean | undefined; hasInProgressIntervals?: boolean | undefined; hasFilledIntervals?: boolean | undefined; } & { start: string; end: string; }>) => Promise<Readonly<{ latestGapTimestamp?: number | undefined; } & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{} & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/index.ts",
         "deprecated": false,

@@ -9,8 +9,8 @@ import {
   getGenAiConfig,
   getActionTypeTitle,
   getConnectorTypeTitle,
-  GenAiConfig,
   OpenAiProviderType,
+  AiConfigCatchAll,
 } from './helpers';
 import { PRECONFIGURED_CONNECTOR } from './translations';
 import {
@@ -19,7 +19,7 @@ import {
   type ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared';
 
-const mockConnector = (config: GenAiConfig, isPreconfigured = false) => ({
+const mockConnector = (config: AiConfigCatchAll, isPreconfigured = false) => ({
   isPreconfigured,
   config,
   actionTypeId: 'test-action',
@@ -40,6 +40,17 @@ describe('getGenAiConfig', () => {
       apiProvider: OpenAiProviderType.OpenAi,
       apiUrl: 'https://api.openai.com',
       defaultModel: 'gpt-4',
+    });
+  });
+
+  test('extracts defaultModel from inference config', () => {
+    const connector = mockConnector({
+      providerConfig: {
+        model_id: 'rainbow-sprinkles',
+      },
+    }) as ActionConnector;
+    expect(getGenAiConfig(connector)).toEqual({
+      defaultModel: 'rainbow-sprinkles',
     });
   });
 

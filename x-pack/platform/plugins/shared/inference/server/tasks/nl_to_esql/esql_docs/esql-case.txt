@@ -1,28 +1,30 @@
-# CASE
+## CASE
 
-The CASE function accepts pairs of conditions and values. It returns the value that corresponds to the first condition that evaluates to `true`. If no condition matches, the function returns a default value or `null` if the number of arguments is even.
+The `CASE` function evaluates a series of conditions and returns a value corresponding to the first condition that evaluates to `true`. If no conditions match, a default value or `null` is returned.
 
 ## Syntax
 
-`CASE(condition, trueValue, elseValue)`
+`CASE (condition, trueValue, elseValue)`
 
 ### Parameters
 
-#### condition
+#### `condition`
 
 A condition to evaluate.
 
-#### trueValue
+#### `trueValue`
 
-The value that is returned when the corresponding condition is the first to evaluate to `true`. If no condition matches, the default value is returned.
+The value returned when the corresponding condition is the first to evaluate to `true`. If no condition matches, the default value is returned.
 
-#### elseValue
+#### `elseValue`
 
-The value that will be returned when no condition evaluates to `true`.
+The value returned when no condition evaluates to `true`.
 
 ## Examples
 
-In this example, employees are categorized as monolingual, bilingual, or polyglot depending on how many languages they speak:
+### Determine whether employees are monolingual, bilingual, or polyglot
+
+Classify employees based on the number of languages they speak:
 
 ```esql
 FROM employees
@@ -33,7 +35,9 @@ FROM employees
 | KEEP emp_no, languages, type
 ```
 
-Calculate the total connection success rate based on log messages:
+### Calculate the total connection success rate based on log messages
+
+Determine the success rate of connections by analyzing log messages:
 
 ```esql
 FROM sample_data
@@ -44,7 +48,9 @@ FROM sample_data
 | STATS success_rate = AVG(successful)
 ```
 
-Calculate an hourly error rate as a percentage of the total number of log messages:
+### Calculate an hourly error rate as a percentage of the total number of log messages
+
+Compute the error rate for each hour based on log messages:
 
 ```esql
 FROM sample_data

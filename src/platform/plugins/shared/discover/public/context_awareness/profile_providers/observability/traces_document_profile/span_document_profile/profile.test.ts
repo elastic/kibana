@@ -76,6 +76,44 @@ describe('spanDocumentProfileProvider', () => {
         })
       ).toEqual(RESOLUTION_MISMATCH);
     });
+
+    it('does not match records with the correct data stream type but the incorrect processor event', () => {
+      expect(
+        spanDocumentProfileProvider.resolve({
+          rootContext: getRootContext({ profileId }),
+          dataSourceContext: DATA_SOURCE_CONTEXT,
+          record: buildMockRecord('index', {
+            'data_stream.type': ['traces'],
+            'processor.event': ['other'],
+          }),
+        })
+      ).toEqual(RESOLUTION_MISMATCH);
+    });
+
+    it('matches records with the correct data stream type and any OTEL `kind` field (unprocessed spans)', () => {
+      expect(
+        spanDocumentProfileProvider.resolve({
+          rootContext: getRootContext({ profileId }),
+          dataSourceContext: DATA_SOURCE_CONTEXT,
+          record: buildMockRecord('index', {
+            'data_stream.type': ['traces'],
+            kind: 'Internal',
+          }),
+        })
+      ).toEqual(RESOLUTION_MATCH);
+    });
+
+    it('defaults to matching records with the correct data stream type but no processor event field (unprocessed spans)', () => {
+      expect(
+        spanDocumentProfileProvider.resolve({
+          rootContext: getRootContext({ profileId }),
+          dataSourceContext: DATA_SOURCE_CONTEXT,
+          record: buildMockRecord('index', {
+            'data_stream.type': ['traces'],
+          }),
+        })
+      ).toEqual(RESOLUTION_MATCH);
+    });
   });
 
   describe('when root profile is NOT observability', () => {

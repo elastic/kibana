@@ -56,7 +56,6 @@ import {
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../../common/utils/get_template_url_package_info';
 import { AWS_SINGLE_ACCOUNT } from './policy_template_form';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -75,7 +74,12 @@ export interface GetCloudConnectorRemoteRoleTemplateParams {
   input: NewPackagePolicyPostureInput;
   cloud: Pick<
     CloudSetup,
-    'isCloudEnabled' | 'cloudHost' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
+    | 'isCloudEnabled'
+    | 'cloudId'
+    | 'cloudHost'
+    | 'deploymentUrl'
+    | 'serverless'
+    | 'isServerlessEnabled'
   >;
   packageInfo: PackageInfo;
 }
@@ -164,9 +168,7 @@ export const getPosturePolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
-  namespace: ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled
-    ? newPolicy.namespace
-    : POSTURE_NAMESPACE,
+  namespace: newPolicy.namespace,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
@@ -505,25 +507,38 @@ export const getDeploymentIdFromUrl = (url: string | undefined): string | undefi
   return match?.[1];
 };
 
+export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
+  if (!cloudId) return undefined;
+
+  const base64Part = cloudId.split(':')[1];
+  const decoded = atob(base64Part);
+  const [, , kibanaComponentId] = decoded.split('$');
+
+  return kibanaComponentId || undefined;
+};
+
 export const getCloudConnectorRemoteRoleTemplate = ({
   input,
   cloud,
   packageInfo,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
+  let elasticResourceId: string | undefined;
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
 
   const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+
   if (!provider || provider !== 'aws') return undefined;
 
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
-  let elasticResourceId: string | undefined;
+
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
 
   if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
     elasticResourceId = cloud.serverless.projectId;
   }
 
-  if (cloud?.isCloudEnabled && deploymentId) {
-    elasticResourceId = deploymentId;
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    elasticResourceId = kibanaComponentId;
   }
 
   if (!elasticResourceId) return undefined;
