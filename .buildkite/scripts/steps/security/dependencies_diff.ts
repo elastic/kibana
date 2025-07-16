@@ -69,6 +69,7 @@ async function main() {
   const packageJsonChanged = changedFiles.some((file) => file === 'package.json');
   const dependenciesAdded = changedFiles.some((file) => file.match('third_party_packages.txt'));
 
+  // Reverting changes (if dependency was added, then removed in the same PR)
   if (!packageJsonChanged && dependenciesAdded) {
     const filePath = join(__dirname, 'third_party_packages.txt');
     execSync(`git checkout ${process.env.GITHUB_PR_MERGE_BASE} -- ${filePath}`);
