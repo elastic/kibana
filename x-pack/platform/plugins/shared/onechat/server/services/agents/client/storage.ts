@@ -25,7 +25,7 @@ const storageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export interface AgentProfileProperties {
+export interface AgentProperties {
   name: string;
   type: AgentType;
   description: string;
@@ -39,10 +39,7 @@ export interface AgentProfileProperties {
 
 export type AgentProfileStorageSettings = typeof storageSettings;
 
-export type AgentProfileStorage = StorageIndexAdapter<
-  AgentProfileStorageSettings,
-  AgentProfileProperties
->;
+export type AgentProfileStorage = StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>;
 
 export const createStorage = ({
   logger,
@@ -51,7 +48,7 @@ export const createStorage = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }): AgentProfileStorage => {
-  return new StorageIndexAdapter<AgentProfileStorageSettings, AgentProfileProperties>(
+  return new StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>(
     esClient,
     logger,
     storageSettings
