@@ -22,7 +22,7 @@ interface ConversationSidebarToggleProps {
 
 export const ConversationSidebarToggle: React.FC<ConversationSidebarToggleProps> = ({
   isSidebarOpen,
-  onToggle: _onToggle,
+  onToggle,
 }) => {
   const labels = {
     open: i18n.translate('xpack.onechat.conversationSidebarToggle.open', {
@@ -38,14 +38,8 @@ export const ConversationSidebarToggle: React.FC<ConversationSidebarToggleProps>
         iconType={isSidebarOpen ? 'transitionLeftOut' : 'transitionLeftIn'}
         color="text"
         aria-label={isSidebarOpen ? labels.close : labels.open}
-        onClick={() => {}}
-        css={[
-          sidebarToggleBtnStyles,
-          // TODO: Show the button once the sidebar is implemented
-          css`
-            display: none;
-          `,
-        ]}
+        onClick={onToggle}
+        css={sidebarToggleBtnStyles}
         display="empty"
         data-test-subj="onechatSidebarToggleBtn"
       />
