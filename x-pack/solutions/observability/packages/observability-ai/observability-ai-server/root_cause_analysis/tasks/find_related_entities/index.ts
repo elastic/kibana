@@ -5,23 +5,20 @@
  * 2.0.
  */
 
+import type { DocumentAnalysis, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_patterns/get_log_patterns';
 import { InferenceClient } from '@kbn/inference-common';
 import { Logger } from '@kbn/logging';
-import {
-  DocumentAnalysis,
-  TruncatedDocumentAnalysis,
-} from '@kbn/genai-utils-common/log_analysis/document_analysis';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { FieldPatternResultWithChanges } from '@kbn/genai-utils-server/log_analysis/get_log_patterns';
+import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 import {
-  analyzeFetchedRelatedEntities,
   RelatedEntityFromSearchResults,
+  analyzeFetchedRelatedEntities,
 } from './analyze_fetched_related_entities';
 import {
   RelatedEntityKeywordSearch,
   writeKeywordSearchForRelatedEntities,
 } from './write_keyword_searches_for_related_entities';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 export type { RelatedEntityFromSearchResults };
 

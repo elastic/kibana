@@ -19,6 +19,7 @@
     "@kbn/traced-es-client",
     "@kbn/genai-utils-common",
     "@kbn/genai-utils-server",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/ai-tools"
   ]
 }

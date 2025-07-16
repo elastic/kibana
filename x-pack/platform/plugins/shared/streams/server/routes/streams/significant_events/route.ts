@@ -47,6 +47,7 @@ const previewSignificantEventsRoute = createServerRoute({
     summary: 'Preview significant events',
     description: 'Preview significant event results based on a given query',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -116,6 +117,7 @@ const readSignificantEventsRoute = createServerRoute({
     summary: 'Read the significant events',
     description: 'Read the significant events',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -176,6 +178,7 @@ const generateSignificantEventsRoute = createServerRoute({
     summary: 'Generate significant events',
     description: 'Generate significant events queries based on the stream data',
     availability: {
+      since: '9.2.0',
       stability: 'experimental',
     },
   },

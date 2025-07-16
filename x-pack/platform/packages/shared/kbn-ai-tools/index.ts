@@ -7,3 +7,7 @@
 
 export { describeDataset } from './src/tools/describe_dataset';
 export { sortAndTruncateAnalyzedFields } from './src/tools/describe_dataset/sort_and_truncate_analyzed_fields';
+export type {
+  DocumentAnalysis,
+  TruncatedDocumentAnalysis,
+} from './src/tools/describe_dataset/document_analysis';

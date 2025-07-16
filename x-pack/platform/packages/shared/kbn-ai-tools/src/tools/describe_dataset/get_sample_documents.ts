@@ -26,7 +26,7 @@ export function getSampleDocuments({
   timeout = '5s',
 }: {
   esClient: ElasticsearchClient;
-  index: string;
+  index: string | string[];
   start: number;
   end: number;
   kql?: string;
