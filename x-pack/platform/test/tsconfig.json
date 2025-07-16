@@ -133,6 +133,8 @@
     "@kbn/ml-string-hash",
     "@kbn/data-visualizer-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
-    "@kbn/ci-stats-reporter"
+    "@kbn/ci-stats-reporter",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-deprecations-common"
   ]
 }
