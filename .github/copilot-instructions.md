@@ -41,6 +41,14 @@ Add a link to the "commitment" docs https://docs.elastic.dev/kibana-dev-docs/con
 Always link to appropriate docs in your suggestions.
 
 <!-- Core: saved objects -->
+When new mappings are added to saved objects we must ensure that they are actively being used to drive search functionality. Examples used to detect similar cases:
+- NEW CODE `myField: { type: 'keyword' }`
+- NEW CODE `fieldWithALongName: { type: 'keyword' }`
+- NEW CODE `anotherField: { type: 'long' }`
+- NEW CODE `dateTime: { type: 'date' }`
+- NEW CODE `objectFieldName: { type: 'object', properties: { ... } }`
+If you see ONE OR MORE of these new mappings, ask developers if they need to add these for search. Add a link to "mappings" docs https://docs.elastic.dev/kibana-dev-docs/tutorials/saved-objects#mappings
+
 When adding your first saved object migration add a blank '1' migration. Examples you should use to detect:
 - NEW CODE including `1` like `  modelVersions: { '1': { changes: [{...}] } }`
 - SHOULD BE `modelVersions: { '1': { changes: [] }, '2': { changes: [{...}] } }`

@@ -46,6 +46,10 @@ export const fileShareObjectType: SavedObjectsType<FileShare> = {
   namespaceType: 'agnostic', // These saved objects should be visible everywhere
   mappings: {
     dynamic: false,
-    properties,
+    properties: {
+      myField: {
+        type: 'keyword',
+      },
+    },
   },
 };
