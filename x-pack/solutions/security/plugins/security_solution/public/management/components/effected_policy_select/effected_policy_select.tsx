@@ -77,6 +77,9 @@ export interface EffectedPolicySelectProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * Policy Selection component used on Endpoint Artifact forms for setting Global/Per-Policy assignment.
+ */
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({ item, description, onChange, disabled = false, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -125,6 +128,34 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         },
       ];
     }, [canManageGlobalArtifacts, getTestId, isSpaceAwarenessEnabled, selectedAssignmentType]);
+
+    const unAccessiblePolicies: PolicySelectorProps['additionalListItems'] = useMemo(() => {
+      const additionalPolicyItems: PolicySelectorProps['additionalListItems'] = [];
+
+      if (artifactRestrictedPolicyIds.policyIds.length > 0) {
+        additionalPolicyItems.push({
+          label: i18n.translate(
+            'xpack.securitySolution.effectedPolicySelect.unaccessibleGroupLabel',
+            { defaultMessage: 'Assigned policies not accessible from current space' }
+          ),
+          isGroupLabel: true,
+        });
+      }
+
+      for (const policyId of artifactRestrictedPolicyIds.policyIds) {
+        additionalPolicyItems.push({
+          label: policyId,
+          toolTipContent: i18n.translate(
+            'xpack.securitySolution.effectedPolicySelect.unaccessiblePolicyTooltip',
+            { defaultMessage: 'Policy is not accessible from the current space' }
+          ),
+          disabled: true,
+          checked: 'on',
+        });
+      }
+
+      return additionalPolicyItems;
+    }, [artifactRestrictedPolicyIds.policyIds]);
 
     const handleOnPolicySelectChange = useCallback<PolicySelectorProps['onChange']>(
       (updatedSelectedPolicyIds) => {
@@ -204,6 +235,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           <EuiFormRow fullWidth>
             <PolicySelector
               selectedPolicyIds={selectedPolicyIds}
+              additionalListItems={unAccessiblePolicies}
               onChange={handleOnPolicySelectChange}
               data-test-subj={getTestId('policiesSelector')}
               useCheckbox={true}
