@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { Redirect, useLocation, useParams, generatePath } from 'react-router-dom';
-import { SEARCH_INDICES_DETAILS_PATH, SearchIndexDetailsTabs } from '../routes';
+import {
+  SEARCH_INDICES_DETAILS_PATH,
+  SearchIndexDetailsTabs,
+  SEARCH_INDICES_DETAILS_TABS_PATH,
+} from '../routes';
 
 export const RedirectWithQuery: React.FC = () => {
   const location = useLocation();
@@ -17,9 +21,12 @@ export const RedirectWithQuery: React.FC = () => {
     <Redirect
       exact
       from={`${SEARCH_INDICES_DETAILS_PATH}/`}
-      to={`${generatePath(`${SEARCH_INDICES_DETAILS_PATH}/${SearchIndexDetailsTabs.DATA}`, {
-        indexName,
-      })}${location.search}`}
+      to={
+        generatePath(SEARCH_INDICES_DETAILS_TABS_PATH, {
+          indexName,
+          tabId: SearchIndexDetailsTabs.DATA,
+        }) + location.search
+      }
     />
   );
 };
