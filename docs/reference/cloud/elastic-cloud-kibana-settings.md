@@ -54,7 +54,7 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
-### Version 9.1.1+ [ec_version_9_1_1]
+### Version 9.2+ [ec_version_9_2]
 
 `xpack.actions.email.recipient_allowlist`
 :    A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
