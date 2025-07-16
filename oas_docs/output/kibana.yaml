@@ -40030,6 +40030,80 @@ paths:
       summary: Initiate Fleet setup
       tags:
         - Fleet internals
+  /api/fleet/space_settings:
+    get:
+      operationId: get-fleet-space-settings
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      allowed_namespace_prefixes:
+                        items:
+                          type: string
+                        type: array
+                      managed_by:
+                        type: string
+                    required:
+                      - allowed_namespace_prefixes
+                required:
+                  - item
+      summary: Get space settings
+      tags: []
+    put:
+      description: '[Required authorization] Route required privileges: fleet-settings-all.'
+      operationId: put-fleet-space-settings
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                allowed_namespace_prefixes:
+                  items:
+                    type: string
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      allowed_namespace_prefixes:
+                        items:
+                          type: string
+                        type: array
+                      managed_by:
+                        type: string
+                    required:
+                      - allowed_namespace_prefixes
+                required:
+                  - item
+      summary: Create space settings
+      tags: []
   /api/fleet/uninstall_tokens:
     get:
       description: 'List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
