@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 
+import { useLocation } from 'react-router-dom';
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { CreateIndexFormState } from '../../types';
@@ -31,7 +32,10 @@ export const CreateIndexUIView = ({
   const [indexNameHasError, setIndexNameHasError] = useState<boolean>(false);
   const { application } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const { createIndex, isLoading } = useCreateIndex('vector');
+  const { search } = useLocation();
+  const workflowParam = React.useMemo(() => new URLSearchParams(search).get('workflow'), [search]);
+  const workflow = typeof workflowParam === 'string' ? workflowParam : undefined;
+  const { createIndex, isLoading } = useCreateIndex(workflow);
   const onIndexNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newIndexName = e.target.value;
     setFormState({ ...formState, indexName: e.target.value });
