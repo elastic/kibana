@@ -75,9 +75,9 @@ src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
-x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/response-ops
-src/platform/packages/shared/kbn-cases-components @elastic/response-ops
-x-pack/platform/plugins/shared/cases @elastic/response-ops @elastic/kibana-cases
+x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
+src/platform/packages/shared/kbn-cases-components @elastic/kibana-cases
+x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
