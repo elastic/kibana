@@ -14,6 +14,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
+  EuiButtonGroup,
   EuiFieldText,
   EuiFieldTextProps,
   EuiFormControlLayout,
@@ -25,7 +26,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
@@ -55,7 +55,7 @@ interface InferenceServicesProps {
   isEdit?: boolean;
   enforceAdaptiveAllocations?: boolean;
   isPreconfigured?: boolean;
-  getActiveSpace?: SpacesPluginStart['getActiveSpace'];
+  currentSolution?: SolutionKeys;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
@@ -64,7 +64,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   isEdit,
   enforceAdaptiveAllocations,
   isPreconfigured,
-  getActiveSpace,
+  currentSolution,
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
@@ -74,7 +74,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
-  const [activeSpaceSolution, setActiveSpaceSolution] = useState<SolutionKeys | undefined>();
+  const [solutionFilter, setSolutionFilter] = useState<SolutionKeys | undefined>();
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [requiredProviderFormFields, setRequiredProviderFormFields] = useState<ConfigEntryView[]>(
@@ -93,22 +93,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     ],
   });
 
-  useEffect(() => {
-    let active = true;
-    async function getSolution() {
-      if (!active || !getActiveSpace) {
-        return;
-      }
-      const space = await getActiveSpace();
-      setActiveSpaceSolution(space?.solution);
-    }
-    getSolution();
-
-    return () => {
-      active = false;
-    };
-  }, [getActiveSpace]);
-
   const toggleProviderPopover = useCallback(() => {
     setProviderPopoverOpen((isOpen) => !isOpen);
   }, []);
@@ -122,6 +106,18 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       setProviderPopoverOpen(true);
     }
   }, []);
+
+  const toggleAndApplyFilter = (selectedFilter: SolutionKeys) => {
+    if (selectedFilter === solutionFilter) {
+      // If the selected filter is already active, toggle off by clearing filter and resetting providers
+      setUpdatedProviders(providers);
+      setSolutionFilter(undefined);
+      return;
+    }
+
+    setSolutionFilter(selectedFilter);
+    setUpdatedProviders(getUpdatedProviders(selectedFilter));
+  };
 
   const providerName = useMemo(
     () =>
@@ -306,7 +302,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
           role="combobox"
           onChange={() => {
             /* Intentionally left blank as onChange is required to avoid console error
-               but not used in this context
+              but not used in this context
             */
           }}
         />
@@ -323,33 +319,51 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     ]
   );
 
+  const getUpdatedProviders = useCallback(
+    (filterBySolution?: SolutionKeys) => {
+      if (providers) {
+        const filteredProviders = filterBySolution
+          ? providers.filter((provider) => {
+              const providerSolutions =
+                SERVICE_PROVIDERS[provider.service as ServiceProviderKeys]?.solutions ?? [];
+              return (
+                !solutionKeys[filterBySolution] ||
+                providerSolutions.includes(solutionKeys[filterBySolution])
+              );
+            })
+          : providers;
+
+        // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
+        const elasticServiceIndex = filteredProviders.findIndex(
+          (provider) => provider.service === 'elastic'
+        );
+
+        if (elasticServiceIndex !== -1) {
+          const elasticService = filteredProviders[elasticServiceIndex];
+          const remainingProviders = filteredProviders.filter(
+            (_, index) => index !== elasticServiceIndex
+          );
+          return [elasticService, ...remainingProviders];
+        } else {
+          return filteredProviders;
+        }
+      }
+    },
+    [providers]
+  );
+
   useEffect(() => {
     if (providers) {
-      const filteredBySolution = activeSpaceSolution
-        ? providers.filter((provider) => {
-            const providerSolutions =
-              SERVICE_PROVIDERS[provider.service as ServiceProviderKeys]?.solutions ?? [];
-            return (
-              !solutionKeys[activeSpaceSolution] ||
-              providerSolutions.includes(solutionKeys[activeSpaceSolution])
-            );
-          })
-        : providers;
-      // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
-      const elasticServiceIndex = filteredBySolution.findIndex(
-        (provider) => provider.service === 'elastic'
-      );
-      if (elasticServiceIndex !== -1) {
-        const elasticService = filteredBySolution[elasticServiceIndex];
-        const remainingProviders = filteredBySolution.filter(
-          (_, index) => index !== elasticServiceIndex
-        );
-        setUpdatedProviders([elasticService, ...remainingProviders]);
-      } else {
-        setUpdatedProviders(filteredBySolution);
+      // Set default filter if applicable
+      const inApplicableSolution =
+        currentSolution && Object.keys(solutionKeys).includes(currentSolution);
+
+      if (inApplicableSolution) {
+        setSolutionFilter(currentSolution);
       }
+      setUpdatedProviders(getUpdatedProviders(currentSolution));
     }
-  }, [providers, activeSpaceSolution]);
+  }, [providers, currentSolution, getUpdatedProviders]);
 
   useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {
@@ -452,20 +466,39 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               isInvalid={isInvalid}
               error={errorMessage}
             >
-              <EuiInputPopover
-                id={'popoverId'}
-                fullWidth
-                input={selectInput}
-                isOpen={isProviderPopoverOpen}
-                closePopover={closeProviderPopover}
-                className="rightArrowIcon"
-              >
-                <SelectableProvider
-                  providers={updatedProviders ?? []}
-                  onClosePopover={closeProviderPopover}
-                  onProviderChange={onProviderChange}
-                />
-              </EuiInputPopover>
+              <>
+                {/* Only show filter if within applicable solution/project space */}
+                {currentSolution && Object.keys(solutionKeys).includes(currentSolution) ? (
+                  <EuiButtonGroup
+                    legend="Solution filter"
+                    idSelected={solutionFilter ?? ''}
+                    onChange={(solution) => toggleAndApplyFilter(solution as SolutionKeys)}
+                    options={Object.keys(solutionKeys).map((solution) => ({
+                      id: solution,
+                      label: solutionKeys[solution],
+                      key: solution,
+                      'data-test-subj': `filterBySolution-${solution}`,
+                    }))}
+                    type="single"
+                    color="text"
+                  />
+                ) : null}
+                <EuiSpacer size="s" />
+                <EuiInputPopover
+                  id={'popoverId'}
+                  fullWidth
+                  input={selectInput}
+                  isOpen={isProviderPopoverOpen}
+                  closePopover={closeProviderPopover}
+                  className="rightArrowIcon"
+                >
+                  <SelectableProvider
+                    providers={updatedProviders ?? []}
+                    onClosePopover={closeProviderPopover}
+                    onProviderChange={onProviderChange}
+                  />
+                </EuiInputPopover>
+              </>
             </EuiFormRow>
           );
         }}

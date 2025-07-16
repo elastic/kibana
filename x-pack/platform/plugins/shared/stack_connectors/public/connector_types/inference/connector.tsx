@@ -5,30 +5,65 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
+import { SolutionView } from '@kbn/spaces-plugin/common';
+
+const solutionMap = {
+  observability: 'oblt',
+  search: 'es',
+} as { [key: string]: SolutionView };
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   isEdit,
 }) => {
   const {
+    cloud,
     http,
     notifications: { toasts },
     spaces,
     isServerless: isServerlessKibanaContext,
   } = useKibana().services;
+  const isMounted = useMountedState();
   const { isServerless: isServerlessConnectorContext } = useConnectorContext();
   const isServerless = isServerlessKibanaContext ?? isServerlessConnectorContext;
+
+  const [activeSpaceSolution, setActiveSpaceSolution] = useState<SolutionView | undefined>();
+
+  const currentSolution = useMemo(() => {
+    let solution: SolutionView | undefined;
+    if (isServerless) {
+      const projectType = cloud?.serverless?.projectType;
+      solution = (
+        projectType && solutionMap[projectType] ? solutionMap[projectType] : projectType
+      ) as SolutionView;
+    } else {
+      solution = activeSpaceSolution;
+    }
+    return solution;
+  }, [isServerless, activeSpaceSolution, cloud?.serverless?.projectType]);
+
+  useEffect(() => {
+    async function getSolution() {
+      if (!isMounted() || !spaces?.getActiveSpace) {
+        return;
+      }
+      const space = await spaces?.getActiveSpace();
+      setActiveSpaceSolution(space?.solution);
+    }
+    getSolution();
+  }, [spaces, spaces?.getActiveSpace, isMounted]);
 
   return (
     <InferenceServiceFormFields
       http={http}
       isEdit={isEdit}
       enforceAdaptiveAllocations={isServerless}
-      getActiveSpace={spaces?.getActiveSpace}
+      currentSolution={currentSolution}
       toasts={toasts}
     />
   );

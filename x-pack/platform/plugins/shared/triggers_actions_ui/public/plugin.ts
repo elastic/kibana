@@ -352,6 +352,7 @@ export class Plugin
         return renderApp({
           ...coreStart,
           actions: plugins.actions,
+          cloud: plugins.cloud,
           dashboard: pluginsStart.dashboard,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
