@@ -23,6 +23,7 @@ export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProp
     return (
       <nav
         id="primary-navigation"
+        // TODO: translate
         aria-label="Main navigation"
         ref={ref}
         css={css`
