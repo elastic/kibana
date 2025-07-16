@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EDITOR_MARKER } from '../../parser/constants';
+import { EDITOR_MARKER } from './constants';
 import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../ast/is';
 import {
   ESQLAst,

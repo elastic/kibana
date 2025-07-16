@@ -12,7 +12,7 @@ import type { ESQLCommand, ESQLSource } from '../../types';
 import type { ISuggestionItem, ESQLSourceResult } from '../../commands_registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
-import { EDITOR_MARKER } from '../../parser/constants';
+import { EDITOR_MARKER } from './constants';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { metadataSuggestion } from '../../commands_registry/options/metadata';
 import { fuzzySearch } from './shared';

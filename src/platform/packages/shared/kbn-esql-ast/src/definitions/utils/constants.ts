@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Token } from 'antlr4';
-
-export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
-export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
-
-export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);
+export const EDITOR_MARKER = 'marker_esql_editor';

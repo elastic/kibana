@@ -10,13 +10,24 @@
 import { CharStreams, type Token } from 'antlr4';
 import { CommonTokenStream, type CharStream } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
-import { GRAMMAR_ROOT_RULE } from './constants';
 import { attachDecorations, collectDecorations } from './formatting';
 import { Builder } from '../builder';
 import { CstToAstConverter } from './cst_to_ast_converter';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
-import type { ESQLAst, ESQLAstQueryExpression, EditorError } from '../types';
+import type {
+  ESQLAst,
+  ESQLAstExpression,
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLMap,
+  ESQLProperNode,
+  EditorError,
+} from '../types';
+import { isFunctionExpression, isProperNode, isQuery, isMap, isCommand } from '../ast/is';
+import { singleItems } from '../visitor/utils';
+import { DEFAULT_CHANNEL, SOURCE_COMMANDS } from './constants';
+import type { EsqlParsingTarget } from './types';
 
 export interface ParseOptions {
   /**
@@ -26,11 +37,11 @@ export interface ParseOptions {
   withFormatting?: boolean;
 }
 
-export interface ParseResult {
+export interface ParseResult<T extends ESQLProperNode = ESQLAstQueryExpression> {
   /**
    * The root *QueryExpression* node of the parsed tree.
    */
-  root: ESQLAstQueryExpression;
+  root: T;
 
   /**
    * List of parsed commands.
@@ -55,12 +66,204 @@ export class Parser {
     return new Parser(src, options);
   };
 
+  /**
+   * Parse a complete ES|QL query, generating an AST and a list of parsing errors.
+   *
+   * Make sure to check the returned `errors` list for any parsing issues.
+   *
+   * For example:
+   *
+   * ```typescript
+   * const result = Parser.parse('FROM my_index | STATS count(*)');
+   * ```
+   *
+   * @param src Source text to parse.
+   * @param options Parsing options.
+   */
   public static readonly parse = (src: string, options?: ParseOptions): ParseResult => {
     return Parser.create(src, options).parse();
   };
 
+  /**
+   * Extract parsing errors from the source text without generating an AST.
+   *
+   * @param src Source text to parse for errors.
+   * @returns A list of parsing errors.
+   */
   public static readonly parseErrors = (src: string): EditorError[] => {
     return Parser.create(src).parseErrors();
+  };
+
+  /**
+   * Parse a single ES|QL command, generating an AST and a list of parsing errors.
+   *
+   * Make sure to check the returned `errors` list for any parsing issues.
+   *
+   * For example:
+   *
+   * ```typescript
+   * const result = Parser.parseCommand('ROW abc = 123');
+   * ```
+   *
+   * @param src Source text of a single command to parse.
+   * @param options Parsing options.
+   * @returns A result object containing the parsed command, its AST, tokens, and errors.
+   */
+  public static readonly parseCommand = (
+    src: string,
+    options?: ParseOptions
+  ): ParseResult<ESQLCommand> => {
+    const [token] = Parser.tokens(src, 1);
+
+    if (!token || token.type === ESQLLexer.EOF) {
+      throw new Error('Cannot parse empty command');
+    }
+
+    const isSourceCommand = SOURCE_COMMANDS.has(token.text.toUpperCase());
+    const result = Parser.parse(isSourceCommand ? src : 'FROM a|' + src, options);
+
+    if (!result.errors.length) {
+      const commands = result.root.commands;
+      const end = isSourceCommand ? 0 : 1;
+
+      if (end + 1 !== commands.length) {
+        throw new Error(`Could not parse a single command completely: "${src}". `);
+      }
+
+      const command = commands[end];
+
+      if (isCommand(command)) {
+        return {
+          ...result,
+          root: command as ESQLCommand,
+          ast: [command],
+        };
+      }
+    }
+
+    throw new Error(`Invalid command: ${src}`);
+  };
+
+  /**
+   * Parse a single ES|QL expression, generating an AST and a list of parsing errors.
+   *
+   * Make sure to check the returned `errors` list for any parsing issues.
+   *
+   * For example:
+   *
+   * ```typescript
+   * const result = Parser.parseExpression('count(*) + 1');
+   * ```
+   *
+   * @param src Source text of an expression to parse.
+   * @param options Parsing options.
+   * @returns A result object containing the parsed expression, its AST, tokens, and errors.
+   */
+  public static readonly parseExpression = (
+    src: string,
+    options?: ParseOptions
+  ): ParseResult<ESQLAstExpression> => {
+    const [token] = Parser.tokens(src, 1);
+
+    if (!token || token.type === ESQLLexer.EOF) {
+      throw new Error('Cannot parse empty command');
+    }
+
+    if (token.text[0] === '{') {
+      return Parser.parseMap(src, options);
+    }
+
+    const { root, ast, errors, ...result } = Parser.parseCommand('STATS ' + src, options);
+    const expressions = [...singleItems(root.args)];
+
+    if (expressions.length !== 1) {
+      throw new Error(
+        `Invalid expression: expected a single expression, got ${expressions.length} in "${src}"`
+      );
+    }
+
+    const expression = expressions[0];
+
+    if (!isProperNode(expression)) {
+      throw errors[0] || new Error('Invalid expression: ' + src);
+    }
+
+    return {
+      root: expression as ESQLAstExpression,
+      errors,
+      ...result,
+
+      // @deprecated Use `root` instead.
+      ast: undefined as any,
+    };
+  };
+
+  public static readonly parseMap = (src: string, options?: ParseOptions): ParseResult<ESQLMap> => {
+    const { root, ast, errors, ...result } = Parser.parseCommand('ROW f(1,' + src + ')', options);
+    const expressions = [...singleItems(root.args)];
+
+    if (expressions.length !== 1) {
+      throw new Error(
+        `Invalid expression: expected a single expression, got ${expressions.length} in "${src}"`
+      );
+    }
+
+    const fn = expressions[0];
+
+    if (!isFunctionExpression(fn)) {
+      throw errors[0] || new Error('Invalid expression: ' + src);
+    }
+
+    const map = fn.args[1];
+
+    if (!isMap(map)) {
+      throw errors[0] || new Error('Invalid expression: ' + src);
+    }
+
+    return {
+      root: map,
+      errors,
+      ...result,
+
+      // @deprecated Use `root` instead.
+      ast: undefined as any,
+    };
+  };
+
+  /**
+   * Get the first `count` tokens from the source text.
+   *
+   * @param src Text to parse for tokens.
+   * @param count Number of tokens to parse.
+   * @param visible Whether to return only visible tokens (not comments or whitespace).
+   * @returns An array of parsed tokens.
+   */
+  public static readonly tokens = (
+    src: string,
+    count: number,
+    visible: boolean = true
+  ): Token[] => {
+    const streams = CharStreams.fromString(src);
+    const lexer = new ESQLLexer(streams);
+    const tokens: Token[] = [];
+    let i = 0;
+
+    while (i < count) {
+      const token = lexer.nextToken();
+
+      if (token.type === ESQLLexer.EOF) {
+        break;
+      }
+
+      if (visible && token.channel !== DEFAULT_CHANNEL) {
+        continue;
+      }
+
+      tokens.push(token);
+      i++;
+    }
+
+    return tokens;
   };
 
   public readonly streams: CharStream;
@@ -82,26 +285,48 @@ export class Parser {
     parser.addErrorListener(this.errors);
   }
 
-  public parse(): ParseResult {
-    const { src, options } = this;
+  public parseTarget<T extends ESQLProperNode>([
+    rule,
+    conversion,
+  ]: EsqlParsingTarget): ParseResult<T> {
+    const ctx = (this.parser[rule]! as Function).call(this.parser);
+    const converter = new CstToAstConverter(this);
+    const root = (converter[conversion] as Function).call(converter, ctx) as T;
 
+    if (!root) {
+      throw new Error('Parsing failed: no root node found');
+    }
+
+    const errors = this.errors.getErrors();
+
+    if (this.options.withFormatting && isQuery(root)) {
+      const decorations = collectDecorations(this.tokens);
+      attachDecorations(root, this.tokens.tokens, decorations.lines);
+    }
+
+    const result: ParseResult<T> = {
+      root,
+      errors,
+      tokens: this.tokens.tokens,
+
+      // @deprecated Use `root` instead.
+      ast: (root as any).commands,
+    };
+
+    return result;
+  }
+
+  public parseSourceCommand(): ParseResult<ESQLCommand> {
+    return this.parseTarget<ESQLCommand>(['sourceCommand', 'fromSourceCommand']);
+  }
+
+  public parseProcessingCommand(): ParseResult<ESQLCommand> {
+    return this.parseTarget<ESQLCommand>(['processingCommand', 'fromProcessingCommand']);
+  }
+
+  public parse(): ParseResult<ESQLAstQueryExpression> {
     try {
-      const ctx = this.parser[GRAMMAR_ROOT_RULE]();
-      const converter = new CstToAstConverter(this);
-      const root = converter.fromSingleStatement(ctx);
-
-      if (!root) {
-        throw new Error('Parsing failed: no root node found');
-      }
-
-      const errors = this.errors.getErrors();
-
-      if (options.withFormatting) {
-        const decorations = collectDecorations(this.tokens);
-        attachDecorations(root, this.tokens.tokens, decorations.lines);
-      }
-
-      return { root, ast: root.commands, errors, tokens: this.tokens.tokens };
+      return this.parseTarget<ESQLAstQueryExpression>(['singleStatement', 'fromSingleStatement']);
     } catch (error) {
       if (error !== 'Empty Stack')
         // eslint-disable-next-line no-console
@@ -118,7 +343,7 @@ export class Parser {
             endLineNumber: 0,
             startColumn: 0,
             endColumn: 0,
-            message: `Invalid query [${src}]`,
+            message: `Invalid query [${this.src}]`,
             severity: 'error',
           },
         ],
@@ -128,7 +353,7 @@ export class Parser {
   }
 
   public parseErrors(): EditorError[] {
-    this.parser[GRAMMAR_ROOT_RULE]();
+    this.parser.singleStatement();
 
     return this.errors.getErrors();
   }
