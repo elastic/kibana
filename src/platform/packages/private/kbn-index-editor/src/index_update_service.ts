@@ -18,6 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -458,19 +459,22 @@ export class IndexUpdateService {
    * @param updates
    */
   public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
-    // Prepare update operations for existing documents
-    const updateOperations = updates
-      .filter((update) => update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX))
-      .map((update) => [{ update: { _id: update.id } }, { doc: update.value }]);
+    const groupedOperations = groupBy(updates, (update) =>
+      update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX) ? 'updates' : 'newDocs'
+    );
 
-    // Group updates by update.id and create new doc operations
-    const newDocs = updates
-      .filter((update) => !update.id || update.id.startsWith(ROW_PLACEHOLDER_PREFIX))
-      .reduce<Record<string, Record<string, any>>>((acc, update) => {
+    const updateOperations =
+      groupedOperations?.updates?.map((update) => [
+        { update: { _id: update.id } },
+        { doc: update.value },
+      ]) || [];
+
+    const newDocs =
+      groupedOperations?.newDocs?.reduce<Record<string, Record<string, any>>>((acc, update) => {
         const docId = update.id || 'new-row';
         acc[docId] = { ...acc[docId], ...update.value };
         return acc;
-      }, {});
+      }, {}) || {};
 
     const newDocOperations = Object.entries(newDocs).map(([id, doc]) => {
       return [{ index: {} }, doc];
