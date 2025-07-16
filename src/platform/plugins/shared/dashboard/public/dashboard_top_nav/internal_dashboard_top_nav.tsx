@@ -409,6 +409,10 @@ const topNavStyles = {
         zIndex: euiTheme.levels.mask,
         top: `var(--kbn-application--sticky-headers-offset, 0px)`,
         background: euiTheme.colors.backgroundBasePlain,
+
+        '@media (width <= 320px)': {
+          position: 'relative',
+        },
       },
     }),
   updateIcon: ({ euiTheme }: UseEuiTheme) =>
