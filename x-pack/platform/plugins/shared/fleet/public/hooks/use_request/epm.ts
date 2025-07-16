@@ -223,6 +223,8 @@ export const useGetPackageVerificationKeyId = () => {
       })
   );
 
+  console.log('API request for verification key', data);
+
   return {
     packageVerificationKeyId: data?.id || undefined,
     ...rest,
