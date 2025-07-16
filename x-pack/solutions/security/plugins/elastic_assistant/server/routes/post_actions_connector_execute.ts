@@ -19,7 +19,7 @@ import {
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
-  INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -83,9 +83,9 @@ export const postActionsConnectorExecuteRoute = (
         let onLlmResponse;
 
         const coreContext = await context.core;
-        const inferenceChatModelEnabled =
+        const inferenceChatModelDisabled =
           (await coreContext?.featureFlags?.getBooleanValue(
-            INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+            INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
             false
           )) ?? false;
 
@@ -203,7 +203,7 @@ export const postActionsConnectorExecuteRoute = (
               connectorId,
               contentReferencesStore,
               isOssModel,
-              inferenceChatModelEnabled,
+              inferenceChatModelDisabled,
               conversationId,
               context: ctx,
               logger,
