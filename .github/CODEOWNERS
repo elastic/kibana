@@ -2306,8 +2306,9 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/test/functional/apps/ingest_pipelines @elastic/kibana-management
 /x-pack/platform/test/functional/apps/home @elastic/kibana-management
-/x-pack/test/functional/apps/license_management @elastic/kibana-management
-/x-pack/test/functional/apps/management @elastic/kibana-management
+/x-pack/platform/test/functional/apps/license_management @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/license_management_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/apps/management @elastic/kibana-management
 /x-pack/test/functional/apps/remote_clusters @elastic/kibana-management
 /x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management

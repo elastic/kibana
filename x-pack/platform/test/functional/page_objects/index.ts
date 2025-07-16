@@ -30,6 +30,7 @@ import { TagManagementPageObject } from './tag_management_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
+import { LicenseManagementPageProvider } from './license_management_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -59,4 +60,5 @@ export const pageObjects = {
   apiKeys: ApiKeysPageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   grokDebugger: GrokDebuggerPageObject,
+  licenseManagement: LicenseManagementPageProvider,
 };
