@@ -30,7 +30,6 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       }}
     >
       <EuiFlexItem grow={false}>
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
