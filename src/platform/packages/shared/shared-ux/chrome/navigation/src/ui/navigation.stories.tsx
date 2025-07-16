@@ -639,7 +639,7 @@ export const GeneralLayoutStructure = (args: NavigationServices) => {
 };
 
 export default {
-  title: 'Chrome/Navigation',
+  title: 'Chrome/OldNavigation',
   description: 'Navigation container to render items for cross-app linking',
   parameters: {
     docs: {
