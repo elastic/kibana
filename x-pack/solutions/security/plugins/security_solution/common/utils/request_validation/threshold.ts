@@ -12,11 +12,8 @@ interface ValidationPayload {
   threshold?: Threshold;
 }
 
-type ThresholdExtraValidation = (props: Threshold) => string[];
-
 export const validateThresholdBase = (
   props: ValidationPayload,
-  extraValidation?: ThresholdExtraValidation
 ): string[] => {
   const errors: string[] = [];
 
@@ -33,14 +30,6 @@ export const validateThresholdBase = (
 
   if (cardinality?.length && field.includes(cardinality[0].field)) {
     errors.push('Cardinality of a field that is being aggregated on is always 1');
-  }
-
-  if (Array.isArray(field) && field.length > 5) {
-    errors.push('Number of fields must be 5 or less');
-  }
-
-  if (extraValidation) {
-    errors.push(...extraValidation(props.threshold));
   }
 
   return errors;

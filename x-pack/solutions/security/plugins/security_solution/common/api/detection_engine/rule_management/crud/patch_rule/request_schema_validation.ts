@@ -57,14 +57,4 @@ const validateTimelineTitle = (rule: PatchRuleRequestBody): string[] => {
   return [];
 };
 
-const patchRuleExtraValidation = (threshold: Threshold) => {
-  const errors: string[] = [];
-  if (threshold.value !== undefined && threshold.value <= 0) {
-    errors.push('"threshold.value" has to be bigger than 0');
-  }
-  return errors;
-};
-
-const validateThreshold = (rule: PatchRuleRequestBody): string[] => {
-  return validateThresholdBase(rule, patchRuleExtraValidation);
-};
+const validateThreshold = (rule: PatchRuleRequestBody): string[] => validateThresholdBase(rule);

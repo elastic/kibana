@@ -30,43 +30,6 @@ describe('validateThresholdBase', () => {
     expect(result).toContain('Cardinality of a field that is being aggregated on is always 1');
   });
 
-  it('returns error if number of fields exceeds 5', () => {
-    const threshold: Threshold = {
-      field: ['a', 'b', 'c', 'd', 'e', 'f'],
-      value: 1,
-    };
-
-    const result = validateThresholdBase({ type: 'threshold', threshold });
-    expect(result).toContain('Number of fields must be 5 or less');
-  });
-
-  it('returns multiple errors if both cardinality and field count issues exist', () => {
-    const threshold: Threshold = {
-      field: ['a', 'b', 'c', 'd', 'e', 'a'],
-      cardinality: [{ field: 'a', value: 1 }],
-      value: 1,
-    };
-
-    const result = validateThresholdBase({ type: 'threshold', threshold });
-    expect(result).toEqual([
-      'Cardinality of a field that is being aggregated on is always 1',
-      'Number of fields must be 5 or less',
-    ]);
-  });
-
-  it('calls extra validation and includes its errors', () => {
-    const extraValidationMock = jest.fn().mockReturnValue(['Extra error']);
-    const threshold: Threshold = {
-      field: ['host.name'],
-      value: 1,
-    };
-
-    const result = validateThresholdBase({ type: 'threshold', threshold }, extraValidationMock);
-
-    expect(extraValidationMock).toHaveBeenCalledWith(threshold);
-    expect(result).toContain('Extra error');
-  });
-
   it('returns no errors for valid threshold', () => {
     const threshold: Threshold = {
       field: ['host.name'],
