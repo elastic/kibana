@@ -21,6 +21,7 @@ import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { mlSavedObjectType } from '@kbn/upgrade-assistant-pkg-server';
+import { ReindexServiceServerPluginStart } from '@kbn/reindex-service-plugin/server';
 import type { DataSourceExclusions, FeatureSet } from '../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
@@ -32,7 +33,7 @@ import { RouteDependencies } from './types';
 import type { UpgradeAssistantConfig } from './config';
 import { defaultExclusions } from './lib/data_source_exclusions';
 
-interface PluginsSetup {
+interface UpgradeAssistantServerSetupDependencies {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
@@ -40,11 +41,20 @@ interface PluginsSetup {
   security?: SecurityPluginSetup;
 }
 
-interface PluginsStart {
+interface UpgradeAssistantServerStartDependencies {
   security: SecurityPluginStart;
+  reindexService: ReindexServiceServerPluginStart;
 }
 
-export class UpgradeAssistantServerPlugin implements Plugin {
+export class UpgradeAssistantServerPlugin
+  implements
+    Plugin<
+      void,
+      void,
+      UpgradeAssistantServerSetupDependencies,
+      UpgradeAssistantServerStartDependencies
+    >
+{
   private readonly logger: Logger;
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;
@@ -63,7 +73,10 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
   }
 
-  setup(coreSetup: CoreSetup, pluginSetup: PluginsSetup) {
+  setup(
+    coreSetup: CoreSetup<UpgradeAssistantServerStartDependencies>,
+    pluginSetup: UpgradeAssistantServerSetupDependencies
+  ) {
     const { http, getStartServices, savedObjects } = coreSetup;
     const { usageCollection, features, licensing, logsShared, security } = pluginSetup;
 
@@ -123,6 +136,11 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       current: versionService.getCurrentVersion(),
       defaultTarget: versionService.getNextMajorVersion(),
       version: versionService,
+      cleanupReindexOperations: async (indexNames: string[]) => {
+        const [, { reindexService }] = await getStartServices();
+
+        return reindexService.cleanupReindexOperations(indexNames);
+      },
     };
 
     registerRoutes(dependencies);
@@ -137,7 +155,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     }
   }
 
-  start({ savedObjects }: CoreStart, { security }: PluginsStart) {
+  start({ savedObjects }: CoreStart, { security }: UpgradeAssistantServerStartDependencies) {
     this.savedObjectsServiceStart = savedObjects;
     this.securityPluginStart = security;
   }

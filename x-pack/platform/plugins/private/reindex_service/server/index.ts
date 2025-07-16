@@ -9,6 +9,8 @@ import { PluginInitializerContext } from '@kbn/core/server';
 
 import { ReindexServiceServerPlugin } from './plugin';
 
+export type { ReindexServiceServerPluginStart } from './types';
+
 export const plugin = async (ctx: PluginInitializerContext) => {
   return new ReindexServiceServerPlugin(ctx);
 };
