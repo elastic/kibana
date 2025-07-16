@@ -2026,7 +2026,7 @@ export class CstToAstConverter {
     }
 
     // The boolean expression parsing might result into no fields, this
-    // happens when ANTLR continues to try to parse and invalid query.
+    // happens when ANTLR continues to try to parse an invalid query.
     return this.collectBooleanExpression(ctx.booleanExpression())[0]! as
       | ast.ESQLAstField
       | undefined;
