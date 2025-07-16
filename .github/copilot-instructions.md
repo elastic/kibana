@@ -56,4 +56,4 @@ When adding your first saved object migration add a blank '1' migration. Example
 - SHOULD BE `modelVersions: { '1': { changes: [] }, '2': { changes: [{...}, {...}] } }`
 - NEW CODE including `1` like `  modelVersions: { '1': { changes: [] } }` IS FINE AS IT IS!
 
-Always link to appropriate docs in your suggestions. For a change, bundle your suggestions together. TRY TO KEEP SUGGESTIONS AS SHORT AS POSSIBLE AND AVOID MULTLINE COMMENTS.
+Always link to appropriate docs in your suggestions. For a change, bundle your suggestions together. TRY TO KEEP SUGGESTIONS AS SHORT AS POSSIBLE AND AVOID MULTILINE COMMENTS.
