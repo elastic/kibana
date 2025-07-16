@@ -36,7 +36,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { SaveDashboardReturn } from '@kbn/dashboard-plugin/public/services/dashboard_content_management_service/types';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -44,6 +43,19 @@ export interface OnSaveProps {
   isTitleDuplicateConfirmed: boolean;
   onTitleDuplicate: () => void;
   newDescription: string;
+}
+
+export interface Reference {
+  type: string;
+  id: string;
+  name: string;
+}
+
+export interface SaveDashboardReturn {
+  id?: string;
+  error?: string;
+  references?: Reference[];
+  redirectRequired?: boolean;
 }
 
 interface Props {
