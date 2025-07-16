@@ -28,7 +28,6 @@ import { filter, switchMap, startWith, Subject, BehaviorSubject, pairwise, takeU
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
-import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 
 /**
@@ -92,7 +91,7 @@ export class FeatureFlagsService {
         if (OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
         }
-        setProviderWithRetries(provider, this.logger);
+        // setProviderWithRetries(provider, this.logger);
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
