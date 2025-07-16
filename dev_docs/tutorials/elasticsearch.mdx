@@ -57,7 +57,7 @@ router.get(
 When working in distributed environments (such as multiple Kibana instances), it is common for several instances to attempt to create the same index at the same time. To ensure the index is ready for ingesting and searching, all instances should:
 
 1. Attempt to create the index.
-2. If the index already exists (or creation succeeds), wait until the index status is **yellow** before proceeding.
+2. If the index already exists (or creation succeeds), wait until the index status is **green** before proceeding.
 
 ```ts
 import type { CoreStart, Plugin } from '@kbn/core/server';
@@ -81,7 +81,9 @@ async function ensureIndexReady(esClient: ElasticsearchClient, indexName: string
     if (error?.body?.error?.type !== 'resource_already_exists_exception') {
       throw error;
     }
-    // Index already exists, continue
+    // Index already exists - this is expected in multi-instance environments
+    // Do NOT log this as an error since it's an expected scenario that we
+    // gracefully handle
   }
 
   // Wait for the index to be ready (green status)
@@ -90,7 +92,7 @@ async function ensureIndexReady(esClient: ElasticsearchClient, indexName: string
   await esClient.cluster.health(
     {
       index: indexName,
-      wait_for_status: 'yellow',
+      wait_for_status: 'green',
       timeout: '300s',
     },
     { requestTimeout: 310_000 }
@@ -119,11 +121,30 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-### Why Wait for Yellow Status?
+### Why Wait for Green Status?
 
 - The create index call can return successfully if the timeout was reached after the operation was accepted but the primary shards are not yet available (in this case the response will include `acknowledged: true, shard_acknowledged: false`).
 - Multiple Kibana instances may race to create the same index. If a given instance receives the "index already exists" exception it does not provide any guarantee that the primary shards are available yet.
-- After creation (or if the index already exists), always wait for the index to reach **yellow** status before indexing or searching. This ensures all primary shards are available, preventing failed operations.
+- After creation (or if the index already exists), always wait for the index to reach **green** status before indexing or searching. This ensures all primary shards are available, preventing failed operations.
+- NOTE: On stateful **yellow** status would be sufficient, but serverless requires waiting for green status.
+
+### Logging Best Practices
+
+When implementing index initialization:
+
+- **Do NOT log `resource_already_exists_exception` as an error** - this is completely expected when multiple Kibana instances start simultaneously
+- **DO log genuine initialization failures** - like an index still not being available after the timeout
+
+```ts
+// Good: Only log actual errors
+} catch (error) {
+  if (error?.body?.error?.type !== 'resource_already_exists_exception') {
+    this.logger.error(`Failed to create index ${indexName}: ${error?.message || error}`);
+    throw error;
+  }
+  // Don't log - this is expected behavior
+}
+```
 
 ---
 
