@@ -14,7 +14,9 @@ import { ElasticGenAIAttributes, GenAISemanticConventions } from '@kbn/inference
 import { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
-const MAX_TOKENS_PER_DOC = 1_000;
+// structured data can end up being a token per character.
+// since the limit is 512 tokens, to avoid truncating, set the max to 512
+const MAX_TOKENS_PER_DOC = 512;
 
 function chunkText(text: string, maxChars = MAX_TOKENS_PER_DOC): string[] {
   const chunks: string[] = [];
@@ -25,7 +27,7 @@ function chunkText(text: string, maxChars = MAX_TOKENS_PER_DOC): string[] {
 }
 
 const DEFAULT_BATCH_SIZE = 1_000;
-const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
+const DEFAULT_MAX_CONCURRENT_REQUESTS = 7;
 
 /**
  * Executes a NER anonymization rule, by:
