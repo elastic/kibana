@@ -17,13 +17,13 @@ export default function ({ getService }: FtrProviderContext) {
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json'
       );
     });
 
     afterEach(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json'
       );
     });
 
