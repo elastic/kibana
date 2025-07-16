@@ -9,11 +9,12 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from '../empty_prompt/translations';
+import type { SettingsOverrideOptions } from '../../history/types';
 
 interface Props {
   isDisabled?: boolean;
   isLoading: boolean;
-  onGenerate: (overrideConnectorId?: string) => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
 
 const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, onGenerate }) => {

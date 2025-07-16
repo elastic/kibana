@@ -25,9 +25,10 @@ import { AlertSelection } from '../alert_selection';
 import { AlertSelectionOld } from '../alert_selection/alert_selection_old';
 import { useKibana } from '../../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
-import { parseFilterQuery } from '../parse_filter_query';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { parseFilterQuery } from '../parse_filter_query';
+import type { SettingsOverrideOptions } from '../../results/history/types';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
 import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
@@ -40,15 +41,7 @@ export interface UseSettingsView {
 interface Props {
   connectorId: string | undefined;
   onConnectorIdSelected: (connectorId: string) => void;
-  onGenerate?: (
-    overrideConnectorId?: string,
-    overrideOptions?: {
-      overrideEnd?: string;
-      overrideFilter?: Record<string, unknown>;
-      overrideSize?: number;
-      overrideStart?: string;
-    }
-  ) => void;
+  onGenerate?: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
   onSettingsReset?: () => void;
   onSettingsSave?: () => void;
@@ -159,11 +152,15 @@ export const useSettingsView = ({
     };
   }, [onSettingsChanged, settings]);
 
-  const onSaveAndRun = useCallback(() => {
+  const handleSave = useCallback(() => {
     if (localConnectorId && localConnectorId !== connectorId) {
       onConnectorIdSelected(localConnectorId);
     }
     onSettingsSave?.();
+  }, [connectorId, localConnectorId, onConnectorIdSelected, onSettingsSave]);
+
+  const onSaveAndRun = useCallback(() => {
+    handleSave();
 
     // Convert settings to filter query for overrides
     const [filterQuery, kqlError] = convertToBuildEsQuery({
@@ -177,30 +174,26 @@ export const useSettingsView = ({
     const overrideFilter = parseFilterQuery({ filterQuery, kqlError });
 
     // Pass the localConnectorId and settings overrides to ensure we use the selected values
-    onGenerate?.(localConnectorId, {
+    onGenerate?.({
+      overrideConnectorId: localConnectorId,
       overrideEnd: settings.end,
       overrideFilter,
       overrideSize: settings.size,
       overrideStart: settings.start,
     });
   }, [
-    connectorId,
-    localConnectorId,
-    onConnectorIdSelected,
-    onGenerate,
-    onSettingsSave,
-    settings,
-    uiSettings,
-    oldSourcererDataView,
     experimentalDataView,
+    handleSave,
+    localConnectorId,
+    oldSourcererDataView,
+    onGenerate,
+    settings.end,
+    settings.filters,
+    settings.query,
+    settings.size,
+    settings.start,
+    uiSettings,
   ]);
-
-  const handleSave = useCallback(() => {
-    if (localConnectorId && localConnectorId !== connectorId) {
-      onConnectorIdSelected(localConnectorId);
-    }
-    onSettingsSave?.();
-  }, [connectorId, localConnectorId, onConnectorIdSelected, onSettingsSave]);
 
   const actionButtons = useMemo(() => {
     return (

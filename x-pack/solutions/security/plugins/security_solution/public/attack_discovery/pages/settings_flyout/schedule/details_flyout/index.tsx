@@ -15,6 +15,8 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutResizable,
   EuiSpacer,
+  isDOMNode,
+  keys,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -202,11 +204,21 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     } else {
       onClose();
 
-      if (isEditing) {
-        setIsEditing(false);
-      }
+      setIsEditing(false);
     }
-  }, [hasUnsavedChanges, isEditing, onClose]);
+  }, [hasUnsavedChanges, onClose]);
+
+  const onKeyDown = useCallback(
+    (ev: React.KeyboardEvent) => {
+      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        handleCloseButtonClick();
+      }
+    },
+    [handleCloseButtonClick]
+  );
 
   return (
     <>
@@ -215,6 +227,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
         data-test-subj="scheduleDetailsFlyout"
         minWidth={MIN_FLYOUT_WIDTH}
         onClose={handleCloseButtonClick}
+        onKeyDown={onKeyDown}
         outsideClickCloses={!isEditing}
         paddingSize="m"
         side="right"

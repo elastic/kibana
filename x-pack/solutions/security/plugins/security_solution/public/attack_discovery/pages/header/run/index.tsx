@@ -9,19 +9,12 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
+import type { SettingsOverrideOptions } from '../../results/history/types';
 import * as i18n from './translations';
 
 interface Props {
   isLoading: boolean;
-  onGenerate: (
-    overrideConnectorId?: string,
-    overrideOptions?: {
-      overrideEnd?: string;
-      overrideFilter?: Record<string, unknown>;
-      overrideSize?: number;
-      overrideStart?: string;
-    }
-  ) => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   isDisabled?: boolean;
 }
 

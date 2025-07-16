@@ -10,6 +10,7 @@ import React from 'react';
 import { Failure } from './failure';
 import { EmptyPrompt } from './empty_prompt';
 import { showFailurePrompt, showNoAlertsPrompt, showWelcomePrompt } from '../../helpers';
+import type { SettingsOverrideOptions } from '../history/types';
 import { NoAlerts } from './no_alerts';
 import { Welcome } from './welcome';
 
@@ -20,7 +21,7 @@ interface Props {
   connectorId: string | undefined;
   failureReason: string | null;
   isLoading: boolean;
-  onGenerate: (overrideConnectorId?: string) => Promise<void>;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   upToAlertsCount: number;
 }
 

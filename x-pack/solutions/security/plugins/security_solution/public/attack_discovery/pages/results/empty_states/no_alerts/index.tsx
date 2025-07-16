@@ -13,16 +13,17 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import React, { useMemo } from 'react';
 
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import * as i18n from './translations';
 import { Generate } from '../generate';
+import type { SettingsOverrideOptions } from '../../history/types';
+import * as i18n from './translations';
 
 interface Props {
   isDisabled: boolean;
   isLoading: boolean;
-  onGenerate: (overrideConnectorId?: string) => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
 
 const NoAlertsComponent: React.FC<Props> = ({ isDisabled, isLoading, onGenerate }) => {

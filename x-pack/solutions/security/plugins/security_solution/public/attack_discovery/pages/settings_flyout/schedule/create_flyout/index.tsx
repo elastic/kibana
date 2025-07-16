@@ -12,6 +12,8 @@ import {
   EuiFlyoutResizable,
   EuiSpacer,
   EuiTitle,
+  isDOMNode,
+  keys,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
@@ -115,6 +117,18 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     }
   }, [hasUnsavedChanges, onClose]);
 
+  const onKeyDown = useCallback(
+    (ev: React.KeyboardEvent) => {
+      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        handleCloseButtonClick();
+      }
+    },
+    [handleCloseButtonClick]
+  );
+
   return (
     <>
       <EuiFlyoutResizable
@@ -122,6 +136,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
         data-test-subj="scheduleCreateFlyout"
         minWidth={MIN_FLYOUT_WIDTH}
         onClose={handleCloseButtonClick}
+        onKeyDown={onKeyDown}
         paddingSize="m"
         side="right"
         size="m"

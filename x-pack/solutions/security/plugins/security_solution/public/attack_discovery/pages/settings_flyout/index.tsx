@@ -33,6 +33,7 @@ import type { AlertsSelectionSettings } from './types';
 import { MIN_FLYOUT_WIDTH, SCHEDULE_TAB_ID } from './constants';
 import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
 import { getDefaultQuery } from '../helpers';
+import type { SettingsOverrideOptions } from '../results/history/types';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 export const DEFAULT_STACK_BY_FIELD = 'kibana.alert.rule.name';
@@ -45,15 +46,7 @@ export interface Props {
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
   onClose: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
-  onGenerate: (
-    overrideConnectorId?: string,
-    overrideOptions?: {
-      overrideEnd?: string;
-      overrideFilter?: Record<string, unknown>;
-      overrideSize?: number;
-      overrideStart?: string;
-    }
-  ) => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   query: Query | undefined;
   setEnd: React.Dispatch<React.SetStateAction<string | undefined>>;
   setFilters: React.Dispatch<React.SetStateAction<Filter[] | undefined>>;

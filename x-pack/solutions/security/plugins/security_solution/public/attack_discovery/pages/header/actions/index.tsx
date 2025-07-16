@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
+import type { SettingsOverrideOptions } from '../../results/history/types';
 import { Run } from '../run';
 import { Schedule } from '../schedule';
 import { Settings } from '../settings';
@@ -16,15 +17,7 @@ import { Settings } from '../settings';
 interface Props {
   isDisabled?: boolean;
   isLoading: boolean;
-  onGenerate: (
-    overrideConnectorId?: string,
-    overrideOptions?: {
-      overrideEnd?: string;
-      overrideFilter?: Record<string, unknown>;
-      overrideSize?: number;
-      overrideStart?: string;
-    }
-  ) => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   openFlyout: (tabId: string) => void;
 }
 

@@ -14,10 +14,11 @@ import {
   type EuiTabbedContentTab,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { css } from '@emotion/react';
 
 import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from '../constants';
+import type { SettingsOverrideOptions } from '../../results/history/types';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
 import { useSettingsView } from './use_settings_view';
@@ -60,15 +61,7 @@ interface Props {
   connectorId: string | undefined;
   defaultSelectedTabId?: string;
   onConnectorIdSelected: (connectorId: string) => void;
-  onGenerate: (
-    overrideConnectorId?: string,
-    overrideOptions?: {
-      overrideEnd?: string;
-      overrideFilter?: Record<string, unknown>;
-      overrideSize?: number;
-      overrideStart?: string;
-    }
-  ) => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
   onSettingsReset?: () => void;
   onSettingsSave?: () => void;

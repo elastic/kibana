@@ -33,6 +33,7 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { Header } from './header';
 import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize, showLoading } from './helpers';
 import { LoadingCallout } from './loading_callout';
@@ -40,6 +41,7 @@ import { deserializeQuery } from './local_storage/deserialize_query';
 import { deserializeFilters } from './local_storage/deserialize_filters';
 import { PageTitle } from './page_title';
 import { Results } from './results';
+import type { SettingsOverrideOptions } from './results/history/types';
 import { SettingsFlyout } from './settings_flyout';
 import { SETTINGS_TAB_ID } from './settings_flyout/constants';
 import { parseFilterQuery } from './settings_flyout/parse_filter_query';
@@ -48,7 +50,6 @@ import { useAttackDiscovery } from './use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
 import { useKibanaFeatureFlags } from './use_kibana_feature_flags';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const ID = 'attackDiscoveryQuery';
 
@@ -224,15 +225,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
   const onGenerate = useCallback(
-    async (
-      overrideConnectorId?: string,
-      overrideOptions?: {
-        overrideEnd?: string;
-        overrideFilter?: Record<string, unknown>;
-        overrideSize?: number;
-        overrideStart?: string;
-      }
-    ) => {
+    async (overrideOptions?: SettingsOverrideOptions) => {
       const size = getSize({
         defaultMaxAlerts: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
         localStorageAttackDiscoveryMaxAlerts,
@@ -245,7 +238,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           filter, // <-- combined search bar query and filters
           size,
           start,
-          overrideConnectorId,
+          overrideConnectorId: overrideOptions?.overrideConnectorId,
           overrideEnd: overrideOptions?.overrideEnd,
           overrideFilter: overrideOptions?.overrideFilter,
           overrideSize: overrideOptions?.overrideSize,

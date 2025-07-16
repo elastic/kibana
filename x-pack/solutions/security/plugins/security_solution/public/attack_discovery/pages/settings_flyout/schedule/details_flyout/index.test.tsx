@@ -204,5 +204,20 @@ describe('DetailsFlyout', () => {
 
       expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
     });
+
+    it('renders the confirmation modal when there are unsaved changes and escape key is pressed', () => {
+      // First, close the modal that was opened in beforeEach
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      // Verify modal is closed
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+
+      // Now press escape key on the flyout
+      const flyout = screen.getByTestId('scheduleDetailsFlyout');
+      fireEvent.keyDown(flyout, { key: 'Escape' });
+
+      // Verify the confirmation modal is shown
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
   });
 });

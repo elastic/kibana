@@ -27,26 +27,19 @@ import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/el
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 
 import { Actions } from './actions';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import type { SettingsOverrideOptions } from '../results/history/types';
 import { SETTINGS_TAB_ID } from '../settings_flyout/constants';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 interface Props {
   connectorId: string | undefined;
   connectorsAreConfigured: boolean;
   isLoading: boolean;
   isDisabledActions: boolean;
-  onGenerate: (
-    overrideConnectorId?: string,
-    overrideOptions?: {
-      overrideEnd?: string;
-      overrideFilter?: Record<string, unknown>;
-      overrideSize?: number;
-      overrideStart?: string;
-    }
-  ) => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
   openFlyout: (tabId: string) => void;

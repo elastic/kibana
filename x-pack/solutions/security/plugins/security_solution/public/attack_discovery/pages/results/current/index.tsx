@@ -21,6 +21,7 @@ import { AttackDiscoveryPanel } from '../attack_discovery_panel';
 import { EmptyStates } from '../empty_states';
 import { showEmptyStates } from '../empty_states/helpers/show_empty_states';
 import { getInitialIsOpen, showLoading, showSummary } from '../../helpers';
+import type { SettingsOverrideOptions } from '../history/types';
 import { LoadingCallout } from '../../loading_callout';
 import { Summary } from '../summary';
 
@@ -38,7 +39,7 @@ interface Props {
   isLoadingPost: boolean;
   loadingConnectorId: string | null;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
-  onGenerate: (overrideConnectorId?: string) => Promise<void>;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onToggleShowAnonymized: () => void;
   selectedConnectorAttackDiscoveries: AttackDiscovery[];
   selectedConnectorLastUpdated: Date | null;

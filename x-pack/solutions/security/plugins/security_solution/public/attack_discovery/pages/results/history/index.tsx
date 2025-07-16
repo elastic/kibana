@@ -29,6 +29,7 @@ import { SearchAndFilter } from './search_and_filter';
 import { ACKNOWLEDGED, CLOSED, OPEN } from './search_and_filter/translations';
 import { Summary } from '../summary';
 import * as i18n from './translations';
+import type { SettingsOverrideOptions } from './types';
 import { useDismissAttackDiscoveryGeneration } from '../../use_dismiss_attack_discovery_generations';
 import { useIdsFromUrl } from './use_ids_from_url';
 import { useFindAttackDiscoveries } from '../../use_find_attack_discoveries';
@@ -49,7 +50,7 @@ const EMPTY_QUERY = '';
 interface Props {
   aiConnectors: AIConnector[] | undefined;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
-  onGenerate: (overrideConnectorId?: string) => Promise<void>;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onToggleShowAnonymized: () => void;
   showAnonymized: boolean;
 }
