@@ -216,6 +216,7 @@ export class ApmConfiguration {
       merge(config, { servicesOverrides });
     }
 
+    console.log('### APM config from config-loader', JSON.stringify(config, null, 2)); // eslint-disable-line no-console
     return config;
   }
 
