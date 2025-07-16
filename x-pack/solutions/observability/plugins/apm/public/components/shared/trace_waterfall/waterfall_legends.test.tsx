@@ -8,8 +8,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { WaterfallLegends } from './waterfall_legends';
 import { EuiThemeProvider } from '@elastic/eui';
-import type { IWaterfallLegend } from '../../../../../../common/waterfall/legend';
-import { WaterfallLegendType } from '../../../../../../common/waterfall/legend';
+import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 
 const createLegend = (overrides: Partial<IWaterfallLegend>): IWaterfallLegend => ({
   type: WaterfallLegendType.ServiceName,

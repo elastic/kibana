@@ -18,7 +18,7 @@ import { ACCORDION_HEIGHT, BORDER_THICKNESS, TraceItemRow } from './trace_item_r
 import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { WaterfallLegends } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
+import { WaterfallLegends } from './waterfall_legends';
 
 export interface Props {
   traceItems: TraceItem[];
