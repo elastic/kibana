@@ -21,7 +21,29 @@ HTTP API paths should be snake case. Examples you should use to detect violation
   should be `path: '/api/my_path/_action'`
 - this `${API_BASE_PATH}/api/my-domain/_bulkUpdate`
   should be `${API_BASE_PATH}/api/myDomain/_bulk_update`
-Add a link "path" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#path in suggestions
+Add a link to "path" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#path in suggestions.
+
+HTTP API paths should not contain any versioning. Examples you should use to detect:
+- `/v1/api/my_path`
+- `/internal/my_path/v1`
+- `/api/my_long_api/v2`
+- `/1/api/my_path`
+- `/internal/my_path/1`
+- `/api/my_long_api/2`
+Add a link to "versioning" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#versioning in suggestions and remove the section contain the versioning in the path `v1` or `v2` or `1` or `2` and so on.
+
+Changing HTTP API paths is a breaking change, create a new version for internal APIs or await a new public version. Examples you should use to detect:
+- BEFORE `/api/my_path`
+  AFTER `/api/your_path`
+- BEFORE `/api/domain/special_resource`
+  AFTER `/api/domain/special_resources`
+- BEFORE `/internal/domain/special_resource`
+  AFTER `/internal/domain/special_resources`
+- BEFORE `/internal/domain/special_resource`
+  AFTER `/internal/domain/special_resources`
+- BEFORE `/api/a_path`
+  AFTER `/internal/anotherPath`
+Add a link to "versioning" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#versioning in suggestions.
 
 Changing HTTP API `access` from `internal` to `public` should be done with care as this API must be maintained for an extended time period and well documented. Examples you should use to detect:
 - BEFORE `access: 'internal'`
@@ -36,7 +58,7 @@ Changing HTTP API `access` from `internal` to `public` should be done with care 
   AFTER new code `const access = 'public'`
 - BEFORE no code
   AFTER new code `const access: RouteAccess = 'public'`
-Add a link to the "commitment" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#commitment and "documentation" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#documentation in suggestions. ALWAYS SUGGEST `internal`. DO NOT SUGGEST `private` or `restricted` or anything else.
+Add a link to the "commitment" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#commitment and "documentation" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#documentation in suggestions. ALWAYS SUGGEST `internal` as an alternative. DO NOT SUGGEST `private` or `restricted` or anything else.
 
 Always link to appropriate docs in your suggestions.
 
