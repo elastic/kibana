@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 
 export const useSourceNotifier = () => {
   const {
@@ -14,7 +14,7 @@ export const useSourceNotifier = () => {
   } = useKibana();
 
   const updateFailure = (message?: string) => {
-    notifications?.toasts.addDanger({
+    notifications.toasts.addDanger({
       toastLifeTimeMs: 3000,
       title: i18n.translate(
         'xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureTitle',
@@ -38,7 +38,7 @@ export const useSourceNotifier = () => {
   };
 
   const updateSuccess = () => {
-    notifications?.toasts.addSuccess({
+    notifications.toasts.addSuccess({
       toastLifeTimeMs: 3000,
       title: i18n.translate(
         'xpack.observability.customThreshold.rule.sourceConfiguration.updateSuccessTitle',
