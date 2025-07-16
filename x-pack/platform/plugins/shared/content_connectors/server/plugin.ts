@@ -29,6 +29,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { registerApiKeysRoutes } from './routes/api_keys';
 import { SearchConnectorsConfig } from './config';
 import { AgentlessConnectorDeploymentsSyncService } from './task';
+import { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
 
 export class SearchConnectorsPlugin
   implements
@@ -43,7 +44,7 @@ export class SearchConnectorsPlugin
   private readonly logger: LoggerFactory;
   private readonly config: SearchConnectorsConfig;
   private agentlessConnectorDeploymentsSyncService: AgentlessConnectorDeploymentsSyncService;
-  private isServerless: boolean;
+  private agentlessConnectorsInfraServiceFactory: AgentlessConnectorsInfraServiceFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.connectors = [];
@@ -52,11 +53,11 @@ export class SearchConnectorsPlugin
     this.agentlessConnectorDeploymentsSyncService = new AgentlessConnectorDeploymentsSyncService(
       this.logger.get()
     );
-    this.isServerless = false;
+    this.agentlessConnectorsInfraServiceFactory = new AgentlessConnectorsInfraServiceFactory();
   }
 
   public setup(
-    coreSetup: CoreSetup<SearchConnectorsPluginStartDependencies, SearchConnectorsPluginStart>,
+    coreSetup: CoreSetup<SearchConnectorsPluginStartDependencies>,
     plugins: SearchConnectorsPluginSetupDependencies
   ) {
     const http = coreSetup.http;
@@ -75,24 +76,16 @@ export class SearchConnectorsPlugin
     });
 
     this.connectors = getConnectorTypes(http.staticAssets);
-    this.isServerless = plugins.cloud && plugins.cloud.isServerlessEnabled;
-    const coreStartServices = coreSetup.getStartServices();
 
     // There seems to be no way to check for agentless here
     // So we register a task, but do not execute it in `start` method
     this.logger.get().debug('Registering agentless connectors infra sync task');
 
-    coreStartServices
-      .then(([coreStart, searchConnectorsPluginStartDependencies]) => {
-        this.agentlessConnectorDeploymentsSyncService.registerInfraSyncTask(
-          plugins,
-          coreStart,
-          searchConnectorsPluginStartDependencies
-        );
-      })
-      .catch((err) => {
-        this.logger.get().error(`Error registering agentless connectors infra sync task`, err);
-      });
+    this.agentlessConnectorDeploymentsSyncService.registerInfraSyncTask(
+      coreSetup,
+      plugins,
+      this.agentlessConnectorsInfraServiceFactory
+    );
     const router = http.createRouter();
 
     // Enterprise Search Routes
@@ -117,12 +110,17 @@ export class SearchConnectorsPlugin
   }
 
   public start(core: CoreStart, plugins: SearchConnectorsPluginStartDependencies) {
-    if (this.isServerless && isAgentlessEnabled()) {
+    if (isAgentlessEnabled()) {
       this.logger
         .get()
         .info(
           'Agentless is supported, scheduling initial agentless connectors infrastructure watcher task'
         );
+      this.agentlessConnectorsInfraServiceFactory.initialize({
+        coreStart: core,
+        plugins,
+        logger: this.logger.get(),
+      });
       this.agentlessConnectorDeploymentsSyncService
         .scheduleInfraSyncTask(this.config, plugins.taskManager)
         .catch((err) => {

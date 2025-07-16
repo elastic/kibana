@@ -87,7 +87,10 @@
     "@kbn/file-upload-common",
     "@kbn/shared-ux-prompt-no-data-views",
     "@kbn/index-management-shared-types",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/file-upload",
+    "@kbn/charts-theme",
+    "@kbn/presentation-util"
   ],
   "exclude": [
     "target/**/*",

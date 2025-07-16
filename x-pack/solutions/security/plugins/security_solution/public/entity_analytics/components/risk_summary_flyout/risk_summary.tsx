@@ -81,8 +81,6 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       query: `${fieldName}: ${entityName}`,
       spaceId,
       riskEntity: entityType,
-      // TODO: add in riskColors when severity palette agreed on.
-      // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
     });
   }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId]);
   const xsFontSize = useEuiFontSize('xxs').fontSize;

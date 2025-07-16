@@ -357,41 +357,6 @@
       },
       {
         "parentPluginId": "@kbn/discover-contextual-components",
-        "id": "def-public.ServiceNameBadgeWithActions",
-        "type": "Function",
-        "tags": [],
-        "label": "ServiceNameBadgeWithActions",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "FieldBadgeWithActionsPropsAndDependencies",
-          ") => React.JSX.Element"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/service_name_badge_with_actions.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-contextual-components",
-            "id": "def-public.ServiceNameBadgeWithActions.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FieldBadgeWithActionsPropsAndDependencies"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/service_name_badge_with_actions.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-contextual-components",
         "id": "def-public.SummaryCellPopover",
         "type": "Function",
         "tags": [],
@@ -549,6 +514,27 @@
             "tags": [],
             "label": "value",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.ResourceFieldDescriptor.property",
+            "type": "Object",
+            "tags": [],
+            "label": "property",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
             "deprecated": false,
             "trackAdoption": false

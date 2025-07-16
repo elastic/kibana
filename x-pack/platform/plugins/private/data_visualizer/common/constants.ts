@@ -9,16 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 export const APP_ID = 'data_visualizer';
-export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
-
-export const MAX_FILE_SIZE = '100MB';
-export const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
-
-export const ABSOLUTE_MAX_FILE_SIZE_BYTES = 1073741274; // 1GB
-
-// Value to use in the Elasticsearch index mapping meta data to identify the
-// index as having been created by the File Data Visualizer.
-export const INDEX_META_DATA_CREATED_BY = 'file-data-visualizer';
 
 export const SUPPORTED_FIELD_TYPES = {
   BOOLEAN: 'boolean',

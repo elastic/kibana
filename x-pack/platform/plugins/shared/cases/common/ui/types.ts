@@ -72,6 +72,9 @@ export interface CasesUiConfigType {
   stack: {
     enabled: boolean;
   };
+  incrementalId: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -341,4 +344,8 @@ export interface CasesCapabilities {
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
+}
+
+export interface CasesSettings {
+  displayIncrementalCaseId: boolean;
 }

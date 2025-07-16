@@ -7,11 +7,9 @@
 
 import { pageObjects as xpackFunctionalPageObjects } from '@kbn/test-suites-xpack/functional/page_objects';
 
-import { cloudSecurityPosturePageObjects } from '@kbn/test-suites-xpack/cloud_security_posture_functional/page_objects';
+import { cloudSecurityPosturePageObjects } from '@kbn/test-suites-xpack-security/cloud_security_posture_functional/page_objects';
 import { SvlCommonPageProvider } from './svl_common_page';
 import { SvlCommonNavigationProvider } from './svl_common_navigation';
-import { SvlObltOnboardingPageProvider } from './svl_oblt_onboarding_page';
-import { SvlObltOnboardingStreamLogFilePageProvider } from './svl_oblt_onboarding_stream_log_file';
 import { SvlObltOverviewPageProvider } from './svl_oblt_overview_page';
 import { SvlSearchLandingPageProvider } from './svl_search_landing_page';
 import { SvlSecLandingPageProvider } from './svl_sec_landing_page';
@@ -34,8 +32,6 @@ export const pageObjects = {
 
   svlCommonPage: SvlCommonPageProvider,
   svlCommonNavigation: SvlCommonNavigationProvider,
-  svlObltOnboardingPage: SvlObltOnboardingPageProvider,
-  SvlObltOnboardingStreamLogFilePage: SvlObltOnboardingStreamLogFilePageProvider,
   svlObltOverviewPage: SvlObltOverviewPageProvider,
   svlSearchConnectorsPage: SvlSearchConnectorsPageProvider,
   svlSearchLandingPage: SvlSearchLandingPageProvider,

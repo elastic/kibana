@@ -28,6 +28,8 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+
 import { saveVisualization } from '../../utils/saved_visualize_utils';
 import { VISUALIZE_EMBEDDABLE_TYPE, getFullPath } from '../..';
 
@@ -38,12 +40,11 @@ import {
 } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
-import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
+import { VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
-import './visualize_navigation.scss';
 import { serializeReferences } from '../../utils/saved_visualization_references';
 import { serializeState } from '../../embeddable/state';
 
@@ -395,7 +396,6 @@ export const getTopNavConfig = (
           },
         },
         isDirty: hasUnappliedChanges || hasUnsavedChanges,
-        toasts: toastNotifications,
       });
     }
   };

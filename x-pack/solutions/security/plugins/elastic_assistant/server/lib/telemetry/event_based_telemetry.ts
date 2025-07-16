@@ -79,7 +79,8 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
   durationMs: number;
   toolsInvoked: {
     AlertCountsTool?: number;
-    NaturalLanguageESQLTool?: number;
+    GenerateESQLTool?: number;
+    AskAboutESQLTool?: number;
     KnowledgeBaseRetrievalTool?: number;
     KnowledgeBaseWriteTool?: number;
     OpenAndAcknowledgedAlertsTool?: number;
@@ -139,7 +140,14 @@ export const INVOKE_ASSISTANT_SUCCESS_EVENT: EventTypeOpts<{
             optional: true,
           },
         },
-        NaturalLanguageESQLTool: {
+        GenerateESQLTool: {
+          type: 'long',
+          _meta: {
+            description: 'Number of times tool was invoked.',
+            optional: true,
+          },
+        },
+        AskAboutESQLTool: {
           type: 'long',
           _meta: {
             description: 'Number of times tool was invoked.',
@@ -243,9 +251,10 @@ export const INVOKE_ASSISTANT_ERROR_EVENT: EventTypeOpts<{
   },
 };
 
-interface AttackDiscoveryScheduleInfo {
+export interface AttackDiscoveryScheduleInfo {
   id: string;
   interval: string;
+  actions: string[];
 }
 
 const scheduleInfoSchema: SchemaValue<AttackDiscoveryScheduleInfo | undefined> = {
@@ -260,6 +269,18 @@ const scheduleInfoSchema: SchemaValue<AttackDiscoveryScheduleInfo | undefined> =
       type: 'keyword',
       _meta: {
         description: 'Attack discovery schedule interval',
+      },
+    },
+    actions: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Action type',
+        },
+      },
+      _meta: {
+        description: 'Actions used within the schedule',
       },
     },
   },
@@ -281,7 +302,7 @@ interface AttackDiscoverySuccessTelemetryEvent {
   isDefaultDateRange: boolean;
   model?: string;
   provider?: string;
-  schedule?: AttackDiscoveryScheduleInfo;
+  scheduleInfo?: AttackDiscoveryScheduleInfo;
 }
 
 export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySuccessTelemetryEvent> = {
@@ -364,7 +385,7 @@ export const ATTACK_DISCOVERY_SUCCESS_EVENT: EventTypeOpts<AttackDiscoverySucces
         optional: true,
       },
     },
-    schedule: scheduleInfoSchema,
+    scheduleInfo: scheduleInfoSchema,
   },
 };
 
@@ -373,7 +394,7 @@ interface AttackDiscoveryErrorTelemetryEvent {
   errorMessage: string;
   model?: string;
   provider?: string;
-  schedule?: AttackDiscoveryScheduleInfo;
+  scheduleInfo?: AttackDiscoveryScheduleInfo;
 }
 
 export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTelemetryEvent> = {
@@ -407,7 +428,7 @@ export const ATTACK_DISCOVERY_ERROR_EVENT: EventTypeOpts<AttackDiscoveryErrorTel
         optional: true,
       },
     },
-    schedule: scheduleInfoSchema,
+    scheduleInfo: scheduleInfoSchema,
   },
 };
 

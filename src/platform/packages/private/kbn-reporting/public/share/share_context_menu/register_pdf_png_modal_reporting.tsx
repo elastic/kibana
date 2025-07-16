@@ -14,29 +14,69 @@ import { ShareContext } from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
 import { ExportGenerationOpts, ExportShare } from '@kbn/share-plugin/public/types';
+import { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
 import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { checkLicense } from '../../license_check';
 
-const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
-  const {
-    objectType,
-    sharingData: { title, locatorParams },
-    optimizedForPrinting,
-  } = opts;
-
+const getBaseParams = (objectType: string) => {
   const el = document.querySelector('[data-shared-items-container]');
   const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
   const dimensions = { height, width };
-  const layoutId = optimizedForPrinting ? ('print' as const) : ('preserve_layout' as const);
-  const layout = { id: layoutId, dimensions };
-  const baseParams = { objectType, layout, title };
+  return {
+    objectType,
+    layout: {
+      id: 'preserve_layout' as 'preserve_layout' | 'print',
+      dimensions,
+    },
+  };
+};
 
-  if (type === 'printablePdfV2') {
-    // multi locator for PDF V2
-    return { ...baseParams, locatorParams: [locatorParams] };
+interface PngPdfReportBaseParams {
+  layout: { dimensions: { height: number; width: number }; id: 'preserve_layout' | 'print' };
+  objectType: string;
+  locatorParams: any;
+}
+
+export const getPngReportParams: ReportParamsGetter<
+  ReportParamsGetterOptions,
+  PngPdfReportBaseParams
+> = ({ sharingData }): PngPdfReportBaseParams => {
+  return {
+    ...getBaseParams('pngV2'),
+    locatorParams: sharingData.locatorParams,
+  };
+};
+
+export const getPdfReportParams: ReportParamsGetter<
+  ReportParamsGetterOptions & { optimizedForPrinting?: boolean },
+  PngPdfReportBaseParams
+> = ({ sharingData, optimizedForPrinting = false }) => {
+  const params = {
+    ...getBaseParams('printablePdfV2'),
+    locatorParams: [sharingData.locatorParams],
+  };
+  if (optimizedForPrinting) {
+    params.layout.id = 'print';
   }
-  // single locator for PNG V2
-  return { ...baseParams, locatorParams };
+  return params;
+};
+
+const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printablePdfV2') => () => {
+  const { objectType, sharingData, optimizedForPrinting } = opts;
+  let baseParams: PngPdfReportBaseParams;
+  if (type === 'pngV2') {
+    baseParams = getPngReportParams({ sharingData });
+  } else {
+    baseParams = getPdfReportParams({
+      sharingData,
+      optimizedForPrinting,
+    });
+  }
+  return {
+    ...baseParams,
+    objectType,
+    title: sharingData.title,
+  };
 };
 
 export const reportingPDFExportProvider = ({
@@ -52,7 +92,6 @@ export const reportingPDFExportProvider = ({
     onClose,
     shareableUrl,
     shareableUrlForSavedObject,
-    toasts,
     ...shareOpts
   }: ShareContext): ReturnType<ExportShare['config']> => {
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
@@ -70,47 +109,52 @@ export const reportingPDFExportProvider = ({
         ...getJobParams({ ...jobProviderOptions, optimizedForPrinting }, 'printablePdfV2')(),
       });
 
-      return apiClient
-        .createReportingJob('printablePdfV2', decoratedJobParams)
-        .then(() => firstValueFrom(startServices$))
-        .then(([startServices]) => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              startServices
-            ),
-            'data-test-subj': 'queueReportSuccess',
+      return firstValueFrom(startServices$).then(([startServices]) => {
+        const {
+          notifications: { toasts },
+          rendering,
+        } = startServices;
+        return apiClient
+          .createReportingJob('printablePdfV2', decoratedJobParams)
+          .then(() => {
+            toasts.addSuccess({
+              title: intl.formatMessage(
+                {
+                  id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                  defaultMessage: 'Queued report for {objectType}',
+                },
+                { objectType }
+              ),
+              text: toMountPoint(
+                <FormattedMessage
+                  id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                  defaultMessage="Track its progress in {path}."
+                  values={{
+                    path: (
+                      <a href={apiClient.getManagementLink()}>
+                        <FormattedMessage
+                          id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                          defaultMessage="Stack Management &gt; Reporting"
+                        />
+                      </a>
+                    ),
+                  }}
+                />,
+                rendering
+              ),
+              'data-test-subj': 'queueReportSuccess',
+            });
+          })
+          .catch((error: any) => {
+            toasts.addError(error, {
+              title: intl.formatMessage({
+                id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+                defaultMessage: 'Unable to create report',
+              }),
+              toastMessage: error.body?.message,
+            });
           });
-        })
-        .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: error.body?.message,
-          });
-        });
+      });
     };
 
     const generateExportUrlPDF = ({ optimizedForPrinting }: ExportGenerationOpts) => {
@@ -212,7 +256,6 @@ export const reportingPNGExportProvider = ({
     onClose,
     shareableUrl,
     shareableUrlForSavedObject,
-    toasts,
     ...shareOpts
   }: ShareContext): ReturnType<ExportShare['config']> => {
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
@@ -238,47 +281,54 @@ export const reportingPNGExportProvider = ({
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'pngV2')(),
       });
-      return apiClient
-        .createReportingJob('pngV2', decoratedJobParams)
-        .then(() => firstValueFrom(startServices$))
-        .then(([startServices]) => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              startServices
-            ),
-            'data-test-subj': 'queueReportSuccess',
+
+      return firstValueFrom(startServices$).then(([startServices]) => {
+        const {
+          notifications: { toasts },
+          rendering,
+        } = startServices;
+
+        return apiClient
+          .createReportingJob('pngV2', decoratedJobParams)
+          .then(() => {
+            toasts.addSuccess({
+              title: intl.formatMessage(
+                {
+                  id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                  defaultMessage: 'Queued report for {objectType}',
+                },
+                { objectType }
+              ),
+              text: toMountPoint(
+                <FormattedMessage
+                  id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                  defaultMessage="Track its progress in {path}."
+                  values={{
+                    path: (
+                      <a href={apiClient.getManagementLink()}>
+                        <FormattedMessage
+                          id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                          defaultMessage="Stack Management &gt; Reporting"
+                        />
+                      </a>
+                    ),
+                  }}
+                />,
+                rendering
+              ),
+              'data-test-subj': 'queueReportSuccess',
+            });
+          })
+          .catch((error: any) => {
+            toasts.addError(error, {
+              title: intl.formatMessage({
+                id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+                defaultMessage: 'Unable to create report',
+              }),
+              toastMessage: error.body?.message,
+            });
           });
-        })
-        .catch((error: any) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: error.body?.message,
-          });
-        });
+      });
     };
 
     return {

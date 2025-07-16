@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
@@ -23,6 +23,21 @@ import { FieldsTable, usePinnedFields } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
+
+const defaultPinnedFields = [
+  'entity.name',
+  'entity.id',
+  'entity.category',
+  'entity.type',
+  'asset.criticality',
+  'user.name',
+  'user.email',
+  'host.name',
+  'host.os',
+  'cloud.account.id',
+  'cloud.region',
+  'cloud.account.name',
+];
 
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
@@ -66,6 +81,13 @@ export const GenericEntityFlyoutContent = ({
 
   return (
     <FlyoutBody>
+      <EntityInsight
+        field={insightsField}
+        value={insightsValue}
+        isPreviewMode={false}
+        isLinkEnabled={true}
+        openDetailsPanel={openGenericEntityDetailsPanelByPath}
+      />
       <ExpandableSection
         title={
           <FormattedMessage
@@ -107,20 +129,12 @@ export const GenericEntityFlyoutContent = ({
         >
           <FieldsTable
             document={filteredDocument}
+            tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
             euiInMemoryTableProps={{ search: undefined, pagination: undefined }}
+            defaultPinnedFields={defaultPinnedFields}
           />
         </ExpandablePanel>
       </ExpandableSection>
-
-      <EuiHorizontalRule />
-
-      <EntityInsight
-        field={insightsField}
-        value={insightsValue}
-        isPreviewMode={false}
-        isLinkEnabled={true}
-        openDetailsPanel={openGenericEntityDetailsPanelByPath}
-      />
     </FlyoutBody>
   );
 };

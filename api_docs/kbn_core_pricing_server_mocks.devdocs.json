@@ -1,0 +1,114 @@
+{
+  "id": "@kbn/core-pricing-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-pricing-server-mocks",
+        "id": "def-server.PricingServiceContract",
+        "type": "Type",
+        "tags": [],
+        "label": "PricingServiceContract",
+        "description": [],
+        "signature": [
+          "{ start: () => { isFeatureAvailable: <TFeatureId extends string>(featureId: TFeatureId) => boolean; }; setup: ({ http }: SetupDeps) => Promise<{ evaluateProductFeatures: () => void; isFeatureAvailable: (featureId: string) => Promise<boolean>; registerProductFeatures: (features: ",
+          "PricingProductFeature",
+          "[]) => void; }>; preboot: ({ http }: PrebootDeps) => void; }"
+        ],
+        "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-pricing-server-mocks",
+        "id": "def-server.pricingServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "pricingServiceMock",
+        "description": [],
+        "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-server-mocks",
+            "id": "def-server.pricingServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "PricingServiceContract",
+              ">"
+            ],
+            "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-server-mocks",
+            "id": "def-server.pricingServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "PricingServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-server-mocks",
+            "id": "def-server.pricingServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "PricingServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

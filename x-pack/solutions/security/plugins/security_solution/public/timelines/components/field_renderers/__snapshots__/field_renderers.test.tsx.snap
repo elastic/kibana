@@ -95,7 +95,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 }
 
 <div
-    data-test-subj="cellActions-renderContent-host.name"
+    data-test-subj="cellActions-renderContent-host.id"
   >
     <div>
       <div
@@ -103,24 +103,23 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
       >
         <div>
           <div
-            data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
+            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
             tabindex="-1"
           >
             <span
               class="c0"
-              data-test-subj="render-content-host.name"
+              data-test-subj="render-content-host.id"
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
               >
-                <a
+                <button
                   class="euiLink emotion-euiLink-primary"
-                  data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/name/raspberrypi"
-                  rel="noreferrer"
+                  data-test-subj="securitySolutionFlyoutLink"
+                  type="button"
                 >
-                  raspberrypi
-                </a>
+                  b19a781f683541a7a25ee345133aa399
+                </button>
               </span>
             </span>
           </div>
@@ -160,14 +159,13 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
               >
-                <a
+                <button
                   class="euiLink emotion-euiLink-primary"
-                  data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/name/raspberrypi"
-                  rel="noreferrer"
+                  data-test-subj="securitySolutionFlyoutLink"
+                  type="button"
                 >
                   raspberrypi
-                </a>
+                </button>
               </span>
             </span>
           </div>

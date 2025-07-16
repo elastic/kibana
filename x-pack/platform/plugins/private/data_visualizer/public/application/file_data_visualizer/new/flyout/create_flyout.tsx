@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import { EuiFlyoutHeader, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
+import type { DataVisualizerStartDependencies } from '../../application/common/types/data_visualizer_plugin';
 
 export function createFlyout(
   coreStart: CoreStart,

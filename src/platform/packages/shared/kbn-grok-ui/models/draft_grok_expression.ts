@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { GrokCollection, GrokPattern } from './grok_collection_and_pattern';
 
 export class DraftGrokExpression {
   private expression: string = '';
   private grokPattern: GrokPattern;
   private expression$: BehaviorSubject<string>;
+  private customPatternsSubscription: Subscription;
 
   constructor(collection: GrokCollection, initialExpression?: string) {
     const expression = initialExpression ?? '';
@@ -21,6 +22,10 @@ export class DraftGrokExpression {
     this.grokPattern = new GrokPattern(expression || '', 'DRAFT_GROK_EXPRESSION', collection);
     this.grokPattern.resolvePattern();
     this.expression$ = new BehaviorSubject<string>(expression);
+    this.customPatternsSubscription = collection.customPatternsChanged$.subscribe(() => {
+      this.grokPattern.resolvePattern(true);
+      this.expression$.next(this.expression);
+    });
   }
 
   public updateExpression = (expression: string) => {
@@ -53,4 +58,8 @@ export class DraftGrokExpression {
   public getExpression$ = () => {
     return this.expression$;
   };
+
+  public destroy() {
+    this.customPatternsSubscription.unsubscribe();
+  }
 }

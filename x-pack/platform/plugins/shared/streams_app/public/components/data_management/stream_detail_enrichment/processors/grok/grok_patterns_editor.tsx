@@ -26,16 +26,22 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiFlexItem,
+  EuiButtonEmptyProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
 import { Expression } from '@kbn/grok-ui';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
-import { GrokAiSuggestions } from './grok_ai_suggestions';
-import { useStreamsEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
+import { useAIFeatures } from './use_ai_features';
+
+const GrokPatternAISuggestions = dynamic(() =>
+  import('./grok_pattern_suggestion').then((mod) => ({ default: mod.GrokPatternAISuggestions }))
+);
 
 export const GrokPatternsEditor = () => {
   const {
@@ -44,7 +50,9 @@ export const GrokPatternsEditor = () => {
     setValue,
   } = useFormContext();
 
-  const grokCollection = useStreamsEnrichmentSelector(
+  const aiFeatures = useAIFeatures();
+
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
 
@@ -78,7 +86,7 @@ export const GrokPatternsEditor = () => {
       <EuiFormRow
         label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorLabel',
-          { defaultMessage: 'Grok patterns editor' }
+          { defaultMessage: 'Grok patterns' }
         )}
       >
         <EuiPanel color="subdued" paddingSize="none">
@@ -102,19 +110,33 @@ export const GrokPatternsEditor = () => {
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap>
-        <GrokAiSuggestions />
-        <EuiButtonEmpty
-          data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
-          onClick={handleAddPattern}
-        >
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
-            { defaultMessage: 'Add pattern' }
-          )}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
+      {aiFeatures ? (
+        <GrokPatternAISuggestions
+          aiFeatures={aiFeatures}
+          grokCollection={grokCollection}
+          setValue={setValue}
+          onAddPattern={handleAddPattern}
+        />
+      ) : (
+        <AddPatternButton onClick={handleAddPattern} />
+      )}
     </>
+  );
+};
+
+const AddPatternButton = (props: EuiButtonEmptyProps) => {
+  return (
+    <EuiButtonEmpty
+      data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
+      flush="left"
+      size="s"
+      {...props}
+    >
+      {i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
+        { defaultMessage: 'Add pattern' }
+      )}
+    </EuiButtonEmpty>
   );
 };
 
@@ -185,6 +207,7 @@ const DraggablePatternInput = ({
               <Expression
                 draftGrokExpression={field.draftGrokExpression}
                 grokCollection={grokCollection}
+                dataTestSubj="streamsAppPatternExpression"
               />
             </EuiFlexItem>
             {onRemove && (

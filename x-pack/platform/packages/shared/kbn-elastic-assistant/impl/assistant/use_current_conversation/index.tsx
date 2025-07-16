@@ -201,7 +201,13 @@ export const useCurrentConversation = ({
     },
     [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, setLastConversation]
   );
-
+  useEffect(() => {
+    if (defaultConnector && !currentConversation?.apiConfig && currentConversation?.id === '') {
+      // first connector created, provide nothing to getNewConversation
+      // to set new conversation with the defaultConnector
+      getNewConversation({});
+    }
+  }, [defaultConnector, currentConversation, getNewConversation]);
   const [localSecuritySolutionAssistantConnectorId] = useLocalStorage<string | undefined>(
     `securitySolution.onboarding.assistantCard.connectorId.${spaceId}`
   );

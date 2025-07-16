@@ -266,7 +266,7 @@ export class SearchSessionService implements ISearchSessionService {
   /**
    * Used to batch requests that add searches into the session saved object
    * Requests are grouped and executed per sessionId
-   * @private
+   * @internal
    */
   private readonly trackIdBatchQueueMap = new Map<
     string /* sessionId */,

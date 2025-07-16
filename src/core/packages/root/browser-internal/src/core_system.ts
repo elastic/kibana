@@ -38,6 +38,7 @@ import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
+import { PricingService } from '@kbn/core-pricing-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
@@ -111,6 +112,7 @@ export class CoreSystem {
   private readonly customBranding: CustomBrandingService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly pricing: PricingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -166,6 +168,7 @@ export class CoreSystem {
     this.deprecations = new DeprecationsService();
     this.executionContext = new ExecutionContextService();
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
+    this.pricing = new PricingService();
     this.coreApp = new CoreAppsService(this.coreContext);
     this.customBranding = new CustomBrandingService();
 
@@ -385,6 +388,7 @@ export class CoreSystem {
       });
 
       const featureFlags = await this.featureFlags.start();
+      const pricing = await this.pricing.start({ http });
 
       const core: InternalCoreStart = {
         analytics,
@@ -408,6 +412,7 @@ export class CoreSystem {
         security,
         userProfile,
         rendering,
+        pricing,
       };
 
       await this.plugins.start(core);
@@ -425,7 +430,10 @@ export class CoreSystem {
       `;
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
-      this.rendering.renderCore({ chrome, application, overlays }, coreUiTargetDomElement);
+      this.rendering.renderCore(
+        { chrome, application, overlays, featureFlags },
+        coreUiTargetDomElement
+      );
 
       performance.mark(KBN_LOAD_MARKS, {
         detail: LOAD_START_DONE,

@@ -36,7 +36,6 @@ import { IndexResultBadge } from '../../index_result_badge';
 import { Stat } from '../../../../../stat';
 import { getIndexResultToolTip } from '../../utils/get_index_result_tooltip';
 import { CHECK_NOW } from '../../translations';
-import { HISTORICAL_RESULTS_TOUR_SELECTOR_KEY } from '../../constants';
 
 const styles = {
   progressContainer: css({
@@ -106,7 +105,6 @@ export const getSummaryTableColumns = ({
   pattern,
   onCheckNowAction,
   onViewHistoryAction,
-  firstIndexName,
   dangerColor,
 }: {
   formatBytes: (value: number | undefined) => string;
@@ -115,7 +113,6 @@ export const getSummaryTableColumns = ({
   pattern: string;
   onCheckNowAction: (indexName: string) => void;
   onViewHistoryAction: (indexName: string) => void;
-  firstIndexName?: string;
   dangerColor: string;
 }): Array<EuiBasicTableColumn<IndexSummaryTableItem>> => [
   {
@@ -142,7 +139,6 @@ export const getSummaryTableColumns = ({
       {
         name: i18n.VIEW_HISTORY,
         render: (item) => {
-          const isFirstIndexName = firstIndexName === item.indexName;
           return (
             <EuiToolTip content={i18n.VIEW_HISTORY}>
               <EuiButtonIcon
@@ -151,9 +147,6 @@ export const getSummaryTableColumns = ({
                 aria-label={i18n.VIEW_HISTORY}
                 data-test-subj={`viewHistoryAction-${item.indexName}`}
                 onClick={() => onViewHistoryAction(item.indexName)}
-                {...(isFirstIndexName && {
-                  [HISTORICAL_RESULTS_TOUR_SELECTOR_KEY]: pattern,
-                })}
               />
             </EuiToolTip>
           );

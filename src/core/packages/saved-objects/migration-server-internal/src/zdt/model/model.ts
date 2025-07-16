@@ -57,7 +57,7 @@ export const model = (
   response: ResponseType<AllActionStates>,
   context: MigratorContext
 ): State => {
-  if (Either.isLeft<unknown, unknown>(response)) {
+  if (Either.isLeft<unknown>(response)) {
     if (isTypeof(response.left, 'retryable_es_client_error')) {
       return delayRetryState(current, response.left.message, context.maxRetryAttempts);
     }

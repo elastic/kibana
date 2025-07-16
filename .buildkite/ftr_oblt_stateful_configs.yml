@@ -10,6 +10,7 @@ disabled:
   #FTR configs
   - x-pack/solutions/observability/plugins/uptime/e2e/config.ts
   - x-pack/solutions/observability/test/api_integration/config.ts
+  - x-pack/solutions/observability/test/functional/config.base.ts
 
   # Elastic Synthetics configs
   - x-pack/solutions/observability/plugins/uptime/e2e/uptime/synthetics_run.ts
@@ -19,33 +20,41 @@ disabled:
   - x-pack/solutions/observability/plugins/ux/e2e/synthetics_run.ts
   - x-pack/solutions/observability/plugins/slo/e2e/synthetics_run.ts
 
+  # Observability AI Assistant local-only tests
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
-  - x-pack/test/alerting_api_integration/observability/config.ts
+  - x-pack/solutions/observability/test/alerting_api_integration/observability/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/logs_ui/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/logs_shared/config.ts
-  - x-pack/test/api_integration/apis/metrics_ui/config.ts
+  - x-pack/solutions/observability/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/synthetics/config.ts
   - x-pack/solutions/observability/test/api_integration/apis/uptime/config.ts
-  - x-pack/test/api_integration/apis/entity_manager/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/basic/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/cloud/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/rules/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/trial/config.ts
-  - x-pack/test/dataset_quality_api_integration/basic/config.ts
+  - x-pack/solutions/observability/test/dataset_quality_api_integration/basic/config.ts
   - x-pack/test/functional/apps/dataset_quality/config.ts
-  - x-pack/test/functional/apps/slo/embeddables/config.ts
-  - x-pack/test/functional/apps/uptime/config.ts
-  - x-pack/test/observability_api_integration/basic/config.ts
-  - x-pack/test/observability_api_integration/trial/config.ts
-  - x-pack/test/observability_functional/with_rac_write.config.ts
-  - x-pack/test/observability_onboarding_api_integration/basic/config.ts
-  - x-pack/test/observability_onboarding_api_integration/cloud/config.ts
-  - x-pack/test/observability_ai_assistant_api_integration/enterprise/config.ts
-  - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
+  - x-pack/solutions/observability/test/functional/apps/uptime/config.ts
+  - x-pack/solutions/observability/test/observability_api_integration/basic/config.ts
+  - x-pack/solutions/observability/test/observability_api_integration/trial/config.ts
+  - x-pack/solutions/observability/test/observability_functional/with_rac_write.config.ts
+  - x-pack/solutions/observability/test/observability_onboarding_api_integration/basic/config.ts
+  - x-pack/solutions/observability/test/observability_onboarding_api_integration/cloud/config.ts
+  - x-pack/solutions/observability/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/solutions/observability/test/api_integration/profiling/cloud/config.ts
   - x-pack/test/functional/apps/apm/config.ts
+  - x-pack/solutions/observability/test/functional_with_es_ssl/config.ts
+  - x-pack/solutions/observability/test/api_integration/apis/cases/config.ts
+  - x-pack/solutions/observability/test/functional/apps/slo/embeddables/config.ts
+  - x-pack/solutions/observability/test/api_integration/apis/security/config.ts
+  - x-pack/solutions/observability/test/accessibility/config.ts
+  - x-pack/solutions/observability/test/functional/apps/infra/config.ts
+  - x-pack/solutions/observability/test/functional/config.firefox.ts
   # stateful configs that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.stateful.config.ts
+  - x-pack/solutions/observability/test/api_integration_deployment_agnostic/feature_flag_configs/stateful/oblt.stateful.config.ts

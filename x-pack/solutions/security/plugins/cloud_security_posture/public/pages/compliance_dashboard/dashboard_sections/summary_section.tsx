@@ -32,7 +32,7 @@ import type {
 import { RisksTable } from '../compliance_charts/risks_table';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
-import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
+import { FINDINGS_GROUPING_OPTIONS, FINDINGS_FILTER_OPTIONS } from '../../../common/constants';
 
 export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   first: 3,
@@ -40,16 +40,27 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   third: 8,
 };
 
-export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => ({
-  'rule.benchmark.posture_type': policyTemplate,
-});
+export const getPolicyTemplateQuery = (
+  policyTemplate: PosturePolicyTemplate,
+  activeNamespace?: string
+): NavFilter =>
+  activeNamespace
+    ? {
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: policyTemplate,
+        [FINDINGS_FILTER_OPTIONS.NAMESPACE]: activeNamespace,
+      }
+    : {
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_POSTURE_TYPE]: policyTemplate,
+      };
 
 export const SummarySection = ({
   dashboardType,
   complianceData,
+  activeNamespace,
 }: {
   dashboardType: PosturePolicyTemplate;
   complianceData: ComplianceDashboardDataV2;
+  activeNamespace?: string;
 }) => {
   const navToFindings = useNavigateFindings();
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
@@ -58,9 +69,13 @@ export const SummarySection = ({
   const { euiTheme } = useEuiTheme();
 
   const handleEvalCounterClick = (evaluation: Evaluation) => {
-    navToFindings({ 'result.evaluation': evaluation, ...getPolicyTemplateQuery(dashboardType) }, [
-      FINDINGS_GROUPING_OPTIONS.NONE,
-    ]);
+    navToFindings(
+      {
+        'result.evaluation': evaluation,
+        ...getPolicyTemplateQuery(dashboardType, activeNamespace),
+      },
+      [FINDINGS_GROUPING_OPTIONS.NONE]
+    );
   };
 
   const handleCellClick = (
@@ -69,7 +84,7 @@ export const SummarySection = ({
   ) => {
     navToFindings(
       {
-        ...getPolicyTemplateQuery(dashboardType),
+        ...getPolicyTemplateQuery(dashboardType, activeNamespace),
         'rule.section': ruleSection,
         'result.evaluation': resultEvaluation,
       },
@@ -78,9 +93,13 @@ export const SummarySection = ({
   };
 
   const handleViewAllClick = () => {
-    navToFindings({ 'result.evaluation': RULE_FAILED, ...getPolicyTemplateQuery(dashboardType) }, [
-      FINDINGS_GROUPING_OPTIONS.RULE_SECTION,
-    ]);
+    navToFindings(
+      {
+        'result.evaluation': RULE_FAILED,
+        ...getPolicyTemplateQuery(dashboardType, activeNamespace),
+      },
+      [FINDINGS_GROUPING_OPTIONS.RULE_SECTION]
+    );
   };
 
   const counters: CspCounterCardProps[] = useMemo(
@@ -97,7 +116,12 @@ export const SummarySection = ({
                 'xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription',
                 { defaultMessage: 'Accounts Evaluated' }
               ),
-        title: <AccountsEvaluatedWidget benchmarkAssets={complianceData.benchmarks} />,
+        title: (
+          <AccountsEvaluatedWidget
+            activeNamespace={activeNamespace}
+            benchmarkAssets={complianceData.benchmarks}
+          />
+        ),
         button: (
           <EuiButtonEmpty
             iconType="listAdd"
@@ -130,7 +154,7 @@ export const SummarySection = ({
             iconType="search"
             data-test-subj="dashboard-view-all-resources"
             onClick={() => {
-              navToFindings(getPolicyTemplateQuery(dashboardType), [
+              navToFindings(getPolicyTemplateQuery(dashboardType, activeNamespace), [
                 FINDINGS_GROUPING_OPTIONS.RESOURCE_ID,
               ]);
             }}
@@ -150,6 +174,7 @@ export const SummarySection = ({
       dashboardType,
       kspmIntegrationLink,
       navToFindings,
+      activeNamespace,
     ]
   );
   const chartTitle = i18n.translate(

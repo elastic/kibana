@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationStart, ToastsStart } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup, ToastsStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -21,6 +21,7 @@ export interface ListingProps {
 
 export type ListingPropsInternal = ListingProps & {
   capabilities: ApplicationStart['capabilities'];
+  http: HttpSetup;
 };
 
-export { ReportListing } from './report_listing';
+export { ReportingTabs } from './components/reporting_tabs';

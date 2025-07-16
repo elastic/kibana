@@ -56,25 +56,21 @@ export type LensSavedObject = LensCrudTypes['Item'];
 export type PartialLensSavedObject = LensCrudTypes['PartialItem'];
 
 // ----------- GET --------------
-
 export type LensGetIn = LensCrudTypes['GetIn'];
-
 export type LensGetOut = LensCrudTypes['GetOut'];
 
 // ----------- CREATE --------------
-
 export type LensCreateIn = LensCrudTypes['CreateIn'];
-
 export type LensCreateOut = LensCrudTypes['CreateOut'];
-// ----------- UPDATE --------------
 
+// ----------- UPDATE --------------
 export type LensUpdateIn = LensCrudTypes['UpdateIn'];
 export type LensUpdateOut = LensCrudTypes['UpdateOut'];
-// ----------- DELETE --------------
 
+// ----------- DELETE --------------
 export type LensDeleteIn = LensCrudTypes['DeleteIn'];
 export type LensDeleteOut = LensCrudTypes['DeleteOut'];
-// ----------- SEARCH --------------
 
+// ----------- SEARCH --------------
 export type LensSearchIn = LensCrudTypes['SearchIn'];
 export type LensSearchOut = LensCrudTypes['SearchOut'];

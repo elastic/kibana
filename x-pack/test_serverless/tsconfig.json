@@ -81,7 +81,6 @@
     "@kbn/search-types",
     "@kbn/config-schema",
     "@kbn/features-plugin",
-    "@kbn/observability-ai-assistant-plugin",
     "@kbn/test-suites-src",
     "@kbn/console-plugin",
     "@kbn/cloud-security-posture-common",
@@ -91,5 +90,7 @@
     "@kbn/scout-info",
     "@kbn/streams-schema",
     "@kbn/test-suites-xpack-platform",
+    "@kbn/test-suites-xpack-security",
+    "@kbn/test-suites-xpack-observability",
   ]
 }

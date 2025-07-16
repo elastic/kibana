@@ -26,6 +26,10 @@ To temporarily resolve the issue and allow the upgrade to proceed, follow these 
 1. Remove the `xpack.alerting.cancelAlertsOnRuleTimeout: false` setting from the `kibana.yml` file.
 2. Restart {{kib}} to apply the changes.
 
+**Resolved**
+
+This was resolved in {{stack}} 9.0.3.
+
 ::::
 
 ::::{dropdown} Errors in rule executions occur when maintenance windows have filters

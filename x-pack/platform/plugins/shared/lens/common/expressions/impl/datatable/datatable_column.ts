@@ -42,6 +42,9 @@ export interface ColumnState {
   originalName?: string;
   bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
   alignment?: 'left' | 'right' | 'center';
+  /**
+   * @deprecated use `colorMapping` config
+   */
   palette?: PaletteOutput<CustomPaletteParams>;
   colorMapping?: ColorMapping.Config;
   colorMode?: 'none' | 'cell' | 'text';

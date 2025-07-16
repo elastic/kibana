@@ -15,14 +15,21 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
+import {
+  AssistantSpaceIdProvider,
+  ConnectorSelectorInline,
+  useAssistantContext,
+} from '@kbn/elastic-assistant';
 import { type AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ElasticLLMCostAwarenessTour } from '@kbn/elastic-assistant/impl/tour/elastic_llm';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/elastic-assistant/impl/tour/const';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 interface Props {
   connectorId: string | undefined;
@@ -34,6 +41,7 @@ interface Props {
   onConnectorIdSelected: (connectorId: string) => void;
   openFlyout: () => void;
   stats: AttackDiscoveryStats | null;
+  showFlyout: boolean;
 }
 
 const HeaderComponent: React.FC<Props> = ({
@@ -46,11 +54,43 @@ const HeaderComponent: React.FC<Props> = ({
   onCancel,
   openFlyout,
   stats,
+  showFlyout,
 }) => {
   const { euiTheme } = useEuiTheme();
   const disabled = connectorId == null;
   const [didCancel, setDidCancel] = useState(false);
+  const { inferenceEnabled } = useAssistantContext();
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+  const spaceId = useSpaceId();
+
+  const [isEISCostTourDisabled, setIsEISCostTourDisabled] = useState<boolean>(
+    attackDiscoveryAlertsEnabled ||
+      !connectorsAreConfigured ||
+      !spaceId ||
+      !inferenceEnabled ||
+      showFlyout
+  );
+
+  useEffect(() => {
+    if (
+      attackDiscoveryAlertsEnabled ||
+      !connectorsAreConfigured ||
+      !spaceId ||
+      !inferenceEnabled ||
+      showFlyout
+    ) {
+      setIsEISCostTourDisabled(true);
+    } else {
+      setIsEISCostTourDisabled(false);
+    }
+  }, [
+    attackDiscoveryAlertsEnabled,
+    connectorsAreConfigured,
+    inferenceEnabled,
+    isEISCostTourDisabled,
+    showFlyout,
+    spaceId,
+  ]);
 
   const handleCancel = useCallback(() => {
     setDidCancel(true);
@@ -103,6 +143,7 @@ const HeaderComponent: React.FC<Props> = ({
             {!attackDiscoveryAlertsEnabled && connectorsAreConfigured && (
               <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
                 <EuiFlexItem
+                  data-test-subj="statusBell"
                   grow={false}
                   css={css`
                     margin-left: ${euiTheme.size.s};
@@ -113,12 +154,25 @@ const HeaderComponent: React.FC<Props> = ({
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <ConnectorSelectorInline
-                    onConnectorSelected={noop}
-                    onConnectorIdSelected={onConnectorIdSelected}
-                    selectedConnectorId={connectorId}
-                    stats={stats}
-                  />
+                  {spaceId && (
+                    <AssistantSpaceIdProvider spaceId={spaceId}>
+                      <ElasticLLMCostAwarenessTour
+                        isDisabled={isEISCostTourDisabled}
+                        selectedConnectorId={connectorId}
+                        zIndex={999} // Should lower than the flyout
+                        storageKey={
+                          NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ATTACK_DISCOVERY
+                        }
+                      >
+                        <ConnectorSelectorInline
+                          onConnectorSelected={noop}
+                          onConnectorIdSelected={onConnectorIdSelected}
+                          selectedConnectorId={connectorId}
+                          stats={stats}
+                        />
+                      </ElasticLLMCostAwarenessTour>
+                    </AssistantSpaceIdProvider>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}

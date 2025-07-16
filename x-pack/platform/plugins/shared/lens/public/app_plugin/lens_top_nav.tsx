@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
@@ -20,7 +20,7 @@ import moment from 'moment';
 import { EuiCallOut, UseEuiTheme, euiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SerializedStyles, css } from '@emotion/react';
-import { LENS_APP_LOCATOR } from '../../common/locator/locator';
+import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
@@ -341,7 +341,6 @@ export const LensTopNavMenu = ({
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
-    notifications,
   } = useKibana<LensAppServices>().services;
 
   const {
@@ -770,7 +769,6 @@ export const LensTopNavMenu = ({
         onClose: () => {
           anchorElement?.focus();
         },
-        toasts: notifications.toasts,
       });
     };
 
@@ -958,7 +956,6 @@ export const LensTopNavMenu = ({
     uiSettings,
     isOnTextBasedMode,
     lensStore,
-    notifications.toasts,
     startServices,
   ]);
 
@@ -1022,7 +1019,7 @@ export const LensTopNavMenu = ({
       // by Redux Toolkit. `filterManager.setFilters` will then try to modify
       // the query's filters, which will throw an error. To avoid this, we need
       // to clone the filters before passing them to `filterManager.setFilters`.
-      const savedQueryFilters = cloneDeep(newSavedQuery.attributes.filters || []);
+      const savedQueryFilters = structuredClone(newSavedQuery.attributes.filters || []);
       const globalFilters = data.query.filterManager.getGlobalFilters();
       data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
       dispatchSetState({

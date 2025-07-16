@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, GridPanelData, GridSectionData, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import { GridData } from '../../../common/content_management/v2/types';
-import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';
-import { DashboardLayout } from '../../dashboard_api/types';
+import type { GridData } from '../../../server/content_management';
+import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import {
@@ -39,7 +39,6 @@ export const DashboardGrid = ({
 
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
-  const { euiTheme } = useEuiTheme();
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
   const [expandedPanelId, layout, useMargins, viewMode] = useBatchedPublishingSubjects(
@@ -111,7 +110,6 @@ export const DashboardGrid = ({
           updatedLayout.sections[widget.id] = {
             collapsed: widget.isCollapsed,
             title: widget.title,
-            id: widget.id,
             gridData: {
               i: widget.id,
               y: widget.row,
@@ -167,6 +165,8 @@ export const DashboardGrid = ({
     [appFixedViewport, dashboardContainerRef, dashboardInternalApi.layout$]
   );
 
+  const styles = useMemoCss(dashboardGridStyles);
+
   useEffect(() => {
     /**
      * ResizeObserver fires the callback on `.observe()` with the initial size of the observed
@@ -199,7 +199,7 @@ export const DashboardGrid = ({
     };
   }, [dashboardApi]);
 
-  const memoizedgridLayout = useMemo(() => {
+  const memoizedGridLayout = useMemo(() => {
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
@@ -229,32 +229,16 @@ export const DashboardGrid = ({
     topOffset,
   ]);
 
-  const { dashboardClasses, dashboardStyles } = useMemo(() => {
-    return {
-      dashboardClasses: classNames({
-        'dshLayout-withoutMargins': !useMargins,
-        'dshLayout--viewing': viewMode === 'view',
-        'dshLayout--editing': viewMode !== 'view',
-        'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
-      }),
-      dashboardStyles: css`
-        // for dashboards with no controls, increase the z-index of the hover actions in the
-        // top row so that they overlap the sticky nav in Dashboard
-        .dshDashboardViewportWrapper:not(:has(.dshDashboardViewport-controls))
-          &
-          .dshDashboardGrid__item[data-grid-row='0']
-          .embPanel__hoverActions {
-          z-index: ${euiTheme.levels.toast};
-        }
-
-        // when in fullscreen mode, combine all floating actions on first row and nudge them down
-      `,
-    };
-  }, [useMargins, viewMode, expandedPanelId, euiTheme.levels.toast]);
-
   return (
-    <div ref={layoutRef} className={dashboardClasses} css={dashboardStyles}>
-      {memoizedgridLayout}
+    <div
+      ref={layoutRef}
+      className={classNames(viewMode === 'edit' ? 'dshLayout--editing' : 'dshLayout--viewing', {
+        'dshLayout-withoutMargins': !useMargins,
+        'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
+      })}
+      css={styles.dashboard}
+    >
+      {memoizedGridLayout}
     </div>
   );
 };
@@ -267,4 +251,48 @@ const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => 
     w: panel.width,
     h: panel.height,
   };
+};
+
+const dashboardGridStyles = {
+  dashboard: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      // for dashboards with no controls, increase the z-index of the hover actions in the
+      // top row so that they overlap the sticky nav in Dashboard
+      ".dshDashboardViewportWrapper:not(:has(.dshDashboardViewport-controls)) & .dshDashboardGrid__item[data-grid-row='0'] .embPanel__hoverActions":
+        {
+          zIndex: euiTheme.levels.toast,
+        },
+
+      // Hide hover actions when dashboard has an overlay
+      '.dshDashboardGrid__item--blurred .embPanel__hoverActions, .dshDashboardGrid__item--focused .embPanel__hoverActions':
+        {
+          visibility: 'hidden !important' as 'hidden',
+        },
+      '&.dshLayout-isMaximizedPanel': {
+        height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
+        '.dshDashboardGrid__item--expanded': {
+          position: 'absolute',
+          width: '100%',
+        },
+      },
+      // LAYOUT MODES
+      // Adjust borders/etc... for non-spaced out and expanded panels
+      '&.dshLayout-withoutMargins': {
+        paddingTop: euiTheme.size.s,
+        '.embPanel__content, .embPanel, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer': {
+          borderRadius: 0,
+        },
+        '.embPanel__content, .embPanel__header': {
+          backgroundColor: euiTheme.colors.backgroundBasePlain,
+        },
+      },
+      // drag handle visibility when dashboard is in edit mode or a panel is expanded
+      '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred, .dshDashboardGrid__item--focused':
+        {
+          '.embPanel--dragHandle': {
+            visibility: 'hidden',
+          },
+        },
+    }),
 };

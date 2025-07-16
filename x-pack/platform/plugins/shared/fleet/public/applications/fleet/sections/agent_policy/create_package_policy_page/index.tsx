@@ -10,6 +10,8 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 
 import { useGetSettings } from '../../../hooks';
 
+import { splitPkgKey } from '../../../../../../common/services';
+
 import type { AddToPolicyParams, EditPackagePolicyFrom } from './types';
 
 import { CreatePackagePolicySinglePage } from './single_page_layout';
@@ -25,6 +27,7 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     [queryParams]
   );
   const [prerelease, setPrerelease] = React.useState<boolean>(false);
+  const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
 
   const { data: settings } = useGetSettings();
 
@@ -53,6 +56,9 @@ export const CreatePackagePolicyPage: React.FC<{}> = () => {
     from,
     queryParamsPolicyId,
     prerelease,
+    pkgName,
+    pkgVersion,
+    integration: params.integration,
   };
 
   if (useMultiPageLayout) {

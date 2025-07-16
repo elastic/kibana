@@ -270,7 +270,7 @@ export class FeatureTable extends Component<Props, State> {
       );
 
       const extraAction = (
-        <EuiText style={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
+        <EuiText css={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
           {feature.reserved.description}
         </EuiText>
       );
@@ -320,7 +320,7 @@ export class FeatureTable extends Component<Props, State> {
     ) {
       infoIcon = (
         <EuiIconTip
-          type="iInCircle"
+          type="info"
           content={
             <FormattedMessage
               id="xpack.security.management.editRole.featureTable.privilegeCustomizationTooltip"
@@ -353,7 +353,7 @@ export class FeatureTable extends Component<Props, State> {
             featureName: feature.name,
           },
         })}
-        style={{
+        css={{
           minWidth: 200,
         }}
       />

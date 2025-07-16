@@ -91,17 +91,14 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
         await testSubjects.existOrFail('connectLLMButton');
+        await testSubjects.existOrFail('createIndexButton');
+        await testSubjects.existOrFail('uploadFileButton');
       },
-
       async expectPlaygroundLLMConnectorOptionsExists() {
         await testSubjects.existOrFail('create-connector-flyout');
         await testSubjects.existOrFail('.gemini-card');
         await testSubjects.existOrFail('.bedrock-card');
         await testSubjects.existOrFail('.gen-ai-card');
-      },
-
-      async expectPlaygroundStartChatPageIndexButtonExists() {
-        await testSubjects.existOrFail('createIndexButton');
       },
 
       async expectPlaygroundStartChatPageIndexCalloutExists() {
@@ -115,6 +112,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectPlaygroundHeaderComponentsToDisabled() {
         expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be('true');
+        expect(await testSubjects.isEnabled('uploadFileButton')).to.be(true);
         expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(false);
         expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
       },
@@ -126,23 +124,78 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectOpenFlyoutAndSelectIndex() {
         await browser.refresh();
         await selectIndex();
+      },
+      async expectDataSourcesButtonToBeSuccess() {
         await testSubjects.existOrFail('dataSourcesSuccessButton');
       },
-
       async expectToSelectIndicesAndLoadChat() {
         await selectIndex();
         await testSubjects.existOrFail('chatPage');
       },
-
-      async expectAddConnectorButtonExists() {
+      async expectSelectingIndicesWithNoFieldtoShowError() {
+        await testSubjects.existOrFail('addDataSourcesButton');
+        await testSubjects.click('addDataSourcesButton');
+        await testSubjects.existOrFail('selectIndicesFlyout');
+        await testSubjects.click('sourceIndex-0');
+        await testSubjects.existOrFail('NoIndicesFieldsMessage');
+        expect(await testSubjects.isEnabled('saveButton')).to.be(false);
+      },
+      async clickConnectLLMButton() {
         await testSubjects.existOrFail('connectLLMButton');
-      },
-
-      async expectOpenConnectorPagePlayground() {
         await testSubjects.click('connectLLMButton');
+      },
+      async createConnectorFlyoutIsVisible() {
         await testSubjects.existOrFail('create-connector-flyout');
+        await testSubjects.existOrFail('.inference-card');
+        await testSubjects.existOrFail('.bedrock-card');
+        await testSubjects.existOrFail('.gemini-card');
+        await testSubjects.existOrFail('.gen-ai-card');
+      },
+      async createOpenAiConnector(connectorName: string) {
+        await testSubjects.existOrFail('.gen-ai-card');
+        await testSubjects.click('.gen-ai-card');
+
+        await testSubjects.existOrFail('create-connector-flyout-header');
+        const headerValue = await testSubjects.getVisibleText('create-connector-flyout-header');
+        expect(headerValue).to.contain('OpenAI connector');
+        await testSubjects.existOrFail('nameInput');
+        await testSubjects.setValue('nameInput', connectorName);
+
+        const openaiProvider = await testSubjects.getVisibleText('config.apiProvider-select');
+        expect(openaiProvider).to.contain('OpenAI');
+
+        await testSubjects.existOrFail('secrets.apiKey-input');
+        await testSubjects.setValue('secrets.apiKey-input', 'apiKey');
+        await testSubjects.existOrFail('create-connector-flyout-save-btn');
+        await testSubjects.click('create-connector-flyout-save-btn');
+        await testSubjects.existOrFail('euiToastHeader');
+      },
+      async clickCreateIndex() {
+        await testSubjects.existOrFail('createIndexButton');
+        expect(await testSubjects.isEnabled('createIndexButton')).equal(true);
+        await testSubjects.click('createIndexButton');
       },
 
+      async searchConnector(connectorName: string) {
+        const searchBox = await findService.byCssSelector(
+          '[data-test-subj="actionsList"] .euiFieldSearch'
+        );
+        await searchBox.click();
+        await searchBox.clearValue();
+        await searchBox.type(connectorName);
+        await searchBox.pressKeys(browser.keys.ENTER);
+        const s = await findService.byCssSelector(
+          '.euiBasicTable[data-test-subj="actionsTable"] .euiTableCellContent__text'
+        );
+        expect(await s.getVisibleText()).to.be(connectorName);
+      },
+      async deleteConnector(connectorName: string) {
+        await this.searchConnector(connectorName);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+      },
       async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();
@@ -165,15 +218,28 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const promptInstructions = await instructionsPromptElement.getVisibleText();
         expect(promptInstructions).to.contain(text);
       },
-
       async expectChatWindowLoaded() {
         expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be(null);
-        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(true);
-        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(true);
-
-        expect(await testSubjects.isEnabled('regenerateActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('clearChatActionButton')).to.be(false);
-        expect(await testSubjects.isEnabled('sendQuestionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('dataSourceActionButton')).to.equal(
+          true,
+          'dataSourceActionButton isEnabled should be true'
+        );
+        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.equal(
+          true,
+          'viewCodeActionButton isEnabled should be true'
+        );
+        expect(await testSubjects.isEnabled('regenerateActionButton')).to.equal(
+          false,
+          'regenerateActionButton isEnabled should be false'
+        );
+        expect(await testSubjects.isEnabled('clearChatActionButton')).to.equal(
+          false,
+          'clearChatActionButton isEnabled should be false'
+        );
+        expect(await testSubjects.isEnabled('sendQuestionButton')).to.equal(
+          false,
+          'sendQuestionButton isEnabled should be false'
+        );
 
         await testSubjects.existOrFail('questionInput');
         const model = await testSubjects.find('summarizationModelSelect');
@@ -189,13 +255,27 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('editContextPanel');
         await testSubjects.existOrFail('summarizationPanel');
       },
+      async expectCanRegenerateQuestion() {
+        await testSubjects.existOrFail('regenerateActionButton');
+        await (await testSubjects.find('regenerateActionButton')).click();
+        await this.expectChatWorks();
+      },
+      async clearChat() {
+        await testSubjects.existOrFail('clearChatActionButton');
+        expect(await testSubjects.isEnabled('clearChatActionButton')).to.be(true);
+        await (await testSubjects.find('clearChatActionButton')).click();
+
+        const userMessageElement = await testSubjects.find('systemMessage');
+        const userMessage = await userMessageElement.getVisibleText();
+        expect(userMessage).to.contain('Welcome! Ask a question to get started.');
+      },
 
       async updatePrompt(prompt: string) {
-        await testSubjects.setValue('instructionsPrompt', prompt);
+        await testSubjects.setValue('instructionsPrompt', prompt, { clearWithKeyboard: true });
       },
 
       async updateQuestion(question: string) {
-        await testSubjects.setValue('questionInput', question);
+        await testSubjects.setValue('questionInput', question, { clearWithKeyboard: true });
       },
 
       async expectQuestionInputToBeEmpty() {
@@ -229,6 +309,36 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('euiFlyoutCloseButton');
       },
 
+      async expectCanChangeCitations() {
+        await testSubjects.existOrFail('includeCitationsToggle');
+        expect(
+          await testSubjects.isEuiSwitchChecked(await testSubjects.find('includeCitationsToggle'))
+        ).to.be(true);
+        await (await testSubjects.find('includeCitationsToggle')).click();
+        expect(
+          await testSubjects.isEuiSwitchChecked(await testSubjects.find('includeCitationsToggle'))
+        ).to.be(false);
+      },
+      async expectCanChangeNumberOfDocumentsSent() {
+        await testSubjects.existOrFail('playground_context_doc_number-3');
+        expect(
+          await (
+            await testSubjects.find('playground_context_doc_number-3')
+          ).getAttribute('aria-pressed')
+        ).to.be('true');
+        await testSubjects.existOrFail('playground_context_doc_number-10');
+        await (await testSubjects.find('playground_context_doc_number-10')).click();
+        expect(
+          await (
+            await testSubjects.find('playground_context_doc_number-10')
+          ).getAttribute('aria-pressed')
+        ).to.be('true');
+        expect(
+          await (
+            await testSubjects.find('playground_context_doc_number-3')
+          ).getAttribute('aria-pressed')
+        ).to.be('false');
+      },
       async openQueryMode() {
         await testSubjects.existOrFail('queryMode');
         await testSubjects.click('queryMode');
@@ -256,6 +366,19 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         ).to.eql(expectedSelectedFields);
       },
 
+      async editContext(indexName: string = 'basic_index', fieldToRemove: string) {
+        await testSubjects.click('chatMode');
+        await testSubjects.existOrFail(`contextField-${fieldToRemove}`);
+        const wrapper = await testSubjects.find(`contextField-${fieldToRemove}`);
+        await (
+          await wrapper.findByCssSelector(
+            `[aria-label="Remove ${fieldToRemove} from selection in this group"]`
+          )
+        ).click();
+        expect(
+          await comboBox.getComboBoxSelectedOptions(`contextFieldsSelectable-${indexName}`)
+        ).to.eql(['bar', 'baz', 'baz.keyword', 'foo', 'nestedField']);
+      },
       async expectSaveFieldsBetweenModes() {
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-true');
@@ -320,17 +443,29 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const modeSelectedValue = await testSubjects.getAttribute(mode, 'aria-pressed');
         expect(modeSelectedValue).to.be('true');
       },
-      async selectPageMode(mode: 'chatMode' | 'queryMode') {
+      async selectPageMode(mode: 'chatMode' | 'queryMode', playgroundId?: string) {
         await testSubjects.existOrFail(mode);
         await testSubjects.click(mode);
         switch (mode) {
           case 'queryMode':
-            expect(await browser.getCurrentUrl()).contain('/app/search_playground/search/query');
+            expect(await browser.getCurrentUrl()).contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search/query`
+                : '/app/search_playground/search/query'
+            );
             break;
           case 'chatMode':
             const url = await browser.getCurrentUrl();
-            expect(url).contain('/app/search_playground/search');
-            expect(url).not.contain('/app/search_playground/search/query');
+            expect(url).contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search`
+                : '/app/search_playground/search'
+            );
+            expect(url).not.contain(
+              playgroundId
+                ? `/app/search_playground/p/${playgroundId}/search/query`
+                : '/app/search_playground/search/query'
+            );
             break;
         }
       },
@@ -429,6 +564,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const editorViewDiv = await codeEditor.findByClassName('view-lines');
         const queryResponse = await editorViewDiv.getVisibleText();
         expect(queryResponse).to.contain(text);
+      },
+    },
+    SavedPlaygroundPage: {
+      async expectPlaygroundNameHeader(name: string) {
+        await testSubjects.existOrFail('playgroundName');
+        const nameTitle = await testSubjects.find('playgroundName');
+        expect(await nameTitle.getVisibleText()).to.be(name);
       },
     },
   };

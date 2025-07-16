@@ -26,6 +26,7 @@ export const convertAlertingRuleToSchedule = (
     params,
     schedule,
     actions,
+    systemActions,
   } = rule;
   return {
     id,
@@ -37,7 +38,7 @@ export const convertAlertingRuleToSchedule = (
     enabled,
     params,
     schedule,
-    actions,
+    actions: [...actions, ...(systemActions ?? [])],
     lastExecution: createScheduleExecutionSummary(rule),
   };
 };

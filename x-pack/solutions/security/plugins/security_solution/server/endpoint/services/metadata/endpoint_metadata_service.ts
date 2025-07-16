@@ -175,7 +175,7 @@ export class EndpointMetadataService {
    * @param _fleetAgent
    * @param _fleetAgentPolicy
    * @param _endpointPackagePolicy
-   * @private
+   * @internal
    */
   // eslint-disable-next-line complexity
   private async enrichHostMetadata(

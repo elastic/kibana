@@ -324,6 +324,23 @@ describe('mappingFromFieldMap', () => {
                   type: 'date_range',
                   format: 'epoch_millis||strict_date_optional_time',
                 },
+                updated_at: {
+                  type: 'date',
+                },
+                updated_by: {
+                  properties: {
+                    user: {
+                      properties: {
+                        id: {
+                          type: 'keyword',
+                        },
+                        name: {
+                          type: 'keyword',
+                        },
+                      },
+                    },
+                  },
+                },
                 url: {
                   ignore_above: 2048,
                   index: false,

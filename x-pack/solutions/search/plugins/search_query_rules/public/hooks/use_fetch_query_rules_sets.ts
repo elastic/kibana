@@ -30,7 +30,6 @@ export const useFetchQueryRulesSets = (page: Page = DEFAULT_PAGE_VALUE) => {
         }
       );
     },
-    refetchOnWindowFocus: false,
     retry: false,
   });
 };

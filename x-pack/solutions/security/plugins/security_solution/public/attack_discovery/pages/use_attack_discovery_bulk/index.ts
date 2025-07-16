@@ -73,10 +73,17 @@ export const useAttackDiscoveryBulk = () => {
       }),
     {
       mutationKey: ATTACK_DISCOVERY_BULK_MUTATION_KEY,
-      onSuccess: () => {
-        if (attackDiscoveryAlertsEnabled) {
+      onSuccess: (_: PostAttackDiscoveryBulkResponse, variables: AttackDiscoveryBulkParams) => {
+        const { ids, kibanaAlertWorkflowStatus } = variables;
+
+        if (attackDiscoveryAlertsEnabled && kibanaAlertWorkflowStatus != null) {
           invalidateFindAttackDiscoveries();
-          addSuccess(i18n.ATTACK_DISCOVERIES_SUCCESSFULLY_UPDATED);
+          addSuccess(
+            i18n.MARKED_ATTACK_DISCOVERIES({
+              attackDiscoveries: ids.length,
+              kibanaAlertWorkflowStatus,
+            })
+          );
         }
       },
       onError: (error) => {

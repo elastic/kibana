@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import {
   EuiFlyoutFooter,
@@ -16,7 +17,9 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export enum SubmittingType {
   savingAsAdHoc = 'savingAsAdHoc',
@@ -67,6 +70,7 @@ export const Footer = ({
   isPersisted,
   canSave,
 }: FooterProps) => {
+  const styles = useMemoCss(componentStyles);
   const isEditingAdHoc = isEdit && !isPersisted;
   const submitPersisted = () => {
     onSubmit(false);
@@ -76,7 +80,7 @@ export const Footer = ({
   };
 
   return (
-    <EuiFlyoutFooter className="indexPatternEditor__footer">
+    <EuiFlyoutFooter css={styles.footer}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -90,7 +94,7 @@ export const Footer = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -134,4 +138,12 @@ export const Footer = ({
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
+};
+
+const componentStyles = {
+  footer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: -euiTheme.size.l,
+      marginRight: -euiTheme.size.l,
+    }),
 };

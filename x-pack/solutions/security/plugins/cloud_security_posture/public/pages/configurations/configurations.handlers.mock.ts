@@ -143,7 +143,7 @@ export const generateCspFinding = (
 
 export const generateFindingHit = (finding: CspFinding) => {
   return {
-    _index: 'logs-cloud_security_posture.findings_latest-default',
+    _index: 'security_solution-cloud_security_posture.misconfiguration_latest',
     _id: uuidV4(),
     _score: null,
     _source: finding,

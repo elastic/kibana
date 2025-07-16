@@ -114,7 +114,7 @@ describe('<InvestigationGuide />', () => {
     });
     const { queryByTestId, getByTestId } = render(
       <IntlProvider locale="en">
-        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isRulePreview: true }}>
           <InvestigationGuide />
         </DocumentDetailsContext.Provider>
       </IntlProvider>

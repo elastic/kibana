@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Location } from '../../definitions/types';
-import { getNewUserDefinedColumnSuggestion } from '../factories';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { getNewUserDefinedColumnSuggestion } from '@kbn/esql-ast';
 import { attachTriggerCommand, getFunctionSignaturesByReturnType, setup } from './helpers';
 
 describe('autocomplete.suggest', () => {

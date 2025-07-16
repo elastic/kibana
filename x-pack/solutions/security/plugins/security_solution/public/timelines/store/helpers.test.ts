@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import type { ColumnHeaderOptions } from '../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
+import { TimelineTabs } from '../../../common/types/timeline';
 import {
   DataProviderTypeEnum,
   TimelineStatusEnum,
@@ -32,7 +32,6 @@ import {
   removeTimelineProvider,
   updateTimelineColumns,
   updateTimelineColumnWidth,
-  updateTimelineGraphEventId,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
@@ -79,7 +78,7 @@ const basicDataProvider: DataProvider = {
 };
 const basicTimeline: TimelineModel = {
   activeTab: TimelineTabs.query,
-  prevActiveTab: TimelineTabs.graph,
+  prevActiveTab: TimelineTabs.eql,
   columns: [],
   defaultColumns: [],
   dataProviders: [{ ...basicDataProvider }],
@@ -1815,77 +1814,6 @@ describe('Timeline', () => {
           },
         },
       ]);
-    });
-  });
-
-  describe('#updateGraphEventId', () => {
-    test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineGraphEventId({
-        id: 'foo',
-        graphEventId: '123',
-        timelineById: timelineByIdMock,
-      });
-      expect(update).not.toBe(timelineByIdMock);
-    });
-
-    test('should empty graphEventId', () => {
-      const update = updateTimelineGraphEventId({
-        id: 'foo',
-        graphEventId: '',
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.graphEventId).toEqual('');
-    });
-
-    test('should empty graphEventId and not change activeTab and prevActiveTab because TimelineId !== TimelineId.active', () => {
-      const update = updateTimelineGraphEventId({
-        id: 'foo',
-        graphEventId: '',
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.graphEventId).toEqual('');
-      expect(update.foo.activeTab).toEqual(timelineByIdMock.foo.activeTab);
-      expect(update.foo.prevActiveTab).toEqual(timelineByIdMock.foo.prevActiveTab);
-    });
-
-    test('should empty graphEventId if timeline is active and user go to another tab', () => {
-      const mock = cloneDeep(timelineByIdMock);
-      mock[TimelineId.active] = {
-        ...timelineByIdMock.foo,
-        activeTab: TimelineTabs.eql,
-        prevActiveTab: TimelineTabs.graph,
-      };
-      delete mock.foo;
-
-      const update = updateTimelineGraphEventId({
-        id: TimelineId.active,
-        graphEventId: '',
-        timelineById: mock,
-      });
-
-      expect(update[TimelineId.active].graphEventId).toEqual('');
-      expect(update[TimelineId.active].activeTab).toEqual(TimelineTabs.eql);
-      expect(update[TimelineId.active].prevActiveTab).toEqual(TimelineTabs.graph);
-    });
-
-    test('should empty graphEventId and return to the previous tab if timeline is active and user close the graph', () => {
-      const mock = cloneDeep(timelineByIdMock);
-      mock[TimelineId.active] = {
-        ...timelineByIdMock.foo,
-        activeTab: TimelineTabs.graph,
-        prevActiveTab: TimelineTabs.eql,
-      };
-      delete mock.foo;
-
-      const update = updateTimelineGraphEventId({
-        id: TimelineId.active,
-        graphEventId: '',
-        timelineById: mock,
-      });
-
-      expect(update[TimelineId.active].graphEventId).toEqual('');
-      expect(update[TimelineId.active].activeTab).toEqual(TimelineTabs.eql);
-      expect(update[TimelineId.active].prevActiveTab).toEqual(TimelineTabs.graph);
     });
   });
 

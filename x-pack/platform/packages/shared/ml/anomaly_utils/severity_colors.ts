@@ -7,6 +7,8 @@
 
 /**
  * RGB hex codes used to indicate the severity of an anomaly according to its anomaly score.
+ * @deprecated Prefer using theme-aware colors via `useSeverityColor` hook or `getThemeResolvedSeverityColor` utility.
+ * This constant provides a fixed set of legacy colors.
  */
 export const ML_SEVERITY_COLORS = {
   /**

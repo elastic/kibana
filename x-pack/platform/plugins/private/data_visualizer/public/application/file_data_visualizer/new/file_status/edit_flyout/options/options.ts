@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { FILE_FORMATS } from '@kbn/file-upload-common/src/constants';
-
+import { FILE_FORMATS } from '@kbn/file-upload-common';
 import {
   TIMESTAMP_OPTIONS,
   DELIMITER_OPTIONS,

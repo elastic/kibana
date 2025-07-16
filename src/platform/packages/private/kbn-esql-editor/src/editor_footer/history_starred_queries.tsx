@@ -87,6 +87,7 @@ export function QueryHistoryAction({
           <EuiButtonEmpty
             size="xs"
             color="primary"
+            flush="both"
             onClick={toggleHistory}
             css={css`
               padding-inline: 0;
@@ -297,7 +298,7 @@ export function QueryList({
               <EuiFlexItem grow={false}>
                 <EuiCopy
                   textToCopy={item.queryString}
-                  content={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
+                  beforeMessage={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                     defaultMessage: 'Copy query to clipboard',
                   })}
                 >

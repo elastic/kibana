@@ -97,6 +97,20 @@
             "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FileUploadResults.timeFieldName",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -204,6 +218,20 @@
           },
           {
             "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.OpenFileUploadLiteContext.existingIndex",
+            "type": "string",
+            "tags": [],
+            "label": "existingIndex",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
             "id": "def-common.OpenFileUploadLiteContext.initialIndexName",
             "type": "string",
             "tags": [],
@@ -239,6 +267,63 @@
     "misc": [
       {
         "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FILE_SIZE_DISPLAY_FORMAT",
+        "type": "string",
+        "tags": [],
+        "label": "FILE_SIZE_DISPLAY_FORMAT",
+        "description": [],
+        "signature": [
+          "\"0,0.[0] b\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.INDEX_META_DATA_CREATED_BY",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_META_DATA_CREATED_BY",
+        "description": [],
+        "signature": [
+          "\"file-data-visualizer\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.MB",
+        "type": "number",
+        "tags": [],
+        "label": "MB",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.NO_TIME_FORMAT",
+        "type": "string",
+        "tags": [],
+        "label": "NO_TIME_FORMAT",
+        "description": [],
+        "signature": [
+          "\"null\""
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
         "id": "def-common.OPEN_FILE_UPLOAD_LITE_ACTION",
         "type": "string",
         "tags": [],
@@ -266,8 +351,82 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.TIKA_PREVIEW_CHARS",
+        "type": "number",
+        "tags": [],
+        "label": "TIKA_PREVIEW_CHARS",
+        "description": [],
+        "signature": [
+          "100000"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.FILE_FORMATS",
+        "type": "Object",
+        "tags": [],
+        "label": "FILE_FORMATS",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_FORMATS.DELIMITED",
+            "type": "string",
+            "tags": [],
+            "label": "DELIMITED",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_FORMATS.NDJSON",
+            "type": "string",
+            "tags": [],
+            "label": "NDJSON",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_FORMATS.SEMI_STRUCTURED_TEXT",
+            "type": "string",
+            "tags": [],
+            "label": "SEMI_STRUCTURED_TEXT",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.FILE_FORMATS.TIKA",
+            "type": "string",
+            "tags": [],
+            "label": "TIKA",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }
