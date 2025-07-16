@@ -27,24 +27,31 @@ spec:
       provider_settings:
         trigger_mode: none
       schedules:
-        daily kibana base image build:
+        weekly kibana base image build:
           branch: main
-          cronline: '0 0 * * *'
+          cronline: '0 0 * * 0' # Sunday at midnight
           env:
             IMAGES_CONFIG: kibana/base_image.yml
           message: Builds Kibana VM base image daily
-        daily kibana cache layer build:
+        weekly kibana packages layer build:
           branch: main
-          cronline: '0 1 * * *' # make sure this runs after the daily kibana base image build
+          cronline: '0 1 * * 0' # make sure this runs after the weekly kibana base image build
           env:
-            IMAGES_CONFIG: kibana/image_cache.yml
+            IMAGES_CONFIG: kibana/packages_layer.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
-          message: Builds Kibana VM cache warmup daily
-        daily kibana fips image build:
+          message: Builds Kibana Packages Layer Weekly
+        daily kibana cache image build:
           branch: main
-          cronline: '0 4 * * *' # make sure this runs after the daily kibana cache image build
+          cronline: '0 2 * * *' # Daily at 2AM UTC
           env:
-            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/image_cache.yml'
+            IMAGES_CONFIG: kibana/image_cache.tpl.yml
+            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
+          message: Builds Kibana VM base image daily
+        weekly kibana fips image build:
+          branch: main
+          cronline: '0 4 * * *'
+          env:
+            BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml,kibana/image_cache.tpl.yml'
             IMAGES_CONFIG: kibana/fips.yml
           message: Builds Kibana FIPS VM image daily
       teams:
