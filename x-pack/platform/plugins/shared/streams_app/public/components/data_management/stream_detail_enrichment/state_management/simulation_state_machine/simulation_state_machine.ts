@@ -212,6 +212,10 @@ export const simulationMachine = setup({
       target: '.assertingRequirements',
       actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
+    'processor.save': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+    },
     'processor.change': {
       target: '.debouncingChanges',
       reenter: true,

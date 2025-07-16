@@ -401,6 +401,7 @@ export const streamEnrichmentMachine = setup({
               initial: 'idle',
               states: {
                 idle: {
+                  entry: [{ type: 'sendProcessorsEventToSimulator', params: ({ event }) => event }],
                   on: {
                     'processor.edit': {
                       guard: 'hasSimulatePrivileges',
@@ -438,14 +439,14 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteProcessor', params: ({ event }) => event },
-                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                        // { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                     'processor.save': {
                       target: 'idle',
                       actions: [
                         { type: 'reassignProcessors' },
-                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                        // { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                   },
@@ -461,23 +462,23 @@ export const streamEnrichmentMachine = setup({
                     },
                     'processor.cancel': {
                       target: 'idle',
-                      actions: [
-                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                      ],
+                      // actions: [
+                      //   { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                      // ],
                     },
                     'processor.delete': {
                       target: 'idle',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteProcessor', params: ({ event }) => event },
-                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                        // { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                     'processor.save': {
                       target: 'idle',
                       actions: [
                         { type: 'reassignProcessors' },
-                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                        // { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                   },

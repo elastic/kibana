@@ -21,9 +21,6 @@ import {
   EuiText,
   EuiBadge,
   EuiFlexItem,
-  EuiBeacon,
-  EuiToolTip,
-  EuiHealth,
 } from '@elastic/eui';
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
@@ -101,9 +98,10 @@ const ProcessorConfigurationListItem = ({
   const processor = useSelector(processorRef, (snapshot) => snapshot.context.processor);
 
   const isConfigured = useSelector(processorRef, (snapshot) => snapshot.matches('configured'));
-  const isNew = useSelector(processorRef, (snapshot) => snapshot.context.isNew);
-  const isUpdated = useSelector(processorRef, (snapshot) => snapshot.context.isUpdated);
-  const isUnsaved = isNew || isUpdated;
+  const isUnsaved = useSelector(
+    processorRef,
+    (snapshot) => snapshot.context.isNew || snapshot.context.isUpdated
+  );
   const canDragAndDrop = isConfigured && dragHandleProps;
 
   const processorDescription = getProcessorDescription(processor);
@@ -113,22 +111,20 @@ const ProcessorConfigurationListItem = ({
   };
 
   return (
-    <ProcessorPanel isNew={isNew}>
+    <ProcessorPanel>
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
         {canDragAndDrop && (
           <EuiPanel
             grow={false}
             hasShadow={false}
             color="transparent"
-            paddingSize="xs"
+            paddingSize="none"
             {...dragHandleProps}
           >
-            <EuiIcon type="grab" />
+            <EuiIcon type="grab" size="m" />
           </EuiPanel>
         )}
-        <SimulationStatus isNew={isNew}>
-          <strong>{processor.type.toUpperCase()}</strong>
-        </SimulationStatus>
+        <strong>{processor.type.toUpperCase()}</strong>
         <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
           {processorDescription}
         </EuiText>
@@ -203,7 +199,6 @@ const ProcessorConfigurationEditor = ({
   }, [methods, processorRef]);
 
   const isConfigured = useSelector(processorRef, (snapshot) => snapshot.matches('configured'));
-  const isNew = useSelector(processorRef, (snapshot) => snapshot.context.isNew);
   const canDelete = useSelector(processorRef, (snapshot) =>
     snapshot.can({ type: 'processor.delete' })
   );
@@ -243,17 +238,13 @@ const ProcessorConfigurationEditor = ({
   };
 
   return (
-    <ProcessorPanel isNew={isNew}>
+    <ProcessorPanel>
       <EuiAccordion
         id="processor-accordion"
         arrowProps={{
           css: { display: 'none' },
         }}
-        buttonContent={
-          <SimulationStatus isNew={isNew}>
-            <strong>{processor.type.toUpperCase()}</strong>
-          </SimulationStatus>
-        }
+        buttonContent={<strong>{processor.type.toUpperCase()}</strong>}
         buttonElement="legend"
         buttonProps={{
           css: css`
@@ -338,69 +329,18 @@ const ProcessorConfigurationEditor = ({
   );
 };
 
-const ProcessorPanel = ({ isNew, ...props }: PropsWithChildren<{ isNew: boolean }>) => {
+const ProcessorPanel = (props: PropsWithChildren) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPanel
       hasBorder
-      color={isNew ? 'subdued' : undefined}
       css={css`
         border: ${euiTheme.border.thin};
         padding: ${euiTheme.size.m};
       `}
       {...props}
     />
-  );
-};
-
-const SimulationStatus = ({ isNew, ...props }: PropsWithChildren<{ isNew: boolean }>) => {
-  return isNew ? <ActiveSimulationStatus {...props} /> : <InactiveSimulationStatus {...props} />;
-};
-
-const ActiveSimulationStatus = ({ children }: PropsWithChildren<{}>) => {
-  const { euiTheme } = useEuiTheme();
-
-  const tooltipContent = i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.newProcessorTooltip',
-    { defaultMessage: 'This processor configuration is used to run the parsing simulation.' }
-  );
-
-  return (
-    <EuiToolTip content={tooltipContent}>
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="xs"
-        css={css`
-          flex-grow: 0;
-        `}
-      >
-        <EuiBeacon
-          color="success"
-          aria-label={tooltipContent}
-          size={8}
-          css={css`
-            margin: ${euiTheme.size.xs};
-          `}
-        />
-        {children}
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
-};
-
-const InactiveSimulationStatus = ({ children }: PropsWithChildren<{}>) => {
-  const tooltipContent = i18n.translate(
-    'xpack.streams.streamDetailView.managementTab.enrichment.configuredProcessorTooltip',
-    { defaultMessage: 'This processor configuration is not used to run the parsing simulation.' }
-  );
-
-  return (
-    <EuiToolTip content={tooltipContent}>
-      <EuiHealth color="subdued" aria-label={tooltipContent}>
-        {children}
-      </EuiHealth>
-    </EuiToolTip>
   );
 };
 

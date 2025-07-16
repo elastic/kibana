@@ -10,6 +10,7 @@ import { FlattenRecord } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
+import { getFormattedError } from '../../../../../util/errors';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
 import { Simulation, SimulationMachineDeps } from './types';
@@ -53,11 +54,12 @@ export function createSimulationRunFailureNofitier({
 }: Pick<SimulationMachineDeps, 'toasts'>) {
   return (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
+    const formattedError = getFormattedError(event.error);
+    toasts.addError(formattedError, {
       title: i18n.translate('xpack.streams.enrichment.simulation.simulationRunError', {
         defaultMessage: 'An issue occurred running the simulation.',
       }),
-      toastMessage: event.error.body.message,
+      toastMessage: formattedError.message,
     });
   };
 }
