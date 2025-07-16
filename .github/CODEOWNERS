@@ -1298,7 +1298,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/apps/lens @elastic/kibana-visualizations
 /x-pack/test/api_integration/apis/lens/ @elastic/kibana-visualizations
 /src/platform/test/functional/apps/visualize/ @elastic/kibana-visualizations
-/x-pack/test/functional/apps/graph @elastic/kibana-visualizations
+/x-pack/platform/test/functional/apps/graph @elastic/kibana-visualizations
 /src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
@@ -1529,7 +1529,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/fleet_tasks @elastic/fleet
 /src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/fleet
 /x-pack/test/fleet_cypress @elastic/fleet
-/x-pack/test/fleet_functional @elastic/fleet
+/x-pack/platform/test/fleet_functional @elastic/fleet
 /x-pack/platform/test/fleet_multi_cluster @elastic/fleet
 /src/dev/build/tasks/bundle_fleet_packages.ts @elastic/fleet @elastic/kibana-operations
 /x-pack/platform/plugins/shared/fleet/server/services/elastic_agent_manifest.ts @elastic/fleet @elastic/obs-cloudnative-monitoring
@@ -2108,12 +2108,12 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional/page_objects/security_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/role_mappings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/copy_saved_objects_to_space_page.ts @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/39002
-/x-pack/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
+/x-pack/platform/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/account_settings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/apps/user_profiles @elastic/kibana-security
 /x-pack/test/common/services/spaces.ts @elastic/kibana-security
 /x-pack/test/api_integration/config_security_*.ts @elastic/kibana-security
-/x-pack/test/functional/apps/api_keys @elastic/kibana-security
+/x-pack/platform/test/functional/apps/api_keys @elastic/kibana-security
 /x-pack/platform/test/ftr_apis/security_and_spaces @elastic/kibana-security
 /src/platform/test/server_integration/services/supertest.js @elastic/kibana-security @elastic/kibana-core
 /src/platform/test/server_integration/http/ssl @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/53810
@@ -2302,9 +2302,9 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-management
 /src/platform/test/functional/services/management @elastic/kibana-management
 /src/platform/test/functional/services/synthtrace/sythtrace.ts  @elastic/kibana-management
-/x-pack/test/functional/apps/cross_cluster_replication @elastic/kibana-management
+/x-pack/platform/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/test/functional/apps/ingest_pipelines @elastic/kibana-management
-/x-pack/test/functional/apps/home @elastic/kibana-management
+/x-pack/platform/test/functional/apps/home @elastic/kibana-management
 /x-pack/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/test/functional/apps/management @elastic/kibana-management
 /x-pack/test/functional/apps/remote_clusters @elastic/kibana-management
@@ -2326,7 +2326,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/accessibility/apps/console.ts @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
 /x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
-/x-pack/test/functional/apps/grok_debugger @elastic/kibana-management
+/x-pack/platform/test/functional/apps/grok_debugger @elastic/kibana-management
 /x-pack/test/functional/apps/index_lifecycle_management @elastic/kibana-management
 /x-pack/test/functional/apps/index_management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/watcher @elastic/kibana-management
@@ -2913,7 +2913,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
-/x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux
+/x-pack/platform/test/functional/apps/advanced_settings @elastic/appex-sharedux
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/global_search @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
