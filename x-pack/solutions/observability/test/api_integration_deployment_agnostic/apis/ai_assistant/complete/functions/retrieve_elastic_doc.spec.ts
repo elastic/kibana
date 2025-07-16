@@ -20,12 +20,11 @@ import {
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../utils/model_and_inference';
 
-const DEFAULT_INFERENCE_ID = TINY_ELSER_INFERENCE_ID;
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe.only('tool: retrieve_elastic_doc', function () {
+  describe('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     const supertest = getService('supertest');
@@ -89,8 +88,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let llmProxy: LlmProxy;
       let connectorId: string;
       let messageAddedEvents: MessageAddEvent[];
-      let firstRequestBody: ChatCompletionStreamParams;
-      let secondRequestBody: ChatCompletionStreamParams;
+      let toolCallRequestBody: ChatCompletionStreamParams;
+      let userPromptRequestBody: ChatCompletionStreamParams;
+
       before(async () => {
         llmProxy = await createLlmProxy(log);
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
@@ -98,7 +98,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         await deployTinyElserAndSetupKb(getService);
 
-        await installProductDoc(supertest, DEFAULT_INFERENCE_ID);
+        await installProductDoc(supertest, TINY_ELSER_INFERENCE_ID);
+
+        void llmProxy.interceptQueryRewrite('This is a rewritten user prompt.');
 
         void llmProxy.interceptWithFunctionRequest({
           name: 'retrieve_elastic_doc',
@@ -118,12 +120,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         }));
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        firstRequestBody = llmProxy.interceptedRequests[0].requestBody;
-        secondRequestBody = llmProxy.interceptedRequests[1].requestBody;
+        toolCallRequestBody = llmProxy.interceptedRequests[1].requestBody;
+        userPromptRequestBody = llmProxy.interceptedRequests[2].requestBody;
       });
 
       after(async () => {
-        await uninstallProductDoc(supertest, DEFAULT_INFERENCE_ID);
+        await uninstallProductDoc(supertest, TINY_ELSER_INFERENCE_ID);
         llmProxy.close();
         await observabilityAIAssistantAPIClient.deleteActionConnector({
           actionId: connectorId,
@@ -131,8 +133,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await teardownTinyElserModelAndInferenceEndpoint(getService);
       });
 
-      it('makes 2 requests to the LLM', () => {
-        expect(llmProxy.interceptedRequests.length).to.be(2);
+      it('makes 3 requests to the LLM', () => {
+        expect(llmProxy.interceptedRequests.length).to.be(3);
       });
 
       it('emits 5 messageAdded events', () => {
@@ -141,8 +143,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('The first request', () => {
         it('enables the LLM to call `retrieve_elastic_doc`', () => {
-          expect(firstRequestBody.tool_choice).to.be('auto');
-          expect(firstRequestBody.tools?.map((t) => t.function.name)).to.contain(
+          expect(toolCallRequestBody.tool_choice).to.be('auto');
+          expect(toolCallRequestBody.tools?.map((t) => t.function.name)).to.contain(
             'retrieve_elastic_doc'
           );
         });
@@ -151,14 +153,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       describe('The second request - Sending the user prompt', () => {
         let lastMessage: ChatCompletionMessageParam;
         let parsedContent: { documents: Array<{ title: string; content: string; url: string }> };
+
         before(() => {
-          lastMessage = last(secondRequestBody.messages) as ChatCompletionMessageParam;
+          lastMessage = last(userPromptRequestBody.messages) as ChatCompletionMessageParam;
           parsedContent = JSON.parse(lastMessage.content as string);
         });
+
         it('includes the retrieve_elastic_doc function call', () => {
-          expect(secondRequestBody.messages[4].role).to.be(MessageRole.Assistant);
+          expect(userPromptRequestBody.messages[4].role).to.be(MessageRole.Assistant);
           // @ts-expect-error
-          expect(secondRequestBody.messages[4].tool_calls[0].function.name).to.be(
+          expect(userPromptRequestBody.messages[4].tool_calls[0].function.name).to.be(
             'retrieve_elastic_doc'
           );
         });
@@ -168,9 +172,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           // @ts-expect-error
           expect(lastMessage?.tool_call_id).to.equal(
             // @ts-expect-error
-            secondRequestBody.messages[4].tool_calls[0].id
+            userPromptRequestBody.messages[4].tool_calls[0].id
           );
         });
+
         it('sends the retrieved documents from Elastic docs to the LLM', () => {
           expect(lastMessage.content).to.be.a('string');
         });
