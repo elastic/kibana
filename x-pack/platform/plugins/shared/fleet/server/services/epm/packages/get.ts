@@ -8,10 +8,11 @@
 import { load } from 'js-yaml';
 import pMap from 'p-map';
 import minimatch from 'minimatch';
-import type {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
+import {
+  SavedObjectsErrorHelpers,
+  type ElasticsearchClient,
+  type SavedObjectsClientContract,
+  type SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
@@ -26,6 +27,7 @@ import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_typ
 
 import {
   ASSETS_SAVED_OBJECT_TYPE,
+  KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
   installationStatuses,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
@@ -39,6 +41,7 @@ import type {
   PackageSpecManifest,
   AssetsMap,
   PackagePolicyAssetsMap,
+  PackageKnowledgeBase,
 } from '../../../../common/types';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -873,6 +876,32 @@ export async function getAgentTemplateAssetsMap({
     return assetsMap as PackagePolicyAssetsMap;
   } catch (error) {
     logger.warn(`getAgentTemplateAssetsMap error: ${error}`);
+    throw error;
+  }
+}
+
+/**
+ * Get knowledge base content for a package
+ * @param options Object with savedObjectsClient and package name
+ * @returns The knowledge base content or undefined if not found
+ */
+export async function getPackageKnowledgeBase(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<PackageKnowledgeBase | undefined> {
+  const { savedObjectsClient, pkgName } = options;
+  // Using imported constant KNOWLEDGE_BASE_SAVED_OBJECT_TYPE
+
+  try {
+    const knowledgeBaseSO = await savedObjectsClient.get<PackageKnowledgeBase>(
+      KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
+      pkgName
+    );
+    return knowledgeBaseSO.attributes;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
     throw error;
   }
 }

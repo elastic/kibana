@@ -87,6 +87,7 @@ import {
   createCustomIntegrationHandler,
   getInputsHandler,
   updateCustomIntegrationHandler,
+  getKnowledgeBaseHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -353,6 +354,36 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getInfoHandler
+    );
+
+  router.versioned
+    .get({
+      path: '/epm/packages/{pkgName}/knowledge_base',
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
+          .granted,
+      summary: `Get all knowledge base content for a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+      security: READ_PACKAGE_INFO_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetInfoRequestSchema,
+          response: {
+            200: {
+              body: () => GetInfoResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getKnowledgeBaseHandler
     );
 
   router.versioned

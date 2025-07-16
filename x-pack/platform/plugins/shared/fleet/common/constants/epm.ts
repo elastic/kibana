@@ -9,6 +9,7 @@ import { ElasticsearchAssetType, KibanaSavedObjectType } from '../types/models';
 
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
+export const KNOWLEDGE_BASE_SAVED_OBJECT_TYPE = 'epm-packages-knowledge-base';
 export const MAX_TIME_COMPLETE_INSTALL = 30 * 60 * 1000; // 30 minutes
 export const MAX_REINSTALL_RETRIES = 3;
 

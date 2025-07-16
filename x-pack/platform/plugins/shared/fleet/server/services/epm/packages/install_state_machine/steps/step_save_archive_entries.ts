@@ -4,65 +4,90 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import type { AssetsMap, KibanaAssetType, PackageAssetReference } from '../../../../../types';
+import { appContextService } from '../../../../app_context';
 
-import { removeArchiveEntries, saveArchiveEntriesFromAssetsMap } from '../../../archive/storage';
+import {
+  ASSETS_SAVED_OBJECT_TYPE,
+  KNOWLEDGE_BASE_SAVED_OBJECT_TYPE,
+} from '../../../../../constants';
 
-import { withPackageSpan } from '../../utils';
+import {
+  assetPathToObjectId,
+  removeArchiveEntries,
+  saveArchiveEntriesFromAssetsMap,
+} from '../../../archive/storage';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
-import { getPathParts } from '../../../archive';
+
+import type { KnowledgeBaseItem, PackageKnowledgeBase } from '../../../../../../common/types';
+import { withPackageSpan } from '../../utils';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
   const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
 
-  const { packageInfo, archiveIterator } = packageInstallContext;
+  await appContextService.getLogger().info(`Installing package from: ${installSource}`);
+  await appContextService.getLogger().debug(`Streaming package: ${useStreaming}`);
 
-  let assetsToSaveMap: AssetsMap = new Map();
+  const { paths, packageInfo, archiveIterator } = packageInstallContext;
 
-  let packageAssetRefs: PackageAssetReference[] = [];
+  if (installSource === 'custom') {
+    await removeArchiveEntries({
+      savedObjectsClient,
+      refs: packageInfo?.assets?.map((path) => {
+        return {
+          type: ASSETS_SAVED_OBJECT_TYPE,
+          id: assetPathToObjectId(path),
+        };
+      }),
+    });
+  }
 
-  async function flushAssets() {
-    const paths = Array.from(assetsToSaveMap.keys());
-    const packageAssetResults = await withPackageSpan('Update archive entries', () =>
-      saveArchiveEntriesFromAssetsMap({
+  // We would try to optimize it by using streaming here before, but for registry we have streaming kibana assets, not package files
+  if (!useStreaming) {
+    try {
+      // Create an assets map from the archiveIterator
+      const assetsMap = new Map<string, Buffer | undefined>();
+      await archiveIterator.traverseEntries(
+        async (entry) => {
+          if (entry.buffer) {
+            assetsMap.set(entry.path, entry.buffer);
+          }
+        },
+        () => true
+      );
+
+      await saveArchiveEntriesFromAssetsMap({
         savedObjectsClient,
-        assetsMap: assetsToSaveMap,
+        assetsMap,
         paths,
         packageInfo,
         installSource,
-      })
-    );
-    packageAssetRefs = [
-      ...packageAssetRefs,
-      ...packageAssetResults.saved_objects.map((result) => ({
-        id: result.id,
-        path: result.attributes?.asset_path,
-        type: ASSETS_SAVED_OBJECT_TYPE as typeof ASSETS_SAVED_OBJECT_TYPE,
-      })),
-    ];
-
-    assetsToSaveMap = new Map();
+      });
+    } catch (error) {
+      throw new Error(`Error saving archive entries: ${error}`);
+    }
   }
 
-  await archiveIterator.traverseEntries(async (entry) => {
-    const assetType = getPathParts(entry.path).type as KibanaAssetType;
-    if (assetType === 'security_rule' && useStreaming) {
-      // Skip security rules to avoid storing to many things
-    } else {
-      assetsToSaveMap.set(entry.path, entry.buffer);
+  // Save knowledge base content if present
+  if (packageInfo.knowledge_base && packageInfo.knowledge_base.length > 0) {
+    try {
+      await saveKnowledgeBaseContent({
+        savedObjectsClient,
+        pkgName: packageInfo.name,
+        pkgVersion: packageInfo.version,
+        knowledgeBaseContent: packageInfo.knowledge_base,
+      });
+    } catch (error) {
+      throw new Error(`Error saving knowledge base content: ${error}`);
     }
-    if (assetsToSaveMap.size > 100) {
-      await flushAssets();
-    }
-  });
+  }
 
-  await flushAssets();
-
-  return { packageAssetRefs };
+  if (useStreaming) {
+    context.nextState = 'save_archive_entries_from_assets_map';
+  }
 }
 
 export async function cleanupArchiveEntriesStep(context: InstallContext) {
@@ -84,4 +109,43 @@ export async function cleanupArchiveEntriesStep(context: InstallContext) {
       await removeArchiveEntries({ savedObjectsClient, refs: packageAssets });
     });
   }
+}
+
+/**
+ * Saves knowledge base content as a separate document in Elasticsearch
+ * @param savedObjectsClient - The saved objects client
+ * @param pkgName - Package name
+ * @param pkgVersion - Package version
+ * @param knowledgeBaseContent - Array of knowledge base items
+ */
+export async function saveKnowledgeBaseContent({
+  savedObjectsClient,
+  pkgName,
+  pkgVersion,
+  knowledgeBaseContent,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  pkgVersion: string;
+  knowledgeBaseContent: KnowledgeBaseItem[];
+}) {
+  if (!knowledgeBaseContent || knowledgeBaseContent.length === 0) {
+    return;
+  }
+
+  // Using the imported KNOWLEDGE_BASE_SAVED_OBJECT_TYPE constant
+
+  // Create knowledge base document
+  const knowledgeBaseDoc: PackageKnowledgeBase = {
+    package_name: pkgName,
+    version: pkgVersion,
+    installed_at: new Date().toISOString(),
+    knowledge_base_content: knowledgeBaseContent,
+  };
+
+  // Save it as a saved object with the package name as the ID
+  await savedObjectsClient.create(KNOWLEDGE_BASE_SAVED_OBJECT_TYPE, knowledgeBaseDoc, {
+    id: pkgName,
+    overwrite: true,
+  });
 }

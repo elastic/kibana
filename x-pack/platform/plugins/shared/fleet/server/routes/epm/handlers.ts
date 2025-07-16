@@ -8,8 +8,9 @@
 import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 import type { HttpResponseOptions } from '@kbn/core/server';
-
 import { omit, pick } from 'lodash';
+
+import { defaultFleetErrorHandler } from '../../errors';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
 
@@ -87,6 +88,7 @@ import { NamingCollisionError } from '../../services/epm/packages/custom_integra
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
+import { getPackageKnowledgeBase } from '../../services/epm/packages';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -634,6 +636,27 @@ export const getInputsHandler: FleetRequestHandler<
     );
   }
   return response.ok({ body });
+};
+
+export const getKnowledgeBaseHandler: FleetRequestHandler<
+  TypeOf<typeof GetInfoRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+  const savedObjectsClient = (await context.fleet).internalSoClient;
+
+  try {
+    const knowledgeBase = await getPackageKnowledgeBase({ savedObjectsClient, pkgName });
+
+    if (!knowledgeBase) {
+      return response.notFound({ body: `Knowledge base not found for package: ${pkgName}` });
+    }
+
+    return response.ok({
+      body: knowledgeBase,
+    });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
 };
 
 // Don't expose the whole SO in the API response, only selected fields
