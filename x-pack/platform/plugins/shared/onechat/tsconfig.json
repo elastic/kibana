@@ -54,5 +54,6 @@
     "@kbn/esql",
     "@kbn/field-types",
     "@kbn/monaco",
+    "@kbn/safer-lodash-set",
   ]
 }
