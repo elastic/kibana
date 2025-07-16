@@ -80512,6 +80512,18 @@ components:
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_percentile_metric'
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_doc_count_metric'
+                    discriminator:
+                      mapping:
+                        avg: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        cardinality: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        doc_count: '#/components/schemas/SLOs_timeslice_metric_doc_count_metric'
+                        last_value: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        max: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        min: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        percentile: '#/components/schemas/SLOs_timeslice_metric_percentile_metric'
+                        std_deviation: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        sum: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                      propertyName: aggregation
                   type: array
                 threshold:
                   description: The threshold used to determine if the metric is a good slice or not.
