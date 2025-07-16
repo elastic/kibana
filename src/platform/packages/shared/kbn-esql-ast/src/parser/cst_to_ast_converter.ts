@@ -247,7 +247,7 @@ export class CstToAstConverter {
 
   // ----------------------------------------------------------------- commands
 
-  private fromSourceCommand(ctx: cst.SourceCommandContext): ast.ESQLCommand | undefined {
+  public fromSourceCommand(ctx: cst.SourceCommandContext): ast.ESQLCommand | undefined {
     const fromCommandCtx = ctx.fromCommand();
 
     if (fromCommandCtx) {
@@ -281,7 +281,7 @@ export class CstToAstConverter {
     // throw new Error(`Unknown source command: ${this.getSrc(ctx)}`);
   }
 
-  private fromProcessingCommand(ctx: cst.ProcessingCommandContext): ast.ESQLCommand | undefined {
+  public fromProcessingCommand(ctx: cst.ProcessingCommandContext): ast.ESQLCommand | undefined {
     const limitCommandCtx = ctx.limitCommand();
 
     if (limitCommandCtx) {
@@ -1770,6 +1770,10 @@ export class CstToAstConverter {
         this.collectDefaultExpression(ctx)
       )
       .flat();
+  }
+
+  public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
+    return this.collectBooleanExpression(ctx)[0] || this.fromParserRuleToUnknown(ctx);
   }
 
   private visitMatchExpression(ctx: cst.MatchExpressionContext): ESQLAstMatchBooleanExpression {
