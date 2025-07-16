@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataView, type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataView, type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { ID as OverviewHostQueryId } from '../../containers/overview_host';
 import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
