@@ -5684,19 +5684,19 @@
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/escape_field_name_factory.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/escape_field_name_factory.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/rule_flyout_component.tsx"
           },
           {
             "plugin": "triggersActionsUi",
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/rule_flyout_component.tsx"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/escape_field_name_factory.ts"
+          },
+          {
+            "plugin": "triggersActionsUi",
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/alert_rule_from_vis_ui_action/escape_field_name_factory.ts"
           },
           {
             "plugin": "discover",

@@ -2712,30 +2712,6 @@
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/vis_type_alias_registry.ts"
           },
           {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/platform/plugins/shared/aiops/public/application/utils/search_utils.ts"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/platform/plugins/shared/aiops/public/application/utils/search_utils.ts"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/platform/plugins/private/graph/public/types/app_state.ts"
           },
