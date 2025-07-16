@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getFragmentData } from '../../../definitions/utils/autocomplete/helpers';
 import {
   pipeCompleteItem,
   type ESQLCommand,
@@ -114,15 +115,22 @@ export const getSuggestionsAfterCompleteExpression = (
     };
   } else if (isColumn(expressionRoot)) {
     // special case: cursor right after a column name
+    const { fragment, rangeToReplace } = getFragmentData(innerText);
+
     sortCommandKeywordSuggestions = sortCommandKeywordSuggestions.map((s) => ({
       ...s,
-      text: `${expressionRoot.text} ${s.text}`, // add a space after the column name
-      filterText: expressionRoot.text, // turn off Monaco's filtering by the suggestion text
+      text: `${fragment} ${s.text}`, // add a space after the column name
+      filterText: fragment, // turn off Monaco's filtering by the suggestion text
+      rangeToReplace,
     }));
-    pipeSuggestion.filterText = expressionRoot.text;
-    pipeSuggestion.text = expressionRoot.text + ' ' + pipeSuggestion.text;
-    commaSuggestion.filterText = expressionRoot.text;
-    commaSuggestion.text = expressionRoot.text + ' ' + commaSuggestion.text;
+
+    pipeSuggestion.filterText = fragment;
+    pipeSuggestion.text = fragment + ' ' + pipeSuggestion.text;
+    pipeSuggestion.rangeToReplace = rangeToReplace;
+
+    commaSuggestion.filterText = fragment;
+    commaSuggestion.text = fragment + ' ' + commaSuggestion.text;
+    commaSuggestion.rangeToReplace = rangeToReplace;
   }
 
   return [...sortCommandKeywordSuggestions, pipeSuggestion, commaSuggestion];
