@@ -10213,6 +10213,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enablePrivilegedUserMonitoring": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "securitySolution:excludeColdAndFrozenTiersInAnalyzer": {
           "type": "boolean",
           "_meta": {
