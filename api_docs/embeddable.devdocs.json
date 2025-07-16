@@ -625,6 +625,79 @@
     "functions": [
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.AddFromLibraryFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "AddFromLibraryFlyout",
+        "description": [],
+        "signature": [
+          "({ container, modalTitleId, }: { container: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "public",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-public.CanAddNewPanel",
+            "text": "CanAddNewPanel"
+          },
+          "; modalTitleId?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/public/add_from_library/add_from_library_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.AddFromLibraryFlyout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  container,\n  modalTitleId,\n}",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/add_from_library/add_from_library_flyout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.AddFromLibraryFlyout.$1.container",
+                "type": "Object",
+                "tags": [],
+                "label": "container",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "public",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-public.CanAddNewPanel",
+                    "text": "CanAddNewPanel"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/embeddable/public/add_from_library/add_from_library_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.AddFromLibraryFlyout.$1.modalTitleId",
+                "type": "string",
+                "tags": [],
+                "label": "modalTitleId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/plugins/shared/embeddable/public/add_from_library/add_from_library_flyout.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.EmbeddableRenderer",
         "type": "Function",
         "tags": [],
@@ -1016,82 +1089,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.openAddFromLibraryFlyout",
-        "type": "Function",
-        "tags": [],
-        "label": "openAddFromLibraryFlyout",
-        "description": [],
-        "signature": [
-          "({ container, onClose, }: { container: ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.CanAddNewPanel",
-            "text": "CanAddNewPanel"
-          },
-          "; onClose?: (() => void) | undefined; }) => ",
-          "OverlayRef"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.openAddFromLibraryFlyout.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  container,\n  onClose,\n}",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.openAddFromLibraryFlyout.$1.container",
-                "type": "Object",
-                "tags": [],
-                "label": "container",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "public",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-public.CanAddNewPanel",
-                    "text": "CanAddNewPanel"
-                  }
-                ],
-                "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.openAddFromLibraryFlyout.$1.onClose",
-                "type": "Function",
-                "tags": [],
-                "label": "onClose",
-                "description": [],
-                "signature": [
-                  "(() => void) | undefined"
-                ],
-                "path": "src/platform/plugins/shared/embeddable/public/add_from_library/open_add_from_library_flyout.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [],
-                "returnComment": []
-              }
-            ]
           }
         ],
         "returnComment": [],

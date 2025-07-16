@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/ingest-pipelines-shared",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ingest-pipelines-shared",
+        "id": "def-common.PipelineStructureTree",
+        "type": "Function",
+        "tags": [],
+        "label": "PipelineStructureTree",
+        "description": [
+          "\nA component for a Pipeline structure tree.\nChildren pipeline nodes represent Pipeline processors that run the\ncorresponding pipelines from the children node.\nSee more at https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor"
+        ],
+        "signature": [
+          "({ pipelineTree }: ",
+          "PipelineStructureTreeProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/pipeline_structure_tree.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineStructureTree.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ pipelineTree }",
+            "description": [],
+            "signature": [
+              "PipelineStructureTreeProps"
+            ],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/pipeline_structure_tree.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1393,6 +1393,17 @@
           },
           {
             "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.isAssistantVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAssistantVisible",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
             "id": "def-public.AssistantAvailability.hasAssistantPrivilege",
             "type": "boolean",
             "tags": [],
@@ -2744,6 +2755,17 @@
             "type": "boolean",
             "tags": [],
             "label": "isAssistantEnabled",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.UseAssistantAvailability.isAssistantVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isAssistantVisible",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/index.ts",
             "deprecated": false,

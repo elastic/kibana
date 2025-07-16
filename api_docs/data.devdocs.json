@@ -10270,6 +10270,9 @@
             "tags": [],
             "label": "ILLEGAL_CHARACTERS_KEY",
             "description": [],
+            "signature": [
+              "\"ILLEGAL_CHARACTERS\""
+            ],
             "path": "src/platform/plugins/shared/data/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10281,6 +10284,9 @@
             "tags": [],
             "label": "CONTAINS_SPACES_KEY",
             "description": [],
+            "signature": [
+              "\"CONTAINS_SPACES\""
+            ],
             "path": "src/platform/plugins/shared/data/public/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -10538,7 +10544,14 @@
             "label": "validate",
             "description": [],
             "signature": [
-              "(indexPattern: string) => { ILLEGAL_CHARACTERS?: string[] | undefined; CONTAINS_SPACES?: boolean | undefined; }"
+              "(indexPattern: string) => ",
+              {
+                "pluginId": "@kbn/data-view-validation",
+                "scope": "common",
+                "docId": "kibKbnDataViewValidationPluginApi",
+                "section": "def-common.ValidationErrors",
+                "text": "ValidationErrors"
+              }
             ],
             "path": "src/platform/plugins/shared/data/public/index.ts",
             "deprecated": false,
@@ -10552,7 +10565,7 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "path": "src/platform/plugins/shared/data_views/common/lib/validate_data_view.ts",
+                "path": "src/platform/packages/shared/kbn-data-view-validation/src/validation.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
