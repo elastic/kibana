@@ -31,7 +31,8 @@
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/observability-ai-assistant-management-plugin"
   ],
   "exclude": [
     "target/**/*"
