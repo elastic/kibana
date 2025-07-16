@@ -8,12 +8,13 @@
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
 import type { SampleDataStartDependencies, SampleDataSetupDependencies } from './types';
 import type { SampleDataIngestConfig } from './config';
-import { SampleDataIngestPlugin } from './plugin';
 export { config } from './config';
 
 export const plugin: PluginInitializer<
   SampleDataStartDependencies,
   SampleDataSetupDependencies
 > = async (pluginInitializerContext: PluginInitializerContext<SampleDataIngestConfig>) => {
+  const { SampleDataIngestPlugin } = await import('./plugin');
+
   return new SampleDataIngestPlugin(pluginInitializerContext);
 };
