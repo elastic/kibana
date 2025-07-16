@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privilege_monitoring/constants';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../../common/entity_analytics/privilege_monitoring/utils';
 import { getPrivilegedMonitorUsersJoin } from '../../queries/helpers';
 
 export const getPrivilegedUsersQuery = (namespace: string) => {
   return `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
   ${getPrivilegedMonitorUsersJoin(namespace)}
-  | STATS user.is_privileged = TOP(user.is_privileged, 1, "desc"), labels.sources = TOP(labels.sources, 1, "desc") BY user.name
+  | EVAL
+      user.is_privileged = user.is_privileged,
+      labels.sources = labels.sources,
+      eaLabels = entity_analytics_monitoring.labels.value
+  | KEEP user.is_privileged, labels.sources, eaLabels
   `;
 };

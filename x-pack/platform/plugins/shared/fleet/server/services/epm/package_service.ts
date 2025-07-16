@@ -44,6 +44,8 @@ import { appContextService } from '..';
 
 import type { GetInstalledPackagesResponse } from '../../../common/types';
 
+import type { TemplateAgentPolicyInput } from '../../../common/types/models/agent_policy';
+
 import {
   type CustomPackageDatasetConfiguration,
   type EnsurePackageResult,
@@ -94,6 +96,8 @@ export interface PackageClient {
     spaceId?: string;
     force?: boolean;
     keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult>;
 
   installCustomIntegration(options: {
@@ -138,6 +142,7 @@ export interface PackageClient {
   getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
     ignoreUnverified?: boolean
   ): Promise<string>;
@@ -243,6 +248,8 @@ class PackageClientImpl implements PackageClient {
     spaceId?: string;
     force?: boolean;
     keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
@@ -252,6 +259,8 @@ class PackageClientImpl implements PackageClient {
       spaceId = DEFAULT_SPACE_ID,
       force = false,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     } = options;
 
     // If pkgVersion isn't specified, find the latest package version
@@ -269,6 +278,8 @@ class PackageClientImpl implements PackageClient {
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     });
   }
 
@@ -321,6 +332,7 @@ class PackageClientImpl implements PackageClient {
   public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
     ignoreUnverified?: boolean
   ) {
@@ -337,6 +349,7 @@ class PackageClientImpl implements PackageClient {
       pkgName,
       pkgVersion,
       'yml',
+      isInputIncluded,
       prerelease,
       ignoreUnverified
     );
