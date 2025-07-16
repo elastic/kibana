@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Logger } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { StartDeps } from './plugin';
 
 export let embeddableService: EmbeddableStart;
+export let logger: Logger;
 
-export const setKibanaServices = (deps: StartDeps) => {
+export const setKibanaServices = (deps: StartDeps, _logger: Logger) => {
   embeddableService = deps.embeddable;
+  logger = _logger;
 };

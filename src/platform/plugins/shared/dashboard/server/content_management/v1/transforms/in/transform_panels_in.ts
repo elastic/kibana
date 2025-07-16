@@ -17,7 +17,7 @@ import {
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
-import { embeddableService } from '../../../../kibana_services';
+import { embeddableService, logger } from '../../../../kibana_services';
 
 export function transformPanelsIn(
   widgets: DashboardAttributes['panels'] | undefined,
@@ -72,6 +72,9 @@ function transformPanelIn(panel: DashboardPanel): {
     }
   } catch (transformInError) {
     // do not prevent save if transformIn throws
+    logger.warn(
+      `Unable to transform "${panel.type}" embeddable state on save. Error: ${transformInError.message}`
+    );
   }
 
   return {

@@ -11,7 +11,7 @@ import { SavedObjectReference } from '@kbn/core/server';
 import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { getReferencesForPanelId } from '../../../../../common';
-import { embeddableService } from '../../../../kibana_services';
+import { embeddableService, logger } from '../../../../kibana_services';
 
 export function transformPanelsOut(
   panelsJSON: string = '{}',
@@ -81,6 +81,9 @@ function transformPanelProperties(
     }
   } catch (transformOutError) {
     // do not prevent read on transformOutError
+    logger.warn(
+      `Unable to transform "${panelType}" embeddable state on read. Error: ${transformOutError.message}`
+    );
   }
 
   return {
