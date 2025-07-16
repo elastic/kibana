@@ -327,7 +327,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             const xLabels2 = [
               'September 22, 2015',
-              '16:00',
               '17:00',
               '18:00',
               '19:00',
