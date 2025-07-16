@@ -479,14 +479,10 @@ export class ModelsProvider {
    *
    */
   async createInferencePipeline(pipelineConfig: IngestPipeline, pipelineName: string) {
-    let result = {};
-
-    result = await this._client.asCurrentUser.ingest.putPipeline({
+    return await this._client.asCurrentUser.ingest.putPipeline({
       id: pipelineName,
       ...pipelineConfig,
     });
-
-    return result;
   }
 
   /**
