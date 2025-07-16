@@ -17,7 +17,6 @@ import { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
-import type { ISearchStart } from '@kbn/data-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
@@ -69,22 +68,18 @@ export class DashboardStorage {
     logger,
     throwOnResultValidationError,
     savedObjectsTagging,
-    searchService,
   }: {
     logger: Logger;
     throwOnResultValidationError: boolean;
     savedObjectsTagging?: SavedObjectTaggingStart;
-    searchService: ISearchStart;
   }) {
     this.savedObjectsTagging = savedObjectsTagging;
-    this.searchService = searchService;
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
   }
 
   private logger: Logger;
   private savedObjectsTagging?: SavedObjectTaggingStart;
-  private searchService: ISearchStart;
   private throwOnResultValidationError: boolean;
 
   private getTagNamesFromReferences(references: SavedObjectReference[], allTags: Tag[]) {
