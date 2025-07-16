@@ -36,24 +36,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      await supertest
-        .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ key: 'testGlobalParam', value: 'testGlobalParamValue' })
-        .expect(200);
-      await supertest
-        .post(SYNTHETICS_API_URLS.PARAMS)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ key: 'testGlobalParam2', value: 'testGlobalParamValue2' })
-        .expect(200);
       const spaces = (await kibanaServer.spaces.list()) as Array<{
         id: string;
       }>;
       for (let i = 0; i < spaces.length; i++) {
         if (spaces[i].id !== 'default') await kibanaServer.spaces.delete(spaces[i].id);
       }
+      await kibanaServer.spaces.create({ id: 'space1', name: 'test space' });
     });
 
     let multiSpaceProject: string;
@@ -199,6 +188,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         (obj: any) => obj.attributes.journey_id === multiSpaceMonitorId
       );
       expect(legacyFound).to.be(undefined);
+    });
+
+    it('should return 404 if a monitor references a non-existent space', async () => {
+      // Try to create a monitor with a non-existent space
+      const resp = await supertest
+        .put(
+          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            multiSpaceProject
+          )
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          monitors: [{ ...multiSpaceMonitor, spaces: ['default', 'nonexistent-space'] }],
+        });
+
+      expect(resp.status).to.be(404);
+      expect(resp.body.message).to.contain('Kibana space does not exist');
+    });
+
+    it('should return error if monitor does not include current spaceId in its spaces', async () => {
+      // Create a monitor with spaces that do not include the current spaceId (default)
+      const resp = await supertest
+        .put(
+          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+            '{projectName}',
+            multiSpaceProject
+          )
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          monitors: [{ ...multiSpaceMonitor, spaces: ['space1'] }],
+        });
+
+      expect(resp.status).to.be(400);
+      expect(resp.body.message).to.contain(
+        `Monitor ${multiSpaceMonitor.name} does not include spaceId default in its spaces.`
+      );
     });
   });
 }

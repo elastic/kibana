@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import pMap from 'p-map';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   legacySyntheticsMonitorTypeSingle,
@@ -75,7 +76,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
     try {
       const [spaceId, permissionError] = await Promise.all([
-        validateSpaceId(routeContext),
+        validProjectMultiSpace(routeContext, monitors),
         validatePermissions(routeContext, monitors),
       ]);
 
@@ -99,8 +100,9 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       };
     } catch (error) {
       if (error.output?.statusCode === 404) {
-        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-        return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
+        return response.notFound({
+          body: { message: `Kibana space '${routeContext.spaceId}' does not exist` },
+        });
       }
 
       server.logger.error(`Error adding monitors to project ${decodedProjectName}`, { error });
@@ -109,21 +111,56 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   },
 });
 
-export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.request', {
-  defaultMessage:
-    'Request payload is too large. Please send a max of 250 browser monitors per request.',
-});
+const validProjectMultiSpace = async (routeContext: RouteContext, monitors: ProjectMonitor[]) => {
+  const { response } = routeContext;
+  const spaceId = await validateSpaceId(routeContext);
 
-export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
-  'xpack.synthetics.server.project.delete.request.lightweight',
-  {
-    defaultMessage:
-      'Request payload is too large. Please send a max of 1500 lightweight monitors per request.',
+  const spacesList = new Set(monitors.map((monitor) => monitor.spaces ?? []).flat());
+  if ((spacesList.size === 1 && spacesList.has(DEFAULT_SPACE_ID)) || spacesList.size === 0) {
+    return spaceId;
   }
-);
+
+  try {
+    await pMap(
+      spacesList,
+      async (space) => {
+        const { server } = routeContext;
+        const spacesClient = server.spaces?.spacesService.createSpacesClient(routeContext.request);
+        if (spacesClient) {
+          await spacesClient.get(space);
+        }
+      },
+      { concurrency: 5, stopOnError: true }
+    );
+  } catch (error) {
+    throw response.notFound({
+      body: { message: `Kibana space does not exist, ${error}` },
+    });
+  }
+
+  for (const monitor of monitors) {
+    if (monitor.spaces?.length && !monitor.spaces.includes(spaceId)) {
+      throw response.badRequest({
+        body: {
+          message: i18n.translate(
+            'xpack.synthetics.server.project.addMonitor.multiSpaceValidation',
+            {
+              defaultMessage: 'Monitor {monitor} does not include spaceId {spaceId} in its spaces.',
+              values: {
+                monitor: monitor.name,
+                spaceId,
+              },
+            }
+          ),
+        },
+      });
+    }
+  }
+  return spaceId;
+};
 
 export const validatePermissions = async (
-  { server, response, request }: RouteContext,
+  { server, request }: RouteContext,
   projectMonitors: ProjectMonitor[]
 ) => {
   const hasPublicLocations = projectMonitors.some(({ locations }) => (locations ?? []).length > 0);
@@ -149,5 +186,18 @@ export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(
   {
     defaultMessage:
       "You don't have permission to use Elastic managed global locations. Please contact your Kibana administrator.",
+  }
+);
+
+export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.request', {
+  defaultMessage:
+    'Request payload is too large. Please send a max of 250 browser monitors per request.',
+});
+
+export const REQUEST_TOO_LARGE_LIGHTWEIGHT = i18n.translate(
+  'xpack.synthetics.server.project.delete.request.lightweight',
+  {
+    defaultMessage:
+      'Request payload is too large. Please send a max of 1500 lightweight monitors per request.',
   }
 );

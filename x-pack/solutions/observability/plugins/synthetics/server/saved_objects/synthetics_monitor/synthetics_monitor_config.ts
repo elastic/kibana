@@ -17,7 +17,7 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
     namespaceType: 'multiple',
     mappings: monitorConfigMappings,
     management: {
-      importableAndExportable: false,
+      importableAndExportable: true,
       icon: 'uptimeApp',
       getTitle: (savedObject) =>
         i18n.translate('xpack.synthetics.syntheticsMonitors.multiple.label', {
