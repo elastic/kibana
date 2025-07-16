@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiPopover, EuiExpression } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ExpressionPreview } from '../common/expression_preview';
 import {
   ESDistanceSourceDescriptor,
   JoinSourceDescriptor,
@@ -20,8 +20,6 @@ interface Props {
 }
 
 export function SpatialJoinExpression(props: Props) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const { geoField } = props.sourceDescriptor;
   const expressionValue =
     geoField !== undefined
@@ -33,34 +31,20 @@ export function SpatialJoinExpression(props: Props) {
           defaultMessage: '-- configure spatial join --',
         });
 
-  return (
-    <EuiPopover
-      id={props.sourceDescriptor.id}
-      isOpen={isPopoverOpen}
-      closePopover={() => {
-        setIsPopoverOpen(false);
-      }}
-      ownFocus
-      initialFocus="body" /* avoid initialFocus on Combobox */
-      anchorPosition="leftCenter"
-      button={
-        <EuiExpression
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-          description={i18n.translate('xpack.maps.spatialJoinExpression.description', {
-            defaultMessage: 'Join with',
-          })}
-          uppercase={false}
-          value={expressionValue}
-        />
-      }
-      repositionOnScroll={true}
-    >
+  function renderDistancePopup() {
+    return (
       <SpatialJoinPopoverContent
         sourceDescriptor={props.sourceDescriptor}
         onSourceDescriptorChange={props.onSourceDescriptorChange}
       />
-    </EuiPopover>
+    );
+  }
+
+  return (
+    <ExpressionPreview
+      previewText={expressionValue}
+      renderPopup={renderDistancePopup}
+      popOverId={props.sourceDescriptor.id}
+    />
   );
 }

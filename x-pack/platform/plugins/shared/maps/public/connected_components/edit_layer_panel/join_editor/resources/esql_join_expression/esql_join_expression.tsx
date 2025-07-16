@@ -7,54 +7,43 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { ExpressionPreview } from '../common/expression_preview';
+import { JoinField } from '../..';
 import {
-  ESTermSourceDescriptor,
+  ESQLTermSourceDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../../common/descriptor_types';
-import type { JoinField } from '../../join_editor';
-import { TermJoinPopoverContent } from './term_join_popover_content';
+import { ESQLJoinPopoverContent } from './esql_join_popover_content';
 
 interface Props {
-  // Left source props (static - can not change)
-  leftSourceName?: string;
-
   // Left field props
   leftValue?: string;
   leftFields: JoinField[];
   onLeftFieldChange: (leftField: string) => void;
 
-  // Right source props
-  sourceDescriptor: Partial<ESTermSourceDescriptor>;
+  // right field props
+  sourceDescriptor: Partial<ESQLTermSourceDescriptor>;
   onSourceDescriptorChange: (sourceDescriptor: Partial<JoinSourceDescriptor>) => void;
-  rightFields: DataViewField[];
+  rightFields: any[];
 }
 
-export function TermJoinExpression(props: Props) {
-  const { size, term } = props.sourceDescriptor;
+export function ESQLJoinExpression(props: Props) {
   const expressionValue =
-    term !== undefined
+    props.sourceDescriptor.term !== undefined && props.sourceDescriptor.esql !== undefined
       ? i18n.translate('xpack.maps.termJoinExpression.value', {
-          defaultMessage: '{topTerms} terms from {term}',
+          defaultMessage: '{term}-field from statement {esql}',
           values: {
-            topTerms:
-              size !== undefined
-                ? i18n.translate('xpack.maps.termJoinExpression.topTerms', {
-                    defaultMessage: 'top {size}',
-                    values: { size },
-                  })
-                : '',
-            term,
+            term: props.sourceDescriptor.term || '',
+            esql: props.sourceDescriptor.esql,
           },
         })
       : i18n.translate('xpack.maps.termJoinExpression.placeholder', {
-          defaultMessage: '-- configure term join --',
+          defaultMessage: '-- configure ES|QL join --',
         });
 
-  function renderTermJoinPopup() {
+  function renderESQLJoinPopup() {
     return (
-      <TermJoinPopoverContent
+      <ESQLJoinPopoverContent
         leftSourceName={props.leftSourceName}
         leftValue={props.leftValue}
         leftFields={props.leftFields}
@@ -69,7 +58,7 @@ export function TermJoinExpression(props: Props) {
   return (
     <ExpressionPreview
       previewText={expressionValue}
-      renderPopup={renderTermJoinPopup}
+      renderPopup={renderESQLJoinPopup}
       popOverId={props.sourceDescriptor.id}
     />
   );

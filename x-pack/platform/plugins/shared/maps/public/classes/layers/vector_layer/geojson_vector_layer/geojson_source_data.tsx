@@ -92,6 +92,7 @@ export async function syncGeojsonSourceData({
       }
     }
     stopLoading(dataRequestId, requestToken, layerFeatureCollection, responseMeta);
+    console.log('STOP LOADING', layerFeatureCollection);
     return {
       refreshed: true,
       featureCollection: layerFeatureCollection,

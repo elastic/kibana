@@ -44,6 +44,7 @@ export function extractPropertiesFromBucket(
 ): BucketProperties {
   const properties: BucketProperties = {};
   for (const key in bucket) {
+    console.log('l', key);
     if (ignoreKeys.includes(key) || !Object.hasOwn(bucket, key)) {
       continue;
     }

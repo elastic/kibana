@@ -615,10 +615,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     joinIndex: number;
     featureCollection?: FeatureCollection;
   } & DataRequestContext): Promise<JoinState> {
+    console.log('sync join', join, joinIndex, featureCollection);
+
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
 
+    console.log('must build vector request meta');
     const joinRequestMeta = buildVectorRequestMeta(
       joinSource,
       [], // fieldNames is empty because join sources only support metrics
@@ -649,6 +652,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     try {
+      console.log('start jhoing', joinSource, joinRequestMeta);
       startLoading(sourceDataId, requestToken, joinRequestMeta);
       const { joinMetrics, warnings } = await joinSource.getJoinMetrics(
         joinRequestMeta,
@@ -657,7 +661,9 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         inspectorAdapters,
         featureCollection
       );
+      console.log('start stop loading', joinMetrics);
       stopLoading(sourceDataId, requestToken, joinMetrics, { warnings });
+      console.log('really stio liading', joinMetrics, warnings);
       return {
         dataHasChanged: true,
         join,
@@ -665,6 +671,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         joinMetrics,
       };
     } catch (error) {
+      console.log('join error');
+      console.error(error);
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(sourceDataId, requestToken, error);
       }

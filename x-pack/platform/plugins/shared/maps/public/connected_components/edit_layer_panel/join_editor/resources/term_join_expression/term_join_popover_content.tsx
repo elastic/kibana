@@ -6,17 +6,12 @@
  */
 
 import React from 'react';
-import {
-  EuiPopoverTitle,
-  EuiFormRow,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormHelpText,
-} from '@elastic/eui';
+import { EuiPopoverTitle, EuiFormRow, EuiFormHelpText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LeftFieldSelector } from '../common/left_field_selector';
 import { getDataViewSelectPlaceholder } from '../../../../../../common/i18n_getters';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../../common/constants';
 import {
@@ -61,13 +56,6 @@ export function TermJoinPopoverContent(props: Props) {
     });
   }
 
-  function onLeftFieldChange(selectedFields: Array<EuiComboBoxOptionOption<JoinField>>) {
-    const leftField = selectedFields?.[0]?.value?.name;
-    if (leftField) {
-      props.onLeftFieldChange(leftField);
-    }
-  }
-
   function onRightFieldChange(term?: string) {
     if (!term || term.length === 0) {
       return;
@@ -77,50 +65,6 @@ export function TermJoinPopoverContent(props: Props) {
       ...props.sourceDescriptor,
       term,
     });
-  }
-
-  function renderLeftFieldSelect() {
-    const { leftValue, leftFields } = props;
-
-    if (!leftFields) {
-      return null;
-    }
-
-    const options = leftFields.map((field) => {
-      return {
-        value: field,
-        label: field.label,
-      };
-    });
-
-    let leftFieldOption;
-    if (leftValue) {
-      leftFieldOption = options.find((option) => {
-        const field = option.value;
-        return field.name === leftValue;
-      });
-    }
-    const selectedOptions = leftFieldOption ? [leftFieldOption] : [];
-
-    return (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.termJoinExpression.leftFieldLabel', {
-          defaultMessage: 'Left field',
-        })}
-        helpText={i18n.translate('xpack.maps.termJoinExpression.leftSourceLabelHelpText', {
-          defaultMessage: 'Left source field that contains the shared key.',
-        })}
-      >
-        <EuiComboBox
-          placeholder={inputStrings.fieldSelectPlaceholder}
-          singleSelection={true}
-          isClearable={false}
-          options={options}
-          selectedOptions={selectedOptions}
-          onChange={onLeftFieldChange}
-        />
-      </EuiFormRow>
-    );
   }
 
   function renderRightSourceSelect() {
@@ -215,17 +159,13 @@ export function TermJoinPopoverContent(props: Props) {
           defaultMessage="Configure the shared key that combines layer features, the left source, with the results of an Elasticsearch aggregation, the right source."
         />
       </EuiFormHelpText>
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.termJoinExpression.leftSourceLabel', {
-          defaultMessage: 'Left source',
-        })}
-      >
-        <EuiComboBox
-          selectedOptions={leftSourceName ? [{ value: leftSourceName, label: leftSourceName }] : []}
-          isDisabled
-        />
-      </EuiFormRow>
-      {renderLeftFieldSelect()}
+
+      <LeftFieldSelector
+        leftSourceName={props.leftSourceName}
+        leftFields={props.leftFields}
+        onLeftFieldChange={props.onLeftFieldChange}
+        leftValue={props.leftValue}
+      />
 
       {renderRightSourceSelect()}
 

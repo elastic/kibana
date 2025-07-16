@@ -31,6 +31,7 @@ import {
   ESTermSource,
   isTermSourceComplete,
   TableSource,
+  ESQLTermSource,
 } from '../sources/join_sources';
 
 export function createJoinSource(
@@ -42,14 +43,13 @@ export function createJoinSource(
 
   if (descriptor.type === SOURCE_TYPES.ES_DISTANCE_SOURCE && isSpatialSourceComplete(descriptor)) {
     return new ESDistanceSource(descriptor as ESDistanceSourceDescriptor);
-  }
-
-  if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE && isTermSourceComplete(descriptor)) {
+  } else if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE && isTermSourceComplete(descriptor)) {
     return new ESTermSource(descriptor as ESTermSourceDescriptor);
-  }
-
-  if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
+  } else if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
     return new TableSource(descriptor as TableSourceDescriptor);
+  } else if (descriptor.type === SOURCE_TYPES.ES_ESQL_TERM_SOURCE) {
+    const esq = new ESQLTermSource(descriptor as ESESQLTermSourceDescriptor);
+    return esq;
   }
 }
 
@@ -154,6 +154,7 @@ export class InnerJoin {
   }
 
   getWhereQuery(): Query | undefined {
+    console.log('inner join get where query');
     return this.getRightJoinSource().getWhereQuery();
   }
 }
