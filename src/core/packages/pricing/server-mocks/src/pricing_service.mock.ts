@@ -31,6 +31,7 @@ export type PricingServiceContract = PublicMethodsOf<PricingService>;
 
 const createMock = () => {
   const mocked: jest.Mocked<PricingServiceContract> = {
+    preboot: jest.fn(),
     setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),

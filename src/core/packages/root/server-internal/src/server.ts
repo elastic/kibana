@@ -207,6 +207,8 @@ export class Server {
       // setup i18n prior to any other service, to have translations ready
       const i18nPreboot = await this.i18n.preboot({ http: httpPreboot, pluginPaths });
 
+      this.pricing.preboot({ http: httpPreboot });
+
       this.capabilities.preboot({ http: httpPreboot });
 
       const elasticsearchServicePreboot = await this.elasticsearch.preboot();

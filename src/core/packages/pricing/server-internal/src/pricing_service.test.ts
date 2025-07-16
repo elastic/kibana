@@ -9,19 +9,25 @@
 
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
-import { httpServiceMock, InternalHttpServiceSetupMock } from '@kbn/core-http-server-mocks';
+import {
+  httpServiceMock,
+  InternalHttpServicePrebootMock,
+  InternalHttpServiceSetupMock,
+} from '@kbn/core-http-server-mocks';
 import { of } from 'rxjs';
 import { PricingService } from './pricing_service';
 import type { PricingConfigType } from './pricing_config';
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
 describe('PricingService', () => {
+  let prebootHttp: InternalHttpServicePrebootMock;
   let setupHttp: InternalHttpServiceSetupMock;
   let service: PricingService;
   let router: RouterMock;
   let mockConfig: PricingConfigType;
 
   beforeEach(() => {
+    prebootHttp = httpServiceMock.createInternalPrebootContract();
     setupHttp = httpServiceMock.createInternalSetupContract();
     router = mockRouter.create();
     setupHttp.createRouter.mockReturnValue(router);
@@ -38,6 +44,19 @@ describe('PricingService', () => {
     coreContext.configService.atPath.mockReturnValue(of(mockConfig));
 
     service = new PricingService(coreContext);
+  });
+
+  describe('#preboot()', () => {
+    it('registers the pricing routes with default config', () => {
+      service.preboot({ http: prebootHttp });
+
+      // Preboot uses default config, not the loaded config
+      const expectedDefaultConfig = { tiers: { enabled: false, products: [] } };
+      expect((service as any).pricingConfig).toEqual(expectedDefaultConfig);
+
+      // Verify that routes are registered on the preboot HTTP service
+      expect(prebootHttp.registerRoutes).toHaveBeenCalledWith('', expect.any(Function));
+    });
   });
 
   describe('#setup()', () => {
