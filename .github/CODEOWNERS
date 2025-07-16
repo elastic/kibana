@@ -77,7 +77,7 @@ x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
 src/platform/packages/shared/kbn-cases-components @elastic/kibana-cases
-x-pack/platform/plugins/shared/cases @elastic/kibana-cases
+x-pack/platform/plugins/shared/cases @elastic/response-ops @elastic/kibana-case
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
