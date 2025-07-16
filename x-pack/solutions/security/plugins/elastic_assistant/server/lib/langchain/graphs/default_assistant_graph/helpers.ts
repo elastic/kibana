@@ -26,7 +26,7 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
-  inferenceChatModelEnabled?: boolean;
+  inferenceChatModelDisabled?: boolean;
   isEnabledKnowledgeBase: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
@@ -54,7 +54,7 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
-  inferenceChatModelEnabled = false,
+  inferenceChatModelDisabled = false,
   isEnabledKnowledgeBase,
   logger,
   onLlmResponse,
@@ -108,7 +108,7 @@ export const streamGraph = async ({
 
   // Stream is from tool calling agent or structured chat agent
   if (
-    inferenceChatModelEnabled ||
+    !inferenceChatModelDisabled ||
     inputs.isOssModel ||
     inputs?.llmType === 'bedrock' ||
     inputs?.llmType === 'gemini'

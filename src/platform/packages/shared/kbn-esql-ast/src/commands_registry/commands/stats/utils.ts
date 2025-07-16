@@ -181,10 +181,15 @@ export function checkFunctionContent(arg: ESQLFunction) {
   if (isAggregation(arg) || isFunctionOperatorParam(arg)) {
     return true;
   }
-  return (arg as ESQLFunction).args.every(
-    (subArg): boolean =>
+  return (arg as ESQLFunction).args.every((subArg): boolean => {
+    // Differentiate between array and non-array arguments
+    if (Array.isArray(subArg)) {
+      return subArg.every((item) => checkFunctionContent(item as ESQLFunction));
+    }
+    return (
       isLiteral(subArg) ||
       isAggregation(subArg) ||
       (isNotAnAggregation(subArg) ? checkFunctionContent(subArg) : false)
-  );
+    );
+  });
 }
