@@ -159,7 +159,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('Dive deeper with Elasticsearch', function () {
+        // FLAKY: https://github.com/elastic/kibana/issues/226572
+        describe.skip('Dive deeper with Elasticsearch', function () {
           it('renders Search labs content', async () => {
             await testSubjects.existOrFail('searchLabsSection');
             await testSubjects.existOrFail('searchLabsButton');
