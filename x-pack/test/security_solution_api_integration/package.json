@@ -201,6 +201,16 @@
     "lists_items:server:ess": "npm run initialize-server:lists:complete lists_items ess",
     "lists_items:runner:ess": "npm run run-tests:lists:complete lists_items ess essEnv",
 
+    "value_lists:auth:lists:server:serverless": "npm run initialize-server:lists:complete authentication/value_lists/lists serverless",
+    "value_lists:auth:lists:runner:serverless": "npm run run-tests:lists:complete authentication/value_lists/lists serverless serverlessEnv",
+    "value_lists:auth:lists:qa:serverless": "npm run run-tests:lists:complete authentication/value_lists/lists serverless qaPeriodicEnv",
+    "value_lists:auth:lists:qa:serverless:release": "npm run run-tests:lists:complete authentication/value_lists/lists serverless qaEnv",
+
+    "value_lists:auth:items:server:serverless": "npm run initialize-server:lists:complete authentication/value_lists/items serverless",
+    "value_lists:auth:items:runner:serverless": "npm run run-tests:lists:complete authentication/value_lists/items serverless serverlessEnv",
+    "value_lists:auth:items:qa:serverless": "npm run run-tests:lists:complete authentication/value_lists/items serverless qaPeriodicEnv",
+    "value_lists:auth:items:qa:serverless:release": "npm run run-tests:lists:complete authentication/value_lists/items serverless qaEnv",
+
     "user_roles:server:serverless": "npm run initialize-server:dr user_roles serverless",
     "user_roles:runner:serverless": "npm run run-tests:dr user_roles serverless serverlessEnv",
     "user_roles:qa:serverless": "npm run run-tests:dr user_roles serverless qaPeriodicEnv",

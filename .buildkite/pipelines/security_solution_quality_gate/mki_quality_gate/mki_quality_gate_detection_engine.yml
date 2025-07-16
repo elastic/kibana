@@ -76,7 +76,7 @@ steps:
               limit: 2
 
       - label: Running lists_items:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh lists_items:qa:serverless:release
         key: lists_items:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -87,6 +87,34 @@ steps:
         retry:
           automatic:
             - exit_status: '1'
+              limit: 2
+
+      - label: Running value_lists:auth:lists:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh value_lists:auth:lists:qa:serverless:release
+        key: value_lists:auth:lists:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running value_lists:auth:items:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh value_lists:auth:items:qa:serverless:release
+        key: value_lists:auth:items:qa:serverless:release
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
               limit: 2
 
       - label: Running user_roles:qa:serverless:release

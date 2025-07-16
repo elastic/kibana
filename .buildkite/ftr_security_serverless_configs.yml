@@ -107,6 +107,8 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/common/essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authorization/exceptions/items/essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authentication/value_lists/lists/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/authentication/value_lists/items/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/hosts/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/network/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/users/trial_license_complete_tier/configs/serverless.config.ts
