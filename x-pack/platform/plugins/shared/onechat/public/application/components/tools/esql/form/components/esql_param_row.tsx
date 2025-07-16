@@ -8,10 +8,12 @@
 import {
   EuiButtonIcon,
   EuiFieldText,
+  EuiFlexGroup,
   EuiIcon,
   EuiSelect,
   EuiTableRow,
   EuiTableRowCell,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
   useIsWithinBreakpoints,
@@ -61,11 +63,13 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
 
   const paramErrors = errors.params?.[index];
   const errorMessages = useMemo(() => {
+    // Mobile will display field level validation errors
+    if (isMobile) return '';
     return [paramErrors?.name, paramErrors?.description, paramErrors?.type]
       .filter((error): error is FieldError => !!error)
       .map((error) => error.message)
       .join('\n');
-  }, [paramErrors?.name, paramErrors?.description, paramErrors?.type]);
+  }, [paramErrors?.name, paramErrors?.description, paramErrors?.type, isMobile]);
 
   return (
     <EuiTableRow
@@ -77,11 +81,12 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
       `}
     >
       <EuiTableRowCell>
-        {errorMessages ? (
+        {!isMobile && errorMessages ? (
           <EuiToolTip content={errorMessages}>
             <EuiIcon type="errorFilled" color={euiTheme.colors.danger} size="m" />
           </EuiToolTip>
         ) : (
+          !isMobile &&
           warning && (
             <EuiToolTip content={warning}>
               <EuiIcon type="warningFilled" color={euiTheme.colors.warning} size="m" />
@@ -99,22 +104,39 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
         <Controller
           control={control}
           name={`params.${index}.name`}
-          render={({ field: { ref, onChange, onBlur, ...field }, fieldState: { invalid } }) => (
-            <EuiFieldText
-              compressed
-              fullWidth={isMobile}
-              placeholder={i18nMessages.paramNamePlaceholder}
-              inputRef={ref}
-              isInvalid={invalid}
-              onBlur={handleValidation}
-              onChange={(event) => {
-                onChange(event);
-                if (isSubmitted) {
-                  handleValidation();
-                }
-              }}
-              {...field}
-            />
+          render={({
+            field: { ref, onChange, onBlur, ...field },
+            fieldState: { invalid, error },
+          }) => (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFieldText
+                compressed
+                fullWidth={isMobile}
+                placeholder={i18nMessages.paramNamePlaceholder}
+                inputRef={ref}
+                isInvalid={invalid}
+                onBlur={handleValidation}
+                onChange={(event) => {
+                  onChange(event);
+                  if (isSubmitted) {
+                    handleValidation();
+                  }
+                }}
+                {...field}
+              />
+              {isMobile &&
+                (invalid && error?.message ? (
+                  <EuiText size="xs" color="danger">
+                    {error.message}
+                  </EuiText>
+                ) : (
+                  warning && (
+                    <EuiText size="xs" color="warning">
+                      {warning}
+                    </EuiText>
+                  )
+                ))}
+            </EuiFlexGroup>
           )}
         />
       </EuiTableRowCell>
@@ -128,15 +150,22 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
         <Controller
           control={control}
           name={`params.${index}.description`}
-          render={({ field: { ref, ...field }, fieldState: { invalid } }) => (
-            <EuiFieldText
-              compressed
-              fullWidth={isMobile}
-              placeholder={i18nMessages.paramDescriptionPlaceholder}
-              inputRef={ref}
-              isInvalid={invalid}
-              {...field}
-            />
+          render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFieldText
+                compressed
+                fullWidth={isMobile}
+                placeholder={i18nMessages.paramDescriptionPlaceholder}
+                inputRef={ref}
+                isInvalid={invalid}
+                {...field}
+              />
+              {isMobile && invalid && error?.message && (
+                <EuiText size="xs" color="danger">
+                  {error.message}
+                </EuiText>
+              )}
+            </EuiFlexGroup>
           )}
         />
       </EuiTableRowCell>
@@ -150,18 +179,25 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
         <Controller
           control={control}
           name={`params.${index}.type`}
-          render={({ field: { ref, ...field }, fieldState: { invalid } }) => (
-            <EuiSelect
-              compressed
-              fullWidth={isMobile}
-              options={Object.values(EsqlToolFieldType).map((option) => ({
-                value: option,
-                text: capitalize(option),
-              }))}
-              inputRef={ref}
-              isInvalid={invalid}
-              {...field}
-            />
+          render={({ field: { ref, ...field }, fieldState: { invalid, error } }) => (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiSelect
+                compressed
+                fullWidth={isMobile}
+                options={Object.values(EsqlToolFieldType).map((option) => ({
+                  value: option,
+                  text: capitalize(option),
+                }))}
+                inputRef={ref}
+                isInvalid={invalid}
+                {...field}
+              />
+              {isMobile && invalid && error?.message && (
+                <EuiText size="xs" color="danger">
+                  {error.message}
+                </EuiText>
+              )}
+            </EuiFlexGroup>
           )}
         />
       </EuiTableRowCell>
