@@ -8,13 +8,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { baseSchema } from './stack_monitoring_common_schema';
 
-export const threadPoolRejectionsCommonSchema = schema.object({
-  threshold: schema.number(),
-  duration: schema.string(),
-  filterQuery: schema.maybe(schema.string()),
-  filterQueryText: schema.maybe(schema.string()),
-});
+export const threadPoolRejectionsCommonSchema = baseSchema.extends({});
 
 export type ThreadPoolRejectionsCommonParams = TypeOf<typeof threadPoolRejectionsCommonSchema>;
