@@ -24,7 +24,8 @@ export interface IntegrationsPageProps {
 
 export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
   ({ useAvailablePackages }) => {
-    useGetPackageVerificationKeyId();
+    const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
+    console.log('retrieved packageVerificationKeyId', packageVerificationKeyId);
 
     const { filteredCards, isLoading, searchTerm, setSearchTerm } = useAvailablePackages({
       prereleaseIntegrationsEnabled: true,
