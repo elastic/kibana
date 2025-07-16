@@ -8,7 +8,6 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { getQueryForFields } from './helper';
 
 describe('getQueryForFields', () => {
