@@ -7,5 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Navigation } from './src/components/navigation';
-export { NavigationProvider, useNavigation } from './src/hooks/use_navigation';
+import { MenuItem } from '../../types';
+
+/**
+ * Checks if a menu item has submenu content
+ */
+export const hasSubmenu = (item: MenuItem): boolean => {
+  return !!item.sections && item.sections.length > 0;
+};
