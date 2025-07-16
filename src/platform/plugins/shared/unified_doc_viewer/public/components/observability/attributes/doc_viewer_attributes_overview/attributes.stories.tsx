@@ -8,13 +8,10 @@
  */
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { Meta, StoryObj } from '@storybook/react';
 import AttributesOverview from '.';
 import basicFixture from './__fixtures__/basic.json';
 import redisSpanFixture from './__fixtures__/redis_span.json';
-import { mockUnifiedDocViewerServices } from '../../../../__mocks__';
-import { setUnifiedDocViewerServices } from '../../../../plugin';
 
 const meta: Meta<typeof AttributesOverview> = {
   title: 'Attributes',
@@ -24,21 +21,9 @@ const meta: Meta<typeof AttributesOverview> = {
 export default meta;
 type Story = StoryObj<typeof AttributesOverview>;
 
-setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
-
-const mockDataView = {
-  ...dataViewMockWithTimeField,
-  fields: { getAll: () => [], getByName: () => null },
-} as never;
-
-const baseArgs = {
-  hit: {},
-  dataView: mockDataView,
-};
-
-export const Basic: Story = { args: { ...baseArgs, hit: buildDataTableRecord(basicFixture) } };
+export const Basic: Story = { args: { hit: buildDataTableRecord(basicFixture) } };
 
 export const RedisSpan: Story = {
   name: 'Redis client span (processed)',
-  args: { ...baseArgs, hit: buildDataTableRecord(redisSpanFixture) },
+  args: { hit: buildDataTableRecord(redisSpanFixture) },
 };

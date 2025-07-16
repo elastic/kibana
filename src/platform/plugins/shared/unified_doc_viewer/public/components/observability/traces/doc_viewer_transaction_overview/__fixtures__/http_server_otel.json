@@ -1,309 +1,206 @@
 {
-  "_index": ".ds-traces-generic.otel-default-2025.07.01-000001",
-  "_id": "AZf0_SbLoGff8Gb4NE1l",
+  "_index": ".ds-traces-generic.otel-default-2025.06.16-000005",
+  "_id": "AZgJL036ZddNnCCnvPoo",
   "_version": 1,
   "_source": {
-    "@timestamp": "2025-07-10T15:39:26.524Z",
+    "@timestamp": "2025-07-14T13:45:46.560Z",
     "attributes": {
+      "app.cart.items.count": 10,
+      "app.user.id": "d81c6ad6-60b8-11f0-813e-7e3cc810e5af",
       "event.outcome": "success",
       "event.success_count": 1,
-      "http.flavor": "1.1",
-      "http.method": "GET",
-      "http.request_content_length": 0,
-      "http.response_content_length": 98549,
-      "http.scheme": "http",
-      "http.status_code": "200",
-      "http.target": "/products/SolarSystemColorImager.jpg",
-      "http.user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36",
-      "net.host.name": "_",
-      "net.host.port": 8081,
-      "net.sock.peer.addr": "172.20.0.21",
-      "net.sock.peer.port": 58518,
+      "grpc.method": "/oteldemo.CartService/GetCart",
+      "grpc.status_code": "0",
+      "http.request.method": "POST",
+      "http.response.status_code": 200,
+      "http.route": "/oteldemo.CartService/GetCart",
+      "network.protocol.version": "2",
       "processor.event": "transaction",
-      "timestamp.us": 1752161966524000,
-      "transaction.duration.us": 0,
-      "transaction.id": "03787b4b12538d4a",
-      "transaction.name": "image-provider",
+      "server.address": "cart",
+      "server.port": 8080,
+      "timestamp.us": 1752500746560942,
+      "transaction.duration.us": 3265,
+      "transaction.id": "c3bc1743bc5be29c",
+      "transaction.name": "POST /oteldemo.CartService/GetCart",
       "transaction.representative_count": 1,
       "transaction.result": "HTTP 2xx",
       "transaction.root": false,
       "transaction.sampled": true,
-      "transaction.type": "request"
+      "transaction.type": "request",
+      "url.path": "/oteldemo.CartService/GetCart",
+      "url.scheme": "http",
+      "user_agent.original": "grpc-node-js/1.12.6"
     },
     "data_stream": {
       "dataset": "generic.otel",
       "namespace": "default",
       "type": "traces"
     },
-    "duration": 0,
+    "duration": 3265700,
     "kind": "Server",
     "links": [],
-    "name": "image-provider",
-    "parent_span_id": "b8cb0a2b391c354a",
+    "name": "POST /oteldemo.CartService/GetCart",
+    "parent_span_id": "146192a7475858f4",
     "resource": {
       "attributes": {
-        "agent.name": "otlp",
-        "agent.version": "unknown",
-        "service.name": "image-provider"
+        "agent.name": "opentelemetry/dotnet/elastic",
+        "agent.version": "1.0.1",
+        "container.id": "dab4ab527fcfd1a90b9c473ff7199bfca6d2533ca5f29e4556e64fadf4694a10",
+        "host.name": "gke-edge-edot-edge-edot-pool-c63174b8-qfmf",
+        "k8s.namespace.name": "default",
+        "k8s.node.name": "gke-edge-edot-edge-edot-pool-c63174b8-qfmf",
+        "k8s.pod.name": "cart-684579cbd4-d55s4",
+        "process.runtime.description": ".NET 8.0.15",
+        "process.runtime.name": ".NET",
+        "process.runtime.version": "8.0.15",
+        "service.environment": "oteldemo",
+        "service.instance.id": "abb606e6-f365-4f6f-bdc1-edef4b5e3198",
+        "service.name": "cart",
+        "service.namespace": "opentelemetry-demo",
+        "telemetry.distro.name": "elastic",
+        "telemetry.distro.version": "1.0.1",
+        "telemetry.sdk.language": "dotnet",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "1.11.2"
       }
     },
     "scope": {
       "attributes": {
-        "service.framework.name": "nginx",
-        "service.framework.version": "1.27.0"
+        "service.framework.name": "Microsoft.AspNetCore",
+        "service.framework.version": ""
       },
-      "name": "nginx",
-      "version": "1.27.0"
+      "name": "Microsoft.AspNetCore"
     },
-    "span_id": "03787b4b12538d4a",
+    "span_id": "c3bc1743bc5be29c",
     "status": {
       "code": "Unset"
     },
-    "trace_id": "3b453a9f636203f3b9a9023e37e4b3ba"
+    "trace_id": "101c694b061bb41c3ba576c072cb42bf"
   },
   "fields": {
-    "attributes.http.flavor": [
-      "1.1"
-    ],
-    "attributes.http.request_content_length": [
-      0
-    ],
-    "attributes.http.response_content_length": [
-      98549
-    ],
-    "scope.name": [
-      "nginx"
-    ],
-    "http.flavor": [
-      "1.1"
-    ],
-    "resource.attributes.agent.name.text": [
-      "otlp"
-    ],
-    "transaction.representative_count": [
-      1
-    ],
-    "transaction.result": [
-      "HTTP 2xx"
-    ],
-    "transaction.id": [
-      "03787b4b12538d4a"
-    ],
-    "attributes.event.success_count": [
-      1
-    ],
-    "attributes.timestamp.us": [
-      1752161966524000
-    ],
-    "attributes.net.host.name": [
-      "_"
-    ],
-    "attributes.net.sock.peer.port": [
-      58518
-    ],
-    "http.user_agent": [
-      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36"
-    ],
-    "processor.event": [
-      "transaction"
-    ],
-    "agent.name": [
-      "otlp"
-    ],
-    "event.outcome": [
-      "success"
-    ],
-    "scope.attributes.service.framework.name": [
-      "nginx"
-    ],
-    "attributes.transaction.sampled": [
-      true
-    ],
-    "attributes.net.host.port": [
-      8081
-    ],
-    "parent_span_id": [
-      "b8cb0a2b391c354a"
-    ],
-    "attributes.net.host.name.text": [
-      "_"
-    ],
-    "http.target": [
-      "/products/SolarSystemColorImager.jpg"
-    ],
-    "span_id": [
-      "03787b4b12538d4a"
-    ],
-    "kind": [
-      "Server"
-    ],
-    "attributes.transaction.duration.us": [
-      0
-    ],
-    "attributes.transaction.name": [
-      "image-provider"
-    ],
-    "transaction.duration.us": [
-      0
-    ],
-    "span.id": [
-      "03787b4b12538d4a"
-    ],
-    "data_stream.type": [
-      "traces"
-    ],
-    "http.request_content_length": [
-      0
-    ],
-    "timestamp.us": [
-      1752161966524000
-    ],
-    "attributes.http.method": [
-      "GET"
-    ],
-    "net.host.port": [
-      8081
-    ],
-    "name": [
-      "image-provider"
-    ],
-    "agent.version": [
-      "unknown"
-    ],
-    "parent.id": [
-      "b8cb0a2b391c354a"
-    ],
-    "transaction.name": [
-      "image-provider"
-    ],
-    "resource.attributes.service.name.text": [
-      "image-provider"
-    ],
-    "scope.attributes.service.framework.version": [
-      "1.27.0"
-    ],
-    "http.scheme": [
-      "http"
-    ],
-    "resource.attributes.service.name": [
-      "image-provider"
-    ],
-    "attributes.transaction.representative_count": [
-      1
-    ],
-    "net.host.name": [
-      "_"
-    ],
-    "span.name": [
-      "image-provider"
-    ],
-    "resource.attributes.agent.version": [
-      "unknown"
-    ],
-    "attributes.transaction.id": [
-      "03787b4b12538d4a"
-    ],
-    "net.sock.peer.addr": [
-      "172.20.0.21"
-    ],
-    "service.framework.version": [
-      "1.27.0"
-    ],
-    "resource.attributes.agent.name": [
-      "otlp"
-    ],
-    "status.code": [
-      "Unset"
-    ],
-    "transaction.sampled": [
-      true
-    ],
-    "duration": [
-      0
-    ],
-    "attributes.transaction.result": [
-      "HTTP 2xx"
-    ],
-    "trace.id": [
-      "3b453a9f636203f3b9a9023e37e4b3ba"
-    ],
-    "attributes.http.scheme": [
-      "http"
-    ],
-    "attributes.transaction.name.text": [
-      "image-provider"
-    ],
-    "event.success_count": [
-      1
-    ],
-    "transaction.root": [
-      false
-    ],
-    "net.sock.peer.port": [
-      58518
-    ],
-    "scope.attributes.service.framework.name.text": [
-      "nginx"
-    ],
-    "attributes.http.target": [
-      "/products/SolarSystemColorImager.jpg"
-    ],
-    "http.method": [
-      "GET"
-    ],
-    "attributes.transaction.root": [
-      false
-    ],
-    "trace_id": [
-      "3b453a9f636203f3b9a9023e37e4b3ba"
-    ],
-    "service.name": [
-      "image-provider"
-    ],
-    "service.framework.name": [
-      "nginx"
-    ],
-    "data_stream.namespace": [
-      "default"
-    ],
-    "attributes.http.user_agent": [
-      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/136.0.0.0 Safari/537.36"
-    ],
-    "attributes.net.sock.peer.addr": [
-      "172.20.0.21"
-    ],
-    "transaction.type": [
-      "request"
-    ],
-    "http.status_code": [
-      "200"
-    ],
-    "attributes.http.status_code": [
-      "200"
-    ],
-    "attributes.processor.event": [
-      "transaction"
-    ],
-    "@timestamp": [
-      "2025-07-10T15:39:26.524Z"
-    ],
-    "http.response_content_length": [
-      98549
-    ],
-    "data_stream.dataset": [
-      "generic.otel"
-    ],
-    "attributes.event.outcome": [
-      "success"
-    ],
-    "attributes.transaction.type": [
-      "request"
-    ],
-    "scope.version": [
-      "1.27.0"
-    ],
-    "event.dataset": [
-      "generic.otel"
-    ]
+    "resource.attributes.telemetry.sdk.name.text": ["opentelemetry"],
+    "k8s.namespace.name": ["default"],
+    "scope.name": ["Microsoft.AspNetCore"],
+    "resource.attributes.telemetry.sdk.name": ["opentelemetry"],
+    "attributes.network.protocol.version": ["2"],
+    "attributes.user_agent.original": ["grpc-node-js/1.12.6"],
+    "service.language.name": ["dotnet"],
+    "transaction.result": ["HTTP 2xx"],
+    "container.id": ["dab4ab527fcfd1a90b9c473ff7199bfca6d2533ca5f29e4556e64fadf4694a10"],
+    "resource.attributes.process.runtime.version": ["8.0.15"],
+    "server.address": ["cart"],
+    "transaction.id": ["c3bc1743bc5be29c"],
+    "attributes.event.success_count": [1],
+    "attributes.timestamp.us": [1752500746560942],
+    "telemetry.sdk.language": ["dotnet"],
+    "resource.attributes.service.instance.id": ["abb606e6-f365-4f6f-bdc1-edef4b5e3198"],
+    "agent.name": ["opentelemetry/dotnet/elastic"],
+    "attributes.user_agent.original.text": ["grpc-node-js/1.12.6"],
+    "http.response.status_code": [200],
+    "event.outcome": ["success"],
+    "scope.attributes.service.framework.name": ["Microsoft.AspNetCore"],
+    "user_agent.original": ["grpc-node-js/1.12.6"],
+    "attributes.url.path": ["/oteldemo.CartService/GetCart"],
+    "span_id": ["c3bc1743bc5be29c"],
+    "attributes.transaction.duration.us": [3265],
+    "attributes.transaction.name": ["POST /oteldemo.CartService/GetCart"],
+    "transaction.duration.us": [3265],
+    "service.runtime.version": ["8.0.15"],
+    "span.id": ["c3bc1743bc5be29c"],
+    "resource.attributes.service.namespace": ["opentelemetry-demo"],
+    "service.namespace": ["opentelemetry-demo"],
+    "url.path": ["/oteldemo.CartService/GetCart"],
+    "resource.attributes.telemetry.sdk.version": ["1.11.2"],
+    "resource.attributes.process.runtime.description": [".NET 8.0.15"],
+    "resource.attributes.k8s.pod.name": ["cart-684579cbd4-d55s4"],
+    "transaction.name": ["POST /oteldemo.CartService/GetCart"],
+    "app.user.id": ["d81c6ad6-60b8-11f0-813e-7e3cc810e5af"],
+    "scope.attributes.service.framework.version": [""],
+    "resource.attributes.service.name": ["cart"],
+    "attributes.transaction.representative_count": [1],
+    "span.name": ["POST /oteldemo.CartService/GetCart"],
+    "resource.attributes.agent.version": ["1.0.1"],
+    "attributes.transaction.id": ["c3bc1743bc5be29c"],
+    "resource.attributes.agent.name": ["opentelemetry/dotnet/elastic"],
+    "resource.attributes.telemetry.distro.name": ["elastic"],
+    "service.node.name": ["abb606e6-f365-4f6f-bdc1-edef4b5e3198"],
+    "attributes.server.port": [8080],
+    "url.scheme": ["http"],
+    "status.code": ["Unset"],
+    "transaction.sampled": [true],
+    "telemetry.sdk.name": ["opentelemetry"],
+    "grpc.method": ["/oteldemo.CartService/GetCart"],
+    "service.instance.id": ["abb606e6-f365-4f6f-bdc1-edef4b5e3198"],
+    "attributes.transaction.name.text": ["POST /oteldemo.CartService/GetCart"],
+    "transaction.root": [false],
+    "server.port": [8080],
+    "resource.attributes.host.name": ["gke-edge-edot-edge-edot-pool-c63174b8-qfmf"],
+    "resource.attributes.telemetry.distro.name.text": ["elastic"],
+    "attributes.url.scheme": ["http"],
+    "network.protocol.version": ["2"],
+    "@timestamp": ["2025-07-14T13:45:46.560Z"],
+    "k8s.node.name": ["gke-edge-edot-edge-edot-pool-c63174b8-qfmf"],
+    "data_stream.dataset": ["generic.otel"],
+    "attributes.event.outcome": ["success"],
+    "attributes.transaction.type": ["request"],
+    "resource.attributes.service.environment": ["oteldemo"],
+    "resource.attributes.agent.name.text": ["opentelemetry/dotnet/elastic"],
+    "transaction.representative_count": [1],
+    "process.runtime.version": ["8.0.15"],
+    "attributes.http.request.method": ["POST"],
+    "process.runtime.name": [".NET"],
+    "grpc.status_code": ["0"],
+    "http.request.method": ["POST"],
+    "app.cart.items.count": [10],
+    "kubernetes.namespace": ["default"],
+    "processor.event": ["transaction"],
+    "attributes.http.response.status_code": [200],
+    "attributes.app.cart.items.count": [10],
+    "host.name": ["gke-edge-edot-edge-edot-pool-c63174b8-qfmf"],
+    "resource.attributes.telemetry.distro.version": ["1.0.1"],
+    "telemetry.sdk.version": ["1.11.2"],
+    "attributes.transaction.sampled": [true],
+    "parent_span_id": ["146192a7475858f4"],
+    "kind": ["Server"],
+    "data_stream.type": ["traces"],
+    "attributes.grpc.status_code": ["0"],
+    "attributes.http.route": ["/oteldemo.CartService/GetCart"],
+    "timestamp.us": [1752500746560942],
+    "name": ["POST /oteldemo.CartService/GetCart"],
+    "agent.version": ["1.0.1"],
+    "parent.id": ["146192a7475858f4"],
+    "resource.attributes.service.name.text": ["cart"],
+    "kubernetes.node.name": ["gke-edge-edot-edge-edot-pool-c63174b8-qfmf"],
+    "telemetry.distro.version": ["1.0.1"],
+    "attributes.server.address": ["cart"],
+    "resource.attributes.k8s.namespace.name": ["default"],
+    "service.framework.version": [""],
+    "resource.attributes.telemetry.sdk.language": ["dotnet"],
+    "duration": [3265700],
+    "attributes.transaction.result": ["HTTP 2xx"],
+    "trace.id": ["101c694b061bb41c3ba576c072cb42bf"],
+    "k8s.pod.name": ["cart-684579cbd4-d55s4"],
+    "event.success_count": [1],
+    "attributes.grpc.method": ["/oteldemo.CartService/GetCart"],
+    "resource.attributes.container.id": [
+      "dab4ab527fcfd1a90b9c473ff7199bfca6d2533ca5f29e4556e64fadf4694a10"
+    ],
+    "kubernetes.pod.name": ["cart-684579cbd4-d55s4"],
+    "scope.attributes.service.framework.name.text": ["Microsoft.AspNetCore"],
+    "attributes.transaction.root": [false],
+    "trace_id": ["101c694b061bb41c3ba576c072cb42bf"],
+    "service.name": ["cart"],
+    "service.framework.name": ["Microsoft.AspNetCore"],
+    "data_stream.namespace": ["default"],
+    "service.runtime.name": [".NET"],
+    "telemetry.distro.name": ["elastic"],
+    "resource.attributes.process.runtime.name": [".NET"],
+    "attributes.app.user.id": ["d81c6ad6-60b8-11f0-813e-7e3cc810e5af"],
+    "transaction.type": ["request"],
+    "attributes.processor.event": ["transaction"],
+    "http.route": ["/oteldemo.CartService/GetCart"],
+    "resource.attributes.k8s.node.name": ["gke-edge-edot-edge-edot-pool-c63174b8-qfmf"],
+    "process.runtime.description": [".NET 8.0.15"],
+    "event.dataset": ["generic.otel"]
   }
 }

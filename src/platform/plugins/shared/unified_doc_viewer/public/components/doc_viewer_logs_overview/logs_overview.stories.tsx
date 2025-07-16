@@ -8,10 +8,7 @@
  */
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { Meta, StoryObj } from '@storybook/react';
-import { mockUnifiedDocViewerServices } from '../../__mocks__';
-import { setUnifiedDocViewerServices } from '../../plugin';
 import otelExampleFixture from './__fixtures__/otel_example.json';
 import { LogsOverview } from './logs_overview';
 
@@ -23,17 +20,9 @@ const meta: Meta<typeof LogsOverview> = {
 export default meta;
 type Story = StoryObj<typeof LogsOverview>;
 
-setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
-
-const mockDataView = {
-  ...dataViewMockWithTimeField,
-  fields: { getAll: () => [], getByName: () => null },
-} as never;
-
 export const Minimal: Story = {
   name: 'Minimal log',
   args: {
-    dataView: mockDataView,
     hit: buildDataTableRecord({ fields: { '@timestamp': new Date().toISOString() } }),
   },
 };
@@ -41,7 +30,6 @@ export const Minimal: Story = {
 export const OtelExample: Story = {
   name: 'Otel example log',
   args: {
-    ...Minimal.args,
     hit: buildDataTableRecord(otelExampleFixture),
   },
 };
