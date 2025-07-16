@@ -12,7 +12,7 @@ import React from 'react';
 import { EuiTitle, EuiSpacer, EuiDescriptionList } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FILE_FORMATS } from '@kbn/file-upload-common';
-import { getTikaDisplayType } from '@kbn/file-upload-common/src/file_manager/tika_utils';
+import { getTikaDisplayType } from '@kbn/file-upload/file_upload_manager';
 
 interface Props {
   results: FindFileStructureResponse;
