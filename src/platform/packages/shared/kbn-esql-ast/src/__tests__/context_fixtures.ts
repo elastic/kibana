@@ -6,13 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { IndexAutocompleteItem } from '@kbn/esql-types';
+import { IndexAutocompleteItem, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import type {
   ESQLFieldWithMetadata,
   ESQLPolicy,
   ESQLUserDefinedColumn,
+  ICommandCallbacks,
   ICommandContext,
-} from '../../commands_registry/types';
+} from '../commands_registry/types';
+import { getFieldNamesByType } from './autocomplete';
 
 export const joinIndices: IndexAutocompleteItem[] = [
   {
@@ -30,6 +32,12 @@ export const joinIndices: IndexAutocompleteItem[] = [
     mode: 'lookup',
     aliases: [],
   },
+];
+
+export const lookupIndexFields = [
+  { name: 'booleanField', type: 'boolean' },
+  { name: 'dateField', type: 'date' },
+  { name: 'joinIndexOnlyField', type: 'text' },
 ];
 
 export const timeseriesIndices: IndexAutocompleteItem[] = [
@@ -65,7 +73,7 @@ export const policies = [
   },
 ];
 
-const indexes = [
+export const indexes = [
   'a_index',
   'index',
   'other_index',
@@ -73,6 +81,38 @@ const indexes = [
   'my-index',
   'unsupported_index',
 ];
+
+export const integrations = ['nginx', 'k8s'];
+
+const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
+  {
+    inference_id: 'inference_1',
+    task_type: 'completion',
+  },
+];
+
+export const editorExtensions = {
+  recommendedQueries: [
+    {
+      name: 'Logs Count by Host',
+      query: 'from logs* | STATS count(*) by host',
+    },
+  ],
+  recommendedFields: [
+    {
+      name: 'host.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'user.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'kubernetes.something.something',
+      pattern: 'logs*',
+    },
+  ],
+};
 
 export const mockContext: ICommandContext = {
   userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([
@@ -152,6 +192,7 @@ export const mockContext: ICommandContext = {
     ['geoPointField', { name: 'geoPointField', type: 'geo_point' }],
     ['geoShapeField', { name: 'geoShapeField', type: 'geo_shape' }],
     ['versionField', { name: 'versionField', type: 'version' }],
+    ['longField', { name: 'longField', type: 'long' }],
   ]),
   policies: new Map<string, ESQLPolicy>(policies.map((policy) => [policy.name, policy])),
   sources: indexes.map((name) => ({
@@ -160,4 +201,18 @@ export const mockContext: ICommandContext = {
     type: 'Index',
   })),
   joinSources: joinIndices,
+  timeSeriesSources: timeseriesIndices,
+  inferenceEndpoints,
+  histogramBarTarget: 50,
+};
+
+export const getMockCallbacks = (): ICommandCallbacks => {
+  const expectedFields = getFieldNamesByType('any');
+  return {
+    getByType: jest
+      .fn()
+      .mockResolvedValue(expectedFields.map((name) => ({ label: name, text: name }))),
+    getSuggestedUserDefinedColumnName: jest.fn(),
+    getColumnsForQuery: jest.fn(),
+  };
 };
