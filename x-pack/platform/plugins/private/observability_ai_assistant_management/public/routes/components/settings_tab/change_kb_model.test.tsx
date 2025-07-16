@@ -23,6 +23,7 @@ import {
   elserDescription,
   elserTitle,
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('../../../hooks/use_install_product_doc', () => ({
   useInstallProductDoc: () => ({
@@ -38,10 +39,17 @@ jest.mock('@kbn/ai-assistant/src/hooks', () => ({
   }),
 }));
 
-jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-ai-assistant-plugin/public'),
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+          addError: jest.fn(),
+          addWarning: jest.fn(),
+          addInfo: jest.fn(),
+        },
+      },
       overlays: {
         openConfirm: jest.fn(() => Promise.resolve(true)),
       },
@@ -105,7 +113,13 @@ const setupMockGetModelOptions = (options = modelOptions) => {
 };
 
 const renderComponent = (mockKb: UseKnowledgeBaseResult) => {
-  render(<ChangeKbModel knowledgeBase={mockKb} />);
+  const queryClient = new QueryClient();
+
+  render(
+    <QueryClientProvider client={queryClient}>
+      <ChangeKbModel knowledgeBase={mockKb} />{' '}
+    </QueryClientProvider>
+  );
 };
 
 describe('ChangeKbModel', () => {
