@@ -97,7 +97,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
         <EuiPopover
           anchorPosition="downRight"
           button={
-            <EuiToolTip content={linkButtonAriaLabel}>
+            <EuiToolTip content={linkButtonAriaLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={linkButtonAriaLabel}
                 data-test-subj="showUnlinkSavedSearchPopover"
