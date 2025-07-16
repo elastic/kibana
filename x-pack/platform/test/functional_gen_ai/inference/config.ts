@@ -12,7 +12,7 @@ import { services } from './ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../functional/config.base.js')
+    require.resolve('../../functional/config.base.ts')
   );
 
   const preconfiguredConnectors = getPreconfiguredConnectorConfig();

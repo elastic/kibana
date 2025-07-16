@@ -49,7 +49,7 @@ disabled:
   - x-pack/performance/configs/http2_config.ts
 
   # Gen AI suites, running with their own pipeline
-  - x-pack/test/functional_gen_ai/inference/config.ts
+  - x-pack/platform/test/functional_gen_ai/inference/config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:

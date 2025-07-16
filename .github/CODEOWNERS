@@ -2073,7 +2073,7 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 
 # AppEx AI Infra
 /x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
-/x-pack/test/functional_gen_ai/inference @elastic/appex-ai-infra
+/x-pack/platform/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
 /x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
