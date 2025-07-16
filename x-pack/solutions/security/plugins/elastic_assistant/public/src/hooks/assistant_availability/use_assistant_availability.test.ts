@@ -75,7 +75,6 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: true,
-      isStarterPromptsEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
@@ -128,7 +127,6 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: false,
-      isStarterPromptsEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
     });
@@ -174,7 +172,6 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: false,
       isAssistantVisible: false,
-      isStarterPromptsEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -220,7 +217,6 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: true,
       isAssistantEnabled: true,
       isAssistantVisible: true,
-      isStarterPromptsEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });
@@ -251,7 +247,6 @@ describe('useAssistantAvailability', () => {
       hasConnectorsReadPrivilege: false,
       isAssistantEnabled: true,
       isAssistantVisible: true,
-      isStarterPromptsEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
     });

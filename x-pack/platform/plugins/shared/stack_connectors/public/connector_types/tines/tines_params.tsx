@@ -72,7 +72,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
   executionMode,
   errors,
 }) => {
-  const { toasts } = useKibana().notifications;
+  const { toasts } = useKibana().services.notifications;
   const { subAction, subActionParams } = actionParams;
   const { body, webhook, webhookUrl } = subActionParams ?? {};
 
@@ -130,10 +130,10 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
 
   useEffect(() => {
     if (storiesError) {
-      toasts.danger({ title: i18n.STORIES_ERROR, body: storiesError.message });
+      toasts.addDanger({ title: i18n.STORIES_ERROR, text: storiesError.message });
     }
     if (webhooksError) {
-      toasts.danger({ title: i18n.WEBHOOKS_ERROR, body: webhooksError.message });
+      toasts.addDanger({ title: i18n.WEBHOOKS_ERROR, text: webhooksError.message });
     }
   }, [toasts, storiesError, webhooksError]);
 
@@ -168,7 +168,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       if (selectedStory) {
         setSelectedStoryOption(createOption(selectedStory));
       } else {
-        toasts.warning({ title: i18n.STORY_NOT_FOUND_WARNING });
+        toasts.addWarning({ title: i18n.STORY_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: undefined });
       }
     }
@@ -188,7 +188,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       if (selectedWebhook) {
         setSelectedWebhookOption(createOption(selectedWebhook));
       } else {
-        toasts.warning({ title: i18n.WEBHOOK_NOT_FOUND_WARNING });
+        toasts.addWarning({ title: i18n.WEBHOOK_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: { storyId: webhook?.storyId } });
       }
     }
