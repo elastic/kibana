@@ -23,7 +23,7 @@ import { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
-describe('dashboardAttributesOut', () => {
+describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {
     explicitInput: { anyKey: 'some value' },
     type: 'type1',
