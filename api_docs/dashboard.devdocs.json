@@ -1420,9 +1420,9 @@
           },
           " & ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-util",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationUtilPluginApi",
             "section": "def-public.TracksOverlays",
             "text": "TracksOverlays"
           },
