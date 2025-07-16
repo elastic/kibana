@@ -76,8 +76,9 @@ export class SynchronizationTaskRunner implements CancellableTask {
 
   public async run() {
     if (!this.analyticsConfig.index.enabled) {
-      this.logDebug('Analytics index is disabled, skipping synchronization task.');
-      return;
+      this.logDebug('Analytics index is disabled, proceeding anyway.');
+      // this.logDebug('Analytics index is disabled, skipping synchronization task.');
+      // return;
     }
 
     const esClient = await this.getESClient();
@@ -290,7 +291,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
   }
 
   public logDebug(message: string) {
-    this.logger.debug(`[${this.destIndex}] ${message}`, {
+    this.logger.info(`[${this.destIndex}] ${message}`, {
       tags: ['cai-synchronization', this.destIndex],
     });
   }

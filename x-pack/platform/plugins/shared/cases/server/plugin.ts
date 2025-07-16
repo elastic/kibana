@@ -207,15 +207,13 @@ export class CasePlugin
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
 
-      if (this.caseConfig.analytics.index?.enabled) {
-        scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
-        createCasesAnalyticsIndexes({
-          esClient: core.elasticsearch.client.asInternalUser,
-          logger: this.logger,
-          isServerless: this.isServerless,
-          taskManager: plugins.taskManager,
-        }).catch(() => {}); // it shouldn't reject, but just in case
-      }
+      scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
+      createCasesAnalyticsIndexes({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger: this.logger,
+        isServerless: this.isServerless,
+        taskManager: plugins.taskManager,
+      }).catch(() => {}); // it shouldn't reject, but just in case
     }
 
     this.userProfileService.initialize({

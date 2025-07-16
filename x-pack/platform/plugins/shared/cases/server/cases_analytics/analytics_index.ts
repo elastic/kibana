@@ -232,7 +232,7 @@ export class AnalyticsIndex {
   }
 
   public logDebug(message: string) {
-    this.logger.debug(`[${this.indexName}] ${message}`, {
+    this.logger.info(`[${this.indexName}] ${message}`, {
       tags: ['cai-index-creation', this.indexName],
     });
   }
