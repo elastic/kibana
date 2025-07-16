@@ -33,6 +33,7 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { Header } from './header';
 import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize, showLoading } from './helpers';
 import { LoadingCallout } from './loading_callout';
@@ -40,7 +41,9 @@ import { deserializeQuery } from './local_storage/deserialize_query';
 import { deserializeFilters } from './local_storage/deserialize_filters';
 import { PageTitle } from './page_title';
 import { Results } from './results';
+import type { SettingsOverrideOptions } from './results/history/types';
 import { SettingsFlyout } from './settings_flyout';
+import { SETTINGS_TAB_ID } from './settings_flyout/constants';
 import { parseFilterQuery } from './settings_flyout/parse_filter_query';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
@@ -68,7 +71,11 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
-  const openFlyout = useCallback(() => setShowFlyout(true), []);
+  const [defaultSelectedTabId, setDefaultSelectedTabId] = useState<string>(SETTINGS_TAB_ID);
+  const openFlyout = useCallback((tabId: string) => {
+    setDefaultSelectedTabId(tabId);
+    setShowFlyout(true);
+  }, []);
 
   // time selection:
   const [start, setStart] = useLocalStorage<string>(
@@ -218,29 +225,40 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
-  const onGenerate = useCallback(async () => {
-    const size = alertsContextCount ?? DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS;
-    const filter = parseFilterQuery({ filterQuery, kqlError });
-
-    try {
-      return await fetchAttackDiscoveries({
-        end,
-        filter, // <-- combined search bar query and filters
-        size,
-        start,
+  const onGenerate = useCallback(
+    async (overrideOptions?: SettingsOverrideOptions) => {
+      const size = getSize({
+        defaultMaxAlerts: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
+        localStorageAttackDiscoveryMaxAlerts,
       });
-    } finally {
-      invalidateGetAttackDiscoveryGenerations();
-    }
-  }, [
-    alertsContextCount,
-    end,
-    fetchAttackDiscoveries,
-    filterQuery,
-    invalidateGetAttackDiscoveryGenerations,
-    kqlError,
-    start,
-  ]);
+      const filter = parseFilterQuery({ filterQuery, kqlError });
+
+      try {
+        return await fetchAttackDiscoveries({
+          end,
+          filter, // <-- combined search bar query and filters
+          size,
+          start,
+          overrideConnectorId: overrideOptions?.overrideConnectorId,
+          overrideEnd: overrideOptions?.overrideEnd,
+          overrideFilter: overrideOptions?.overrideFilter,
+          overrideSize: overrideOptions?.overrideSize,
+          overrideStart: overrideOptions?.overrideStart,
+        });
+      } finally {
+        invalidateGetAttackDiscoveryGenerations();
+      }
+    },
+    [
+      end,
+      fetchAttackDiscoveries,
+      filterQuery,
+      invalidateGetAttackDiscoveryGenerations,
+      kqlError,
+      localStorageAttackDiscoveryMaxAlerts,
+      start,
+    ]
+  );
 
   useEffect(() => {
     setSelectedConnectorReplacements(replacements);
@@ -344,10 +362,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             {showFlyout && (
               <SettingsFlyout
                 connectorId={connectorId}
+                defaultSelectedTabId={defaultSelectedTabId}
                 end={end}
                 filters={filters}
                 onClose={onClose}
                 onConnectorIdSelected={onConnectorIdSelected}
+                onGenerate={onGenerate}
                 query={query}
                 setEnd={setEnd}
                 setFilters={setFilters}
