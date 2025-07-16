@@ -38,9 +38,12 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import {
+  PrebuiltRuleBaseVersionFlyoutContextProvider,
+  usePrebuiltRuleBaseVersionContext,
+} from '../../../rule_management/components/rule_details/base_version_diff/base_version_context';
 import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import {
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
@@ -147,7 +150,7 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
-import { CustomizedPrebuiltRuleBadge } from '../../../rule_management/components/rule_details/customized_prebuilt_rule_badge';
+import { ModifiedRuleBadge } from '../../../rule_management/components/rule_details/modified_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
@@ -155,7 +158,6 @@ import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
-import { usePrebuiltRulesViewBaseDiff } from '../../../rule_management/hooks/use_prebuilt_rules_view_base_diff';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -262,12 +264,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
     useSourcererDataView(SourcererScopeName.detections);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec: experimentalDataViewSpec, status } = useDataViewSpec(
-    SourcererScopeName.detections
-  );
-  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataViewSpec;
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
   const isLoadingIndexPattern = newDataViewPickerEnabled
     ? status !== 'ready'
     : oldIsLoadingIndexPattern;
@@ -339,12 +336,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     });
   }, [navigateToApp, ruleId]);
 
+  const {
+    actions: { setBaseVersionRule },
+  } = usePrebuiltRuleBaseVersionContext();
+
   // persist rule until refresh is complete
   useEffect(() => {
     if (maybeRule != null) {
       setRule(maybeRule);
+      setBaseVersionRule(maybeRule);
     }
-  }, [maybeRule]);
+  }, [maybeRule, setBaseVersionRule]);
 
   useLegacyUrlRedirect({ rule, spacesApi });
 
@@ -432,18 +434,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     message: ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE,
     onUpgrade: refreshRule,
   });
-
-  const {
-    baseVersionFlyout,
-    openFlyout,
-    doesBaseVersionExist,
-    isLoading: isBaseVersionLoading,
-  } = usePrebuiltRulesViewBaseDiff({ rule, onRevert: refreshRule });
-
-  const isRevertBaseVersionDisabled = useMemo(
-    () => !doesBaseVersionExist || isBaseVersionLoading,
-    [doesBaseVersionExist, isBaseVersionLoading]
-  );
 
   const ruleStatusInfo = useMemo(() => {
     return (
@@ -621,7 +611,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       {upgradeCallout}
-      {baseVersionFlyout}
       {isBulkDuplicateConfirmationVisible && (
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
@@ -652,7 +641,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
-            sourcererDataView={sourcererDataViewSpec}
+            sourcererDataView={oldSourcererDataViewSpec} // Can be removed after migration to new dataview picker
           />
         </FiltersGlobal>
         <RuleDetailsContextProvider>
@@ -663,7 +652,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 subtitle={subTitle}
                 subtitle2={
                   <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                    <CustomizedPrebuiltRuleBadge rule={rule} />
+                    <ModifiedRuleBadge rule={rule} />
                     <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         {ruleStatusI18n.STATUS}
@@ -736,8 +725,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
                           showManualRuleRunConfirmation={showManualRuleRunConfirmation}
                           confirmDeletion={confirmDeletion}
-                          isRevertBaseVersionDisabled={isRevertBaseVersionDisabled}
-                          openRuleDiffFlyout={openFlyout}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -769,6 +756,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                               rule={rule}
                               isInteractive
                               dataTestSubj="definitionRule"
+                              showModifiedFields
                             />
                           )}
                         </StepPanel>
@@ -776,7 +764,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <EuiSpacer />
                       <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
                         <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
-                          {rule != null && <RuleScheduleSection rule={rule} />}
+                          {rule != null && <RuleScheduleSection rule={rule} showModifiedFields />}
                         </StepPanel>
                       </EuiFlexItem>
                       {hasActions && (
@@ -824,7 +812,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <GroupedAlertsTable
                         accordionButtonContent={defaultGroupTitleRenderers}
                         accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                        dataViewSpec={sourcererDataViewSpec}
+                        dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
+                        dataView={experimentalDataView}
                         defaultFilters={alertMergedFilters}
                         defaultGroupingOptions={defaultGroupingOptions}
                         from={from}
@@ -907,6 +896,12 @@ type PropsFromRedux = ConnectedProps<typeof connector>;
 
 RuleDetailsPageComponent.displayName = 'RuleDetailsPageComponent';
 
-export const RuleDetailsPage = connector(React.memo(RuleDetailsPageComponent));
+const ConnectedRuleDetailsPage = connector(React.memo(RuleDetailsPageComponent));
+
+export const RuleDetailsPage = () => (
+  <PrebuiltRuleBaseVersionFlyoutContextProvider>
+    <ConnectedRuleDetailsPage />
+  </PrebuiltRuleBaseVersionFlyoutContextProvider>
+);
 
 RuleDetailsPage.displayName = 'RuleDetailsPage';

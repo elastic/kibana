@@ -9,6 +9,7 @@ import { of, isObservable, firstValueFrom, toArray } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { createRegexWorkerServiceMock } from '../test_utils';
 import {
   MessageRole,
   type PromptAPI,
@@ -42,6 +43,11 @@ jest.mock('../../common/prompt/prompt_to_message_options', () => {
     promptToMessageOptions: jest.fn(actual.promptToMessageOptions),
   };
 });
+const mockEsClient = {
+  ml: {
+    inferTrainedModel: jest.fn(),
+  },
+} as any;
 
 const mockCreateChatCompleteCallbackApi = jest.mocked(createChatCompleteCallbackApi);
 const mockPromptToMessageOptions = jest.mocked(promptToMessageOptions);
@@ -62,6 +68,7 @@ describe('createPromptApi', () => {
   let actions: ReturnType<typeof actionsMock.createStart>;
   let promptApi: PromptAPI;
   let mockCallbackApi: jest.MockedFn<ChatCompleteApiWithCallback>;
+  let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
 
   const mockInput = { query: 'world' };
 
@@ -69,11 +76,19 @@ describe('createPromptApi', () => {
     request = httpServerMock.createKibanaRequest();
     logger = loggerMock.create();
     actions = actionsMock.createStart();
+    regexWorker = createRegexWorkerServiceMock();
 
     mockCallbackApi = jest.fn();
     mockCreateChatCompleteCallbackApi.mockReturnValue(mockCallbackApi);
 
-    promptApi = createPromptApi({ request, actions, logger });
+    promptApi = createPromptApi({
+      request,
+      actions,
+      logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      esClient: mockEsClient,
+    });
   });
 
   afterEach(() => {
@@ -81,7 +96,14 @@ describe('createPromptApi', () => {
   });
 
   it('initializes createChatCompleteCallbackApi with correct options', () => {
-    expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({ request, actions, logger });
+    expect(mockCreateChatCompleteCallbackApi).toHaveBeenCalledWith({
+      request,
+      actions,
+      logger,
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
+      esClient: mockEsClient,
+    });
   });
 
   it('calls the callback API with correct initial options', async () => {

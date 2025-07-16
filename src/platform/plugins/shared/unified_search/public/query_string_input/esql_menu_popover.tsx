@@ -24,9 +24,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import {
-  getRecommendedQueries,
   getRecommendedQueriesTemplatesFromExtensions,
-} from '@kbn/esql-validation-autocomplete';
+  getRecommendedQueriesTemplates,
+} from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
@@ -142,7 +142,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 
     // Handle the static recommended queries, no solutions specific
     if (queryForRecommendedQueries && timeFieldName) {
-      const recommendedQueriesFromStaticTemplates = getRecommendedQueries({
+      const recommendedQueriesFromStaticTemplates = getRecommendedQueriesTemplates({
         fromCommand: queryForRecommendedQueries,
         timeField: timeFieldName,
         categorizationField,

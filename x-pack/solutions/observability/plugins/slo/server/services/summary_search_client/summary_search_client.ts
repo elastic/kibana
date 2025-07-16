@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
@@ -32,7 +32,7 @@ import { isCursorPagination } from './types';
 
 export class DefaultSummarySearchClient implements SummarySearchClient {
   constructor(
-    private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private soClient: SavedObjectsClientContract,
     private logger: Logger,
     private spaceId: string
@@ -47,7 +47,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   ): Promise<Paginated<SummaryResult>> {
     const parsedFilters = parseStringFilters(filters, this.logger);
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
 
     const esParams = createEsParams({
       index: indices,
@@ -83,7 +83,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 
     try {
       const summarySearch = await typedSearch<EsSummaryDocument, typeof esParams>(
-        this.esClient,
+        this.scopedClusterClient.asCurrentUser,
         esParams
       );
 
@@ -173,7 +173,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     // Always attempt to delete temporary summary documents with an existing non-temp summary document
     // The temp summary documents are _eventually_ removed as we get through the real summary documents
 
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       conflicts: 'proceed',

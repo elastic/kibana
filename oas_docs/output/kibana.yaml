@@ -5959,7 +5959,7 @@ paths:
               deleteAgentConfigurationRequest1:
                 $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_delete_request1'
             schema:
-              $ref: '#/components/schemas/APM_UI_service_object'
+              $ref: '#/components/schemas/APM_UI_delete_service_object'
         required: true
       responses:
         '200':
@@ -13354,6 +13354,27 @@ paths:
                   - status
           description: Successful response
       summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/privileges:
+    get:
+      description: Check if the current user has all required permissions for Privilege Monitoring
+      operationId: PrivMonPrivileges
+      responses:
+        '200':
+          content:
+            application/json:
+              example:
+                has_all_required: true
+                privileges:
+                  elasticsearch:
+                    index:
+                      .entity_analytics.monitoring.user-default:
+                        read: true
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivileges'
+          description: Successful response
+      summary: Run a privileges check on Privilege Monitoring
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
@@ -48049,7 +48070,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -49381,7 +49401,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -50546,7 +50565,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -51731,7 +51749,6 @@ paths:
                                         type: object
                                         properties:
                                           query:
-                                            minLength: 1
                                             type: string
                                         required:
                                           - query
@@ -52896,7 +52913,6 @@ paths:
                                     type: object
                                     properties:
                                       query:
-                                        minLength: 1
                                         type: string
                                     required:
                                       - query
@@ -55858,7 +55874,6 @@ paths:
                                     type: object
                                     properties:
                                       query:
-                                        minLength: 1
                                         type: string
                                     required:
                                       - query
@@ -55959,7 +55974,6 @@ paths:
                   type: object
                   properties:
                     query:
-                      minLength: 1
                       type: string
                   required:
                     - query
@@ -55988,13 +56002,11 @@ paths:
           name: from
           required: true
           schema:
-            format: date-time
             type: string
         - in: query
           name: to
           required: true
           schema:
-            format: date-time
             type: string
         - in: query
           name: bucketSize
@@ -56015,6 +56027,66 @@ paths:
                 - not: {}
       responses: {}
       summary: Read the significant events
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/significant_events/_preview:
+    post:
+      description: 'Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: post-streams-name-significant-events-preview
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: to
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: bucketSize
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                query:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    kql:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                      required:
+                        - query
+                  required:
+                    - kql
+              required:
+                - query
+      responses: {}
+      summary: Preview significant events
       tags:
         - streams
       x-state: Technical Preview
@@ -64215,6 +64287,14 @@ components:
         result:
           description: Result
           type: string
+    APM_UI_delete_service_object:
+      description: Service
+      type: object
+      properties:
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+      required:
+        - service
     APM_UI_search_agent_configuration_object:
       type: object
       properties:
@@ -76550,6 +76630,40 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_GenericEntity'
+    Security_Entity_Analytics_API_EntityAnalyticsPrivileges:
+      type: object
+      properties:
+        has_all_required:
+          type: boolean
+        has_read_permissions:
+          type: boolean
+        has_write_permissions:
+          type: boolean
+        privileges:
+          type: object
+          properties:
+            elasticsearch:
+              type: object
+              properties:
+                cluster:
+                  additionalProperties:
+                    type: boolean
+                  type: object
+                index:
+                  additionalProperties:
+                    additionalProperties:
+                      type: boolean
+                    type: object
+                  type: object
+            kibana:
+              additionalProperties:
+                type: boolean
+              type: object
+          required:
+            - elasticsearch
+      required:
+        - has_all_required
+        - privileges
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -80398,6 +80512,18 @@ components:
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_percentile_metric'
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_doc_count_metric'
+                    discriminator:
+                      mapping:
+                        avg: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        cardinality: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        doc_count: '#/components/schemas/SLOs_timeslice_metric_doc_count_metric'
+                        last_value: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        max: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        min: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        percentile: '#/components/schemas/SLOs_timeslice_metric_percentile_metric'
+                        std_deviation: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        sum: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                      propertyName: aggregation
                   type: array
                 threshold:
                   description: The threshold used to determine if the metric is a good slice or not.

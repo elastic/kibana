@@ -48,10 +48,11 @@ import {
 import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../../../common/types';
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import { getFormattedAlertStats } from '../../../../../flyout/document_details/shared/components/alert_count_insight';
+import { SCOPE_ID } from '../../constants';
 
 const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };
 
-const getPrivilegedUserColumn = (fieldName: string) => ({
+const getPrivilegedUserColumn = () => ({
   field: 'user.name',
   name: (
     <FormattedMessage
@@ -64,9 +65,9 @@ const getPrivilegedUserColumn = (fieldName: string) => ({
     user != null
       ? getRowItemsWithActions({
           values: isArray(user) ? user : [user],
-          fieldName,
+          fieldName: 'user.name',
           idPrefix: 'privileged-user-monitoring-privileged-user',
-          render: (item) => <UserName userName={item} />,
+          render: (item) => <UserName userName={item} scopeId={SCOPE_ID} />,
           displayCount: 1,
         })
       : getEmptyTagValue(),
@@ -320,7 +321,7 @@ export const buildPrivilegedUsersTableColumns = (
   euiTheme: EuiThemeComputed
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openUserFlyout),
-  getPrivilegedUserColumn('user.name'),
+  getPrivilegedUserColumn(),
   getRiskScoreColumn(euiTheme),
   getAssetCriticalityColumn(),
   getDataSourceColumn(),
