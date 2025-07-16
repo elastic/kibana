@@ -433,6 +433,51 @@ describe('AlertsDataGrid', () => {
         );
         expect(columnCheckbox).toBeChecked();
       });
+
+      it('should toggle column visibility on via column selector dropdown on a hidden column', async () => {
+        const columnToHide = mockColumns[0].id;
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            toolbarVisibility={{
+              showColumnSelector: true,
+            }}
+            initialBulkActionsState={{
+              ...createMockBulkActionsState(),
+              rowSelection: new Map(),
+            }}
+          />
+        );
+
+        await userEvent.click(screen.getByTestId(`dataGridHeaderCellActionButton-${columnToHide}`));
+
+        const popover = screen.getByRole('dialog');
+        const hideColumnBtn = within(popover).getByRole('button', { name: 'Hide column' });
+
+        await userEvent.click(hideColumnBtn);
+
+        const fieldBrowserBtn = screen.getByTestId(FIELD_BROWSER_BTN_TEST_ID);
+        await userEvent.click(fieldBrowserBtn);
+        expect(screen.getByTestId(FIELD_BROWSER_TEST_ID)).toBeVisible();
+        // The column should be checked in the field browser, independent of its visibility status
+        const columnCheckbox: HTMLInputElement = screen.getByTestId(
+          `field-${columnToHide}-checkbox`
+        );
+
+        expect(columnCheckbox).toBeChecked();
+
+        const columnSelectorBtn = screen.getByTestId('dataGridColumnSelectorButton');
+        await userEvent.click(columnSelectorBtn);
+
+        const columnVisibilityToggle = screen.getByTestId(
+          `dataGridColumnSelectorToggleColumnVisibility-${columnToHide}`
+        );
+
+        await userEvent.click(columnVisibilityToggle);
+
+        expect(columnVisibilityToggle).toBeChecked();
+        expect(screen.getByTestId(`dataGridHeaderCell-${columnToHide}`)).toBeInTheDocument();
+      });
     });
 
     describe('cases column', () => {
