@@ -14,7 +14,6 @@ import {
   removeDropCommandsFromESQLQuery,
   hasTransformationalCommand,
   getTimeFieldFromESQLQuery,
-  prettifyQuery,
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
@@ -197,26 +196,6 @@ describe('esql query helpers', () => {
           'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
         )
       ).toBe('date_nanos');
-    });
-  });
-
-  describe('prettifyQuery', function () {
-    it('should return the code wrapped', function () {
-      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1', false);
-      expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
-    });
-
-    it('should return the code unwrapped', function () {
-      const code = prettifyQuery('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
-      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
-    });
-
-    it('should return the code unwrapped and trimmed', function () {
-      const code = prettifyQuery(
-        'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
-        true
-      );
-      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
     });
   });
 
