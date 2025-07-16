@@ -252,16 +252,14 @@ export const initializeTabs = createInternalStateAsyncThunk(
     ]);
 
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
-      if (persistedDiscoverSession.id) {
-        services.chrome.recentlyAccessed.add(
-          getSavedSearchFullPathUrl(persistedDiscoverSession.id),
-          persistedDiscoverSession.title ??
-            i18n.translate('discover.defaultDiscoverSessionTitle', {
-              defaultMessage: 'Untitled Discover session',
-            }),
-          persistedDiscoverSession.id
-        );
-      }
+      services.chrome.recentlyAccessed.add(
+        getSavedSearchFullPathUrl(persistedDiscoverSession.id),
+        persistedDiscoverSession.title ??
+          i18n.translate('discover.defaultDiscoverSessionTitle', {
+            defaultMessage: 'Untitled Discover session',
+          }),
+        persistedDiscoverSession.id
+      );
 
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
