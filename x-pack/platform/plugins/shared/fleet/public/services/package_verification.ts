@@ -20,9 +20,16 @@ export function isPackageUnverified(
   const { verification_status: verificationStatus, verification_key_id: verificationKeyId } =
     pkg?.installationInfo;
 
+  console.log('installationInfo', pkg.installationInfo);
+
   const isKeyOutdated = !!verificationKeyId && verificationKeyId !== packageVerificationKeyId;
+
+  console.log('isKeyOutdated', isKeyOutdated);
+
   const isUnverified =
     verificationStatus === 'unverified' || (verificationStatus === 'verified' && isKeyOutdated);
+
+  console.log('isPackageUnverified', isUnverified);
   return isUnverified;
 }
 
