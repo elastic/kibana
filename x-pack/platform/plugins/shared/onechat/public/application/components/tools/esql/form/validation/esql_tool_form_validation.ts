@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { i18n } from '@kbn/i18n';
 import { EsqlToolFieldType, idRegexp, isReservedToolId } from '@kbn/onechat-common';
+import { set } from '@kbn/safer-lodash-set';
 import { z } from '@kbn/zod';
+import { get } from 'lodash';
 import { useCallback } from 'react';
 import { Resolver } from 'react-hook-form';
-import { extractEsqlParams } from '../../../../../utils/extract_esql_params';
 import { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
 
 const i18nMessages = {
@@ -68,7 +70,7 @@ const i18nMessages = {
 };
 
 export const useEsqlToolFormValidationResolver = (): Resolver<OnechatEsqlToolFormData> => {
-  return useCallback(async (data, context, options) => {
+  return useCallback(async (data) => {
     try {
       const values = await esqlFormValidationSchema.parseAsync(data);
       return {
@@ -82,11 +84,11 @@ export const useEsqlToolFormValidationResolver = (): Resolver<OnechatEsqlToolFor
       const errors = error.issues.reduce<Record<string, { type: string; message: string }>>(
         (errorMap, issue) => {
           const path = issue.path.join('.');
-          if (!errorMap[path]) {
-            errorMap[path] = {
+          if (!get(errorMap, path)) {
+            set(errorMap, path, {
               type: issue.code,
               message: issue.message,
-            };
+            });
           }
           return errorMap;
         },
@@ -150,7 +152,7 @@ export const esqlFormValidationSchema = z
     tags: z.array(z.string()),
   })
   .superRefine(({ esql, params }, ctx) => {
-    const inferredParams = extractEsqlParams(esql);
+    const inferredParams = getESQLQueryVariables(esql);
     const definedParams = new Set(params.map((param) => param.name));
 
     for (const param of inferredParams) {

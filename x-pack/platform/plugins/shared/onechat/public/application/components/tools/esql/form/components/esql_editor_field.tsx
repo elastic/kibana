@@ -19,14 +19,13 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { defer, noop } from 'lodash';
 import React, { useCallback, useRef } from 'react';
 import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { promisify } from 'util';
-import { extractEsqlParams } from '../../../../../utils/extract_esql_params';
-import { scrollIntoViewIfNeeded } from '../../../../../utils/scroll_into_view';
 import { useEsqlEditorParams } from '../hooks/use_esql_editor_params';
 import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
 import { i18nMessages } from '../i18n';
@@ -37,7 +36,8 @@ export const OnechatEsqlEditorField = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
-  const { control, getValues, formState, trigger } = useFormContext<OnechatEsqlToolFormData>();
+  const { control, getValues, formState, trigger, setFocus } =
+    useFormContext<OnechatEsqlToolFormData>();
   const { errors, isSubmitted } = formState;
 
   const {
@@ -62,17 +62,10 @@ export const OnechatEsqlEditorField = React.memo(() => {
     addParam: (name) => appendParamField({ name, description: '', type: ES_FIELD_TYPES.TEXT }),
   });
 
-  const scrollToParamsTable = useCallback(() => {
-    const tableContainer = tableContainerRef.current;
-    if (tableContainer) {
-      defer(() => scrollIntoViewIfNeeded(tableContainer));
-    }
-  }, []);
-
   const { triggerEsqlParamWarnings, triggerEsqlParamFieldsValidation } = useEsqlParamsValidation();
 
   const inferParamsFromEsql = useCallback(() => {
-    const inferredParamNamesFromEsql = extractEsqlParams(getValues('esql'));
+    const inferredParamNamesFromEsql = getESQLQueryVariables(getValues('esql'));
 
     const existingParamsNameMap = getValues('params').reduce((paramNamesMap, param) => {
       if (!paramNamesMap[param.name]) {
@@ -92,9 +85,12 @@ export const OnechatEsqlEditorField = React.memo(() => {
     });
 
     replaceParamFields(updatedParams);
-    scrollToParamsTable();
+
+    // Scroll into view
+    defer(() => setFocus(`params.${updatedParams.length - 1}.name`));
+
     triggerEsqlParamWarnings();
-  }, [getValues, replaceParamFields, scrollToParamsTable, triggerEsqlParamWarnings]);
+  }, [getValues, replaceParamFields, triggerEsqlParamWarnings, setFocus]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -105,8 +101,11 @@ export const OnechatEsqlEditorField = React.memo(() => {
           render={({ field: { onBlur, ...field } }) => (
             <div
               onBlur={() => {
-                onBlur();
-                triggerEsqlParamWarnings();
+                if (isSubmitted) {
+                  trigger('esql');
+                } else {
+                  triggerEsqlParamWarnings();
+                }
               }}
             >
               <ESQLLangEditor

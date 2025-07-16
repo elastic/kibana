@@ -103,7 +103,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             <EuiFieldText
               compressed
               fullWidth={isMobile}
-              placeholder="Name"
+              placeholder={i18nMessages.paramNamePlaceholder}
               inputRef={ref}
               isInvalid={invalid}
               onBlur={handleValidation}
@@ -132,7 +132,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
             <EuiFieldText
               compressed
               fullWidth={isMobile}
-              placeholder="Description"
+              placeholder={i18nMessages.paramDescriptionPlaceholder}
               inputRef={ref}
               isInvalid={invalid}
               {...field}

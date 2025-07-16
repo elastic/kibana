@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { FieldPath, useFormContext } from 'react-hook-form';
-import { extractEsqlParams } from '../../../../../utils/extract_esql_params';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { OnechatEsqlParam, OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
 import { i18nMessages } from '../i18n';
 
@@ -19,7 +19,7 @@ export const useEsqlParamsValidation = () => {
     const formParams = getValues('params');
     if (!formParams) return;
 
-    const inferredParams = new Set(extractEsqlParams(esql));
+    const inferredParams = new Set(getESQLQueryVariables(esql));
 
     formParams.forEach((param, index) => {
       const shouldWarn = param.name && !inferredParams.has(param.name);

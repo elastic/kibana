@@ -7,11 +7,12 @@
 
 import { ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import { useEffect } from 'react';
-import { extractEsqlParamMatches } from '../../../../../utils/extract_esql_params';
 import { OnechatEsqlParam } from '../types/esql_tool_form_types';
 
 const SOURCE_NAME = 'esql-param-validator';
 const COMMAND_ID = 'esql.addParam';
+
+const PARAM_REGEX = /(?<!\S)\?\??(\w+)/g;
 
 const highlightMissingParams = ({
   model,
@@ -21,10 +22,10 @@ const highlightMissingParams = ({
   params: OnechatEsqlParam[];
 }) => {
   const definedParams = new Set(params.map((param) => param.name));
-  const paramMatches = extractEsqlParamMatches(model.getValue());
+  const paramMatches = model.getValue().matchAll(PARAM_REGEX);
   const markers: monaco.editor.IMarkerData[] = [];
 
-  paramMatches.forEach((match) => {
+  for (const match of paramMatches) {
     const [matchStr, paramName] = match;
     if (match.index !== undefined && !definedParams.has(paramName)) {
       const start = match.index;
@@ -41,7 +42,7 @@ const highlightMissingParams = ({
         source: SOURCE_NAME,
       });
     }
-  });
+  }
 
   monaco.editor.setModelMarkers(model, SOURCE_NAME, markers);
 };

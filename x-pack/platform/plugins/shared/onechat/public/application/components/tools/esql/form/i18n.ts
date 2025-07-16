@@ -16,9 +16,18 @@ export const i18nMessages = {
   paramNameLabel: i18n.translate('xpack.onechat.tools.newTool.paramNameLabel', {
     defaultMessage: 'Name',
   }),
+  paramNamePlaceholder: i18n.translate('xpack.onechat.tools.newTool.paramNamePlaceholder', {
+    defaultMessage: 'Name',
+  }),
   paramDescriptionLabel: i18n.translate('xpack.onechat.tools.newTool.paramDescriptionLabel', {
     defaultMessage: 'Description',
   }),
+  paramDescriptionPlaceholder: i18n.translate(
+    'xpack.onechat.tools.newTool.paramDescriptionPlaceholder',
+    {
+      defaultMessage: 'Description',
+    }
+  ),
   paramTypeLabel: i18n.translate('xpack.onechat.tools.newTool.paramTypeLabel', {
     defaultMessage: 'Type',
   }),

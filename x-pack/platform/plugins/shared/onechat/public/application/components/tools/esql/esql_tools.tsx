@@ -6,6 +6,7 @@
  */
 
 import {
+  CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
@@ -61,6 +62,7 @@ const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
 export const OnechatEsqlTools: React.FC = () => {
   const { tools, isLoading: isLoadingTools, error: toolsError } = useOnechatEsqlTools();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
   const { addSuccessToast, addErrorToast } = useToasts();
 
   const handleCloseFlyout = useCallback(() => {
@@ -122,8 +124,11 @@ export const OnechatEsqlTools: React.FC = () => {
           itemId="id"
           error={errorMessage}
           search={search}
+          onTableChange={({ page: { index } }: CriteriaWithPagination<ToolDefinition>) => {
+            setPageIndex(index);
+          }}
           pagination={{
-            pageIndex: 0,
+            pageIndex,
             pageSize: 10,
             showPerPageOptions: false,
           }}
