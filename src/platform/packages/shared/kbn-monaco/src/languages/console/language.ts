@@ -68,7 +68,6 @@ export const ConsoleLang: LangModuleType = {
           const esqlSuggestions = await suggest(
             unescapedQuery,
             unescapedQuery.length,
-            context,
             esqlCallbacks
           );
           return {

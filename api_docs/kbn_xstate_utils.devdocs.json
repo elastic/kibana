@@ -129,55 +129,6 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-public.sendIfDefined",
-        "type": "Function",
-        "tags": [],
-        "label": "sendIfDefined",
-        "description": [],
-        "signature": [
-          "<TSentEvent extends ",
-          "EventObject",
-          " = ",
-          "AnyEventObject",
-          ">(target: string | ",
-          "ActorRef",
-          "<TSentEvent, any>) => <TContext, TEvent extends ",
-          "EventObject",
-          ">(eventExpr: ",
-          "Expr",
-          "<TContext, TEvent, TSentEvent | null | undefined>, options?: ",
-          "SendActionOptions",
-          "<TContext, TEvent> | undefined) => ",
-          "PureAction",
-          "<TContext, TEvent, TEvent>"
-        ],
-        "path": "src/platform/packages/shared/kbn-xstate-utils/src/actions.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-public.sendIfDefined.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "target",
-            "description": [],
-            "signature": [
-              "string | ",
-              "ActorRef",
-              "<TSentEvent, any>"
-            ],
-            "path": "src/platform/packages/shared/kbn-xstate-utils/src/actions.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -264,74 +215,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-public.MatchedState",
-        "type": "Type",
-        "tags": [],
-        "label": "MatchedState",
-        "description": [],
-        "signature": [
-          "TState extends ",
-          "State",
-          "<any, infer TEvent extends ",
-          "EventObject",
-          ", infer TStateSchema extends ",
-          "StateSchema",
-          "<any>, infer TTypestate extends ",
-          "Typestate",
-          "<any>, infer TResolvedTypesMeta> ? ",
-          "State",
-          "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
-        ],
-        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-public.MatchedStateFromActor",
-        "type": "Type",
-        "tags": [],
-        "label": "MatchedStateFromActor",
-        "description": [],
-        "signature": [
-          "EmittedFrom",
-          "<TActorRef> extends ",
-          "State",
-          "<any, infer TEvent extends ",
-          "EventObject",
-          ", infer TStateSchema extends ",
-          "StateSchema",
-          "<any>, infer TTypestate extends ",
-          "Typestate",
-          "<any>, infer TResolvedTypesMeta> ? ",
-          "State",
-          "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
-        ],
-        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-public.OmitDeprecatedState",
-        "type": "Type",
-        "tags": [],
-        "label": "OmitDeprecatedState",
-        "description": [],
-        "signature": [
-          "{ [P in Exclude<keyof T, \"state\">]: T[P]; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   },
   "server": {
