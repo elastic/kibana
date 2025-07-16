@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
-import { correctQuerySyntax } from '../autocomplete/helper';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
+import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import { ESQLAstItem, Parser, Walker } from '@kbn/esql-ast';
 import { getAstContext, isMarkerNode } from './context';
 
