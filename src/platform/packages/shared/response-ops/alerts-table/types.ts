@@ -57,7 +57,6 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Case } from './apis/bulk_get_cases';
-import type { getRuleIdFromEvent } from './helpers/get_rule_id_from_event';
 
 export interface Consumer {
   id: AlertConsumers;
@@ -94,6 +93,17 @@ type UseCasesAddToExistingCaseModal = (
   close: () => void;
 };
 
+export interface Ecs {
+  _id: string;
+  _index?: string;
+  signal?: {
+    [x: string]: any;
+  };
+  kibana?: {
+    [x: string]: any;
+  };
+}
+
 /**
  * Minimal cases service interface required by the alerts table
  *
@@ -110,7 +120,7 @@ export interface CasesService {
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
-    getRuleIdFromEvent: typeof getRuleIdFromEvent;
+    getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
 }
 
@@ -617,66 +627,4 @@ export interface TimelineItem {
 export interface TimelineNonEcsData {
   field: string;
   value?: string[] | null;
-}
-
-export interface RuleEcs {
-  id?: string[];
-  rule_id?: string[];
-  name?: string[];
-  false_positives?: string[];
-  saved_id?: string[];
-  timeline_id?: string[];
-  timeline_title?: string[];
-  max_signals?: number[];
-  risk_score?: string[];
-  output_index?: string[];
-  description?: string[];
-  from?: string[];
-  immutable?: boolean[];
-  index?: string[];
-  interval?: string[];
-  language?: string[];
-  query?: string[];
-  references?: string[];
-  severity?: string[];
-  tags?: string[];
-  threat?: unknown;
-  threshold?: unknown;
-  type?: string[];
-  size?: string[];
-  to?: string[];
-  enabled?: boolean[];
-  filters?: unknown;
-  created_at?: string[];
-  updated_at?: string[];
-  created_by?: string[];
-  updated_by?: string[];
-  version?: string[];
-  note?: string[];
-  building_block_type?: string[];
-}
-
-export interface SignalEcs {
-  rule?: RuleEcs;
-  original_time?: string[];
-  status?: string[];
-  group?: {
-    id?: string[];
-  };
-  threshold_result?: unknown;
-}
-
-export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
-  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
-  building_block_type?: string[];
-  workflow_status?: string[];
-};
-
-export interface Ecs {
-  _id: string;
-  _index?: string;
-  signal?: SignalEcs;
-  kibana?: {
-    alert: SignalEcsAAD;
-  };
 }
