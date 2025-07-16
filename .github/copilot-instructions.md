@@ -36,7 +36,7 @@ Changing HTTP API `access` from `internal` to `public` should be done with care 
   AFTER new code `const access = 'public'`
 - BEFORE no code
   AFTER new code `const access: RouteAccess = 'public'`
-Add a link to the "commitment" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#commitment and "documentation" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#documentation in suggestions
+Add a link to the "commitment" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#commitment and "documentation" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#documentation in suggestions. ALWAYS SUGGEST `internal`. DO NOT SUGGEST `private` or `restricted` or anything else.
 
 Always link to appropriate docs in your suggestions.
 
