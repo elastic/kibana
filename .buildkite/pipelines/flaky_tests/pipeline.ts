@@ -119,6 +119,7 @@ const pipeline = {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
     ...envFromLabels,
     ELASTIC_APM_ENVIRONMENT: 'rylnd',
+    ELASTIC_APM_API_KEY: undefined,
   },
   steps,
 };
