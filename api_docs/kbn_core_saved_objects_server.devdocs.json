@@ -6710,6 +6710,40 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsMappingPropertiesSafe",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsMappingPropertiesSafe",
+        "description": [],
+        "signature": [
+          "SavedObjectsMappingPropertiesSafe",
+          " extends ",
+          "SavedObjectsMappingProperties"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/mapping_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsMappingPropertiesSafe.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[field: string]: SavedObjectsFieldMappingSafe",
+            "description": [],
+            "signature": [
+              "[field: string]:  ",
+              "SavedObjectsFieldMappingSafe"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/mapping_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
         "id": "def-server.SavedObjectsMigrationLogger",
         "type": "Interface",
         "tags": [],
@@ -9060,6 +9094,10 @@
                 "path": "x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts"
               },
               {
+                "plugin": "uptime",
+                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/saved_objects/exception_list.ts"
               },
@@ -9108,10 +9146,6 @@
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts"
               },
               {
-                "plugin": "uptime",
-                "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
-              },
-              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/saved_objects/csp_benchmark_rule.ts"
               },
@@ -9146,6 +9180,22 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -10324,7 +10374,7 @@
               "The dynamic property of the mapping, either `false` or `'strict'`. If\nunspecified `dynamic: 'strict'` will be inherited from the top-level\nindex mappings."
             ],
             "signature": [
-              "false | \"strict\" | undefined"
+              "false | \"strict\" | \"false\" | undefined"
             ],
             "path": "src/core/packages/saved-objects/server/src/mapping_definition.ts",
             "deprecated": false,
@@ -11194,7 +11244,7 @@
           "MappingProperty",
           " & ",
           "MappingPropertyBase",
-          " & { dynamic?: false | \"strict\" | undefined; properties?: Record<string, ",
+          " & { dynamic?: false | \"strict\" | \"false\" | undefined; properties?: Record<string, ",
           "MappingProperty",
           "> | undefined; }"
         ],
