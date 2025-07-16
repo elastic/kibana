@@ -106,7 +106,9 @@ export const OtelLogsPanel: React.FC = () => {
   }, [getDeeplinks]);
 
   const sampleConfigurationPath = isServerless
-    ? './otel_samples/managed_otlp/platformlogs_hostmetrics.yml'
+    ? metricsOnboardingEnabled
+      ? './otel_samples/managed_otlp/platformlogs_hostmetrics.yml'
+      : './otel_samples/managed_otlp/platformlogs.yml'
     : './otel_samples/platformlogs_hostmetrics.yml';
   const elasticEndpointVarName = isServerless ? 'ELASTIC_OTLP_ENDPOINT' : 'ELASTIC_ENDPOINT';
 
