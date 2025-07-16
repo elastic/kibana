@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Conversation } from '@kbn/onechat-common';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { ConversationWithoutRounds } from '@kbn/onechat-common';
+import moment from 'moment';
 
 enum SectionGroup {
   Today,
@@ -75,7 +75,7 @@ const getTimeSection = (updatedAt: string): SectionGroup => {
 
 interface TimeSection {
   label: string;
-  conversations: Conversation[];
+  conversations: ConversationWithoutRounds[];
 }
 
 const orderedSections = [
@@ -88,8 +88,10 @@ const orderedSections = [
   SectionGroup.Older,
 ];
 
-export const groupConversationsByTime = (conversations: Conversation[]): TimeSection[] => {
-  const groups: Record<SectionGroup, Conversation[]> = {
+export const groupConversationsByTime = (
+  conversations: ConversationWithoutRounds[]
+): TimeSection[] => {
+  const groups: Record<SectionGroup, ConversationWithoutRounds[]> = {
     [SectionGroup.Today]: [],
     [SectionGroup.Yesterday]: [],
     [SectionGroup.LastWeek]: [],

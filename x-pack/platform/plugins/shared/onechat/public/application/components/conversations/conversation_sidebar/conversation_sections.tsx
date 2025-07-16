@@ -8,14 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { Conversation } from '@kbn/onechat-common';
+import { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React, { useMemo } from 'react';
 import { groupConversationsByTime } from '../../../utils/group_conversations';
 import { ConversationItem } from './conversation_item';
 import { NoConversationsPrompt } from './no_conversations_prompt';
 
 interface ConversationSectionsProps {
-  conversations: Conversation[];
+  conversations: ConversationWithoutRounds[];
 }
 
 const emptyStyles = css`

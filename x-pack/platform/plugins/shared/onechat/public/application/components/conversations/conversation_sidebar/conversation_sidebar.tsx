@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React from 'react';
-import { Conversation } from '@kbn/onechat-common';
 import { ConversationSections } from './conversation_sections';
 
 const loadingStyles = css`
@@ -18,7 +18,7 @@ const loadingStyles = css`
 `;
 
 interface ConversationsSidebarProps {
-  conversations: Conversation[];
+  conversations: ConversationWithoutRounds[];
   isLoading: boolean;
 }
 

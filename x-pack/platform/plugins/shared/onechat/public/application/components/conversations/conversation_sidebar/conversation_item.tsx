@@ -6,14 +6,14 @@
  */
 
 import { EuiListGroupItem } from '@elastic/eui';
-import { Conversation } from '@kbn/onechat-common';
+import { ConversationWithoutRounds } from '@kbn/onechat-common';
 import React from 'react';
 import { useConversationId } from '../../../hooks/use_conversation_id';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 
 interface ConversationItemProps {
-  conversation: Conversation;
+  conversation: ConversationWithoutRounds;
 }
 
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
