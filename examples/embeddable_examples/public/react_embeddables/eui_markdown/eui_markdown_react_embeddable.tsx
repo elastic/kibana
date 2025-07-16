@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLink, EuiMarkdownEditor, EuiMarkdownFormat, getDefaultEuiMarkdownPlugins, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiMarkdownEditor,
+  EuiMarkdownFormat,
+  EuiToolTip,
+  getDefaultEuiMarkdownPlugins,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +56,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       initialState.rawState,
       defaultMarkdownState
     );
+    const isEditing$ = new BehaviorSubject<boolean>(false);
 
     /**
      * if this embeddable had a difference between its runtime and serialized state, we could define and run a
@@ -94,48 +105,124 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       ...unsavedChangesApi,
       ...titleManager.api,
       serializeState,
+      onEdit: async () => {
+        isEditing$.next(!isEditing$.getValue());
+        parentApi.focusedPanelId$.next(api.uuid);
+      },
+      isEditingEnabled: () => true,
+      getTypeDisplayName: () => 'Markdown',
     });
 
     return {
       api,
       Component: () => {
-
-
         // get state for rendering
         const content = useStateFromPublishingSubject(markdownStateManager.api.content$);
         const viewMode = useStateFromPublishingSubject(
           getViewModeSubject(api) ?? new BehaviorSubject('view')
         );
+        const isEditing = useStateFromPublishingSubject(isEditing$);
+        console.log('isEditing', isEditing);
         const excludingPlugins = Array<'lineBreaks' | 'linkValidator' | 'tooltip'>();
 
         const { euiTheme } = useEuiTheme();
         const { parsingPlugins, processingPlugins, uiPlugins } = getDefaultEuiMarkdownPlugins({
           exclude: excludingPlugins,
         });
-          // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
-  processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
-       
-  console.log(uiPlugins);
+        // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
+        processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
-        return viewMode === 'edit' ? ( 
-          <EuiMarkdownEditor
-            css={css`
-              width: 100%;
-            `}
-            value={content ?? ''}
-            onChange={(value) => markdownStateManager.api.setContent(value)}
-            aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableAriaLabel', {
-              defaultMessage: 'Dashboard markdown editor',
-            })}
-            processingPluginList={processingPlugins}
-            height="full"
-            uiPlugins={uiPlugins}
+        processingPlugins[1][1].components.img = (props) => <img {...props} style={{maxWidth: '100%'}}/>
 
-          />
+        console.log('CHECK', processingPlugins[1][1].components);
+
+        // const markdownRef = React.useRef(null);
+
+        const [value, onChange] = React.useState(content ?? '');
+
+        //  className="embPanel__hoverActions"
+
+        return viewMode === 'edit' && isEditing$.getValue() ? (
+          <>
+            <EuiMarkdownEditor
+              // ref={markdownRef}
+              css={css`
+                width: 100%;
+                [data-test-subj='markdown_editor_preview_button'] {
+                  display: none;
+                }
+              `}
+              value={value}
+              onChange={(v) => onChange(v)}
+              aria-label={i18n.translate(
+                'embeddableExamples.euiMarkdownEditor.embeddableAriaLabel',
+                {
+                  defaultMessage: 'Dashboard markdown editor',
+                }
+              )}
+              processingPluginList={processingPlugins}
+              height="full"
+              uiPlugins={uiPlugins}
+            />
+
+            <EuiFlexGroup
+              gutterSize="xs"
+              css={css`
+                position: absolute;
+                right: 0;
+                padding: 4px;
+              `}
+            >
+              <EuiFlexItem>
+                <EuiToolTip
+                  content={i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableSave', {
+                    defaultMessage: 'Save',
+                  })}
+                >
+                  <EuiButtonIcon
+                    iconType={'check'}
+                    color="success"
+                    display="base"
+                    size="xs"
+                    iconSize="m"
+                    aria-label="Save"
+                    onClick={() => {
+                      markdownStateManager.api.setContent(value);
+                      isEditing$.next(false);
+                      parentApi.focusedPanelId$.next();
+                    }}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiToolTip
+                  content={i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableCancel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                >
+                  <EuiButtonIcon
+                    color="danger"
+                    display="base"
+                    size="xs"
+                    iconSize="m"
+                    iconType={'cross'}
+                    aria-label="Cancel"
+                    onClick={() => {
+                      // markdownStateManager.api.setContent(value);
+                      isEditing$.next(false);
+                      parentApi.focusedPanelId$.next();
+                    }}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         ) : (
           <EuiMarkdownFormat
             css={css`
               padding: ${euiTheme.size.m};
+              overflow: scroll;
             `}
           >
             {content ?? ''}
@@ -144,4 +231,12 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       },
     };
   },
+};
+
+const CustomEditingActions = () => {
+  return (
+    <div>
+      <button>Save</button>
+    </div>
+  );
 };
