@@ -21,7 +21,7 @@ export default createTestConfig({
   services,
   // add feature flags
   kbnServerArgs: [
-    '--xpack.security.roleManagementEnabled=true', 
+    '--xpack.security.roleManagementEnabled=true',
     // needed for roles based testing for streams tests
   ],
   // load tests in the index file
