@@ -31,6 +31,6 @@ Changing HTTP API `access` from `internal` to `public` should be done with care 
   AFTER new code `const access = 'public'`
 - BEFORE no code
   AFTER new code `const access: RouteAccess = 'public'`
-See "commitment" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#commitment and "documentation" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#documentation. If you do not see code mentioning `stability: 'experimental'`, mention adding `availability: { stability: 'experimental' }`.
+See "commitment" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#commitment and "documentation" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#documentation.
 
 Always link to appropriate docs in your suggestions.
