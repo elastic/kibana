@@ -736,8 +736,6 @@
       "@kbn/custom-branding-plugin/*": ["x-pack/platform/plugins/private/custom_branding/*"],
       "@kbn/custom-icons": ["src/platform/packages/shared/kbn-custom-icons"],
       "@kbn/custom-icons/*": ["src/platform/packages/shared/kbn-custom-icons/*"],
-      "@kbn/custom-integrations": ["x-pack/solutions/observability/packages/kbn-custom-integrations"],
-      "@kbn/custom-integrations/*": ["x-pack/solutions/observability/packages/kbn-custom-integrations/*"],
       "@kbn/custom-integrations-plugin": ["src/platform/plugins/shared/custom_integrations"],
       "@kbn/custom-integrations-plugin/*": ["src/platform/plugins/shared/custom_integrations/*"],
       "@kbn/cypress-config": ["src/platform/packages/shared/kbn-cypress-config"],
@@ -776,6 +774,8 @@
       "@kbn/data-view-management-plugin/*": ["src/platform/plugins/shared/data_view_management/*"],
       "@kbn/data-view-utils": ["src/platform/packages/shared/kbn-data-view-utils"],
       "@kbn/data-view-utils/*": ["src/platform/packages/shared/kbn-data-view-utils/*"],
+      "@kbn/data-view-validation": ["src/platform/packages/shared/kbn-data-view-validation"],
+      "@kbn/data-view-validation/*": ["src/platform/packages/shared/kbn-data-view-validation/*"],
       "@kbn/data-views-plugin": ["src/platform/plugins/shared/data_views"],
       "@kbn/data-views-plugin/*": ["src/platform/plugins/shared/data_views/*"],
       "@kbn/data-visualizer-plugin": ["x-pack/platform/plugins/private/data_visualizer"],
@@ -1146,6 +1146,8 @@
       "@kbn/infra-plugin/*": ["x-pack/solutions/observability/plugins/infra/*"],
       "@kbn/ingest-pipelines-plugin": ["x-pack/platform/plugins/shared/ingest_pipelines"],
       "@kbn/ingest-pipelines-plugin/*": ["x-pack/platform/plugins/shared/ingest_pipelines/*"],
+      "@kbn/ingest-pipelines-shared": ["x-pack/platform/packages/shared/ingest-pipelines"],
+      "@kbn/ingest-pipelines-shared/*": ["x-pack/platform/packages/shared/ingest-pipelines/*"],
       "@kbn/input-control-vis-plugin": ["src/platform/plugins/private/input_control_vis"],
       "@kbn/input-control-vis-plugin/*": ["src/platform/plugins/private/input_control_vis/*"],
       "@kbn/inspector-plugin": ["src/platform/plugins/shared/inspector"],
@@ -1490,6 +1492,8 @@
       "@kbn/presentation-panel-plugin/*": ["src/platform/plugins/private/presentation_panel/*"],
       "@kbn/presentation-publishing": ["src/platform/packages/shared/presentation/presentation_publishing"],
       "@kbn/presentation-publishing/*": ["src/platform/packages/shared/presentation/presentation_publishing/*"],
+      "@kbn/presentation-util": ["src/platform/packages/shared/presentation/presentation_util"],
+      "@kbn/presentation-util/*": ["src/platform/packages/shared/presentation/presentation_util/*"],
       "@kbn/presentation-util-plugin": ["src/platform/plugins/shared/presentation_util"],
       "@kbn/presentation-util-plugin/*": ["src/platform/plugins/shared/presentation_util/*"],
       "@kbn/product-doc-artifact-builder": ["x-pack/packages/ai-infra/product-doc-artifact-builder"],
@@ -1628,6 +1632,8 @@
       "@kbn/safer-lodash-set/*": ["src/platform/packages/shared/kbn-safer-lodash-set/*"],
       "@kbn/saml-provider-plugin": ["x-pack/test/security_api_integration/plugins/saml_provider"],
       "@kbn/saml-provider-plugin/*": ["x-pack/test/security_api_integration/plugins/saml_provider/*"],
+      "@kbn/sample-data-ingest": ["x-pack/platform/plugins/shared/sample_data_ingest"],
+      "@kbn/sample-data-ingest/*": ["x-pack/platform/plugins/shared/sample_data_ingest/*"],
       "@kbn/sample-log-parser": ["x-pack/platform/packages/shared/kbn-sample-parser"],
       "@kbn/sample-log-parser/*": ["x-pack/platform/packages/shared/kbn-sample-parser/*"],
       "@kbn/sample-task-plugin": ["x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin"],
@@ -2265,7 +2271,10 @@
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
       "@emotion/core": ["typings/@emotion"],
-      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"]
+      // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
+      // We should be able to remove this once we support cjs/esm interop.
+      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

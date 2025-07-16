@@ -147,6 +147,12 @@ export class ImportResolver {
       return Path.resolve(REPO_ROOT, `node_modules/@modelcontextprotocol/sdk/dist/esm/${relPath}`);
     }
 
+    // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.
+    // We should be able to remove this once we support cjs/esm interop.
+    if (req.startsWith('@elastic/opentelemetry-node/sdk')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@elastic/opentelemetry-node/lib/sdk.js`);
+    }
+
     if (req.startsWith('@typescript-eslint/parser')) {
       return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
     }

@@ -25,6 +25,8 @@ import { SearchSessionsPageProvider } from '@kbn/test-suites-xpack-platform/func
 import { GraphPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/graph_page';
 import { MaintenanceWindowsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/maintenance_windows_page';
 import { BannersPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/banners_page';
+import { NavigationalSearchPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/navigational_search';
+import { TagManagementPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/tag_management_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
@@ -37,21 +39,15 @@ import { IndexManagementPageProvider } from './index_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
-import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
-import { InfraSavedViewsProvider } from './infra_saved_views';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { LogstashPageObject } from './logstash_page';
-import { NavigationalSearchPageObject } from './navigational_search';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
-import { ObservabilityPageProvider } from './observability_page';
-import { AlertControlsProvider } from './alert_controls';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { RollupPageObject } from './rollup_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { StatusPageObject } from './status_page';
-import { TagManagementPageObject } from './tag_management_page';
 import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
@@ -84,8 +80,6 @@ export const pageObjects = {
   infraHome: InfraHomePageProvider,
   infraHostsView: InfraHostsViewProvider,
   infraLogs: InfraLogsPageProvider,
-  infraMetricsExplorer: InfraMetricsExplorerProvider,
-  infraSavedViews: InfraSavedViewsProvider,
   ingestPipelines: IngestPipelinesPageProvider,
   lens: LensPageProvider,
   licenseManagement: LicenseManagementPageProvider,
@@ -96,8 +90,6 @@ export const pageObjects = {
   navigationalSearch: NavigationalSearchPageObject,
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
   datasetQuality: DatasetQualityPageObject,
-  observability: ObservabilityPageProvider,
-  alertControls: AlertControlsProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
