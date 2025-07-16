@@ -7,8 +7,8 @@
 
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
+import { NotificationChannel } from '@kbn/xstate-utils';
 import { ILogViewsClient } from '../../../services/log_views';
-import { NotificationChannel } from '../../xstate_helpers';
 import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './notifications';
 import {
   LogViewContext,
