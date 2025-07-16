@@ -8,7 +8,7 @@
  */
 
 import { execSync } from 'child_process';
-import { appendFile, readFile } from 'fs/promises';
+import { appendFile, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { getGithubClient } from '#pipeline-utils';
 
@@ -40,44 +40,67 @@ async function getDependenciesDiff() {
   const oldDeps = { ...oldPackageJson.dependencies, ...oldPackageJson.devDependencies };
   const newDeps = { ...newPackageJson.dependencies, ...newPackageJson.devDependencies };
 
-  const newPackages: Record<string, string> = {};
+  const newPackages = [];
+  const removedPackages = [];
 
   console.info('Comparing dependencies...');
 
   for (const name in newDeps) {
     if (!oldDeps[name] && !name.match(INTERNAL_PACKAGE_PREFIX_REGEX)) {
-      newPackages[name] = newDeps[name];
+      newPackages.push(name);
     }
   }
 
-  return newPackages;
+  for (const name in oldDeps) {
+    if (!newDeps[name] && !name.match(INTERNAL_PACKAGE_PREFIX_REGEX)) {
+      removedPackages.push(name);
+    }
+  }
+
+  return { added: newPackages, removed: removedPackages };
 }
 
 async function main() {
-  const newPackages = await getDependenciesDiff();
-  console.info('New packages:', newPackages);
+  const changedFiles = execSync(`git diff --name-only ${process.env.GITHUB_PR_MERGE_BASE} HEAD`)
+    .toString()
+    .trim()
+    .split('\n');
 
-  if (Object.keys(newPackages).length) {
+  const packageJsonChanged = changedFiles.some((file) => file === 'package.json');
+  const dependenciesAdded = changedFiles.some((file) => file.match('third_party_packages.txt'));
+
+  if (!packageJsonChanged && dependenciesAdded) {
     const filePath = join(__dirname, 'third_party_packages.txt');
-    let existingContent = '';
+    execSync(`git checkout ${process.env.GITHUB_PR_MERGE_BASE} -- ${filePath}`);
 
-    try {
-      existingContent = await readFile(filePath, 'utf8');
-    } catch (error) {
-      // File doesn't exist, will be created
-    }
+    return;
+  }
 
-    const existingLines = new Set(existingContent.split('\n').filter(Boolean));
+  const { added, removed } = await getDependenciesDiff();
 
-    const newEntries = Object.entries(newPackages)
-      .map(([name, version]) => `${name}: ${version}`)
-      .filter((entry) => !existingLines.has(entry));
+  if (!added.length && !removed.length) {
+    return;
+  }
+
+  const filePath = join(__dirname, 'third_party_packages.txt');
+  const existingContent = await readFile(filePath, 'utf8');
+
+  const existingLines = new Set(existingContent.split('\n').filter(Boolean));
+
+  if (added.length && !removed.length) {
+    const newEntries = added.filter((entry) => !existingLines.has(entry));
 
     if (newEntries.length) {
       const data = newEntries.join('\n') + '\n';
       await appendFile(filePath, data);
     }
+
+    return;
   }
+
+  const updatedLines = [...existingLines, ...added].filter((line) => !removed.includes(line));
+
+  await writeFile(filePath, updatedLines.join('\n') + '\n');
 }
 
 main();
