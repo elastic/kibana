@@ -7,34 +7,19 @@
 
 import { fetchPipelineStructureTree } from './fetch_pipeline_structure_tree';
 import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-
-const createMockClient = () => ({
-  asCurrentUser: {
-    ingest: {
-      getPipeline: jest.fn(),
-    },
-  },
-});
+import type { estypes } from '@elastic/elasticsearch';
 
 describe('fetchPipelineStructureTree', () => {
-  let client: ReturnType<typeof createMockClient>;
+  it('fetches a simple root pipeline', () => {
+    const allPipelines: Record<string, estypes.IngestPipeline> = {
+      'my-pipeline': {
+        _meta: { managed: true },
+        deprecated: true,
+        processors: [],
+      },
+    };
 
-  beforeEach(() => {
-    client = createMockClient();
-  });
-
-  it('fetches a simple root pipeline', async () => {
-    client.asCurrentUser.ingest.getPipeline.mockResolvedValue({
-      _meta: { managed: true },
-      deprecated: true,
-      processors: [],
-    });
-
-    const result = await fetchPipelineStructureTree(
-      client as unknown as IScopedClusterClient,
-      'my-pipeline'
-    );
+    const result = fetchPipelineStructureTree(allPipelines, 'my-pipeline');
 
     expect(result).toEqual({
       pipelineName: 'my-pipeline',
@@ -42,40 +27,24 @@ describe('fetchPipelineStructureTree', () => {
       isDeprecated: true,
       children: [],
     });
-
-    expect(client.asCurrentUser.ingest.getPipeline).toHaveBeenCalledWith({ id: 'my-pipeline' });
   });
 
-  it('recursively fetches child pipelines from processors', async () => {
-    client.asCurrentUser.ingest.getPipeline.mockImplementation(async ({ id }) => {
-      if (id === 'root') {
-        return {
-          _meta: {},
-          deprecated: false,
-          processors: [{ pipeline: { name: 'child-1' } }, { pipeline: { name: 'child-2' } }],
-        };
-      }
-      if (id === 'child-1') {
-        return {
-          _meta: { managed: true },
-          deprecated: false,
-          processors: [],
-        };
-      }
-      if (id === 'child-2') {
-        return {
-          _meta: {},
-          deprecated: true,
-          processors: [],
-        };
-      }
-      return {};
-    });
+  it('recursively fetches child pipelines from processors', () => {
+    const allPipelines: Record<string, estypes.IngestPipeline> = {
+      root: {
+        processors: [{ pipeline: { name: 'child-1' } }, { pipeline: { name: 'child-2' } }],
+      },
+      'child-1': {
+        _meta: { managed: true },
+        processors: [],
+      },
+      'child-2': {
+        deprecated: true,
+        processors: [],
+      },
+    };
 
-    const result = await fetchPipelineStructureTree(
-      client as unknown as IScopedClusterClient,
-      'root'
-    );
+    const result = fetchPipelineStructureTree(allPipelines, 'root');
 
     expect(result).toEqual({
       pipelineName: 'root',
@@ -98,54 +67,69 @@ describe('fetchPipelineStructureTree', () => {
     });
   });
 
-  it('stops recursion when MAX_TREE_LEVEL is reached', async () => {
-    const depth = MAX_TREE_LEVEL + 2;
+  it('stops recursion when MAX_TREE_LEVEL is reached', () => {
+    const allPipelines: Record<string, estypes.IngestPipeline> = {
+      root: {
+        processors: [{ pipeline: { name: 'infinite' } }],
+      },
+      infinite: {
+        processors: [{ pipeline: { name: 'infinite' } }],
+      },
+    };
 
-    client.asCurrentUser.ingest.getPipeline.mockImplementation(async ({ id }) => ({
-      _meta: {},
-      deprecated: false,
-      processors: [{ pipeline: { name: 'leaf' } }],
-    }));
-
-    const result = await fetchPipelineStructureTree(
-      client as unknown as IScopedClusterClient,
-      'leaf',
-      MAX_TREE_LEVEL + 1
-    );
+    const result = fetchPipelineStructureTree(allPipelines, 'infinite', MAX_TREE_LEVEL + 1);
 
     expect(result).toEqual({
-      pipelineName: 'leaf',
+      pipelineName: 'infinite',
       isManaged: false,
       isDeprecated: false,
       children: [],
     });
 
-    // Should not recurse further
-    expect(client.asCurrentUser.ingest.getPipeline).toHaveBeenCalledTimes(1);
+    const resultFromRoot = fetchPipelineStructureTree(allPipelines, 'root');
+
+    let lastLeaf = resultFromRoot;
+    let currentLevel = 1;
+    while (currentLevel < MAX_TREE_LEVEL + 1) {
+      lastLeaf = lastLeaf.children[0];
+      currentLevel++;
+    }
+    expect(lastLeaf).toEqual({
+      pipelineName: 'infinite',
+      isManaged: false,
+      isDeprecated: false,
+      children: [],
+    });
   });
 
-  it('handles processors with non-pipeline entries safely', async () => {
-    client.asCurrentUser.ingest.getPipeline.mockImplementation(async ({ id }) => {
-      if (id === 'root') {
-        return {
-          _meta: {},
-          deprecated: false,
-          processors: [{ set: { field: 'foo', value: 'bar' } }, { pipeline: { name: 'sub' } }],
-        };
-      }
-      return {
-        _meta: {},
-        deprecated: false,
+  it('handles processors with non-pipeline entries safely', () => {
+    const allPipelines: Record<string, estypes.IngestPipeline> = {
+      root: {
+        processors: [{ set: { field: 'foo', value: 'bar' } }, { pipeline: { name: 'sub' } }],
+      },
+      sub: {
         processors: [],
-      };
-    });
+      },
+    };
 
-    const result = await fetchPipelineStructureTree(
-      client as unknown as IScopedClusterClient,
-      'root'
-    );
+    const result = fetchPipelineStructureTree(allPipelines, 'root');
 
     expect(result.children).toHaveLength(1);
     expect(result.children?.[0].pipelineName).toBe('sub');
+  });
+
+  it('handles missing processors, deprecated, and managed fields gracefully', () => {
+    const allPipelines: Record<string, estypes.IngestPipeline> = {
+      root: {},
+    };
+
+    const result = fetchPipelineStructureTree(allPipelines, 'root');
+
+    expect(result).toEqual({
+      pipelineName: 'root',
+      isManaged: false,
+      isDeprecated: false,
+      children: [],
+    });
   });
 });
