@@ -49,6 +49,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertest);
+  const log = getService('log');
 
   async function indexTestDocs() {
     const testAlertDocs = getTestAlertDocs();
@@ -72,6 +73,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
   };
 
   const cleanupEventLog = async () => {
+    log.info(`Cleaning up event log`);
     await retry.try(async () => {
       await es.deleteByQuery({
         index: '.kibana-event-log*',
@@ -83,6 +85,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         index: '.kibana-event-log*',
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
       });
+      log.info(`Found anyLeft hits ${JSON.stringify(anyLeft.hits.hits)}`);
       expect(anyLeft.hits.hits.length).to.eql(0);
     });
   };
@@ -108,12 +111,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     expectedAlertsIds: string[],
     deletedAlertIds: string[]
   ) => {
+    log.info(
+      `testExpectedAlertsAreDeleted expectedAlertsIds: ${JSON.stringify(expectedAlertsIds)}`
+    );
+    log.info(`testExpectedAlertsAreDeleted deletedAlertIds: ${JSON.stringify(deletedAlertIds)}`);
     // wait for the task to complete
     await retry.try(async () => {
       const results = await es.search<IValidatedEvent>({
         index: '.kibana-event-log*',
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
       });
+      log.info(`testExpectedAlertsAreDeleted results: ${JSON.stringify(results.hits.hits)}`);
       expect(results.hits.hits.length).to.eql(1);
       expect(results.hits.hits[0]._source?.event?.outcome).to.eql('success');
       expect(results.hits.hits[0]._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
