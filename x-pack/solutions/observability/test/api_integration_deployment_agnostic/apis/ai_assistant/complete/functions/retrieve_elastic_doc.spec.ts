@@ -14,8 +14,12 @@ import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
+import {
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../utils/model_and_inference';
 
-const DEFAULT_INFERENCE_ID = '.elser-2-elasticsearch';
+const DEFAULT_INFERENCE_ID = 'tiny_elser_inference_id';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -92,6 +96,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
         });
+        await deployTinyElserAndSetupKb(getService);
+
         await installProductDoc(supertest, DEFAULT_INFERENCE_ID);
 
         void llmProxy.interceptWithFunctionRequest({
@@ -122,6 +128,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await observabilityAIAssistantAPIClient.deleteActionConnector({
           actionId: connectorId,
         });
+        await teardownTinyElserModelAndInferenceEndpoint(getService);
       });
 
       it('makes 2 requests to the LLM', () => {
