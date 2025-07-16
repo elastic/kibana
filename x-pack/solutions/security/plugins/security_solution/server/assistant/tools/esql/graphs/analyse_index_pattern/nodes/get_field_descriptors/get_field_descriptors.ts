@@ -19,18 +19,26 @@ export const getFieldDescriptors = ({ esClient }: { esClient: ElasticsearchClien
     }
 
     const { indexPattern } = state.input;
-    const { fields: fieldDescriptors } = await indexPatternsFetcher.getFieldsForWildcard({
-      pattern: indexPattern,
-      fieldCapsOptions: {
-        allow_no_indices: false,
-        includeUnmapped: false,
-      },
-    });
+    try {
+      const { fields: fieldDescriptors } = await indexPatternsFetcher.getFieldsForWildcard({
+        pattern: indexPattern,
+        fieldCapsOptions: {
+          allow_no_indices: false,
+          includeUnmapped: false,
+        },
+      });
 
-    return new Command({
-      update: {
-        fieldDescriptors,
-      },
-    });
-  };
+      return new Command({
+        update: {
+          fieldDescriptors,
+        },
+      });
+    } catch (error) {
+      return new Command({
+        update: {
+          fieldDescriptors: [],
+        },
+      });
+    };
+  }
 };
