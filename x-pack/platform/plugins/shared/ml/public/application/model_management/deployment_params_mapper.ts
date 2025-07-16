@@ -20,8 +20,6 @@ export type MlStartTrainedModelDeploymentRequestNew = MlStartTrainedModelDeploym
 /** Maximum allowed number of threads per allocation */
 const MAX_NUMBER_OF_THREADS = 16;
 
-const MAX_NUMBER_OF_THREADS_SERVERLESS = 8;
-
 type VCPUBreakpoints = Record<
   DeploymentParamsUI['vCPUUsage'],
   {
@@ -32,6 +30,7 @@ type VCPUBreakpoints = Record<
      * Not allowed in certain environments, Obs and Security serverless projects.
      */
     static?: number;
+    maxThreads?: number;
   }
 >;
 
@@ -47,21 +46,7 @@ export class DeploymentParamsMapper {
    * vCPUs level breakpoints for cloud cluster with enabled ML autoscaling.
    * TODO resolve dynamically when Control Pane exposes the vCPUs range.
    */
-  private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
-    medium: { min: 1, max: 32, static: 32 },
-    high: { min: 1, max: 99999, static: 128 },
-  };
-
-  /**
-   * Default vCPUs level breakpoints for serverless projects.
-   * Can be overridden by the project specific settings.
-   */
-  private readonly serverlessVCPUBreakpoints: VCPUBreakpoints = {
-    low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
-    medium: { min: 0, max: 32, static: 32 },
-    high: { min: 0, max: 512, static: 512 },
-  };
+  private readonly autoscalingVCPUBreakpoints: VCPUBreakpoints;
 
   /**
    * vCPUs level breakpoints based on the ML server limits.
@@ -81,28 +66,37 @@ export class DeploymentParamsMapper {
    * @internal
    */
   private get minAllowedNumberOfAllocation(): number {
-    return !this.showNodeInfo || this.cloudInfo.isMlAutoscalingEnabled ? 0 : 1;
+    return this.cloudInfo.isMlAutoscalingEnabled ? 0 : 1;
   }
 
   constructor(
     private readonly mlServerLimits: MlServerLimits,
     private readonly cloudInfo: CloudInfo,
-    private readonly showNodeInfo: boolean,
     private readonly nlpSettings?: NLPSettings
   ) {
+    this.autoscalingVCPUBreakpoints = {
+      low: { min: this.minAllowedNumberOfAllocation, max: 2, static: 2 },
+      medium: { min: 1, max: 32, static: 32 },
+      high: { min: 1, max: 99999, static: 128 },
+    };
+
     /**
      * Initial value can be different for serverless and ESS with autoscaling.
      * Also not available with 0 ML active nodes.
      */
     const maxSingleMlNodeProcessors = this.mlServerLimits.max_single_ml_node_processors;
 
+    let maxNumberOfThreads = MAX_NUMBER_OF_THREADS;
+    if (this.nlpSettings?.modelDeployment) {
+      maxNumberOfThreads = Math.max(
+        ...Object.values(this.nlpSettings.modelDeployment.vCPURange).map((v) => v.maxThreads)
+      );
+    }
+
     this.threadingParamsValues = Array.from(
       /** To allow maximum number of threads to be 2^THREADS_MAX_EXPONENT */
       {
-        length:
-          Math.floor(
-            Math.log2(this.showNodeInfo ? MAX_NUMBER_OF_THREADS : MAX_NUMBER_OF_THREADS_SERVERLESS)
-          ) + 1,
+        length: Math.floor(Math.log2(maxNumberOfThreads)) + 1,
       },
       (_, i) => 2 ** i
     ).filter(maxSingleMlNodeProcessors ? (v) => v <= maxSingleMlNodeProcessors : () => true);
@@ -119,12 +113,9 @@ export class DeploymentParamsMapper {
       },
     };
 
-    if (!this.showNodeInfo) {
-      this.vCpuBreakpoints = this.serverlessVCPUBreakpoints;
-      if (this.nlpSettings?.modelDeployment) {
-        // Apply project specific overrides
-        this.vCpuBreakpoints = this.nlpSettings.modelDeployment.vCPURange;
-      }
+    if (this.nlpSettings?.modelDeployment) {
+      // Apply project specific overrides
+      this.vCpuBreakpoints = this.nlpSettings.modelDeployment.vCPURange;
     } else if (this.cloudInfo.isMlAutoscalingEnabled) {
       this.vCpuBreakpoints = this.autoscalingVCPUBreakpoints;
     } else {
@@ -138,14 +129,8 @@ export class DeploymentParamsMapper {
       return 1;
     }
 
-    // Serverless: fixed mapping per vCPU usage level
-    if (!this.showNodeInfo) {
-      const serverlessThreads: Record<DeploymentParamsUI['vCPUUsage'], number> = {
-        low: 2,
-        medium: 4,
-        high: 8,
-      };
-      return serverlessThreads[input.vCPUUsage];
+    if (this.nlpSettings?.modelDeployment) {
+      return this.nlpSettings.modelDeployment.vCPURange[input.vCPUUsage]?.maxThreads!;
     }
 
     // low → 2 threads, otherwise use the maximum
@@ -165,21 +150,23 @@ export class DeploymentParamsMapper {
       'min_number_of_allocations' | 'max_number_of_allocations'
     > {
     const threadsPerAllocation = this.getNumberOfThreads(params);
+    const { min: minVcpu, max: maxVcpu } = this.vCpuBreakpoints[params.vCPUUsage];
 
-    const levelValues = this.vCpuBreakpoints[params.vCPUUsage];
+    // Maximum allocations is always the upper vCPU limit divided by threads per allocation.
+    const maxAllocations = Math.floor(maxVcpu / threadsPerAllocation) || 1;
 
-    const maxValue = Math.floor(levelValues.max / threadsPerAllocation) || 1;
+    // Minimum allocations depends on environment.
+    const minAllocations = this.nlpSettings?.modelDeployment
+      ? // Serverless / project-specific range comes straight from config.
+        this.nlpSettings.modelDeployment.vCPURange[params.vCPUUsage].min
+      : // Otherwise derive from break-points and fall back to defaults.
+        Math.floor(minVcpu / threadsPerAllocation) ||
+        (params.vCPUUsage === 'low' ? this.minAllowedNumberOfAllocation : 1);
 
     return {
-      number_of_allocations: maxValue,
-      min_number_of_allocations:
-        Math.floor(levelValues.min / threadsPerAllocation) ||
-        // For serverless env, always allow scale down to 0
-        // For other envs, allow scale down to 0 only for "low" vCPU usage
-        (this.showNodeInfo === false || params.vCPUUsage === 'low'
-          ? this.minAllowedNumberOfAllocation
-          : 1),
-      max_number_of_allocations: maxValue,
+      number_of_allocations: maxAllocations,
+      min_number_of_allocations: minAllocations,
+      max_number_of_allocations: maxAllocations,
     };
   }
 
@@ -198,15 +185,22 @@ export class DeploymentParamsMapper {
    * @returns
    */
   public getVCURange(vCPUUsage: DeploymentParamsUI['vCPUUsage']) {
-    // general purpose (c6gd) 1VCU = 1GB RAM / 0.5 vCPU
-    // vector optimized (r6gd) 1VCU = 1GB RAM / 0.125 vCPU
     const vCPUBreakpoints = this.vCpuBreakpoints[vCPUUsage];
 
-    return Object.entries(vCPUBreakpoints).reduce((acc, [key, val]) => {
-      // as we can't retrieve Search project configuration, we assume that the vector optimized instance is used
-      acc[key as keyof BreakpointValues] = Math.round(val / 0.125);
-      return acc;
-    }, {} as BreakpointValues);
+    // We need only min / max / static in VCUs, ignore any other props
+    const allowedKeys: Array<keyof BreakpointValues> = ['min', 'max', 'static'];
+
+    const result = {} as Partial<BreakpointValues>;
+
+    for (const key of allowedKeys) {
+      const cpuValue = vCPUBreakpoints[key];
+      if (cpuValue !== undefined) {
+        // As we can't retrieve Search project configuration, assume vector-optimized instances
+        result[key] = Math.round(cpuValue / 0.125);
+      }
+    }
+
+    return result as BreakpointValues;
   }
 
   /**
@@ -218,7 +212,7 @@ export class DeploymentParamsMapper {
     input: DeploymentParamsUI
   ): StartAllocationParams {
     const resultInput: DeploymentParamsUI = Object.create(input);
-    if (!this.showNodeInfo && this.nlpSettings?.modelDeployment.allowStaticAllocations === false) {
+    if (this.nlpSettings?.modelDeployment?.allowStaticAllocations === false) {
       // Enforce adaptive resources for serverless projects with prohibited static allocations
       resultInput.adaptiveResources = true;
     }

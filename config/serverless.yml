@@ -175,6 +175,26 @@ xpack.security.showInsecureClusterWarning: false
 xpack.security.ui.userManagementEnabled: false
 xpack.security.ui.roleMappingManagementEnabled: false
 
+xpack.ml.nlp:
+  modelDeployment:
+    allowStaticAllocations: false
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+        static: 2
+        maxThreads: 2
+      medium:
+        min: 0
+        max: 32
+        static: 32
+        maxThreads: 4
+      high:
+        min: 0
+        max: 512
+        static: 512
+        maxThreads: 8
+
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 server.restrictInternalApis: true
 # Telemetry enabled by default and not disableable via UI

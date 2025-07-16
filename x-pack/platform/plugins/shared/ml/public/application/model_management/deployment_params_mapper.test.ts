@@ -24,8 +24,6 @@ describe('DeploymentParamsMapper', () => {
 
   let mapper: DeploymentParamsMapper;
 
-  mapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, true);
-
   describe('DeploymentParamsMapper', () => {
     describe('running in serverless', () => {
       beforeEach(() => {
@@ -37,7 +35,16 @@ describe('DeploymentParamsMapper', () => {
           {
             isMlAutoscalingEnabled: false,
           } as CloudInfo,
-          false
+          {
+            modelDeployment: {
+              allowStaticAllocations: false,
+              vCPURange: {
+                low: { min: 0, max: 2, static: 2, maxThreads: 2 },
+                medium: { min: 0, max: 32, static: 32, maxThreads: 4 },
+                high: { min: 0, max: 512, static: 512, maxThreads: 8 },
+              },
+            },
+          }
         );
       });
 
@@ -68,13 +75,17 @@ describe('DeploymentParamsMapper', () => {
             vCPUUsage: 'low',
           })
         ).toEqual({
-          modelId: 'test-model',
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 1,
+            min_number_of_allocations: 0,
+          },
           deploymentParams: {
-            number_of_allocations: 1,
             deployment_id: 'test-deployment',
             priority: 'normal',
             threads_per_allocation: 2,
           },
+          modelId: 'test-model',
         });
 
         expect(
@@ -85,13 +96,17 @@ describe('DeploymentParamsMapper', () => {
             vCPUUsage: 'low',
           })
         ).toEqual({
-          modelId: 'test-model',
+          adaptiveAllocationsParams: {
+            enabled: true,
+            max_number_of_allocations: 2,
+            min_number_of_allocations: 0,
+          },
           deploymentParams: {
             deployment_id: 'test-deployment',
-            threads_per_allocation: 1,
             priority: 'normal',
-            number_of_allocations: 2,
+            threads_per_allocation: 1,
           },
+          modelId: 'test-model',
         });
 
         expect(
@@ -218,13 +233,13 @@ describe('DeploymentParamsMapper', () => {
       });
 
       it('overrides vCPUs levels and enforces adaptive allocations if static support is not configured', () => {
-        mapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, false, {
+        mapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, {
           modelDeployment: {
             allowStaticAllocations: false,
             vCPURange: {
-              low: { min: 0, max: 2, static: 2 },
-              medium: { min: 1, max: 32, static: 32 },
-              high: { min: 1, max: 128, static: 128 },
+              low: { min: 0, max: 2, static: 2, maxThreads: 2 },
+              medium: { min: 0, max: 32, static: 32, maxThreads: 4 },
+              high: { min: 0, max: 128, static: 128, maxThreads: 8 },
             },
           },
         });
@@ -235,12 +250,12 @@ describe('DeploymentParamsMapper', () => {
           static: 16,
         });
         expect(mapper.getVCURange('medium')).toEqual({
-          min: 8,
+          min: 0,
           max: 256,
           static: 256,
         });
         expect(mapper.getVCURange('high')).toEqual({
-          min: 8,
+          min: 0,
           max: 1024,
           static: 1024,
         });
@@ -298,8 +313,7 @@ describe('DeploymentParamsMapper', () => {
           },
           {
             isMlAutoscalingEnabled: false,
-          } as CloudInfo,
-          true
+          } as CloudInfo
         );
       });
 
@@ -312,13 +326,9 @@ describe('DeploymentParamsMapper', () => {
 
     describe('when autoscaling is disabled', () => {
       beforeEach(() => {
-        mapper = new DeploymentParamsMapper(
-          mlServerLimits,
-          {
-            isMlAutoscalingEnabled: false,
-          } as CloudInfo,
-          true
-        );
+        mapper = new DeploymentParamsMapper(mlServerLimits, {
+          isMlAutoscalingEnabled: false,
+        } as CloudInfo);
       });
 
       it('should map UI params to API request correctly', () => {
@@ -607,8 +617,7 @@ describe('DeploymentParamsMapper', () => {
           } as MlServerLimits,
           {
             isMlAutoscalingEnabled: true,
-          } as CloudInfo,
-          true
+          } as CloudInfo
         );
       });
 
