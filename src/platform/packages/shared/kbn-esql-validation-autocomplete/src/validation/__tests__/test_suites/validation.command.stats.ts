@@ -83,7 +83,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors(
               'from a_index | STATS sum(doubleField) / (min(doubleField) + max(doubleField))  ',
               []
-        );
+            );
           });
 
           test('errors on each aggregation field, which does not contain at least one agg function', async () => {
