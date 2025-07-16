@@ -34,11 +34,15 @@ import { getAuthenticationsEsqlSource } from '../../queries/authentications_esql
 import { getAccountSwitchesEsqlSource } from '../../queries/account_switches_esql_query';
 import { getGrantedRightsEsqlSource } from '../../queries/granted_rights_esql_query';
 
-interface UseDiscoverUrlProps {
-  generateTableQuery?: string;
-}
-
-export const useDiscoverUrl = ({ generateTableQuery }: UseDiscoverUrlProps) => {
+export const useDiscoverUrl = ({
+  generateTableQuery,
+}: {
+  generateTableQuery?: (
+    sortField: string | number | symbol,
+    sortDirection: string,
+    currentPage: number
+  ) => string;
+}) => {
   const { getAppUrl } = useNavigation();
   const { addWarning } = useAppToasts();
 
