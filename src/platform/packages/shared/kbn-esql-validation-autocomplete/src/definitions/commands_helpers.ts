@@ -50,10 +50,17 @@ export function checkFunctionContent(arg: ESQLFunction) {
     return true;
   }
   return (arg as ESQLFunction).args.every(
-    (subArg): boolean =>
-      isLiteralItem(subArg) ||
-      isAggregation(subArg) ||
-      (isNotAnAggregation(subArg) ? checkFunctionContent(subArg) : false)
+    (subArg): boolean => {
+       // Differentiate between array and non-array arguments
+      if (Array.isArray(subArg)) {
+        return subArg.every((item) => checkFunctionContent(item as ESQLFunction));
+      }
+      return (
+        isLiteralItem(subArg) ||
+        isAggregation(subArg) ||
+        (isNotAnAggregation(subArg) ? checkFunctionContent(subArg) : false)
+      );
+    }
   );
 }
 
