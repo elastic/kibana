@@ -59,7 +59,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:explore_hosts
-        label: 'Cypress MKI - Explore Hosts'
+        label: 'Cypress MKI - Explore - Hosts'
         key: test_explore_hosts
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -73,7 +73,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:machine_learning
-        label: 'Cypress MKI - Explore Machine Learning'
+        label: 'Cypress MKI - Explore - Machine Learning'
         key: test_explore_machine_learning
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -87,7 +87,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:network
-        label: 'Cypress MKI - Explore Network'
+        label: 'Cypress MKI - Explore - Network'
         key: test_explore_network
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -101,7 +101,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics:users
-        label: 'Cypress MKI - Explore Users'
+        label: 'Cypress MKI - Explore - Users'
         key: test_explore_users
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"

@@ -101,7 +101,7 @@ steps:
         parallelism: 2
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:filters
-        label: 'Cypress MKI - Explore Filters'
+        label: 'Cypress MKI - Explore - Filters'
         key: test_explore_filters
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -115,7 +115,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:guided_onboarding
-        label: 'Cypress MKI - Explore Guided Onboarding'
+        label: 'Cypress MKI - Explore - Guided Onboarding'
         key: test_explore_guided_onboarding
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -129,7 +129,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:inspect
-        label: 'Cypress MKI - Explore Inspect'
+        label: 'Cypress MKI - Explore - Inspect'
         key: test_explore_inspect
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -143,7 +143,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:navigation
-        label: 'Cypress MKI - Explore Navigation'
+        label: 'Cypress MKI - Explore - Navigation'
         key: test_explore_navigation
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -157,7 +157,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:overview
-        label: 'Cypress MKI - Explore Overview'
+        label: 'Cypress MKI - Explore - Overview'
         key: test_explore_overview
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -171,7 +171,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:pagination
-        label: 'Cypress MKI - Explore Pagination'
+        label: 'Cypress MKI - Explore - Pagination'
         key: test_explore_pagination
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"
@@ -185,7 +185,7 @@ steps:
         parallelism: 1
 
       - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations:urls
-        label: 'Cypress MKI - Explore URLs'
+        label: 'Cypress MKI - Explore - URLs'
         key: test_explore_urls
         env:
           BK_TEST_SUITE_KEY: "serverless-cypress-explore"

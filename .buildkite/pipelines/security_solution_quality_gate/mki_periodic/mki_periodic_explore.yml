@@ -14,4 +14,4 @@ steps:
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
-        parallelism: 2
+        parallelism: 1
