@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { GenericFtrProviderContext } from '@kbn/test';
 import {
   DatasetQualityApiClient,
@@ -27,12 +27,12 @@ export type DatasetQualityServices = InheritedServices & {
 export const services: DatasetQualityServices = {
   ...inheritedServices,
   datasetQualityApiClient: getDatasetQualityApiClientService,
-  logsSynthtraceEsClient: async (context: InheritedFtrProviderContext) =>
-    new LogsSynthtraceEsClient({
-      client: context.getService('es'),
-      logger: createLogger(LogLevel.info),
-      refreshAfterIndex: true,
-    }),
+  logsSynthtraceEsClient: async (context: InheritedFtrProviderContext) => {
+    const synthtraceClient = context.getService('synthtrace');
+    const { logsEsClient } = synthtraceClient.getClients(['logsEsClient']);
+
+    return logsEsClient;
+  },
 };
 
 export type DatasetQualityFtrContextProvider = GenericFtrProviderContext<typeof services, {}>;
