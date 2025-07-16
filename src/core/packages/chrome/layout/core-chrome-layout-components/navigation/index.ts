@@ -8,4 +8,3 @@
  */
 
 export { LayoutNavigation, type LayoutNavigationProps } from './layout_navigation';
-export { LayoutNavigationPanel, type LayoutNavigationPanelProps } from './layout_navigation_panel';
