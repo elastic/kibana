@@ -28,6 +28,10 @@ describe('bulkInstallPackages', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   const mockSoClient = savedObjectsClientMock.create();
   const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const alertingRulesClient = {
+    create: jest.fn(),
+    bulkDeleteRules: jest.fn(),
+  } as any;
 
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
@@ -42,6 +46,7 @@ describe('bulkInstallPackages', () => {
 
       await bulkInstallPackages({
         savedObjectsClient: mockSoClient,
+        alertingRulesClient,
         packagesToInstall,
         esClient: mockEsClient,
         spaceId: 'default',
@@ -60,6 +65,7 @@ describe('bulkInstallPackages', () => {
 
       await bulkInstallPackages({
         savedObjectsClient: mockSoClient,
+        alertingRulesClient,
         packagesToInstall,
         esClient: mockEsClient,
         spaceId: 'default',
@@ -78,6 +84,7 @@ describe('bulkInstallPackages', () => {
 
       await bulkInstallPackages({
         savedObjectsClient: mockSoClient,
+        alertingRulesClient,
         packagesToInstall: [...stringPackagesToInstall, ...objectPackagesToInstall],
         esClient: mockEsClient,
         spaceId: 'default',

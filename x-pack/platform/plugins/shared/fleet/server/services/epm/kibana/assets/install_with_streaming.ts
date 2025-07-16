@@ -32,7 +32,7 @@ interface InstallKibanaAssetsWithStreamingArgs {
   packageInstallContext: PackageInstallContext;
   spaceId: string;
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClientApi | null;
 }
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 100;
@@ -89,7 +89,7 @@ export async function installKibanaAssetsWithStreaming({
     }
   });
 
-  if (alertRuleBatch.length >= MAX_CONCURRENT_PACKAGE_ASSETS) {
+  if (alertRuleBatch.length >= MAX_CONCURRENT_PACKAGE_ASSETS && alertingRulesClient) {
     await installAlertRules({
       logger,
       alertingRulesClient,
@@ -110,7 +110,13 @@ export async function installKibanaAssetsWithStreaming({
     });
   }
 
-  if (alertRuleBatch.length) {
+  if (alertRuleBatch.length && !alertingRulesClient) {
+    logger.debug(
+      `Installing ${alertRuleBatch.length} alert rules will be skipped because no alert rules client was provided. This maybe due to the operation running outside of a request context.`
+    );
+  }
+
+  if (alertRuleBatch.length && alertingRulesClient) {
     await installAlertRules({
       logger,
       alertingRulesClient,

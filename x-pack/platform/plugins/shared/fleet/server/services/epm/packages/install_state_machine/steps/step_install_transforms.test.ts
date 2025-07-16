@@ -38,6 +38,7 @@ const mockCleanupTransforms = cleanupTransforms as jest.MockedFunction<typeof cl
 
 let soClient: jest.Mocked<SavedObjectsClientContract>;
 let esClient: jest.Mocked<ElasticsearchClient>;
+let alertingRulesClient: any;
 
 const packageInstallContext = {
   packageInfo: {
@@ -83,6 +84,10 @@ describe('stepInstallTransforms', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
+    alertingRulesClient = {
+      create: jest.fn(),
+      bulkDeleteRules: jest.fn(),
+    };
   });
   afterEach(async () => {
     jest.mocked(mockedInstallTransforms).mockReset();
@@ -122,6 +127,7 @@ describe('stepInstallTransforms', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -154,6 +160,7 @@ describe('stepInstallTransforms', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -229,6 +236,7 @@ describe('cleanupTransformsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -255,6 +263,7 @@ describe('cleanupTransformsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -282,6 +291,7 @@ describe('cleanupTransformsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -307,6 +317,7 @@ describe('cleanupTransformsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -333,6 +344,7 @@ describe('cleanupTransformsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {

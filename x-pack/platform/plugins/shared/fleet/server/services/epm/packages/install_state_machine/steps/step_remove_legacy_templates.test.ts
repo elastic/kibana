@@ -37,6 +37,7 @@ const mockedRemoveLegacyTemplates = removeLegacyTemplates as jest.MockedFunction
 describe('stepRemoveLegacyTemplates', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
+  let alertingRulesClient: any;
   const logger = loggingSystemMock.createLogger();
 
   const getMockInstalledPackageSo = (
@@ -64,6 +65,10 @@ describe('stepRemoveLegacyTemplates', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
+    alertingRulesClient = {
+      create: jest.fn(),
+      bulkDeleteRules: jest.fn(),
+    };
   });
   afterEach(async () => {
     jest.mocked(mockedRemoveLegacyTemplates).mockReset();
@@ -116,6 +121,7 @@ describe('stepRemoveLegacyTemplates', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger,
       packageInstallContext,
       installedPkg,
@@ -139,6 +145,7 @@ describe('stepRemoveLegacyTemplates', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger,
       packageInstallContext,
       installedPkg,

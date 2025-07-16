@@ -71,7 +71,7 @@ export interface PackagePolicyClient {
   create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    alertingRulesClientApi: RulesClientApi,
+    alertingRulesClientApi: RulesClientApi | null,
     packagePolicy: NewPackagePolicy,
     options?: {
       spaceId?: string;

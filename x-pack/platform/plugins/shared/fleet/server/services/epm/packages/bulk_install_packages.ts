@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import pLimit from 'p-limit';
 import { uniqBy } from 'lodash';
@@ -22,6 +23,7 @@ import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
+  alertingRulesClient: RulesClientApi | null;
   packagesToInstall: Array<
     | string
     | { name: string; version?: string; prerelease?: boolean; skipDataStreamRollover?: boolean }
@@ -37,6 +39,7 @@ interface BulkInstallPackagesParams {
 
 export async function bulkInstallPackages({
   savedObjectsClient,
+  alertingRulesClient,
   packagesToInstall,
   esClient,
   spaceId,
@@ -139,6 +142,7 @@ export async function bulkInstallPackages({
       const installResult = await installPackage({
         savedObjectsClient,
         esClient,
+        alertingRulesClient,
         pkgkey,
         installSource: 'registry',
         spaceId,

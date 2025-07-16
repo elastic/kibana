@@ -51,7 +51,6 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
-
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
@@ -873,7 +872,8 @@ export class FleetPlugin
       fleetSetupCompleted: () => fleetSetupPromise,
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
-        internalSoClient
+        internalSoClient,
+        plugins.alerting
       ),
       agentService: this.setupAgentService(
         core.elasticsearch.client.asInternalUser,
@@ -937,7 +937,8 @@ export class FleetPlugin
 
   private setupPackageService(
     internalEsClient: ElasticsearchClient,
-    internalSoClient: SavedObjectsClientContract
+    internalSoClient: SavedObjectsClientContract,
+    alertingStart: AlertingServerStart
   ): PackageService {
     if (this.packageService) {
       return this.packageService;
@@ -946,6 +947,7 @@ export class FleetPlugin
     this.packageService = new PackageServiceImpl(
       internalEsClient,
       internalSoClient,
+      alertingStart,
       this.getLogger()
     );
     return this.packageService!;

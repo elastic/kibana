@@ -49,6 +49,7 @@ const mockedInstallIndexTemplatesAndPipelines =
   >;
 let soClient: jest.Mocked<SavedObjectsClientContract>;
 let esClient: jest.Mocked<ElasticsearchClient>;
+let alertingRulesClient: any;
 
 describe('stepInstallIndexTemplatePipelines', () => {
   const getMockInstalledPackageSo = (
@@ -76,6 +77,10 @@ describe('stepInstallIndexTemplatePipelines', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
+    alertingRulesClient = {
+      create: jest.fn(),
+      bulkDeleteRules: jest.fn(),
+    };
   });
   afterEach(async () => {
     jest.mocked(mockedInstallIndexTemplatesAndPipelines).mockReset();
@@ -160,6 +165,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -324,6 +330,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -471,6 +478,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -550,6 +558,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installType: 'install',
@@ -604,6 +613,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installType: 'install',
@@ -714,6 +724,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -772,6 +783,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -800,6 +812,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -826,6 +839,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -853,6 +867,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {

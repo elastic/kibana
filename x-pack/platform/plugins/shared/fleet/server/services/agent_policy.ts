@@ -23,13 +23,10 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
-
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-
 import { withSpan } from '@kbn/apm-utils';
 
 import { catchAndSetErrorStackTrace } from '../errors/utils';
@@ -825,6 +822,7 @@ class AgentPolicyService {
   public async update(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
+    alertingRulesClient: RulesClientApi | null,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
     options?: {
@@ -898,6 +896,7 @@ class AgentPolicyService {
       await bulkInstallPackages({
         savedObjectsClient: soClient,
         esClient,
+        alertingRulesClient,
         packagesToInstall,
         spaceId: options?.spaceId || DEFAULT_SPACE_ID,
         authorizationHeader: options?.authorizationHeader,
@@ -925,6 +924,7 @@ class AgentPolicyService {
   public async copy(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
+    alertingRulesClient: RulesClientApi,
     id: string,
     newAgentPolicyProps: Pick<AgentPolicy, 'name' | 'description'>,
     options?: { user?: AuthenticatedUser }
@@ -1044,7 +1044,7 @@ class AgentPolicyService {
         user: options?.user,
       });
     } else {
-      await this.deployPolicy(soClient, newAgentPolicy.id);
+      await this.deployPolicy(soClient, alertingRulesClient, newAgentPolicy.id);
     }
 
     // Get updated agent policy with package policies and adjusted tamper protection
@@ -1086,6 +1086,7 @@ class AgentPolicyService {
    */
   public async removeOutputFromAll(
     esClient: ElasticsearchClient,
+    alertingRulesClient: RulesClientApi,
     outputId: string,
     options?: { force?: boolean }
   ) {
@@ -1139,10 +1140,17 @@ class AgentPolicyService {
           const soClient = appContextService.getInternalUserSOClientForSpaceId(
             agentPolicy.space_ids?.[0]
           );
-          return this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
-            skipValidation: true,
-            force: options?.force,
-          });
+          return this.update(
+            soClient,
+            esClient,
+            alertingRulesClient,
+            agentPolicy.id,
+            getAgentPolicy(agentPolicy),
+            {
+              skipValidation: true,
+              force: options?.force,
+            }
+          );
         },
         {
           concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
@@ -1156,6 +1164,7 @@ class AgentPolicyService {
    */
   public async removeFleetServerHostFromAll(
     esClient: ElasticsearchClient,
+    alertingRulesClient: RulesClientApi,
     fleetServerHostId: string,
     options?: { force?: boolean }
   ) {
@@ -1180,6 +1189,7 @@ class AgentPolicyService {
           this.update(
             appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
             esClient,
+            alertingRulesClient,
             agentPolicy.id,
             {
               fleet_server_host_id: null,
@@ -1489,14 +1499,21 @@ class AgentPolicyService {
 
   public async deployPolicy(
     soClient: SavedObjectsClientContract,
+    alertingRulesClient: RulesClientApi,
     agentPolicyId: string,
     agentPolicy?: AgentPolicy | null
   ) {
-    await this.deployPolicies(soClient, [agentPolicyId], agentPolicy ? [agentPolicy] : undefined);
+    await this.deployPolicies(
+      soClient,
+      alertingRulesClient,
+      [agentPolicyId],
+      agentPolicy ? [agentPolicy] : undefined
+    );
   }
 
   public async deployPolicies(
     soClient: SavedObjectsClientContract,
+    alertingRulesClient: RulesClientApi,
     agentPolicyIds: string[],
     agentPolicies?: AgentPolicy[]
   ) {
@@ -1640,6 +1657,7 @@ class AgentPolicyService {
         return agentPolicyService.update(
           soClient,
           esClient,
+          alertingRulesClient,
           fleetServerPolicy.policy_id,
           {
             schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
@@ -1762,7 +1780,11 @@ class AgentPolicyService {
    * @param esClient
    * @param downloadSourceId
    */
-  public async removeDefaultSourceFromAll(esClient: ElasticsearchClient, downloadSourceId: string) {
+  public async removeDefaultSourceFromAll(
+    esClient: ElasticsearchClient,
+    alertingRulesClient: RulesClientApi,
+    downloadSourceId: string
+  ) {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const agentPolicies = (
       await appContextService
@@ -1784,6 +1806,7 @@ class AgentPolicyService {
           this.update(
             appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_ids?.[0]),
             esClient,
+            alertingRulesClient,
             agentPolicy.id,
             {
               download_source_id:
@@ -2185,6 +2208,7 @@ export const agentPolicyService = new AgentPolicyService();
 export async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
+  alertingRulesClient: RulesClientApi | null,
   agentPolicy: AgentPolicy,
   packageInfo: PackageInfo,
   packagePolicyName?: string,
@@ -2211,7 +2235,7 @@ export async function addPackageToAgentPolicy(
     ? String(packagePolicyId)
     : uuidv5(`${agentPolicy.id}-${packagePolicyName}`, UUID_V5_NAMESPACE);
 
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+  await packagePolicyService.create(soClient, esClient, alertingRulesClient, newPackagePolicy, {
     id,
     bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,

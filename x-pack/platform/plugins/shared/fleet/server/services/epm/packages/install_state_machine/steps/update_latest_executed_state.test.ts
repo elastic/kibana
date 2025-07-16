@@ -42,12 +42,17 @@ const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof audi
 describe('updateLatestExecutedState', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
+  let alertingRulesClient: any;
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
+    alertingRulesClient = {
+      create: jest.fn(),
+      bulkDeleteRules: jest.fn(),
+    };
   });
   afterEach(() => {
     mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
@@ -60,6 +65,7 @@ describe('updateLatestExecutedState', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger,
       packageInstallContext: {
         archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -116,6 +122,7 @@ describe('updateLatestExecutedState', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger,
       packageInstallContext: {
         archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -153,6 +160,7 @@ describe('updateLatestExecutedState', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger,
       packageInstallContext: {
         archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -198,6 +206,7 @@ describe('updateLatestExecutedState', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger,
       packageInstallContext: {
         archiveIterator: createArchiveIteratorFromMap(new Map()),

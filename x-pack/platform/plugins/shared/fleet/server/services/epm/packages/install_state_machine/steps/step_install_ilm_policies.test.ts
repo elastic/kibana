@@ -63,6 +63,7 @@ const packageInstallContext = {
 };
 let soClient: jest.Mocked<SavedObjectsClientContract>;
 let esClient: jest.Mocked<ElasticsearchClient>;
+let alertingRulesClient: any;
 
 describe('stepInstallILMPolicies', () => {
   const mockInstalledPackageSo: SavedObject<Installation> = {
@@ -95,6 +96,10 @@ describe('stepInstallILMPolicies', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
+    alertingRulesClient = {
+      create: jest.fn(),
+      bulkDeleteRules: jest.fn(),
+    };
   });
   afterEach(async () => {
     jest.mocked(installILMPolicy).mockReset();
@@ -122,6 +127,7 @@ describe('stepInstallILMPolicies', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installType: 'install',
@@ -154,6 +160,7 @@ describe('stepInstallILMPolicies', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -227,6 +234,7 @@ describe('stepInstallILMPolicies', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext: {
         packageInfo: {
@@ -322,6 +330,7 @@ describe('stepInstallILMPolicies', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -447,6 +456,7 @@ describe('cleanupILMPoliciesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -505,6 +515,7 @@ describe('cleanupILMPoliciesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -533,6 +544,7 @@ describe('cleanupILMPoliciesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -559,6 +571,7 @@ describe('cleanupILMPoliciesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -586,6 +599,7 @@ describe('cleanupILMPoliciesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
+      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {

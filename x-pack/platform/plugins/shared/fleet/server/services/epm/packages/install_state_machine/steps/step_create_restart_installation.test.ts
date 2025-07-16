@@ -46,6 +46,7 @@ const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof audi
 describe('stepCreateRestartInstallation', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
+  let alertingRulesClient: any;
   const logger = loggingSystemMock.createLogger();
 
   describe('When package is stuck in `installing`', () => {
@@ -71,6 +72,10 @@ describe('stepCreateRestartInstallation', () => {
       soClient = savedObjectsClientMock.create();
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       appContextService.start(createAppContextStartContractMock());
+      alertingRulesClient = {
+        create: jest.fn(),
+        bulkDeleteRules: jest.fn(),
+      };
     });
     afterEach(() => {
       mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
@@ -83,6 +88,7 @@ describe('stepCreateRestartInstallation', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
+        alertingRulesClient,
         logger,
         packageInstallContext: {
           archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -119,6 +125,7 @@ describe('stepCreateRestartInstallation', () => {
           // @ts-ignore
           savedObjectsImporter: jest.fn(),
           esClient,
+          alertingRulesClient,
           logger,
           packageInstallContext: {
             archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -163,6 +170,7 @@ describe('stepCreateRestartInstallation', () => {
           // @ts-ignore
           savedObjectsImporter: jest.fn(),
           esClient,
+          alertingRulesClient,
           logger,
           packageInstallContext: {
             archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -207,6 +215,7 @@ describe('stepCreateRestartInstallation', () => {
           // @ts-ignore
           savedObjectsImporter: jest.fn(),
           esClient,
+          alertingRulesClient,
           logger,
           packageInstallContext: {
             archiveIterator: createArchiveIteratorFromMap(new Map()),

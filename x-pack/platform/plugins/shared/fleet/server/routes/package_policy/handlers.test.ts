@@ -92,7 +92,7 @@ jest.mock(
         ),
         buildPackagePolicyFromPackage: jest.fn(),
         bulkCreate: jest.fn(),
-        create: jest.fn((soClient, esClient, newData) =>
+        create: jest.fn((soClient, esClient, alertingRulesClient, newData) =>
           Promise.resolve({
             ...newData,
             inputs: newData.inputs.map((input) => ({

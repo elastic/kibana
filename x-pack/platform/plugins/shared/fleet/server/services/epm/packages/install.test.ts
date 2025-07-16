@@ -163,6 +163,10 @@ describe('createInstallation', () => {
 });
 
 describe('install', () => {
+  const alertingRulesClient = {
+    create: jest.fn(),
+    bulkDeleteRules: jest.fn(),
+  } as any;
   beforeEach(() => {
     jest
       .mocked(Registry.fetchFindLatestPackageOrThrow)
@@ -191,6 +195,7 @@ describe('install', () => {
         pkgkey: 'apache-1.1.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
@@ -214,6 +219,7 @@ describe('install', () => {
         pkgkey: 'apache-1.3.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
@@ -237,6 +243,7 @@ describe('install', () => {
         pkgkey: 'apache-1.3.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
@@ -263,6 +270,7 @@ describe('install', () => {
         pkgkey: 'apache-1.3.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
@@ -289,6 +297,7 @@ describe('install', () => {
         pkgkey: 'apache-1.3.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
@@ -319,6 +328,7 @@ describe('install', () => {
         pkgkey: 'test_package-1.0.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(response.error).toBeUndefined();
@@ -336,6 +346,7 @@ describe('install', () => {
         pkgkey: 'test_package',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(response.status).toEqual('installed');
@@ -365,6 +376,7 @@ describe('install', () => {
         pkgkey: 'apache-1.2.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(response.status).toEqual('already_installed');
@@ -389,6 +401,7 @@ describe('install', () => {
           pkgkey: 'test_package',
           savedObjectsClient: savedObjectsClientMock.create(),
           esClient: {} as ElasticsearchClient,
+          alertingRulesClient,
         });
         expect(response.error).toBeDefined();
         expect(response.error!.message).toEqual(
@@ -407,6 +420,7 @@ describe('install', () => {
           pkgkey: 'test_package',
           savedObjectsClient: savedObjectsClientMock.create(),
           esClient: {} as ElasticsearchClient,
+          alertingRulesClient,
           force: true,
         });
         expect(response.error).toBeUndefined();
@@ -423,6 +437,7 @@ describe('install', () => {
           pkgkey: 'test_package',
           savedObjectsClient: savedObjectsClientMock.create(),
           esClient: {} as ElasticsearchClient,
+          alertingRulesClient,
         });
         expect(response.error).toBeUndefined();
       });
@@ -443,6 +458,7 @@ describe('install', () => {
         pkgkey: 'fleet_server-2.0.0',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(response.status).toEqual('installed');
@@ -457,6 +473,7 @@ describe('install', () => {
         pkgkey: 'security_detection_engine',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(response.error).toBeUndefined();
@@ -480,6 +497,7 @@ describe('install', () => {
         contentType: '',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
@@ -502,6 +520,7 @@ describe('install', () => {
         contentType: '',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
@@ -528,6 +547,7 @@ describe('install', () => {
         contentType: '',
         savedObjectsClient: savedObjectsClientMock.create(),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
       });
 
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
@@ -548,6 +568,10 @@ describe('install', () => {
 describe('handleInstallPackageFailure', () => {
   const mockedLogger = jest.mocked(appContextService.getLogger());
   const savedObjectsClient = savedObjectsClientMock.create();
+  const alertingRulesClient = {
+    create: jest.fn(),
+    bulkDeleteRules: jest.fn(),
+  } as any;
 
   beforeEach(() => {
     mockedLogger.error.mockClear();
@@ -598,6 +622,7 @@ describe('handleInstallPackageFailure', () => {
       savedObjectsClient,
       error: new ConcurrentInstallOperationError('test 123'),
       esClient: {} as ElasticsearchClient,
+      alertingRulesClient,
       installedPkg,
       pkgName,
       pkgVersion: '2.0.0',
@@ -629,6 +654,7 @@ describe('handleInstallPackageFailure', () => {
       savedObjectsClient,
       error: new FleetError('test 123'),
       esClient: {} as ElasticsearchClient,
+      alertingRulesClient,
       installedPkg,
       pkgName,
       pkgVersion: '2.0.0',
@@ -676,6 +702,7 @@ describe('handleInstallPackageFailure', () => {
         savedObjectsClient,
         error: new Error('test 123'),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
         installedPkg,
         pkgName,
         pkgVersion: '2.0.0',
@@ -712,6 +739,7 @@ describe('handleInstallPackageFailure', () => {
         savedObjectsClient,
         error: new Error('test 123'),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
         installedPkg: undefined as any,
         pkgName,
         pkgVersion: '1.0.0',
@@ -752,6 +780,7 @@ describe('handleInstallPackageFailure', () => {
         savedObjectsClient,
         error: new Error('test installing'),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
         installedPkg,
         pkgName,
         pkgVersion: '2.0.0',
@@ -814,6 +843,7 @@ describe('handleInstallPackageFailure', () => {
         savedObjectsClient,
         error: new Error('test installing'),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
         installedPkg,
         pkgName,
         pkgVersion: '2.0.0',
@@ -876,6 +906,7 @@ describe('handleInstallPackageFailure', () => {
         savedObjectsClient,
         error: new Error('test installing'),
         esClient: {} as ElasticsearchClient,
+        alertingRulesClient,
         installedPkg,
         pkgName,
         pkgVersion: '2.0.0',

@@ -39,6 +39,10 @@ describe('updateCustomIntegration', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   const savedObjectsClient = savedObjectsClientMock.create();
   const esClient = elasticsearchClientMock.createElasticsearchClient();
+  const alertingRulesClient = {
+    create: jest.fn(),
+    bulkDeleteRules: jest.fn(),
+  } as any;
 
   beforeEach(() => {
     mockContract = createAppContextStartContractMock();
@@ -104,10 +108,16 @@ describe('updateCustomIntegration', () => {
   });
 
   it('should update custom integration with new version and readme', async () => {
-    const result = await updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
-      readMeData: '# Updated Test Integration',
-      categories: ['custom'],
-    });
+    const result = await updateCustomIntegration(
+      esClient,
+      savedObjectsClient,
+      alertingRulesClient,
+      'test-integration',
+      {
+        readMeData: '# Updated Test Integration',
+        categories: ['custom'],
+      }
+    );
 
     // Verify the updated version
     expect(result).toEqual({
@@ -137,6 +147,7 @@ describe('updateCustomIntegration', () => {
     const result = await incrementVersionAndUpdate(
       savedObjectsClient,
       esClient,
+      alertingRulesClient,
       'test-integration',
       {
         readme: '# Updated Test Integration',
@@ -164,9 +175,15 @@ describe('updateCustomIntegration', () => {
     });
 
     await expect(
-      updateCustomIntegration(esClient, savedObjectsClient, 'non-existent-integration', {
-        readMeData: '# Updated Test Integration',
-      })
+      updateCustomIntegration(
+        esClient,
+        savedObjectsClient,
+        alertingRulesClient,
+        'non-existent-integration',
+        {
+          readMeData: '# Updated Test Integration',
+        }
+      )
     ).rejects.toThrow('Integration with ID non-existent-integration not found');
   });
 
@@ -175,9 +192,15 @@ describe('updateCustomIntegration', () => {
     mockGetInstalledPackageWithAssets.mockRejectedValueOnce(testError);
 
     await expect(
-      updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
-        readMeData: '# Updated Test Integration',
-      })
+      updateCustomIntegration(
+        esClient,
+        savedObjectsClient,
+        alertingRulesClient,
+        'test-integration',
+        {
+          readMeData: '# Updated Test Integration',
+        }
+      )
     ).rejects.toThrow('Test error during update');
   });
 
@@ -196,9 +219,15 @@ describe('updateCustomIntegration', () => {
     });
 
     await expect(
-      updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
-        readMeData: '# Updated Test Integration',
-      })
+      updateCustomIntegration(
+        esClient,
+        savedObjectsClient,
+        alertingRulesClient,
+        'test-integration',
+        {
+          readMeData: '# Updated Test Integration',
+        }
+      )
     ).rejects.toThrow('Integration with ID test-integration is not a custom integration');
   });
 });

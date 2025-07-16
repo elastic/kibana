@@ -162,6 +162,11 @@ function getAgentPolicyCreateMock() {
 }
 let mockedLogger: jest.Mocked<Logger>;
 
+const alertingRulesClient = {
+  create: jest.fn(),
+  bulkDeleteRules: jest.fn(),
+} as any;
+
 describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
@@ -923,7 +928,7 @@ describe('Agent policy', () => {
         soClient
       );
       mockedAppContextService.getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
-      await agentPolicyService.removeOutputFromAll(esClient, 'output-id-123');
+      await agentPolicyService.removeOutputFromAll(esClient, alertingRulesClient, 'output-id-123');
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
@@ -984,7 +989,11 @@ describe('Agent policy', () => {
         ],
       } as any);
 
-      await agentPolicyService.removeDefaultSourceFromAll(esClient, 'default-download-source-id');
+      await agentPolicyService.removeDefaultSourceFromAll(
+        esClient,
+        alertingRulesClient,
+        'default-download-source-id'
+      );
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
@@ -1035,7 +1044,7 @@ describe('Agent policy', () => {
           },
         ],
       });
-      await agentPolicyService.update(soClient, esClient, 'mocked', {
+      await agentPolicyService.update(soClient, esClient, alertingRulesClient, 'mocked', {
         name: 'mocked',
         namespace: 'default',
         is_managed: false,
@@ -1044,7 +1053,7 @@ describe('Agent policy', () => {
       let calledWith = soClient.update.mock.calls[0];
       expect(calledWith[2]).toHaveProperty('is_managed', false);
 
-      await agentPolicyService.update(soClient, esClient, 'mocked', {
+      await agentPolicyService.update(soClient, esClient, alertingRulesClient, 'mocked', {
         name: 'is_managed: true provided',
         namespace: 'default',
         is_managed: true,
@@ -1071,7 +1080,7 @@ describe('Agent policy', () => {
       });
 
       await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
+        agentPolicyService.update(soClient, esClient, alertingRulesClient, 'test-id', {
           is_protected: true,
         })
       ).rejects.toThrowError(
@@ -1096,11 +1105,17 @@ describe('Agent policy', () => {
         ],
       });
 
-      await agentPolicyService.update(soClient, esClient, 'test-agent-policy', {
-        name: 'Test Agent Policy',
-        namespace: 'default',
-        is_managed: false,
-      });
+      await agentPolicyService.update(
+        soClient,
+        esClient,
+        alertingRulesClient,
+        'test-agent-policy',
+        {
+          name: 'Test Agent Policy',
+          namespace: 'default',
+          is_managed: false,
+        }
+      );
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
@@ -1128,7 +1143,7 @@ describe('Agent policy', () => {
       });
 
       await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
+        agentPolicyService.update(soClient, esClient, alertingRulesClient, 'test-id', {
           name: 'test',
           namespace: 'default',
           is_protected: true,
@@ -1156,7 +1171,7 @@ describe('Agent policy', () => {
       });
 
       await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
+        agentPolicyService.update(soClient, esClient, alertingRulesClient, 'test-id', {
           name: 'test',
           namespace: 'default',
         })
@@ -1189,7 +1204,7 @@ describe('Agent policy', () => {
       });
 
       await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
+        agentPolicyService.update(soClient, esClient, alertingRulesClient, 'test-id', {
           name: 'test',
           namespace: 'default',
           is_protected: true,
@@ -1219,7 +1234,7 @@ describe('Agent policy', () => {
       });
 
       await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
+        agentPolicyService.update(soClient, esClient, alertingRulesClient, 'test-id', {
           name: 'test',
           namespace: 'default',
           supports_agentless: true,
@@ -1249,7 +1264,7 @@ describe('Agent policy', () => {
       });
 
       await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
+        agentPolicyService.update(soClient, esClient, alertingRulesClient, 'test-id', {
           name: 'test',
           namespace: 'default',
           supports_agentless: true,
@@ -1280,7 +1295,7 @@ describe('Agent policy', () => {
       });
 
       await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
+        agentPolicyService.update(soClient, esClient, alertingRulesClient, 'test-id', {
           name: 'test',
           namespace: 'default',
           supports_agentless: true,
@@ -1311,7 +1326,7 @@ describe('Agent policy', () => {
       });
 
       await expect(
-        agentPolicyService.update(soClient, esClient, 'test-id', {
+        agentPolicyService.update(soClient, esClient, alertingRulesClient, 'test-id', {
           name: 'test',
           namespace: 'default',
         })
@@ -1342,7 +1357,7 @@ describe('Agent policy', () => {
         },
       ] as any);
       try {
-        await agentPolicyService.copy(soClient, esClient, 'mocked', {
+        await agentPolicyService.copy(soClient, esClient, alertingRulesClient, 'mocked', {
           name: 'copy mocked',
         });
       } catch (e) {
@@ -1421,7 +1436,7 @@ describe('Agent policy', () => {
       ] as any;
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue(packagePolicies);
       mockedPackagePolicyService.list.mockResolvedValue({ items: packagePolicies } as any);
-      await agentPolicyService.copy(soClient, esClient, 'mocked', {
+      await agentPolicyService.copy(soClient, esClient, alertingRulesClient, 'mocked', {
         name: 'copy mocked',
       });
       expect(mockedPackagePolicyService.bulkCreate).toBeCalledWith(
@@ -1494,7 +1509,7 @@ describe('Agent policy', () => {
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [mockSo],
       });
-      await agentPolicyService.deployPolicy(soClient, 'policy123');
+      await agentPolicyService.deployPolicy(soClient, alertingRulesClient, 'policy123');
 
       expect(esClient.create).not.toBeCalled();
     });
@@ -1546,7 +1561,7 @@ describe('Agent policy', () => {
       soClient.bulkGet.mockResolvedValue({
         saved_objects: [mockSo],
       });
-      await agentPolicyService.deployPolicy(soClient, 'policy123');
+      await agentPolicyService.deployPolicy(soClient, alertingRulesClient, 'policy123');
 
       expect(esClient.bulk).toBeCalledWith(
         expect.objectContaining({
@@ -1594,7 +1609,7 @@ describe('Agent policy', () => {
         ],
       });
 
-      await agentPolicyService.deployPolicy(soClient, 'test-agent-policy');
+      await agentPolicyService.deployPolicy(soClient, alertingRulesClient, 'test-agent-policy');
 
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `User deploying policy [id=test-agent-policy]`,

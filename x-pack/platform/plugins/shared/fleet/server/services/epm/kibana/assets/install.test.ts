@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { type ArchiveAsset } from './install';
+import type { SavedObjectAsset, ArchiveAsset } from './install';
 
 jest.mock('timers/promises', () => ({
   async setTimeout() {},
@@ -31,8 +31,8 @@ const createImportError = (so: ArchiveAsset, type: string) =>
   ({ id: so.id, error: { type } } as SavedObjectsImportFailure);
 const createImportSuccess = (so: ArchiveAsset) =>
   ({ id: so.id, type: so.type, meta: {} } as SavedObjectsImportSuccess);
-const createAsset = (asset: Partial<ArchiveAsset>) =>
-  ({ id: 1234, type: 'dashboard', attributes: {}, ...asset } as ArchiveAsset);
+const createAsset = (asset: Partial<SavedObjectAsset>) =>
+  ({ id: 1234, type: 'dashboard', attributes: {}, ...asset } as SavedObjectAsset);
 
 const createImportResponse = (
   errors: SavedObjectsImportFailure[] = [],
