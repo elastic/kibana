@@ -91,7 +91,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
             onKeyDown={(e) => {
               if (onClick && (e.key === 'Enter' || e.key === ' ')) {
                 // Ignore event if it comes from a link
-                if ((e.target as HTMLElement).tagName === 'A') {
+                if (e.target instanceof HTMLAnchorElement) {
                   return;
                 }
                 e.preventDefault(); // Prevent scroll if Space is pressed
