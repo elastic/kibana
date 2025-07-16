@@ -1214,7 +1214,7 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /x-pack/platform/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
 /x-pack/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
 /x-pack/platform/test/examples/search_examples @elastic/kibana-data-discovery
-/x-pack/test/functional/apps/data_views @elastic/kibana-data-discovery
+/x-pack/platform/test/functional/apps/data_views @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/discover @elastic/kibana-data-discovery
 /x-pack/platform/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover @elastic/kibana-data-discovery
@@ -1262,13 +1262,13 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/es_archives/graph @elastic/kibana-visualizations
 /x-pack/test/functional/es_archives/visualize @elastic/kibana-visualizations
 /src/platform/test/functional/fixtures/kbn_archiver/visualize.json @elastic/kibana-visualizations
-/src/platform/test/functional/fixtures/kbn_archiver/managed_content.json @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/managed_content/managed_content.ts#L38
+/src/platform/test/functional/fixtures/kbn_archiver/managed_content.json @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/platform/test/functional/apps/managed_content/managed_content.ts#L38
 /src/platform/test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json @elastic/kibana-visualizations
 /src/platform/test/functional/apps/getting_started/*.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/199767#discussion_r1840485031
 /x-pack/platform/test/upgrade/apps/graph @elastic/kibana-visualizations
 /x-pack/platform/test/functional/page_objects/log_wrapper.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/36437
 /x-pack/platform/test/functional/page_objects/graph_page.ts @elastic/kibana-visualizations
-/x-pack/test/functional/apps/managed_content @elastic/kibana-visualizations
+/x-pack/platform/test/functional/apps/managed_content @elastic/kibana-visualizations
 /src/platform/test/functional/services/visualizations @elastic/kibana-visualizations
 /src/platform/test/functional/services/renderable.ts @elastic/kibana-visualizations
 /src/platform/test/functional/page_objects/vega_chart_page.ts @elastic/kibana-visualizations

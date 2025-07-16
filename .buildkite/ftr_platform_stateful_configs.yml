@@ -209,7 +209,7 @@ enabled:
   - x-pack/test/functional/apps/dashboard/group1/config.ts
   - x-pack/test/functional/apps/dashboard/group2/config.ts
   - x-pack/test/functional/apps/dashboard/group3/config.ts
-  - x-pack/test/functional/apps/data_views/config.ts
+  - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/group1/config.ts
   - x-pack/test/functional/apps/discover/group2/config.ts
@@ -232,7 +232,7 @@ enabled:
   - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/test/functional/apps/license_management/config.ts
   - x-pack/test/functional/apps/logstash/config.ts
-  - x-pack/test/functional/apps/managed_content/config.ts
+  - x-pack/platform/test/functional/apps/managed_content/config.ts
   - x-pack/test/functional/apps/management/config.ts
   - x-pack/test/functional/apps/maps/group1/config.ts
   - x-pack/test/functional/apps/maps/group2/config.ts
