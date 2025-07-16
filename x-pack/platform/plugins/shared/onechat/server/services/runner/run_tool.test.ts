@@ -10,8 +10,10 @@ import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
+  createToolRegistryMock,
   CreateScopedRunnerDepsMock,
   MockedTool,
+  ToolRegistryMock,
 } from '../../test_utils';
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
@@ -19,15 +21,18 @@ import { runTool } from './run_tool';
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
+  let registry: ToolRegistryMock;
   let tool: MockedTool;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
 
+    registry = createToolRegistryMock();
     const {
-      toolsService: { registry },
+      toolsService: { getRegistry },
     } = runnerDeps;
+    getRegistry.mockResolvedValue(registry);
 
     tool = createMockedTool({
       schema: z.object({
@@ -38,10 +43,6 @@ describe('runTool', () => {
   });
 
   it('calls the tool registry with the expected parameters', async () => {
-    const {
-      toolsService: { registry },
-    } = runnerDeps;
-
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
       toolParams: { foo: 'bar' },
@@ -53,16 +54,10 @@ describe('runTool', () => {
     });
 
     expect(registry.get).toHaveBeenCalledTimes(1);
-    expect(registry.get).toHaveBeenCalledWith({
-      toolId: params.toolId,
-      request: runnerDeps.request,
-    });
+    expect(registry.get).toHaveBeenCalledWith(params.toolId);
   });
 
   it('throws if the tool parameters do not match the schema', async () => {
-    const {
-      toolsService: { registry },
-    } = runnerDeps;
     tool = createMockedTool({
       schema: z.object({
         bar: z.string(),

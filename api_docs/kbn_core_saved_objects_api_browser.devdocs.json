@@ -112,22 +112,6 @@
             "path": "x-pack/platform/plugins/shared/lens/public/types.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
           },
@@ -142,22 +126,6 @@
           {
             "plugin": "cases",
             "path": "x-pack/platform/plugins/shared/cases/common/ui/types.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
           },
           {
             "plugin": "graph",
@@ -1460,10 +1428,6 @@
                 "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
               },
               {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-internal/src/saved_objects_client.ts"
               },
@@ -1526,10 +1490,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
               },
               {
                 "plugin": "@kbn/core",
@@ -2752,44 +2712,12 @@
             "path": "src/platform/plugins/shared/visualizations/public/vis_types/vis_type_alias_registry.ts"
           },
           {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/platform/plugins/private/data_visualizer/common/types/index.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/platform/plugins/shared/aiops/public/application/utils/search_utils.ts"
-          },
-          {
-            "plugin": "aiops",
-            "path": "x-pack/platform/plugins/shared/aiops/public/application/utils/search_utils.ts"
-          },
-          {
             "plugin": "graph",
             "path": "x-pack/platform/plugins/private/graph/public/types/app_state.ts"
           },
           {
             "plugin": "graph",
             "path": "x-pack/platform/plugins/private/graph/public/types/app_state.ts"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-          },
-          {
-            "plugin": "dashboardEnhanced",
-            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
           },
           {
             "plugin": "graph",

@@ -203,7 +203,7 @@ export const LayerActions = (props: LayerActionsProps) => {
     >
       {outsideListAction && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={outsideListAction.displayName}>
+          <EuiToolTip content={outsideListAction.displayName} disableScreenReaderOutput>
             <EuiButtonIcon
               size="s"
               iconType={outsideListAction.icon}

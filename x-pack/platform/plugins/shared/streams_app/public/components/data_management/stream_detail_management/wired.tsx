@@ -87,7 +87,7 @@ export function WiredStreamDetailManagement({
     ...otherTabs,
   };
 
-  if (!isValidManagementSubTab(tab)) {
+  if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
   }
 

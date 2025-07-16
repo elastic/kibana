@@ -13,11 +13,12 @@ import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext, initializeStateManager } from '@kbn/presentation-publishing';
 import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import type { BookState } from '../../../server';
+import { BOOK_EMBEDDABLE_TYPE, type BookEmbeddableState } from '../../../common';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
-import { defaultBookAttributes } from './book_state';
-import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
-import { openSavedBookEditor } from './saved_book_editor';
-import { BookAttributes, BookSerializedState } from './types';
+import { defaultBookState } from './default_book_state';
+import { ADD_SAVED_BOOK_ACTION_ID } from './constants';
 
 export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
@@ -29,26 +30,31 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      const newPanelStateManager = initializeStateManager<BookAttributes>(
-        defaultBookAttributes,
-        defaultBookAttributes
+      const newBookStateManager = initializeStateManager<BookState>(
+        defaultBookState,
+        defaultBookState
       );
-
-      const { savedBookId } = await openSavedBookEditor({
-        attributesManager: newPanelStateManager,
-        parent: embeddable,
-        isCreate: true,
+      openLazyFlyout({
         core,
-      });
-
-      const bookAttributes = newPanelStateManager.getLatestState();
-      const initialState: BookSerializedState = savedBookId
-        ? { savedBookId }
-        : { attributes: bookAttributes };
-
-      embeddable.addNewPanel<BookSerializedState>({
-        panelType: SAVED_BOOK_ID,
-        serializedState: { rawState: initialState },
+        parentApi: parent,
+        loadContent: async ({ closeFlyout }) => {
+          const { getSavedBookEditor } = await import('./saved_book_editor');
+          return getSavedBookEditor({
+            closeFlyout,
+            stateManager: newBookStateManager,
+            isCreate: true,
+            onSubmit: async ({ savedObjectId }) => {
+              embeddable.addNewPanel<BookEmbeddableState>({
+                panelType: BOOK_EMBEDDABLE_TYPE,
+                serializedState: {
+                  rawState: savedObjectId
+                    ? { savedObjectId }
+                    : newBookStateManager.getLatestState(),
+                },
+              });
+            },
+          });
+        },
       });
     },
     getDisplayName: () =>

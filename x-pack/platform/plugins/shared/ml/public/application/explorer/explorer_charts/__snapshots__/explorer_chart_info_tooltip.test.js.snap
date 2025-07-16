@@ -2,29 +2,51 @@
 
 exports[`ExplorerChartTooltip Render tooltip based on infoTooltip data. 1`] = `
 <div
-  css="unknown styles"
+  class="css-i0ye19-tooltip"
 >
-  <TooltipDefinitionList
-    toolTipData={
-      Array [
-        Object {
-          "description": "mock-job-id",
-          "title": "job ID",
-        },
-        Object {
-          "description": "15m",
-          "title": "aggregation interval",
-        },
-        Object {
-          "description": "avg responsetime",
-          "title": "chart function",
-        },
-        Object {
-          "description": "JAL",
-          "title": "airline",
-        },
-      ]
-    }
-  />
+  <dl
+    class="css-1e0ucnv-descriptionList"
+  >
+    <dt
+      class="css-1kstli8-title"
+    >
+      job ID
+    </dt>
+    <dd
+      class="css-8eo5hl-description"
+    >
+      mock-job-id
+    </dd>
+    <dt
+      class="css-1kstli8-title"
+    >
+      aggregation interval
+    </dt>
+    <dd
+      class="css-8eo5hl-description"
+    >
+      15m
+    </dd>
+    <dt
+      class="css-1kstli8-title"
+    >
+      chart function
+    </dt>
+    <dd
+      class="css-8eo5hl-description"
+    >
+      avg responsetime
+    </dd>
+    <dt
+      class="css-1kstli8-title"
+    >
+      airline
+    </dt>
+    <dd
+      class="css-8eo5hl-description"
+    >
+      JAL
+    </dd>
+  </dl>
 </div>
 `;
