@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { usePageReady } from '@kbn/ebt-tools';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -407,7 +408,11 @@ function DiscoverDocumentsComponent({
     [dispatch, setDataGridUiState]
   );
 
-  if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
+  const isPageLoading = isDataViewLoading || (isEmptyDataResult && isDataLoading);
+
+  usePageReady({ isReady: !isPageLoading, isRefreshing: false });
+
+  if (isPageLoading) {
     return (
       // class is used in tests
       <div className="dscDocuments__loading" css={styles.dscDocumentsLoading}>
