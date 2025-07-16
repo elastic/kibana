@@ -13,6 +13,7 @@ import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsBarChart } from './barchart';
 import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { ScreenReaderAnnouncements } from '../../containers/screen_reader_a11y';
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -53,11 +54,13 @@ describe('<IndicatorsBarChart />', () => {
 
     const { container } = render(
       <TestProvidersComponent>
-        <IndicatorsBarChart
-          indicators={mockIndicators}
-          dateRange={mockDateRange}
-          field={mockField}
-        />
+        <ScreenReaderAnnouncements>
+          <IndicatorsBarChart
+            indicators={mockIndicators}
+            dateRange={mockDateRange}
+            field={mockField}
+          />
+        </ScreenReaderAnnouncements>
       </TestProvidersComponent>
     );
 
