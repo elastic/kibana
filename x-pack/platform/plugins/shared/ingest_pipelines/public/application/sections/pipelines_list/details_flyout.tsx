@@ -256,7 +256,6 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
               >
                 <EuiContextMenu
                   initialPanelId={0}
-                  data-test-subj="autoFollowPatternActionContextMenu"
                   panels={[
                     {
                       id: 0,
