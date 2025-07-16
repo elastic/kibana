@@ -11,6 +11,7 @@ disabled:
   - x-pack/solutions/observability/plugins/uptime/e2e/config.ts
   - x-pack/solutions/observability/test/api_integration/config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts
+  - x-pack/solutions/observability/test/functional/config.base.ts
 
   # Elastic Synthetics configs
   - x-pack/solutions/observability/plugins/uptime/e2e/uptime/synthetics_run.ts
@@ -44,7 +45,10 @@ enabled:
   - x-pack/solutions/observability/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/solutions/observability/test/api_integration/profiling/cloud/config.ts
   - x-pack/test/functional/apps/apm/config.ts
-  - x-pack/test/functional_with_es_ssl/apps/config.ts
+  - x-pack/solutions/observability/test/functional_with_es_ssl/config.ts
+  - x-pack/solutions/observability/test/accessibility/config.ts
+  - x-pack/solutions/observability/test/functional/apps/infra/config.ts
+  - x-pack/solutions/observability/test/functional/config.firefox.ts
   # stateful configs that run deployment-agnostic tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts
