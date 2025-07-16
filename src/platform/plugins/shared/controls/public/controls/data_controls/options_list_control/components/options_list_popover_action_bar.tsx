@@ -132,6 +132,7 @@ export const OptionsListPopoverActionBar = ({
                       ? OptionsListStrings.popover.getAllOptionsButtonTitle()
                       : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
                   }
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     size="xs"

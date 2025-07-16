@@ -75,7 +75,7 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
     <EuiPopover
       data-test-subj={POPOVER_BUTTON_TEST_ID}
       button={
-        <EuiToolTip content={BUTTON_LABEL}>
+        <EuiToolTip content={BUTTON_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
             aria-label={BUTTON_LABEL}
             iconType="boxesHorizontal"

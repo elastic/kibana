@@ -183,7 +183,10 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
                 <SaveTimelineButton timelineId={timelineId} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}>
+                <EuiToolTip
+                  content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}
+                  disableScreenReaderOutput
+                >
                   <EuiButtonIcon
                     aria-label={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}
                     iconType="cross"

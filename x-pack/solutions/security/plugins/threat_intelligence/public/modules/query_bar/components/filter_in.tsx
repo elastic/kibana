@@ -60,7 +60,7 @@ export const FilterInButtonIcon: VFC<FilterInProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_IN_TITLE}>
+    <EuiToolTip content={FILTER_IN_TITLE} disableScreenReaderOutput>>
       <EuiButtonIcon
         aria-label={FILTER_IN_TITLE}
         iconType={ICON_TYPE}

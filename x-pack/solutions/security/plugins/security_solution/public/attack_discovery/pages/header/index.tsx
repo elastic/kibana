@@ -148,7 +148,7 @@ const HeaderComponent: React.FC<Props> = ({
         `}
         grow={false}
       >
-        <EuiToolTip content={i18n.SETTINGS} data-test-subj="openAlertSelectionToolTip">
+        <EuiToolTip content={i18n.SETTINGS} data-test-subj="openAlertSelectionToolTip" disableScreenReaderOutput>
           <EuiButtonIcon
             aria-label={i18n.SETTINGS}
             color="text"

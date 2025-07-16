@@ -155,7 +155,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         `}
       >
         {isClearable && selectedPrompt && (
-          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
+          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
               data-test-subj="clearSystemPrompt"

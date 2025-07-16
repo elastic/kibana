@@ -140,7 +140,7 @@ export const SearchOrFilter = React.memo<Props>(
               */
               timelineType === TimelineTypeEnum.default ? (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={dataProviderIconTooltipContent}>
+                  <EuiToolTip content={dataProviderIconTooltipContent} disableScreenReaderOutput>
                     <EuiButtonIcon
                       color={buttonColor}
                       isSelected={isDataProviderVisible}

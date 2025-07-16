@@ -212,7 +212,11 @@ export const Actions = ({
       {showToggleSearch && showInvestigateInTimeline && <EuiHorizontalRule margin="xs" />}
       {showInvestigateInTimeline && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={investigateInTimelineTooltip} position="left">
+          <EuiToolTip
+            content={investigateInTimelineTooltip}
+            position="left"
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               iconType="timeline"
               display="base"

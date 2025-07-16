@@ -18,7 +18,7 @@ interface ExtraActionsButtonProps {
 
 export const ExtraActionsButton: React.FC<ExtraActionsButtonProps> = ({ onClick, showTooltip }) =>
   showTooltip ? (
-    <EuiToolTip content={SHOW_MORE_ACTIONS}>
+    <EuiToolTip content={SHOW_MORE_ACTIONS} disableScreenReaderOutput>
       <EuiButtonIcon
         data-test-subj="showExtraActionsButton"
         aria-label={SHOW_MORE_ACTIONS}

@@ -56,7 +56,7 @@ export function AlertActionsCell(alertActionsProps: AlertActionsProps) {
         <EuiPopover
           anchorPosition="downLeft"
           button={
-            <EuiToolTip content={actionsToolTip}>
+            <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={actionsToolTip}
                 color="text"

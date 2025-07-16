@@ -304,7 +304,7 @@ export function VisualizeESQL({
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
-                <EuiToolTip content={editVisualizationLabel}>
+                <EuiToolTip content={editVisualizationLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
                     iconType="pencil"
@@ -319,7 +319,7 @@ export function VisualizeESQL({
                   />
                 </EuiToolTip>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={saveVisualizationLabel}>
+                  <EuiToolTip content={saveVisualizationLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
                       size="xs"
                       iconType="save"
