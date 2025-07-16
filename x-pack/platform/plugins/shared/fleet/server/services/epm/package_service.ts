@@ -96,6 +96,8 @@ export interface PackageClient {
     spaceId?: string;
     force?: boolean;
     keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult>;
 
   installCustomIntegration(options: {
@@ -246,6 +248,8 @@ class PackageClientImpl implements PackageClient {
     spaceId?: string;
     force?: boolean;
     keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
@@ -255,6 +259,8 @@ class PackageClientImpl implements PackageClient {
       spaceId = DEFAULT_SPACE_ID,
       force = false,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     } = options;
 
     // If pkgVersion isn't specified, find the latest package version
@@ -272,6 +278,8 @@ class PackageClientImpl implements PackageClient {
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
       keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     });
   }
 
