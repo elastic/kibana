@@ -20,6 +20,7 @@ export interface PrimaryMenuItemProps {
   href?: string;
   iconType?: IconType;
   isCurrent?: boolean;
+  isCollapsed: boolean;
   onClick?: () => void;
   submenuPanelId?: string;
 }
@@ -30,6 +31,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   href,
   iconType,
   isCurrent = false,
+  isCollapsed,
   onClick,
   submenuPanelId,
 }) => {
@@ -65,6 +67,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
         href={href}
         iconType={iconType}
         isCurrent={isCurrent}
+        isCollapsed={isCollapsed}
         onClick={handleClick}
       >
         {children}
