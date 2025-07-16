@@ -1630,6 +1630,8 @@
       "@kbn/safer-lodash-set/*": ["src/platform/packages/shared/kbn-safer-lodash-set/*"],
       "@kbn/saml-provider-plugin": ["x-pack/test/security_api_integration/plugins/saml_provider"],
       "@kbn/saml-provider-plugin/*": ["x-pack/test/security_api_integration/plugins/saml_provider/*"],
+      "@kbn/sample-data-ingest": ["x-pack/platform/plugins/shared/sample_data_ingest"],
+      "@kbn/sample-data-ingest/*": ["x-pack/platform/plugins/shared/sample_data_ingest/*"],
       "@kbn/sample-log-parser": ["x-pack/platform/packages/shared/kbn-sample-parser"],
       "@kbn/sample-log-parser/*": ["x-pack/platform/packages/shared/kbn-sample-parser/*"],
       "@kbn/sample-task-plugin": ["x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin"],
@@ -2266,7 +2268,10 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": ["typings/@emotion"],
+      // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
+      // We should be able to remove this once we support cjs/esm interop.
+      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

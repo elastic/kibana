@@ -8,9 +8,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
-import { ComplianceBarComponent } from './latest_findings_group_renderer';
 import { RawBucket } from '@kbn/grouping/src';
-import { FindingsGroupingAggregation } from './use_grouped_findings';
+import { FindingsGroupingAggregation } from '@kbn/cloud-security-posture';
+import { ComplianceBarComponent } from './latest_findings_group_renderer';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 
 jest.mock('@elastic/eui', () => {
