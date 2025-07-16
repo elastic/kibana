@@ -5,10 +5,15 @@
  * 2.0.
  */
 import { EuiBasicTable, EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { ContentPackEntry, ContentPackStream, PARENT_STREAM_ID } from '@kbn/content-packs-schema';
-import { getSegments } from '@kbn/streams-schema';
+import {
+  getAncestors,
+  getAncestorsAndSelf,
+  getSegments,
+  isDescendantOf,
+} from '@kbn/streams-schema';
 
 type StreamRow = ContentPackStream & {
   level: number;
@@ -36,17 +41,18 @@ export function ContentPackObjectsList({
   objects: ContentPackEntry[];
   onSelectionChange: (objects: ContentPackEntry[]) => void;
 }) {
-  const sortedStreams = sortStreams(
-    objects.filter((entry): entry is ContentPackStream => entry.type === 'stream')
-  );
+  const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>({});
 
-  const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>(() => {
-    const initialSelection: Record<string, boolean> = {};
-    sortedStreams.forEach(({ stream }) => {
-      initialSelection[stream.name] = true;
-    });
-    return initialSelection;
-  });
+  const sortedStreams = useMemo(() => {
+    const rows = sortStreams(
+      objects.filter((entry): entry is ContentPackStream => entry.type === 'stream')
+    );
+    const selection: Record<string, boolean> = {};
+    rows.forEach(({ stream }) => (selection[stream.name] = true));
+    setSelectedItems(selection);
+
+    return rows;
+  }, [objects]);
 
   return (
     <EuiBasicTable
@@ -61,7 +67,37 @@ export function ContentPackObjectsList({
             <EuiCheckbox
               id={`stream-checkbox-${item.stream.name}`}
               checked={!!selectedItems[item.stream.name]}
-              onChange={(e) => {}}
+              onChange={(e) => {
+                const selection = { ...selectedItems };
+                if (e.target.checked) {
+                  [
+                    ...getAncestorsAndSelf(item.stream.name),
+                    ...Object.keys(selection).filter((name) =>
+                      isDescendantOf(item.stream.name, name)
+                    ),
+                  ].forEach((name) => {
+                    selection[name] = true;
+                  });
+                } else {
+                  const streamNames = Object.keys(selection);
+                  streamNames
+                    .filter(
+                      (name) => name === item.stream.name || isDescendantOf(item.stream.name, name)
+                    )
+                    .forEach((name) => (selection[name] = false));
+
+                  getAncestors(item.stream.name)
+                    .reverse()
+                    .forEach((ancestor) => {
+                      const hasSelectedChild = streamNames.some(
+                        (name) => isDescendantOf(ancestor, name) && selection[name]
+                      );
+                      selection[ancestor] = hasSelectedChild;
+                    });
+                }
+
+                setSelectedItems(selection);
+              }}
             />
           ),
         },
