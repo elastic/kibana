@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-op;
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import {
   EuiButtonEmpty,
