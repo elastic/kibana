@@ -64549,6 +64549,8 @@ components:
         - type: string
         - items:
             type: string
+          maxItems: 5
+          minItems: 0
           type: array
     Security_Detections_API_ThresholdRule:
       allOf:
