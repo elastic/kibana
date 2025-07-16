@@ -60,7 +60,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
           <p>{label}</p>
         );
 
-        let helpText: string | React.ReactNode  | null = description;
+        let helpText: string | React.ReactNode | null = description;
         if (isInternalProvider && key === 'model_id' && !isPreconfigured) {
           helpText = (
             <>
@@ -79,11 +79,9 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
           const editedDescription = description.replace(regex, '');
           helpText = (
             <>
-            {editedDescription}{' '}
-            {descriptionLinks[key]}
+              {editedDescription} {descriptionLinks[key]}
             </>
           );
-
         }
 
         const optionalLabel = !required ? (

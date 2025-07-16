@@ -30,7 +30,12 @@ import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
-import { DEFAULT_TASK_TYPE, INTERNAL_OVERRIDE_FIELDS, ServiceProviderKeys, serviceProviderLinkComponents } from '../constants';
+import {
+  DEFAULT_TASK_TYPE,
+  INTERNAL_OVERRIDE_FIELDS,
+  ServiceProviderKeys,
+  serviceProviderLinkComponents,
+} from '../constants';
 import { SelectableProvider } from './providers/selectable';
 import {
   TaskTypeOption,

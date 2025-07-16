@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
-import { GEMINI_REGION_DOC_LINK, GEMINI_PROJECT_ID_DOC_LINK } from '@kbn/inference-endpoint-ui-common';
+import {
+  GEMINI_REGION_DOC_LINK,
+  GEMINI_PROJECT_ID_DOC_LINK,
+} from '@kbn/inference-endpoint-ui-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import {
