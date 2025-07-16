@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { createMemoryHistory, createLocation } from 'history';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -42,6 +43,10 @@ jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions
 const { useGetRuleTypesPermissions } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
 );
+jest.mock('@kbn/ebt-tools');
+
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
 const queryClient = new QueryClient();
 
