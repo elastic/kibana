@@ -64,7 +64,7 @@ export const FilterOutButtonIcon: FC<FilterOutProps> = ({
   }
 
   return (
-    <EuiToolTip content={FILTER_OUT_TITLE}>
+    <EuiToolTip content={FILTER_OUT_TITLE} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={FILTER_OUT_TITLE}
         iconType={ICON_TYPE}
