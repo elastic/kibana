@@ -8,8 +8,10 @@
  */
 
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
-import type { GetPricingResponse, PricingServiceStart } from '@kbn/core-pricing-browser';
+import type { GetPricingResponse } from '@kbn/core-pricing-common';
 import { PricingTiersClient, ProductFeaturesRegistry } from '@kbn/core-pricing-common';
+import type { PricingServiceStart } from '@kbn/core-pricing-browser';
+import type { CoreService } from '@kbn/core-base-browser-internal';
 
 interface StartDeps {
   http: InternalHttpStart;
@@ -27,7 +29,10 @@ const defaultPricingResponse: GetPricingResponse = {
  * Service that is responsible for UI Pricing.
  * @internal
  */
-export class PricingService {
+export class PricingService implements CoreService<{}, PricingServiceStart> {
+  public setup() {
+    return {};
+  }
   public async start({ http }: StartDeps): Promise<PricingServiceStart> {
     const isAnonymous = http.anonymousPaths.isAnonymous(window.location.pathname);
     const pricingResponse = isAnonymous
@@ -40,7 +45,11 @@ export class PricingService {
     );
 
     return {
-      isFeatureAvailable: tiersClient.isFeatureAvailable,
+      isFeatureAvailable: tiersClient.isFeatureAvailable.bind(tiersClient),
+      getActiveProduct: tiersClient.getActiveProduct.bind(tiersClient),
     };
+  }
+  public async stop() {
+    // no resources to release
   }
 }
