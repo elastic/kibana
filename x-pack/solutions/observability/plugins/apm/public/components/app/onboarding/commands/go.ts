@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { API_KEY_COMMAND_PLACEHOLDER, SECRET_TOKEN_COMMAND_PLACEHOLDER } from './shared_hints';
 
 export const goVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'ELASTIC_APM_SECRET_TOKEN' }),
@@ -37,11 +38,11 @@ export ELASTIC_APM_SERVICE_NAME=<your-service-name>
 
 {{^secretToken}}
 # {{apiKeyHint}}
-export ELASTIC_APM_API_KEY={{{apiKey}}}
+export ELASTIC_APM_API_KEY=${API_KEY_COMMAND_PLACEHOLDER}
 {{/secretToken}}
 {{#secretToken}}
 # {{secretTokenHint}}
-export ELASTIC_APM_SECRET_TOKEN={{{secretToken}}}
+export ELASTIC_APM_SECRET_TOKEN=${SECRET_TOKEN_COMMAND_PLACEHOLDER}
 {{/secretToken}}
 
 # {{{serverUrlHint}}}

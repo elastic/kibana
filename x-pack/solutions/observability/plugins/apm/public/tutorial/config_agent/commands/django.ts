@@ -11,6 +11,7 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
+  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const djangoVariables = {
@@ -57,7 +58,7 @@ export const django = `INSTALLED_APPS = (
 ELASTIC_APM = {
   '${djangoVariables.apmServiceName}': '{{{apmServiceName}}}',
 
-  '${djangoVariables.secretToken}': '{{{secretToken}}}',
+  '${djangoVariables.secretToken}': '${SECRET_TOKEN_COMMAND_PLACEHOLDER}',
 
   '${djangoVariables.apmServerUrl}': '{{{apmServerUrl}}}',
 

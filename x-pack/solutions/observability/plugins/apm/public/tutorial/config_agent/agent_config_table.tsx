@@ -9,8 +9,9 @@ import React from 'react';
 import type { ValuesType } from 'utility-types';
 import { get } from 'lodash';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiFieldPassword, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { secretTokenKeys } from './commands/get_apm_agent_commands';
 
 export function AgentConfigurationTable({
   variables,
@@ -38,11 +39,15 @@ export function AgentConfigurationTable({
       name: i18n.translate('xpack.apm.tutorial.agent.column.configValue', {
         defaultMessage: 'Configuration value',
       }),
-      render: (_, { value }) => (
-        <EuiText size="s" color="accent">
-          {value}
-        </EuiText>
-      ),
+      render: (_, { value, setting }) => {
+        if (secretTokenKeys.includes(setting) && !!value)
+          return <EuiFieldPassword type="dual" value={value ?? ''} data-test-subj="secret_key" />;
+        return (
+          <EuiText size="s" color="accent">
+            {value}
+          </EuiText>
+        );
+      },
     },
   ];
 
@@ -50,5 +55,6 @@ export function AgentConfigurationTable({
     setting: variables[k],
     value: get(data, k), // TODO do we want default values?
   }));
+
   return <EuiBasicTable items={items} columns={columns} />;
 }

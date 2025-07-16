@@ -34,7 +34,7 @@ export const javaLineNumbers = {
 
 export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
 -${javaVariables.apmServiceName}={{{apmServiceName}}} \\
--${javaVariables.secretToken}={{{secretToken}}} \\
+-${javaVariables.secretToken}=<APM_SECRET_TOKEN> \\
 -${javaVariables.apmServerUrl}={{{apmServerUrl}}} \\
 -${javaVariables.apmEnvironment}={{{apmEnvironment}}} \\
 -Delastic.apm.application_packages=org.example \\

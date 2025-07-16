@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { API_KEY_COMMAND_PLACEHOLDER } from './shared_hints';
 
 export const railsVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'secret_token' }),
@@ -31,7 +32,7 @@ service_name: '<your-service-name>'
 
 {{^secretToken}}
 # {{apiKeyHint}}
-api_key: '{{{apiKey}}}'
+api_key: '${API_KEY_COMMAND_PLACEHOLDER}'
 {{/secretToken}}
 {{#secretToken}}
 # {{secretTokenHint}}

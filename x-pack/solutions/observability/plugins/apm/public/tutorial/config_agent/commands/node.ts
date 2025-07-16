@@ -10,6 +10,7 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
+  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const nodeVariables = {
@@ -48,7 +49,7 @@ export const node = `// ${i18n.translate(
 var apm = require('elastic-apm-node').start({
   ${nodeVariables.apmServiceName}: '{{{apmServiceName}}}',
 
-  ${nodeVariables.secretToken}: '{{{secretToken}}}',
+  ${nodeVariables.secretToken}: '${SECRET_TOKEN_COMMAND_PLACEHOLDER}',
 
   ${nodeVariables.apmServerUrl}: '{{{apmServerUrl}}}',
 

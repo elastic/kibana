@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { API_KEY_COMMAND_PLACEHOLDER } from './shared_hints';
+
 export const phpVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'elastic_apm.secret_token' }),
   ...(!secretToken && { apiKey: 'elastic_apm.api_key' }),
@@ -22,7 +25,7 @@ elastic_apm.service_name="<your-service-name>"
 
 {{^secretToken}}
 # {{apiKeyHint}}
-elastic_apm.api_key="{{{apiKey}}}"
+elastic_apm.api_key="${API_KEY_COMMAND_PLACEHOLDER}"
 {{/secretToken}}
 {{#secretToken}}
 # {{secretTokenHint}}
