@@ -111,8 +111,7 @@ describe('BackfillTaskRunner', () => {
       expect(esClient.cluster.health).toBeCalledWith({
         index: destIndex,
         wait_for_status: 'green',
-        timeout: '300ms',
-        wait_for_active_shards: 'all',
+        timeout: '30s',
       });
 
       expect(logger.error).toBeCalledWith(
