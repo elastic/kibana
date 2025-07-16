@@ -335,10 +335,6 @@
                 "path": "src/platform/plugins/shared/discover/public/context_awareness/hooks/use_additional_cell_actions.ts"
               },
               {
-                "plugin": "imageEmbeddable",
-                "path": "src/platform/plugins/private/image_embeddable/public/actions/create_image_action.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register_discover_histogram_actions.ts"
               }
@@ -717,14 +713,6 @@
               {
                 "plugin": "discoverEnhanced",
                 "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/dashboard_drilldowns_services.ts"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/dashboard_drilldowns_services.ts"
               },
               {
                 "plugin": "securitySolution",
