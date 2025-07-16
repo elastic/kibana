@@ -10,6 +10,7 @@ import {
   type UserIdAndName,
   type Conversation,
   createConversationNotFoundError,
+  ConversationWithoutRounds,
 } from '@kbn/onechat-common';
 import type {
   ConversationCreateRequest,
@@ -17,13 +18,20 @@ import type {
   ConversationListOptions,
 } from '../../../common/conversations';
 import { ConversationStorage } from './storage';
-import { fromEs, toEs, createRequestToEs, updateConversation, type Document } from './converters';
+import {
+  fromEs,
+  fromEsWithoutRounds,
+  toEs,
+  createRequestToEs,
+  updateConversation,
+  type Document,
+} from './converters';
 
 export interface ConversationClient {
   get(conversationId: string): Promise<Conversation>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
   update(conversation: ConversationUpdateRequest): Promise<Conversation>;
-  list(options?: ConversationListOptions): Promise<Conversation[]>;
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
 }
 
 export const createClient = ({
@@ -45,12 +53,15 @@ class ConversationClientImpl implements ConversationClient {
     this.user = user;
   }
 
-  async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
+  async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
     const { agentId } = options;
 
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
+      _source: {
+        excludes: ['rounds'],
+      },
       query: {
         bool: {
           must: [
@@ -61,7 +72,7 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) => fromEs(hit as Document));
+    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
   }
 
   async get(conversationId: string): Promise<Conversation> {

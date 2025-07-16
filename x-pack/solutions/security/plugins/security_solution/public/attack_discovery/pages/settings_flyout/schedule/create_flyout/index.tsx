@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 
+import { DataViewManagerScopeName } from '../../../../../data_view_manager/constants';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
@@ -46,6 +48,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
   });
 
   const { sourcererDataView } = useSourcererDataView();
+  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.detections);
 
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
     useCreateAttackDiscoverySchedule();
@@ -63,7 +66,8 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
           alertsIndexPattern ?? '',
           connector,
           sourcererDataView,
-          uiSettings
+          uiSettings,
+          experimentalDataView
         );
         await createAttackDiscoverySchedule({ scheduleToCreate });
         onClose();
@@ -75,6 +79,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       aiConnectors,
       alertsIndexPattern,
       createAttackDiscoverySchedule,
+      experimentalDataView,
       onClose,
       sourcererDataView,
       uiSettings,

@@ -23,7 +23,7 @@ import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/i
 import { PageTitleWithPopover } from './page_title_with_popover';
 
 type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'> & {
-  assetType: InventoryItemType;
+  entityType: InventoryItemType;
   loading: boolean;
 };
 
@@ -31,7 +31,7 @@ export const FlyoutHeader = ({
   title,
   tabs = [],
   rightSideItems = [],
-  assetType,
+  entityType,
   loading,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -55,7 +55,7 @@ export const FlyoutHeader = ({
             {loading ? (
               <EuiLoadingSpinner size="m" />
             ) : (
-              <h4>{assetType === 'host' ? <PageTitleWithPopover name={title ?? ''} /> : title}</h4>
+              <h4>{entityType === 'host' ? <PageTitleWithPopover name={title ?? ''} /> : title}</h4>
             )}
           </EuiTitle>
         </EuiFlexItem>

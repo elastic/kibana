@@ -86,7 +86,7 @@ export const TTYTextSizer = ({
         <div css={styles.separator} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiToolTip content={ZOOM_FIT}>
+        <EuiToolTip content={ZOOM_FIT} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomFit"
             aria-label={ZOOM_FIT}
@@ -102,7 +102,7 @@ export const TTYTextSizer = ({
         <div css={styles.separator} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiToolTip content={ZOOM_OUT}>
+        <EuiToolTip content={ZOOM_OUT} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomOut"
             aria-label={ZOOM_OUT}
@@ -116,7 +116,7 @@ export const TTYTextSizer = ({
         {`${Math.round((fontSize / DEFAULT_TTY_FONT_SIZE) * 100)}%`}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiToolTip content={ZOOM_IN}>
+        <EuiToolTip content={ZOOM_IN} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomIn"
             aria-label={ZOOM_IN}

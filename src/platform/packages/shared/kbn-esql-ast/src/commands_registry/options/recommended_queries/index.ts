@@ -147,7 +147,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Use the CATEGORIZE function to identify patterns in your logs',
               }
             ),
-            queryString: `${fromCommand}\n  | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(${categorizationField})\n  | SORT Count DESC`,
+            queryString: `${fromCommand}\n | SAMPLE .001\n | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(${categorizationField})\n  | SORT Count DESC`,
           },
         ]
       : []),
