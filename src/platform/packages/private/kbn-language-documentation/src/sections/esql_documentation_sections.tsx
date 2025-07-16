@@ -261,7 +261,7 @@ COMPLETION [column =] prompt WITH inference_id
 
 **Examples**
 
-The following is basic example with an inline prompt:
+The following is a basic example with an inline prompt:
 
 \`\`\` esql
 ROW question = "What is Elasticsearch?"
