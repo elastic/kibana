@@ -21,7 +21,7 @@ export const getBuildSuccessReportFromLastMessageNode = () => {
 
     return new Command({
       update: {
-        messages: [`${lastMessage.content}\n\nAll queries have been validated against the available data. Do not make any further changes to the queries.`],
+        messages: [`${lastMessage.content}\n\nNote: All queries have been validated against the available data. No need to make any further changes to the queries.`],
       },
     });
   };
