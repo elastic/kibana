@@ -10,7 +10,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   CreateWorkflowRequest,
-  WorkflowExecutionEngineModel,
+  WorkflowExecution,
   WorkflowExecutionListModel,
   WorkflowListModel,
   WorkflowModel,
@@ -91,7 +91,7 @@ export class WorkflowsService {
     });
   }
 
-  public getWorkflowExecution(id: string): Promise<WorkflowExecutionEngineModel | null> {
+  public getWorkflowExecution(id: string): Promise<WorkflowExecution | null> {
     return getWorkflowExecution({
       esClient: this.esClient,
       logger: this.logger,

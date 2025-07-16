@@ -8,7 +8,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows/types/v1';
+import { WorkflowExecution } from '@kbn/workflows/types/v1';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -22,9 +22,9 @@ export const getWorkflowExecution = async ({
   logger,
   workflowExecutionIndex,
   workflowExecutionId,
-}: GetWorkflowExecutionParams): Promise<WorkflowExecutionEngineModel | null> => {
+}: GetWorkflowExecutionParams): Promise<WorkflowExecution | null> => {
   try {
-    const response = await esClient.search<WorkflowExecutionEngineModel>({
+    const response = await esClient.search<WorkflowExecution>({
       index: workflowExecutionIndex,
       query: {
         match: {

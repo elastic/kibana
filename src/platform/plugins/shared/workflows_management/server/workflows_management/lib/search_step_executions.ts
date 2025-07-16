@@ -28,6 +28,7 @@ export const searchStepExecutions = async ({
     const response = await esClient.search<WorkflowStepExecution>({
       index: stepsExecutionIndex,
       query: { match: { workflowRunId: workflowExecutionId } },
+      sort: 'startedAt:dsc',
     });
 
     logger.info(

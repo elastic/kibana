@@ -22,7 +22,7 @@ export function StatusBadge({ status }: { status: ExecutionStatus }) {
     case 'running':
       return (
         <EuiBadge color="subdued" iconType={() => <EuiLoadingSpinner size="s" />}>
-          {status}
+          &nbsp;{status}
         </EuiBadge>
       );
     case 'waiting_for_input':

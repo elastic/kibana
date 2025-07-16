@@ -24,6 +24,7 @@ export interface WorkflowExecution {
   id: string;
   workflowId: string;
   status: ExecutionStatus;
+  error: string | null;
   triggers: WorkflowTrigger[];
   steps: WorkflowStep[];
   createdAt: Date;

@@ -88,6 +88,7 @@ export class WorkflowsManagementApi {
       status: workflowExecution.status,
       startedAt: workflowExecution.startedAt,
       finishedAt: workflowExecution.finishedAt,
+      duration: workflowExecution.duration,
       stepExecutions,
     };
   }
