@@ -73,6 +73,7 @@ export interface UsageStats {
   'securitySolution:enableVisualizationsInFlyout': boolean;
   'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
+  'securitySolution:enablePrivilegedUserMonitoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
