@@ -173,7 +173,7 @@ export class Parser {
       return Parser.parseMap(src, options);
     }
 
-    const { root, ast, errors, ...result } = Parser.parseCommand('STATS ' + src, options);
+    const { root, ast, errors, ...result } = Parser.parseCommand('EVAL ' + src, options);
     const expressions = [...singleItems(root.args)];
 
     if (expressions.length !== 1) {
