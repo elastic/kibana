@@ -171,6 +171,46 @@ describe('PolicySelector component', () => {
     });
   });
 
+  it('should maintain consistent total count display when searching/filtering', async () => {
+    props.selectedPolicyIds = [testPolicyId1, testPolicyId2];
+    const { getByTestId } = await render();
+
+    // Initially should show correct total
+    expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual('2 of 50 selected');
+
+    // Mock filtered search response with fewer results
+    apiMocks.responseProvider.packagePolicies.mockImplementationOnce(() => ({
+      items: [apiMocks.responseProvider.packagePolicies().items[0]], // Only one result
+      total: 1, // Filtered total
+      page: 1,
+      perPage: 20,
+    }));
+
+    // Search for something
+    act(() => {
+      userEvent.type(getByTestId('test-searchbar'), 'foo');
+    });
+
+    // Wait for search to complete
+    await waitFor(() => {
+      expect(mockedContext.coreStart.http.get).toHaveBeenCalledWith(
+        packagePolicyRouteService.getListPath(),
+        expect.objectContaining({
+          query: expect.objectContaining({
+            kuery: expect.stringContaining('foo'),
+          }),
+        })
+      );
+    });
+
+    // Total count should still show 50 (unfiltered total), not 1 (filtered total)
+    await waitFor(() => {
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '2 of 50 selected'
+      );
+    });
+  });
+
   it('should display a checkbox when "useCheckbox" prop is true', async () => {
     props.useCheckbox = true;
     const { getByTestId } = await render();
@@ -390,6 +430,35 @@ describe('PolicySelector component', () => {
 
       expect(getByTestId('test-customItem1-checkbox')).toBeTruthy();
       expect(getByTestId('test-customItem2-checkbox')).toBeTruthy();
+    });
+
+    it('should exclude group labels from total count calculation', async () => {
+      // Override additionalListItems to include a group label
+      props.additionalListItems = [
+        {
+          label: 'Additional filters',
+          isGroupLabel: true, // This should NOT be counted
+        },
+        {
+          label: 'Global entries',
+          checked: 'on',
+          'data-test-subj': 'globalOption',
+        },
+        {
+          label: 'Unassigned entries',
+          checked: undefined,
+          'data-test-subj': 'unassignedOption',
+        },
+      ];
+      props.selectedPolicyIds = [testPolicyId1];
+
+      const { getByTestId } = await render();
+
+      // Should be 1 policy + 2 selectable items = 52 total (50 + 2), not 53 (50 + 3)
+      // The group label "Additional filters" should be excluded from count
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '2 of 52 selected'
+      );
     });
   });
 
