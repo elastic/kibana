@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { asyncForEach } from '@kbn/std';
 import { PipelineTreeNode, MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { estypes } from '@elastic/elasticsearch';
 import { Processor } from '../../../../common/types';
 
-export const fetchPipelineStructureTree = async (
-  client: IScopedClusterClient,
+export const fetchPipelineStructureTree = (
+  allPipelines: {
+    [key: string]: estypes.IngestPipeline;
+  },
   rootPipelineName: string,
   level: number = 1
-): Promise<PipelineTreeNode> => {
-  const rootPipeline = await client.asCurrentUser.ingest.getPipeline({
-    id: rootPipelineName,
-  });
+): PipelineTreeNode => {
+  const rootPipeline = allPipelines[rootPipelineName];
   const pipelineNode: PipelineTreeNode = {
     pipelineName: rootPipelineName,
     isManaged: Boolean(rootPipeline?._meta?.managed === true),
@@ -28,11 +27,11 @@ export const fetchPipelineStructureTree = async (
     return pipelineNode;
   }
   const processorPipelines =
-    (rootPipeline?.processors as Processor[])
+    ((rootPipeline?.processors as Processor[]) ?? [])
       .filter((p) => p.pipeline !== undefined)
       .map((p) => p.pipeline.name) ?? [];
-  await asyncForEach(processorPipelines, async (pipeline) => {
-    const pipelineChild = await fetchPipelineStructureTree(client, pipeline, level + 1);
+  processorPipelines.forEach((pipeline) => {
+    const pipelineChild = fetchPipelineStructureTree(allPipelines, pipeline, level + 1);
     pipelineNode.children!.push(pipelineChild);
   });
   return pipelineNode;

@@ -103,7 +103,8 @@ export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDepen
       const { name } = req.params;
 
       try {
-        const pipelineStructureTree = fetchPipelineStructureTree(clusterClient, name);
+        const allPipelines = await clusterClient.asCurrentUser.ingest.getPipeline();
+        const pipelineStructureTree = fetchPipelineStructureTree(allPipelines, name);
         return res.ok({
           body: {
             pipelineStructureTree,
