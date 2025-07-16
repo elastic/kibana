@@ -60,7 +60,7 @@ describe('RelatedDashboardsClient', () => {
 
     alertId = 'test-alert-id';
 
-    client = new RelatedDashboardsClient(logger, dashboardClient, alertsClient, alertId, 'default');
+    client = new RelatedDashboardsClient(logger, dashboardClient, alertsClient, alertId);
 
     jest.clearAllMocks();
   });
@@ -414,10 +414,7 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       await client.fetchDashboards({ page: 1, perPage: 2 });
 
-      expect(dashboardClient.search).toHaveBeenCalledWith(
-        { limit: 2, cursor: '1' },
-        { spaces: ['default'] }
-      );
+      expect(dashboardClient.search).toHaveBeenCalledWith({ limit: 2, cursor: '1' });
       expect(client.dashboardsById.size).toBe(2);
     });
   });
