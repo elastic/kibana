@@ -142,7 +142,7 @@ export async function getFunctionArgsSuggestions(
   fullText: string,
   offset: number,
   context?: ICommandContext,
-  license?: ILicense
+  license: ILicense | undefined = undefined
 ): Promise<ISuggestionItem[]> {
   const astContext = findAstPosition(commands, offset);
   const node = astContext.node;
@@ -445,7 +445,7 @@ async function getListArgsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   fieldsMap: Map<string, ESQLFieldWithMetadata>,
   offset: number,
-  license?: ILicense
+  license: ILicense | undefined = undefined
 ) {
   const suggestions = [];
   const { command, node } = findAstPosition(commands, offset);
@@ -550,6 +550,7 @@ export const getInsideFunctionsSuggestions = async (
         getExpressionType: (expression) =>
           getExpressionType(expression, context?.fields, context?.userDefinedColumns),
         getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
+        license: callbacks?.license,
       });
     }
     if (['in', 'not in'].includes(node.name)) {

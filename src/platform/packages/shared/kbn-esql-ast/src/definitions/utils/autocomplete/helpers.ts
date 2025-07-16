@@ -185,7 +185,7 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  license?: ILicense
+  license: ILicense | undefined = undefined
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -354,7 +354,7 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType: GetColumnsByTypeFn;
   context?: ICommandContext;
-  license?: ILicense;
+  license: ILicense | undefined;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
 

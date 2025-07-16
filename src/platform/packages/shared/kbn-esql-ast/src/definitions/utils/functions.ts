@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
@@ -84,7 +85,7 @@ export function getFunctionDefinition(name: string) {
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
   predicates: FunctionFilterPredicates | undefined,
-  license?: ILicense
+  license: ILicense | undefined
 ): FunctionDefinition[] => {
   if (!predicates) {
     return functions;
@@ -100,7 +101,8 @@ export const filterFunctionDefinitions = (
     if (hasRestrictedSignature) {
       const availableSignatures = signatures.filter((signature) => {
         if (!signature.license) return true;
-        return license?.type === signature.license;
+
+        return license?.hasAtLeast(signature.license.toLocaleLowerCase() as LicenseType);
       });
 
       if (availableSignatures.length === 0) {
@@ -248,7 +250,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
  */
 export const getFunctionSuggestions = (
   predicates?: FunctionFilterPredicates,
-  license?: ILicense
+  license?: ILicense | undefined
 ): ISuggestionItem[] => {
   return filterFunctionDefinitions(allFunctions(), predicates, license).map(getFunctionSuggestion);
 };

@@ -197,7 +197,6 @@ export interface Signature {
   params: FunctionParameter[];
   minParams?: number;
   returnType: FunctionReturnType;
-  // Not used yet, but we will in the future.
   license?: string;
 }
 
@@ -214,7 +213,6 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
   customParametersSnippet?: string;
-  // Not used yet, but we will in the future.
   license?: string;
 }
 

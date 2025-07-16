@@ -54,13 +54,15 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
  * @returns
  */
 export const getOperatorSuggestions = (
-  predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType }
+  predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType },
+  license?: ILicense | undefined
 ): ISuggestionItem[] => {
   const filteredDefinitions = filterFunctionDefinitions(
     getTestFunctions().length
       ? [...operatorsDefinitions, ...getTestFunctions()]
       : operatorsDefinitions,
-    predicates
+    predicates,
+    license
   );
 
   // make sure the operator has at least one signature that matches
@@ -123,7 +125,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
-  license?: ILicense;
+  license: ILicense | undefined;
 }) {
   const suggestions = [];
   const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
