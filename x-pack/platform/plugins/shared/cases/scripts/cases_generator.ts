@@ -15,8 +15,6 @@ import pMap from 'p-map';
 import yargs from 'yargs';
 import { CaseSeverity, type CasePostRequest } from '../common';
 
-// bXIycURaZ0I2SVNYdnRFeHVMM3k6NHdiRWtpZEllbXo3dFlJay1veS1CUQ==
-
 const toolingLogger = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
