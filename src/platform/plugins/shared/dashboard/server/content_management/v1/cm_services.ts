@@ -373,10 +373,6 @@ export const dashboardAttributesSchema = schema.object({
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const dashboardAttributesSchemaResponsePanels = schema.object(
-  dashboardCreationResponsePanels
-);
-
 export const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends(
   dashboardCreationResponsePanels
 );
