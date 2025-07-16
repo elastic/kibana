@@ -68,6 +68,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
       mainProps={{
         css: mainStyles,
       }}
+      responsive={[]}
     >
       {isSidebarOpen && (
         <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
