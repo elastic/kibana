@@ -104,9 +104,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Organization members', function () {
-        // Observability will not support custom roles
         // Cannot test cloud link on MKI (will redirect to login)
-        this.tags(['skipSvlOblt', 'skipMKI']); // ToDo: should be able to remove the skipSvlOblt here as custom roles are now supported in OBLT
+        this.tags(['skipMKI']);
 
         it('displays the organization members management card, and will navigate to the cloud organization URL', async () => {
           // The org members nav card is always visible because there is no way to check if a user has approprite privileges
