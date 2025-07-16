@@ -32,6 +32,7 @@ export class FeatureFlagsExamplePlugin implements Plugin {
 
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
+
     // Register server side APIs
     defineRoutes(router);
   }
