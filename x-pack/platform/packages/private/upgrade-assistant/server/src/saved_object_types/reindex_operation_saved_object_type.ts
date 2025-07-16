@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { REINDEX_OP_TYPE } from '@kbn//upgrade-assistant-pkg-common';
+import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-common';
 
 export const reindexOperationSavedObjectType: SavedObjectsType = {
   name: REINDEX_OP_TYPE,
