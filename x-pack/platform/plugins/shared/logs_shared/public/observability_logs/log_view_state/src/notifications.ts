@@ -6,8 +6,8 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { createNotificationChannel } from '@kbn/xstate-utils';
 import { LogViewReference, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
-import { createNotificationChannel } from '../../xstate_helpers';
 import { LogViewContext, LogViewEvent } from './types';
 
 export type LogViewNotificationEvent =
