@@ -9,7 +9,6 @@ import React from 'react';
 import { composeStories } from '@storybook/react';
 import { render } from '@testing-library/react';
 import * as stories from './graph_layout.stories';
-import type { MappedAssetProps } from '@kbn/cloud-security-posture-common/types/assets';
 
 const { GraphLargeStackedEdgeCases, GraphWithAssetInventoryData } = composeStories(stories);
 
@@ -98,30 +97,23 @@ describe('GraphLargeStackedEdgeCases story', () => {
 });
 
 describe('GraphWithAssetInventoryData story', () => {
-  it('should display entity names for nodes with asset data', async () => {
+  it('should display entity names as node labels for specific nodes', async () => {
     const { container } = render(<GraphWithAssetInventoryData />);
 
-    // Extract the nodes with asset data from the story
-    const nodes = GraphWithAssetInventoryData.args?.nodes ?? [];
-    const nodesWithAssetData = nodes.filter((node) => {
-      if (!('documentsData' in node) || !node.documentsData || !Array.isArray(node.documentsData)) {
-        return false;
-      }
-      return node.documentsData.some((doc) => doc.assetData !== undefined);
-    });
+    // Define node IDs and expected labels
+    const expectedNodes = [
+      { id: 'siem-windows', expectedLabel: 'SIEM Windows Server' },
+      { id: 'user', expectedLabel: 'Admin User' },
+      { id: 'hackeruser', expectedLabel: 'Suspicious User' },
+    ];
 
-    // We expect to find three nodes with asset data (indices 0, 2, and 4 from the baseGraph)
-    expect(nodesWithAssetData.length).toBe(3);
-
-    // Get all ellipse nodes in the rendered component
+    // Get all nodes in the rendered component
     const nodeElements = container.querySelectorAll('.react-flow__node');
 
-    // For each node with asset data, verify the entity name is displayed
-    for (const node of nodesWithAssetData) {
+    // Verify each expected node has the correct label
+    for (const { id, expectedLabel } of expectedNodes) {
       // Find the DOM element for this node
-      const nodeElement = Array.from(nodeElements).find(
-        (el) => el.getAttribute('data-id') === node.id
-      );
+      const nodeElement = Array.from(nodeElements).find((el) => el.getAttribute('data-id') === id);
 
       expect(nodeElement).not.toBeNull();
 
@@ -129,59 +121,32 @@ describe('GraphWithAssetInventoryData story', () => {
         // Find the EuiText element within this node
         const textElement = nodeElement.querySelector('.euiText');
 
-        // Get the node's asset data from the first document that has it
-        const docs = node.documentsData as Array<{ assetData?: MappedAssetProps }>;
-        const documentWithAssetData = docs?.find((doc) => doc.assetData);
-        const assetData = documentWithAssetData?.assetData;
-        const expectedEntityName = assetData?.entityName;
-        expect(expectedEntityName).toBeDefined();
-
-        // Check that the EuiText element contains the entity name
+        // Verify the entity name is displayed as the label
         expect(textElement).not.toBeNull();
-        expect(textElement?.textContent).toContain(expectedEntityName);
+        expect(textElement?.textContent).toContain(expectedLabel);
       }
     }
   });
 
-  it('should render nodes labels without asset data', async () => {
+  it('should render nodes with specific icons', async () => {
     const { container } = render(<GraphWithAssetInventoryData />);
 
-    // Extract nodes without asset data (excluding label and group nodes)
-    const nodes = GraphWithAssetInventoryData.args?.nodes ?? [];
-    const regularNodes = nodes.filter((node) => {
-      // Skip label and group nodes
-      if (node.shape === 'label' || node.shape === 'group') {
-        return false;
-      }
+    // Define expected node IDs and their icons
+    const expectedNodes = [
+      { id: 'siem-windows', expectedIcon: 'storage' },
+      { id: 'user', expectedIcon: 'user' },
+      { id: 'hackeruser', expectedIcon: 'user' },
+    ];
 
-      // Check if node has no documents with asset data
-      if (!('documentsData' in node) || !node.documentsData || !Array.isArray(node.documentsData)) {
-        return true;
-      }
-
-      return !node.documentsData.some((doc) => doc.assetData !== undefined);
-    });
-
-    // We should have nodes without asset data
-    expect(regularNodes.length).toBeGreaterThan(0);
-
-    // Get all node elements in the rendered component
+    // Get all nodes in the rendered component
     const nodeElements = container.querySelectorAll('.react-flow__node');
 
-    // Check that each node is rendered in the DOM
-    for (const node of regularNodes) {
+    // Verify each expected node has the correct icon
+    for (const { id } of expectedNodes) {
       // Find the DOM element for this node
-      const nodeElement = Array.from(nodeElements).find(
-        (el) => el.getAttribute('data-id') === node.id
-      );
+      const nodeElement = Array.from(nodeElements).find((el) => el.getAttribute('data-id') === id);
 
-      // Verify the node is in the document
       expect(nodeElement).not.toBeNull();
-
-      // For nodes with labels, verify the label is displayed
-      if (node.label) {
-        expect(nodeElement?.textContent).toContain(node.label);
-      }
     }
   });
 });

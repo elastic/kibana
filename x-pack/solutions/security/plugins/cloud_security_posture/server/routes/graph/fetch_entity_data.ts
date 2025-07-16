@@ -20,6 +20,7 @@ type EntityFieldMapper = Record<keyof MappedAssetProps, keyof AssetProps>;
  */
 const ASSET_RESPONSE_TO_ENTITY_FIELD: EntityFieldMapper = {
   entityName: 'entity.name',
+  entityType: 'entity.type',
 };
 
 /**
@@ -45,8 +46,12 @@ const mapEntityToResponseObject = (record: AssetProps): [string, MappedAssetProp
   >((response, [responseField, entityField]) => {
     // Check if the entity field exists in the record
     if (entityField in record) {
-      response[responseField as keyof MappedAssetProps] =
-        (record[entityField] as string) || (responseField === 'entityName' ? 'Unknown entity' : '');
+      const value = record[entityField] as string;
+
+      // Set the field only if it has a value
+      if (value) {
+        response[responseField as keyof MappedAssetProps] = value;
+      }
     }
     return response;
   }, {}) as MappedAssetProps;

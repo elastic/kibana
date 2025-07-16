@@ -60,15 +60,11 @@ GeneratedText.displayName = 'GeneratedText';
 
 export interface LabelProps {
   text?: string;
-  entityName?: string;
 }
 
-const LabelComponent = ({ text = '', entityName = '' }: LabelProps) => {
+const LabelComponent = ({ text = '' }: LabelProps) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
   const { euiTheme } = useEuiTheme();
-
-  // Determine display text - prioritize entityName if available
-  const displayText = entityName || text;
 
   return (
     <EuiText
@@ -78,16 +74,15 @@ const LabelComponent = ({ text = '', entityName = '' }: LabelProps) => {
         width: ${NODE_LABEL_WIDTH}px;
         margin-left: ${-(NODE_LABEL_WIDTH - NODE_WIDTH) / 2}px;
         overflow: hidden;
-        text-overflow: ellipsis;
         max-height: ${euiTheme.size.xl};
         font-weight: ${euiTheme.font.weight.bold};
       `}
     >
-      <EuiToolTip content={isTruncated ? displayText : ''} position="bottom">
+      <EuiToolTip content={isTruncated ? text : ''} position="bottom">
         <EuiTextTruncate
           truncation="end"
           truncationOffset={20}
-          text={displayText}
+          text={text}
           width={NODE_LABEL_WIDTH * 1.5}
         >
           {(truncatedText) => (

@@ -29,5 +29,6 @@ export interface AssetProps {
  * This is intentionally simplified to only expose the essential entity name field
  */
 export interface MappedAssetProps {
-  entityName: string;
+  entityName?: string;
+  entityType?: string;
 }

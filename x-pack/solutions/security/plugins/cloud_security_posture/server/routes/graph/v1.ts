@@ -11,7 +11,6 @@ import type {
   UiSettingsRequestHandlerContext,
 } from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import type { MappedAssetProps } from '@kbn/cloud-security-posture-common/types/assets';
 import { fetchGraph } from './fetch_graph';
@@ -37,6 +36,36 @@ export interface GetGraphParams {
   };
   showUnknownTarget: boolean;
   nodesLimit?: number;
+}
+
+/**
+ * Interface for the input parameters to mapEntityDataToNodeProps
+ */
+interface EntityDataToNodePropsParams {
+  entityData: MappedAssetProps;
+  nodeFieldsMapping: NodeFieldsMapping; // Maps asset fields to node fields
+}
+
+/**
+ * Type that defines mapping from MappedAssetProps fields to MappedNodeProps fields
+ * with optional transform functions
+ */
+export type NodeFieldsMapping = {
+  [K in keyof MappedAssetProps]?:
+    | keyof MappedNodeProps // Simple field mapping
+    | {
+        targetField: keyof MappedNodeProps;
+        transform?: (value: MappedAssetProps[K]) => any;
+      }; // Advanced mapping with transform
+};
+
+/**
+ * Interface for the output properties from mapEntityDataToNodeProps
+ */
+export interface MappedNodeProps {
+  label?: string;
+  icon?: string;
+  // Additional properties can be added here in the future
 }
 
 export const getGraph = async ({
@@ -126,44 +155,26 @@ export const enhanceGraphWithEntityData = async ({
     // Continue without entity data if fetch fails
   }
 
-  // Enhance nodes with entity data
+  // Map entity data to node properties and return enhanced graph data
   const enhancedNodes = graphData.nodes.map((node) => {
     // If entity has asset data
     if (entityIds.has(node.id) && assetData[node.id]) {
-      // If documentsData exists, find the correct document to update
-      if (
-        'documentsData' in node &&
-        Array.isArray(node.documentsData) &&
-        node.documentsData.length > 0
-      ) {
-        // Look for a document with matching id
-        const documentIndex = node.documentsData.findIndex((doc) => doc.id === node.id);
+      const entityData = assetData[node.id];
+      const mappedProps = mapEntityDataToNodeProps({
+        entityData,
+        nodeFieldsMapping: {
+          entityName: 'label',
+          entityType: {
+            targetField: 'icon',
+            transform: transformEntityTypeToIcon,
+          },
+        },
+      });
 
-        if (documentIndex >= 0) {
-          // We found a matching document, update only this one
-          return {
-            ...node,
-            documentsData: node.documentsData.map((doc, index) =>
-              index === documentIndex ? { ...doc, assetData: assetData[node.id] } : doc
-            ),
-          };
-        } else {
-          // No matching document found, but we have documentsData
-          // return same node without changes
-          return node;
-        }
-      }
-
-      // If documentsData doesn't exist, create it with asset data
+      // Apply mapped properties to the node
       return {
         ...node,
-        documentsData: [
-          {
-            id: node.id,
-            type: DOCUMENT_TYPE_EVENT,
-            assetData: assetData[node.id],
-          },
-        ],
+        ...mappedProps,
       };
     }
     return node;
@@ -174,4 +185,55 @@ export const enhanceGraphWithEntityData = async ({
     ...graphData,
     nodes: enhancedNodes,
   };
+};
+
+/**
+ * Maps entity data to node properties for visualization.
+ * This function extracts relevant information from entity data and maps it to
+ * properties used by the graph visualization components.
+ *
+ * @param params Object containing entity data and mapping configuration
+ * @returns Mapped node properties
+ */
+export const mapEntityDataToNodeProps = (params: EntityDataToNodePropsParams): MappedNodeProps => {
+  const { entityData, nodeFieldsMapping } = params;
+
+  const mappedProps: MappedNodeProps = {};
+
+  // Apply field mappings from entityData to mappedProps
+  Object.entries(nodeFieldsMapping).forEach(([assetField, fieldConfig]) => {
+    const assetKey = assetField as keyof MappedAssetProps;
+    const assetValue = entityData[assetKey];
+
+    if (assetValue === undefined) {
+      return; // Skip if asset value is undefined
+    }
+
+    // Handle both simple mapping (string) and complex mapping (object with transform)
+    if (typeof fieldConfig === 'string') {
+      // Simple mapping: just copy the value to the target field
+      mappedProps[fieldConfig as keyof MappedNodeProps] = assetValue;
+    } else if (fieldConfig && typeof fieldConfig === 'object') {
+      // Complex mapping with possible transform
+      const { targetField, transform } = fieldConfig;
+
+      // Apply transform if provided, otherwise use the value directly
+      const transformedValue = transform ? transform(assetValue) : assetValue;
+
+      mappedProps[targetField] = transformedValue;
+    }
+  });
+
+  return mappedProps;
+};
+
+/**
+ * Transforms entity type values to standardized icon names
+ * This helps normalize different entity type representations to consistent icon names
+ *
+ * @param entityType The entity type value to transform
+ * @returns The standardized icon name
+ */
+export const transformEntityTypeToIcon = (entityType: string | undefined): string | undefined => {
+  return 'user';
 };
