@@ -14,19 +14,22 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useNavigation } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { encode } from '@kbn/rison';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PAGE_SIZE, PRIVILEGED_USER_ACTIVITY_QUERY_ID } from './constants';
 import { EsqlDashboardPanel } from '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel';
-import { usePrivilegedUserActivityParams, useStackByOptions, useToggleOptions } from './hooks';
+import {
+  usePrivilegedUserActivityParams,
+  useStackByOptions,
+  useToggleOptions,
+  useDiscoverUrl,
+} from './hooks';
 import type { TableItemType } from './types';
 import { VisualizationToggleOptions } from './types';
 
@@ -68,34 +71,8 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
   const defaultStackByOption = stackByOptions[0];
   const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption);
   const toggleOptions = useToggleOptions();
-  const { getAppUrl } = useNavigation();
 
-  const { discoverUrl } = useMemo(() => {
-    if (!generateTableQuery) return { discoverUrl: '' };
-
-    const query = generateTableQuery('@timestamp', 'DESC', 100);
-    const appState = {
-      query: {
-        esql: query,
-      },
-    };
-
-   let discoverAppPath;
-    try {
-      const encodedAppState = encode(appState);
-      discoverAppPath = `#/?_a=${encodedAppState}`;            
-    } catch (error) {
-      addWarning(error, { title: ERROR_ENCODING_ESQL_QUERY});
-      discoverAppPath = '#/';            
-    }
-    
-      return {
-        discoverUrl: getAppUrl({
-          appId: 'discover',
-          path: discoverAppPath,
-        }),
-      };
-  }, [generateTableQuery, getAppUrl]);
+  const { discoverUrl } = useDiscoverUrl({ generateTableQuery });
 
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">

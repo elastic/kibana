@@ -9,6 +9,9 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { encode } from '@kbn/rison';
+import { useNavigation } from '../../../../../common/lib/kibana';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import {
   generateListESQLQuery,
@@ -25,10 +28,49 @@ import {
   ACCOUNT_SWITCH_STACK_BY,
   AUTHENTICATIONS_STACK_BY,
   GRANTED_RIGHTS_STACK_BY,
+  ERROR_ENCODING_ESQL_QUERY,
 } from './constants';
 import { getAuthenticationsEsqlSource } from '../../queries/authentications_esql_query';
 import { getAccountSwitchesEsqlSource } from '../../queries/account_switches_esql_query';
 import { getGrantedRightsEsqlSource } from '../../queries/granted_rights_esql_query';
+
+interface UseDiscoverUrlProps {
+  generateTableQuery?: string;
+}
+
+export const useDiscoverUrl = ({ generateTableQuery }: UseDiscoverUrlProps) => {
+  const { getAppUrl } = useNavigation();
+  const { addWarning } = useAppToasts();
+
+  const discoverUrl = useMemo(() => {
+    if (!generateTableQuery) return { discoverUrl: '' };
+
+    const query = generateTableQuery('@timestamp', 'DESC', 100);
+    const appState = {
+      query: {
+        esql: query,
+      },
+    };
+
+    let discoverAppPath;
+    try {
+      const encodedAppState = encode(appState);
+      discoverAppPath = `#/?_a=${encodedAppState}`;
+    } catch (error) {
+      addWarning(error, { title: ERROR_ENCODING_ESQL_QUERY });
+      discoverAppPath = '#/';
+    }
+
+    return {
+      discoverUrl: getAppUrl({
+        appId: 'discover',
+        path: discoverAppPath,
+      }),
+    };
+  }, [generateTableQuery, getAppUrl, addWarning]);
+
+  return discoverUrl;
+};
 
 const toggleOptionsConfig = {
   [VisualizationToggleOptions.GRANTED_RIGHTS]: {
