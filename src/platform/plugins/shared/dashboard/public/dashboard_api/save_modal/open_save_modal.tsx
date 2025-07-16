@@ -127,16 +127,9 @@ export async function openSaveModal({
             resolve({ ...saveResult, savedState: dashboardStateToSave });
             return saveResult;
           } catch (error) {
-            coreServices.notifications.toasts.addDanger({
-              title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-                defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
-                values: {
-                  title: dashboardState.title,
-                  errorMessage: error.message,
-                },
-              }),
-              'data-test-subj': 'saveDashboardFailure',
-            });
+            coreServices.notifications.toasts.addDanger(
+              generateDashboardNotSavedToast(dashboardState.title, error.message)
+            );
             return error;
           }
         };
@@ -157,16 +150,9 @@ export async function openSaveModal({
       }
     );
   } catch (error) {
-    coreServices.notifications.toasts.addDanger({
-      title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-        defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
-        values: {
-          title: dashboardState.title,
-          errorMessage: error.message,
-        },
-      }),
-      'data-test-subj': 'saveDashboardFailure',
-    });
+    coreServices.notifications.toasts.addDanger(
+      generateDashboardNotSavedToast(dashboardState.title, error.message)
+    );
     return undefined;
   }
 }
@@ -182,6 +168,19 @@ function getCustomModalTitle(viewMode: ViewMode) {
       defaultMessage: 'Duplicate dashboard',
     });
   return undefined;
+}
+
+function generateDashboardNotSavedToast(title: string, errorMessage: any) {
+  return {
+    title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+      defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
+      values: {
+        title,
+        errorMessage,
+      },
+    }),
+    'data-test-subj': 'saveDashboardFailure',
+  };
 }
 
 async function getSaveAsTitle(title: string) {
