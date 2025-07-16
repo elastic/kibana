@@ -629,7 +629,7 @@
         "label": "useGetPackagesQuery",
         "description": [],
         "signature": [
-          "(query: { category?: string | undefined; prerelease?: boolean | undefined; excludeInstallStatus?: boolean | undefined; withPackagePoliciesCount?: boolean | undefined; }, options?: { enabled?: boolean | undefined; } | undefined) => ",
+          "(query: { category?: string | undefined; prerelease?: boolean | undefined; excludeInstallStatus?: boolean | undefined; withPackagePoliciesCount?: boolean | undefined; type?: string | undefined; }, options?: { enabled?: boolean | undefined; } | undefined) => ",
           "UseQueryResult",
           "<",
           {
@@ -655,7 +655,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "{ category?: string | undefined; prerelease?: boolean | undefined; excludeInstallStatus?: boolean | undefined; withPackagePoliciesCount?: boolean | undefined; }"
+              "{ category?: string | undefined; prerelease?: boolean | undefined; excludeInstallStatus?: boolean | undefined; withPackagePoliciesCount?: boolean | undefined; type?: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
             "deprecated": false,
@@ -2236,6 +2236,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/fleet_api_integration/apis/package_policy/update.ts"
+              },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
@@ -11578,7 +11582,7 @@
             "label": "installPackage",
             "description": [],
             "signature": [
-              "(options: { pkgName: string; pkgVersion?: string | undefined; spaceId?: string | undefined; force?: boolean | undefined; keepFailedInstallation?: boolean | undefined; }) => Promise<",
+              "(options: { pkgName: string; pkgVersion?: string | undefined; spaceId?: string | undefined; force?: boolean | undefined; keepFailedInstallation?: boolean | undefined; useStreaming?: boolean | undefined; automaticInstall?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -11662,6 +11666,34 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "keepFailedInstallation",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installPackage.$1.useStreaming",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "useStreaming",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installPackage.$1.automaticInstall",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "automaticInstall",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -25663,6 +25695,10 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/fleet_api_integration/apis/package_policy/update.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/fleet_services.ts"
               },
@@ -27091,7 +27127,9 @@
             "label": "discovery",
             "description": [],
             "signature": [
-              "{ fields?: { name: string; }[] | undefined; } | undefined"
+              "{ datasets?: ",
+              "DiscoveryDataset",
+              "[] | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -30073,7 +30111,9 @@
             "section": "def-common.RegistryPolicyTemplate",
             "text": "RegistryPolicyTemplate"
           },
-          "[] | undefined; }"
+          "[] | undefined; discovery?: { datasets?: ",
+          "DiscoveryDataset",
+          "[] | undefined; } | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,
