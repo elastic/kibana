@@ -11,7 +11,7 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataSourceProfileProvider } from '../../../..';
 
 // Field names that should always be surfaced in the UI for logs data.
-const RECOMMENDED_FIELD_NAMES: Array<DataViewField['name']> = [
+export const DEFAULT_LOGS_RECOMMENDED_FIELD_NAMES: Array<DataViewField['name']> = [
   'event.dataset',
   'service.name',
   'host.name',
@@ -19,14 +19,18 @@ const RECOMMENDED_FIELD_NAMES: Array<DataViewField['name']> = [
   'log.level',
 ];
 
-export const getRecommendedFields: DataSourceProfileProvider['profile']['getRecommendedFields'] =
-  (prev) => (fields) => ({
+export const createRecommendedFields = ({
+  defaultFields,
+}: {
+  defaultFields: Array<DataViewField['name']>;
+}): DataSourceProfileProvider['profile']['getRecommendedFields'] => {
+  return (prev) => (fields) => ({
     ...(prev ? prev(fields) : {}),
 
     recommendedFields:
       fields && fields.length
-        ? fields.filter((field) => RECOMMENDED_FIELD_NAMES.includes(field.name))
-        : RECOMMENDED_FIELD_NAMES.map(
+        ? fields.filter((field) => defaultFields.includes(field.name))
+        : defaultFields.map(
             (name) =>
               new DataViewField({
                 name,
@@ -36,3 +40,4 @@ export const getRecommendedFields: DataSourceProfileProvider['profile']['getReco
               })
           ),
   });
+};
