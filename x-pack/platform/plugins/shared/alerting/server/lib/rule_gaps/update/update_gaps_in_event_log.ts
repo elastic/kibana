@@ -25,76 +25,72 @@ export const updateGapsInEventLog = async ({
   alertingEventLogger,
   logger,
   eventLogClient,
-  retryCount = 0,
 }: {
   gaps: Gap[];
   prepareGaps: (gaps: Gap[]) => Promise<Array<{ gap: GapBase; internalFields: InternalFields }>>;
   alertingEventLogger: AlertingEventLogger;
   logger: Logger;
   eventLogClient: IEventLogClient;
-  retryCount?: number;
 }): Promise<boolean> => {
+  let gapsToUpdate = gaps;
+  let retryCount = 0;
+  let erroredItemsCount = 0;
   try {
-    // Prepare all gaps for update
-    const gapsToUpdate = await prepareGaps(gaps);
-    if (gapsToUpdate.length === 0) {
-      return true;
-    }
+    while (retryCount < MAX_RETRIES) {
+      if (gapsToUpdate.length === 0) {
+        return true;
+      }
 
-    // Attempt bulk update
-    const bulkResponse = await withSpan(
-      { name: 'updateGapsInEventLog.alertingEventLogger.updateGaps', type: 'rule' },
-      () => alertingEventLogger.updateGaps(gapsToUpdate)
-    );
+      // Prepare all gaps for update
+      const preparedGaps = await prepareGaps(gapsToUpdate);
+      if (preparedGaps.length === 0) {
+        return true;
+      }
 
-    if (!bulkResponse.errors) {
-      return true;
-    }
-
-    if (retryCount >= MAX_RETRIES) {
-      logger.error(
-        `Failed to update ${bulkResponse.items.length} gaps after ${MAX_RETRIES} retries due to conflicts`
-      );
-      return false;
-    }
-    logger.info(
-      `Retrying update of ${bulkResponse.items.length} gaps due to conflicts. Retry ${
-        retryCount + 1
-      } of ${MAX_RETRIES}`
-    );
-
-    const retryDelaySec: number = Math.min(Math.pow(3, retryCount + 1), 30);
-    await delay(retryDelaySec * 1000 * Math.random());
-    const failedUpdatesDocs = bulkResponse?.items
-      .filter((item) => item.update?.status === CONFLICT_STATUS_CODE)
-      .map((item) => ({ _id: item.update?._id, _index: item.update?._index }))
-      .filter(
-        (doc): doc is { _id: string; _index: string } =>
-          doc._id !== undefined && doc._index !== undefined
+      // Attempt bulk update
+      const bulkResponse = await withSpan(
+        { name: 'updateGapsInEventLog.alertingEventLogger.updateGaps', type: 'rule' },
+        () => alertingEventLogger.updateGaps(preparedGaps)
       );
 
-    // Fetch latest versions of failed gaps
-    const gapsToRetry = await mgetGaps({
-      eventLogClient,
-      logger,
-      params: {
-        docs: failedUpdatesDocs,
-      },
-    });
+      if (!bulkResponse.errors) {
+        return true;
+      }
 
-    if (gapsToRetry.length === 0) {
-      return true;
+      erroredItemsCount = bulkResponse.items.length;
+
+      retryCount++;
+
+      logger.info(
+        `Retrying update of ${erroredItemsCount} gaps due to conflicts. Retry ${retryCount} of ${MAX_RETRIES}`
+      );
+
+      const maxDelaySec: number = Math.min(Math.pow(3, retryCount), 30);
+      const minDelaySec = Math.pow(2, retryCount);
+      const delaySec = Math.random() * (maxDelaySec - minDelaySec) + minDelaySec;
+      await delay(delaySec * 1000);
+
+      const failedUpdatesDocs = bulkResponse?.items
+        .filter((item) => item.update?.status === CONFLICT_STATUS_CODE)
+        .map((item) => ({ _id: item.update?._id, _index: item.update?._index }))
+        .filter(
+          (doc): doc is { _id: string; _index: string } =>
+            doc._id !== undefined && doc._index !== undefined
+        );
+
+      // Fetch latest versions of failed gaps
+      gapsToUpdate = await mgetGaps({
+        eventLogClient,
+        logger,
+        params: {
+          docs: failedUpdatesDocs,
+        },
+      });
     }
-
-    // Retry failed gaps
-    return updateGapsInEventLog({
-      gaps: gapsToRetry,
-      prepareGaps,
-      alertingEventLogger,
-      logger,
-      eventLogClient,
-      retryCount: retryCount + 1,
-    });
+    logger.error(
+      `Failed to update ${erroredItemsCount} gaps after ${MAX_RETRIES} retries due to conflicts`
+    );
+    return false;
   } catch (e) {
     logger.error(`Failed to update gaps in event log: ${e.message}`);
     return false;
