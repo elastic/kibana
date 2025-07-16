@@ -30,6 +30,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     // loadTestFile(require.resolve('./stack_monitoring'));
     // loadTestFile(require.resolve('./watcher'));
     // loadTestFile(require.resolve('./rollup_jobs'));
-    // loadTestFile(require.resolve('./observability'));
   });
 };

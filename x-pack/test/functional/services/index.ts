@@ -64,7 +64,6 @@ import { RandomProvider } from './random';
 // @ts-ignore not ts yet
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
-import { LogsUiProvider } from './logs_ui';
 import { ObservabilityProvider } from './observability';
 import { DataStreamProvider } from './data_stream';
 import { SloUiServiceProvider } from './slo';
@@ -116,7 +115,6 @@ export const services = {
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
-  logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
