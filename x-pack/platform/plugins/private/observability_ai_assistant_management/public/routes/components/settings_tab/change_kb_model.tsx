@@ -31,8 +31,8 @@ import {
   LEGACY_CUSTOM_INFERENCE_ID,
   useKibana,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
-import { getMappedInferenceId } from '@kbn/observability-ai-assistant-management-plugin/public/helpers/inference_utils';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
