@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useRuleCustomizationsDiff } from './use_rule_customizations_diff';
@@ -20,7 +19,6 @@ export interface RuleCustomizationsState {
 export interface RuleCustomizationsActions {
   openCustomizationsPreviewFlyout: () => void;
   openCustomizationsRevertFlyout: () => void;
-  setCustomizationsRule: Dispatch<SetStateAction<RuleResponse | null>>;
 }
 
 export interface RuleCustomizationsContextType {
@@ -31,14 +29,14 @@ export interface RuleCustomizationsContextType {
 export const RuleCustomizationsContext = createContext<RuleCustomizationsContextType | null>(null);
 
 interface RuleCustomizationsContextProviderProps {
+  rule: RuleResponse | null;
   children: React.ReactNode;
 }
 
 export const RuleCustomizationsContextProvider = ({
+  rule,
   children,
 }: RuleCustomizationsContextProviderProps) => {
-  const [rule, setRule] = useState<RuleResponse | null>(null);
-
   const {
     ruleCustomizationsFlyout,
     openCustomizationsPreviewFlyout,
@@ -52,7 +50,6 @@ export const RuleCustomizationsContextProvider = ({
     () => ({
       openCustomizationsPreviewFlyout,
       openCustomizationsRevertFlyout,
-      setCustomizationsRule: setRule,
     }),
     [openCustomizationsPreviewFlyout, openCustomizationsRevertFlyout]
   );
