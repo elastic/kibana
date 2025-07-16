@@ -16,6 +16,12 @@ export default function ({ getService }: FtrProviderContext) {
   const url = `/api/ingest_pipelines/structure_tree`;
   const rootPipelineName = 'root';
 
+  /**
+   * This function generates a tree of {@link levels} levels and each node
+   * on each level has {@link childrenPerNode} children.
+   *
+   * For example, the 5th child of the `pipeline-level2-child1` node would be `pipeline-level3-child5`
+   */
   const createComplexTree = async (levels: number, childrenPerNode: number) => {
     const getChildrenProcessors = (level: number) => {
       const pipelineProcessors = [];
