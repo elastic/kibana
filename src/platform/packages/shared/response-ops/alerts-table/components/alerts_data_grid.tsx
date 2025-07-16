@@ -18,7 +18,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { ActionsCellHost } from './actions_cell_host';
 import { ControlColumnHeaderCell } from './control_column_header_cell';
 import { CellValueHost } from './cell_value_host';
@@ -101,7 +100,7 @@ export const AlertsDataGrid = typedMemo(
       services: { http, notifications, application, cases: casesService, settings },
     } = renderContext;
 
-    const { colorMode } = useEuiTheme();
+    const { colorMode, euiTheme } = useEuiTheme();
     const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
     const {
       isBulkActionsColumnActive,
@@ -321,16 +320,16 @@ export const AlertsDataGrid = typedMemo(
     const rowStyles = useMemo(
       () => css`
         .alertsTableHighlightedRow {
-          background-color: ${euiThemeVars.euiColorHighlight};
+          background-color: ${euiTheme.components.dataGridRowBackgroundMarked};
         }
 
         .alertsTableActiveRow {
           background-color: ${colorMode === 'LIGHT'
-            ? tint(euiThemeVars.euiColorLightShade, 0.5)
-            : euiThemeVars.euiColorLightShade};
+            ? tint(euiTheme.colors.lightShade, 0.5)
+            : euiTheme.colors.lightShade};
         }
       `,
-      [colorMode]
+      [colorMode, euiTheme]
     );
 
     return (
