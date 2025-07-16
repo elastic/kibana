@@ -19,6 +19,7 @@ export default createTestConfig({
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
   esServerArgs: ['xpack.ml.dfa.enabled=false'],
   kbnServerArgs: [
+    '--xpack.security.roleManagementEnabled=true',
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller
