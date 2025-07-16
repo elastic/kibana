@@ -43,6 +43,10 @@ Changing HTTP API paths is a breaking change, create a new version for internal 
   AFTER `/internal/domain/special_resources`
 - BEFORE `/api/a_path`
   AFTER `/internal/anotherPath`
+- BEFORE `${BASE_PATH_API}/special_resource`
+  AFTER `${BASE_PATH_API}/special_resources`
+- BEFORE `${SOME_BASE_PATH}/a_resource`
+  AFTER `${SOME_BASE_PATH}/prefix/b_resources`
 Add a link to "versioning" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#versioning in suggestions.
 
 Changing HTTP API `access` from `internal` to `public` should be done with care as this API must be maintained for an extended time period and well documented. Examples you should use to detect:
