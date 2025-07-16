@@ -203,6 +203,4 @@ export interface UseAssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
-  // remove once product has signed off on prompt text
-  isStarterPromptsEnabled: boolean;
 }

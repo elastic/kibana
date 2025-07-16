@@ -83,7 +83,7 @@ export function KeyboardShortcuts() {
         anchorPosition="downRight"
         panelPaddingSize="none"
         button={
-          <EuiToolTip content={label} delay="long">
+          <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
             <EuiButtonIcon
               size="xs"
               iconType="keyboard"
