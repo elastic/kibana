@@ -74,8 +74,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                   <div
                     class="css-8kb6u7-ProgressContainer e1vv032p0"
                   >
+                    <div
+                      aria-atomic="true"
+                      aria-live="polite"
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      <span>
+                        12
+                      </span>
+                    </div>
                     <progress
-                      aria-hidden="false"
                       class="euiProgress emotion-euiProgress-native-m-static-primary"
                       max="13748195"
                       value="12"
@@ -143,8 +151,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          12
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="12"
                         value="12"
@@ -228,8 +244,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                   <div
                     class="css-8kb6u7-ProgressContainer e1vv032p0"
                   >
+                    <div
+                      aria-atomic="true"
+                      aria-live="polite"
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      <span>
+                        70860
+                      </span>
+                    </div>
                     <progress
-                      aria-hidden="false"
                       class="euiProgress emotion-euiProgress-native-m-static-primary"
                       max="13748195"
                       value="70860"
@@ -297,8 +321,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          999
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="70860"
                         value="999"
@@ -350,8 +382,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          7777
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="70860"
                         value="7777"
@@ -403,8 +443,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          66
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="70860"
                         value="66"
@@ -456,8 +504,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          60015
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="70860"
                         value="60015"
@@ -509,8 +565,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          2003
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="70860"
                         value="2003"
@@ -594,8 +658,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                   <div
                     class="css-8kb6u7-ProgressContainer e1vv032p0"
                   >
+                    <div
+                      aria-atomic="true"
+                      aria-live="polite"
+                      class="emotion-euiScreenReaderOnly"
+                    >
+                      <span>
+                        13677323
+                      </span>
+                    </div>
                     <progress
-                      aria-hidden="false"
                       class="euiProgress emotion-euiProgress-native-m-static-primary"
                       max="13748195"
                       value="13677323"
@@ -663,8 +735,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          10277307
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="13677323"
                         value="10277307"
@@ -716,8 +796,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          16
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="13677323"
                         value="16"
@@ -769,8 +857,16 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
                     <div
                       class="css-8kb6u7-ProgressContainer e1vv032p0"
                     >
+                      <div
+                        aria-atomic="true"
+                        aria-live="polite"
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        <span>
+                          3400000
+                        </span>
+                      </div>
                       <progress
-                        aria-hidden="false"
                         class="euiProgress emotion-euiProgress-native-m-static-subdued"
                         max="13677323"
                         value="3400000"

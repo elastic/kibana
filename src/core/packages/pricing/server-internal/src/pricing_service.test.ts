@@ -35,10 +35,7 @@ describe('PricingService', () => {
     mockConfig = {
       tiers: {
         enabled: true,
-        products: [
-          { name: 'observability', tier: 'complete' },
-          { name: 'security', tier: 'essentials' },
-        ],
+        products: [{ name: 'observability', tier: 'complete' }],
       },
     };
 
@@ -64,7 +61,6 @@ describe('PricingService', () => {
 
   describe('#setup()', () => {
     it('registers the pricing routes', async () => {
-      await service.preboot({ http: prebootHttp });
       await service.setup({ http: setupHttp });
 
       expect(setupHttp.createRouter).toHaveBeenCalledWith('');
@@ -83,7 +79,6 @@ describe('PricingService', () => {
     });
 
     it('allows registering product features', async () => {
-      await service.preboot({ http: prebootHttp });
       const setup = await service.setup({ http: setupHttp });
 
       const mockFeatures: PricingProductFeature[] = [
@@ -108,7 +103,6 @@ describe('PricingService', () => {
     });
 
     it('allows checking if a feature is available', async () => {
-      await service.preboot({ http: prebootHttp });
       const setup = await service.setup({ http: setupHttp });
 
       const mockFeatures: PricingProductFeature[] = [
@@ -128,7 +122,6 @@ describe('PricingService', () => {
   });
 
   it('should block isFeatureAvailable until evaluateProductFeatures is called', async () => {
-    await service.preboot({ http: prebootHttp });
     const setup = await service.setup({ http: setupHttp });
 
     // Start calling isFeatureAvailable, before said feature was registered or evaluateProductFeatures is called
@@ -160,7 +153,6 @@ describe('PricingService', () => {
 
   describe('#start()', () => {
     it('returns a PricingTiersClient with the configured tiers', async () => {
-      await service.preboot({ http: prebootHttp });
       await service.setup({ http: setupHttp });
       const start = service.start();
 
@@ -168,7 +160,6 @@ describe('PricingService', () => {
     });
 
     it('returns a PricingTiersClient that can check feature availability', async () => {
-      await service.preboot({ http: prebootHttp });
       const setup = await service.setup({ http: setupHttp });
 
       const mockFeatures: PricingProductFeature[] = [
@@ -184,6 +175,15 @@ describe('PricingService', () => {
 
       // Since our mock config has observability product enabled, this feature should be available
       expect(start.isFeatureAvailable('feature1')).toBe(true);
+    });
+
+    it('exposes the current product configuration', async () => {
+      await service.setup({ http: setupHttp });
+
+      const start = service.start();
+
+      // Mock config has observability complete enabled
+      expect(start.getActiveProduct()).toMatchObject({ type: 'observability', tier: 'complete' });
     });
   });
 });

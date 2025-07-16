@@ -9,8 +9,6 @@ export {
   getBackwardCompatibleDocumentTypeFilter,
   callAsyncWithDebug,
   cancelEsRequestOnAbort,
-  getDebugBody,
-  getDebugTitle,
   getDataTierFilterCombined,
 } from './lib/helpers';
 

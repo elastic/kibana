@@ -25,7 +25,7 @@ import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
-interface ValueClickDataContext {
+export interface ValueClickDataContext {
   data: Array<{
     table: Pick<Datatable, 'rows' | 'columns' | 'meta'>;
     column: number;
