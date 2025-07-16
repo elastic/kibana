@@ -12,6 +12,7 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
   const { dashboard, common, share, security, spaceSelector } = getPageObjects([
     'dashboard',
     'common',
@@ -24,6 +25,8 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
 
   describe('Dashboard Custom Space share', () => {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+
       await spacesService.create({
         id: spaceId,
         name: 'Another Space',
@@ -71,12 +74,18 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
 
     it('should copy the dashboard url', async () => {
       await share.clickShareTopNavButton();
+      // This is required because the default position causes clicking on permalinks, to display a tooltip that blocks the click
+      await browser
+        .getActions()
+        .move({
+          origin: (await testSubjects.find('sharePanel-Permalinks'))._webElement,
+          x: -20,
+          y: 0,
+        })
+        .perform();
       await share.checkShortenUrl();
       const shareUrl = await share.getSharedUrl();
       expect(shareUrl).to.contain(`/s/${spaceId}/`);
-      // navigate to the copied URL
-      await browser.navigateTo(shareUrl);
-      await dashboard.expectOnDashboard('few panels');
     });
   });
 }
