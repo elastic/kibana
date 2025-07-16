@@ -15,6 +15,9 @@ import { useUploadDone } from '../files/use_upload_done';
 import type { MarkdownEditorRef } from './types';
 import { NO_SIMULTANEOUS_UPLOADS_MESSAGE, UNSUPPORTED_MIME_TYPE_MESSAGE } from './translations';
 import { SUPPORTED_PASTE_MIME_TYPES } from './constants';
+import { constructFileKindIdByOwner } from '../../../common/files';
+import { type Owner } from '../../../common/constants/types';
+import { OWNERS } from '../../../common/constants';
 
 interface UseImagePasteUploadArgs {
   editorRef: React.ForwardedRef<MarkdownEditorRef | null>;
@@ -32,13 +35,11 @@ function generatePlaceholderCopy(filename: string, extension?: string) {
   return `<!-- uploading "${filename}${extension ? `.${extension}` : ''}" -->`;
 }
 
-const IMAGE_PATH = (kindId: string, id: string) => `/api/files/files/${kindId}/${id}/blob`;
-
 /**
  * Returns a markdown link for the file with a link to the asset
  */
-export const markdownImage = (fileName: string, kindId: string, id: string, ext?: string) =>
-  `![${fileName}${ext ? `.${ext}` : ''}](${IMAGE_PATH(kindId, id)})`;
+export const markdownImage = (fileName: string, fileUrl: string, ext?: string) =>
+  `![${fileName}${ext ? `.${ext}` : ''}](${fileUrl})`;
 
 function getTextarea(editorRef: React.ForwardedRef<MarkdownEditorRef | null>) {
   if (!editorRef || typeof editorRef === 'function' || !editorRef.current) {
@@ -46,6 +47,9 @@ function getTextarea(editorRef: React.ForwardedRef<MarkdownEditorRef | null>) {
   }
   return editorRef.current.textarea;
 }
+
+const validOwners = new Set<Owner>(OWNERS);
+const isOwner = (o: string): o is Owner => validOwners.has(o as Owner);
 
 export function useImagePasteUpload({
   editorRef,
@@ -79,14 +83,22 @@ export function useImagePasteUpload({
   const replacePlaceholder = useCallback(
     (file: DoneNotification) => {
       if (!textarea) return;
+      if (!isOwner(owner)) return;
 
       const newText = textarea.value.replace(
         uploadPlaceholder ?? '',
-        markdownImage(file.fileJSON.name, kind.id, file.id, file.fileJSON.extension)
+        markdownImage(
+          file.fileJSON.name,
+          client.getDownloadHref({
+            id: file.id,
+            fileKind: constructFileKindIdByOwner(owner),
+          }),
+          file.fileJSON.extension
+        )
       );
       field.setValue(newText);
     },
-    [textarea, uploadPlaceholder, kind, field]
+    [textarea, uploadPlaceholder, field, client, owner]
   );
   const onDone = useUploadDone({
     caseId,
@@ -163,9 +175,13 @@ export function useImagePasteUpload({
    */
   useLayoutEffect(() => {
     pasteHandlerRef.current = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items || items.length === 0) return;
+      const clipboardItems = e.clipboardData?.items;
+      if (!clipboardItems) return;
 
+      const items = Array.from(clipboardItems)
+        .map((item) => item?.getAsFile())
+        .filter((item) => !!item);
+      if (items.length === 0) return;
       // NOTE: In Firefox, there will always be only 1 or 0 items,
       // see: https://bugzilla.mozilla.org/show_bug.cgi?id=1699743
       if (items.length > 1) {
@@ -175,8 +191,8 @@ export function useImagePasteUpload({
         return;
       }
 
-      const file = items[0].getAsFile();
-      if (!file) {
+      const fileToUpload = items[0];
+      if (!fileToUpload) {
         // this is a non-file paste, so bubble and clear errors
         setErrors([]);
         return;
@@ -187,7 +203,7 @@ export function useImagePasteUpload({
 
       if (
         !SUPPORTED_PASTE_MIME_TYPES.includes(
-          file.type as (typeof SUPPORTED_PASTE_MIME_TYPES)[number]
+          fileToUpload.type as (typeof SUPPORTED_PASTE_MIME_TYPES)[number]
         )
       ) {
         handlePasteError(e, UNSUPPORTED_MIME_TYPE_MESSAGE, {
@@ -197,7 +213,7 @@ export function useImagePasteUpload({
       }
 
       try {
-        uploadState.setFiles([file]);
+        uploadState.setFiles([fileToUpload]);
       } catch (err) {
         setErrors((prev) => (prev.includes(err) ? prev : [...prev, err]));
       }
