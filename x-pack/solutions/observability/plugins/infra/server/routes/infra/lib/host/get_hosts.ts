@@ -41,7 +41,7 @@ export const getHosts = async ({
 
   if (hostNames.length === 0) {
     return {
-      assetType: 'host',
+      entityType: 'host',
       nodes: [],
     };
   }
@@ -79,7 +79,7 @@ export const getHosts = async ({
   });
 
   return {
-    assetType: 'host',
+    entityType: 'host',
     nodes: hosts,
   };
 };
