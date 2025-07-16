@@ -12,9 +12,7 @@ interface ValidationPayload {
   threshold?: Threshold;
 }
 
-export const validateThresholdBase = (
-  props: ValidationPayload,
-): string[] => {
+export const validateThresholdBase = (props: ValidationPayload): string[] => {
   const errors: string[] = [];
 
   if (props.type !== 'threshold') {
