@@ -2195,7 +2195,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/security/test/cases_api_integration/ @elastic/kibana-cases
 /x-pack/platform/test/functional/services/cases/ @elastic/kibana-cases
 /x-pack/platform/test/functional_with_es_ssl/apps/cases/ @elastic/kibana-cases
-/x-pack/test/api_integration/apis/cases/ @elastic/kibana-cases
+/x-pack/platform/test/api_integration/apis/cases/ @elastic/kibana-cases
+/x-pack/solutions/observability/test/api_integration/apis/cases/ @elastic/kibana-cases
+/x-pack/solutions/security/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/observability/cases @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/search/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/security/ftr/cases/ @elastic/kibana-cases
