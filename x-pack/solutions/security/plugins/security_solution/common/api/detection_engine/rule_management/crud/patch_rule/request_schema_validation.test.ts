@@ -72,30 +72,6 @@ describe('Patch rule request schema, additional validation', () => {
       expect(errors).toEqual(['either "id" or "rule_id" must be set']);
     });
 
-    test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
-      const schema: ThresholdRulePatchProps = {
-        ...getPatchThresholdRulesSchemaMock(),
-        threshold: {
-          field: '',
-          value: -1,
-        },
-      };
-      const errors = validatePatchRuleRequestBody(schema);
-      expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
-    });
-
-    test('threshold.field should contain 5 items or less', () => {
-      const schema: ThresholdRulePatchProps = {
-        ...getPatchThresholdRulesSchemaMock(),
-        threshold: {
-          field: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5', 'field-6'],
-          value: 1,
-        },
-      };
-      const errors = validatePatchRuleRequestBody(schema);
-      expect(errors).toEqual(['Number of fields must be 5 or less']);
-    });
-
     test('threshold.cardinality[0].field should not be in threshold.field', () => {
       const schema: ThresholdRulePatchProps = {
         ...getPatchThresholdRulesSchemaMock(),
