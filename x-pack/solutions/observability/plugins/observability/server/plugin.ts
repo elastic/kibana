@@ -28,6 +28,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { PAGE_ATTACHMENT_TYPE } from '@kbn/page-attachment-schema';
+import { getLogsFeature } from './features/logs_feature';
 import { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import {
@@ -106,6 +107,7 @@ export class ObservabilityPlugin
         id: PAGE_ATTACHMENT_TYPE,
       });
     }
+    plugins.features.registerKibanaFeature(getLogsFeature());
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
