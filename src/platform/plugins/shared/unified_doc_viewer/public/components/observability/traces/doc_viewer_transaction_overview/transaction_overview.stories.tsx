@@ -9,27 +9,20 @@
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { Meta, StoryObj } from '@storybook/react';
-import {
-  args as unifiedDocViewerArgs,
-  type UnifiedDocViewerStorybookArgs,
-} from '../../../../../.storybook/preview';
 import httpServerOtelFixture from './__fixtures__/http_server_otel.json';
-import { TransactionOverview, type TransactionOverviewProps } from './transaction_overview';
-
-type StoryArgs = UnifiedDocViewerStorybookArgs<TransactionOverviewProps>;
+import { TransactionOverview } from './transaction_overview';
 
 const meta = {
   title: 'Transaction overview',
   component: TransactionOverview,
-} satisfies Meta<StoryArgs>;
+} satisfies Meta<typeof TransactionOverview>;
 export default meta;
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof TransactionOverview>;
 
 export const OtelHttpServer: Story = {
   name: 'Otel HTTP server transaction',
   args: {
-    ...unifiedDocViewerArgs,
     hit: buildDataTableRecord(httpServerOtelFixture),
-  } as StoryArgs,
+  },
 };

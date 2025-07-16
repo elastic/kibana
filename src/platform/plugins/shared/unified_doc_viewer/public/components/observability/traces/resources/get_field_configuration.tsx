@@ -43,7 +43,6 @@ export const getCommonFieldConfiguration = ({
   attributes: TransactionDocumentOverview | SpanDocumentOverview;
   flattenedDoc: TransactionDocumentOverview | SpanDocumentOverview;
 }): Record<string, FieldConfiguration> => {
-  console.log({ flattenedDoc });
   return {
     [TRANSACTION_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.transactionName.title', {
