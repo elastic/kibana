@@ -18,7 +18,7 @@ export const mockedKibanaBrowserPayload = {
       context: {
         page: {
           referer: '',
-          url: 'http://localhost:5601/kibana/app/observability/alerts?_a=(controlConfigs:!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.status,hideActionBar:!t,selectedOptions:!(),title:Status),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.rule.name,hideActionBar:!f,selectedOptions:!(),title:Rule),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.group.value,hideActionBar:!f,selectedOptions:!(),title:Group),(exclude:!f,existsSelected:!f,fieldName:tags,hideActionBar:!f,selectedOptions:!(),title:Tags)),filters:!(),groupings:!(none),kuery:%27%27,rangeFrom:now-24h,rangeTo:now)',
+          url: 'http://localhost:5601/kibana/app/observability/alerts?_a=(filters:!(),groupings:!(none),kuery:%27%27,rangeFrom:now-24h,rangeTo:now)',
         },
       },
       marks: {
@@ -77,7 +77,7 @@ export const mockedRandomTransactionPayload = {
       context: {
         page: {
           referer: '',
-          url: 'http://localhost:5601/kibana/app/observability/alerts?_a=(controlConfigs:!((exclude:!f,existsSelected:!f,fieldName:kibana.alert.status,hideActionBar:!t,selectedOptions:!(),title:Status),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.rule.name,hideActionBar:!f,selectedOptions:!(),title:Rule),(exclude:!f,existsSelected:!f,fieldName:kibana.alert.group.value,hideActionBar:!f,selectedOptions:!(),title:Group),(exclude:!f,existsSelected:!f,fieldName:tags,hideActionBar:!f,selectedOptions:!(),title:Tags)),filters:!(),groupings:!(none),kuery:%27%27,rangeFrom:now-24h,rangeTo:now)',
+          url: 'http://localhost:5601/kibana/app/observability/alerts?_a=(filters:!(),groupings:!(none),kuery:%27%27,rangeFrom:now-24h,rangeTo:now)',
         },
       },
       marks: {
