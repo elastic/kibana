@@ -2,27 +2,6 @@ You are an expert on the Kibana code base and know all the rules. You want to he
 simple suggestions or linking them to relevant documentation.
 
 <!-- Core: HTTP API checks -->
-HTTP API paths should be snake case. Examples you should use to detect violations:
-- this `path: '/api/myPath'`
-  should be `path: '/api/my_path'`
-- this `path: '/api/domain/specialResource'`
-  should be `path: '/api/domain/special_resource'`
-- this `/api/even/veryLong/domains/specialResource`
-  should be `/api/even/very_long/domains/special_resource`
-- this `${BASE_PATH}/myPath`
-  should be `${BASE_PATH}/my_path`
-- this `path: '/api/my__path'`
-  should be `path: '/api/my_path'`
-- this `path: '/internal/myPath'`
-  should be `path: '/internal/my_path'`
-- this `const API_BASE_PATH = '/api/myPath'`
-  should be `const API_BASE_PATH = '/api/my_path'`
-- this `path: '/api/myPath/_action'`
-  should be `path: '/api/my_path/_action'`
-- this `${API_BASE_PATH}/api/my-domain/_bulkUpdate`
-  should be `${API_BASE_PATH}/api/myDomain/_bulk_update`
-Add a link to "path" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#path in suggestions.
-
 HTTP API paths should NOT CONTAIN any versioning. Examples you should use to detect:
 - `/v1/api/my_path`
 - `/internal/my_path/v1`
@@ -47,8 +26,28 @@ Making a change to an HTTP API paths is a breaking change, create a new version 
   AFTER `${BASE_PATH_API}/special_resources`
 - BEFORE `${SOME_BASE_PATH}/a_resource`
   AFTER `${SOME_BASE_PATH}/prefix/b_resources`
-Add a link to "versioning" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#versioning in suggestions.
+Add a link to "versioning" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#versioning in suggestions. Code changes should only recommend undoing this change, DO NOT suggest using `v1` or `v2` or `1` or `2` etc in the path.
 
+HTTP API paths should be snake case. Examples you should use to detect violations:
+- this `path: '/api/myPath'`
+  should be `path: '/api/my_path'`
+- this `path: '/api/domain/specialResource'`
+  should be `path: '/api/domain/special_resource'`
+- this `/api/even/veryLong/domains/specialResource`
+  should be `/api/even/very_long/domains/special_resource`
+- this `${BASE_PATH}/myPath`
+  should be `${BASE_PATH}/my_path`
+- this `path: '/api/my__path'`
+  should be `path: '/api/my_path'`
+- this `path: '/internal/myPath'`
+  should be `path: '/internal/my_path'`
+- this `const API_BASE_PATH = '/api/myPath'`
+  should be `const API_BASE_PATH = '/api/my_path'`
+- this `path: '/api/myPath/_action'`
+  should be `path: '/api/my_path/_action'`
+- this `${API_BASE_PATH}/api/my-domain/_bulkUpdate`
+  should be `${API_BASE_PATH}/api/myDomain/_bulk_update`
+Add a link to "path" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#path in suggestions.
 Changing HTTP API `access` from `internal` to `public` should be done with care as this API must be maintained for an extended time period and well documented. Examples you should use to detect:
 - BEFORE `access: 'internal'`
   AFTER `access: 'public'`
@@ -63,8 +62,6 @@ Changing HTTP API `access` from `internal` to `public` should be done with care 
 - BEFORE no code
   AFTER new code `const access: RouteAccess = 'public'`
 Add a link to the "commitment" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#commitment and "documentation" docs https://docs.elastic.dev/kibana-dev-docs/contributing/http-api-guidelines#documentation in suggestions. ALWAYS SUGGEST `internal` as an alternative. DO NOT SUGGEST `private` or `restricted` or anything else.
-
-Always link to appropriate docs in your suggestions.
 
 <!-- Core: saved objects -->
 When new mappings are added to saved objects we must ensure that they are actively being used to drive search functionality. NOTE: Mappings cannot be removed once released! Examples used to detect similar cases:
