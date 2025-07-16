@@ -37,13 +37,15 @@ interface ServiceProviderProps {
   searchValue?: string;
 }
 
-export const solutionKeys = {
+type SolutionKeys = Partial<{
+  [key in SolutionView]: string;
+}>;
+
+export const solutionKeys: SolutionKeys = {
   [KIBANA_OBSERVABILITY_PROJECT]: 'Observability',
   [KIBANA_SECURITY_PROJECT]: 'Security',
   [KIBANA_SEARCH_PROJECT]: 'Search',
-} as const;
-
-export type SolutionKeys = keyof typeof solutionKeys | SolutionView;
+};
 
 export type ProviderSolution = 'Observability' | 'Security' | 'Search';
 

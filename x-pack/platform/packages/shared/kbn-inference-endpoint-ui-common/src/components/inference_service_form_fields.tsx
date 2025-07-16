@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 import {
   getFieldValidityAndErrorMessage,
   UseField,
@@ -33,7 +34,7 @@ import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/ty
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
-  type SolutionKeys,
+  type ProviderSolution,
 } from './providers/render_service_provider/service_provider';
 import { DEFAULT_TASK_TYPE, ServiceProviderKeys, INTERNAL_OVERRIDE_FIELDS } from '../constants';
 import { SelectableProvider } from './providers/selectable';
@@ -55,7 +56,7 @@ interface InferenceServicesProps {
   isEdit?: boolean;
   enforceAdaptiveAllocations?: boolean;
   isPreconfigured?: boolean;
-  currentSolution?: SolutionKeys;
+  currentSolution?: SolutionView;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
@@ -74,7 +75,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState<string>(DEFAULT_TASK_TYPE);
-  const [solutionFilter, setSolutionFilter] = useState<SolutionKeys | undefined>();
+  const [solutionFilter, setSolutionFilter] = useState<SolutionView | undefined>();
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
   const [requiredProviderFormFields, setRequiredProviderFormFields] = useState<ConfigEntryView[]>(
@@ -107,7 +108,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     }
   }, []);
 
-  const toggleAndApplyFilter = (selectedFilter: SolutionKeys) => {
+  const toggleAndApplyFilter = (selectedFilter: SolutionView) => {
     if (selectedFilter === solutionFilter) {
       // If the selected filter is already active, toggle off by clearing filter and resetting providers
       setUpdatedProviders(providers);
@@ -320,7 +321,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   );
 
   const getUpdatedProviders = useCallback(
-    (filterBySolution?: SolutionKeys) => {
+    (filterBySolution?: SolutionView) => {
       if (providers) {
         const filteredProviders = filterBySolution
           ? providers.filter((provider) => {
@@ -328,7 +329,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 SERVICE_PROVIDERS[provider.service as ServiceProviderKeys]?.solutions ?? [];
               return (
                 !solutionKeys[filterBySolution] ||
-                providerSolutions.includes(solutionKeys[filterBySolution])
+                (solutionKeys[filterBySolution] !== undefined &&
+                  providerSolutions.includes(solutionKeys[filterBySolution] as ProviderSolution))
               );
             })
           : providers;
@@ -472,10 +474,10 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                   <EuiButtonGroup
                     legend="Solution filter"
                     idSelected={solutionFilter ?? ''}
-                    onChange={(solution) => toggleAndApplyFilter(solution as SolutionKeys)}
+                    onChange={(solution) => toggleAndApplyFilter(solution as SolutionView)}
                     options={Object.keys(solutionKeys).map((solution) => ({
                       id: solution,
-                      label: solutionKeys[solution],
+                      label: solutionKeys[solution as SolutionView],
                       key: solution,
                       'data-test-subj': `filterBySolution-${solution}`,
                     }))}
