@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
 
 import { savedObjectsTaggingService } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
@@ -26,7 +27,7 @@ interface DashboardSaveModalProps {
     newTimeRestore,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
-  }: DashboardSaveOptions) => Promise<void>;
+  }: DashboardSaveOptions) => Promise<SaveDashboardReturn>;
   onClose: () => void;
   title: string;
   description: string;
@@ -67,7 +68,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     }) => {
-      await onSave({
+      return await onSave({
         newTitle,
         newDescription,
         newCopyOnSave,

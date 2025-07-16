@@ -36,6 +36,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { SaveDashboardReturn } from '@kbn/dashboard-plugin/public/services/dashboard_content_management_service/types';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -46,7 +47,7 @@ export interface OnSaveProps {
 }
 
 interface Props {
-  onSave: (props: OnSaveProps) => Promise<void>;
+  onSave: (props: OnSaveProps) => Promise<SaveDashboardReturn>;
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
