@@ -26,6 +26,7 @@ export function QueryWrapComponent({
         content={i18n.translate('esqlEditor.query.prettifyQueryLabel', {
           defaultMessage: 'Prettify query',
         })}
+        disableScreenReaderOutput
       >
         <EuiButtonIcon
           iconType={'pipeBreaks'}

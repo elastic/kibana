@@ -31,7 +31,6 @@ import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
-import type { EditorContext } from '../types';
 import {
   joinIndices,
   timeseriesIndices,
@@ -45,8 +44,6 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
   text: '',
   label: 'Choose from the time picker',
 };
-
-export const triggerCharacters = [',', '(', '=', ' '];
 
 export type TestField = ESQLFieldWithMetadata & { suggestedAs?: string };
 
@@ -292,15 +289,6 @@ export function createCustomCallbackMocks(
   };
 }
 
-export function createCompletionContext(triggerCharacter?: string) {
-  if (triggerCharacter) {
-    return { triggerCharacter, triggerKind: 1 }; // any number is fine here
-  }
-  return {
-    triggerKind: 0,
-  };
-}
-
 export function getPolicyFields(policyName: string) {
   return policies
     .filter(({ name }) => name === policyName)
@@ -331,11 +319,7 @@ export const setup = async (caret = '/') => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
-    const ctx: EditorContext = opts.triggerCharacter
-      ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
-      : { triggerKind: 0 };
-
-    return await autocomplete.suggest(querySansCaret, pos, ctx, opts.callbacks ?? callbacks);
+    return await autocomplete.suggest(querySansCaret, pos, opts.callbacks ?? callbacks);
   };
 
   const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {
