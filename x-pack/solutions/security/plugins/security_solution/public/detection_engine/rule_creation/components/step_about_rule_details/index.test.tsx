@@ -26,7 +26,7 @@ jest.mock(
   '../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context'
 );
 
-const usePrebuiltRuleBaseVersionContextMock = useRuleCustomizationsContext as jest.Mock;
+const useRuleCustomizationsContextMock = useRuleCustomizationsContext as jest.Mock;
 
 const mockTheme = getMockTheme({
   eui: { euiSizeL: '10px', euiBreakpoints: { s: '450px' }, euiSizeM: '10px' },
@@ -37,7 +37,7 @@ describe('StepAboutRuleToggleDetails', () => {
 
   beforeEach(() => {
     stepDataMock = mockAboutStepRule();
-    usePrebuiltRuleBaseVersionContextMock.mockReturnValue({
+    useRuleCustomizationsContextMock.mockReturnValue({
       actions: { openCustomizationsPreviewFlyout: jest.fn() },
       state: { doesBaseVersionExist: true, modifiedFields: new Set() },
     });

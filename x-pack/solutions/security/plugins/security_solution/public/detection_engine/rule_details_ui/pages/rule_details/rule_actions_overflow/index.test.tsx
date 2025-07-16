@@ -51,11 +51,11 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 const useExecuteBulkActionMock = useExecuteBulkAction as jest.Mock;
 const useBulkExportMock = useBulkExport as jest.Mock;
-const usePrebuiltRuleBaseVersionContextMock = useRuleCustomizationsContext as jest.Mock;
+const useRuleCustomizationsContextMock = useRuleCustomizationsContext as jest.Mock;
 
 describe('RuleActionsOverflow', () => {
   beforeEach(() => {
-    usePrebuiltRuleBaseVersionContextMock.mockReturnValue({
+    useRuleCustomizationsContextMock.mockReturnValue({
       actions: { openCustomizationsRevertFlyout: jest.fn() },
       state: { doesBaseVersionExist: true },
     });
@@ -322,7 +322,7 @@ describe('RuleActionsOverflow', () => {
     });
 
     test('it disabled the revert action when isRevertBaseVersionDisabled is true', async () => {
-      usePrebuiltRuleBaseVersionContextMock.mockReturnValue({
+      useRuleCustomizationsContextMock.mockReturnValue({
         actions: { openCustomizationsRevertFlyout: jest.fn() },
         state: { doesBaseVersionExist: false },
       });
