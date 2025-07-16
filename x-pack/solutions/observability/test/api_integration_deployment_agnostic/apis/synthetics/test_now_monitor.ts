@@ -9,7 +9,6 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
-import { omit } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
@@ -59,13 +58,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const result = res.body;
       expect(typeof result.testRunId).to.eql('string');
-      expect(typeof result.configId).to.eql('string');
-      expect(result.schedule).to.eql({ number: '5', unit: 'm' });
-      expect(result.locations).to.eql([LOCAL_LOCATION]);
-
-      expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
-        omit(newMonitor, ['id', 'config_id'])
-      );
     });
 
     it('works in non default space', async () => {
@@ -87,13 +79,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const result = res.body;
       expect(typeof result.testRunId).to.eql('string');
-      expect(typeof result.configId).to.eql('string');
-      expect(result.schedule).to.eql({ number: '5', unit: 'm' });
-      expect(result.locations).to.eql([LOCAL_LOCATION]);
-
-      expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
-        omit({ ...newMonitor, spaces: [SPACE_ID] }, ['id', 'config_id'])
-      );
     });
   });
 }

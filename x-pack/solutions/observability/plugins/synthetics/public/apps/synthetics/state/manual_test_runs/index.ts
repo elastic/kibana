@@ -11,7 +11,6 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 import { IHttpFetchError } from '@kbn/core-http-browser';
 
 import { ActionPayload } from '../utils/actions';
-import { TestNowResponse } from '../../../../../common/types';
 import {
   clearTestNowMonitorAction,
   hideTestNowFlyoutAction,
@@ -26,6 +25,7 @@ import {
   ServiceLocationErrors,
   SyntheticsMonitorSchedule,
 } from '../../../../../common/runtime_types';
+import { EnrichedTestNowResponse } from './api';
 
 export enum TestRunStatus {
   LOADING = 'loading',
@@ -46,7 +46,7 @@ export interface ManualTestRun {
   errors?: ServiceLocationErrors;
   fetchError?: { name: string; message: string };
   isTestNowFlyoutOpen: boolean;
-  monitor?: TestNowResponse['monitor'];
+  monitor?: EnrichedTestNowResponse['monitor'];
 }
 
 export interface ManualTestRunsState {
@@ -81,7 +81,10 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
     )
     .addCase(
       String(manualTestMonitorAction.success),
-      (state: WritableDraft<ManualTestRunsState>, { payload }: PayloadAction<TestNowResponse>) => {
+      (
+        state: WritableDraft<ManualTestRunsState>,
+        { payload }: PayloadAction<EnrichedTestNowResponse>
+      ) => {
         state[payload.configId] = {
           configId: payload.configId,
           testRunId: payload.testRunId,
@@ -99,7 +102,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
       String(manualTestMonitorAction.fail),
       (
         state: WritableDraft<ManualTestRunsState>,
-        action: ActionPayload<TestNowResponse, TestNowPayload>
+        action: ActionPayload<EnrichedTestNowResponse, TestNowPayload>
       ) => {
         const fetchError = action.payload as unknown as IHttpFetchError;
         if (fetchError?.request?.url) {

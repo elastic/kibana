@@ -11,7 +11,7 @@ import { IKibanaResponse } from '@kbn/core-http-server';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { TestNowResponse } from '../../../common/types';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { getMonitorNotFoundResponse } from './service_errors';
@@ -49,9 +49,6 @@ export const triggerTestNow = async (
   try {
     const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
 
-    const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } =
-      normalizedMonitor.attributes;
-
     const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
       normalizedMonitor.attributes
@@ -72,19 +69,11 @@ export const triggerTestNow = async (
       return {
         errors,
         testRunId,
-        schedule,
-        locations,
-        configId: monitorId,
-        monitor: normalizedMonitor.attributes,
       };
     }
 
     return {
       testRunId,
-      schedule,
-      locations,
-      configId: monitorId,
-      monitor: normalizedMonitor.attributes,
     };
   } catch (getErr) {
     if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
