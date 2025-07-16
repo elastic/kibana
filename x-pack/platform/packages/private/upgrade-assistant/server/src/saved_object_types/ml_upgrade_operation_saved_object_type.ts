@@ -9,7 +9,6 @@ import type { SavedObjectsType } from '@kbn/core/server';
 
 import { ML_UPGRADE_OP_TYPE } from '@kbn/upgrade-assistant-pkg-common';
 
-// todo not sure if this needs to be shared
 export const mlSavedObjectType: SavedObjectsType = {
   name: ML_UPGRADE_OP_TYPE,
   hidden: true,

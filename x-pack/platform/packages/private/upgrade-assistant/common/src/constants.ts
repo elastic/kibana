@@ -6,5 +6,7 @@
  */
 
 const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
+const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
+const UA_BASE_PATH = '/api/upgrade_assistant';
 
-export { ML_UPGRADE_OP_TYPE };
+export { ML_UPGRADE_OP_TYPE, REINDEX_OP_TYPE, UA_BASE_PATH };

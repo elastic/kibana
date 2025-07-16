@@ -6,7 +6,6 @@
  */
 
 import { flow } from 'fp-ts/function';
-// todo
 import { ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
 
 export interface SortedReindexSavedObjects {

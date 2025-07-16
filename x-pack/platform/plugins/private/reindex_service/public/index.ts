@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { ReindexService } from './src/reindex_service';
+export { ReindexService } from './src/reindex_service';
 export type { ReindexServicePublicSetup, ReindexServicePublicStart } from './types';

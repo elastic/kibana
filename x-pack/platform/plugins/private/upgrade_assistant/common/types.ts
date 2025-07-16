@@ -13,7 +13,7 @@ export type {
   IndexWarning,
   IndexWarningType,
 } from '@kbn/upgrade-assistant-pkg-common';
-export { ReindexStep, ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+export { ReindexStep, ReindexStatus, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-common';
 
 export * from './data_stream_types';
 
@@ -28,9 +28,6 @@ export interface ResponseError {
     allNodesUpgraded: boolean;
   };
 }
-
-// todo - move to package
-export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
 
 // Telemetry types
 export type UIOpenOption = 'overview' | 'elasticsearch' | 'kibana';

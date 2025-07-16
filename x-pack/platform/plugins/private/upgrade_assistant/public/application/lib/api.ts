@@ -258,7 +258,6 @@ export class ApiService {
   /**
    * FINISH: Data Stream Migrations
    */
-  // TODO - move to reindex service
 
   public async getReindexStatus(indexName: string) {
     return this.reindexService!.getReindexStatus(indexName);

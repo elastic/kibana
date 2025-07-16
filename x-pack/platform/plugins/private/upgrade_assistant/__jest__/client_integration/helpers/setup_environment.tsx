@@ -34,7 +34,7 @@ const createAuthorizationContextValue = (privileges: Privileges) => {
 export const WithAppDependencies =
   (Comp: any, httpSetup: HttpSetup, { privileges, ...overrides }: Record<string, unknown> = {}) =>
   (props: Record<string, unknown>) => {
-    apiService.setup(httpSetup, {} as ReindexService);
+    apiService.setup(httpSetup, new ReindexService(httpSetup));
     breadcrumbService.setup(() => '');
 
     const appContextMock = getAppContextMock(kibanaVersion) as unknown as AppDependencies;

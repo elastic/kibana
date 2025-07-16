@@ -6,10 +6,10 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
+import { REINDEX_OP_TYPE } from '@kbn//upgrade-assistant-pkg-common';
 
 export const reindexOperationSavedObjectType: SavedObjectsType = {
-  // todo does this need to be shared?
-  name: 'upgrade-assistant-reindex-operation',
+  name: REINDEX_OP_TYPE,
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {

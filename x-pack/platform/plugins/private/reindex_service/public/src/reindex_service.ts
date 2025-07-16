@@ -6,11 +6,8 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { ReindexStatusResponse } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatusResponse, UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
 import { sendRequest } from '@kbn/es-ui-shared-plugin/public';
-
-// todo move / rename
-const API_BASE_PATH = '/api/upgrade_assistant';
 
 export class ReindexService {
   private client: HttpSetup;
@@ -23,7 +20,7 @@ export class ReindexService {
   public async getReindexStatus(indexName: string) {
     return sendRequest<ReindexStatusResponse>(this.client, {
       method: 'get',
-      path: `${API_BASE_PATH}/reindex/${indexName}`,
+      path: `${UA_BASE_PATH}/reindex/${indexName}`,
     });
   }
 
@@ -31,14 +28,15 @@ export class ReindexService {
   public async startReindex(indexName: string) {
     return sendRequest(this.client, {
       method: 'post',
-      path: `${API_BASE_PATH}/reindex/${indexName}`,
+      path: `${UA_BASE_PATH}/reindex/${indexName}`,
     });
   }
 
+  // todo better types
   public async cancelReindex(indexName: string) {
     return sendRequest(this.client, {
       method: 'post',
-      path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
+      path: `${UA_BASE_PATH}/reindex/${indexName}/cancel`,
     });
   }
 }
