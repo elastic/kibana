@@ -413,7 +413,7 @@ src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
 src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-cases-components @elastic/response-ops
+src/platform/packages/shared/kbn-cases-components @elastic/kibana-cases
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
@@ -877,7 +877,7 @@ x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
-x-pack/platform/plugins/shared/cases @elastic/response-ops @elastic/kibana-cases
+x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
@@ -1024,16 +1024,16 @@ x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/r
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
-x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
-x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
+x-pack/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
+x-pack/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
+x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/kibana-cases
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
-x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
+x-pack/test/functional_with_es_ssl/plugins/cases @elastic/kibana-cases
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 x-pack/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
@@ -2717,6 +2717,13 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 /.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
