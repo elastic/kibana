@@ -10,7 +10,7 @@
     "public/**/*.tsx",
     "server/**/*.ts",
     "../../typings/**/*"
-    , "common/book/transforms"  ],
+  ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -37,9 +37,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/unified-data-table",
     "@kbn/kibana-utils-plugin",
-    "@kbn/core-mount-utils-browser",
-    "@kbn/react-kibana-mount",
     "@kbn/shared-ux-router",
+    "@kbn/presentation-util",
     "@kbn/content-management-plugin",
     "@kbn/object-versioning",
     "@kbn/logging",

@@ -33,9 +33,9 @@ import React from 'react';
 import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { BookState } from '../../../server';
 import { defaultBookState } from './default_book_state';
-import { openSavedBookEditor } from './saved_book_editor';
 import { loadBook, saveBook } from './library_utils';
 import { BookApi } from './types';
 import type { BookEmbeddableState, BookByReferenceState } from '../../../common';
@@ -96,22 +96,32 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         ...unsavedChangesApi,
         ...titleManager.api,
         onEdit: async () => {
-          openSavedBookEditor({
-            stateManager: bookStateManager,
-            parent: api.parentApi,
-            isCreate: false,
+          openLazyFlyout({
             core,
-            api,
-          }).then((result) => {
-            const nextIsByReference = Boolean(result.savedObjectId);
+            parentApi: api.parentApi,
+            loadContent: async ({ closeFlyout }) => {
+              const { getSavedBookEditor } = await import('./saved_book_editor');
+              return getSavedBookEditor({
+                closeFlyout,
+                stateManager: bookStateManager,
+                isCreate: false,
+                api,
+                onSubmit: (result: { savedObjectId?: string }) => {
+                  const nextIsByReference = Boolean(result.savedObjectId);
 
-            // if the by reference state has changed during this edit, reinitialize the panel.
-            if (nextIsByReference !== isByReference && apiIsPresentationContainer(api.parentApi)) {
-              api.parentApi.replacePanel<BookEmbeddableState>(api.uuid, {
-                serializedState: serializeBook(result.savedObjectId),
-                panelType: api.type,
+                  // if the by reference state has changed during this edit, reinitialize the panel.
+                  if (
+                    nextIsByReference !== isByReference &&
+                    apiIsPresentationContainer(api.parentApi)
+                  ) {
+                    api.parentApi.replacePanel<BookEmbeddableState>(api.uuid, {
+                      serializedState: serializeBook(result.savedObjectId),
+                      panelType: api.type,
+                    });
+                  }
+                },
               });
-            }
+            },
           });
         },
         isEditingEnabled: () => true,

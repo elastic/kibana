@@ -22,74 +22,48 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { i18n } from '@kbn/i18n';
-import { tracksOverlays } from '@kbn/presentation-containers';
-import { apiHasUniqueId, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useState } from 'react';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import { i18n } from '@kbn/i18n';
 import type { BookState } from '../../../server';
 import { BookApi } from './types';
 import { saveBook } from './library_utils';
 
-export const openSavedBookEditor = ({
+export const getSavedBookEditor = ({
   stateManager,
   isCreate,
-  core,
-  parent,
   api,
+  closeFlyout,
+  onSubmit,
 }: {
   stateManager: StateManager<BookState>;
   isCreate: boolean;
-  core: CoreStart;
-  parent?: unknown;
   api?: BookApi;
-}): Promise<{ savedObjectId?: string }> => {
-  return new Promise((resolve) => {
-    const closeOverlay = (overlayRef: OverlayRef) => {
-      if (tracksOverlays(parent)) parent.clearOverlays();
-      overlayRef.close();
-    };
+  closeFlyout: () => void;
+  onSubmit: (result: { savedObjectId?: string }) => void;
+}) => {
+  const initialState = stateManager.getLatestState();
+  return (
+    <SavedBookEditor
+      api={api}
+      isCreate={isCreate}
+      stateManager={stateManager}
+      onCancel={() => {
+        // set the state back to the initial state and reject
+        stateManager.reinitializeState(initialState);
+        closeFlyout();
+      }}
+      onSubmit={async (addToLibrary: boolean) => {
+        const savedObjectId = addToLibrary
+          ? await saveBook(api?.getSavedObjectId(), stateManager.getLatestState())
+          : undefined;
 
-    const initialState = stateManager.getLatestState();
-    const overlay = core.overlays.openFlyout(
-      toMountPoint(
-        <SavedBookEditor
-          api={api}
-          isCreate={isCreate}
-          stateManager={stateManager}
-          onCancel={() => {
-            // set the state back to the initial state and reject
-            stateManager.reinitializeState(initialState);
-            closeOverlay(overlay);
-          }}
-          onSubmit={async (addToLibrary: boolean) => {
-            const savedObjectId = addToLibrary
-              ? await saveBook(api?.getSavedObjectId(), stateManager.getLatestState())
-              : undefined;
-
-            closeOverlay(overlay);
-            resolve({ savedObjectId });
-          }}
-        />,
-        core
-      ),
-      {
-        type: isCreate ? 'overlay' : 'push',
-        size: 'm',
-        onClose: () => closeOverlay(overlay),
-      }
-    );
-
-    const overlayOptions = !isCreate && apiHasUniqueId(api) ? { focusedPanelId: api.uuid } : {};
-    /**
-     * if our parent needs to know about the overlay, notify it. This allows the parent to close the overlay
-     * when navigating away, or change certain behaviors based on the overlay being open.
-     */
-    if (tracksOverlays(parent)) parent.openOverlay(overlay, overlayOptions);
-  });
+        closeFlyout();
+        onSubmit({ savedObjectId });
+      }}
+    />
+  );
 };
 
 export const SavedBookEditor = ({
