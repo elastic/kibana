@@ -30,10 +30,10 @@ export const deleteTestSpaces = async ({ getService }: FtrProviderContext) => {
 export const createTags = async ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   await kibanaServer.importExport.load(
-    'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags/default_space.json'
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags/default_space.json'
   );
   await kibanaServer.importExport.load(
-    'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags/space_1.json',
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags/space_1.json',
     { space: 'space_1' }
   );
 };
