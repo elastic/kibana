@@ -65,6 +65,7 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
+  type ConversationWithoutRounds,
   type ToolCallStep,
   type ConversationRoundStep,
   type ReasoningStepData,
