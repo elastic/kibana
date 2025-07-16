@@ -90,7 +90,6 @@
     "@kbn/apm-sources-access-plugin",
     "@kbn/test-suites-xpack-platform",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/core-chrome-browser",
     "@kbn/core-provider-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/core",
