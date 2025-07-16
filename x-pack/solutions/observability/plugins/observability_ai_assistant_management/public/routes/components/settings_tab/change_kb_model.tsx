@@ -25,27 +25,36 @@ import {
   getModelOptionsForInferenceEndpoints,
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
-import { KnowledgeBaseState, useKibana } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ELSER_ON_ML_NODE_INFERENCE_ID,
+  KnowledgeBaseState,
+  LEGACY_CUSTOM_INFERENCE_ID,
+  useKibana,
+} from '@kbn/observability-ai-assistant-plugin/public';
+import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
 
-  const currentlyDeployedInferenceId = knowledgeBase.status.value?.currentInferenceId;
-
-  const [selectedInferenceId, setSelectedInferenceId] = useState<string>(
-    currentlyDeployedInferenceId || ''
-  );
-
   const [hasLoadedCurrentModel, setHasLoadedCurrentModel] = useState(false);
   const [isUpdatingModel, setIsUpdatingModel] = useState(false);
-  const { installProductDoc } = useGetProductDoc(currentlyDeployedInferenceId);
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
   const modelOptions: ModelOptionsData[] = getModelOptionsForInferenceEndpoints({
     endpoints: inferenceEndpoints,
   });
+
+  const currentlyDeployedInferenceId = getMappedInferenceId(
+    knowledgeBase.status.value?.currentInferenceId
+  );
+
+  const { installProductDoc } = useGetProductDoc(currentlyDeployedInferenceId);
+
+  const [selectedInferenceId, setSelectedInferenceId] = useState(
+    currentlyDeployedInferenceId || ''
+  );
 
   const doesModelNeedRedeployment =
     knowledgeBase.status?.value?.kbState === KnowledgeBaseState.MODEL_PENDING_ALLOCATION ||
@@ -224,6 +233,8 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
             isDisabled={
               !selectedInferenceId ||
               isKnowledgeBaseInLoadingState ||
+              (knowledgeBase.status?.value?.endpoint?.inference_id === LEGACY_CUSTOM_INFERENCE_ID &&
+                selectedInferenceId === ELSER_ON_ML_NODE_INFERENCE_ID) ||
               (knowledgeBase.status?.value?.kbState !== KnowledgeBaseState.NOT_INSTALLED &&
                 selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id &&
                 !doesModelNeedRedeployment)

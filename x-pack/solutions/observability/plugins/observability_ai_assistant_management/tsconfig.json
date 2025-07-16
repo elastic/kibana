@@ -29,7 +29,7 @@
     "@kbn/core-plugins-server",
     "@kbn/product-doc-base-plugin",
     "@kbn/ml-plugin",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*"
