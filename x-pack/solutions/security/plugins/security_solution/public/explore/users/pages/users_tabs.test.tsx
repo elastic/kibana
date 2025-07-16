@@ -14,12 +14,11 @@ import { Users } from './users';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { withMatchedIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 import {
   getMockDataView,
   getMockDataViewWithMatchedIndices,
-} from '@kbn/security-solution-plugin/public/data_view_manager/mocks/mock_data_view';
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+} from '../../../data_view_manager/mocks/mock_data_view';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 jest.mock('../../../common/components/empty_prompt');
 jest.mock('../../../sourcerer/containers');
