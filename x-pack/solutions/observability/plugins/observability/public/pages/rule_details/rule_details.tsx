@@ -221,6 +221,10 @@ export function RuleDetailsPage() {
   usePageReady({
     isReady: !isInitialLoading,
     isRefreshing: isRefetching,
+    meta: {
+      description:
+        '[ttfmp_rule_details] The Observability Rule Details overview page has loaded successfully.',
+    },
   });
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
