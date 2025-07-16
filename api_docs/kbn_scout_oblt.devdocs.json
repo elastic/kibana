@@ -1109,7 +1109,7 @@
         "tags": [],
         "label": "spaceTest",
         "description": [
-          "\nShould be used test spec files, running in parallel in isolated spaces agaist the same Kibana instance."
+          "\nShould be used test spec files, running in parallel in isolated spaces against the same Kibana instance."
         ],
         "signature": [
           "TestType",
@@ -1255,7 +1255,7 @@
         "tags": [],
         "label": "test",
         "description": [
-          "\nShould be used for the test spec files executed seqentially."
+          "\nShould be used for the test spec files executed sequentially."
         ],
         "signature": [
           "TestType",
@@ -1395,7 +1395,9 @@
             "section": "def-common.ObltWorkerFixtures",
             "text": "ObltWorkerFixtures"
           },
-          ">"
+          " & { sloData: ",
+          "SloDataFixture",
+          "; }>"
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/single_thread_fixtures.ts",
         "deprecated": false,
@@ -6123,6 +6125,20 @@
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ObltWorkerFixtures.sloData",
+            "type": "Object",
+            "tags": [],
+            "label": "sloData",
+            "description": [],
+            "signature": [
+              "SloDataFixture"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6501,7 +6517,17 @@
             "label": "apmSynthtraceEsClient",
             "description": [],
             "signature": [
-              "SynthtraceFixtureEsClient<",
+              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
+              "Readable",
+              " | ",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.SynthtraceGenerator",
+                "text": "SynthtraceGenerator"
+              },
+              "<",
               {
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
@@ -6509,7 +6535,9 @@
                 "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
-              ">"
+              ">>, pipelineCallback?: ((base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
             "deprecated": false,
@@ -6523,7 +6551,17 @@
             "label": "infraSynthtraceEsClient",
             "description": [],
             "signature": [
-              "SynthtraceFixtureEsClient<",
+              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
+              "Readable",
+              " | ",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.SynthtraceGenerator",
+                "text": "SynthtraceGenerator"
+              },
+              "<",
               {
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
@@ -6531,7 +6569,9 @@
                 "section": "def-common.InfraDocument",
                 "text": "InfraDocument"
               },
-              ">"
+              ">>, pipelineCallback?: ((base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
             "deprecated": false,
@@ -6545,7 +6585,17 @@
             "label": "logsSynthtraceEsClient",
             "description": [],
             "signature": [
-              "SynthtraceFixtureEsClient<",
+              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
+              "Readable",
+              " | ",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.SynthtraceGenerator",
+                "text": "SynthtraceGenerator"
+              },
+              "<",
               {
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
@@ -6553,29 +6603,9 @@
                 "section": "def-common.LogDocument",
                 "text": "LogDocument"
               },
-              ">"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-oblt",
-            "id": "def-common.SynthtraceFixture.otelSynthtraceEsClient",
-            "type": "Object",
-            "tags": [],
-            "label": "otelSynthtraceEsClient",
-            "description": [],
-            "signature": [
-              "SynthtraceFixtureEsClient<",
-              {
-                "pluginId": "@kbn/apm-synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnApmSynthtraceClientPluginApi",
-                "section": "def-common.ApmOtelFields",
-                "text": "ApmOtelFields"
-              },
-              ">"
+              ">>, pipelineCallback?: ((base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
             "deprecated": false,
