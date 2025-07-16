@@ -7122,6 +7122,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sample-data-ingest@link:x-pack/platform/plugins/shared/sample_data_ingest":
+  version "0.0.0"
+  uid ""
+
 "@kbn/sample-log-parser@link:x-pack/platform/packages/shared/kbn-sample-parser":
   version "0.0.0"
   uid ""
