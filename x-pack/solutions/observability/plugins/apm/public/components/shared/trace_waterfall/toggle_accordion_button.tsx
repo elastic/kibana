@@ -24,7 +24,7 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       justifyContent="center"
       responsive={false}
       css={{ position: 'relative', display: 'flex', width: `${TOGGLE_BUTTON_WIDTH}px` }}
-      onClick={(e: any) => {
+      onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
