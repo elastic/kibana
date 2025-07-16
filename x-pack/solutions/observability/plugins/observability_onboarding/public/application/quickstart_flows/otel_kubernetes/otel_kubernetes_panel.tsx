@@ -39,7 +39,7 @@ import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
-const OTEL_KUBE_STACK_VERSION = '0.6.2';
+const OTEL_KUBE_STACK_VERSION = '0.6.3';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
