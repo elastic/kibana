@@ -21,6 +21,7 @@ import type { ToolPersistedDefinition } from '../client';
 import { createClient } from '../client';
 import { toToolDefinition } from './utils/to_tool_definition';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
+import { validateConfig } from './utils/validate_configuration';
 
 export const createEsqlToolTypeDefinition = ({
   logger,
@@ -77,6 +78,8 @@ export const createEsqlToolClient = ({
       } catch (e) {
         throw createBadRequestError(`Invalid configuration for esql tool: ${e.message}`);
       }
+
+      await validateConfig(createRequest.configuration);
       const tool = await toolClient.create({
         ...createRequest,
         type: ToolType.esql,
@@ -90,6 +93,12 @@ export const createEsqlToolClient = ({
       } catch (e) {
         throw createBadRequestError(`Invalid configuration for esql tool: ${e.message}`);
       }
+      const existingTool = await this.get(toolId);
+      const query = updateRequest.configuration?.query ?? existingTool.configuration.query;
+      const params = updateRequest.configuration?.params ?? existingTool.configuration.params;
+
+      await validateConfig({ query, params });
+
       const tool = await toolClient.update(toolId, updateRequest);
       return toToolDefinition(tool as ToolPersistedDefinition<EsqlToolConfig>);
     },
