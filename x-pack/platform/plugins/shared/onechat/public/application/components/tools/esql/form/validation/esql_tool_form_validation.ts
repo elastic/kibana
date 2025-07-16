@@ -55,6 +55,13 @@ const i18nMessages = {
         defaultMessage: 'Parameter name is required.',
       }
     ),
+    nameFormatError: i18n.translate(
+      'xpack.onechat.tools.newTool.validation.params.nameFormatError',
+      {
+        defaultMessage:
+          'Parameter name must start with a letter or underscore and contain only letters, numbers, and underscores.',
+      }
+    ),
     descriptionRequiredError: i18n.translate(
       'xpack.onechat.tools.newTool.validation.params.descriptionRequiredError',
       {
@@ -129,7 +136,12 @@ export const esqlFormValidationSchema = z
     params: z
       .array(
         z.object({
-          name: z.string().min(1, { message: i18nMessages.params.nameRequiredError }),
+          name: z
+            .string()
+            .min(1, { message: i18nMessages.params.nameRequiredError })
+            .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, {
+              message: i18nMessages.params.nameFormatError,
+            }),
           description: z.string().min(1, { message: i18nMessages.params.descriptionRequiredError }),
           type: z.nativeEnum(EsqlToolFieldType),
         })
