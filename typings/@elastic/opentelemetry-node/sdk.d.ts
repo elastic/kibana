@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IPricingTiersClient } from '@kbn/core-pricing-common';
-/**
- * Start contract for Core's pricing service.
- *
- * @public
- */
-export interface PricingServiceStart {
-  isFeatureAvailable: IPricingTiersClient['isFeatureAvailable'];
+declare module '@elastic/opentelemetry-node/sdk' {
+  export * from '@elastic/opentelemetry-node/types/sdk';
 }
