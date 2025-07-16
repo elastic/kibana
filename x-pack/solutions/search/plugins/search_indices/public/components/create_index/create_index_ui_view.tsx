@@ -31,7 +31,7 @@ export const CreateIndexUIView = ({
   const [indexNameHasError, setIndexNameHasError] = useState<boolean>(false);
   const { application } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const { createIndex, isLoading } = useCreateIndex();
+  const { createIndex, isLoading } = useCreateIndex('vector');
   const onIndexNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newIndexName = e.target.value;
     setFormState({ ...formState, indexName: e.target.value });
