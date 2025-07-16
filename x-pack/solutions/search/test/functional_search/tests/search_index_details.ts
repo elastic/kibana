@@ -7,9 +7,11 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
-const archivedBooksIndex = 'x-pack/test/functional_search/fixtures/search-books';
-const archiveEmptyIndex = 'x-pack/test/functional_search/fixtures/search-empty-index';
-const archiveDenseVectorIndex = 'x-pack/test/functional_search/fixtures/search-national-parks';
+const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
+const archiveEmptyIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';
+const archiveDenseVectorIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-national-parks';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([

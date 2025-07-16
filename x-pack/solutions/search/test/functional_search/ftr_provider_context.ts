@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { services as functionalServices } from '../functional/services';
+import { GenericFtrProviderContext } from '@kbn/test';
+import { pageObjects } from './page_objects';
+import { services } from './services';
 
-export const services = functionalServices;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

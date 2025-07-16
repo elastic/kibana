@@ -6,6 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './services';
+import { pageObjects } from './page_objects';
 
 /**
  * NOTE: The solution view is currently only available in the cloud environment.
@@ -13,10 +15,14 @@ import { FtrConfigProviderContext } from '@kbn/test';
  */
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
+  const functionalConfig = await readConfigFile(
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
+  );
 
   return {
     ...functionalConfig.getAll(),
+    services,
+    pageObjects,
     junit: {
       reportName: 'Search Solution UI Functional Tests',
     },
