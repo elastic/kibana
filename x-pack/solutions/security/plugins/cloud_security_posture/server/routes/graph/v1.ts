@@ -131,7 +131,11 @@ export const enhanceGraphWithEntityData = async ({
     // If entity has asset data
     if (entityIds.has(node.id) && assetData[node.id]) {
       // If documentsData exists, find the correct document to update
-      if ('documentsData' in node && node.documentsData && node.documentsData.length > 0) {
+      if (
+        'documentsData' in node &&
+        Array.isArray(node.documentsData) &&
+        node.documentsData.length > 0
+      ) {
         // Look for a document with matching id
         const documentIndex = node.documentsData.findIndex((doc) => doc.id === node.id);
 
@@ -145,14 +149,8 @@ export const enhanceGraphWithEntityData = async ({
           };
         } else {
           // No matching document found, but we have documentsData
-          // Just update the first document as a fallback
-          return {
-            ...node,
-            documentsData: [
-              { ...node.documentsData[0], assetData: assetData[node.id] },
-              ...node.documentsData.slice(1),
-            ],
-          };
+          // return same node without changes
+          return node;
         }
       }
 
