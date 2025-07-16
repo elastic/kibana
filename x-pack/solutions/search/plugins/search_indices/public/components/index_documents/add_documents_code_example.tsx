@@ -13,6 +13,7 @@ import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { WorkflowId } from '@kbn/search-shared-ui';
+import { useLocation } from 'react-router-dom';
 import { useKibana } from '../../hooks/use_kibana';
 import { IngestCodeSnippetParameters } from '../../types';
 import { LanguageSelector } from '../shared/language_selector';
@@ -49,6 +50,7 @@ export const AddDocumentsCodeExample = ({
   const [selectedLanguage, setSelectedLanguage] =
     useState<AvailableLanguages>(getDefaultCodingLanguage);
   const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples } = useWorkflow();
+
   const selectedCodeExamples = ingestExamples[selectedLanguage];
   const codeSampleMappings = indexHasMappings ? mappingProperties : ingestExamples.defaultMapping;
   const onSelectLanguage = useCallback(
@@ -65,6 +67,16 @@ export const AddDocumentsCodeExample = ({
     return exampleTexts.map((text) => generateSampleDocument(codeSampleMappings, text));
   }, [codeSampleMappings]);
   const { apiKey } = useSearchApiKey();
+
+  const { search } = useLocation();
+  React.useEffect(() => {
+    const workflowFromQuery = new URLSearchParams(search).get('workflow');
+    if (workflowFromQuery && workflowFromQuery !== selectedWorkflowId) {
+      setSelectedWorkflowId(workflowFromQuery as WorkflowId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
       indexName,
