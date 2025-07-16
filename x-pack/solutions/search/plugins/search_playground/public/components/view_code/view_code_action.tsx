@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
@@ -24,20 +24,18 @@ export const ViewCodeAction: React.FC<{ selectedPageMode: PlaygroundPageMode }> 
       {showFlyout && (
         <ViewCodeFlyout selectedPageMode={selectedPageMode} onClose={() => setShowFlyout(false)} />
       )}
-      <EuiButton
-        iconType="editorCodeBlock"
-        color="primary"
-        fill={selectedPageMode === PlaygroundPageMode.chat}
+      <EuiButtonEmpty
+        iconType="export"
         onClick={() => setShowFlyout(true)}
         disabled={!selectedIndices || selectedIndices?.length === 0}
         data-test-subj="viewCodeActionButton"
         size="s"
       >
         <FormattedMessage
-          id="xpack.searchPlayground.viewCode.actionButtonLabel"
-          defaultMessage="View code"
+          id="xpack.searchPlayground.export.actionButtonLabel"
+          defaultMessage="Export"
         />
-      </EuiButton>
+      </EuiButtonEmpty>
     </>
   );
 };
