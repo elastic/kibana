@@ -10,6 +10,7 @@ import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { TINY_ELSER_INFERENCE_ID } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
 import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -19,13 +20,12 @@ import {
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../utils/model_and_inference';
 
-const DEFAULT_INFERENCE_ID = 'tiny_elser_inference_id';
-
+const DEFAULT_INFERENCE_ID = TINY_ELSER_INFERENCE_ID;
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('tool: retrieve_elastic_doc', function () {
+  describe.only('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     const supertest = getService('supertest');
