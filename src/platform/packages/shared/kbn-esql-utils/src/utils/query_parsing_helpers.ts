@@ -6,14 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  parse,
-  Walker,
-  walk,
-  BasicPrettyPrinter,
-  isFunctionExpression,
-  isColumn,
-} from '@kbn/esql-ast';
+import { parse, Walker, walk, EsqlQuery, isFunctionExpression, isColumn } from '@kbn/esql-ast';
 
 import type {
   ESQLSource,
@@ -138,9 +131,9 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
   return numberOfCommands === pipesWithNewLine?.length;
 };
 
-export const prettifyQuery = (query: string, isWrapped: boolean): string => {
-  const { root } = parse(query);
-  return BasicPrettyPrinter.print(root, { multiline: !isWrapped });
+export const prettifyQuery = (src: string): string => {
+  const query = EsqlQuery.fromSrc(src);
+  return query.print({ multiline: true, indent: '  ' });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {

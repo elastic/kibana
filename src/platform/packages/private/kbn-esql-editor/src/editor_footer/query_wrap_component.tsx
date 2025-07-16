@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { prettifyQuery, isQueryWrappedByPipes } from '@kbn/esql-utils';
+import { prettifyQuery } from '@kbn/esql-utils';
 
 export function QueryWrapComponent({
   code,
@@ -19,40 +19,24 @@ export function QueryWrapComponent({
   code: string;
   updateQuery: (qs: string) => void;
 }) {
-  const isWrappedByPipes = useMemo(() => {
-    return isQueryWrappedByPipes(code);
-  }, [code]);
-
   return (
     <EuiFlexItem grow={false}>
       <EuiToolTip
         position="top"
-        content={
-          isWrappedByPipes
-            ? i18n.translate('esqlEditor.query.disableWordWrapLabel', {
-                defaultMessage: 'Remove line breaks on pipes',
-              })
-            : i18n.translate('esqlEditor.query.EnableWordWrapLabel', {
-                defaultMessage: 'Add line breaks on pipes',
-              })
-        }
+        content={i18n.translate('esqlEditor.query.prettifyQueryLabel', {
+          defaultMessage: 'Prettify query',
+        })}
       >
         <EuiButtonIcon
-          iconType={isWrappedByPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
+          iconType={'pipeBreaks'}
           color="text"
           size="xs"
           data-test-subj="ESQLEditor-toggleWordWrap"
-          aria-label={
-            isWrappedByPipes
-              ? i18n.translate('esqlEditor.query.disableWordWrapLabel', {
-                  defaultMessage: 'Remove line breaks on pipes',
-                })
-              : i18n.translate('esqlEditor.query.EnableWordWrapLabel', {
-                  defaultMessage: 'Add line breaks on pipes',
-                })
-          }
+          aria-label={i18n.translate('esqlEditor.query.prettifyQueryLabel', {
+            defaultMessage: 'Prettify query',
+          })}
           onClick={() => {
-            const updatedCode = prettifyQuery(code, isWrappedByPipes);
+            const updatedCode = prettifyQuery(code);
             if (code !== updatedCode) {
               updateQuery(updatedCode);
             }
