@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
-import { useEuiThemeCSSVariables } from '@elastic/eui';
+// import { useEffect } from 'react';
+// import { useEuiThemeCSSVariables } from '@elastic/eui';
 
 export const hackEuiPushFlyoutPaddingInlineEnd = '--euiPushFlyoutOffsetInlineEnd';
 export const hackEuiPushFlyoutPaddingInlineStart = '--euiPushFlyoutOffsetInlineStart';
