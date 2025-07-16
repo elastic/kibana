@@ -177,7 +177,7 @@ export class ServerlessSearchPlugin
             observabilityAiAssistantManagement: {
               category: appCategories.OTHER,
               title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
-                defaultMessage: 'AI Assistant Settings',
+                defaultMessage: 'AI Assistant',
               }),
               description: i18n.translate(
                 'xpack.serverlessSearch.aiAssistantManagementDescription',

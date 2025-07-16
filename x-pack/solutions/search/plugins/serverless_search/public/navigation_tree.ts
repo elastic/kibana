@@ -229,6 +229,16 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
                   },
                   {
+                    title: 'AI',
+                    children: [
+                      { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+                      {
+                        link: 'management:observabilityAiAssistantManagement',
+                        breadcrumbStatus: 'hidden',
+                      },
+                    ],
+                  },
+                  {
                     title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {
                       defaultMessage: 'Content',
                     }),
@@ -246,17 +256,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                       defaultMessage: 'Other',
                     }),
                     breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                      {
-                        link: 'management:observabilityAiAssistantManagement',
-                        breadcrumbStatus: 'hidden',
-                        title: i18n.translate(
-                          'xpack.serverlessSearch.nav.mngt.other.aiAssistantSettings',
-                          { defaultMessage: 'AI Assistant Settings' }
-                        ),
-                      },
-                    ],
+                    children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
                   },
                 ],
               },

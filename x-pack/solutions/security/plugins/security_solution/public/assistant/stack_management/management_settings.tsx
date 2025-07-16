@@ -55,7 +55,7 @@ export const ManagementSettings = React.memo(() => {
           text: i18n.translate(
             'xpack.securitySolution.assistant.settings.breadcrumb.serverless.security',
             {
-              defaultMessage: 'AI Assistant for Security Settings',
+              defaultMessage: 'AI Assistant',
             }
           ),
         },

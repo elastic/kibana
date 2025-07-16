@@ -41,7 +41,7 @@ export function SettingsPage() {
           text: i18n.translate(
             'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
             {
-              defaultMessage: 'AI Assistant for Observability and Search Settings',
+              defaultMessage: 'AI Assistant',
             }
           ),
         },

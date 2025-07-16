@@ -64,7 +64,7 @@ export class AiAssistantManagementObservabilityPlugin
     { home, management, observabilityAIAssistant }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
     const title = i18n.translate('xpack.observabilityAiAssistantManagement.app.title', {
-      defaultMessage: 'AI Assistant for Observability and Search',
+      defaultMessage: 'AI Assistant',
     });
 
     if (home) {
