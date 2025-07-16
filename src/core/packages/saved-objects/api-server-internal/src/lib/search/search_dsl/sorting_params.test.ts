@@ -325,7 +325,7 @@ describe('searchDsl/getSortParams', () => {
   });
 
   describe('runtime field type detection', () => {
-    it('sets runtime field type to long for all long fields', () => {
+    it('normalizes long fields to double type', () => {
       expect(getSortingParams(MAPPINGS, ['numeric', 'numeric'], 'count')).toEqual({
         runtime_mappings: {
           merged_count: {
@@ -340,7 +340,7 @@ describe('searchDsl/getSortParams', () => {
       });
     });
 
-    it('sets runtime field type to float if any field is float', () => {
+    it('normalizes float fields to double type', () => {
       expect(getSortingParams(MAPPINGS, ['numeric', 'mixed'], 'price')).toEqual({
         runtime_mappings: {
           merged_price: {
@@ -355,7 +355,7 @@ describe('searchDsl/getSortParams', () => {
       });
     });
 
-    it('sets runtime field type to date if any field is date', () => {
+    it('preserves date type without normalization', () => {
       expect(getSortingParams(MAPPINGS, ['numeric', 'mixed'], 'created')).toEqual({
         runtime_mappings: {
           merged_created: {
@@ -370,7 +370,7 @@ describe('searchDsl/getSortParams', () => {
       });
     });
 
-    it('sets runtime field type to keyword if all fields are keyword/text with keyword', () => {
+    it('uses keyword for text fields with keyword subfield type', () => {
       expect(getSortingParams(MAPPINGS, ['pending', 'saved'], 'title')).toEqual({
         runtime_mappings: {
           merged_title: {
@@ -385,7 +385,7 @@ describe('searchDsl/getSortParams', () => {
       });
     });
 
-    it('throws error if sort field has different mapping types across types', () => {
+    it('throws error when normalized field types are incompatible across types', () => {
       // Add a new mapping with a different type for 'count'
       const MAPPINGS_WITH_MISMATCH = {
         ...MAPPINGS,
@@ -404,7 +404,44 @@ describe('searchDsl/getSortParams', () => {
       expect(() =>
         getSortingParams(MAPPINGS_WITH_MISMATCH, ['numeric', 'mismatch'], 'count')
       ).toThrow(
-        'Sort field "count" has different mapping types across types: [long, keyword]. Sorting requires the field to have the same type in all types (numeric types are considered equivalent).'
+        'Sort field "count" has incompatible types across saved object types: [double, keyword]. All field types must be compatible for sorting (numeric types are considered equivalent).'
+      );
+    });
+
+    it('throws error when sort field is of type text without keyword subfield', () => {
+      // This test demonstrates that we explicitly reject text fields without keyword subfields.
+      // If we allowed this, it would create dangerous inconsistent behavior:
+      // - Single type: would fail at query time (cannot sort on text directly)
+      // - Multi type: could work with runtime fields but would be confusing
+
+      // Add a mapping with text field without keyword subfield
+      const MAPPINGS_WITH_TEXT_ONLY = {
+        ...MAPPINGS,
+        properties: {
+          ...MAPPINGS.properties,
+          textonly: {
+            properties: {
+              description: {
+                type: 'text', // No keyword subfield
+              },
+            },
+          },
+          saved: {
+            ...MAPPINGS.properties.saved,
+            properties: {
+              ...MAPPINGS.properties.saved.properties,
+              description: {
+                type: 'text', // No keyword subfield in saved type either
+              },
+            },
+          },
+        },
+      } as const;
+
+      expect(() =>
+        getSortingParams(MAPPINGS_WITH_TEXT_ONLY, ['textonly', 'saved'], 'description')
+      ).toThrow(
+        'Sort field "textonly.description" is of type "text" which is not sortable. Sorting on text fields requires a "keyword" subfield.'
       );
     });
   });

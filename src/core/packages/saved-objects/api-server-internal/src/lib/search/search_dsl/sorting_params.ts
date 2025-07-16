@@ -10,6 +10,7 @@
 import Boom from '@hapi/boom';
 import {
   MappingRuntimeFields,
+  MappingRuntimeFieldType,
   SortCombinations,
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -18,9 +19,9 @@ import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-ser
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
 import {
   getKeywordField,
-  getMergedFieldType,
   isValidSortingField,
-  validateSameFieldTypeForAllTypes,
+  normalizeFieldType,
+  validateFieldTypeCompatibility,
 } from './sorting_params_utils';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
@@ -71,14 +72,22 @@ export function getSortingParams(
       // Only create a runtime field if the sort field is present in all types
       const allTypesHaveField = types.every((t) => !!getProperty(mappings, `${t}.${sortField}`));
       if (allTypesHaveField) {
-        // Throw error if any field is text without keyword subfield
+        // Validate that all fields are sortable to prevent dangerous inconsistencies.
+        //
+        // NOTE: While it would be technically possible to make text fields without
+        // keyword subfields work in multi-type scenarios using runtime fields, this
+        // would create inconsistent behavior where the same field is sortable when
+        // querying multiple types but fails when querying a single type.
+        //
+        // This inconsistency would be confusing and error-prone for users, so we
+        // explicitly require keyword subfields for all text field sorting.
         for (const t of types) {
           const fieldMapping = getProperty(mappings, `${t}.${sortField}`);
           if (!isValidSortingField(fieldMapping) && fieldMapping) {
             throw Boom.badRequest(
               `Sort field "${t}.${sortField}" is of type "${
                 fieldMapping.type
-              }" which is not sortable. ${
+              }" which is not sortable.${
                 fieldMapping.type === 'text'
                   ? ' Sorting on text fields requires a "keyword" subfield.'
                   : ''
@@ -90,14 +99,20 @@ export function getSortingParams(
         const fieldMappings = types
           .map((t) => getProperty(mappings, `${t}.${sortField}`))
           .filter(Boolean) as SavedObjectsFieldMapping[];
-        // Validate that all field mappings have the same type
-        try {
-          validateSameFieldTypeForAllTypes(sortField, fieldMappings);
-        } catch (e) {
-          throw Boom.badRequest(e.message);
+
+        // First normalize all field types, then validate compatibility
+        const normalizedTypes = fieldMappings.map(normalizeFieldType);
+        const validationResult = validateFieldTypeCompatibility(normalizedTypes);
+        if (!validationResult.isValid) {
+          throw Boom.badRequest(
+            `Sort field "${sortField}" has incompatible types across saved object types: [${validationResult.conflictingTypes.join(
+              ', '
+            )}]. All field types must be compatible for sorting (numeric types are considered equivalent).`
+          );
         }
+
         const mergedFieldName = `merged_${sortField}`;
-        const mergedFieldType = getMergedFieldType(fieldMappings);
+        const mergedFieldType = (normalizedTypes[0] ?? 'keyword') as MappingRuntimeFieldType;
 
         // Instead of emitting only the first found value, emit all possible values for the field across types
         // This ensures that sorting is done across all types as a single field

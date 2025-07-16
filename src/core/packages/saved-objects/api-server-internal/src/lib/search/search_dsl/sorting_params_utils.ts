@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
-import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 
 const NUMERIC_TYPES = [
   'long',
@@ -29,7 +28,22 @@ const SORTABLE_TYPES = new Set([...NUMERIC_TYPES, 'date', 'keyword', 'boolean'])
 /**
  * Returns true if the field mapping is sortable in Elasticsearch.
  * Only keyword, numeric, date, boolean, and similar types are sortable.
- * Text fields are not sortable.
+ * Text fields are not sortable unless they have keyword subfields.
+ *
+ * IMPORTANT: We explicitly reject text fields without keyword subfields to prevent
+ * dangerous inconsistencies in sorting behavior:
+ *
+ * - Single-type sorting on text without keyword subfield: Would fail at query time
+ *   because Elasticsearch cannot sort directly on analyzed text fields
+ *
+ * - Multi-type sorting on text without keyword subfield: Could theoretically work
+ *   using runtime fields that emit keyword values from text sources, but this would
+ *   create inconsistent behavior where the same field is sortable in some contexts
+ *   but not others
+ *
+ * This inconsistency would be confusing and error-prone for users. Instead, we require
+ * explicit keyword subfields for all sortable text fields, ensuring consistent behavior
+ * across all sorting scenarios.
  */
 export const isValidSortingField = (fieldMapping?: SavedObjectsFieldMapping): boolean => {
   if (!fieldMapping) return false;
@@ -55,51 +69,45 @@ export const getKeywordField = (fieldMapping?: SavedObjectsFieldMapping): string
 };
 
 /**
- * Validates that all field mappings have the same type.
- * Throws an error if types are not the same, except all numeric types are considered equivalent.
+ * Validates that all normalized field types are compatible for sorting.
+ * Returns a discriminated union indicating validity and conflicting types if any.
  */
-export function validateSameFieldTypeForAllTypes(
-  sortField: string,
-  fieldMappings: SavedObjectsFieldMapping[]
-): void {
-  const fieldTypes = fieldMappings.map((fm) => fm.type);
-  const uniqueTypes = Array.from(new Set(fieldTypes));
-  // If all types are numeric, allow
-  if (uniqueTypes.every((t) => NUMERIC_TYPES.includes(t as (typeof NUMERIC_TYPES)[number]))) {
-    return;
-  }
+export function validateFieldTypeCompatibility(
+  normalizedTypes: string[]
+): { isValid: true } | { isValid: false; conflictingTypes: string[] } {
+  const uniqueTypes = Array.from(new Set(normalizedTypes));
   if (uniqueTypes.length > 1) {
-    throw new Error(
-      `Sort field "${sortField}" has different mapping types across types: [${uniqueTypes.join(
-        ', '
-      )}]. Sorting requires the field to have the same type in all types (numeric types are considered equivalent).`
-    );
+    return {
+      isValid: false,
+      conflictingTypes: uniqueTypes,
+    };
   }
+  return { isValid: true };
 }
 
 /**
- * Helper to determine the merged type for runtime field.
- * Maps unsupported runtime types to supported equivalents.
+ * Normalizes a field mapping to its canonical type for comparison.
+ * - All numeric types are normalized to 'double'
+ * - Text fields with keyword subfields are normalized to 'keyword'
+ * - Other types remain unchanged
  */
-export const getMergedFieldType = (
-  fields?: SavedObjectsFieldMapping[]
-): MappingRuntimeFieldType => {
-  if (!fields) return 'keyword';
-  const types = fields
-    .map((f) => {
-      if (!f) return undefined;
-      if (f.type === 'text' && f.fields) {
-        // If text with keyword subfield, treat as keyword
-        return Object.values(f.fields).some((sub) => sub?.type === 'keyword') ? 'keyword' : 'text';
-      }
-      return f.type;
-    })
-    .filter(Boolean) as string[];
+export function normalizeFieldType(fieldMapping: SavedObjectsFieldMapping): string {
+  if (!fieldMapping.type) {
+    throw new Error('Field mapping is missing required type property');
+  }
 
-  // Always return 'double' for any numeric type
-  if (types.some((t) => NUMERIC_TYPES_SET.has(t as (typeof NUMERIC_TYPES)[number]))) {
+  if (NUMERIC_TYPES_SET.has(fieldMapping.type as (typeof NUMERIC_TYPES)[number])) {
     return 'double';
   }
-  // fallback to keyword if unknown
-  return (types?.[0] as MappingRuntimeFieldType) ?? 'keyword';
-};
+
+  // If text field has a keyword subfield, treat as keyword for sorting
+  if (
+    fieldMapping.type === 'text' &&
+    fieldMapping.fields &&
+    Object.values(fieldMapping.fields).some((sub) => sub?.type === 'keyword')
+  ) {
+    return 'keyword';
+  }
+
+  return fieldMapping.type;
+}
