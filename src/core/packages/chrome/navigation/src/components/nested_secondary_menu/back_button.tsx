@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React, { FC } from 'react';
 import { css } from '@emotion/react';
 
@@ -27,31 +27,17 @@ export const BackButton: FC<BackButtonProps> = ({ title }) => {
     border-radius: ${euiTheme.border.radius.medium};
     display: flex;
     gap: ${euiTheme.size.s};
+    padding: ${euiTheme.size.base} ${euiTheme.size.m};
     padding-bottom: ${euiTheme.size.xs};
-    padding: ${euiTheme.size.base} 20px;
     position: sticky;
     top: 0;
     z-index: 1;
   `;
 
-  // TODO: resolve the rule issue (`currentColor` is acceptable)
-  // eslint-disable-next-line @elastic/eui/no-css-color
-  const backButtonStyle = css`
-    align-items: center;
-    background: none;
-    border: none;
-    color: currentColor;
-    cursor: pointer;
-    display: flex;
-    font-size: ${euiTheme.size.m};
-    padding: 0;
-  `;
-
   return (
     <div css={titleStyle}>
-      <button css={backButtonStyle} aria-label="Go back" onClick={goBack} type="button">
-        <EuiIcon type="arrowLeft" />
-      </button>
+      {/* TODO: translate */}
+      <EuiButtonIcon aria-label="Go back" color="text" iconType="arrowLeft" onClick={goBack} />
       {title && (
         <EuiTitle size="xs">
           <h4>{title}</h4>
