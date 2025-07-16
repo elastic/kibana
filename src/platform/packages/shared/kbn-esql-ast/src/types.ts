@@ -39,6 +39,19 @@ export type ESQLSingleAstItem =
   | ESQLMap
   | ESQLMapEntry;
 
+/**
+ * A field is either an index field `this.is.field`, or it is a field assignment
+ * `new_field = 123`, in which case it is a binary expression with "=" operator.
+ *
+ * Also, a field can be specified as a parameter.
+ *
+ * ```
+ * STATS this.is.a.nested.field
+ * STATS new_field = 123
+ * STATS ?param
+ * STATS ?param = 123
+ * ```
+ */
 export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
 
 /**

@@ -625,10 +625,6 @@ export class CstToAstConverter {
     return aggField;
   }
 
-  private fromField(ctx: cst.FieldContext) {
-    return this.fromField2(ctx)[0];
-  }
-
   /**
    * @todo Do not return array here.
    */
@@ -1374,61 +1370,6 @@ export class CstToAstConverter {
     return args;
   }
 
-  private fromFields(ctx: cst.FieldsContext | undefined): ast.ESQLAstField[] {
-    const fields: ast.ESQLAstField[] = [];
-
-    if (!ctx) {
-      return fields;
-    }
-
-    try {
-      for (const field of ctx.field_list()) {
-        fields.push(...(this.fromField2(field) as ast.ESQLAstField[]));
-      }
-    } catch (e) {
-      // do nothing
-    }
-
-    return fields;
-  }
-
-  private fromAggFields(ctx: cst.AggFieldsContext | undefined): ast.ESQLAstField[] {
-    const fields: ast.ESQLAstField[] = [];
-
-    if (!ctx) {
-      return fields;
-    }
-
-    try {
-      for (const aggField of ctx.aggField_list()) {
-        fields.push(...(this.fromField2(aggField.field()) as ast.ESQLAstField[]));
-      }
-    } catch (e) {
-      // do nothing
-    }
-
-    return fields;
-  }
-
-  /**
-   * @todo Align this method with the `fromField` method.
-   */
-  private fromField2(ctx: cst.FieldContext): ast.ESQLAstItem[] {
-    if (ctx.qualifiedName() && ctx.ASSIGN()) {
-      const fn = this.createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
-
-      fn.args.push(
-        this.toColumn(ctx.qualifiedName()!),
-        this.collectBooleanExpression(ctx.booleanExpression())
-      );
-      fn.location = this.computeLocationExtends(fn);
-
-      return [fn];
-    }
-
-    return this.collectBooleanExpression(ctx.booleanExpression());
-  }
-
   private visitLogicalNot(ctx: cst.LogicalNotContext) {
     const fn = this.createFunction('not', ctx, undefined, 'unary-expression');
     fn.args.push(...this.collectBooleanExpression(ctx.booleanExpression()));
@@ -2002,6 +1943,58 @@ export class CstToAstConverter {
 
   private isQuoted(text: string | undefined) {
     return text && /^(`)/.test(text);
+  }
+
+  private fromFields(ctx: cst.FieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const field of ctx.field_list()) {
+        fields.push(this.fromField(field));
+      }
+    } catch (e) {
+      // do nothing
+    }
+
+    return fields;
+  }
+
+  private fromAggFields(ctx: cst.AggFieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const aggField of ctx.aggField_list()) {
+        fields.push(this.fromField(aggField.field()));
+      }
+    } catch (e) {
+      // do nothing
+    }
+
+    return fields;
+  }
+
+  private fromField(ctx: cst.FieldContext): ast.ESQLAstField {
+    if (ctx.qualifiedName() && ctx.ASSIGN()) {
+      const fn = this.createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
+
+      fn.args.push(
+        this.toColumn(ctx.qualifiedName()!),
+        this.collectBooleanExpression(ctx.booleanExpression())
+      );
+      fn.location = this.computeLocationExtends(fn);
+
+      return fn;
+    }
+
+    return this.collectBooleanExpression(ctx.booleanExpression())[0]! as ast.ESQLAstField;
   }
 
   // --------------------------------------------------- expression: "function"
