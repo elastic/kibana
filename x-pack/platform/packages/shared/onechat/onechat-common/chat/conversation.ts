@@ -112,10 +112,12 @@ export interface ConversationRound {
 
 export interface Conversation {
   id: string;
-  agentId: string;
+  agent_id: string;
   user: UserIdAndName;
   title: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   rounds: ConversationRound[];
 }
+
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
