@@ -19,7 +19,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
-import { disableGaps } from '../../../../lib/rule_gaps/disable/disable_gaps';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
   try {
@@ -109,7 +109,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
 
   const eventLogClient = await context.getEventLogClient();
 
-  await disableGaps({
+  await softDeleteGaps({
     ruleId: id,
     logger: context.logger,
     eventLogClient,

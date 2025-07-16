@@ -41,17 +41,17 @@ import {
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { disableGaps } from '../../../../lib/rule_gaps/disable/disable_gaps';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 
-jest.mock('../../../../lib/rule_gaps/disable/disable_gaps');
+jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-const disableGapsMock = disableGaps as jest.Mock;
+const softDeleteGapsMock = softDeleteGaps as jest.Mock;
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -214,7 +214,7 @@ describe('bulkDelete', () => {
 
     ruleIds.forEach((ruleId, idx) => {
       const callOrder = idx + 1;
-      expect(disableGapsMock).toHaveBeenNthCalledWith(callOrder, {
+      expect(softDeleteGapsMock).toHaveBeenNthCalledWith(callOrder, {
         ruleId,
         eventLogClient,
         logger,
@@ -335,7 +335,7 @@ describe('bulkDelete', () => {
       unsecuredSavedObjectsClient,
     });
 
-    expect(disableGapsMock).toHaveBeenCalledWith({
+    expect(softDeleteGapsMock).toHaveBeenCalledWith({
       ruleId: 'id1',
       eventLogClient,
       logger,

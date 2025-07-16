@@ -7,7 +7,7 @@
 
 import { updateGapsInEventLog } from '../update/update_gaps_in_event_log';
 import { loggerMock } from '@kbn/logging-mocks';
-import { disableGapsBatch } from './disable_gaps_batch';
+import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { Gap } from '../gap';
 import { alertingEventLoggerMock } from '../../alerting_event_logger/alerting_event_logger.mock';
@@ -36,11 +36,11 @@ const getGap = (id: string) =>
   });
 const gaps = [getGap('1'), getGap('2')];
 
-describe('disableGapsBatch', () => {
+describe('softDeleteGapsBatch', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
 
-    await disableGapsBatch({
+    await softDeleteGapsBatch({
       gaps,
       eventLogClient,
       alertingEventLogger,
@@ -73,7 +73,7 @@ describe('disableGapsBatch', () => {
     it('should return gaps ready to be written to the event log', () => {
       expect(result).toEqual(
         gaps.map((gap) => ({
-          gap: { ...gap.toObject(), disabled: true },
+          gap: { ...gap.toObject(), deleted: true },
           internalFields: gap.internalFields,
         }))
       );

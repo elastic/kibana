@@ -163,7 +163,7 @@ export const EventSchema = schema.maybe(
                     filled_duration_ms: ecsStringOrNumber(),
                     unfilled_duration_ms: ecsStringOrNumber(),
                     in_progress_duration_ms: ecsStringOrNumber(),
-                    disabled: ecsBoolean(),
+                    deleted: ecsBoolean(),
                   })
                 ),
                 execution: schema.maybe(

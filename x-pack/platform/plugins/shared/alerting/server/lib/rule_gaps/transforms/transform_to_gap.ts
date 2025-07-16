@@ -31,10 +31,10 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
   return events?.data
     ?.map((doc) => {
       const gap = doc?.kibana?.alert?.rule?.gap;
-      // Filter out disabled gaps in the event that we request them by id.
-      // Due to a race condition when we update gaps, we could end up requesting a disabled gap by id
-      // Disabled gaps should not be used by Kibana at all because it means that the rule they are associated with has been deleted
-      if (!gap || gap.disabled) return null;
+      // Filter out deleted gaps in the event that we request them by id.
+      // Due to a race condition when we update gaps, we could end up requesting a deleted gap by id
+      // Deleted gaps should not be used by Kibana at all because it means that the rule they are associated with has been deleted
+      if (!gap || gap.deleted) return null;
 
       const range = validateInterval(gap.range);
 

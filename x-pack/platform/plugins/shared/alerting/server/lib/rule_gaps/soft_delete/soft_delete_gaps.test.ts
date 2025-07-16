@@ -10,20 +10,20 @@ import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock'
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { processAllRuleGaps } from '../process_all_rule_gaps';
 import { Gap } from '../gap';
-import { disableGapsBatch } from './disable_gaps_batch';
+import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
-import { disableGaps } from './disable_gaps';
+import { softDeleteGaps } from './soft_delete_gaps';
 
 jest.mock('../process_all_rule_gaps');
-jest.mock('./disable_gaps_batch');
+jest.mock('./soft_delete_gaps_batch');
 
-describe('disableGaps', () => {
+describe('softDeleteGaps', () => {
   const mockLogger = loggerMock.create();
   const mockEventLogger = eventLoggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
 
   const processAllRuleGapsMock = processAllRuleGaps as jest.Mock;
-  const disableGapsBatchMock = disableGapsBatch as jest.Mock;
+  const softDeleteGapsBatchMock = softDeleteGapsBatch as jest.Mock;
 
   const gaps = [
     new Gap({
@@ -40,9 +40,9 @@ describe('disableGaps', () => {
     processAllRuleGapsMock.mockImplementation(({ processGapsBatch }) => processGapsBatch(gaps));
   });
 
-  describe('disableGaps', () => {
+  describe('softDeleteGaps', () => {
     it('should orchestrate the gap disable process', async () => {
-      await disableGaps({
+      await softDeleteGaps({
         ruleId,
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
@@ -57,15 +57,15 @@ describe('disableGaps', () => {
       });
     });
 
-    it('should pass a function that calls disableGapsBatch when gaps are fetched', async () => {
-      await disableGaps({
+    it('should pass a function that calls softDeleteGapsBatch when gaps are fetched', async () => {
+      await softDeleteGaps({
         ruleId,
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
       });
 
-      expect(disableGapsBatchMock).toHaveBeenCalledWith({
+      expect(softDeleteGapsBatchMock).toHaveBeenCalledWith({
         gaps,
         alertingEventLogger: expect.any(AlertingEventLogger),
         logger: mockLogger,
@@ -74,8 +74,8 @@ describe('disableGaps', () => {
     });
 
     it('should log an error when disable gaps is not successful', async () => {
-      disableGapsBatchMock.mockResolvedValue(false);
-      await disableGaps({
+      softDeleteGapsBatchMock.mockResolvedValue(false);
+      await softDeleteGaps({
         ruleId,
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,

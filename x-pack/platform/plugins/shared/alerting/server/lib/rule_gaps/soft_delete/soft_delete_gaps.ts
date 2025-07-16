@@ -10,9 +10,9 @@ import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
 import { processAllRuleGaps } from '../process_all_rule_gaps';
-import { disableGapsBatch } from './disable_gaps_batch';
+import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
 
-interface DisableGapsParams {
+interface SoftDeleteGapsParams {
   ruleId: string;
   eventLogger?: IEventLogger;
   eventLogClient: IEventLogClient;
@@ -20,10 +20,10 @@ interface DisableGapsParams {
 }
 
 /**
- * Disable gaps for a given rule.
- * It orchestrates the process of searching and disabling all the rule gaps
+ * Soft delete gaps for a given rule.
+ * It orchestrates the process of searching and marking all the rule gaps as deleted
  */
-export const disableGaps = async (params: DisableGapsParams) => {
+export const softDeleteGaps = async (params: SoftDeleteGapsParams) => {
   const { ruleId, logger, eventLogClient, eventLogger } = params;
 
   if (!eventLogger) {
@@ -36,7 +36,7 @@ export const disableGaps = async (params: DisableGapsParams) => {
 
     const processGapsBatch = async (fetchedGaps: Gap[]) => {
       if (fetchedGaps.length > 0) {
-        const success = await disableGapsBatch({
+        const success = await softDeleteGapsBatch({
           gaps: fetchedGaps,
           alertingEventLogger,
           logger,
@@ -57,9 +57,9 @@ export const disableGaps = async (params: DisableGapsParams) => {
     });
 
     if (hasErrors) {
-      throw new Error('Some gaps failed to disable');
+      throw new Error('Some gaps failed to soft delete');
     }
   } catch (e) {
-    logger.error(`Failed to disable gaps for rule ${ruleId}: ${e.message}`);
+    logger.error(`Failed to soft delete gaps for rule ${ruleId}: ${e.message}`);
   }
 };

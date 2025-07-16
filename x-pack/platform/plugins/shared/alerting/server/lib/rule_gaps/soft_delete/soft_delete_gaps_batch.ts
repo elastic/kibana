@@ -11,26 +11,26 @@ import type { AlertingEventLogger } from '../../alerting_event_logger/alerting_e
 import type { Gap } from '../gap';
 import { updateGapsInEventLog } from '../update/update_gaps_in_event_log';
 
-interface DisableGapsBatchParams {
+interface SoftDeleteGapsBatchParams {
   gaps: Gap[];
   alertingEventLogger: AlertingEventLogger;
   logger: Logger;
   eventLogClient: IEventLogClient;
 }
 
-export const disableGapsBatch = async ({
+export const softDeleteGapsBatch = async ({
   gaps,
   alertingEventLogger,
   logger,
   eventLogClient,
-}: DisableGapsBatchParams): Promise<boolean> => {
+}: SoftDeleteGapsBatchParams): Promise<boolean> => {
   // Convert gaps to the format expected by updateDocuments
   const prepareGaps = async (gapsToUpdate: Gap[]) => {
     return gapsToUpdate
       .map((gap) => {
         if (!gap.internalFields) return null;
         return {
-          gap: { ...gap.toObject(), disabled: true },
+          gap: { ...gap.toObject(), deleted: true },
           internalFields: gap.internalFields,
         };
       })

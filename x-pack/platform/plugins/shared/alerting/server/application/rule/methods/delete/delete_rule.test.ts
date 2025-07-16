@@ -26,7 +26,7 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-import { disableGaps } from '../../../../lib/rule_gaps/disable/disable_gaps';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 
@@ -34,9 +34,9 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-jest.mock('../../../../lib/rule_gaps/disable/disable_gaps');
+jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
 
-const disableGapsMock = disableGaps as jest.Mock;
+const softDeleteGapsMock = softDeleteGaps as jest.Mock;
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -170,7 +170,7 @@ describe('delete()', () => {
 
   test('attempts to disable gaps', async () => {
     await rulesClient.delete({ id: '1' });
-    expect(disableGapsMock).toHaveBeenCalledWith({
+    expect(softDeleteGapsMock).toHaveBeenCalledWith({
       ruleId: '1',
       logger: rulesClientParams.logger,
       eventLogClient,

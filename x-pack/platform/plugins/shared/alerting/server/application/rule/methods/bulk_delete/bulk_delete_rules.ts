@@ -38,7 +38,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
-import { disableGaps } from '../../../../lib/rule_gaps/disable/disable_gaps';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -201,7 +201,7 @@ const bulkDeleteWithOCC = async (
   await pMap(
     rulesToDelete.map((rule) => rule.id),
     (ruleId) =>
-      disableGaps({
+      softDeleteGaps({
         ruleId,
         logger: context.logger,
         eventLogClient,

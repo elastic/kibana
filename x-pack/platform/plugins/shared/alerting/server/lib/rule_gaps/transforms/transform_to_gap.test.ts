@@ -153,7 +153,7 @@ describe('transformToGap', () => {
     expect(result[0].inProgressIntervals).toHaveLength(1);
   });
 
-  it('should filter out disabled gaps', () => {
+  it('should filter out soft deleted gaps', () => {
     const events = createMockEvent({
       kibana: {
         alert: {
@@ -168,7 +168,7 @@ describe('transformToGap', () => {
                 validInterval,
                 { gte: '2023-01-01T00:00:00.000Z', lte: undefined },
               ],
-              disabled: true,
+              deleted: true,
             },
           },
         },
