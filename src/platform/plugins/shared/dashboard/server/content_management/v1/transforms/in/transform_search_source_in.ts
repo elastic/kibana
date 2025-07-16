@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { extractReferences } from '@kbn/data-plugin/common';
 import { DashboardAttributes } from '../../types';
 
 export function transformSearchSourceIn(
   kibanaSavedObjectMeta: DashboardAttributes['kibanaSavedObjectMeta']
 ) {
   const { searchSource } = kibanaSavedObjectMeta;
-  return { searchSourceJSON: JSON.stringify(searchSource ?? {}) };
+  const [extractedState, references] = extractReferences(searchSource ?? {});
+  return { searchSourceJSON: JSON.stringify(extractedState ?? {}), references };
 }

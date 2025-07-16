@@ -60,6 +60,7 @@ export { METRIC_TYPES, ES_SEARCH_STRATEGY } from '../common';
 
 export type {
   IScopedSearchClient,
+  ISearchStart,
   ISearchStrategy,
   SearchStrategyDependencies,
   ISearchSessionService,

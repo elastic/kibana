@@ -53,6 +53,9 @@ export const transformDashboardIn = async ({
       dashboardState;
     const { panelsJSON, sections } = transformPanelsIn(panels);
 
+    const { searchSourceJSON, references: searchSourceReferences } =
+      transformSearchSourceIn(kibanaSavedObjectMeta);
+
     const attributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -66,10 +69,10 @@ export const transformDashboardIn = async ({
       }),
       ...(sections?.length && { sections }),
       ...(kibanaSavedObjectMeta && {
-        kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
+        kibanaSavedObjectMeta: { searchSourceJSON },
       }),
     };
-    return { attributes, references: tagReferences, error: null };
+    return { attributes, references: [...tagReferences, ...searchSourceReferences], error: null };
   } catch (e) {
     return { attributes: null, references: null, error: e };
   }

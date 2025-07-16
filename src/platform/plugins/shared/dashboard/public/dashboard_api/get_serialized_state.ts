@@ -16,7 +16,7 @@ import type { DashboardAttributes } from '../../server';
 
 import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
-import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
+import { dataService } from '../services/kibana_services';
 import { DashboardApi } from './types';
 import { generateNewPanelIds } from './generate_new_panel_ids';
 
@@ -35,13 +35,11 @@ export const getSerializedState = ({
   generateNewIds,
   dashboardState,
   panelReferences,
-  searchSourceReferences,
 }: {
   controlGroupReferences?: Reference[];
   generateNewIds?: boolean;
   dashboardState: DashboardState;
   panelReferences?: Reference[];
-  searchSourceReferences?: Reference[];
 }): ReturnType<DashboardApi['getSerializedState']> => {
   const {
     query: {
@@ -110,23 +108,12 @@ export const getSerializedState = ({
     timeRestore,
     options,
     panels,
+    tags,
     timeFrom,
     title,
     timeTo,
   };
 
-  // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
-  // will be extracted by the server.
-  const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
-  const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences(searchSourceReferences ?? [], tags)
-    : searchSourceReferences ?? [];
-
-  const allReferences = [
-    ...references,
-    ...(prefixedPanelReferences ?? []),
-    ...(controlGroupReferences ?? []),
-    ...(searchSourceReferences ?? []),
-  ];
+  const allReferences = [...(prefixedPanelReferences ?? []), ...(controlGroupReferences ?? [])];
   return { attributes, references: allReferences };
 };

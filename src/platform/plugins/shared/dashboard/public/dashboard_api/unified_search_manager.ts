@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import {
   GlobalQueryStateFromUrl,
   RefreshInterval,
   connectToQueryState,
-  extractSearchSourceReferences,
   syncGlobalQueryStateWithUrl,
-  injectSearchSourceReferences,
 } from '@kbn/data-plugin/public';
 import {
   COMPARE_ALL_OPTIONS,
@@ -298,28 +294,19 @@ export function initializeUnifiedSearchManager(
     Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
   >;
 
-  const getState = (): {
-    state: Pick<
-      DashboardState,
-      'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
-    >;
-    references: SavedObjectReference[];
-  } => {
+  const getState = (): Pick<
+    DashboardState,
+    'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+  > => {
     // pinned filters are not serialized when saving the dashboard
     const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
-    const [{ filter, query }, references] = extractSearchSourceReferences({
-      filter: serializableFilters,
-      query: query$.value,
-    });
+
     return {
-      state: {
-        filters: filter ?? DEFAULT_DASHBOARD_STATE.filters,
-        query: (query as Query) ?? DEFAULT_DASHBOARD_STATE.query,
-        refreshInterval: refreshInterval$.value,
-        timeRange: timeRange$.value,
-        timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
-      },
-      references,
+      filters: serializableFilters ?? DEFAULT_DASHBOARD_STATE.filters,
+      query: query$.value ?? DEFAULT_DASHBOARD_STATE.query,
+      refreshInterval: refreshInterval$.value,
+      timeRange: timeRange$.value,
+      timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
     };
   };
 
@@ -370,19 +357,19 @@ export function initializeUnifiedSearchManager(
         }
       },
       getState,
-      injectReferences: (dashboardState: DashboardState, references: Reference[]) => {
-        const searchSourceValues = injectSearchSourceReferences(
-          {
-            filter: dashboardState.filters,
-          },
-          references
-        );
+      // injectReferences: (dashboardState: DashboardState, references: Reference[]) => {
+      //   const searchSourceValues = injectSearchSourceReferences(
+      //     {
+      //       filter: dashboardState.filters,
+      //     },
+      //     references
+      //   );
 
-        return {
-          ...dashboardState,
-          filters: searchSourceValues.filter ?? dashboardState.filters,
-        };
-      },
+      //   return {
+      //     ...dashboardState,
+      //     filters: searchSourceValues.filter ?? dashboardState.filters,
+      //   };
+      // },
     },
     cleanup: () => {
       controlGroupSubscriptions.unsubscribe();

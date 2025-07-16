@@ -19,6 +19,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -42,7 +43,7 @@ interface SetupDeps {
   contentManagement: ContentManagementServerSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;

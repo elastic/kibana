@@ -22,6 +22,8 @@ import {
   panelGridDataSchema,
   panelSchema,
   sectionSchema,
+  filterSchema,
+  querySchema,
   dashboardAttributesSchema,
   dashboardCreateOptionsSchema,
   dashboardCreateResultSchema,
@@ -33,6 +35,8 @@ import {
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
+export type DashboardFilter = TypeOf<typeof filterSchema>;
+export type DashboardQuery = TypeOf<typeof querySchema>;
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
 // Panel config has some defined types but also allows for custom keys added by embeddables

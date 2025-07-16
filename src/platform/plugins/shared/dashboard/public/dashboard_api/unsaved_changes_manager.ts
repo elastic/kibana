@@ -70,12 +70,11 @@ export function initializeUnsavedChangesManager({
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
-    onSave: (savedState: DashboardState, references: Reference[]) => void;
+    onSave: (savedState: DashboardState) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-  // lastSavedState contains filters with injected references
-  // references injected while loading dashboard saved object in loadDashboardState
+
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
   const hasPanelChanges$ = childrenUnsavedChanges$(layoutManager.api.children$).pipe(
@@ -184,12 +183,8 @@ export function initializeUnsavedChangesManager({
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
-      onSave: (savedState: DashboardState, references: Reference[]) => {
-        // savedState contains filters with extracted references
-        // lastSavedState$ should contain filters with injected references
-        lastSavedState$.next(
-          unifiedSearchManager.internalApi.injectReferences(savedState, references)
-        );
+      onSave: (savedState: DashboardState) => {
+        lastSavedState$.next(savedState);
       },
     },
   };
