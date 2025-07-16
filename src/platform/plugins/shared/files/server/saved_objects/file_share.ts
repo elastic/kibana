@@ -38,6 +38,11 @@ const properties: Properties = {
 export const fileShareObjectType: SavedObjectsType<FileShare> = {
   name: FILE_SHARE_SO_TYPE,
   hidden: true,
+  modelVersions: {
+    '1': {
+      changes: [{ type: 'data_backfill', backfillFn: (doc) => ({ ...doc }) }],
+    },
+  },
   namespaceType: 'agnostic', // These saved objects should be visible everywhere
   mappings: {
     dynamic: false,
