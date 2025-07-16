@@ -54,11 +54,29 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
+### Version 9.1.1+ [ec_version_9_1_1]
+
+`xpack.actions.email.recipient_allowlist`
+:    A list of allowed email recipient (`to`, `cc`, or `bcc`) patterns that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+
+### Version 9.1+ [ec_version_9_1]
+
+`xpack.actions.email.services.enabled`
+:   An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+
+`xpack.actions.email.services.ses.host`
+:   The SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+
+`xpack.actions.email.services.ses.port`
+:   The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
+
+`xpack.actions.webhook.ssl.pfx.enabled`
+:   Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to the [Webhook connector](/reference/connectors-kibana/webhook-action-type.md).
+
 ### Version 8.18+ [ec_version_8_18]
 
 `xpack.fleet.enableManagedLogsAndMetricsDataviews`
 :   Allow to disable the automatic creation of global dataviews `logs-*` and `metrics-*`.
-
 
 ### Version 8.16+ [ec_version_8_16]
 
