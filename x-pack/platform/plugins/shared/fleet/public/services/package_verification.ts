@@ -17,6 +17,8 @@ export function isPackageUnverified(
 ) {
   if (!('installationInfo' in pkg) || !pkg.installationInfo) return false;
 
+  console.log('packageVerificationKeyId', packageVerificationKeyId);
+
   const { verification_status: verificationStatus, verification_key_id: verificationKeyId } =
     pkg?.installationInfo;
 
