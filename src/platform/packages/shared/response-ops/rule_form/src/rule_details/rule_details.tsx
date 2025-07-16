@@ -115,6 +115,7 @@ export const RuleDetails = () => {
               placeholder={RULE_NAME_INPUT_TITLE}
               onChange={onNameChange}
               data-test-subj="ruleDetailsNameInput"
+              isInvalid={!!baseErrors?.name?.length}
             />
           </EuiFormRow>
         </EuiFlexItem>

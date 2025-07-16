@@ -36,7 +36,7 @@ exports[`LayerControl is rendered 1`] = `
           <EuiToolTip
             content="Hide all layers"
             delay="long"
-            disableScreenReaderOutput={false}
+            disableScreenReaderOutput={true}
             display="inlineBlock"
             position="top"
           >
@@ -54,7 +54,7 @@ exports[`LayerControl is rendered 1`] = `
           <EuiToolTip
             content="Show all layers"
             delay="long"
-            disableScreenReaderOutput={false}
+            disableScreenReaderOutput={true}
             display="inlineBlock"
             position="top"
           >
@@ -197,7 +197,7 @@ exports[`LayerControl isReadOnly 1`] = `
           <EuiToolTip
             content="Hide all layers"
             delay="long"
-            disableScreenReaderOutput={false}
+            disableScreenReaderOutput={true}
             display="inlineBlock"
             position="top"
           >
@@ -215,7 +215,7 @@ exports[`LayerControl isReadOnly 1`] = `
           <EuiToolTip
             content="Show all layers"
             delay="long"
-            disableScreenReaderOutput={false}
+            disableScreenReaderOutput={true}
             display="inlineBlock"
             position="top"
           >
@@ -294,7 +294,7 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
           <EuiToolTip
             content="Hide all layers"
             delay="long"
-            disableScreenReaderOutput={false}
+            disableScreenReaderOutput={true}
             display="inlineBlock"
             position="top"
           >
@@ -312,7 +312,7 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
           <EuiToolTip
             content="Show all layers"
             delay="long"
-            disableScreenReaderOutput={false}
+            disableScreenReaderOutput={true}
             display="inlineBlock"
             position="top"
           >
