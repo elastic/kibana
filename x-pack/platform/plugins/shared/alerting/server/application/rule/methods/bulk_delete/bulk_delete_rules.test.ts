@@ -236,6 +236,25 @@ describe('bulkDelete', () => {
     });
   });
 
+  test('swallows errors when soft deleting gaps fails', async () => {
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+    });
+    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+      statuses: [
+        { id: 'id1', type: 'alert', success: true },
+        { id: 'id2', type: 'alert', success: true },
+      ],
+    });
+
+    softDeleteGapsMock.mockRejectedValue(new Error('Boom!'));
+
+    await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to soft delete gaps for rules: id1,id2: Boom!'
+    );
+  });
+
   test('should try to delete rules, two successful and one with 500 error', async () => {
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [
@@ -420,7 +439,7 @@ describe('bulkDelete', () => {
     });
   });
 
-  test('should thow an error if number of matched rules greater than 10,000', async () => {
+  test('should throw an error if number of matched rules greater than 10,000', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
         alertTypeId: {

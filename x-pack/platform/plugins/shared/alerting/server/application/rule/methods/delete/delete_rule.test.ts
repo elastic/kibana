@@ -168,7 +168,7 @@ describe('delete()', () => {
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 
-  test('attempts to disable gaps', async () => {
+  test('attempts to soft delete gaps', async () => {
     await rulesClient.delete({ id: '1' });
     expect(softDeleteGapsMock).toHaveBeenCalledWith({
       ruleId: '1',
@@ -176,6 +176,14 @@ describe('delete()', () => {
       eventLogClient,
       eventLogger: rulesClientParams.eventLogger,
     });
+  });
+
+  test('swallows errors when soft deleting gaps fails', async () => {
+    softDeleteGapsMock.mockRejectedValueOnce(new Error('Boom!'));
+    await rulesClient.delete({ id: '1' });
+    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+      'delete(): Failed to soft delete gaps for rule 1: Boom!'
+    );
   });
 
   test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {
