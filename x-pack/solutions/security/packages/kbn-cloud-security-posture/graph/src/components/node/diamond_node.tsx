@@ -29,10 +29,10 @@ const NODE_SHAPE_HEIGHT = 98;
 export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick, documentsData } =
     props.data as EntityNodeViewModel;
-  
+
   // Extract entityName from assetData inside documentsData
   const entityName = documentsData?.find((doc) => doc.assetData)?.assetData?.entityName;
-  
+
   const { euiTheme } = useEuiTheme();
   return (
     <>
