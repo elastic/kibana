@@ -10,6 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import type { Literals } from './types';
 
+export const EDITOR_MARKER = 'marker_esql_editor';
+
 export const timeUnitsToSuggest: Literals[] = [
   {
     name: 'year',
