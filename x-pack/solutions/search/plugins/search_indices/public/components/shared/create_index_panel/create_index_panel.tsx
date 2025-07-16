@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -59,6 +60,9 @@ export const CreateIndexPanel = ({
     }
     return http.basePath.prepend('/app/observability/onboarding');
   }, [cloud, http]);
+
+  const { search } = useLocation();
+  const workflow = React.useMemo(() => new URLSearchParams(search).get('workflow'), [search]);
 
   return (
     <>
