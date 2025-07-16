@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
 import { loadDashboardApi } from './load_dashboard_api';
 
-jest.mock('./performance/query_performance_tracking', () => {
+jest.mock('../performance/query_performance_tracking', () => {
   return {
     startQueryPerformanceTracking: () => {},
   };
@@ -32,7 +32,7 @@ describe('loadDashboardApi', () => {
 
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('./get_dashboard_api').getDashboardApi = getDashboardApiMock;
+    require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
     getDashboardApiMock.mockReturnValue({
       api: {},
       cleanUp: jest.fn(),
@@ -40,7 +40,7 @@ describe('loadDashboardApi', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../services/dashboard_content_management_service').getDashboardContentManagementService =
+    require('../../services/dashboard_content_management_service').getDashboardContentManagementService =
       () => ({
         loadDashboardState: () => ({
           dashboardFound: true,
@@ -50,7 +50,7 @@ describe('loadDashboardApi', () => {
       });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../services/dashboard_backup_service').getDashboardBackupService = () => ({
+    require('../../services/dashboard_backup_service').getDashboardBackupService = () => ({
       getState: () => ({
         query: lastSavedQuery,
       }),
