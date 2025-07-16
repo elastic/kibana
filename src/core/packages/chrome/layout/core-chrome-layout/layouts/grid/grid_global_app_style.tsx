@@ -10,7 +10,10 @@
 import React from 'react';
 import { css, Global } from '@emotion/react';
 import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
-import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-chrome-layout-constants';
+import {
+  APP_FIXED_VIEWPORT_ID,
+  APP_MAIN_SCROLL_CONTAINER_ID,
+} from '@kbn/core-chrome-layout-constants';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
 import {
   useHackSyncPushFlyout,
@@ -105,7 +108,7 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   // push flyout should be pushing the application area, instead of body
-  main[class*='LayoutApplication'] {
+  #${APP_MAIN_SCROLL_CONTAINER_ID} {
     ${logicalCSS('padding-right', `var(${hackEuiPushFlyoutPaddingInlineEnd}, 0px)`)};
     ${logicalCSS('padding-left', `var(${hackEuiPushFlyoutPaddingInlineStart}, 0px)`)};
   }
