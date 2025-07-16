@@ -50,6 +50,12 @@ export function ContentPackObjectsList({
     const selection: Record<string, boolean> = {};
     rows.forEach(({ stream }) => (selection[stream.name] = true));
     setSelectedItems(selection);
+    onSelectionChange(
+      objects.filter(
+        (entry): entry is ContentPackStream =>
+          entry.type === 'stream' && selection[entry.stream.name]
+      )
+    );
 
     return rows;
   }, [objects]);
@@ -97,6 +103,12 @@ export function ContentPackObjectsList({
                 }
 
                 setSelectedItems(selection);
+                onSelectionChange(
+                  objects.filter(
+                    (entry): entry is ContentPackStream =>
+                      entry.type === 'stream' && selection[entry.stream.name]
+                  )
+                );
               }}
             />
           ),
