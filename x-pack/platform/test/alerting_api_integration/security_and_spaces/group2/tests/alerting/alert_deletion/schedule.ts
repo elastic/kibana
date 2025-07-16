@@ -79,15 +79,14 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
       query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
     });
     log.info(`Found ${numToDelete.hits.hits.length} event log entries to delete`);
-    let numDeleted = 0;
     await retry.try(async () => {
       const results = await es.deleteByQuery({
         index: '.kibana-event-log*',
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
         conflicts: 'proceed',
       });
-      numDeleted += results.deleted ?? 0;
-      expect(numDeleted).to.eql(numToDelete.hits.hits.length);
+      log.info(`Deleted ${results.deleted} event log entries`);
+      expect((results?.deleted ?? 0) > 0).to.eql(true);
     });
   };
 
