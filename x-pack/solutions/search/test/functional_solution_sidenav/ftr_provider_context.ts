@@ -10,4 +10,4 @@ import { pageObjects } from '../functional_search/page_objects';
 import { services } from '../functional_search/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
-export { pageObjects };
+export { pageObjects, services };

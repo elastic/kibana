@@ -27,6 +27,8 @@ import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { BannersPageObject } from './banners_page';
 import { NavigationalSearchPageObject } from './navigational_search';
 import { TagManagementPageObject } from './tag_management_page';
+import { ApiKeysPageProvider } from './api_keys_page';
+import { IndexManagementPageProvider } from './index_management_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -53,4 +55,6 @@ export const pageObjects = {
   banners: BannersPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   tagManagement: TagManagementPageObject,
+  apiKeys: ApiKeysPageProvider,
+  indexManagement: IndexManagementPageProvider,
 };

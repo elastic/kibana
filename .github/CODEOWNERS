@@ -2110,7 +2110,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional/page_objects/security_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/role_mappings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/copy_saved_objects_to_space_page.ts @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/39002
-/x-pack/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
+/x-pack/platform/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/account_settings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/apps/user_profiles @elastic/kibana-security
 /x-pack/test/common/services/spaces.ts @elastic/kibana-security
@@ -2327,6 +2327,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/accessibility/apps/management.ts @elastic/kibana-management
 /src/platform/test/accessibility/apps/console.ts @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
 /x-pack/test/functional/apps/grok_debugger @elastic/kibana-management
 /x-pack/test/functional/apps/index_lifecycle_management @elastic/kibana-management

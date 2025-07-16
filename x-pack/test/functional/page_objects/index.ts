@@ -27,7 +27,8 @@ import { MaintenanceWindowsPageProvider } from '@kbn/test-suites-xpack-platform/
 import { BannersPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/banners_page';
 import { NavigationalSearchPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/navigational_search';
 import { TagManagementPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/tag_management_page';
-import { ApiKeysPageProvider } from './api_keys_page';
+import { ApiKeysPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/api_keys_page';
+import { IndexManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_management_page';
 import { AssetDetailsProvider } from './asset_details';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
@@ -35,7 +36,6 @@ import { EmbeddedConsoleProvider } from './embedded_console';
 import { GeoFileUploadPageObject } from './geo_file_upload';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
-import { IndexManagementPageProvider } from './index_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
