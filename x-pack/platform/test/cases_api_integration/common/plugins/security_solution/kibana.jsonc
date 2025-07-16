@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/security-solution-fixtures-plugin",
-  "owner": "@elastic/response-ops",
+  "owner": "@elastic/kibana-cases",
   "plugin": {
     "id": "securitySolutionFixtures",
     "server": true,
