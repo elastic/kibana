@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const Fs = require('fs');
 const ts = require('typescript');
 const { getExportCode, getExportNamedNamespaceCode } = require('../helpers/codegen');
-const tsEstree = require('@typescript-eslint/typescript-estree');
 
 const { getExportNamesDeep } = require('../helpers/exports');
 
@@ -40,22 +38,12 @@ module.exports = {
 
         /** @type Parser */
         const parser = (path) => {
-          const code = Fs.readFileSync(path, 'utf-8');
-          const sourceFile = ts.createSourceFile(
-            path,
-            code,
-            ts.ScriptTarget.ESNext,
-            true,
-            ts.ScriptKind.TS
-          );
-
           const program = ts.createProgram([path], {
             allowJs: true,
             target: ts.ScriptTarget.ESNext,
             module: ts.ModuleKind.CommonJS,
           });
 
-          // Use this instead of result.services.program.getSourceFile(path)
           return program.getSourceFile(path);
         };
 
