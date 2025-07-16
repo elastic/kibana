@@ -18,9 +18,6 @@ import type { FileUploadManager } from '@kbn/file-upload';
 import type { FileUploadPluginStart, MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { IndexUpdateService } from './index_update_service';
 
-export const ROW_PLACEHOLDER_PREFIX = 'row-placeholder-';
-export const COLUMN_PLACEHOLDER_PREFIX = 'column-placeholder-';
-
 export interface EditLookupIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;

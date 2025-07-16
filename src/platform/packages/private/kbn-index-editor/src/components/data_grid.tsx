@@ -23,7 +23,8 @@ import {
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, times } from 'lodash';
-import { COLUMN_PLACEHOLDER_PREFIX, KibanaContextExtra } from '../types';
+import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
+import { KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './value_input_control';
 import { AddColumnHeader } from './add_column_header';
 
@@ -117,7 +118,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - props.columns.length;
     const addColumnPlaceholders =
       missingPlaceholders > 0
-        ? times(missingPlaceholders, (idx) => `${COLUMN_PLACEHOLDER_PREFIX}-${idx}`)
+        ? times(missingPlaceholders, (idx) => `${COLUMN_PLACEHOLDER_PREFIX}${idx}`)
         : [];
 
     return [...newColumns, ...preservedOrder, ...addColumnPlaceholders];

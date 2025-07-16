@@ -41,8 +41,8 @@ import {
   withLatestFrom,
   firstValueFrom,
 } from 'rxjs';
-import { ROW_PLACEHOLDER_PREFIX } from './types';
 import { parsePrimitive } from './utils';
+import { ROW_PLACEHOLDER_PREFIX } from './constants';
 
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
