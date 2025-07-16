@@ -439,15 +439,11 @@ export const streamEnrichmentMachine = setup({
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteProcessor', params: ({ event }) => event },
-                        // { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                     'processor.save': {
                       target: 'idle',
-                      actions: [
-                        { type: 'reassignProcessors' },
-                        // { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                      ],
+                      actions: [{ type: 'reassignProcessors' }],
                     },
                   },
                 },
@@ -460,26 +456,17 @@ export const streamEnrichmentMachine = setup({
                         { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
-                    'processor.cancel': {
-                      target: 'idle',
-                      // actions: [
-                      //   { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                      // ],
-                    },
+                    'processor.cancel': 'idle',
                     'processor.delete': {
                       target: 'idle',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteProcessor', params: ({ event }) => event },
-                        // { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
                     'processor.save': {
                       target: 'idle',
-                      actions: [
-                        { type: 'reassignProcessors' },
-                        // { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
-                      ],
+                      actions: [{ type: 'reassignProcessors' }],
                     },
                   },
                 },
