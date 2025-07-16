@@ -38,7 +38,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <aside
+    <div
       className="side-nav"
       css={css`
         background-color: ${euiTheme.colors.backgroundBasePlain};
@@ -52,7 +52,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
       `}
     >
       {children}
-    </aside>
+    </div>
   );
 };
 
