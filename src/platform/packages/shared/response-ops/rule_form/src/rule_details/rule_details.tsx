@@ -109,7 +109,6 @@ export const RuleDetails = () => {
             error={baseErrors?.name}
           >
             <EuiFieldText
-              isInvalid={!!baseErrors?.name?.length}
               fullWidth
               value={name}
               placeholder={RULE_NAME_INPUT_TITLE}
