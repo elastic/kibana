@@ -10,16 +10,31 @@ import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
 import { estypes } from '@elastic/elasticsearch';
 import { Processor } from '../../../../common/types';
 
+/**
+ * This function fetches a Pipeline Structure Tree of type {@link PipelineTreeNode}
+ * with a root pipeline {@link rootPipelineName}
+ *
+ * Note: We fetch MAX_TREE_LEVEL + 1 levels of pipelines, since this generated
+ * structure tree will be used by the {@link PipelineStructureTree} component, which
+ * displays MAX_TREE_LEVEL levels of pipeline. The tree nodes at the MAX_TREE_LEVEL level
+ * have child nodes "+X more pipelines" so we need to know how many children
+ * the MAX_TREE_LEVEL level nodes have. Therefore we fetch one more level
+ * (MAX_TREE_LEVEL + 1) as well.
+ *
+ * @param allPipelines All pipelines as returned by Elasticsearch
+ * @param rootPipelineId The pipeline
+ * @param level The level of the current {@link rootPipelineName} pipeline
+ */
 export const fetchPipelineStructureTree = (
   allPipelines: {
     [key: string]: estypes.IngestPipeline;
   },
-  rootPipelineName: string,
+  rootPipelineId: string,
   level: number = 1
 ): PipelineTreeNode => {
-  const rootPipeline = allPipelines[rootPipelineName];
+  const rootPipeline = allPipelines[rootPipelineId];
   const pipelineNode: PipelineTreeNode = {
-    pipelineName: rootPipelineName,
+    pipelineName: rootPipelineId,
     isManaged: Boolean(rootPipeline?._meta?.managed === true),
     isDeprecated: Boolean(rootPipeline?.deprecated === true),
     children: [],
