@@ -747,7 +747,9 @@ describe('Fleet integrations', () => {
           message: 'Invalid date format. Use "latest" or "YYYY-MM-DD" format. UTC time.',
         },
         {
-          date: '2020-10-31',
+          // Test exact "too far in the past" boundary - exactly 18 months ago (without +1 day)
+          // This tests the precise boundary condition rather than an arbitrary old date
+          date: moment.utc().subtract(18, 'months').format('YYYY-MM-DD'),
           message:
             'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.',
         },
