@@ -15,7 +15,10 @@ import React, { PropsWithChildren, useCallback, type FC, useState } from 'react'
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { OverrideWarningModal } from './modals/override_warning_modal';
+import {
+  OVERRIDE_WARNING_DISMISSED_STORAGE_KEY,
+  OverrideWarningModal,
+} from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
 import { KibanaContextExtra } from '../types';
@@ -43,7 +46,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   noResults,
 }) => {
   const {
-    services: { indexUpdateService },
+    services: { indexUpdateService, storage },
   } = useKibana<KibanaContextExtra>();
   const [showOverrideWarning, setShowOverrideWarning] = useState(false);
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
@@ -64,14 +67,20 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
         return;
       }
 
-      if (docsPendingToBeSaved.size > 0 || columnsPendingToBeSaved.length > 0) {
+      const dontAskMeAgainFlag = storage.get(OVERRIDE_WARNING_DISMISSED_STORAGE_KEY);
+      const hasPendingChanges = docsPendingToBeSaved.size > 0 || columnsPendingToBeSaved.length > 0;
+
+      if (hasPendingChanges && !dontAskMeAgainFlag) {
         setShowOverrideWarning(true);
         return;
       }
 
+      indexUpdateService.discardUnsavedChanges();
+      indexUpdateService.discardUnsavedColumns();
+
       await fileUploadManager.addFiles(files);
     },
-    [fileUploadManager, docsPendingToBeSaved, columnsPendingToBeSaved]
+    [fileUploadManager, docsPendingToBeSaved, columnsPendingToBeSaved, storage, indexUpdateService]
   );
 
   const { getRootProps, getInputProps, isDragActive, inputRef, acceptedFiles } = useDropzone({

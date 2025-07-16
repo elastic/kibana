@@ -7,9 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiText,
+  EuiModal,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextExtra } from '../../types';
+
+export const OVERRIDE_WARNING_DISMISSED_STORAGE_KEY = 'indexEditor.OverrideWarningDismissed';
 
 interface OverrideWarningModalProps {
   onCancel: () => void;
@@ -20,27 +38,72 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
   onCancel,
   onContinue,
 }) => {
+  const [dontAskMeAgainCheck, setDontAskMeAgainCheck] = useState(false);
+
+  const {
+    services: { storage },
+  } = useKibana<KibanaContextExtra>();
+
+  const continueHandler = () => {
+    if (dontAskMeAgainCheck) {
+      storage.set(OVERRIDE_WARNING_DISMISSED_STORAGE_KEY, true);
+    }
+    onContinue();
+  };
+
   return (
-    <EuiConfirmModal
-      title={
-        <FormattedMessage
-          id="indexEditor.overrideWarningModal.title"
-          defaultMessage="This action will override your data"
-        />
-      }
-      onCancel={onCancel}
-      onConfirm={onContinue}
-      cancelButtonText={
-        <FormattedMessage id="indexEditor.overrideWarningModal.cancel" defaultMessage="Cancel" />
-      }
-      confirmButtonText={
-        <FormattedMessage id="indexEditor.overrideWarningModal.confirm" defaultMessage="Continue" />
-      }
-    >
-      <FormattedMessage
-        id="indexEditor.overrideWarningModal.body"
-        defaultMessage="This action will override the unsaved data in the index."
-      />
-    </EuiConfirmModal>
+    <EuiModal style={{ width: 700 }} onClose={onCancel}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="indexEditor.overrideWarningModal.title"
+            defaultMessage="This action will override the unsaved changes in your table."
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        <EuiText size="m">
+          <FormattedMessage
+            id="indexEditor.overrideWarningModal.body"
+            defaultMessage="You have unsaved changes in your table. If you continue, these changes will be lost."
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+      </EuiModalBody>
+
+      <EuiModalFooter css={{ paddingBlockStart: 0 }}>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox
+              id="dismiss-discard-starred-query-modal"
+              label={i18n.translate('esqlEditor.discardStarredQueryModal.dismissButtonLabel', {
+                defaultMessage: "Don't ask me again",
+              })}
+              checked={dontAskMeAgainCheck}
+              onChange={(e) => setDontAskMeAgainCheck(e.target.checked)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onCancel} color="primary">
+                  {i18n.translate('esqlEditor.overrideWarningModal.cancelLabel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={continueHandler}>
+                  {i18n.translate('esqlEditor.overrideWarningModal.continue', {
+                    defaultMessage: 'Continue',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

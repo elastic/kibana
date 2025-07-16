@@ -41,6 +41,7 @@ import {
   withLatestFrom,
   firstValueFrom,
 } from 'rxjs';
+import { difference } from 'lodash';
 import { ROW_PLACEHOLDER_PREFIX } from './types';
 import { parsePrimitive } from './utils';
 
@@ -188,18 +189,20 @@ export class IndexUpdateService {
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
   ]).pipe(
     map(([dataView, pendingColumnsToBeSaved]) => {
-      for (const column of pendingColumnsToBeSaved) {
-        if (!dataView.fields.getByName(column.name)) {
-          dataView.fields.add({
+      const unsavedFields = pendingColumnsToBeSaved
+        .filter((column) => !dataView.fields.getByName(column.name))
+        .map((column) => {
+          return dataView.fields.create({
             name: column.name,
             type: KBN_FIELD_TYPES.UNKNOWN,
             aggregatable: true,
             searchable: true,
           });
-        }
-      }
+        });
+
       return (
         dataView.fields
+          .concat(unsavedFields)
           // Exclude metadata fields. TODO check if this is the right way to do it
           // @ts-ignore
           .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
@@ -378,15 +381,30 @@ export class IndexUpdateService {
     this._subscription.add(
       this.actions$
         .pipe(
-          scan((acc: ColumnAddition[], action) => {
+          withLatestFrom(this.dataView$),
+          scan((acc: ColumnAddition[], [action, dataView]) => {
             if (action.type === 'add-column') {
               return [...acc, action.payload];
             }
             if (action.type === 'saved') {
-              // Filter out columns that were saved with a value
-              return acc.filter((column) =>
+              action.payload.updates.forEach((update) => {});
+              // Filter out columns that were saved with a value from _pendingColumnsToBeSaved$
+              const unsavedColumns = acc.filter((column) =>
                 action.payload.updates.every((update) => update.value[column.name] === undefined)
               );
+
+              // Add saved columns to the data view
+              const savedColumns = difference(acc, unsavedColumns);
+              savedColumns.forEach((column) => {
+                dataView.fields.add({
+                  name: column.name,
+                  type: KBN_FIELD_TYPES.UNKNOWN,
+                  aggregatable: true,
+                  searchable: true,
+                });
+              });
+
+              return unsavedColumns;
             }
             if (action.type === 'new-row-added') {
               // Filter out columns that were populated when adding a new row

@@ -21,7 +21,6 @@ import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataLoadingState, DataTableColumnsMeta, UnifiedDataTable } from '@kbn/unified-data-table';
 import React, { FC, Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -260,11 +259,18 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
   columnNames,
 }) => {
   const {
-    services: { data, theme, uiSettings, notifications, dataViewFieldEditor, fieldFormats },
+    services: {
+      data,
+      theme,
+      uiSettings,
+      notifications,
+      dataViewFieldEditor,
+      fieldFormats,
+      storage,
+    },
   } = useKibana<KibanaContextExtra>();
 
   const services = useMemo(() => {
-    const storage = new Storage(localStorage);
     return {
       data,
       theme,
@@ -274,7 +280,7 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
       fieldFormats,
       storage,
     };
-  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats]);
+  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats, storage]);
 
   const columnsMeta = useMemo(() => {
     return columnNames.reduce((acc, columnName) => {

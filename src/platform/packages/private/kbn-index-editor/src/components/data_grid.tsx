@@ -11,7 +11,6 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { css } from '@emotion/react';
 import {
   CustomCellRenderer,
@@ -57,6 +56,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       notifications,
       dataViewFieldEditor,
       indexUpdateService,
+      storage,
     },
   } = useKibana<KibanaContextExtra>();
 
@@ -131,8 +131,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [props.columns]);
 
   const services = useMemo(() => {
-    const storage = new Storage(localStorage);
-
     return {
       data,
       theme,
@@ -142,7 +140,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       fieldFormats,
       storage,
     };
-  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats]);
+  }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats, storage]);
 
   const onValueChange = useCallback(
     (docId: string, update: any) => {
