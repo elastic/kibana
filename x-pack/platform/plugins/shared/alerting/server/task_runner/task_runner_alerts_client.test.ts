@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
   RuleExecutorOptions,
@@ -125,7 +124,6 @@ jest.mock('../lib/alerting_event_logger/alerting_event_logger');
 jest.mock('../rules_client/lib/get_alert_from_raw');
 const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
-let fakeTimer: sinon.SinonFakeTimers;
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const taskRunnerLogger = createTaskRunnerLogger({ logger, tags: ['1', 'test'] });
 
@@ -162,11 +160,12 @@ describe('Task Runner', () => {
     let mockedTaskInstance: ConcreteTaskInstance;
 
     beforeAll(() => {
-      fakeTimer = sinon.useFakeTimers();
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(DATE_1970));
       mockedTaskInstance = mockTaskInstance();
     });
 
-    afterAll(() => fakeTimer.restore());
+    afterAll(() => jest.useRealTimers());
 
     const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
     const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();

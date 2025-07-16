@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './check_rule_type_usage';
-export * from './get_security_telemetry_stats';
-export * from './remove_time_fields_from_telemetry_stats';
+
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Share', function () {
+    loadTestFile(require.resolve('./share_from_custom_space'));
+  });
+}
