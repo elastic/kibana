@@ -10,8 +10,8 @@
 import { useEffect } from 'react';
 import { useEuiThemeCSSVariables } from '@elastic/eui';
 
-export const hackEuiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding-inline-end';
-export const hackEuiPushFlyoutPaddingInlineStart = '--eui-push-flyout-padding-inline-start';
+export const hackEuiPushFlyoutPaddingInlineEnd = '--euiPushFlyoutOffsetInlineEnd';
+export const hackEuiPushFlyoutPaddingInlineStart = '--euiPushFlyoutOffsetInlineStart';
 
 /**
  * This is definitely a hack for experimental purposes.
@@ -20,59 +20,59 @@ export const hackEuiPushFlyoutPaddingInlineStart = '--eui-push-flyout-padding-in
  * https://github.com/elastic/eui/issues/8820
  */
 export function useHackSyncPushFlyout() {
-  const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
-
-  useEffect(() => {
-    const targetNode = document.body;
-
-    const callback = (mutations?: MutationRecord[]) => {
-      mutations?.forEach((mutation) => {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-          const oldValue = mutation.oldValue;
-          const newValue = (mutation.target as HTMLElement).getAttribute(mutation.attributeName);
-          // eslint-disable-next-line no-console
-          console.log('HackSyncPushFlyout: Style attribute changed: ', oldValue, '->', newValue);
-        }
-      });
-      // If the style attribute has changed, we need to re-evaluate the padding values
-
-      const paddingInline = targetNode.style.paddingInline;
-      let paddingInlineStart = targetNode.style.paddingInlineStart;
-      let paddingInlineEnd = targetNode.style.paddingInlineEnd;
-
-      const [start, end] = paddingInline?.split(' ') ?? ['', ''];
-
-      paddingInlineStart = paddingInlineStart || start || '0px';
-      paddingInlineEnd = paddingInlineEnd || end || '0px';
-
-      // eslint-disable-next-line no-console
-      console.log(
-        'HackSyncPushFlyout:',
-        JSON.stringify({
-          paddingInlineStart,
-          paddingInlineEnd,
-        })
-      );
-
-      setGlobalCSSVariables({
-        [hackEuiPushFlyoutPaddingInlineStart]: paddingInlineStart,
-        [hackEuiPushFlyoutPaddingInlineEnd]: paddingInlineEnd,
-      });
-    };
-
-    const observer = new MutationObserver(callback);
-
-    observer.observe(targetNode, {
-      attributes: true,
-      attributeFilter: ['style'],
-      attributeOldValue: true,
-    });
-
-    // Initial call to set the CSS variables based on the current style
-    callback();
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [setGlobalCSSVariables]);
+  // const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
+  //
+  // useEffect(() => {
+  //   const targetNode = document.body;
+  //
+  //   const callback = (mutations?: MutationRecord[]) => {
+  //     mutations?.forEach((mutation) => {
+  //       if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+  //         const oldValue = mutation.oldValue;
+  //         const newValue = (mutation.target as HTMLElement).getAttribute(mutation.attributeName);
+  //         // eslint-disable-next-line no-console
+  //         console.log('HackSyncPushFlyout: Style attribute changed: ', oldValue, '->', newValue);
+  //       }
+  //     });
+  //     // If the style attribute has changed, we need to re-evaluate the padding values
+  //
+  //     const paddingInline = targetNode.style.paddingInline;
+  //     let paddingInlineStart = targetNode.style.paddingInlineStart;
+  //     let paddingInlineEnd = targetNode.style.paddingInlineEnd;
+  //
+  //     const [start, end] = paddingInline?.split(' ') ?? ['', ''];
+  //
+  //     paddingInlineStart = paddingInlineStart || start || '0px';
+  //     paddingInlineEnd = paddingInlineEnd || end || '0px';
+  //
+  //     // eslint-disable-next-line no-console
+  //     console.log(
+  //       'HackSyncPushFlyout:',
+  //       JSON.stringify({
+  //         paddingInlineStart,
+  //         paddingInlineEnd,
+  //       })
+  //     );
+  //
+  //     setGlobalCSSVariables({
+  //       [hackEuiPushFlyoutPaddingInlineStart]: paddingInlineStart,
+  //       [hackEuiPushFlyoutPaddingInlineEnd]: paddingInlineEnd,
+  //     });
+  //   };
+  //
+  //   const observer = new MutationObserver(callback);
+  //
+  //   observer.observe(targetNode, {
+  //     attributes: true,
+  //     attributeFilter: ['style'],
+  //     attributeOldValue: true,
+  //   });
+  //
+  //   // Initial call to set the CSS variables based on the current style
+  //   callback();
+  //
+  //   return () => {
+  //     observer.disconnect();
+  //   };
+  // }, [setGlobalCSSVariables]);
 }

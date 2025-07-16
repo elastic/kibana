@@ -127,7 +127,7 @@
     "@elastic/ecs": "^8.11.5",
     "@elastic/elasticsearch": "9.0.3",
     "@elastic/ems-client": "8.6.3",
-    "@elastic/eui": "104.1.0",
+    "@elastic/eui": "./eui.tgz",
     "@elastic/eui-amsterdam": "npm:@elastic/eui@104.1.0-amsterdam.0",
     "@elastic/eui-theme-borealis": "3.1.0",
     "@elastic/filesaver": "1.1.2",
