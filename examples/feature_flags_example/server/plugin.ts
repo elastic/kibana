@@ -30,7 +30,7 @@ export class FeatureFlagsExamplePlugin implements Plugin {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: any) {
+  public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     // Register server side APIs
     defineRoutes(router);
