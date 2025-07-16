@@ -52,6 +52,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
       data-test-subj="onechatPageConversations"
       grow={false}
       panelled={false}
+      responsive={[]}
     >
       {isSidebarOpen && (
         <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar">
