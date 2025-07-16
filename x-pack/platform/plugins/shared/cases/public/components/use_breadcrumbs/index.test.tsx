@@ -26,9 +26,6 @@ jest.mock('../../common/lib/kibana', () => {
     KibanaServices: {
       ...originalModule.KibanaServices,
       get: () => mockGetKibanaServices(),
-      getConfig: () => ({
-        incrementalId: { enabled: true },
-      }),
     },
     useNavigation: jest.fn().mockReturnValue({
       getAppUrl: jest.fn((params?: { deepLinkId: string }) => params?.deepLinkId ?? '/test'),
