@@ -21,8 +21,8 @@ import {
 
 import type { IngestPipeline } from '@kbn/file-upload-plugin/common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { FileAnalysis } from '@kbn/file-upload-common';
-import { getFieldsFromMappings } from '@kbn/file-upload-common/src/file_manager/merge_tools';
+import type { FileAnalysis } from '@kbn/file-upload';
+import { getFieldsFromMappings } from '@kbn/file-upload/file_upload_manager';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
 import { CombinedFieldLabel } from './combined_field_label';
