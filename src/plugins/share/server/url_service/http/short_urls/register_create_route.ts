@@ -97,7 +97,7 @@ export const registerCreateRoute = (
       }
 
       const urlFromParams = (params as { url: string | undefined }).url;
-      if (urlFromParams && !isInternalURL(urlFromParams, http.basePath.get(req))) {
+      if (urlFromParams && !isInternalURL(urlFromParams)) {
         return res.customError({
           statusCode: 400,
           body: 'Can not create a short URL for an external URL.',
