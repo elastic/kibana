@@ -46,7 +46,7 @@ export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
@@ -65,9 +65,9 @@ export const Processes = () => {
   });
 
   const hostTerm = useMemo(() => {
-    const field = getFieldByType(asset.type) ?? asset.type;
-    return { [field]: asset.name };
-  }, [asset.name, asset.type]);
+    const field = getFieldByType(entity.type) ?? entity.type;
+    return { [field]: entity.name };
+  }, [entity.name, entity.type]);
 
   const searchFilter = useMemo(() => parseSearchString(searchText), [searchText]);
   const parsedSortBy = useMemo(
