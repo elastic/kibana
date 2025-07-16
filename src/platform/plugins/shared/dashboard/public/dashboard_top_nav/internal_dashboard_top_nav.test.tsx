@@ -12,7 +12,6 @@ import { render } from '@testing-library/react';
 import { buildMockDashboardApi } from '../mocks';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { dataService, navigationService } from '../services/kibana_services';
 import { BehaviorSubject } from 'rxjs';
@@ -25,24 +24,9 @@ jest.mock('../dashboard_app/top_nav/dashboard_editing_toolbar', () => ({
   },
 }));
 describe('Internal dashboard top nav', () => {
-  const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
-    if (badges) {
-      return badges?.map((badge, index) => (
-        <div key={index} className="badge">
-          {badge?.badgeText}
-        </div>
-      ));
-    } else {
-      return <div>Top Nav</div>;
-    }
-  };
-
   beforeEach(() => {
     setMockedPresentationUtilServices();
     dataService.query.filterManager.getFilters = jest.fn().mockReturnValue([]);
-    // topNavMenu is mocked as a jest.fn() so we want to mock it with a component
-    // @ts-ignore type issue with the mockTopNav for this test suite
-    navigationService.ui.TopNavMenu = jest.fn(({ badges }: TopNavMenuProps) => mockTopNav(badges));
   });
 
   it('should not render the managed badge by default', async () => {
