@@ -41,9 +41,9 @@ import {
   withLatestFrom,
   firstValueFrom,
 } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX } from './constants';
-
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
 const UNDO_EMIT_MS = 500; // 0.5 seconds
@@ -74,8 +74,6 @@ export class IndexUpdateService {
   constructor(private readonly http: HttpStart, private readonly data: DataPublicPluginStart) {
     this.listenForUpdates();
   }
-
-  private _rowPlaceholderCount = 0;
 
   private _indexName$ = new BehaviorSubject<string | null>(null);
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
@@ -404,7 +402,7 @@ export class IndexUpdateService {
 
   private buildPlaceholderRow(): DataTableRecord {
     return buildDataTableRecord({
-      _id: `${ROW_PLACEHOLDER_PREFIX}${this._rowPlaceholderCount++}`,
+      _id: `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`,
     });
   }
 
