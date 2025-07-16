@@ -873,11 +873,11 @@ x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/appex-ai-i
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-page-attachment-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/kbn-page-attachment-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
