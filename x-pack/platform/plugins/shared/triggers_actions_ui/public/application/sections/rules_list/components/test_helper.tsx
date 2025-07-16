@@ -10,11 +10,6 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
-import React from 'react';
 import type { ValidationResult } from '../../../../types';
 
 export const mockedRulesData = [
@@ -301,16 +296,4 @@ export const ruleType = {
   },
   ruleParamsExpression: () => null,
   requiresAppContext: false,
-};
-
-export const getRenderWithProviders = ({ queryClient }: { queryClient: QueryClient }) => {
-  const Providers = ({ children }: { children: React.ReactNode }) => (
-    <IntlProvider locale="en">
-      <PerformanceContextProvider>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </PerformanceContextProvider>
-    </IntlProvider>
-  );
-
-  return (ui: React.ReactNode) => render(ui, { wrapper: Providers });
 };

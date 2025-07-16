@@ -9,15 +9,18 @@ import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plug
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import { IToasts } from '@kbn/core/public';
-import { QueryClient } from '@tanstack/react-query';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   cleanup,
   fireEvent,
+  render,
   screen,
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import * as React from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -35,12 +38,10 @@ import { RulesList, percentileFields } from './rules_list';
 import { RulesListDocLink } from './rules_list_doc_link';
 import {
   getDisabledByLicenseRuleTypeFromApi,
-  getRenderWithProviders,
   mockedRulesData,
   ruleType,
   ruleTypeFromApi,
 } from './test_helper';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -133,13 +134,10 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 });
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
-
 jest.mock('@kbn/ebt-tools');
+
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
-usePerformanceContextMock.mockReturnValue({
-  onPageReady: jest.fn(),
-  onPageRefreshStart: jest.fn(),
-});
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
@@ -163,7 +161,15 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderWithProviders = getRenderWithProviders({ queryClient });
+const AllTheProviders = ({ children }: { children: any }) => (
+  <IntlProvider locale="en">
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </IntlProvider>
+);
+
+const renderWithProviders = (ui: any) => {
+  return render(ui, { wrapper: AllTheProviders });
+};
 
 describe('Update Api Key', () => {
   const addSuccess = jest.fn();
@@ -211,7 +217,7 @@ describe('Update Api Key', () => {
 
   it('Have the option to update API key', async () => {
     bulkUpdateAPIKey.mockResolvedValueOnce({ errors: [], total: 1, rules: [], skipped: [] });
-    renderWithProviders(<RulesList />);
+    const s = renderWithProviders(<RulesList />);
 
     expect(await screen.findByText('test rule ok')).toBeInTheDocument();
 

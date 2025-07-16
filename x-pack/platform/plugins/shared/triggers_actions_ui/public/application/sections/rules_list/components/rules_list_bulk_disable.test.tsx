@@ -6,10 +6,12 @@
  */
 import { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { QueryClient } from '@tanstack/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   cleanup,
   fireEvent,
+  render,
   screen,
   waitFor,
   waitForElementToBeRemoved,
@@ -22,7 +24,6 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
 import {
   getDisabledByLicenseRuleTypeFromApi,
-  getRenderWithProviders,
   mockedRulesData,
   ruleType,
   ruleTypeFromApi,
@@ -107,11 +108,9 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 });
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 jest.mock('@kbn/ebt-tools');
+
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
-usePerformanceContextMock.mockReturnValue({
-  onPageReady: jest.fn(),
-  onPageRefreshStart: jest.fn(),
-});
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
@@ -139,7 +138,15 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderWithProviders = getRenderWithProviders({ queryClient });
+const AllTheProviders = ({ children }: { children: any }) => (
+  <IntlProvider locale="en">
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </IntlProvider>
+);
+
+const renderWithProviders = (ui: any) => {
+  return render(ui, { wrapper: AllTheProviders });
+};
 
 describe('Rules list Bulk Disable', () => {
   beforeAll(async () => {
