@@ -50,7 +50,7 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
       return ELSER_ON_ML_NODE_INFERENCE_ID;
     }
     return knowledgeBase.status.value?.currentInferenceId;
-  }, [knowledgeBase.status.value?.currentInferenceId, modelOptions]);
+  }, [knowledgeBase.status.value?.currentInferenceId]);
 
   const { installProductDoc } = useGetProductDoc(currentlyDeployedInferenceId);
 
