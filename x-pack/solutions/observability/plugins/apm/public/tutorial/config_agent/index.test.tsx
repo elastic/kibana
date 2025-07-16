@@ -89,7 +89,7 @@ describe('TutorialConfigAgent', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
-        -Delastic.apm.secret_token= \\\\
+        -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
         -Delastic.apm.server_url=http://localhost:8200 \\\\
         -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -103,7 +103,7 @@ describe('TutorialConfigAgent', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
-        -Delastic.apm.secret_token=foo token \\\\
+        -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
         -Delastic.apm.server_url=foo url \\\\
         -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -141,7 +141,7 @@ describe('TutorialConfigAgent', () => {
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
-          -Delastic.apm.secret_token= \\\\
+          -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
           -Delastic.apm.server_url=http://localhost:8200 \\\\
           -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
@@ -178,7 +178,7 @@ describe('TutorialConfigAgent', () => {
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
-          -Delastic.apm.secret_token= \\\\
+          -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
           -Delastic.apm.server_url=http://localhost:8200 \\\\
           -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
@@ -221,7 +221,7 @@ describe('TutorialConfigAgent', () => {
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
-          -Delastic.apm.secret_token=cloud_token \\\\
+          -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
           -Delastic.apm.server_url=cloud_url \\\\
           -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
@@ -263,7 +263,7 @@ describe('TutorialConfigAgent', () => {
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
-          -Delastic.apm.secret_token=apm_cloud_token \\\\
+          -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
           -Delastic.apm.server_url=apm_cloud_url \\\\
           -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
@@ -299,7 +299,7 @@ describe('TutorialConfigAgent', () => {
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
-          -Delastic.apm.secret_token= \\\\
+          -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
           -Delastic.apm.server_url=http://localhost:8200 \\\\
           -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
@@ -360,7 +360,7 @@ describe('TutorialConfigAgent', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
-        -Delastic.apm.secret_token= \\\\
+        -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
         -Delastic.apm.server_url=http://localhost:8200 \\\\
         -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -399,7 +399,7 @@ describe('TutorialConfigAgent', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
-        -Delastic.apm.secret_token=cloud_token \\\\
+        -Delastic.apm.secret_token=&lt;APM_SECRET_TOKEN&gt; \\\\
         -Delastic.apm.server_url=cloud_url \\\\
         -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
