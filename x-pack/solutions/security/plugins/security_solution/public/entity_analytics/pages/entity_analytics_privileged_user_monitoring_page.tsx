@@ -1,4 +1,4 @@
-/*
+op/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
@@ -40,6 +40,7 @@ import { PrivilegedUserMonitoringManageDataSources } from '../components/privile
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
+import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -109,8 +110,8 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
