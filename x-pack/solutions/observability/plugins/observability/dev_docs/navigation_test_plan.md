@@ -32,9 +32,9 @@ Side navigation opens and closes correctly, based on the deployment type (classi
 - Expect classic view to have all plugins displayed in a single column for the Kibana home page, with the observability nav bar to appear once the user navigates to the solution.
 
   - Once the user navigates to the observability solution, the nav bar should appear with the obs plugins as outlined in these plugin files:
-    - [Observability](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability/public/plugin.ts).
-    - [Synthetics](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/public/plugin.ts).
-    - [User Experience](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/ux/public/plugin.ts).
+    - [Observability](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability/public/plugin.ts)
+    - [Synthetics](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/public/plugin.ts)
+    - [User Experience](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/ux/public/plugin.ts)
 
 - Expect solution view to have a collapsed view of nav sections with headers, with each view visible in a flyout once the header is clicked on.
 
