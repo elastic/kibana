@@ -89,13 +89,7 @@ export const useRiskLevelsPrivilegedUserQuery = ({
 
   const inspect = useMemo(() => {
     return {
-      dsl: [
-        JSON.stringify(
-          { index: index ? [index] : [''], body: prettifyQuery(query, false) },
-          null,
-          2
-        ),
-      ],
+      dsl: [JSON.stringify({ index: index ? [index] : [''], body: prettifyQuery(query) }, null, 2)],
       response: response ? [JSON.stringify(response, null, 2)] : [],
     };
   }, [index, query, response]);
