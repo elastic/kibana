@@ -36,7 +36,9 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
   export const Basic: Story = {};
 
   export const WithProp: Story = {
-    render: () => <MyComponent prop="value" />,
+    args: {
+      prop: "value"
+    }
   };
   ```
 
