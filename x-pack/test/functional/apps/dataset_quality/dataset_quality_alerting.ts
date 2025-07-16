@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   const to = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
 
-  describe('Dataset quality handles user privileges', () => {
+  describe('Dataset quality alerting', () => {
     before(async () => {
       await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
     });
