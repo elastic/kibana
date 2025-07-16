@@ -14,7 +14,6 @@ import {
   getClockSkew,
   getLegends,
   createColorLookupMap,
-  getColor,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -269,24 +268,6 @@ describe('createColorLookupMap', () => {
     expect(result.get('serviceName:svcA')).toBe('red');
     expect(result.get('serviceName:svcB')).toBe('blue');
     expect(result.get('spanType:db')).toBe('green');
-  });
-});
-
-describe('gerColor', () => {
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should get color beased on type and value', () => {
-    const colorMap = new Map<string, string>([
-      ['serviceName:svcA', 'red'],
-      ['serviceName:svcB', 'blue'],
-      ['spanType:db', 'green'],
-    ]);
-
-    expect(getColor(colorMap, WaterfallLegendType.ServiceName, 'svcA')).toBe('red');
-    expect(getColor(colorMap, WaterfallLegendType.ServiceName, 'svcB')).toBe('blue');
-    expect(getColor(colorMap, WaterfallLegendType.SpanType, 'db')).toBe('green');
   });
 });
 

@@ -79,14 +79,6 @@ export function createColorLookupMap(legends: IWaterfallLegend[]): Map<string, s
   return new Map(legends.map((legend) => [`${legend.type}:${legend.value}`, legend.color]));
 }
 
-export function getColor(
-  colorMap: Map<string, string>,
-  type: WaterfallLegendType,
-  value: string
-): string {
-  return colorMap.get(`${type}:${value}`)!;
-}
-
 export function getTraceParentChildrenMap(traceItems: TraceItem[]) {
   const traceMap = traceItems.reduce<Record<string, TraceItem[]>>((acc, item) => {
     if (!item.parentId) {
@@ -115,8 +107,8 @@ export function getTraceWaterfall(
     const startMicroseconds = item.timestampUs;
     const color =
       colorBy === WaterfallLegendType.ServiceName
-        ? getColor(colorMap, WaterfallLegendType.ServiceName, item.serviceName)
-        : getColor(colorMap, WaterfallLegendType.SpanType, item.spanType ?? '');
+        ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`)!
+        : colorMap.get(`${WaterfallLegendType.SpanType}:${item.spanType ?? ''}`)!;
     const traceWaterfallItem: TraceWaterfallItem = {
       ...item,
       depth,
