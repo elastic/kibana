@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
+  const ml = getService('ml');
   const esArchiver = getService('esArchiver');
 
   /**
