@@ -155,9 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve an existing ES|QL tool', async () => {
-        const response = await supertest
-          .get(`/api/chat/tools/get-test-tool`)
-          .expect(200);
+        const response = await supertest.get(`/api/chat/tools/get-test-tool`).expect(200);
 
         expect(response.body).to.have.property('id', 'get-test-tool');
         expect(response.body).to.have.property('type', 'esql');
