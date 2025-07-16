@@ -11,27 +11,19 @@ import { ParseOptions } from '../parser';
 import { EsqlQuery } from '../query';
 import { makeSynthNode, createSynthMethod } from './helpers';
 import type { SynthGenerator } from './types';
-import type { ESQLCommand } from '../types';
+import type { ESQLAstQueryExpression } from '../types';
 
-const generator: SynthGenerator<ESQLCommand> = (
+const generator: SynthGenerator<ESQLAstQueryExpression> = (
   src: string,
   { withFormatting = true, ...rest }: ParseOptions = {}
-): ESQLCommand => {
+): ESQLAstQueryExpression => {
   src = src.trimStart();
+  const query = EsqlQuery.fromSrc(src, { withFormatting, ...rest });
+  const node = query.ast;
 
-  // TODO: Improve check for source command.
-  const isSourceCommand = /^FROM/i.test(src);
-  const querySrc = isSourceCommand ? src : 'FROM a | ' + src;
-  const query = EsqlQuery.fromSrc(querySrc, { withFormatting, ...rest });
-  const command = query.ast.commands[isSourceCommand ? 0 : 1];
+  makeSynthNode(node);
 
-  if (command.type !== 'command') {
-    throw new Error('Expected a command node');
-  }
-
-  makeSynthNode(command);
-
-  return command;
+  return node;
 };
 
-export const cmd = createSynthMethod<ESQLCommand>(generator);
+export const esql = createSynthMethod<ESQLAstQueryExpression>(generator);
