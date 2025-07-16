@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import type { EventOutcome, StatusCode } from '@kbn/apm-types';
-
-export const isFailureOrError = (status: EventOutcome | StatusCode | undefined) => {
-  if (!status) {
-    return false;
-  }
-  return status === 'failure' || status === 'Error';
-};
+export type StatusCode = 'Ok' | 'Unset' | 'Error';

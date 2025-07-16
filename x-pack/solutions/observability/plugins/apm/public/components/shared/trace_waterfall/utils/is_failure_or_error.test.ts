@@ -9,7 +9,7 @@ import { isFailureOrError } from './is_failure_or_error';
 
 describe('isFailureOrError', () => {
   it('returns true for "error"', () => {
-    expect(isFailureOrError('error')).toBe(true);
+    expect(isFailureOrError('Error')).toBe(true);
   });
 
   it('returns true for "failure"', () => {
@@ -22,7 +22,8 @@ describe('isFailureOrError', () => {
 
   it('returns false for other values', () => {
     expect(isFailureOrError('success')).toBe(false);
-    expect(isFailureOrError('pending')).toBe(false);
-    expect(isFailureOrError('')).toBe(false);
+    expect(isFailureOrError('unknown')).toBe(false);
+    expect(isFailureOrError('Ok')).toBe(false);
+    expect(isFailureOrError('Unset')).toBe(false);
   });
 });
