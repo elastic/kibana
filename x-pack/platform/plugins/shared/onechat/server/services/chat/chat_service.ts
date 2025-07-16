@@ -262,7 +262,7 @@ const createConversation$ = ({
     switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.create({
         title,
-        agentId,
+        agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
       });
     }),
@@ -373,10 +373,10 @@ const placeholderConversation = ({ agentId }: { agentId: string }): Conversation
   return {
     id: uuidv4(),
     title: 'New conversation',
-    agentId,
+    agent_id: agentId,
     rounds: [],
-    updatedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
     user: {
       id: 'unknown',
       username: 'unknown',
