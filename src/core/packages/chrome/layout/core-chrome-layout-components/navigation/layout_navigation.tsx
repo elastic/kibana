@@ -21,5 +21,10 @@ export interface LayoutNavigationProps {
  * @returns The rendered LayoutNavigation component.
  */
 export const LayoutNavigation = ({ children }: LayoutNavigationProps) => {
-  return <nav css={styles.root}>{children}</nav>;
+  // TODO: translate
+  return (
+    <aside aria-label="Side navigation" css={styles.root}>
+      {children}
+    </aside>
+  );
 };

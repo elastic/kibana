@@ -27,7 +27,7 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
     display: flex;
   }
 
-  aside.side-nav,
+  div.side-nav,
   div.side_panel {
     height: 100vh;
   }
