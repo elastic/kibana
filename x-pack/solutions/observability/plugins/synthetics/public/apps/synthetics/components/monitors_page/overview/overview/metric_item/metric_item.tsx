@@ -93,7 +93,7 @@ export const MetricItem = ({
       });
     }
 
-    if (trendData === null) {
+    if (!trendData) {
       return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage.noData', {
         defaultMessage: 'No data available for the selected time window.',
       });
