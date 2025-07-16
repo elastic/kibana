@@ -164,9 +164,27 @@ export function getObservabilitySystemPrompt({
           ', '
         )}, ${
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
-            ? `first try \`${CONTEXT_FUNCTION_NAME}\`. If no time range is found in context,`
+            ? `first try \`${CONTEXT_FUNCTION_NAME}\` to find time range. If no time range is found in context,`
             : ''
         } use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user.`
+      );
+    }
+
+    if (isFunctionAvailable(GET_DATASET_INFO_FUNCTION_NAME)) {
+      usage.push(
+        `**Get Dataset Information:** Use the \`${GET_DATASET_INFO_FUNCTION_NAME}\` tool to get information about indices/datasets available and the fields available on them. 
+         * Providing an empty string as index name will retrieve all indices. Otherwise list of all fields for the given index will be given. 
+         * If no fields are returned this means no indices were matched by provided index pattern. 
+         * Wildcards can be part of index name.`
+      );
+    }
+
+    if (
+      isFunctionAvailable(GET_DATASET_INFO_FUNCTION_NAME) &&
+      isFunctionAvailable(ELASTICSEARCH_FUNCTION_NAME)
+    ) {
+      usage.push(
+        `**Always use the \`${GET_DATASET_INFO_FUNCTION_NAME}\` tool to get information about indices/datasets available and the fields and field types available on them instead of using Elasticsearch APIs directly.**`
       );
     }
 
@@ -246,22 +264,6 @@ export function getObservabilitySystemPrompt({
           *  **Prioritize User-Specified Time:** First, you **MUST** scan the user's query for any statement of time (e.g., "last hour," "past 30 minutes," "between 2pm and 4pm yesterday"). 
           *  **Override Defaults:** If a time range is found in the query, you **MUST** use it. This user-provided time range **ALWAYS** takes precedence over and replaces any default or contextual time range (like \`now-15m\`).
           *  **Extract Service Name:** Correctly extract the \`service.name\` from the user query.`
-      );
-    }
-
-    if (isFunctionAvailable(GET_DATASET_INFO_FUNCTION_NAME)) {
-      usage.push(
-        `**Get Dataset Info:** Use the \`${GET_DATASET_INFO_FUNCTION_NAME}\` tool to get information about indices/datasets available and the fields available on them. Providing an empty string as index name will retrieve all indices,
-        else list of all fields for the given index will be given. If no fields are returned this means no indices were matched by provided index pattern. Wildcards can be part of index name.`
-      );
-    }
-
-    if (
-      isFunctionAvailable(GET_DATASET_INFO_FUNCTION_NAME) &&
-      isFunctionAvailable(ELASTICSEARCH_FUNCTION_NAME)
-    ) {
-      usage.push(
-        `**Always use the \`${GET_DATASET_INFO_FUNCTION_NAME}\` tool to get information about indices/datasets available and the fields and field types available on them instead of using Elasticsearch APIs directly.`
       );
     }
 
