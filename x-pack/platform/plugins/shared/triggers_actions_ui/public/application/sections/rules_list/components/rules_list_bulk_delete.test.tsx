@@ -4,29 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as React from 'react';
 import { IToasts } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import {
-  render,
-  screen,
-  waitForElementToBeRemoved,
-  fireEvent,
-  act,
-  cleanup,
-} from '@testing-library/react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { QueryClient } from '@tanstack/react-query';
+import { act, cleanup, fireEvent, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import * as React from 'react';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
 import {
-  mockedRulesData,
-  ruleTypeFromApi,
   getDisabledByLicenseRuleTypeFromApi,
+  getRenderWithProviders,
+  mockedRulesData,
   ruleType,
-} from './test_helpers';
+  ruleTypeFromApi,
+} from './test_helper';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -96,6 +90,12 @@ jest.mock('@kbn/alerts-ui-shared', () => ({
   ...jest.requireActual('@kbn/alerts-ui-shared'),
   MaintenanceWindowCallout: jest.fn(() => <></>),
 }));
+jest.mock('@kbn/ebt-tools');
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
+usePerformanceContextMock.mockReturnValue({
+  onPageReady: jest.fn(),
+  onPageRefreshStart: jest.fn(),
+});
 
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
@@ -122,15 +122,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const AllTheProviders = ({ children }: { children: any }) => (
-  <IntlProvider locale="en">
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  </IntlProvider>
-);
-
-const renderWithProviders = (ui: any) => {
-  return render(ui, { wrapper: AllTheProviders });
-};
+const renderWithProviders = getRenderWithProviders({ queryClient });
 
 // FLAKY: https://github.com/elastic/kibana/issues/152521
 describe.skip('Rules list Bulk Delete', () => {

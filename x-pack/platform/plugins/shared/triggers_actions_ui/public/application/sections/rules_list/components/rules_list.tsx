@@ -7,23 +7,23 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { i18n } from '@kbn/i18n';
-import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
-import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import React, { useEffect, useState, ReactNode, useCallback, useMemo, useRef } from 'react';
 import {
-  EuiSpacer,
-  EuiPageTemplate,
-  EuiTableSortingType,
   EuiButtonIcon,
-  EuiSelectableOption,
   EuiDescriptionList,
+  EuiPageTemplate,
+  EuiSelectableOption,
+  EuiSpacer,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
+import { KueryNode } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
+import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {
@@ -31,24 +31,24 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
+import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { usePageReady } from '@kbn/ebt-tools';
 import {
   RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
   getCreateRuleRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
-import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import {
-  Rule,
-  RuleTableItem,
-  RuleType,
-  RuleStatus,
+  BulkEditActions,
   Pagination,
   Percentiles,
+  Rule,
+  RuleStatus,
+  RuleTableItem,
+  RuleType,
   SnoozeSchedule,
   UpdateFiltersProps,
-  BulkEditActions,
   UpdateRulesToBulkEditProps,
 } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -56,47 +56,47 @@ import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../commo
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
 import { RulesListFiltersBar } from './rules_list_filters_bar';
 
+import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
+import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
+import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
+import { cloneRule } from '../../../lib/rule_api/clone';
 import { snoozeRule } from '../../../lib/rule_api/snooze';
 import { unsnoozeRule } from '../../../lib/rule_api/unsnooze';
 import { bulkUpdateAPIKey } from '../../../lib/rule_api/update_api_key';
-import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
-import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
-import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
-import { cloneRule } from '../../../lib/rule_api/clone';
 
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
-import { RulesListPrompts } from './rules_list_prompts';
-import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
-import { useKibana } from '../../../../common/lib/kibana';
-import { CreateRuleButton } from './create_rule_button';
-import { ManageLicenseModal } from './manage_license_modal';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
-import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
-import { RulesListDocLink } from './rules_list_doc_link';
+import { useKibana } from '../../../../common/lib/kibana';
+import { RulesDeleteModalConfirmation } from '../../../components/rules_delete_modal_confirmation';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
+import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { runRule } from '../../../lib/run_rule';
+import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
-import { useBulkEditSelect } from '../../../hooks/use_bulk_edit_select';
-import { runRule } from '../../../lib/run_rule';
+import { CreateRuleButton } from './create_rule_button';
+import { ManageLicenseModal } from './manage_license_modal';
+import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
+import { RulesListDocLink } from './rules_list_doc_link';
+import { RulesListPrompts } from './rules_list_prompts';
+import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 
+import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
+import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
-import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
-import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
+import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import {
+  MULTIPLE_RULE_TITLE,
+  SINGLE_RULE_TITLE,
   getConfirmDeletionButtonText,
   getConfirmDeletionModalText,
-  SINGLE_RULE_TITLE,
-  MULTIPLE_RULE_TITLE,
 } from '../translations';
-import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
-import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
 
 export interface RulesListProps {
@@ -170,7 +170,6 @@ export const RulesList = ({
   navigateToEditRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
-  const { onPageReady } = usePerformanceContext();
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
@@ -419,11 +418,10 @@ export const RulesList = ({
 
   const handleClearRuleParamFilter = () => updateFilters({ filter: 'ruleParams', value: {} });
 
-  useEffect(() => {
-    if (onPageReady && !rulesState?.isLoading) {
-      onPageReady();
-    }
-  }, [onPageReady, rulesState?.isLoading]);
+  usePageReady({
+    isReady: !rulesState?.initialLoad,
+    isRefreshing: rulesState?.isLoading,
+  });
 
   useEffect(() => {
     if (statusFilter) {

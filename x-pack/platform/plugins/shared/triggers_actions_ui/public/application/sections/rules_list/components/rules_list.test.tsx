@@ -5,44 +5,42 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
+import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
+import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
+import { IToasts } from '@kbn/core/public';
+import { QueryClient } from '@tanstack/react-query';
 import {
+  cleanup,
   fireEvent,
-  render,
   screen,
   waitFor,
   waitForElementToBeRemoved,
-  cleanup,
 } from '@testing-library/react';
-
-import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
-import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
-import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { percentileFields, RulesList } from './rules_list';
+import * as React from 'react';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   ActionTypeRegistryContract,
   Percentiles,
   RuleTypeModel,
   RuleTypeRegistryContract,
 } from '../../../../types';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { IToasts } from '@kbn/core/public';
-import { CreateRuleButton } from './create_rule_button';
-import { RulesListDocLink } from './rules_list_doc_link';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
-
-import {
-  mockedRulesData,
-  ruleTypeFromApi,
-  ruleType,
-  getDisabledByLicenseRuleTypeFromApi,
-} from './test_helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
 import { getFormattedDuration } from '../../../lib/monitoring_utils';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { CreateRuleButton } from './create_rule_button';
+import { RulesList, percentileFields } from './rules_list';
+import { RulesListDocLink } from './rules_list_doc_link';
+import {
+  getDisabledByLicenseRuleTypeFromApi,
+  getRenderWithProviders,
+  mockedRulesData,
+  ruleType,
+  ruleTypeFromApi,
+} from './test_helper';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -136,6 +134,13 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 
+jest.mock('@kbn/ebt-tools');
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
+usePerformanceContextMock.mockReturnValue({
+  onPageReady: jest.fn(),
+  onPageRefreshStart: jest.fn(),
+});
+
 const ruleTags = ['a', 'b', 'c', 'd'];
 
 const { getRuleTypes } = jest.requireMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
@@ -158,15 +163,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const AllTheProviders = ({ children }: { children: any }) => (
-  <IntlProvider locale="en">
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  </IntlProvider>
-);
-
-const renderWithProviders = (ui: any) => {
-  return render(ui, { wrapper: AllTheProviders });
-};
+const renderWithProviders = getRenderWithProviders({ queryClient });
 
 describe('Update Api Key', () => {
   const addSuccess = jest.fn();
