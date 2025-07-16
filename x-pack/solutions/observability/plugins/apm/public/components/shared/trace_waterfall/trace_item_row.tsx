@@ -13,6 +13,7 @@ import { BarDetails } from './bar_details';
 import { TOGGLE_BUTTON_WIDTH, ToggleAccordionButton } from './toggle_accordion_button';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
+import { isFailureOrError } from './utils/is_failure_or_error';
 
 export interface Props {
   item: TraceWaterfallItem;
@@ -34,10 +35,13 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
   const hasToggle = showAccordion && childrenCount > 0;
   const accordionIndent = ACCORDION_PADDING_LEFT * item.depth;
   const { euiTheme } = useEuiTheme();
+  const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
 
   function calculateMarginLeft() {
     const marginLeft =
-      margin.left - accordionIndent - (item.status ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
+      margin.left -
+      accordionIndent -
+      (itemStatusIsFailureOrError ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
     return hasToggle ? marginLeft - TOGGLE_BUTTON_WIDTH : marginLeft;
   }
 
@@ -55,7 +59,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           margin-left: ${accordionIndent}px;
           margin-right: ${margin.right}px;
           border-left: ${
-            item.status
+            itemStatusIsFailureOrError
               ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.danger};`
               : `${euiTheme.border.thin};`
           }

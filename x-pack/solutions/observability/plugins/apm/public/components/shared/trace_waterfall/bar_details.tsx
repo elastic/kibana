@@ -22,6 +22,7 @@ import { asDuration } from '../../../../common/utils/formatters';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
+import { isFailureOrError } from './utils/is_failure_or_error';
 
 export function BarDetails({
   item,
@@ -34,6 +35,7 @@ export function BarDetails({
 }) {
   const theme = useEuiTheme();
   const { getRelatedErrorsHref } = useTraceWaterfallContext();
+  const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
 
   const viewRelatedErrorsLabel = i18n.translate(
     'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
@@ -83,7 +85,7 @@ export function BarDetails({
             {asDuration(item.duration)}
           </EuiText>
         </EuiFlexItem>
-        {item.status && (
+        {item.status && itemStatusIsFailureOrError && (
           <EuiFlexItem grow={false}>
             <EuiToolTip
               data-test-subj="apmBarDetailsFailureTooltip"

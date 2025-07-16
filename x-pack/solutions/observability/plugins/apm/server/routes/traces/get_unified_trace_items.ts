@@ -149,14 +149,13 @@ export async function getUnifiedTraceItems({
       }
 
       const docErrorCount = errorCountByDocId[id] || 0;
-      const isFailureOrError = event.event?.outcome === 'failure' || event.status?.code === 'Error';
       return {
         id: event.span?.id ?? event.transaction?.id,
         timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
         duration: resolveDuration(apmDuration, event.duration),
-        ...(isFailureOrError && {
+        ...((event.event?.outcome || event.status?.code) && {
           status: {
             fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
             value: event.event?.outcome || event.status?.code,

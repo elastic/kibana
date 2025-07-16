@@ -132,10 +132,9 @@ describe('BarDetails', () => {
     const mockItemWithFailure = {
       name: 'Test Span',
       duration: 1234,
-      isFailure: true,
       status: {
         fieldName: 'fieldName',
-        value: 'value',
+        value: 'error',
       },
     } as unknown as TraceItem;
 
