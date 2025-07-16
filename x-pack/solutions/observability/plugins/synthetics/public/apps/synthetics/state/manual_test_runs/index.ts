@@ -19,12 +19,7 @@ import {
   TestNowPayload,
   toggleTestNowFlyoutAction,
 } from './actions';
-import {
-  MonitorFields,
-  ScheduleUnit,
-  ServiceLocationErrors,
-  SyntheticsMonitorSchedule,
-} from '../../../../../common/runtime_types';
+import { ServiceLocationErrors } from '../../../../../common/runtime_types';
 import { EnrichedTestNowResponse } from './api';
 
 export enum TestRunStatus {
@@ -38,15 +33,11 @@ export const isTestRunning = (testRun?: ManualTestRun) =>
 
 export interface ManualTestRun {
   configId: string;
-  name: string;
   testRunId?: string;
   status: TestRunStatus;
-  schedule: SyntheticsMonitorSchedule;
-  locations: MonitorFields['locations'];
   errors?: ServiceLocationErrors;
   fetchError?: { name: string; message: string };
   isTestNowFlyoutOpen: boolean;
-  monitor?: EnrichedTestNowResponse['monitor'];
 }
 
 export interface ManualTestRunsState {
@@ -71,10 +62,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
 
         state[action.payload.configId] = {
           configId: action.payload.configId,
-          name: action.payload.name,
           status: TestRunStatus.LOADING,
-          schedule: { unit: ScheduleUnit.MINUTES, number: '3' },
-          locations: [],
           isTestNowFlyoutOpen: true,
         };
       }
@@ -90,11 +78,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
           testRunId: payload.testRunId,
           status: TestRunStatus.IN_PROGRESS,
           errors: payload.errors,
-          schedule: payload.schedule,
-          locations: payload.locations,
           isTestNowFlyoutOpen: true,
-          monitor: payload.monitor,
-          name: payload.monitor.name,
         };
       }
     )

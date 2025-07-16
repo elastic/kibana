@@ -5,22 +5,13 @@
  * 2.0.
  */
 
-import {
-  MonitorFields,
-  ServiceLocationErrors,
-  SyntheticsMonitor,
-  SyntheticsMonitorSchedule,
-} from '../../../../../common/runtime_types';
+import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { TestNowResponse } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { fetchSyntheticsMonitor } from '../monitor_details/api';
 
 export interface EnrichedTestNowResponse extends TestNowResponse {
-  schedule: SyntheticsMonitorSchedule;
-  locations: MonitorFields['locations'];
   configId: string;
-  monitor: SyntheticsMonitor;
 }
 
 export const triggerTestNowMonitor = async ({
@@ -28,28 +19,17 @@ export const triggerTestNowMonitor = async ({
   spaceId,
 }: {
   configId: string;
-  name: string;
   spaceId?: string;
 }): Promise<EnrichedTestNowResponse | undefined> => {
-  const [testNowRes, monitorData] = await Promise.all([
-    apiService.post<TestNowResponse>(
-      SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${configId}`,
-      undefined,
-      undefined,
-      {
-        spaceId,
-      }
-    ),
-    fetchSyntheticsMonitor({ monitorId: configId }),
-  ]);
-
-  return {
-    ...testNowRes,
-    schedule: monitorData.schedule,
-    monitor: monitorData,
-    configId,
-    locations: monitorData.locations,
-  };
+  const res = await apiService.post<TestNowResponse>(
+    SYNTHETICS_API_URLS.TEST_NOW_MONITOR + `/${configId}`,
+    undefined,
+    undefined,
+    {
+      spaceId,
+    }
+  );
+  return { ...res, configId };
 };
 
 export const runOnceMonitor = async ({
