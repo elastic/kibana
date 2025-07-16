@@ -1794,6 +1794,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/apm_api_integration  @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test/common/utils/observability  @elastic/appex-qa # temporarily due to SKA tests relocation
 /x-pack/test/common/utils/uptime  @elastic/appex-qa # temporarily due to SKA tests relocation
+/x-pack/platform/test/.gitignore @elastic/appex-qa
+/x-pack/solutions/**/test/.gitignore @elastic/appex-qa
 
 # Core
 ^/src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
