@@ -16,7 +16,6 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import {
   App,
   AppDeepLink,
@@ -127,7 +126,6 @@ export interface ConfigSchema {
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
-  cases?: CasesPublicSetup;
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
