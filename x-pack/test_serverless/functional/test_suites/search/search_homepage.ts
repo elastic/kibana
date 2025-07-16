@@ -100,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('createKeywordIndexButton');
           await testSubjects.click('createKeywordIndexButton');
           expect(await browser.getCurrentUrl()).contain(
-            'app/elasticsearch/indices/create?workflow=keyword'
+            'app/elasticsearch/indices/create?workflow=default'
           );
         });
       });
