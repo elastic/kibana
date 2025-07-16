@@ -7,34 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
+import { registerContentInsights } from '@kbn/content-management-content-insights-server';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  UiSettingsParams,
+} from '@kbn/core/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { i18n } from '@kbn/i18n';
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
-import { registerContentInsights } from '@kbn/content-management-content-insights-server';
-
-import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import { registerAPIRoutes } from './api';
+import { capabilitiesProvider } from './capabilities_provider';
+import { DashboardStorage } from './content_management';
+import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
+import { createDashboardSavedObjectType } from './dashboard_saved_object';
+import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import {
+  TASK_ID,
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
-  TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
-import { getUISettings } from './ui_settings';
-import { DashboardStorage } from './content_management';
-import { capabilitiesProvider } from './capabilities_provider';
-import { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { createDashboardSavedObjectType } from './dashboard_saved_object';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
-import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
-import { registerAPIRoutes } from './api';
-import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 
+export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection?: UsageCollectionSetup;
@@ -122,7 +130,25 @@ export class DashboardPlugin
       dashboardPersistableStateServiceFactory(plugins.embeddable)
     );
 
-    core.uiSettings.register(getUISettings());
+    const dashboardUiSettings: Record<string, UiSettingsParams<boolean>> = {
+      [DEFER_BELOW_FOLD]: {
+        schema: schema.boolean(),
+        requiresPageReload: true,
+        category: ['Dashboard'],
+        value: false,
+        name: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectName', {
+          defaultMessage: 'Defer loading panels below "the fold"',
+        }),
+        description: i18n.translate(
+          'presentationUtil.labs.enableDeferBelowFoldProjectDescription',
+          {
+            defaultMessage:
+              'Any panels below "the fold"-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
+          }
+        ),
+      },
+    };
+    core.uiSettings.register(dashboardUiSettings);
 
     registerAPIRoutes({
       http: core.http,

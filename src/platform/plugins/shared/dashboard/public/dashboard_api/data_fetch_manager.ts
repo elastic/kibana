@@ -7,18 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
-import { getUISettings } from './ui_settings';
-
-export class PresentationUtilPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
-    core.uiSettings.register(getUISettings());
-    return {};
-  }
-
-  public start() {
-    return {};
-  }
-
-  public stop() {}
-}
+export const initializeDataFetchManager = () => {};

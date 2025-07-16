@@ -33,6 +33,7 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
+  PublishesFetchSetting,
   PublishesSavedObjectId,
   PublishesTitle,
   PublishesUnifiedSearch,
@@ -98,6 +99,7 @@ export type DashboardApi = CanExpandPanels &
   HasUniqueId &
   PresentationContainer &
   PublishesDataLoading &
+  PublishesFetchSetting &
   PublishesDataViews &
   PublishesDescription &
   Pick<PublishesTitle, 'title$'> &
