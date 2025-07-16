@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-export { config } from './config';
-
+import { schema, TypeOf } from '@kbn/config-schema';
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { WorkflowsExecutionEnginePlugin } = await import('./plugin');
-  return new WorkflowsExecutionEnginePlugin(initializerContext);
-}
-
-export type {
-  WorkflowsExecutionEnginePluginSetup,
-  WorkflowsExecutionEnginePluginStart,
-} from './types';
+export const config = {
+  schema: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+};
+export type MyPluginConfigType = TypeOf<typeof config.schema>;

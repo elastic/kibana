@@ -6,6 +6,7 @@
   "visibility": "shared",
   "description": "Stateless execution engine for workflows.",
   "plugin": {
+    "configPath": ["workflowsExecutionEngine"],
     "id": "workflowsExecutionEngine",
     "browser": false,
     "server": true,
