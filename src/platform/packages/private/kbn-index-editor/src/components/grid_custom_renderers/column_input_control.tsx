@@ -26,9 +26,6 @@ export const getColumnInputRenderer = (
     ...column,
     display: <AddColumnHeader initialColumnName={initialColumnName} />,
     actions: false,
-    displayHeaderCellProps: {
-      className: 'custom-column--placeholder',
-    },
   });
 };
 
@@ -96,6 +93,7 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
       css={{
         color: euiTheme.colors.textSubdued,
         width: '100%',
+        height: euiTheme.size.xl,
       }}
       flush="left"
       contentProps={{
