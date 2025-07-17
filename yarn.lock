@@ -15808,7 +15808,7 @@ chrome-trace-event@^1.0.2:
 chromedriver@^137.0.0:
   version "137.0.1"
   resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-137.0.1.tgz#a7c1eeb0c0b091a1e2505b384b4df8aaceb133fb"
-  integrity sha512-H4amLfsU3zubwD9X7me9Ajd8z3+MARfJ90gLV6PEKdad0Jgmh3fAGnCuz8Ew8yeuoSJ5ycb/vGEvyqgGVFAjJQ==
+  integrity "sha1-p8HusMCwkaHiUFs4S034qs6xM/s= sha512-H4amLfsU3zubwD9X7me9Ajd8z3+MARfJ90gLV6PEKdad0Jgmh3fAGnCuz8Ew8yeuoSJ5ycb/vGEvyqgGVFAjJQ=="
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -29413,7 +29413,7 @@ select-hose@^2.0.0:
 selenium-webdriver@^4.33.0:
   version "4.33.0"
   resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.33.0.tgz#6587a9eab09bf30ad27cf27bc8d0b944457252da"
-  integrity sha512-5vRhk4iI0B9nYbEitfnCjPDXBfG6o9DNhj5DG2355eQo8idETknhj1tigqqlkHsGephSZwLZqEm/d+3e1stGUA==
+  integrity "sha1-ZYep6rCb8wrSfPJ7yNC5REVyUto= sha512-5vRhk4iI0B9nYbEitfnCjPDXBfG6o9DNhj5DG2355eQo8idETknhj1tigqqlkHsGephSZwLZqEm/d+3e1stGUA=="
   dependencies:
     "@bazel/runfiles" "^6.3.1"
     jszip "^3.10.1"
