@@ -40,6 +40,7 @@ import type {
   InstallResult,
   InstallSource,
   InstallType,
+  KibanaAssetType,
   PackageVerificationResult,
   InstallResultStatus,
 } from '../../../types';
@@ -71,6 +72,8 @@ import {
   unpackBufferToAssetsMap,
 } from '../archive';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+import { toAssetReference } from '../kibana/assets/install';
+import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
@@ -1250,6 +1253,12 @@ export async function createInstallation(options: {
 
   return created;
 }
+
+export const kibanaAssetsToAssetsRef = (
+  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
+): KibanaAssetReference[] => {
+  return Object.values(kibanaAssets).flat().map(toAssetReference);
+};
 
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
