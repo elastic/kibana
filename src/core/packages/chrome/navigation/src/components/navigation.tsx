@@ -14,7 +14,7 @@ import { MenuItem, NavigationStructure } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
 import { SecondaryMenu } from './secondary_menu';
 import { SideNav } from './side_nav';
-import { hasSubmenu } from '../utils/has_submenu';
+import { getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
@@ -92,7 +92,7 @@ export const Navigation = ({
             <SideNav.Popover
               key={item.id}
               container={document.documentElement}
-              hasContent={hasSubmenu(item)}
+              hasContent={getHasSubmenu(item)}
               isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
               trigger={
                 <SideNav.PrimaryMenuItem
@@ -100,7 +100,7 @@ export const Navigation = ({
                   iconType={item.iconType}
                   isCollapsed={isCollapsed}
                   isCurrent={item.id === sidePanelContent?.id}
-                  hasContent={hasSubmenu(item)}
+                  hasContent={getHasSubmenu(item)}
                   onClick={() => handleMainItemClick(item)}
                 >
                   {item.label}
@@ -162,7 +162,7 @@ export const Navigation = ({
                         {overflowMenuItems.map((item) => {
                           const isCurrent =
                             item.href === currentPage || item.href === currentSubpage;
-                          const hasSubItems = hasSubmenu(item);
+                          const hasSubItems = getHasSubmenu(item);
 
                           return (
                             <NestedSecondaryMenu.PrimaryMenuItem
@@ -187,7 +187,7 @@ export const Navigation = ({
                         })}
                       </NestedSecondaryMenu.Section>
                     </NestedSecondaryMenu.Panel>
-                    {overflowMenuItems.filter(hasSubmenu).map((item) => (
+                    {overflowMenuItems.filter(getHasSubmenu).map((item) => (
                       <NestedSecondaryMenu.Panel
                         key={`submenu-${item.id}`}
                         id={`submenu-${item.id}`}
@@ -260,14 +260,14 @@ export const Navigation = ({
             <SideNav.Popover
               key={item.id}
               isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
-              hasContent={hasSubmenu(item)}
+              hasContent={getHasSubmenu(item)}
               persistent={false}
               container={document.documentElement}
               trigger={
                 <SideNav.FooterItem
                   isCurrent={item.id === sidePanelContent?.id}
                   onClick={() => navigateTo(item)}
-                  hasContent={hasSubmenu(item)}
+                  hasContent={getHasSubmenu(item)}
                   onKeyDown={(e) => handleFooterItemKeyDown(item, e)}
                   label={item.label}
                   iconType={item.iconType}
