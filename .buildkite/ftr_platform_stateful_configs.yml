@@ -282,10 +282,10 @@ enabled:
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/test/rule_registry/spaces_only/config_trial.ts
-  - x-pack/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
-  - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
-  - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
-  - x-pack/test/saved_object_tagging/functional/config.ts
+  - x-pack/platform/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
+  - x-pack/platform/test/saved_object_tagging/api_integration/tagging_api/config.ts
+  - x-pack/platform/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
+  - x-pack/platform/test/saved_object_tagging/functional/config.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
   - x-pack/test/security_api_integration/anonymous_es_anonymous.config.ts
