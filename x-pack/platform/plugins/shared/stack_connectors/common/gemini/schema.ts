@@ -18,6 +18,7 @@ export const ConfigSchema = schema.object({
   defaultModel: schema.string({ defaultValue: DEFAULT_GEMINI_MODEL }),
   gcpRegion: schema.string(),
   gcpProjectID: schema.string(),
+  contextWindowLength: schema.maybe(schema.number({ min: 32_000 })),
 });
 
 export const SecretsSchema = schema.object({

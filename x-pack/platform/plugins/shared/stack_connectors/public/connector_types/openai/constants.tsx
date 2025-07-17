@@ -54,6 +54,25 @@ export const getDefaultBody = (config?: Config) => {
   return DEFAULT_BODY;
 };
 
+const contextWindowField: ConfigFieldSchema = {
+  id: 'contextWindowLength',
+  label: i18n.CONTEXT_WINDOW_LABEL,
+  isRequired: false,
+  helpText: (
+    <FormattedMessage
+      defaultMessage="Can be set to manually define the context length of the default model used by the connector"
+      id="xpack.stackConnectors.components.genAi.contextWindowLengthTextHelpText"
+    />
+  ),
+  euiFieldProps: {
+    append: (
+      <EuiText size="xs" color="subdued">
+        {i18n.OPTIONAL_LABEL}
+      </EuiText>
+    ),
+  },
+};
+
 export const openAiConfig: ConfigFieldSchema[] = [
   {
     id: 'apiUrl',
@@ -90,6 +109,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_OPENAI_MODEL,
   },
+  contextWindowField,
   {
     id: 'organizationId',
     label: i18n.ORG_ID_LABEL,
@@ -158,6 +178,7 @@ export const azureAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
+  contextWindowField,
 ];
 
 export const otherOpenAiConfig: ConfigFieldSchema[] = [
@@ -194,6 +215,7 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
+  contextWindowField,
 ];
 
 export const openAiSecrets: SecretsFieldSchema[] = [

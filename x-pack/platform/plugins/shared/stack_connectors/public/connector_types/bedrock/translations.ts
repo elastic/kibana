@@ -27,6 +27,20 @@ export const DEFAULT_MODEL_LABEL = i18n.translate(
   }
 );
 
+export const CONTEXT_WINDOW_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.bedrock.contextWindowLengthTextFieldLabel',
+  {
+    defaultMessage: 'Context window length',
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
 export const SECRET = i18n.translate('xpack.stackConnectors.components.bedrock.secret', {
   defaultMessage: 'Secret',
 });

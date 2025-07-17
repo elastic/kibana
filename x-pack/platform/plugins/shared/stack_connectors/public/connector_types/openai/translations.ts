@@ -18,6 +18,13 @@ export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.ge
   defaultMessage: 'API key',
 });
 
+export const CONTEXT_WINDOW_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.contextWindowLengthTextFieldLabel',
+  {
+    defaultMessage: 'Context window',
+  }
+);
+
 export const DEFAULT_MODEL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel',
   {

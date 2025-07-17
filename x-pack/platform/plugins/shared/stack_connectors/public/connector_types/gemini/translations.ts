@@ -32,6 +32,20 @@ export const DEFAULT_MODEL_LABEL = i18n.translate(
   }
 );
 
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const CONTEXT_WINDOW_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.gemini.contextWindowLengthTextFieldLabel',
+  {
+    defaultMessage: 'Context window length',
+  }
+);
+
 export const SECRET = i18n.translate('xpack.stackConnectors.components.gemini.secret', {
   defaultMessage: 'Secret',
 });

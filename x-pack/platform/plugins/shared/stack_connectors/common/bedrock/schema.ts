@@ -17,6 +17,7 @@ export const TelemtryMetadataSchema = schema.object({
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_BEDROCK_MODEL }),
+  contextWindowLength: schema.maybe(schema.number({ min: 32_000 })),
 });
 
 export const SecretsSchema = schema.object({
