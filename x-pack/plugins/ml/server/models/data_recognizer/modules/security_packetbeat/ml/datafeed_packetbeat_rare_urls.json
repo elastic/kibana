@@ -11,7 +11,12 @@
         {"exists": {"field": "url.full"}}
       ],
       "must_not": [
-        {"bool": {"filter": {"term": {"destination.ip": "169.254.169.254"}}}}
+        {"bool": {"filter": {"term": {"destination.ip": "169.254.169.254"}}}},
+        {
+          "terms": {
+            "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"]
+          }
+        }
       ]
     }
   }
