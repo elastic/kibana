@@ -1458,9 +1458,9 @@ module.exports = {
         'packages/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/ui_tests/**/*.ts',
-        'x-pack/platform/plugins/**/ui_tests/**/*.ts',
-        'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
       ],
       excludedFiles: ['packages/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -1976,7 +1976,7 @@ module.exports = {
         'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 1,
@@ -2177,8 +2177,8 @@ module.exports = {
     },
     {
       files: [
-        'src/platform/plugins/**/ui_tests/**/*.ts',
-        'x-pack/platform/**/plugins/**/ui_tests/**/*.ts',
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
       ],
       rules: {
         'no-restricted-imports': [
@@ -2199,7 +2199,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/observability/plugins/**/ui_tests/**/*.ts'],
+      files: ['x-pack/solutions/observability/plugins/**/test/scout/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2226,7 +2226,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/plugins/**/ui_tests/**/*.ts'],
+      files: ['x-pack/solutions/security/plugins/**/test/scout/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
