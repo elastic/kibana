@@ -178,6 +178,26 @@ export const AddComment = React.memo(
       const isDisabled =
         isLoading || !comment?.trim().length || comment.trim().length > MAX_COMMENT_LENGTH;
 
+      const handleKeyDown = useCallback(
+        (event: { key: string; metaKey: boolean; ctrlKey: boolean }) => {
+          const isWindows = navigator.userAgent.includes('Windows');
+          const modifierPressed = isWindows ? event.ctrlKey : event.metaKey;
+          if (!isDisabled && event.key === 'Enter' && modifierPressed) {
+            onSubmit();
+          }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [onSubmit, comment]
+      );
+
+      useEffect(() => {
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+          window.removeEventListener('keydown', handleKeyDown);
+        };
+      }, [handleKeyDown]);
+
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && (

@@ -300,6 +300,52 @@ describe('draft comment ', () => {
     expect(screen.getByLabelText('caseComment').textContent).toBe('');
   });
 
+  it('should add a comment on the correct key stroke', async () => {
+    renderWithTestingProviders(<AddComment {...addCommentProps} />);
+
+    fireEvent.change(screen.getByLabelText('caseComment'), {
+      target: { value: sampleData.comment },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('caseComment')).toHaveValue(sessionStorage.getItem(draftKey));
+    });
+
+    fireEvent.keyDown(screen.getByLabelText('caseComment'), {
+      key: 'Enter',
+      code: 13,
+      metaKey: true,
+    });
+
+    await waitFor(() => {
+      expect(onCommentSaving).toBeCalled();
+    });
+
+    expect(createAttachmentsMock).toBeCalledWith(
+      {
+        caseId: addCommentProps.caseId,
+        attachments: [
+          {
+            comment: sampleData.comment,
+            type: AttachmentType.user,
+          },
+        ],
+        caseOwner: SECURITY_SOLUTION_OWNER,
+      },
+      { onSuccess: expect.any(Function) }
+    );
+
+    await waitFor(() => {
+      expect(sessionStorage.getItem(draftKey)).toBe('');
+    });
+
+    expect(screen.getByLabelText('caseComment').textContent).toBe('');
+  });
+
   describe('existing storage key', () => {
     beforeEach(() => {
       sessionStorage.setItem(draftKey, 'value set in storage');
