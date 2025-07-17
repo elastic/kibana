@@ -20,6 +20,9 @@ disabled:
   - x-pack/solutions/observability/plugins/ux/e2e/synthetics_run.ts
   - x-pack/solutions/observability/plugins/slo/e2e/synthetics_run.ts
 
+  # Configs that exist but weren't running in CI when this file was introduced
+  - x-pack/solutions/observability/test/screenshot_creation/config.ts
+
   # Observability AI Assistant local-only tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant_local.stateful.config.ts
 
@@ -35,7 +38,7 @@ enabled:
   - x-pack/solutions/observability/test/apm_api_integration/cloud/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/rules/config.ts
   - x-pack/solutions/observability/test/apm_api_integration/trial/config.ts
-  - x-pack/test/dataset_quality_api_integration/basic/config.ts
+  - x-pack/solutions/observability/test/dataset_quality_api_integration/basic/config.ts
   - x-pack/test/functional/apps/dataset_quality/config.ts
   - x-pack/solutions/observability/test/functional/apps/uptime/config.ts
   - x-pack/solutions/observability/test/observability_api_integration/basic/config.ts
