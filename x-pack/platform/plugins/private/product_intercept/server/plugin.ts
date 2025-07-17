@@ -13,7 +13,7 @@ import {
   type Logger,
 } from '@kbn/core/server';
 import type { InterceptSetup, InterceptStart } from '@kbn/intercepts-plugin/server';
-import { TRIGGER_DEF_ID } from '../common/constants';
+import { TRIGGER_DEF_ID, UPGRADE_TRIGGER_DEF_PREFIX_ID } from '../common/constants';
 import { ServerConfigSchema } from '../common/config';
 
 interface ProductInterceptServerPluginSetup {
@@ -32,10 +32,13 @@ export class ProductInterceptServerPlugin
 {
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
+  private readonly buildVersion: string;
+  private readonly upgradeInterval: string = '14d';
 
   constructor(initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<ServerConfigSchema>();
+    this.buildVersion = initContext.env.packageInfo.version;
   }
 
   setup(core: CoreSetup, {}: ProductInterceptServerPluginSetup) {
@@ -45,9 +48,17 @@ export class ProductInterceptServerPlugin
   start(core: CoreStart, { intercepts }: ProductInterceptServerPluginStart) {
     if (this.config.enabled) {
       void intercepts.registerTriggerDefinition?.(TRIGGER_DEF_ID, () => {
-        this.logger.debug('Registering kibana product trigger definition');
+        this.logger.debug('Registering global product intercept trigger definition');
         return { triggerAfter: this.config.interval };
       });
+
+      void intercepts.registerTriggerDefinition?.(
+        `${UPGRADE_TRIGGER_DEF_PREFIX_ID}:${this.buildVersion}`,
+        () => {
+          this.logger.debug('Registering global product upgrade intercept trigger definition');
+          return { triggerAfter: this.upgradeInterval, isRecurrent: false };
+        }
+      );
     }
 
     return {};

@@ -184,14 +184,13 @@ export const MetricVis = ({
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: ({ fontSize, color }) => (
+        extra: ({ color }) => (
           <SecondaryMetric
             row={row}
             config={config}
             columns={data.columns}
             getMetricFormatter={getMetricFormatter}
             color={config.metric.secondaryColor}
-            fontSize={fontSize}
             trendConfig={
               hasDynamicColoring && trendConfig
                 ? { ...trendConfig, borderColor: color }
@@ -212,14 +211,13 @@ export const MetricVis = ({
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: ({ fontSize, color }) => (
+      extra: ({ color }) => (
         <SecondaryMetric
           row={row}
           config={config}
           columns={data.columns}
           getMetricFormatter={getMetricFormatter}
           color={config.metric.secondaryColor}
-          fontSize={fontSize}
           trendConfig={
             hasDynamicColoring && trendConfig ? { ...trendConfig, borderColor: color } : trendConfig
           }
@@ -300,12 +298,15 @@ export const MetricVis = ({
   return (
     <div
       ref={scrollContainerRef}
-      css={css`
-        height: 100%;
-        width: 100%;
-        overflow-y: auto;
-        ${useEuiScrollBar()}
-      `}
+      css={[
+        styles.layout,
+        css`
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          ${useEuiScrollBar()}
+        `,
+      ]}
     >
       <div
         css={css`
@@ -362,4 +363,18 @@ export const MetricVis = ({
       </div>
     </div>
   );
+};
+
+const styles = {
+  layout: css({
+    '.echMetricText__valuesBlock': {
+      display: 'flex',
+      minWidth: 0,
+      maxWidth: '100%',
+    },
+    '.echMetricText__valuesBlock > div': {
+      minWidth: 'inherit',
+      maxWidth: 'inherit',
+    },
+  }),
 };

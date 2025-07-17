@@ -178,8 +178,9 @@
         "@aws-crypto/sha256-js",
         "@aws-crypto/util",
         "@langtrase/trace-attributes",
-        "@opentelemetry/sdk-trace-base",
+        "@arizeai/openinference-semantic-conventions",
         "@smithy/eventstream-serde-node",
+        "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
         "ajv",
@@ -190,7 +191,12 @@
         "langsmith",
         "openai",
         "@types/json-schema",
-        "table"
+        "table",
+        "@huggingface/hub",
+        "cache-manager",
+        "cache-manager-fs-hash",
+        "keyv",
+        "@types/cache-manager-fs-hash"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -296,6 +302,9 @@
       ],
       "matchBaseBranches": [
         "main"
+      ],
+      "matchUpdateTypes": [
+        "patch"
       ],
       "labels": [
         "Team:SharedUX",
@@ -457,6 +466,10 @@
       "reviewers": [
         "team:appex-sharedux"
       ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "matchBaseBranches": [
         "main"
       ],
@@ -500,13 +513,18 @@
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is"
+        "@types/react-is",
+        "csstype"
       ],
       "reviewers": [
         "team:appex-sharedux"
       ],
       "matchBaseBranches": [
         "main"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
       "labels": [
         "Team:SharedUX",
@@ -561,6 +579,10 @@
         "@types/react-router-dom",
         "history",
         "@types/history"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -690,10 +712,10 @@
     {
       "groupName": "@reduxjs/toolkit",
       "matchDepNames": [
-        "@reduxjs/toolkit"
+        "@reduxjs/toolkit",
+        "immer"
       ],
       "reviewers": [
-        "team:ml-ui",
         "team:kibana-visualizations",
         "team:security-solution"
       ],
@@ -739,6 +761,8 @@
         "js-search",
         "openpgp",
         "remark-gfm",
+        "rehype-raw",
+        "rehype-sanitize",
         "yaml",
         "@types/js-search"
       ],
@@ -1027,9 +1051,7 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "csstype",
-        "cronstrue",
-        "immer"
+        "cronstrue"
       ],
       "reviewers": [
         "team:kibana-management"
@@ -2212,7 +2234,7 @@
         "release_note:skip",
         "backport:prev-minor"
       ],
-      "recreateWhen": "never",
+      "dependencyDashboardApproval": true,
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -3333,6 +3355,24 @@
       "enabled": true
     },
     {
+      "groupName": "p-timeout",
+      "matchDepNames": [
+        "p-timeout"
+      ],
+      "reviewers": [
+        "team:obs-ai-assistant"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "redux-actions",
       "matchDepNames": [
         "redux-actions",
@@ -4307,33 +4347,33 @@
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
+        "@elastic/opentelemetry-node",
         "@opentelemetry/api",
-        "@opentelemetry/api-metrics",
-        "@opentelemetry/core",
+        "@opentelemetry/context-async-hooks",
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-prometheus",
-        "@opentelemetry/resources",
-        "@opentelemetry/sdk-metrics-base",
-        "@opentelemetry/semantic-conventions",
-        "@arizeai/openinference-semantic-conventions",
-        "@opentelemetry/context-async-hooks",
-        "@opentelemetry/exporter-trace-otlp-grpc",
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
+        "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
-        "@opentelemetry/sdk-node",
-        "@opentelemetry/sdk-trace-node"
+        "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
-        "team:stack-monitoring",
-        "team:kibana-core"
+        "team:appex-ai-infra",
+        "team:kibana-core",
+        "team:kibana-security",
+        "team:stack-monitoring"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
+        "Team:AI Infra",
         "Team:Monitoring",
-        "backport:all-open",
+        "Team:Core",
+        "Team:Security",
+        "backport:prev-minor",
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",

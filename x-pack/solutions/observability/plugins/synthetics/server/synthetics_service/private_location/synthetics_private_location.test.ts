@@ -116,7 +116,8 @@ describe('SyntheticsPrivateLocation', () => {
         await syntheticsPrivateLocation.createPackagePolicies(
           [{ config: testConfig, globalParams: {} }],
           [mockPrivateLocation],
-          'test-space'
+          'test-space',
+          []
         );
       } catch (e) {
         expect(e).toEqual(new Error(error));
@@ -138,7 +139,8 @@ describe('SyntheticsPrivateLocation', () => {
         await syntheticsPrivateLocation.editMonitors(
           [{ config: testConfig, globalParams: {} }],
           [mockPrivateLocation],
-          'test-space'
+          'test-space',
+          []
         );
       } catch (e) {
         expect(e).toEqual(new Error(error));
@@ -183,7 +185,8 @@ describe('SyntheticsPrivateLocation', () => {
       testMonitorPolicy,
       MonitorTypeEnum.BROWSER,
       dummyBrowserConfig,
-      {}
+      {},
+      []
     );
 
     expect(test.formattedPolicy.inputs[3].streams[1]).toStrictEqual({

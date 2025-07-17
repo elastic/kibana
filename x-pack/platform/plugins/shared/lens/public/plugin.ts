@@ -28,6 +28,7 @@ import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
   ACTION_CONVERT_TO_LENS,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+  ACTION_CONVERT_AGG_BASED_TO_LENS,
   VisualizationsSetup,
   VisualizationsStart,
 } from '@kbn/visualizations-plugin/public';
@@ -70,6 +71,7 @@ import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -118,9 +120,7 @@ import type {
   VisualizationMap,
 } from './types';
 import { lensVisTypeAlias } from './vis_type_alias';
-import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { inAppEmbeddableEditTrigger } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
-
 import type {
   LensEmbeddableStartServices,
   LensSerializedState,
@@ -130,12 +130,11 @@ import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { setupExpressions } from './expressions';
-import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
-import { LensDocument } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
   LATEST_VERSION,
@@ -401,14 +400,20 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
+          const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
           container.addNewPanel(
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
-                references: savedObject.references,
+                rawState: {},
+                references: [
+                  ...savedObject.references,
+                  {
+                    name: SAVED_OBJECT_REF_NAME,
+                    type: LENS_EMBEDDABLE_TYPE,
+                    id: savedObject.id,
+                  },
+                ],
               },
             },
             true
@@ -478,7 +483,9 @@ export class LensPlugin {
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      euiIconType: 'logoKibana',
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
@@ -515,20 +522,6 @@ export class LensPlugin {
         });
       },
     });
-
-    if (globalSearch) {
-      globalSearch.registerResultProvider(
-        getSearchProvider(
-          core.getStartServices().then(
-            ([
-              {
-                application: { capabilities },
-              },
-            ]) => capabilities
-          )
-        )
-      );
-    }
 
     urlForwarding.forwardApp(APP_ID, APP_ID);
 
@@ -684,11 +677,11 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerActionAsync(
       AGG_BASED_VISUALIZATION_TRIGGER,
-      ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+      ACTION_CONVERT_AGG_BASED_TO_LENS,
       async () => {
         const { convertToLensActionFactory } = await import('./async_services');
         const action = convertToLensActionFactory(
-          ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+          ACTION_CONVERT_AGG_BASED_TO_LENS,
           i18n.translate('xpack.lens.visualizeAggBasedLegend', {
             defaultMessage: 'Visualize agg based chart',
           }),
@@ -701,13 +694,6 @@ export class LensPlugin {
     );
 
     // Allows the Lens embeddable to easily open the inline editing flyout
-    // });
-    // embeddable inline edit panel action
-    // startDependencies.uiActions.addTriggerAction(
-    //   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
-    //   editLensEmbeddableAction
-    // );
-
     startDependencies.uiActions.addTriggerActionAsync(
       IN_APP_EMBEDDABLE_EDIT_TRIGGER,
       ACTION_EDIT_LENS_EMBEDDABLE,
@@ -744,13 +730,19 @@ export class LensPlugin {
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
-      startDependencies.uiActions.addTriggerAction(
+      startDependencies.uiActions.addTriggerActionAsync(
         CONTEXT_MENU_TRIGGER,
-        createOpenInDiscoverAction(
-          discoverLocator,
-          startDependencies.dataViews,
-          this.hasDiscoverAccess
-        )
+        'ACTION_OPEN_IN_DISCOVER',
+        async () => {
+          const { createOpenInDiscoverAction } = await import(
+            './trigger_actions/open_in_discover_action'
+          );
+          return createOpenInDiscoverAction(
+            discoverLocator,
+            startDependencies.dataViews,
+            this.hasDiscoverAccess
+          );
+        }
       );
     }
 

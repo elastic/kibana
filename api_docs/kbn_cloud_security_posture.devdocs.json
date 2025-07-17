@@ -156,7 +156,9 @@
         "type": "Function",
         "tags": [],
         "label": "decodeQuery",
-        "description": [],
+        "description": [
+          "\nDecodes query parameters from a search string"
+        ],
         "signature": [
           "<T extends unknown>(search?: string | undefined) => Partial<T> | undefined"
         ],
@@ -170,7 +172,9 @@
             "type": "string",
             "tags": [],
             "label": "search",
-            "description": [],
+            "description": [
+              "- The search string to decode"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -180,7 +184,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The decoded query object or undefined if decoding fails"
+        ],
         "initialIsOpen": false
       },
       {
@@ -189,9 +195,11 @@
         "type": "Function",
         "tags": [],
         "label": "encodeQuery",
-        "description": [],
+        "description": [
+          "\nEncodes query parameters using rison and returns a search string with 'cspq=' prefix"
+        ],
         "signature": [
-          "(query: any) => string | undefined"
+          "(query: unknown) => string | undefined"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
         "deprecated": false,
@@ -200,12 +208,14 @@
           {
             "parentPluginId": "@kbn/cloud-security-posture",
             "id": "def-public.encodeQuery.$1",
-            "type": "Any",
+            "type": "Unknown",
             "tags": [],
             "label": "query",
-            "description": [],
+            "description": [
+              "- The query object to encode"
+            ],
             "signature": [
-              "any"
+              "unknown"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
             "deprecated": false,
@@ -213,7 +223,9 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "The encoded search string or undefined if encoding fails"
+        ],
         "initialIsOpen": false
       },
       {
@@ -228,7 +240,7 @@
         "signature": [
           "(references: string[], id: string) => string | null"
         ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/find_reference_link.util.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -242,7 +254,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/find_reference_link.util.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -257,7 +269,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/find_reference_link.util.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -309,6 +321,55 @@
               "<{}>"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/get_finding_colors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.getNonCveReferences",
+        "type": "Function",
+        "tags": [],
+        "label": "getNonCveReferences",
+        "description": [
+          "\nGet non-CVE references from vulnerability record"
+        ],
+        "signature": [
+          "(vulnerabilityRecord: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-common",
+            "scope": "common",
+            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+            "section": "def-common.CspVulnerabilityFinding",
+            "text": "CspVulnerabilityFinding"
+          },
+          ") => string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.getNonCveReferences.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "vulnerabilityRecord",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.CspVulnerabilityFinding",
+                "text": "CspVulnerabilityFinding"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -631,6 +692,56 @@
               "VulnerabilityCounts"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.isCveReference",
+        "type": "Function",
+        "tags": [],
+        "label": "isCveReference",
+        "description": [
+          "\nChecks if a reference URL contains a vulnerability ID"
+        ],
+        "signature": [
+          "(reference: string, id: string) => boolean"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.isCveReference.$1",
+            "type": "string",
+            "tags": [],
+            "label": "reference",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.isCveReference.$2",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2236,7 +2347,9 @@
         "type": "Type",
         "tags": [],
         "label": "NavFilter",
-        "description": [],
+        "description": [
+          "\nType alias for navigation filters"
+        ],
         "signature": [
           "{ [x: string]: FilterValue; }"
         ],

@@ -54,6 +54,7 @@ subs:
   bedrock:   "Amazon Bedrock"
   gemini:   "Google Gemini"
   hive:   "TheHive"
+  xsoar:   "XSOAR"
   report-features:   "reporting features"
   ml:   "machine learning"
   ccs:   "cross-cluster search"

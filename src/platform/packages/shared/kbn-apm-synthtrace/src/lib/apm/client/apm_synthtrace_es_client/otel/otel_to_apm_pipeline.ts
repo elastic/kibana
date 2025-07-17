@@ -48,8 +48,8 @@ export function otelToApmPipeline(logger: Logger, includeSerialization: boolean 
     const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       getOtelToApmTransform(),
       ...getOtelTransforms(),

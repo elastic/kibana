@@ -35,7 +35,7 @@ export class ServiceManager {
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup(),
+      tools: this.services.tools.setup({ logger }),
       agents: this.services.agents.setup({ logger }),
     };
 
@@ -64,10 +64,14 @@ export class ServiceManager {
 
     const tools = this.services.tools.start({
       getRunner,
+      elasticsearch,
     });
 
     const agents = this.services.agents.start({
+      security,
+      elasticsearch,
       getRunner,
+      toolsService: tools,
     });
 
     const runnerFactory = new RunnerFactoryImpl({

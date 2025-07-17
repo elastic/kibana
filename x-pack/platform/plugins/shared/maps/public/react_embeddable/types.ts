@@ -19,7 +19,7 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { Observable } from 'rxjs';
 import type { MapAttributes } from '../../common/content_management';
 import type {

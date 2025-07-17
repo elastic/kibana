@@ -17,7 +17,12 @@ import { inputsFormat } from '../../../common/constants';
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
+import {
+  appContextService,
+  agentPolicyService,
+  packagePolicyService,
+  licenseService,
+} from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import {
   AGENTS_PREFIX,
@@ -310,6 +315,12 @@ export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
 
   const agentClient = fleetContext.agentClient.asCurrentUser;
 
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError(
+      'Auto-upgrade agents feature requires at least Enterprise license'
+    );
+  }
+
   const body = await getAutoUpgradeAgentsStatus(agentClient, request.params.agentPolicyId);
   return response.ok({
     body,
@@ -528,6 +539,8 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   logger.debug(`updating policy [${request.params.agentPolicyId}] in space [${spaceId}]`);
 
   try {
+    const requestSpaceId = spaceId;
+
     if (spaceIds?.length) {
       const authorizedSpaces = await checkAgentPoliciesAllPrivilegesForSpaces(
         request,
@@ -539,7 +552,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
-        options: { force },
+        options: { force, validateUniqueName: true },
       });
 
       spaceId = spaceIds[0];
@@ -553,7 +566,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, bumpRevision, user, spaceId }
+      { force, bumpRevision, user, spaceId, requestSpaceId }
     );
 
     let item: any = agentPolicy;

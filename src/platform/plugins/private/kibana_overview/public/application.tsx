@@ -11,7 +11,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { NewsfeedApiEndpoint } from '@kbn/newsfeed-plugin/public';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
@@ -42,14 +41,14 @@ export const renderApp = (
       );
 
     ReactDOM.render(
-      <KibanaRenderContextProvider {...core}>
+      core.rendering.addContext(
         <KibanaContextProvider services={{ ...core, ...deps }}>
           <KibanaOverviewApp
             basename={appBasePath}
             {...{ notifications, http, navigation, newsfeed$, solutions, features$ }}
           />
         </KibanaContextProvider>
-      </KibanaRenderContextProvider>,
+      ),
       element
     );
   });

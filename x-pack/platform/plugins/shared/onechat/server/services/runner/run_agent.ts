@@ -8,61 +8,69 @@
 import type {
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
-  ConversationalAgentParams,
   RunAgentReturn,
 } from '@kbn/onechat-server';
-import { internalProviderToPublic } from '../tools/utils';
+import { withAgentSpan } from '../../tracing';
+import { registryToProvider } from '../tools/utils';
+import { createAgentHandler } from '../agents/modes/create_handler';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
 import type { RunnerManager } from './runner';
 
-export const createAgentHandlerContext = <TParams = Record<string, unknown>>({
+export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
   agentExecutionParams,
   manager,
 }: {
-  agentExecutionParams: ScopedRunnerRunAgentParams<TParams>;
+  agentExecutionParams: ScopedRunnerRunAgentParams;
   manager: RunnerManager;
-}): AgentHandlerContext => {
+}): Promise<AgentHandlerContext> => {
   const { onEvent } = agentExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService } =
+  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
     manager.deps;
   return {
     request,
+    logger,
     esClient: elasticsearch.client.asScoped(request),
     modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
-    toolProvider: internalProviderToPublic({
-      provider: toolsService.registry,
+    toolProvider: registryToProvider({
+      registry: await toolsService.getRegistry({ request }),
       getRunner: manager.getRunner,
+      request,
     }),
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };
 
-export const runAgent = async <TParams = Record<string, unknown>, TResult = unknown>({
+export const runAgent = async ({
   agentExecutionParams,
   parentManager,
 }: {
-  agentExecutionParams: ScopedRunnerRunAgentParams<TParams>;
+  agentExecutionParams: ScopedRunnerRunAgentParams;
   parentManager: RunnerManager;
-}): Promise<RunAgentReturn<TResult>> => {
+}): Promise<RunAgentReturn> => {
   const { agentId, agentParams } = agentExecutionParams;
 
   const context = forkContextForAgentRun({ parentContext: parentManager.context, agentId });
   const manager = parentManager.createChild(context);
 
   const { agentsService, request } = manager.deps;
-  const agent = await agentsService.registry.get({ agentId, request });
-  const agentHandlerContext = createAgentHandlerContext<TParams>({ agentExecutionParams, manager });
-  const agentResult = await agent.handler(
-    {
-      runId: manager.context.runId,
-      agentParams: agentParams as ConversationalAgentParams,
-    },
-    agentHandlerContext
-  );
+  const agentClient = await agentsService.getScopedClient({ request });
+  const agent = await agentClient.get(agentId);
+
+  const agentResult = await withAgentSpan({ agent }, async () => {
+    const agentHandler = createAgentHandler({ agent });
+    const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
+    return await agentHandler(
+      {
+        runId: manager.context.runId,
+        agentParams,
+      },
+      agentHandlerContext
+    );
+  });
 
   return {
     runId: manager.context.runId,
-    result: agentResult.result as TResult,
+    result: agentResult.result,
   };
 };

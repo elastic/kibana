@@ -25,9 +25,9 @@ import {
   EuiIconTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-
 import styled from 'styled-components';
 
+import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
@@ -308,63 +308,20 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 >
                   {/* Namespace  */}
                   <EuiFlexItem>
-                    <EuiFormRow
-                      isInvalid={!!validationResults.namespace}
-                      error={validationResults.namespace}
-                      label={
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
-                          defaultMessage="Namespace"
-                        />
-                      }
-                      helpText={
-                        isEditPage && packageInfo.type === 'input' ? (
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditNamespaceHelpLabel"
-                            defaultMessage="The namespace cannot be changed for this integration. Create a new integration policy to use a different namespace."
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                            defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMore}."
-                            values={{
-                              learnMore: (
-                                <EuiLink
-                                  href={docLinks.links.fleet.datastreamsNamingScheme}
-                                  target="_blank"
-                                >
-                                  {i18n.translate(
-                                    'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
-                                    { defaultMessage: 'Learn more' }
-                                  )}
-                                </EuiLink>
-                              ),
-                            }}
-                          />
-                        )
-                      }
-                    >
-                      <EuiComboBox
-                        data-test-subj="packagePolicyNamespaceInput"
-                        noSuggestions
-                        placeholder={namespacePlaceholder}
-                        isDisabled={isEditPage && packageInfo.type === 'input'}
-                        singleSelection={true}
-                        selectedOptions={
-                          packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []
-                        }
-                        onCreateOption={(newNamespace: string) => {
-                          updatePackagePolicy({
-                            namespace: newNamespace,
-                          });
-                        }}
-                        onChange={(newNamespaces: Array<{ label: string }>) => {
-                          updatePackagePolicy({
-                            namespace: newNamespaces.length ? newNamespaces[0].label : '',
-                          });
-                        }}
-                      />
-                    </EuiFormRow>
+                    <NamespaceComboBox
+                      namespace={packagePolicy.namespace || ''}
+                      placeholder={namespacePlaceholder}
+                      isEditPage={isEditPage}
+                      packageType={packageInfo.type}
+                      validationError={validationResults.namespace}
+                      docLinks={docLinks}
+                      onNamespaceChange={(newNamespace: string) => {
+                        updatePackagePolicy({
+                          namespace: newNamespace,
+                        });
+                      }}
+                      data-test-subj="packagePolicyNamespaceInput"
+                    />
                   </EuiFlexItem>
 
                   {/* Output */}

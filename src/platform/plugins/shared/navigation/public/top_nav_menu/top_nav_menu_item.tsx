@@ -83,6 +83,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     : { onClick: handleClick };
 
   const commonButtonProps = {
+    id: props.htmlId,
     isDisabled: isDisabled(),
     isLoading: props.isLoading,
     iconType: props.iconType,

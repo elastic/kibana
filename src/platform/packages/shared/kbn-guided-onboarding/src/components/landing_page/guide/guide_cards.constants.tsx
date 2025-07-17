@@ -63,36 +63,6 @@ export const getGuideCards = (
       order: 1,
     },
     {
-      solution: 'search',
-      icon: 'vector',
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title', {
-        defaultMessage: 'Set up vector search',
-      }),
-      url: application.getUrlForApp('enterpriseSearchVectorSearch'),
-      telemetryId: 'onboarding--search--vector',
-      order: 4,
-    },
-    {
-      solution: 'search',
-      icon: 'magnifyWithPlus',
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
-        defaultMessage: 'Build an AI-powered search experience',
-      }),
-      url: application.getUrlForApp('enterpriseSearchAISearch'),
-      telemetryId: 'onboarding--search--ai',
-      order: 7,
-    },
-    {
-      solution: 'search',
-      icon: 'search',
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title', {
-        defaultMessage: 'Add search to my website',
-      }),
-      guideId: 'websiteSearch',
-      telemetryId: 'onboarding--search--website',
-      order: 13,
-    },
-    {
       solution: 'observability',
       icon: 'logstashInput',
       title: i18n.translate(

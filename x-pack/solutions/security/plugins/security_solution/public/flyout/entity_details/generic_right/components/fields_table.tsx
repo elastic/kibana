@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { EuiCode, EuiCodeBlock, EuiText, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
@@ -67,8 +67,21 @@ const setPinnedFieldsInLocalStorage = (storageKey: string, fields: string[]) => 
   localStorage.setItem(storageKey, JSON.stringify(fields));
 };
 
-export const usePinnedFields = (storageKey: string) => {
+export const usePinnedFields = (storageKey: string, defaultPinnedFields?: string[]) => {
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const hasStoredPinnedFields = !!getPinnedFieldsFromLocalStorage(storageKey)?.length;
+    const hasDefaultPinnedFields = !!defaultPinnedFields?.length;
+
+    // If no pinned fields exist in localStorage, set the default fields
+    if (!hasStoredPinnedFields && hasDefaultPinnedFields) {
+      setPinnedFieldsInLocalStorage(storageKey, defaultPinnedFields);
+      queryClient.setQueryData(['pinnedFields', storageKey], defaultPinnedFields);
+      queryClient.invalidateQueries(['pinnedFields', storageKey]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { data: pinnedFields = [] } = useQuery<string[]>({
     queryKey: ['pinnedFields', storageKey],
@@ -109,6 +122,11 @@ export interface FieldsTableProps {
    * Optional key to override component's defaults or set custom behaviors.
    */
   euiInMemoryTableProps?: Partial<EuiInMemoryTableProps>;
+
+  /**
+   * Set default fields if storage key does not exist.
+   */
+  defaultPinnedFields?: string[];
 }
 
 /**
@@ -118,8 +136,12 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
   document,
   tableStorageKey,
   euiInMemoryTableProps,
+  defaultPinnedFields,
 }) => {
-  const { pinnedFields, togglePin } = usePinnedFields(tableStorageKey || 'fields-table-pins');
+  const { pinnedFields, togglePin } = usePinnedFields(
+    tableStorageKey || 'fields-table-pins',
+    defaultPinnedFields
+  );
 
   const sortedItems: FlattenedItem[] = useMemo(
     () => getSortedFlattenedItems(document, pinnedFields),
@@ -169,7 +191,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
           defaultMessage: 'Value',
         }),
         render: (value: unknown) => (
-          <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
+          <div css={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
         ),
       },
     ],

@@ -48,7 +48,7 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onToggl
         overflow: hidden;
       `}
     >
-      <EuiToolTip content={label} delay="long">
+      <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
         <EuiButtonIcon
           data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
           iconSize="m"
@@ -79,7 +79,7 @@ export const getPinColumnControl = ({
     id: 'pin_field',
     width: 32,
     headerCellRender: () => (
-      <EuiIconTip aria-label={pinColumnHeader} type="iInCircle" content={pinColumnHeader} />
+      <EuiIconTip aria-label={pinColumnHeader} type="info" content={pinColumnHeader} />
     ),
     rowCellRender: ({ rowIndex }) => {
       const row = rows[rowIndex];

@@ -194,7 +194,7 @@ export const getSourceLayer = (
         },
         lineColor: {
           type: 'STATIC',
-          options: { color: dependencies.euiTheme.colors.vis.euiColorVisNeutral0 },
+          options: { color: dependencies.euiTheme.colors.vis.euiColorVisBase0 },
         },
         lineWidth: { type: 'STATIC', options: { size: 2 } },
         iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -264,7 +264,7 @@ export const getDestinationLayer = (
         },
         lineColor: {
           type: 'STATIC',
-          options: { color: dependencies.euiTheme.colors.vis.euiColorVisNeutral0 },
+          options: { color: dependencies.euiTheme.colors.vis.euiColorVisBase0 },
         },
         lineWidth: { type: 'STATIC', options: { size: 2 } },
         iconSize: { type: 'STATIC', options: { size: 8 } },

@@ -24,7 +24,7 @@ import { get } from 'lodash';
 
 /**
  * setup method dependencies
- * @private
+ * @internal
  */
 export interface FeatureFlagsSetupDeps {
   /**
@@ -35,7 +35,7 @@ export interface FeatureFlagsSetupDeps {
 
 /**
  * The browser-side Feature Flags Service
- * @private
+ * @internal
  */
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
@@ -64,6 +64,7 @@ export class FeatureFlagsService {
       this.overrides = featureFlagsInjectedMetadata.overrides;
     }
     return {
+      getInitialFeatureFlags: () => featureFlagsInjectedMetadata?.initialFeatureFlags ?? {},
       setProvider: (provider) => {
         if (this.isProviderReadyPromise) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
@@ -159,7 +160,7 @@ export class FeatureFlagsService {
 
   /**
    * Waits for the provider initialization with a timeout to avoid holding the page load for too long
-   * @private
+   * @internal
    */
   private async waitForProviderInitialization() {
     // Adding a timeout here to avoid hanging the start for too long if the provider is unresponsive
@@ -185,7 +186,7 @@ export class FeatureFlagsService {
    * @param evaluationFn The actual evaluation API
    * @param flagName The name of the flag to evaluate
    * @param fallbackValue The fallback value
-   * @private
+   * @internal
    */
   private evaluateFlag<T extends string | boolean | number>(
     evaluationFn: (flagName: string, fallbackValue: T) => T,
@@ -198,7 +199,7 @@ export class FeatureFlagsService {
         ? (override as T)
         : // We have to bind the evaluation or the client will lose its internal context
           evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
-    apm.addLabels({ [`flag_${flagName}`]: value });
+    apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
     // TODO: increment usage counter
     return value;
   }
@@ -206,7 +207,7 @@ export class FeatureFlagsService {
   /**
    * Formats the provided context to fulfill the expected multi-context structure.
    * @param contextToAppend The {@link EvaluationContext} to append.
-   * @private
+   * @internal
    */
   private async appendContext(contextToAppend: EvaluationContext): Promise<void> {
     // If no kind provided, default to the project|deployment level.

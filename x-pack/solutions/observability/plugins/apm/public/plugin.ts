@@ -11,9 +11,11 @@ import type {
 } from '@kbn/alerting-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type {
+  ApplicationStart,
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  NotificationsStart,
   Plugin,
   PluginInitializerContext,
   SecurityServiceStart,
@@ -64,7 +66,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -75,6 +77,7 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -121,6 +124,8 @@ export interface ApmServices {
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
+  application: ApplicationStart;
+  cases?: CasesPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
   discover?: DiscoverStart;
@@ -135,8 +140,9 @@ export interface ApmPluginStartDeps {
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   fleet?: FleetStart;
-  fieldFormats?: FieldFormatsStart;
+  fieldFormats: FieldFormatsStart;
   security?: SecurityPluginStart;
+  settings: SettingsStart;
   spaces?: SpacesPluginStart;
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -154,6 +160,7 @@ export interface ApmPluginStartDeps {
   savedSearch: SavedSearchPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   share?: SharePublicStart;
+  notifications: NotificationsStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {

@@ -21,7 +21,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { ESQLControlVariable } from '@kbn/esql-types';
-import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -77,11 +77,11 @@ function getDefaultLensApiMock() {
     serializeState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
+    getEditPanel: jest.fn(async () => <div data-test-subj="editLensFlyout" />),
     isEditingEnabled: jest.fn(() => true),
     getTypeDisplayName: jest.fn(() => 'Lens'),
     setTitle: jest.fn(),
     setHideTitle: jest.fn(),
-    mountInlineFlyout: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
       id: faker.string.uuid(),
       status: 'rendered',
@@ -192,26 +192,28 @@ export function makeEmbeddableServices(
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
     embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(
-        () =>
-          ({
-            api: {
-              enhancements: { dynamicActions: {} },
-              setDynamicActions: jest.fn(),
-              dynamicActionsState$: {},
-            } as unknown as EmbeddableDynamicActionsManager['api'],
-            anyStateChange$: of(undefined),
-            comparators: {
-              enhancements: jest.fn(),
-            },
-            getLatestState: jest.fn(),
-            reinitializeState: jest.fn(),
-            startDynamicActions: jest.fn(),
-          } as EmbeddableDynamicActionsManager)
-      ),
+      initializeEmbeddableDynamicActions: jest.fn(mockDynamicActionsManager),
     },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
+}
+
+export function mockDynamicActionsManager() {
+  return {
+    api: {
+      enhancements: { dynamicActions: {} },
+      setDynamicActions: jest.fn(),
+      dynamicActionsState$: {},
+    } as unknown as EmbeddableDynamicActionsManager['api'],
+    anyStateChange$: of(undefined),
+    comparators: {
+      enhancements: jest.fn(),
+    },
+    getLatestState: jest.fn(),
+    serializeState: jest.fn(),
+    reinitializeState: jest.fn(),
+    startDynamicActions: jest.fn(),
+  } as EmbeddableDynamicActionsManager;
 }
 
 export const mockVisualizationMap = (

@@ -33,7 +33,7 @@ export const SelectedVSAvailableCallout = ({
           <EuiCallOut
             color="primary"
             data-test-subj="dscSelectedColumnsCallout"
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate('discover.esqlMode.selectedColumnsCallout', {
               defaultMessage:
                 'Displaying {selectedColumnsNumber} of {esqlQueryColumnsNumber} fields. Add more from the Available fields list.',

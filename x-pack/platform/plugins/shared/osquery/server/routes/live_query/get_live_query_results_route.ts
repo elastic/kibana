@@ -10,6 +10,7 @@ import { map } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import type {
   GetLiveQueryResultsRequestQuerySchema,
   GetLiveQueryResultsRequestParamsSchema,
@@ -30,8 +31,12 @@ import {
   getLiveQueryResultsRequestParamsSchema,
   getLiveQueryResultsRequestQuerySchema,
 } from '../../../common/api';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
+export const getLiveQueryResultsRoute = (
+  router: IRouter<DataRequestHandlerContext>,
+  osqueryContext: OsqueryAppContext
+) => {
   router.versioned
     .get({
       access: 'public',
@@ -62,6 +67,10 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
           const search = await context.search;
           const { actionDetails } = await lastValueFrom(
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
@@ -69,10 +78,15 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
                 actionId: request.params.id,
                 kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
+                spaceId,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )
           );
+
+          if (!actionDetails) {
+            return response.notFound({ body: { message: 'Action not found' } });
+          }
 
           const queries = actionDetails?._source?.queries;
 

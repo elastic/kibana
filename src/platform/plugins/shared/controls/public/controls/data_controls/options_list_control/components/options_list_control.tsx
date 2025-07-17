@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
@@ -55,10 +55,14 @@ const optionListControlStyles = {
     font-weight: ${euiTheme.font.weight.medium};
   `,
   invalidSelectionsToken: css({ verticalAlign: 'text-bottom' }),
-  filterButton: ({ euiTheme }: UseEuiTheme) => css`
-    font-weight: ${euiTheme.font.weight.regular} !important;
-    color: ${euiTheme.colors.subduedText} !important;
-  `,
+  filterButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: `${euiTheme.font.weight.regular} !important` as 'normal',
+      color: `${euiTheme.colors.subduedText} !important`,
+      '&:hover::before': {
+        background: `${euiTheme.colors.backgroundBaseSubdued} !important`,
+      },
+    }),
   filterButtonText: css({
     flexGrow: 1,
     textAlign: 'left',
@@ -70,6 +74,23 @@ const optionListControlStyles = {
       borderStartStartRadius: '0 !important',
     },
   }),
+  /* additional custom overrides due to unexpected component usage;
+    open issue: https://github.com/elastic/eui-private/issues/270 */
+  filterGroup: css`
+    /* prevents duplicate border due to nested filterGroup */
+    &::after {
+      display: none;
+    }
+
+    .euiFilterButton__wrapper {
+      padding: 0;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  `,
 };
 
 export const OptionsListControl = ({
@@ -104,7 +125,7 @@ export const OptionsListControl = ({
   );
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
-  const styles = useMemoizedStyles(optionListControlStyles);
+  const styles = useMemoCss(optionListControlStyles);
 
   const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     return {
@@ -215,6 +236,7 @@ export const OptionsListControl = ({
       fullWidth
       compressed={isCompressed(componentApi)}
       className={controlPanelClassName}
+      css={optionListControlStyles.filterGroup}
     >
       <EuiInputPopover
         id={popoverId}

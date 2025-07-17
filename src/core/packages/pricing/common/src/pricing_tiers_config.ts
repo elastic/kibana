@@ -18,7 +18,7 @@ import { TypeOf, offeringBasedSchema, schema } from '@kbn/config-schema';
 export const pricingProductsSchema = schema.oneOf([
   schema.object({
     name: schema.literal('observability'),
-    tier: schema.oneOf([schema.literal('complete'), schema.literal('essentials')]),
+    tier: schema.oneOf([schema.literal('complete'), schema.literal('logs_essentials')]),
   }),
   schema.object({
     name: schema.literal('ai_soc'),
@@ -56,7 +56,7 @@ export const pricingProductsSchema = schema.oneOf([
  *
  * @public
  */
-export type PricingProduct = TypeOf<typeof pricingProductsSchema>;
+export type IPricingProduct = TypeOf<typeof pricingProductsSchema>;
 
 /**
  * Schema defining the pricing tiers configuration structure.
@@ -70,7 +70,31 @@ export const tiersConfigSchema = schema.object({
     traditional: schema.literal(false),
     options: { defaultValue: false },
   }),
-  products: schema.maybe(schema.arrayOf(pricingProductsSchema)),
+  products: schema.maybe(
+    schema.arrayOf(pricingProductsSchema, {
+      validate: (products) => {
+        if (products && products.length > 1) {
+          const firstTier = products[0].tier;
+          const allSameTier = products.every((product) => product.tier === firstTier);
+          if (!allSameTier) {
+            return `Invalid pricing configuration: All products must have the same tier. Found tiers: ${products
+              .map((p) => `${p.name}:${p.tier}`)
+              .join(', ')}`;
+          }
+
+          // Check for mixed product types (observability vs security-related)
+          const hasObservability = products.some((p) => p.name === 'observability');
+          const hasSecurityProducts = products.some((p) =>
+            ['ai_soc', 'endpoint', 'cloud', 'security'].includes(p.name)
+          );
+
+          if (hasObservability && hasSecurityProducts) {
+            return 'Cannot mix observability and security products in the same configuration';
+          }
+        }
+      },
+    })
+  ),
 });
 
 /**
