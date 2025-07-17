@@ -434,7 +434,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should result in 400 error if more than 3 threshold fields', async () => {
+        it('should result in 400 error if more than 5 threshold fields', async () => {
           const existingRule = getThresholdRuleForAlertTesting(['*']);
           await createRule(supertest, log, existingRule);
 
@@ -448,7 +448,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body } = await securitySolutionApi.updateRule({ body: rule }).expect(400);
 
           expect(body).to.eql({
-            message: ['Number of fields must be 5 or less'],
+            error: 'Bad Request',
+            message: '[request body]: threshold.field: Array must contain at most 5 element(s)',
             status_code: 400,
           });
         });

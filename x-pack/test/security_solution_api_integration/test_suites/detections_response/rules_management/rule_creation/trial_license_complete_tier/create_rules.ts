@@ -398,7 +398,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body).toEqual({
-            message: ['Number of fields must be 5 or less'],
+            error: "Bad Request",
+            message: "[request body]: threshold.field: Array must contain at most 5 element(s)",
             status_code: 400,
           });
         });
