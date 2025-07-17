@@ -519,6 +519,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
       hideAgentlessSelector,
+      isServerless,
     ]
   );
 
