@@ -257,16 +257,12 @@ describe('validation logic', () => {
       },
     });
 
-    describe('ESQL query cannot be empty', () => {
-      testErrorsAndWarnings('', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
-      ]);
-      testErrorsAndWarnings(' ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
-      ]);
-      testErrorsAndWarnings('     ', [
-        "SyntaxError: mismatched input '<EOF>' expecting {'row', 'from', 'show'}",
-      ]);
+    // The following block tests a case that is allowed in Kibana
+    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-ast/src/ast_parser.ts
+    describe('EMPTY query does NOT produce syntax error', () => {
+      testErrorsAndWarnings('', []);
+      testErrorsAndWarnings(' ', []);
+      testErrorsAndWarnings('     ', []);
     });
 
     describe('ESQL query should start with a source command', () => {
