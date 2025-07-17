@@ -247,7 +247,7 @@ export class CstToAstConverter {
 
   // ----------------------------------------------------------------- commands
 
-  private fromSourceCommand(ctx: cst.SourceCommandContext): ast.ESQLCommand | undefined {
+  public fromSourceCommand(ctx: cst.SourceCommandContext): ast.ESQLCommand | undefined {
     const fromCommandCtx = ctx.fromCommand();
 
     if (fromCommandCtx) {
@@ -281,7 +281,7 @@ export class CstToAstConverter {
     // throw new Error(`Unknown source command: ${this.getSrc(ctx)}`);
   }
 
-  private fromProcessingCommand(ctx: cst.ProcessingCommandContext): ast.ESQLCommand | undefined {
+  public fromProcessingCommand(ctx: cst.ProcessingCommandContext): ast.ESQLCommand | undefined {
     const limitCommandCtx = ctx.limitCommand();
 
     if (limitCommandCtx) {
@@ -389,13 +389,6 @@ export class CstToAstConverter {
     if (rerankCommandCtx) {
       return this.fromRerankCommand(rerankCommandCtx);
     }
-
-    const rrfCommandCtx = ctx.rrfCommand();
-
-    if (rrfCommandCtx) {
-      return this.fromRrfCommand(rrfCommandCtx);
-    }
-
     const fuseCommandCtx = ctx.fuseCommand();
 
     if (fuseCommandCtx) {
@@ -592,9 +585,11 @@ export class CstToAstConverter {
       for (const fieldCtx of fields.aggField_list()) {
         if (fieldCtx.getText() === '') continue;
 
-        const node = this.fromAggField(fieldCtx);
+        const field = this.fromAggField(fieldCtx);
 
-        command.args.push(node);
+        if (field) {
+          command.args.push(field);
+        }
       }
     }
 
@@ -610,6 +605,10 @@ export class CstToAstConverter {
   private fromAggField(ctx: cst.AggFieldContext) {
     const fieldCtx = ctx.field();
     const field = this.fromField(fieldCtx);
+
+    if (!field) {
+      return;
+    }
 
     const booleanExpression = ctx.booleanExpression();
 
@@ -630,10 +629,6 @@ export class CstToAstConverter {
     );
 
     return aggField;
-  }
-
-  private fromField(ctx: cst.FieldContext) {
-    return this.fromField2(ctx)[0];
   }
 
   /**
@@ -868,9 +863,10 @@ export class CstToAstConverter {
   }
 
   private toPolicyNameFromEnrichCommand(ctx: cst.EnrichCommandContext): ast.ESQLSource {
-    const policyName = ctx._policyName;
+    const policyNameCtx = ctx._policyName;
+    const policyName = policyNameCtx?.ENRICH_POLICY_NAME() || policyNameCtx?.QUOTED_STRING();
 
-    if (!policyName || !textExistsAndIsValid(policyName.text)) {
+    if (!policyName || !textExistsAndIsValid(policyName.getText())) {
       const source = Builder.expression.source.node(
         {
           sourceType: 'policy',
@@ -881,13 +877,13 @@ export class CstToAstConverter {
         {
           incomplete: true,
           text: '',
-          location: { min: policyName.start, max: policyName.stop },
+          location: { min: policyNameCtx.start.start, max: policyNameCtx.start.stop },
         }
       );
       return source;
     }
 
-    const name = ctx._policyName.text;
+    const name = policyName.getText();
     const colonIndex = name.indexOf(':');
     const withPrefix = colonIndex !== -1;
     const incomplete = false;
@@ -907,7 +903,10 @@ export class CstToAstConverter {
         {
           text: prefixName,
           incomplete: false,
-          location: { min: policyName.start, max: policyName.start + prefixName.length - 1 },
+          location: {
+            min: policyNameCtx.start.start,
+            max: policyNameCtx.start.start + prefixName.length - 1,
+          },
         }
       );
       index = Builder.expression.literal.string(
@@ -919,8 +918,8 @@ export class CstToAstConverter {
           text: indexName,
           incomplete: false,
           location: {
-            min: policyName.start + prefixName.length + 1,
-            max: policyName.stop,
+            min: policyNameCtx.start.start + prefixName.length + 1,
+            max: policyNameCtx.start.stop,
           },
         }
       );
@@ -933,7 +932,7 @@ export class CstToAstConverter {
         {
           text: name,
           incomplete: false,
-          location: { min: policyName.start, max: policyName.stop },
+          location: { min: policyNameCtx.start.start, max: policyNameCtx.start.stop },
         }
       );
     }
@@ -949,8 +948,8 @@ export class CstToAstConverter {
         incomplete,
         text: name,
         location: {
-          min: policyName.start,
-          max: policyName.stop,
+          min: policyNameCtx.start.start,
+          max: policyNameCtx.start.stop,
         },
       }
     );
@@ -1260,14 +1259,6 @@ export class CstToAstConverter {
     return command;
   }
 
-  // ---------------------------------------------------------------------- RRF
-
-  private fromRrfCommand(ctx: cst.RrfCommandContext): ast.ESQLCommand<'rrf'> {
-    const command = this.createCommand('rrf', ctx);
-
-    return command;
-  }
-
   // --------------------------------------------------------------------- FUSE
 
   private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
@@ -1383,61 +1374,6 @@ export class CstToAstConverter {
         }) ?? [];
 
     return args;
-  }
-
-  private fromFields(ctx: cst.FieldsContext | undefined): ast.ESQLAstField[] {
-    const fields: ast.ESQLAstField[] = [];
-
-    if (!ctx) {
-      return fields;
-    }
-
-    try {
-      for (const field of ctx.field_list()) {
-        fields.push(...(this.fromField2(field) as ast.ESQLAstField[]));
-      }
-    } catch (e) {
-      // do nothing
-    }
-
-    return fields;
-  }
-
-  private fromAggFields(ctx: cst.AggFieldsContext | undefined): ast.ESQLAstField[] {
-    const fields: ast.ESQLAstField[] = [];
-
-    if (!ctx) {
-      return fields;
-    }
-
-    try {
-      for (const aggField of ctx.aggField_list()) {
-        fields.push(...(this.fromField2(aggField.field()) as ast.ESQLAstField[]));
-      }
-    } catch (e) {
-      // do nothing
-    }
-
-    return fields;
-  }
-
-  /**
-   * @todo Align this method with the `fromField` method.
-   */
-  private fromField2(ctx: cst.FieldContext): ast.ESQLAstItem[] {
-    if (ctx.qualifiedName() && ctx.ASSIGN()) {
-      const fn = this.createFunction(ctx.ASSIGN()!.getText(), ctx, undefined, 'binary-expression');
-
-      fn.args.push(
-        this.toColumn(ctx.qualifiedName()!),
-        this.collectBooleanExpression(ctx.booleanExpression())
-      );
-      fn.location = this.computeLocationExtends(fn);
-
-      return [fn];
-    }
-
-    return this.collectBooleanExpression(ctx.booleanExpression());
   }
 
   private visitLogicalNot(ctx: cst.LogicalNotContext) {
@@ -1783,6 +1719,10 @@ export class CstToAstConverter {
       .flat();
   }
 
+  public fromBooleanExpression(ctx: cst.BooleanExpressionContext): ast.ESQLAstItem {
+    return this.collectBooleanExpression(ctx)[0] || this.fromParserRuleToUnknown(ctx);
+  }
+
   private visitMatchExpression(ctx: cst.MatchExpressionContext): ESQLAstMatchBooleanExpression {
     return this.visitMatchBooleanExpression(ctx.matchBooleanExpression());
   }
@@ -2005,6 +1945,11 @@ export class CstToAstConverter {
     return node;
   }
 
+  /**
+   * @todo Parsing should not depend on ANTLR token constants. Those constants
+   *     change all the time, and this code will break (maybe is already broken).
+   *     Rethink this method.
+   */
   private getQuotedText(ctx: antlr.ParserRuleContext) {
     return [27 /* esql_parser.QUOTED_STRING */, 69 /* esql_parser.QUOTED_IDENTIFIER */]
       .map((keyCode) => ctx.getToken(keyCode, 0))
@@ -2015,8 +1960,110 @@ export class CstToAstConverter {
     return text && /^(`)/.test(text);
   }
 
+  private fromFields(ctx: cst.FieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const fieldCtx of ctx.field_list()) {
+        const field = this.fromField(fieldCtx);
+
+        if (field) {
+          fields.push(field as any);
+        }
+      }
+    } catch (e) {
+      // do nothing
+    }
+
+    return fields;
+  }
+
+  private fromAggFields(ctx: cst.AggFieldsContext | undefined): ast.ESQLAstField[] {
+    const fields: ast.ESQLAstField[] = [];
+
+    if (!ctx) {
+      return fields;
+    }
+
+    try {
+      for (const aggField of ctx.aggField_list()) {
+        const field = this.fromField(aggField.field());
+
+        if (field) {
+          fields.push(field);
+        }
+      }
+    } catch (e) {
+      // do nothing
+    }
+
+    return fields;
+  }
+
+  private fromField(ctx: cst.FieldContext): ast.ESQLAstField | undefined {
+    // TODO: Just checking on `ctx.qualifiedName()` should be enough and we
+    //     should dereference `ctx.qualifiedName()` only once.
+    if (ctx.qualifiedName() && ctx.ASSIGN()) {
+      // TODO: use binary expression construction method.
+      const assignment = this.createFunction(
+        ctx.ASSIGN()!.getText(),
+        ctx,
+        undefined,
+        'binary-expression'
+      ) as ast.ESQLBinaryExpression;
+
+      assignment.args.push(
+        this.toColumn(ctx.qualifiedName()!),
+        // TODO: The second argument here is an array, should be a single item.
+        this.collectBooleanExpression(ctx.booleanExpression())
+      );
+
+      // TODO: Avoid using `computeLocationExtends` here. Location should be computed
+      //       without that function, and we should eventually remove it.
+      assignment.location = this.computeLocationExtends(assignment);
+
+      return assignment;
+    }
+
+    // The boolean expression parsing might result into no fields, this
+    // happens when ANTLR continues to try to parse an invalid query.
+    return this.collectBooleanExpression(ctx.booleanExpression())[0]! as
+      | ast.ESQLAstField
+      | undefined;
+  }
+
   // --------------------------------------------------- expression: "function"
 
+  // TODO: Rename to `toFunction` or similar.
+  private createFunction<Subtype extends ast.FunctionSubtype>(
+    name: string,
+    ctx: antlr.ParserRuleContext,
+    customPosition?: ast.ESQLLocation,
+    subtype?: Subtype,
+    args: ast.ESQLAstItem[] = [],
+    incomplete?: boolean
+  ): ast.ESQLFunction<Subtype> {
+    const node: ast.ESQLFunction<Subtype> = {
+      type: 'function',
+      name,
+      text: ctx.getText(),
+      location: customPosition ?? getPosition(ctx.start, ctx.stop),
+      args,
+      incomplete: Boolean(ctx.exception) || !!incomplete,
+    };
+
+    if (subtype) {
+      node.subtype = subtype;
+    }
+
+    return node;
+  }
+
+  // TODO: Rename to `toFunctionCall` or similar.
   private createFunctionCall(ctx: cst.FunctionContext): ast.ESQLFunctionCallExpression {
     const functionExpressionCtx = ctx.functionExpression();
     const functionName = functionExpressionCtx.functionName();
@@ -2043,28 +2090,7 @@ export class CstToAstConverter {
     return node;
   }
 
-  private createFunction<Subtype extends ast.FunctionSubtype>(
-    name: string,
-    ctx: antlr.ParserRuleContext,
-    customPosition?: ast.ESQLLocation,
-    subtype?: Subtype,
-    args: ast.ESQLAstItem[] = [],
-    incomplete?: boolean
-  ): ast.ESQLFunction<Subtype> {
-    const node: ast.ESQLFunction<Subtype> = {
-      type: 'function',
-      name,
-      text: ctx.getText(),
-      location: customPosition ?? getPosition(ctx.start, ctx.stop),
-      args,
-      incomplete: Boolean(ctx.exception) || !!incomplete,
-    };
-    if (subtype) {
-      node.subtype = subtype;
-    }
-    return node;
-  }
-
+  // TODO: Rename to `toBinaryExpression` or similar.
   private createBinaryExpression(
     operator: ast.BinaryExpressionOperator,
     ctx: antlr.ParserRuleContext,

@@ -93,6 +93,17 @@ type UseCasesAddToExistingCaseModal = (
   close: () => void;
 };
 
+export interface Ecs {
+  _id: string;
+  _index?: string;
+  signal?: {
+    [x: string]: any;
+  };
+  kibana?: {
+    alert: any;
+  };
+}
+
 /**
  * Minimal cases service interface required by the alerts table
  *
@@ -109,6 +120,7 @@ export interface CasesService {
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
+    getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
 }
 

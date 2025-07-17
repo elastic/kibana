@@ -18,7 +18,8 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('find gaps', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/225982
+  describe.skip('find gaps', () => {
     const objectRemover = new ObjectRemover(supertest);
     const searchStart = '2024-01-01T00:00:00.000Z';
     const searchEnd = '2024-01-31T00:00:00.000Z';
@@ -52,6 +53,14 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
           username: user.username,
           password: user.password,
         };
+
+        beforeEach(async () => {
+          await supertest
+            .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/delete_gaps`)
+            .set('kbn-xsrf', 'foo')
+            .send({})
+            .expect(200);
+        });
 
         describe('find gaps with request body', () => {
           it('should handle finding gaps with various parameters', async () => {

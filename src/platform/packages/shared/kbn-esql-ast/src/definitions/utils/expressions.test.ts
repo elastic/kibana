@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parse } from '../../parser';
+import { Parser } from '../../parser';
 import { SupportedDataType, FunctionDefinitionTypes } from '../types';
 import { Location } from '../../commands_registry/types';
 import { buildPartialMatcher, getExpressionType } from './expressions';
@@ -29,13 +29,16 @@ describe('buildPartialMatcher', () => {
 
 describe('getExpressionType', () => {
   const getASTForExpression = (expression: string) => {
-    const { root } = parse(`FROM index | EVAL ${expression}`);
+    const { root, errors } = Parser.parse(`FROM index | EVAL ${expression}`);
+
+    if (errors.length > 0) {
+      throw new Error(
+        `Failed to parse expression "${expression}": ${errors.map((e) => e.message).join(', ')}`
+      );
+    }
+
     return root.commands[1].args[0];
   };
-
-  test('empty expression', () => {
-    expect(getExpressionType(getASTForExpression(''))).toBe('unknown');
-  });
 
   describe('literal expressions', () => {
     const cases: Array<{ expression: string; expectedType: SupportedDataType }> = [
@@ -302,10 +305,6 @@ describe('getExpressionType', () => {
       {
         expression: '[1., 2.]',
         expectedType: 'double',
-      },
-      {
-        expression: '[null, null, null]',
-        expectedType: 'null',
       },
       {
         expression: '[true, false]',

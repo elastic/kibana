@@ -56,7 +56,7 @@ export const TableView = (props: Props) => {
 
   const toggleAssetPopover = (uniqueID: string, nodeId: string) => {
     if (isFlyoutMode) {
-      setFlyoutUrlState({ detailsItemId: nodeId, assetType: nodeType });
+      setFlyoutUrlState({ detailsItemId: nodeId, entityType: nodeType });
     } else {
       setOpenPopoverId(uniqueID);
     }

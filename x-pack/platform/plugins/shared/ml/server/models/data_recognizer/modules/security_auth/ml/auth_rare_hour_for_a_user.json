@@ -1,5 +1,5 @@
 {
-  "description": "Security: Authentication - Looks for a user logging in at a time of day that is unusual for the user. This can be due to credentialed access via a compromised account when the user and the threat actor are in different time zones. In addition, unauthorized user activity often takes place during non-business hours.",
+  "description": "Security: Authentication - Looks for a user with successful login/logon at a time of day that is unusual for the user. This can be due to credentialed access via a compromised account when the user and the threat actor are in different time zones. In addition, unauthorized user activity often takes place during non-business hours.",
   "groups": ["security", "authentication"],
   "analysis_config": {
     "bucket_span": "15m",
