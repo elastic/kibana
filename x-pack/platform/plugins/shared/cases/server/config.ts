@@ -24,11 +24,9 @@ export const ConfigSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
   analytics: schema.object({
-    index: schema.maybe(
-      schema.object({
-        enabled: schema.boolean({ defaultValue: true }),
-      })
-    ),
+    index: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
   }),
 });
 

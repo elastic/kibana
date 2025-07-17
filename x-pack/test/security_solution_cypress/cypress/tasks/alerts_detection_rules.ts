@@ -63,6 +63,7 @@ import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import {
   MODIFIED_PREBUILT_RULE_BADGE,
+  MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE,
   POPOVER_ACTIONS_TRIGGER_BUTTON,
   RULE_NAME_HEADER,
 } from '../screens/rule_details';
@@ -408,12 +409,20 @@ export const expectToContainRule = (
   cy.get(tableSelector).find(RULES_ROW).should('include.text', ruleName);
 };
 
-export const expectModifiedBadgeToBeDisplayed = () => {
+export const expectModifiedRuleBadgeToBeDisplayed = () => {
   cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('exist');
 };
 
-export const expectModifiedBadgeToNotBeDisplayed = () => {
+export const expectModifiedRulePerFieldBadgeToBeDisplayed = (fieldName: string) => {
+  cy.get(MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE(fieldName)).should('exist');
+};
+
+export const expectModifiedRuleBadgeToNotBeDisplayed = () => {
   cy.get(MODIFIED_PREBUILT_RULE_BADGE).should('not.exist');
+};
+
+export const expectModifiedRulePerFieldBadgeToNotBeDisplayed = (fieldName: string) => {
+  cy.get(MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE(fieldName)).should('not.exist');
 };
 
 const selectOverwriteRulesImport = () => {
