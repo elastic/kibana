@@ -147,12 +147,12 @@ const prepareRouting =
   (descendants: ContentPackStream[], prepareDestination: (name: string) => string) =>
   (routing: RoutingDefinition[]) => {
     return routing
-      .filter((routing) =>
-        descendants.some((descendant) => descendant.name === routing.destination)
+      .filter((definition) =>
+        descendants.some((descendant) => descendant.name === definition.destination)
       )
-      .map((routing) => ({
-        ...routing,
-        destination: prepareDestination(routing.destination),
+      .map((definition) => ({
+        ...definition,
+        destination: prepareDestination(definition.destination),
       }));
   };
 

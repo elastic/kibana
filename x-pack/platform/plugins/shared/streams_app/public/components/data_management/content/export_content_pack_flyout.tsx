@@ -127,7 +127,7 @@ export function ExportContentPackFlyout({
 
             <ContentPackObjectsList
               objects={exportResponse.contentPack.entries}
-              onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
+              onSelectionChange={setSelectedContentPackObjects}
             />
           </>
         ) : null}

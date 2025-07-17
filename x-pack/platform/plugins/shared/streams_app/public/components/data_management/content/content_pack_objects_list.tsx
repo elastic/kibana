@@ -63,7 +63,7 @@ export function ContentPackObjectsList({
     );
 
     return rows;
-  }, [objects]);
+  }, [objects, onSelectionChange]);
 
   return (
     <EuiBasicTable
