@@ -144,6 +144,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             { defaultMessage: 'Assigned policies not accessible from current space' }
           ),
           isGroupLabel: true,
+          'data-test-subj': getTestId('unaccessibleGroupLabel'),
         });
       }
 
@@ -156,11 +157,12 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           ),
           disabled: true,
           checked: 'on',
+          'data-test-subj': getTestId(`unAccessiblePolicy-${policyId}`),
         });
       }
 
       return additionalPolicyItems;
-    }, [artifactRestrictedPolicyIds.policyIds]);
+    }, [artifactRestrictedPolicyIds.policyIds, getTestId]);
 
     const handleOnPolicySelectChange = useCallback<PolicySelectorProps['onChange']>(
       (updatedSelectedPolicyIds) => {
