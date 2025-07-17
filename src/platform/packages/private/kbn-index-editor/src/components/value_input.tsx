@@ -46,8 +46,6 @@ export const ValueInput = ({
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     event.stopPropagation();
     if (event.key === 'Enter') {
-      event.stopPropagation();
-
       if (error) {
         return;
       }

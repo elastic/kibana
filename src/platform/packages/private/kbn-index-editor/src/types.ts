@@ -19,9 +19,6 @@ import type { FileUploadPluginStart, MessageImporter } from '@kbn/file-upload-pl
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IndexUpdateService } from './index_update_service';
 
-export const ROW_PLACEHOLDER_PREFIX = 'row-placeholder-';
-export const COLUMN_PLACEHOLDER_PREFIX = 'column-placeholder-';
-
 export interface EditLookupIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;
