@@ -53,5 +53,6 @@
     "@kbn/logging",
     "@kbn/core-saved-objects-server",
     "@kbn/data-forge",
+    "@kbn/test-suites-xpack",
   ]
 }
