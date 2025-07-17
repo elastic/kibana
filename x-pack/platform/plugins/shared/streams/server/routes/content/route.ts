@@ -10,15 +10,21 @@ import { z } from '@kbn/zod';
 import {
   ContentPack,
   ContentPackStream,
+  PARENT_STREAM_ID,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
 } from '@kbn/content-packs-schema';
-import { Streams, getInheritedFieldsFromAncestors, isChildOf } from '@kbn/streams-schema';
+import { Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { generateArchive, parseArchive } from '../../lib/content';
-import { prepareStreamsForExport, prepareStreamsForImport } from '../../lib/content/stream';
+import {
+  prepareStreamsForExport,
+  prepareStreamsForImport,
+  resolveAncestors,
+  withRootPrefix,
+} from '../../lib/content/stream';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -53,18 +59,27 @@ const exportContentRoute = createServerRoute({
       throw new StatusError('Only wired streams can be exported', 400);
     }
 
-    if (!isIncludeAll(params.body.include)) {
-      throw new StatusError('Streams subset is not implemented', 400);
-    }
-
     const [ancestors, descendants] = await Promise.all([
       streamsClient.getAncestors(params.path.name),
       streamsClient.getDescendants(params.path.name),
     ]);
 
+    const exportedDescendants = isIncludeAll(params.body.include)
+      ? descendants
+      : resolveAncestors(params.body.include.objects.streams).map((name) => {
+          const descendant = descendants.find((d) => d.name === withRootPrefix(root.name, name));
+          if (!descendant) {
+            throw new StatusError(
+              `Could not find [${name}] as a descendant of [${root.name}]`,
+              400
+            );
+          }
+          return descendant;
+        });
+
     const streamObjects = prepareStreamsForExport({
       root,
-      descendants,
+      descendants: exportedDescendants,
       inheritedFields: getInheritedFieldsFromAncestors(ancestors),
     });
 
@@ -119,13 +134,34 @@ const importContentRoute = createServerRoute({
     const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
 
     const contentPack = await parseArchive(params.body.content);
+    const parentEntry = contentPack.entries.find(
+      (entry): entry is ContentPackStream =>
+        entry.type === 'stream' && entry.stream.name === PARENT_STREAM_ID
+    );
+    if (!parentEntry) {
+      throw new StatusError(`[${PARENT_STREAM_ID}] definition not found`, 400);
+    }
+
+    const importedStreamEntries = isIncludeAll(params.body.include)
+      ? contentPack.entries.filter((entry): entry is ContentPackStream => entry.type === 'stream')
+      : [
+          parentEntry,
+          ...resolveAncestors(params.body.include.objects.streams).map((name) => {
+            const descendant = contentPack.entries.find(
+              (entry): entry is ContentPackStream =>
+                entry.type === 'stream' && entry.stream.name === name
+            );
+            if (!descendant) {
+              throw new StatusError(`Could not find definition for stream [${name}]`, 400);
+            }
+            return descendant;
+          }),
+        ];
 
     const definitions = prepareStreamsForImport({
       root,
       inheritedFields,
-      entries: contentPack.entries.filter(
-        (entry): entry is ContentPackStream => entry.type === 'stream'
-      ),
+      entries: importedStreamEntries,
     });
 
     await streamsClient.bulkChanges(

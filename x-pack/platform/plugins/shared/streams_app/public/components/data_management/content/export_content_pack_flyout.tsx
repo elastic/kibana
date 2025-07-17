@@ -29,6 +29,7 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { ContentPackObjectsList } from './content_pack_objects_list';
 import { previewContent } from './requests';
 import { ContentPackMetadata } from './content_pack_manifest';
+import { prepareIncludePayload } from './utils';
 
 export function ExportContentPackFlyout({
   definition,
@@ -159,7 +160,10 @@ export function ExportContentPackFlyout({
                         path: { name: definition.stream.name },
                         body: {
                           ...manifest,
-                          include: { all: {} },
+                          include: prepareIncludePayload(
+                            exportResponse.contentPack.entries,
+                            selectedContentPackObjects
+                          ),
                         },
                       },
                       signal: new AbortController().signal,
@@ -178,7 +182,7 @@ export function ExportContentPackFlyout({
                     }),
                   });
                 } finally {
-                  setIsExporting(true);
+                  setIsExporting(false);
                 }
               }}
             >

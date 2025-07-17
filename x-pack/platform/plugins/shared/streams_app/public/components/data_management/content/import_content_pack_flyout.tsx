@@ -27,6 +27,7 @@ import { ContentPackObjectsList } from './content_pack_objects_list';
 import { importContent, previewContent } from './requests';
 import { ContentPackMetadata } from './content_pack_manifest';
 import { getFormattedError } from '../../../util/errors';
+import { prepareIncludePayload } from './utils';
 
 export function ImportContentPackFlyout({
   definition,
@@ -140,7 +141,7 @@ export function ImportContentPackFlyout({
                     http,
                     file,
                     definition,
-                    include: { all: {} },
+                    include: prepareIncludePayload(contentPackObjects, selectedContentPackObjects),
                   });
 
                   setIsLoading(false);

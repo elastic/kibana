@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { mapValues, omit } from 'lodash';
+import { mapValues, omit, uniq } from 'lodash';
 import { ContentPackStream, PARENT_STREAM_ID } from '@kbn/content-packs-schema';
-import { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+import {
+  FieldDefinition,
+  InheritedFieldDefinition,
+  RoutingDefinition,
+  Streams,
+  getAncestorsAndSelf,
+} from '@kbn/streams-schema';
 
 export function prepareStreamsForExport({
   root,
@@ -18,6 +24,10 @@ export function prepareStreamsForExport({
   descendants: Streams.WiredStream.Definition[];
   inheritedFields: InheritedFieldDefinition;
 }) {
+  const prepareIncludedDestinations = prepareRouting(descendants, (destination) =>
+    withoutRootPrefix(root.name, destination)
+  );
+
   const streamObjects: ContentPackStream[] = [
     {
       type: 'stream',
@@ -29,10 +39,7 @@ export function prepareStreamsForExport({
           ...root.ingest,
           wired: {
             ...root.ingest.wired,
-            routing: root.ingest.wired.routing.map((routing) => ({
-              ...routing,
-              destination: withoutRootPrefix(routing.destination, root.name),
-            })),
+            routing: prepareIncludedDestinations(root.ingest.wired.routing),
             fields: {
               ...root.ingest.wired.fields,
               ...mapValues(inheritedFields, (field) => omit(field, ['from'])),
@@ -46,15 +53,12 @@ export function prepareStreamsForExport({
       id: stream.name,
       stream: {
         ...stream,
-        name: withoutRootPrefix(stream.name, root.name),
+        name: withoutRootPrefix(root.name, stream.name),
         ingest: {
           ...stream.ingest,
           wired: {
             ...stream.ingest.wired,
-            routing: stream.ingest.wired.routing.map((routing) => ({
-              ...routing,
-              destination: withoutRootPrefix(routing.destination, root.name),
-            })),
+            routing: prepareIncludedDestinations(stream.ingest.wired.routing),
           },
         },
       },
@@ -73,8 +77,13 @@ export function prepareStreamsForImport({
   entries: ContentPackStream[];
   inheritedFields: InheritedFieldDefinition;
 }) {
-  const definitions: Streams.WiredStream.Definition[] = entries.map((entry) => {
-    if (entry.stream.name === PARENT_STREAM_ID) {
+  const prepareIncludedDestinations = prepareRouting(
+    entries.map((entry) => entry.stream),
+    (destination) => withRootPrefix(root.name, destination)
+  );
+
+  const definitions: Streams.WiredStream.Definition[] = entries.map(({ stream }) => {
+    if (stream.name === PARENT_STREAM_ID) {
       return {
         ...root,
         ingest: {
@@ -82,17 +91,14 @@ export function prepareStreamsForImport({
           wired: {
             ...root.ingest.wired,
             routing: root.ingest.wired.routing.concat(
-              entry.stream.ingest.wired.routing.map((routing) => ({
-                ...routing,
-                destination: withRootPrefix(routing.destination, root.name),
-              }))
+              prepareIncludedDestinations(stream.ingest.wired.routing)
             ),
             fields: {
               ...root.ingest.wired.fields,
-              ...Object.keys(entry.stream.ingest.wired.fields)
+              ...Object.keys(stream.ingest.wired.fields)
                 .filter((key) => !root.ingest.wired.fields[key] && !inheritedFields[key])
                 .reduce((acc, key) => {
-                  acc[key] = { ...entry.stream.ingest.wired.fields[key] };
+                  acc[key] = { ...stream.ingest.wired.fields[key] };
                   return acc;
                 }, {} as FieldDefinition),
             },
@@ -102,16 +108,13 @@ export function prepareStreamsForImport({
     }
 
     return {
-      ...entry.stream,
-      name: withRootPrefix(entry.stream.name, root.name),
+      ...stream,
+      name: withRootPrefix(root.name, stream.name),
       ingest: {
-        ...entry.stream.ingest,
+        ...stream.ingest,
         wired: {
-          ...entry.stream.ingest.wired,
-          routing: entry.stream.ingest.wired.routing.map((routing) => ({
-            ...routing,
-            destination: withRootPrefix(routing.destination, root.name),
-          })),
+          ...stream.ingest.wired,
+          routing: prepareIncludedDestinations(stream.ingest.wired.routing),
         },
       },
     };
@@ -120,10 +123,29 @@ export function prepareStreamsForImport({
   return definitions;
 }
 
-function withoutRootPrefix(name: string, root: string) {
-  return name.replace(root + '.', '');
+const prepareRouting =
+  (descendants: Streams.WiredStream.Definition[], prepareDestination: (name: string) => string) =>
+  (routing: RoutingDefinition[]) => {
+    return routing
+      .filter((routing) =>
+        descendants.some((descendant) => descendant.name === routing.destination)
+      )
+      .map((routing) => ({
+        ...routing,
+        destination: prepareDestination(routing.destination),
+      }));
+  };
+
+export function withoutRootPrefix(root: string, name: string) {
+  const prefix = `${root}.`;
+  return name.startsWith(prefix) ? name.slice(prefix.length) : name;
 }
 
-function withRootPrefix(name: string, root: string) {
+export function withRootPrefix(root: string, name: string) {
   return `${root}.${name}`;
+}
+
+export function resolveAncestors(leafs: string[]) {
+  const streamNames = leafs.flatMap((name) => getAncestorsAndSelf(name));
+  return uniq(streamNames);
 }
