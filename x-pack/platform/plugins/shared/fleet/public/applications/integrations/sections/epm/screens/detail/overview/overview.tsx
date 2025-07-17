@@ -167,6 +167,7 @@ export const OverviewPage: React.FC<Props> = memo(
       [integrationInfo, packageInfo.screenshots]
     );
     const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
+    console.log('retrieved packageVerificationKeyId', packageVerificationKeyId);
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);

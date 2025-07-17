@@ -17,6 +17,7 @@ import {
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
+  useGetPackageVerificationKeyId,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
@@ -142,6 +143,8 @@ export const useAvailablePackages = ({
 
   const { isAgentlessEnabled } = useAgentless();
 
+  const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
+
   const {
     initialSelectedCategory,
     initialSubcategory,
@@ -200,10 +203,17 @@ export const useAvailablePackages = ({
 
     return eprAndCustomPackages
       .map((item) => {
-        return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
+        return mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId });
       })
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [addBasePath, appendCustomIntegrations, getAbsolutePath, getHref, mergedEprPackages]);
+  }, [
+    addBasePath,
+    appendCustomIntegrations,
+    getAbsolutePath,
+    getHref,
+    mergedEprPackages,
+    packageVerificationKeyId,
+  ]);
 
   // Packages to show
   // Filters out based on selected category and subcategory (if any)
