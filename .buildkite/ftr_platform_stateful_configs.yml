@@ -32,7 +32,6 @@ disabled:
   - x-pack/platform/test/cloud_integration/config.ts
   - x-pack/platform/test/load/config.ts
   - x-pack/platform/test/plugin_api_perf/config.ts
-  - x-pack/test/screenshot_creation/config.ts
   - x-pack/platform/test/screenshot_creation/config.ts
   - x-pack/platform/test/fleet_packages/config.ts
 
@@ -165,9 +164,6 @@ enabled:
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/platform/test/disable_ems/config.ts
   - x-pack/platform/test/examples/config.ts
-  - x-pack/test/fleet_api_integration/config.agent.ts
-  - x-pack/test/fleet_api_integration/config.epm.ts
-  - x-pack/test/fleet_api_integration/config.package_policy.ts
   - x-pack/platform/test/fleet_api_integration/config.agent.ts
   - x-pack/platform/test/fleet_api_integration/config.agent_policy.ts
   - x-pack/platform/test/fleet_api_integration/config.epm.ts
@@ -175,7 +171,7 @@ enabled:
   - x-pack/platform/test/fleet_api_integration/config.fleet.ts
   - x-pack/platform/test/fleet_api_integration/config.package_policy.ts
   - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
-  - x-pack/test/fleet_functional/config.ts
+  - x-pack/platform/test/fleet_functional/config.ts
   - x-pack/platform/test/fleet_tasks/config.ts
   - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/platform/test/functional_basic/apps/ml/permissions/config.ts
@@ -201,22 +197,22 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
-  - x-pack/test/functional/apps/advanced_settings/config.ts
+  - x-pack/platform/test/functional/apps/advanced_settings/config.ts
   - x-pack/platform/test/functional/apps/aiops/config.ts
-  - x-pack/test/functional/apps/api_keys/config.ts
+  - x-pack/platform/test/functional/apps/api_keys/config.ts
   - x-pack/platform/test/functional/apps/canvas/config.ts
-  - x-pack/test/functional/apps/cross_cluster_replication/config.ts
+  - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/test/functional/apps/dashboard/group1/config.ts
   - x-pack/test/functional/apps/dashboard/group2/config.ts
   - x-pack/test/functional/apps/dashboard/group3/config.ts
-  - x-pack/test/functional/apps/data_views/config.ts
+  - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/group1/config.ts
   - x-pack/test/functional/apps/discover/group2/config.ts
   - x-pack/test/functional/apps/discover/group3/config.ts
-  - x-pack/test/functional/apps/graph/config.ts
-  - x-pack/test/functional/apps/grok_debugger/config.ts
-  - x-pack/test/functional/apps/home/config.ts
+  - x-pack/platform/test/functional/apps/graph/config.ts
+  - x-pack/platform/test/functional/apps/grok_debugger/config.ts
+  - x-pack/platform/test/functional/apps/home/config.ts
   - x-pack/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/test/functional/apps/index_management/config.ts
   - x-pack/test/functional/apps/ingest_pipelines/config.ts
@@ -230,10 +226,10 @@ enabled:
   - x-pack/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/test/functional/apps/lens/open_in_lens/dashboard/config.ts
-  - x-pack/test/functional/apps/license_management/config.ts
+  - x-pack/platform/test/functional/apps/license_management/config.ts
   - x-pack/test/functional/apps/logstash/config.ts
-  - x-pack/test/functional/apps/managed_content/config.ts
-  - x-pack/test/functional/apps/management/config.ts
+  - x-pack/platform/test/functional/apps/managed_content/config.ts
+  - x-pack/platform/test/functional/apps/management/config.ts
   - x-pack/test/functional/apps/maps/group1/config.ts
   - x-pack/test/functional/apps/maps/group2/config.ts
   - x-pack/test/functional/apps/maps/group3/config.ts
@@ -287,10 +283,10 @@ enabled:
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/test/rule_registry/spaces_only/config_trial.ts
-  - x-pack/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
-  - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
-  - x-pack/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
-  - x-pack/test/saved_object_tagging/functional/config.ts
+  - x-pack/platform/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
+  - x-pack/platform/test/saved_object_tagging/api_integration/tagging_api/config.ts
+  - x-pack/platform/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
+  - x-pack/platform/test/saved_object_tagging/functional/config.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
   - x-pack/test/security_api_integration/anonymous_es_anonymous.config.ts
@@ -334,7 +330,7 @@ enabled:
   - x-pack/platform/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
-  - x-pack/test/upgrade_assistant_integration/config.ts
+  - x-pack/platform/test/upgrade_assistant_integration/config.ts
   - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
