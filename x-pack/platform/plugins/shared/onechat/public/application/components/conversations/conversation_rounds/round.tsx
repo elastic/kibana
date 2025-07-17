@@ -40,7 +40,7 @@ export const Round: React.FC<RoundProps> = ({ round }) => {
     <EuiFlexGroup direction="column" gutterSize="l" aria-label={labels.container}>
       <EuiPanel
         css={userMessageContainerStyles}
-        paddingSize="l"
+        paddingSize="m"
         hasShadow={false}
         hasBorder={false}
         aria-label={labels.userMessage}

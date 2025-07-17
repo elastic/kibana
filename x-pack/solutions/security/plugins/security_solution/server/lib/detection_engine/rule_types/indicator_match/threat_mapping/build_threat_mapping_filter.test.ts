@@ -13,7 +13,6 @@ import type {
 import {
   filterThreatMapping,
   buildThreatMappingFilter,
-  splitShouldClauses,
   createInnerAndClauses,
   createAndOrClauses,
   buildEntriesMappingFilter,
@@ -23,7 +22,6 @@ import {
   getThreatListItemMock,
   getThreatMappingFilterMock,
   getFilterThreatMapping,
-  getThreatMappingFiltersShouldMock,
   getThreatMappingFilterShouldMock,
   getThreatListSearchResponseMock,
 } from './build_threat_mapping_filter.mock';
@@ -31,27 +29,6 @@ import type { BooleanFilter, ThreatListItem } from './types';
 
 describe('build_threat_mapping_filter', () => {
   describe('buildThreatMappingFilter', () => {
-    test('it should throw if given a chunk over 1024 in size', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock().hits.hits;
-      expect(() =>
-        buildThreatMappingFilter({
-          threatMapping,
-          threatList,
-          chunkSize: 1025,
-          entryKey: 'value',
-        })
-      ).toThrow('chunk sizes cannot exceed 1024 in size');
-    });
-
-    test('it should NOT throw if given a chunk under 1024 in size', () => {
-      const threatMapping = getThreatMappingMock();
-      const threatList = getThreatListSearchResponseMock().hits.hits;
-      expect(() =>
-        buildThreatMappingFilter({ threatMapping, threatList, chunkSize: 1023, entryKey: 'value' })
-      ).not.toThrow();
-    });
-
     test('it should create the correct entries when using the default mocks', () => {
       const threatMapping = getThreatMappingMock();
       const threatList = getThreatListSearchResponseMock().hits.hits;
@@ -229,7 +206,7 @@ describe('build_threat_mapping_filter', () => {
             },
           ],
         },
-      } = getThreatMappingFilterShouldMock(); // get the first element
+      } = getThreatMappingFilterShouldMock();
       expect(innerClause).toEqual(filter);
     });
 
@@ -374,12 +351,9 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
       });
-      const expected: BooleanFilter = {
-        bool: { should: [getThreatMappingFilterShouldMock()], minimum_should_match: 1 },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
     });
 
@@ -389,7 +363,6 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
       });
       const expected: BooleanFilter = {
@@ -403,7 +376,6 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping: [],
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
       });
       const expected: BooleanFilter = {
@@ -438,12 +410,9 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
       });
-      const expected: BooleanFilter = {
-        bool: { should: [getThreatMappingFilterShouldMock()], minimum_should_match: 1 },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
     });
 
@@ -453,20 +422,19 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
         allowedFieldsForTermsQuery: {
           source: { 'source.ip': true },
           threat: { 'source.ip': true },
         },
       });
-      const mock = { ...getThreatMappingFilterShouldMock() };
+      const mock = getThreatMappingFilterShouldMock();
       mock.bool.should.pop();
 
       const expected: BooleanFilter = {
         bool: {
           should: [
-            mock,
+            ...mock.bool.should,
             {
               terms: {
                 _name: '__SEP____SEP__source.ip__SEP__source.ip__SEP__tq',
@@ -486,7 +454,6 @@ describe('build_threat_mapping_filter', () => {
       const mapping = buildEntriesMappingFilter({
         threatMapping,
         threatList,
-        chunkSize: 1024,
         entryKey: 'value',
         allowedFieldsForTermsQuery: {
           source: { 'host.name': true, 'host.ip': true },
@@ -494,157 +461,8 @@ describe('build_threat_mapping_filter', () => {
         },
       });
 
-      const expected: BooleanFilter = {
-        bool: {
-          should: [getThreatMappingFilterShouldMock()],
-          minimum_should_match: 1,
-        },
-      };
+      const expected: BooleanFilter = getThreatMappingFilterShouldMock();
       expect(mapping).toEqual(expected);
-    });
-  });
-
-  describe('splitShouldClauses', () => {
-    test('it should NOT split a single should clause as there is nothing to split on with chunkSize 1', () => {
-      const should = getThreatMappingFiltersShouldMock();
-      const clauses = splitShouldClauses({ should, chunkSize: 1 });
-      expect(clauses).toEqual(getThreatMappingFiltersShouldMock());
-    });
-
-    test('it should NOT mutate the original should clause passed in', () => {
-      const should = getThreatMappingFiltersShouldMock();
-      expect(should).toEqual(getThreatMappingFiltersShouldMock());
-    });
-
-    test('it should NOT split a single should clause as there is nothing to split on with chunkSize 2', () => {
-      const should = getThreatMappingFiltersShouldMock();
-      const clauses = splitShouldClauses({ should, chunkSize: 2 });
-      expect(clauses).toEqual(getThreatMappingFiltersShouldMock());
-    });
-
-    test('it should return an empty array given an empty array', () => {
-      const clauses = splitShouldClauses({ should: [], chunkSize: 2 });
-      expect(clauses).toEqual([]);
-    });
-
-    test('it should split an array of size 2 into a length 2 array with chunks on "chunkSize: 1"', () => {
-      const should = getThreatMappingFiltersShouldMock(2);
-      const clauses = splitShouldClauses({ should, chunkSize: 1 });
-      expect(clauses.length).toEqual(2);
-    });
-
-    test('it should not mutate the original when splitting on chunks', () => {
-      const should = getThreatMappingFiltersShouldMock(2);
-      splitShouldClauses({ should, chunkSize: 1 });
-      expect(should).toEqual(getThreatMappingFiltersShouldMock(2));
-    });
-
-    test('it should split an array of size 2 into 2 different chunks on "chunkSize: 1"', () => {
-      const should = getThreatMappingFiltersShouldMock(2);
-      const clauses = splitShouldClauses({ should, chunkSize: 1 });
-      const expected: BooleanFilter[] = [
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(1)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(2)],
-            minimum_should_match: 1,
-          },
-        },
-      ];
-      expect(clauses).toEqual(expected);
-    });
-
-    test('it should split an array of size 4 into 4 groups of 4 chunks on "chunkSize: 1"', () => {
-      const should = getThreatMappingFiltersShouldMock(4);
-      const clauses = splitShouldClauses({ should, chunkSize: 1 });
-      const expected: BooleanFilter[] = [
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(1)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(2)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(3)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(4)],
-            minimum_should_match: 1,
-          },
-        },
-      ];
-      expect(clauses).toEqual(expected);
-    });
-
-    test('it should split an array of size 4 into 2 groups of 2 chunks on "chunkSize: 2"', () => {
-      const should = getThreatMappingFiltersShouldMock(4);
-      const clauses = splitShouldClauses({ should, chunkSize: 2 });
-      const expected: BooleanFilter[] = [
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(1), getThreatMappingFilterShouldMock(2)],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(3), getThreatMappingFilterShouldMock(4)],
-            minimum_should_match: 1,
-          },
-        },
-      ];
-      expect(clauses).toEqual(expected);
-    });
-
-    test('it should NOT split an array of size 4 into any groups on "chunkSize: 5"', () => {
-      const should = getThreatMappingFiltersShouldMock(4);
-      const clauses = splitShouldClauses({ should, chunkSize: 5 });
-      const expected: BooleanFilter[] = [
-        getThreatMappingFilterShouldMock(1),
-        getThreatMappingFilterShouldMock(2),
-        getThreatMappingFilterShouldMock(3),
-        getThreatMappingFilterShouldMock(4),
-      ];
-      expect(clauses).toEqual(expected);
-    });
-
-    test('it should split an array of size 4 into 2 groups on "chunkSize: 3"', () => {
-      const should = getThreatMappingFiltersShouldMock(4);
-      const clauses = splitShouldClauses({ should, chunkSize: 3 });
-      const expected: BooleanFilter[] = [
-        {
-          bool: {
-            should: [
-              getThreatMappingFilterShouldMock(1),
-              getThreatMappingFilterShouldMock(2),
-              getThreatMappingFilterShouldMock(3),
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        {
-          bool: {
-            should: [getThreatMappingFilterShouldMock(4)],
-            minimum_should_match: 1,
-          },
-        },
-      ];
-      expect(clauses).toEqual(expected);
     });
   });
 });

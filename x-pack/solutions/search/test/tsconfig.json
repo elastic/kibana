@@ -29,5 +29,7 @@
     "@kbn/search-playground",
     "@kbn/tooling-log",
     "@kbn/test-suites-xpack",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/core-chrome-browser",
   ]
 }
