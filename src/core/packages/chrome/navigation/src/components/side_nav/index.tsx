@@ -15,7 +15,7 @@ import { SideNavFooter } from './footer';
 import { SideNavFooterItem } from './footer_item';
 import { SideNavLogo } from './logo';
 import { SideNavPanel } from './panel';
-import { SideNavPopover } from './popover';
+import { SideNavPopover } from '../popover';
 import { SideNavPrimaryMenu } from './primary_menu';
 import { SideNavPrimaryMenuItem } from './primary_menu_item';
 

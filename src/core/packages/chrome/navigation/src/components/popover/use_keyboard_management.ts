@@ -9,7 +9,7 @@
 
 import { RefObject, useCallback, useEffect } from 'react';
 
-import { useFocusTrap } from './use_focus_management';
+import { trapFocus } from '../../utils/trap_focus';
 
 /**
  * Hook for keyboard event handling
@@ -20,8 +20,6 @@ export const useKeyboardManagement = (
   triggerRef: RefObject<HTMLElement>,
   popoverRef: RefObject<HTMLElement>
 ) => {
-  const trapFocus = useFocusTrap(popoverRef);
-
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -35,10 +33,10 @@ export const useKeyboardManagement = (
           onClose();
           break;
         default:
-          trapFocus(e);
+          trapFocus(popoverRef)(e);
       }
     },
-    [isOpen, onClose, triggerRef, trapFocus]
+    [isOpen, onClose, triggerRef, popoverRef]
   );
 
   useEffect(() => {
