@@ -20,7 +20,8 @@
     "@kbn/config",
     "@kbn/doc-links",
     "@kbn/core-ui-settings-common",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/spaces-plugin"
   ],
   "exclude": ["target/**/*"]
 }
