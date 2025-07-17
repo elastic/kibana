@@ -38,7 +38,12 @@ import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
 import { MetricVisualizationState, SecondaryTrend } from './types';
-import { getColorMode, getDefaultConfigForMode, getTrendPalette } from './helpers';
+import {
+  getColorMode,
+  getDefaultConfigForMode,
+  getTrendPalette,
+  isInConflictWithPrimary,
+} from './helpers';
 import { getAccessorType } from '../../shared_components';
 
 export const DEFAULT_MAX_COLUMNS = 3;
@@ -557,22 +562,31 @@ export const getMetricVisualization = ({
     }
 
     // this should clean up the secondary trend state if in conflict
-    const { isNumeric: isMetricNumeric } = getAccessorType(
+    const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(
+      datasourceLayer,
+      state.metricAccessor
+    );
+    const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
       datasourceLayer,
       state.secondaryMetricAccessor
     );
-    const colorMode = getColorMode(state.secondaryTrend, isMetricNumeric);
-    // if there are no conflicts, it's all persistable as is
-    if (colorMode === state.secondaryTrend?.type) {
-      return { state, savedObjectReferences: [] };
+    const colorMode = getColorMode(state.secondaryTrend, isSecondaryMetricNumeric);
+
+    if (
+      colorMode !== state.secondaryTrend?.type ||
+      isInConflictWithPrimary(state.secondaryTrend, isPrimaryMetricNumeric)
+    ) {
+      return {
+        state: {
+          ...state,
+          secondaryPrefix: undefined,
+          secondaryTrend: getDefaultConfigForMode(colorMode),
+        },
+        savedObjectReferences: [],
+      };
     }
-    return {
-      state: {
-        ...state,
-        secondaryTrend: getDefaultConfigForMode(colorMode),
-      },
-      savedObjectReferences: [],
-    };
+    // if there are no conflicts, it's all persistable as is
+    return { state, savedObjectReferences: [] };
   },
 
   setDimension({ prevState, columnId, groupId }) {

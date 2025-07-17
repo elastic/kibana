@@ -113,3 +113,14 @@ export function getSecondaryDynamicTrendBaselineValue(
   }
   return baselineValue;
 }
+
+export function isInConflictWithPrimary(
+  secondaryTrend: MetricVisualizationState['secondaryTrend'],
+  isPrimaryMetricNumeric: boolean
+): boolean {
+  return (
+    secondaryTrend?.type === 'dynamic' &&
+    secondaryTrend?.baselineValue === 'primary' &&
+    !isPrimaryMetricNumeric
+  );
+}

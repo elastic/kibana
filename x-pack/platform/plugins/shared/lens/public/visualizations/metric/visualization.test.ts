@@ -1156,7 +1156,7 @@ describe('metric visualization', () => {
         )
       ).toEqual(
         expect.objectContaining({
-          state: expect.objectContaining({ secondaryTrend: getDefaultConfigForMode('static') }),
+          state: expect.objectContaining({ secondaryTrend: getDefaultConfigForMode('dynamic') }),
         })
       );
     });
