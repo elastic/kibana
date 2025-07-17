@@ -63,6 +63,11 @@ export const saveDashboardState = async ({
             references,
           },
         });
+    console.log('result----------', result);
+    if ('error' in result) {
+      throw Error(result.error.message);
+    }
+
     const newId = result.meta.id;
 
     if (newId) {

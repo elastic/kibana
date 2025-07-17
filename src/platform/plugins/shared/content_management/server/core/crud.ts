@@ -156,8 +156,10 @@ export class ContentCrud<T = unknown> {
       data,
       options,
     });
+
     try {
       const result = await this.storage.create(ctx, data, options);
+
       this.eventBus.emit({
         type: 'createItemSuccess',
         contentTypeId: this.contentTypeId,

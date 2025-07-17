@@ -14,7 +14,7 @@ import { DashboardPanel } from '../../../../server';
 
 contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {
-    return { item: { id: 'newlyGeneratedId' } };
+    return { meta: { id: 'newlyGeneratedId' } };
   }
 
   throw new Error('Update should be used when id is provided');
@@ -24,7 +24,7 @@ contentManagementService.client.update = jest.fn().mockImplementation(({ id }) =
   if (id === undefined) {
     throw new Error('Update needs an id');
   }
-  return { item: { id } };
+  return { meta: { id } };
 });
 
 dataService.query.timefilter.timefilter.getTime = jest
