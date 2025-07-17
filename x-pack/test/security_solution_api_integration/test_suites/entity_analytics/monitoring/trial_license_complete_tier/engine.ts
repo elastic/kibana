@@ -129,7 +129,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should sync plain index', async () => {
         // Register monitoring source
-        await privmon.registerIndexSource(entitySource); // Throwing 500, index already exists
+        const response = await privmon.registerIndexSource(entitySource);
+        expect(response.status).to.be(200);
         // Call init to trigger the sync
         // await privmon.initEngine();
         // Now list the users in monitoring

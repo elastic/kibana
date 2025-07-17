@@ -22,6 +22,7 @@ import {
   type CreateEntitySourceResponse,
   GetEntitySourceRequestParams,
   UpdateEntitySourceRequestParams,
+  DeleteEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 
 export const monitoringEntitySourceRoute = (
@@ -68,6 +69,42 @@ export const monitoringEntitySourceRoute = (
       }
     );
 
+  router.versioned
+    .delete({
+      access: 'public',
+      path: '/api/entity_analytics/monitoring/entity_source/{id}',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            params: DeleteEntitySourceRequestParams,
+          },
+        },
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+
+        try {
+          const secSol = await context.securitySolution;
+          await secSol.getMonitoringEntitySourceDataClient().delete(request.params.id);
+          return response.ok({ body: { acknowledged: true } });
+        } catch (e) {
+          const error = transformError(e);
+          logger.error(`Error deleting user: ${error.message}`);
+          return siemResponse.error({
+            statusCode: error.statusCode,
+            body: error.message,
+          });
+        }
+      }
+    );
   router.versioned
     .get({
       access: 'public',
