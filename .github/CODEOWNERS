@@ -1014,6 +1014,13 @@ x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/
 x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
 x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
+x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
+x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
+x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
@@ -1130,13 +1137,6 @@ x-pack/test
 x-pack/test_serverless
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
-x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
