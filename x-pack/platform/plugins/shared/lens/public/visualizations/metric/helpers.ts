@@ -27,7 +27,11 @@ export function getColorMode(
 
 export function getPrefixSelected(
   state: VisualizationDimensionEditorProps<MetricVisualizationState>['state'],
-  { defaultPrefix, colorMode }: { defaultPrefix: string; colorMode: SecondaryTrendType }
+  {
+    defaultPrefix,
+    colorMode,
+    isPrimaryMetricNumeric,
+  }: { defaultPrefix: string; colorMode: SecondaryTrendType; isPrimaryMetricNumeric: boolean }
 ): { mode: 'auto' | 'none' } | { mode: 'custom'; label: string } {
   const isAutoPrefix = state.secondaryPrefix === undefined;
   const hasPrefixOverride =
@@ -36,7 +40,8 @@ export function getPrefixSelected(
     // it is not enabled due to other conflicts (i.e. primary metric is not numeric)
     colorMode === 'dynamic' &&
     state.secondaryTrend?.type === 'dynamic' &&
-    state.secondaryTrend.baselineValue === 'primary';
+    state.secondaryTrend.baselineValue === 'primary' &&
+    isPrimaryMetricNumeric;
 
   if (isAutoPrefix) {
     return hasPrefixOverride
@@ -93,4 +98,18 @@ export function getTrendPalette(
   const palette = getKbnPalettes(theme).get(secondaryTrend.paletteId);
   const colors = palette?.colors(3);
   return (secondaryTrend.reversed ? colors.reverse() : colors) as [string, string, string];
+}
+
+export function getSecondaryDynamicTrendBaselineValue(
+  isPrimaryMetricNumeric: boolean,
+  baselineValue: number | 'primary'
+) {
+  if (isPrimaryMetricNumeric) {
+    return baselineValue ?? 0;
+  }
+  // If primary is not numeric, reset baseline value to 0
+  if (baselineValue === 'primary') {
+    return 0;
+  }
+  return baselineValue;
 }
