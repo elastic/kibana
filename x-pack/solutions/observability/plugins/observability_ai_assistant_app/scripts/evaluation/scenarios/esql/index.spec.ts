@@ -297,8 +297,8 @@ describe('ES|QL query generation', () => {
     it('trace duration', async () => {
       await evaluateEsqlQuery({
         question:
-          'My APM data is in .ds-traces-apm-default-*. Execute a query to find the average for `transaction.duration.us` per service over the last hour',
-        expected: `FROM .ds-traces-apm-default-*
+          'My APM data is in traces-apm-*. Execute a query to find the average for `transaction.duration.us` per service over the last hour',
+        expected: `FROM traces-apm-*
         | WHERE @timestamp > NOW() - 1 hour
         | STATS AVG(transaction.duration.us) BY service.name`,
         execute: true,
