@@ -61,11 +61,7 @@ export function prepareSOForImport({
 }) {
   const uniqObjects = uniqBy(
     savedObjects
-      .filter(
-        (object) =>
-          object.type === 'dashboard' &&
-          (isIncludeAll(include) || include.objects.dashboards.includes(object.id))
-      )
+      .filter((object) => object.type === 'dashboard' && isIncludeAll(include))
       .flatMap((object) => [
         object,
         ...compact(
