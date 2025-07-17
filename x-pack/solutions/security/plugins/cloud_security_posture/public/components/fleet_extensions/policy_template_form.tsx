@@ -1021,30 +1021,33 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           </>
         )}
         {shouldRenderAgentlessSelector && (
-          <SetupTechnologySelector
-            showLimitationsMessage={!isServerless}
-            disabled={isEditPage}
-            setupTechnology={setupTechnology}
-            isAgentless={!!newPolicy?.supports_agentless}
-            useDescribedFormGroup={false}
-            allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
-            onSetupTechnologyChange={(value) => {
-              updateSetupTechnology(value);
-              updatePolicy(
-                getPosturePolicy(
-                  newPolicy,
-                  input.type,
-                  getDefaultCloudCredentialsType(
-                    value === SetupTechnology.AGENTLESS,
-                    input.type as Extract<
-                      PostureInput,
-                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                    >
+          <>
+            <EuiSpacer size="m" />
+            <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
+              disabled={isEditPage}
+              setupTechnology={setupTechnology}
+              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
+              onSetupTechnologyChange={(value) => {
+                updateSetupTechnology(value);
+                updatePolicy(
+                  getPosturePolicy(
+                    newPolicy,
+                    input.type,
+                    getDefaultCloudCredentialsType(
+                      value === SetupTechnology.AGENTLESS,
+                      input.type as Extract<
+                        PostureInput,
+                        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                      >
+                    )
                   )
-                )
-              );
-            }}
-          />
+                );
+              }}
+              showBetaBadge={false}
+              useDescribedFormGroup={false}
+            />
+          </>
         )}
 
         {/* Defines the vars of the enabled input of the active policy template */}

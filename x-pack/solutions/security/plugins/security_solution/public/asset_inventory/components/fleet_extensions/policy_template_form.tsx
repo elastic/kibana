@@ -107,6 +107,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
     }) => {
       const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
       const { cloud, uiSettings } = useKibana().services;
+      const isServerless = !!cloud.serverless.projectType;
       const input = getSelectedOption(newPolicy.inputs);
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
         input,
@@ -318,30 +319,35 @@ export const CloudAssetInventoryPolicyTemplateForm =
             />
           </EuiAccordion>
           {shouldRenderAgentlessSelector && (
-            <SetupTechnologySelector
-              disabled={isEditPage}
-              setupTechnology={setupTechnology}
-              useDescribedFormGroup={false}
-              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
-              onSetupTechnologyChange={(value) => {
-                updateSetupTechnology(value);
-                updatePolicy(
-                  getAssetPolicy(
-                    newPolicy,
-                    input.type,
-                    getDefaultCloudCredentialsType(
-                      value === SetupTechnology.AGENTLESS,
-                      input.type as Extract<
-                        AssetInput,
-                        | 'cloudbeat/asset_inventory_aws'
-                        | 'cloudbeat/asset_inventory_azure'
-                        | 'cloudbeat/asset_inventory_gcp'
-                      >
+            <>
+              <EuiSpacer size="m" />
+              <SetupTechnologySelector
+                showLimitationsMessage={!isServerless}
+                disabled={isEditPage}
+                setupTechnology={setupTechnology}
+                allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
+                onSetupTechnologyChange={(value) => {
+                  updateSetupTechnology(value);
+                  updatePolicy(
+                    getAssetPolicy(
+                      newPolicy,
+                      input.type,
+                      getDefaultCloudCredentialsType(
+                        value === SetupTechnology.AGENTLESS,
+                        input.type as Extract<
+                          AssetInput,
+                          | 'cloudbeat/asset_inventory_aws'
+                          | 'cloudbeat/asset_inventory_azure'
+                          | 'cloudbeat/asset_inventory_gcp'
+                        >
+                      )
                     )
-                  )
-                );
-              }}
-            />
+                  );
+                }}
+                showBetaBadge={false}
+                useDescribedFormGroup={false}
+              />
+            </>
           )}
           <PolicyTemplateVarsForm
             input={input}

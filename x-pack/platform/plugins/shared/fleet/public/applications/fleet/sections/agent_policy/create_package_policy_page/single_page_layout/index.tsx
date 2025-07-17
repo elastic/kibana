@@ -118,7 +118,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
+  const isServerless = !!cloud?.serverless.projectType;
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -459,6 +460,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
           {!hideAgentlessSelector && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
@@ -467,7 +469,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
               }}
-              isAgentlessDefault={isAgentlessDefault}
+              showBetaBadge={isAgentlessDefault}
             />
           )}
 

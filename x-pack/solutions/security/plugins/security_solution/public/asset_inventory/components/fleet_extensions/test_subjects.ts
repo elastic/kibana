@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '@kbn/fleet-plugin/public';
 
 export const AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'aws-credentials-type-selector';
 export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
