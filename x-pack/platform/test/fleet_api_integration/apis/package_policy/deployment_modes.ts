@@ -45,7 +45,11 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/fleet_server_hosts/fleet-default-fleet-server-host`)
         .set('kbn-xsrf', 'xxxx');
+<<<<<<< HEAD
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+=======
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+>>>>>>> 641c1ab963a6 ([UII] Supporting input-level `deployment_modes` for integration policies (#226086))
       mockApiServer.close();
     });
 
