@@ -58,6 +58,10 @@ export const DATASTREAM_DATASET = 'data_stream.dataset';
 
 // OTel hostmetricsreceiver
 
+// OTel hostmetricsreceiver
+export const EVENT_DATASET = 'event.dataset';
+export const OTEL_RECEIVER_DATASET_VALUE = 'hostmetricsreceiver.otel';
+
 // integrations
 export const SYSTEM_INTEGRATION = 'system';
 export const HOST_METRICS_RECEIVER_OTEL = 'hostmetricsreceiver.otel';

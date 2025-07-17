@@ -19,7 +19,10 @@ import {
 
 export const diskIORead: LensBaseLayer = {
   label: DISK_READ_IOPS_LABEL,
-  value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  value: `defaults(
+        counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *'),
+        counter_rate(max(system.disk.operations, kql='attributes.direction: read'))    
+    )`,
   format: 'number',
   decimals: 0,
   normalizeByUnit: 's',
@@ -27,7 +30,10 @@ export const diskIORead: LensBaseLayer = {
 
 export const diskReadThroughput: LensBaseLayer = {
   label: DISK_READ_THROUGHPUT_LABEL,
-  value: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
+  value: `defaults(
+        counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *'),
+        counter_rate(max(system.disk.io, kql='attributes.direction: read'))    
+    )`,
   format: 'bytes',
   decimals: 1,
   normalizeByUnit: 's',
@@ -35,7 +41,7 @@ export const diskReadThroughput: LensBaseLayer = {
 
 export const diskSpaceAvailable: LensBaseLayer = {
   label: DISK_SPACE_AVAILABLE_LABEL,
-  value: 'average(system.filesystem.free)',
+  value: `defaults(average(system.filesystem.free), average(system.filesystem.usage, kql='state: free'))`,
   format: 'bytes',
   decimals: 0,
 };
@@ -49,7 +55,10 @@ export const diskSpaceAvailability: LensBaseLayer = {
 
 export const diskUsage: LensBaseLayer = {
   label: DISK_USAGE_LABEL,
-  value: 'max(system.filesystem.used.pct)',
+  value: `defaults(
+        max(system.filesystem.used.pct),
+        1 - sum(metrics.system.filesystem.usage, kql='state: free')/sum(metrics.system.filesystem.usage)
+    )`,
   format: 'percent',
   decimals: 0,
 };
@@ -61,9 +70,19 @@ export const diskUsageAverage: LensBaseLayer = {
   decimals: 0,
 };
 
+export const diskUsageAverageOTel: LensBaseLayer = {
+    label: DISK_USAGE_AVERAGE_LABEL,
+    value: `1 - sum(metrics.system.filesystem.usage, kql='state: free')/sum(metrics.system.filesystem.usage)`,
+    format: 'percent',
+    decimals: 0,
+  };
+
 export const diskIOWrite: LensBaseLayer = {
   label: DISK_WRITE_IOPS_LABEL,
-  value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  value: `defaults(
+        counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *'),
+        counter_rate(max(system.disk.operations, kql='attributes.direction: write'))    
+    )`,
   format: 'number',
   decimals: 0,
   normalizeByUnit: 's',
@@ -71,7 +90,10 @@ export const diskIOWrite: LensBaseLayer = {
 
 export const diskWriteThroughput: LensBaseLayer = {
   label: DISK_WRITE_THROUGHPUT_LABEL,
-  value: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
+  value: `defaults(
+        counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *'),
+        counter_rate(max(system.disk.io, kql='attributes.direction: write'))    
+    )`,
   format: 'bytes',
   decimals: 1,
   normalizeByUnit: 's',
