@@ -127,7 +127,7 @@ export class PrivilegeMonitoringDataClient {
       type: 'index',
       managed: true,
       indexPattern: defaultMonitoringUsersIndex,
-      name: 'default-monitoring-index',
+      name: `default-monitoring-index-${this.opts.namespace}`,
     });
     this.log(
       'debug',
