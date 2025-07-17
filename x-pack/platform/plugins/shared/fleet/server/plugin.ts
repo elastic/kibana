@@ -40,7 +40,6 @@ import type {
   SecurityPluginSetup,
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
-import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/server';
 import type {
@@ -167,7 +166,6 @@ export interface FleetStartDeps {
   data: DataPluginStart;
   licensing: LicensingPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  alerting: AlertingServerStart;
   security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
   savedObjectsTagging: SavedObjectTaggingStart;
@@ -180,7 +178,6 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  alertingStart: AlertingServerStart;
   securityCoreStart: SecurityServiceStart;
   securitySetup: SecurityPluginSetup;
   securityStart: SecurityPluginStart;
@@ -558,6 +555,7 @@ export class FleetPlugin
         const routeAuthz = routeRequiredAuthz
           ? calculateRouteAuthz(authz, routeRequiredAuthz)
           : undefined;
+
         const getInternalSoClient = (): SavedObjectsClientContract =>
           appContextService
             .getSavedObjects()
@@ -714,7 +712,6 @@ export class FleetPlugin
       data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
-      alertingStart: plugins.alerting,
       securityCoreStart: core.security,
       securitySetup: this.securitySetup,
       securityStart: plugins.security,

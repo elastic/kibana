@@ -303,10 +303,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const alertingRulesClient = await appContextService
-    .getAlerting()
-    .getRulesClientWithRequest(request);
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+
   const { pkgName, pkgVersion } = request.params;
 
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
@@ -318,7 +316,6 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     savedObjectsClient,
     pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
-    alertingRulesClient,
     spaceId,
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
@@ -351,9 +348,6 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const alertingRulesClient = await appContextService
-    .getAlerting()
-    .getRulesClientWithRequest(request);
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const kibanaVersion = appContextService.getKibanaVersion();
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
@@ -367,7 +361,6 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
       pkgName: integrationName,
       datasets,
       esClient,
-      alertingRulesClient,
       spaceId,
       force,
       authorizationHeader,
@@ -484,9 +477,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const alertingRulesClient = await appContextService
-    .getAlerting()
-    .getRulesClientWithRequest(request);
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
@@ -497,7 +487,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     installSource,
     savedObjectsClient,
     esClient,
-    alertingRulesClient,
     archiveBuffer,
     spaceId,
     contentType,
