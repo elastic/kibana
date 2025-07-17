@@ -9,8 +9,8 @@ import { Streams } from '@kbn/streams-schema';
 
 export const PARENT_STREAM_ID = '__parent__';
 
-export type ContentPackStream = {
+export interface ContentPackStream {
   type: 'stream';
   name: string;
   request: Streams.WiredStream.UpsertRequest;
-};
+}

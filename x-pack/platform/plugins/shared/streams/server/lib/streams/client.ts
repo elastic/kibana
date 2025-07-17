@@ -29,7 +29,6 @@ import { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
-import { StreamChange } from './state_management/types';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -269,7 +268,7 @@ export class StreamsClient {
     };
   }
 
-  async bulkUpsert(streams: { name: string; request: Streams.all.UpsertRequest }[]) {
+  async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
     const result = await State.attemptChanges(
       streams.map(({ name, request }) => ({
         type: 'upsert',
