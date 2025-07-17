@@ -134,7 +134,7 @@ describe('BarDetails', () => {
       duration: 1234,
       status: {
         fieldName: 'fieldName',
-        value: 'error',
+        value: 'Error',
       },
     } as unknown as TraceItem;
 
