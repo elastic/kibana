@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
+import { camelCase, isPlainObject, startCase } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type {
   DiffableAllFields,
@@ -22,6 +22,7 @@ import {
 } from './constants';
 import * as i18n from './translations';
 import { assertUnreachable } from '../../../../../common/utility_types';
+import { fieldToDisplayNameMap } from './diff_components/translations';
 
 export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
   const aboutFields = [];
@@ -48,8 +49,8 @@ export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
 };
 
 /**
- * Filters out any fields that have a `diff_outcome` of `CustomizedValueNoUpdate`
- * or `CustomizedValueSameUpdate` as they are not supported for display in the
+ * Filters out any fields that have a `diff_outcome` of
+ * `CustomizedValueSameUpdate` as it is not supported for display in the
  * current per-field rule diff flyout
  */
 export const filterUnsupportedDiffOutcomes = (
@@ -59,7 +60,6 @@ export const filterUnsupportedDiffOutcomes = (
     Object.entries(fields).filter(([key, value]) => {
       const diff = value as ThreeWayDiff<unknown>;
       return (
-        diff.diff_outcome !== ThreeWayDiffOutcome.CustomizedValueNoUpdate &&
         diff.diff_outcome !== ThreeWayDiffOutcome.CustomizedValueSameUpdate &&
         diff.diff_outcome !== ThreeWayDiffOutcome.MissingBaseNoUpdate
       );
@@ -116,3 +116,6 @@ export function getDataSourceProps(dataSource: DiffableAllFields['data_source'])
 
   return assertUnreachable(dataSource);
 }
+
+export const convertFieldToDisplayName = (fieldName: string) =>
+  fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName));

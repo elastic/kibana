@@ -24,7 +24,7 @@ interface Props {
  */
 const TableHeaderTooltipCellComponent = ({ title, tooltipContent, customTooltip }: Props) => (
   <EuiFlexGroup gutterSize="none">
-    <EuiFlexItem style={{ width: 'calc(100% - 20px)' }}>
+    <EuiFlexItem css={{ width: 'calc(100% - 20px)' }}>
       <span className="eui-textTruncate">{title}</span>
     </EuiFlexItem>
     {customTooltip ?? (

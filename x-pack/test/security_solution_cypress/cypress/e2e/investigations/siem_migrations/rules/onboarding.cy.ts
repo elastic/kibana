@@ -75,7 +75,7 @@ export const SPLUNK_TEST_RULES = [
 describe(
   'Rule Migrations - Basic Workflow',
   {
-    tags: ['@ess', '@serverless', '@serverlessQA'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {

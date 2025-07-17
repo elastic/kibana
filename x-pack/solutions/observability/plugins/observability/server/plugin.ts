@@ -26,8 +26,9 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import { getLogsFeature } from './features/logs_feature';
 import { ObservabilityConfig } from '.';
-import { observabilityFeatureId } from '../common';
+import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
 import {
   kubernetesGuideConfig,
   kubernetesGuideId,
@@ -98,21 +99,13 @@ export class ObservabilityPlugin
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
+    plugins.features.registerKibanaFeature(getLogsFeature());
+
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
     core.uiSettings.register(uiSettings);
 
-    if (config.annotations.enabled) {
-      annotationsApiPromise = bootstrapAnnotations({
-        core,
-        index: config.annotations.index,
-        context: this.initContext,
-      }).catch((err) => {
-        const logger = this.initContext.logger.get('annotations');
-        logger.warn(err);
-        throw err;
-      });
-    }
+    core.pricing.registerProductFeatures(OBSERVABILITY_TIERED_FEATURES);
 
     const { ruleDataService } = plugins.ruleRegistry;
 
@@ -124,6 +117,21 @@ export class ObservabilityPlugin
     });
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
+      const isCompleteOverviewEnabled = coreStart.pricing.isFeatureAvailable(
+        'observability:complete_overview'
+      );
+
+      if (config.annotations.enabled && isCompleteOverviewEnabled) {
+        annotationsApiPromise = bootstrapAnnotations({
+          core,
+          index: config.annotations.index,
+          context: this.initContext,
+        }).catch((err) => {
+          const logger = this.initContext.logger.get('annotations');
+          logger.warn(err);
+          throw err;
+        });
+      }
       registerRoutes({
         core,
         dependencies: {
@@ -163,6 +171,7 @@ export class ObservabilityPlugin
       },
       alertDetailsContextualInsightsService,
       alertsLocator,
+      managedOtlpServiceUrl: config.managedOtlpServiceUrl,
     };
   }
 

@@ -242,7 +242,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   private prepareExactPolicyIdQuery(policyId: string | undefined): string | undefined {
     if (!policyId) return undefined;
     // Escape special characters but don't add wildcards for exact matching
-    return policyId.replace(new RegExp(/[@#&*+()\[\]{}|.?~"<]/, 'g'), '\\$&');
+    return this.prepareSearchString(policyId, /[@#&*+()\[\]{}|.?~"<]/, '');
   }
   private prepareRegexpQuery(str: string | undefined): string | undefined {
     return this.prepareSearchString(str, /[@#&*+()[\]{}|.?~"<]/, '.*');

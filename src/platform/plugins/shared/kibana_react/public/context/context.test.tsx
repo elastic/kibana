@@ -71,13 +71,12 @@ test('createContext() creates context that can be consumed by useKibana() hook',
   expect(div!.textContent).toBe('baz');
 });
 
-test('services, notifications and overlays objects are always available', () => {
+test('services and overlays objects are always available', () => {
   const { Provider } = createKibanaReactContext({});
   const Test: React.FC = () => {
     const kibana = useKibana();
     expect(kibana).toMatchObject({
       services: expect.any(Object),
-      notifications: expect.any(Object),
       overlays: expect.any(Object),
     });
     return null;
@@ -96,7 +95,6 @@ test('<KibanaContextProvider> provider provides default kibana-react context', (
     const kibana = useKibana();
     expect(kibana).toMatchObject({
       services: expect.any(Object),
-      notifications: expect.any(Object),
       overlays: expect.any(Object),
     });
     return null;
@@ -179,8 +177,10 @@ test('overlays wrapper uses the closest overlays service', () => {
 
 test('notifications wrapper uses the closest notifications service', () => {
   const Test: React.FC = () => {
-    const { notifications } = useKibana();
-    notifications.toasts.show({} as any);
+    const {
+      services: { notifications },
+    } = useKibana();
+    notifications?.toasts.add({} as any);
     return null;
   };
 

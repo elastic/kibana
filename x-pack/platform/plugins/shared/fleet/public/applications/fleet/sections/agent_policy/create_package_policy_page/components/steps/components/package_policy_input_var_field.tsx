@@ -430,7 +430,11 @@ function SecretInputField({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
-          onClick={() => setIsReplacing(true)}
+          onClick={() => {
+            setIsReplacing(true);
+            setIsDirty(false);
+            onChange('');
+          }}
           color="primary"
           iconType="refresh"
           iconSide="left"
@@ -473,7 +477,7 @@ function SecretInputField({
     );
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false} style={{ width: '100%' }}>
+        <EuiFlexItem grow={false} css={{ width: '100%' }}>
           {inputComponent}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>

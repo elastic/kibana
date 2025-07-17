@@ -19,9 +19,6 @@ xpack.cloud.serverless.project_type: observability
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
 
-## Set the home route
-uiSettings.overrides.defaultRoute: /app/observability/landing
-
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
 
