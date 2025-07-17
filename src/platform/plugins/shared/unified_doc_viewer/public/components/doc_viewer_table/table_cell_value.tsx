@@ -215,10 +215,6 @@ const componentStyles = {
       '.euiDataGridRowCell__popover &': {
         fontSize,
       },
-
-      '& mark': {
-        textDecoration: 'dotted underline',
-      },
     });
   },
   docViewerValueHighlighted: ({ euiTheme }: UseEuiTheme) =>

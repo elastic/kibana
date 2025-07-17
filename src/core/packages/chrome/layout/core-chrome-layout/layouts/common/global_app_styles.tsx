@@ -11,7 +11,7 @@ import { type UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import React from 'react';
 
-// Due to pure HTML and the scope being large, we decided to temporarily apply following 3 style blocks globally.
+// Due to pure HTML and the scope being large, we decided to temporarily apply following 4 style blocks globally.
 // TODO: refactor within github issue #223571
 const hackGlobalFieldFormattersPluginStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   // Styles applied to the span.ffArray__highlight from FieldFormat class that is used to visually distinguish array delimiters when rendering array values as HTML in Kibana field formatters
@@ -20,6 +20,10 @@ const hackGlobalFieldFormattersPluginStyles = (euiTheme: UseEuiTheme['euiTheme']
   }
 
   // Styles applied to the span.ffString__emptyValue from FieldFormat class that is used to visually distinguish empty string values when rendering string values as HTML in Kibana field formatters
+  .ffString__highlight {
+    text-decoration: dotted underline;
+  }
+
   .ffString__emptyValue {
     color: ${euiTheme.colors.darkShade};
   }
