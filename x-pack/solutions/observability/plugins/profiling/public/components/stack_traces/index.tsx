@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -21,7 +22,7 @@ import type { StackedBarChartProps } from '../stacked_bar_chart';
 import { StackedBarChart } from '../stacked_bar_chart';
 import type { TopNSubchart } from '../../../common/topn';
 import { ChartGrid } from '../chart_grid';
-import type { AsyncState } from '../../hooks/use_async';
+import { AsyncStatus, type AsyncState } from '../../hooks/use_async';
 import { AsyncComponent } from '../async_component';
 import { SubChart } from '../subchart';
 
@@ -66,6 +67,8 @@ export function StackTraces({
   const charts = state.data?.charts ?? [];
   const isTracesType = type === TopNType.Traces;
   const [selectedSubchart, setSelectedSubchart] = useState<TopNSubchart | undefined>(undefined);
+  const isExecutableType = type === TopNType.Executables;
+  const displayAgentCallout = charts.length && charts[0].Category === 'Other';
 
   function handleChartClick(selectedChart: TopNSubchart) {
     // When clicking on the charts on the Traces view, the flyout must open
@@ -79,6 +82,21 @@ export function StackTraces({
   return (
     <>
       <EuiFlexGroup direction="column">
+        {state.status === AsyncStatus.Settled && isExecutableType && displayAgentCallout && (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              iconType="warning"
+              title={i18n.translate('xpack.profiling.stackTraces.euiCallOut.wrongAgentTitle', {
+                defaultMessage: 'No executable names available',
+              })}
+            >
+              {i18n.translate('xpack.profiling.stackTraces.euiCallOut.wrongAgentMessage', {
+                defaultMessage:
+                  'This might be due to data from agents prior to v9.1.0 or due to data from OpenTelemetry agents that do not send executable names.',
+              })}
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow>
           <EuiPanel>
             <EuiFlexGroup direction="column" gutterSize="m">
