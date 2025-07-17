@@ -94,7 +94,6 @@
     "@kbn/scout-info",
     "@kbn/inference-common",
     "@kbn/apm-sources-access-plugin",
-    "@kbn/test-suites-xpack-observability",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
     "@kbn/test-suites-xpack-platform",
