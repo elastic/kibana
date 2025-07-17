@@ -1,2 +1,1 @@
-
-fast-jwt
+dependency-cruiser
