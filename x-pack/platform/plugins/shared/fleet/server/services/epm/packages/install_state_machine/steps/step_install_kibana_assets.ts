@@ -48,8 +48,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
 }
 
 export async function stepInstallKibanaAssetsWithStreaming(context: InstallContext) {
-  const { savedObjectsClient, alertingRulesClient, packageInstallContext, spaceId, logger } =
-    context;
+  const { savedObjectsClient, alertingRulesClient, packageInstallContext, spaceId } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -62,7 +61,6 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
         pkgName,
         packageInstallContext,
         spaceId,
-        logger,
       })
   );
 
@@ -73,7 +71,6 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
   const {
     logger,
     installedPkg,
-    alertingRulesClient,
     packageInstallContext,
     spaceId,
     retryFromLastState,
@@ -96,7 +93,6 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
     await withPackageSpan('Retry transition - clean up Kibana assets first', async () => {
       await deleteKibanaAssets({
         installedObjects,
-        alertingRulesClient,
         spaceId,
         packageSpecConditions: packageInfo?.conditions,
         logger,
@@ -116,14 +112,8 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
  *
  */
 export async function cleanUpUnusedKibanaAssetsStep(context: InstallContext) {
-  const {
-    logger,
-    installedPkg,
-    packageInstallContext,
-    spaceId,
-    installedKibanaAssetsRefs,
-    alertingRulesClient,
-  } = context;
+  const { logger, installedPkg, packageInstallContext, spaceId, installedKibanaAssetsRefs } =
+    context;
   const { packageInfo } = packageInstallContext;
 
   if (!installedKibanaAssetsRefs) {
@@ -150,7 +140,6 @@ export async function cleanUpUnusedKibanaAssetsStep(context: InstallContext) {
   await withPackageSpan('Clean up Kibana assets that are no longer in the package', async () => {
     await deleteKibanaAssets({
       installedObjects: assetsToRemove,
-      alertingRulesClient,
       spaceId,
       packageSpecConditions: packageInfo?.conditions,
       logger,
