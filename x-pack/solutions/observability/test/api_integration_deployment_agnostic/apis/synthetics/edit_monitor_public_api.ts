@@ -11,6 +11,7 @@ import moment from 'moment';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { NO_BACKTICKS_ERROR_MESSAGE } from '@kbn/synthetics-plugin/common/translations/translations';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
@@ -207,6 +208,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           spaces: ['default'],
         })
       );
+    });
+
+    it('receives 400 error if pushing inline script with ` character', async () => {
+      const monitor = {
+        name: `test name ${uuidv4()}`,
+        type: 'browser',
+        origin: 'ui',
+        locations: [LOCAL_PUBLIC_LOCATION.id],
+        url: 'https://www.google.com',
+        'source.inline.script': 'step(`test`, () => false)',
+      };
+      const result = await editMonitorAPI(monitorId, monitor, 400);
+
+      expect(result).eql({
+        error: 'Bad Request',
+        message: NO_BACKTICKS_ERROR_MESSAGE,
+        statusCode: 400,
+      });
     });
   });
 }

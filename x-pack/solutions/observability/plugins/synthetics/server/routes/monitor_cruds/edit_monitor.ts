@@ -20,12 +20,13 @@ import { getPrivateLocations } from '../../synthetics_service/get_private_locati
 import { mergeSourceMonitor } from './formatters/saved_object_to_monitor';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import {
-  MonitorFields,
-  EncryptedSyntheticsMonitorAttributes,
-  SyntheticsMonitorWithSecretsAttributes,
-  SyntheticsMonitor,
+  type MonitorFields,
+  type EncryptedSyntheticsMonitorAttributes,
+  type SyntheticsMonitorWithSecretsAttributes,
+  type SyntheticsMonitor,
   ConfigKey,
-  MonitorLocations,
+  type MonitorLocations,
+  type BrowserFields,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from './monitor_validation';
@@ -36,6 +37,7 @@ import {
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { NO_BACKTICKS_ERROR_MESSAGE } from '../../../common/translations/translations';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -73,6 +75,19 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     }
     if (monitor.origin && monitor.origin !== 'ui') {
       return response.badRequest(getInvalidOriginError(monitor));
+    }
+    if (
+      monitor.type &&
+      monitor.type === 'browser' &&
+      monitor.origin === 'ui' &&
+      (monitor as BrowserFields)?.[ConfigKey.SOURCE_INLINE] &&
+      (monitor as BrowserFields)[ConfigKey.SOURCE_INLINE].includes('`')
+    ) {
+      return response.badRequest({
+        body: {
+          message: NO_BACKTICKS_ERROR_MESSAGE,
+        },
+      });
     }
 
     const editMonitorAPI = new AddEditMonitorAPI(routeContext);

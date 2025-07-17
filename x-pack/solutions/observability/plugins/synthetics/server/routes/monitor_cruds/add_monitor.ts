@@ -21,6 +21,8 @@ import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
+import { ConfigKey } from '../../../common/runtime_types';
+import { NO_BACKTICKS_ERROR_MESSAGE } from '../../../common/translations/translations';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -74,6 +76,13 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
             details: invalidOriginError(request.body.origin),
             payload: request.body,
           },
+        },
+      });
+    }
+    if (monitor[ConfigKey.SOURCE_INLINE] && monitor[ConfigKey.SOURCE_INLINE].includes('`')) {
+      return response.badRequest({
+        body: {
+          message: NO_BACKTICKS_ERROR_MESSAGE,
         },
       });
     }
