@@ -102,7 +102,7 @@
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
     "@types/react": "~18.2.0",
     "@types/react-dom": "~18.2.0",
-    "@xstate5/react/**/xstate": "^5.19.2",
+    "@xstate5/react/**/xstate": "^5.20.1",
     "globby/fast-glob": "^3.3.2",
     "pkce-challenge": "3.1.0"
   },
