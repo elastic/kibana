@@ -2371,6 +2371,27 @@ Object {
       ],
       "type": "string",
     },
+    "contextWindowLength": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 32000,
+          },
+          "name": "min",
+        },
+      ],
+      "type": "number",
+    },
     "defaultModel": Object {
       "flags": Object {
         "default": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
@@ -7076,6 +7097,27 @@ Object {
         },
       ],
       "type": "string",
+    },
+    "contextWindowLength": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 32000,
+          },
+          "name": "min",
+        },
+      ],
+      "type": "number",
     },
     "defaultModel": Object {
       "flags": Object {
