@@ -17,7 +17,7 @@ import {
   Wrapper,
 } from './wrapper';
 import { TestProviders } from '../../../common/mock';
-import { useIntegrationsLastActivity } from '../../hooks/alert_summary/use_integrations_last_activity';
+import { useIntegrationLastAlertIngested } from '../../hooks/alert_summary/use_integration_last_alert_ingested';
 import { ADD_INTEGRATIONS_BUTTON_TEST_ID } from './integrations/integration_section';
 import { SEARCH_BAR_TEST_ID } from './search_bar/search_bar_section';
 import { KPIS_SECTION } from './kpis/kpis_section';
@@ -35,7 +35,7 @@ jest.mock('../alerts_table/alerts_grouping', () => ({
   GroupedAlertsTable: () => <div />,
 }));
 jest.mock('../../hooks/alert_summary/use_navigate_to_integrations_page');
-jest.mock('../../hooks/alert_summary/use_integrations_last_activity');
+jest.mock('../../hooks/alert_summary/use_integration_last_alert_ingested');
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/hooks/use_create_data_view');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
@@ -95,9 +95,9 @@ describe('<Wrapper />', () => {
 
     it('should render the content if the dataView is created correctly', async () => {
       (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
-      (useIntegrationsLastActivity as jest.Mock).mockReturnValue({
+      (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
         isLoading: true,
-        lastActivities: {},
+        lastAlertIngested: {},
       });
       (useCreateDataView as jest.Mock).mockReturnValue({
         dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
@@ -164,9 +164,9 @@ describe('<Wrapper />', () => {
 
     it('should render the content if the dataView is created correctly', async () => {
       (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
-      (useIntegrationsLastActivity as jest.Mock).mockReturnValue({
+      (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
         isLoading: true,
-        lastActivities: {},
+        lastAlertIngested: {},
       });
       (useDataView as jest.Mock).mockReturnValue({
         dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
