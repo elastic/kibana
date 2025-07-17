@@ -77,6 +77,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
             <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
           </ul>`,
       values: {
+        em: (chunks) => `<em>${chunks}</em>`,
         ul: (chunks) => `<ul>${chunks}</ul>`,
         li: (chunks) => `<li>${chunks}</li>`,
         strong: (chunks) => `<strong>${chunks}</strong>`,
