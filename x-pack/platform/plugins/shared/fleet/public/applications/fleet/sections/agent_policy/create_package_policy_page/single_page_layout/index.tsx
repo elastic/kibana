@@ -119,7 +119,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
   const { docLinks, cloud } = useStartServices();
-  const isServerless = !!cloud?.serverless.projectType;
+  const isServerless = !!cloud?.isServerlessEnabled;
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
