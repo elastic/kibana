@@ -21,6 +21,8 @@ export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JS
 
   return (
     <footer
+      // TODO: translate
+      aria-label="Side navigation footer"
       css={css`
         align-items: center;
         border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
