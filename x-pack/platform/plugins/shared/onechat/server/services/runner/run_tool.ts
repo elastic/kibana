@@ -39,25 +39,29 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
     TResult
   >;
 
-  const toolReturn = await withExecuteToolSpan({ name: tool.id, input: toolParams }, async () => {
-    const validation = tool.schema.safeParse(toolParams);
-    if (validation.error) {
-      throw createBadRequestError(
-        `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
+  const toolReturn = await withExecuteToolSpan(
+    tool.id,
+    { tool: { input: toolParams } },
+    async () => {
+      const validation = tool.schema.safeParse(toolParams);
+      if (validation.error) {
+        throw createBadRequestError(
+          `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
+        );
+      }
+
+      const toolHandlerContext = await createToolHandlerContext<TParams>({
+        toolExecutionParams,
+        manager,
+      });
+      const toolReturnInternal = await tool.handler(
+        validation.data as Record<string, any>,
+        toolHandlerContext
       );
+
+      return toolReturnInternal;
     }
-
-    const toolHandlerContext = await createToolHandlerContext<TParams>({
-      toolExecutionParams,
-      manager,
-    });
-    const toolReturnInternal = await tool.handler(
-      validation.data as Record<string, any>,
-      toolHandlerContext
-    );
-
-    return toolReturnInternal;
-  });
+  );
 
   return {
     runId: manager.context.runId,
