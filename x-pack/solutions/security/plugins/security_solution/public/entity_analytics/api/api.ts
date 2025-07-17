@@ -276,13 +276,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
-    const updateSavedObjectConfiguration = (params: {}) => {
+    const updateSavedObjectConfiguration = (params: {}) =>
       http.fetch(RISK_ENGINE_CONFIGURE_SO_URL, {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
         body: JSON.stringify(params),
       });
-    };
 
     return {
       fetchRiskScorePreview,
