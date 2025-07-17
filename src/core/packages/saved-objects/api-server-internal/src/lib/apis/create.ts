@@ -109,6 +109,12 @@ export const performCreate = async <T>(
       id,
       initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
+      name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+        attributes: {
+          ...(preflightResult?.existingDocument?._source?.[type] ?? {}),
+          ...attributes,
+        },
+      }),
     },
   });
 
