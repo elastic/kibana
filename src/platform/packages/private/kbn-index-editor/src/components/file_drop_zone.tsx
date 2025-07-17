@@ -11,14 +11,12 @@ import { EuiLoadingSpinner, EuiProgress, transparentize, useEuiTheme } from '@el
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { PropsWithChildren, useCallback, type FC, useState } from 'react';
+import React, { type FC, PropsWithChildren, useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import {
-  OVERRIDE_WARNING_DISMISSED_STORAGE_KEY,
-  OverrideWarningModal,
-} from './modals/override_warning_modal';
+import { DismissableElement, useDontShowMeAgain } from '../hooks/use_dont_show_me_again';
+import { OverrideWarningModal } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
 import { KibanaContextExtra } from '../types';
@@ -46,10 +44,12 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   noResults,
 }) => {
   const {
-    services: { indexUpdateService, storage },
+    services: { indexUpdateService },
   } = useKibana<KibanaContextExtra>();
   const [showOverrideWarning, setShowOverrideWarning] = useState(false);
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
+
+  const { isElementDismissed } = useDontShowMeAgain();
 
   const docsPendingToBeSaved = useObservable(indexUpdateService.savingDocs$, new Map());
   const columnsPendingToBeSaved = useObservable(indexUpdateService.pendingColumnsToBeSaved$, []);
@@ -67,7 +67,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
         return;
       }
 
-      const dontAskMeAgainFlag = storage.get(OVERRIDE_WARNING_DISMISSED_STORAGE_KEY);
+      const dontAskMeAgainFlag = isElementDismissed(DismissableElement.OVERRIDE_WARNING_MODAL);
       const hasPendingChanges = docsPendingToBeSaved.size > 0 || columnsPendingToBeSaved.length > 0;
 
       if (hasPendingChanges && !dontAskMeAgainFlag) {
@@ -76,11 +76,16 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
       }
 
       indexUpdateService.discardUnsavedChanges();
-      indexUpdateService.discardUnsavedColumns();
 
       await fileUploadManager.addFiles(files);
     },
-    [fileUploadManager, docsPendingToBeSaved, columnsPendingToBeSaved, storage, indexUpdateService]
+    [
+      isElementDismissed,
+      docsPendingToBeSaved.size,
+      columnsPendingToBeSaved.length,
+      indexUpdateService,
+      fileUploadManager,
+    ]
   );
 
   const { getRootProps, getInputProps, isDragActive, inputRef, acceptedFiles } = useDropzone({
@@ -95,7 +100,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     setShowOverrideWarning(false);
 
     indexUpdateService.discardUnsavedChanges();
-    indexUpdateService.discardUnsavedColumns();
 
     await fileUploadManager.addFiles(acceptedFiles);
   }, [acceptedFiles, fileUploadManager, indexUpdateService]);

@@ -31,7 +31,7 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
   const pendingColumnsToBeSaved = useObservable(indexUpdateService.pendingColumnsToBeSaved$, []);
 
   const closeWithoutSaving = () => {
-    indexUpdateService.discardUnsavedColumns();
+    indexUpdateService.discardUnsavedChanges();
     onClose();
   };
 

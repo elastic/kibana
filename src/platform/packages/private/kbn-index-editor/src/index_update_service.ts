@@ -67,7 +67,7 @@ type Action =
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
   | { type: 'add-column'; payload: ColumnAddition }
   | { type: 'discard-unsaved-columns' }
-  | { type: 'discard-unsaved-changes' }
+  | { type: 'discard-unsaved-values' }
   | { type: 'new-row-added'; payload: Record<string, any> };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
@@ -125,7 +125,7 @@ export class IndexUpdateService {
         // Clear the buffer after save
         // TODO check for update response
         return [];
-      } else if (action.type === 'discard-unsaved-changes') {
+      } else if (action.type === 'discard-unsaved-values') {
         return [];
       } else {
         return acc;
@@ -527,12 +527,9 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedFields$.next(value);
   }
 
-  public discardUnsavedColumns() {
-    this.actions$.next({ type: 'discard-unsaved-columns' });
-  }
-
   public discardUnsavedChanges() {
-    this.actions$.next({ type: 'discard-unsaved-changes' });
+    this.actions$.next({ type: 'discard-unsaved-values' });
+    this.actions$.next({ type: 'discard-unsaved-columns' });
   }
 
   public destroy() {

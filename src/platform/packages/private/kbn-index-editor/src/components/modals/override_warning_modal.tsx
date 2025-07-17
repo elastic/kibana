@@ -24,10 +24,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextExtra } from '../../types';
-
-export const OVERRIDE_WARNING_DISMISSED_STORAGE_KEY = 'indexEditor.OverrideWarningDismissed';
+import { DismissableElement, useDontShowMeAgain } from '../../hooks/use_dont_show_me_again';
 
 interface OverrideWarningModalProps {
   onCancel: () => void;
@@ -40,13 +37,11 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
 }) => {
   const [dontAskMeAgainCheck, setDontAskMeAgainCheck] = useState(false);
 
-  const {
-    services: { storage },
-  } = useKibana<KibanaContextExtra>();
+  const { dontShowMeAgain } = useDontShowMeAgain();
 
   const continueHandler = () => {
     if (dontAskMeAgainCheck) {
-      storage.set(OVERRIDE_WARNING_DISMISSED_STORAGE_KEY, true);
+      dontShowMeAgain(DismissableElement.OVERRIDE_WARNING_MODAL);
     }
     onContinue();
   };
