@@ -149,9 +149,6 @@ export class AssetInventoryDataClient {
 
       let entityStoreEnablementResponse;
 
-      // For Asset Inventory onboarding, the Generic Entities should be initialized with a lookback period of 26 hours
-      // to account for the fact that entity extraction integrations have a default ingest window time of 24 hours
-      // and we want to cover the ingest window time with a buffer of 2 hours.
       const genericRequestBody: InitEntityStoreRequestBody = {
         ...requestBodyOverrides,
         lookbackPeriod: ASSET_INVENTORY_GENERIC_LOOKBACK_PERIOD,
