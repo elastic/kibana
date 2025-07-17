@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { LensMetricFormulaMap } from '../../../types';
 import {
   cpuUsage,
   cpuUsageIowait,
@@ -72,6 +73,4 @@ export const formulas = {
   memoryCache,
   rx,
   tx,
-} as const;
-
-export type HostFormulas = typeof formulas;
+} satisfies LensMetricFormulaMap;

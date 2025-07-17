@@ -7,15 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../types';
 import {
   aws as awsRequiredMetrics,
   nginx as nginxRequireMetrics,
 } from '../shared/metrics/required_metrics';
-export { hostSnapshotMetricTypes } from './metrics';
+import { createInventoryModel } from '../shared/create_inventory_model';
 
-export const host: InventoryModel<typeof metrics> = {
-  id: 'host',
+export const host = createInventoryModel('host', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.host.displayName', {
     defaultMessage: 'Hosts',
   }),
@@ -57,4 +55,4 @@ export const host: InventoryModel<typeof metrics> = {
   ],
   tooltipMetrics: ['cpuV2', 'memory', 'txV2', 'rxV2', 'cpu', 'tx', 'rx'],
   legacyMetrics: ['cpu', 'tx', 'rx'],
-};
+});

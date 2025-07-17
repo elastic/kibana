@@ -5,25 +5,15 @@
  * 2.0.
  */
 
-import { cpu } from './snapshot/cpu';
-import { memory } from './snapshot/memory';
-import { rx } from './snapshot/rx';
-import { tx } from './snapshot/tx';
-
 import { podOverview } from './tsvb/pod_overview';
 import { podCpuUsage } from './tsvb/pod_cpu_usage';
 import { podLogUsage } from './tsvb/pod_log_usage';
 import { podMemoryUsage } from './tsvb/pod_memory_usage';
 import { podNetworkTraffic } from './tsvb/pod_network_traffic';
-import type { InventoryMetrics } from '../../../types';
+import { createInventoryModelMetrics } from '../../../shared/create_inventory_model';
+import { getAggregation } from '../../../shared/metrics/resolve_schema_metrics';
 
-const podSnapshotMetrics = { cpu, memory, rx, tx };
-
-export const podSnapshotMetricTypes = Object.keys(podSnapshotMetrics) as Array<
-  keyof typeof podSnapshotMetrics
->;
-
-export const metrics: InventoryMetrics = {
+export const metrics = createInventoryModelMetrics({
   tsvb: {
     podOverview,
     podCpuUsage,
@@ -31,7 +21,12 @@ export const metrics: InventoryMetrics = {
     podNetworkTraffic,
     podMemoryUsage,
   },
-  snapshot: podSnapshotMetrics,
+  getAggregation: async (aggregation) => {
+    return import('./snapshot').then(({ snapshot }) => {
+      const a = getAggregation(snapshot)(aggregation);
+      return a;
+    });
+  },
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
-};
+});

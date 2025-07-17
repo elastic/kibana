@@ -20,6 +20,7 @@ import { rx } from './rx';
 import { tx } from './tx';
 import { txV2 } from './tx_v2';
 import { rxV2 } from './rx_v2';
+import type { MetricAggregationMap } from '../../../types';
 
 export const snapshot = {
   cpuV2,
@@ -37,4 +38,4 @@ export const snapshot = {
   cpu,
   rx,
   tx,
-};
+} satisfies MetricAggregationMap;

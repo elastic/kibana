@@ -5,31 +5,20 @@
  * 2.0.
  */
 
-import { cpu } from './snapshot/cpu';
-import { rx } from './snapshot/rx';
-import { tx } from './snapshot/tx';
-import { diskIOReadBytes } from './snapshot/disk_io_read_bytes';
-import { diskIOWriteBytes } from './snapshot/disk_io_write_bytes';
-
 import { awsEC2CpuUtilization } from './tsvb/aws_ec2_cpu_utilization';
 import { awsEC2NetworkTraffic } from './tsvb/aws_ec2_network_traffic';
 import { awsEC2DiskIOBytes } from './tsvb/aws_ec2_diskio_bytes';
+import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
 
-import type { InventoryMetrics } from '../../types';
-
-const awsEC2SnapshotMetrics = { cpu, rx, tx, diskIOReadBytes, diskIOWriteBytes };
-
-export const awsEC2SnapshotMetricTypes = Object.keys(awsEC2SnapshotMetrics) as Array<
-  keyof typeof awsEC2SnapshotMetrics
->;
-
-export const metrics: InventoryMetrics = {
+export const metrics = createInventoryModelMetrics({
   tsvb: {
     awsEC2CpuUtilization,
     awsEC2NetworkTraffic,
     awsEC2DiskIOBytes,
   },
-  snapshot: awsEC2SnapshotMetrics,
+  getAggregation: async (aggregation) =>
+    await import('./snapshot').then(({ snapshot }) => snapshot[aggregation]),
+  getAggregations: async () => await import('./snapshot').then(({ snapshot }) => snapshot),
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
-};
+});

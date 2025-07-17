@@ -269,26 +269,52 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
-export interface InventoryMetrics {
-  tsvb?: { [name: string]: TSVBMetricModelCreator };
-  snapshot: { [name: string]: MetricsUIAggregation | undefined };
+export type LensMetricFormulaMap = Record<string, LensBaseLayer>;
+export type LensMetricChartMap = Record<
+  string,
+  { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }
+>;
+export type MetricAggregationMap<TAggKey extends string = string> = Record<
+  TAggKey,
+  MetricsUIAggregation
+>;
+
+interface InventoryMetricsBase<TAggregations extends MetricAggregationMap> {
+  tsvb?: Record<string, TSVBMetricModelCreator>;
+
+  getAggregation<TAggKey extends string>(
+    aggregation: TAggKey,
+    args?: {
+      schema?: 'ecs' | 'semconv';
+    }
+  ): Promise<TAggregations[TAggKey]>;
+  // getAggregations(args?: { schema?: 'ecs' | 'semconv' }): Promise<TAggregations>;
   defaultSnapshot: SnapshotMetricType;
-  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metrics like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;
 }
-
-export interface InventoryMetricsWithCharts<
-  TFormula extends Record<string, LensBaseLayer>,
-  TChart extends Record<string, { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }>
-> extends InventoryMetrics {
-  getFormulas: () => Promise<TFormula>;
-  getCharts: () => Promise<TChart>;
-}
+type InventoryMetricsWithLens<
+  TAggregations extends MetricAggregationMap,
+  TFormulas extends LensMetricFormulaMap,
+  TCharts extends LensMetricChartMap
+> = InventoryMetricsBase<TAggregations> & {
+  getFormulas: () => Promise<TFormulas>;
+  getCharts: () => Promise<TCharts>;
+};
+export type InventoryMetrics<
+  TAggregations extends MetricAggregationMap = MetricAggregationMap,
+  TFormulas extends LensMetricFormulaMap | undefined = undefined,
+  TCharts extends LensMetricChartMap | undefined = undefined
+> = [TFormulas, TCharts] extends [LensMetricFormulaMap, LensMetricChartMap]
+  ? InventoryMetricsWithLens<TAggregations, NonNullable<TFormulas>, NonNullable<TCharts>>
+  : InventoryMetricsBase<TAggregations>;
 
 type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
 
-export interface InventoryModel<TMetrics = InventoryMetrics> {
-  id: string;
+export interface InventoryModel<
+  TEntityType extends InventoryItemType,
+  TMetrics = InventoryMetrics
+> {
+  id: TEntityType;
   displayName: string;
   singularDisplayName: string;
   requiredModule: Modules;
@@ -313,3 +339,10 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
 }
 
 export type LensConfigWithId = LensConfig & { id: string };
+
+export type MetricDefinition = LensMetricFormulaMap | MetricAggregationMap;
+
+export interface MetricsBySchema<TMetricDefinition extends MetricDefinition> {
+  ecs: TMetricDefinition;
+  semconv: TMetricDefinition;
+}

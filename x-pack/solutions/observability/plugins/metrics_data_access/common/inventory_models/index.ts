@@ -29,11 +29,10 @@ const catalog = {
 } as const;
 
 export const inventoryModels = Object.values(catalog);
-
 export type InventoryModels<T extends InventoryItemType> = (typeof catalog)[T];
 
 export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
-  const model = inventoryModels.find((m) => m.id === type);
+  const model = catalog[type];
   if (!model) {
     throw new Error(
       i18n.translate('xpack.metricsData.inventoryModels.findInventoryModel.error', {

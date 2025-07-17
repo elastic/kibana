@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../types';
+import { createInventoryModel } from '../shared/create_inventory_model';
 
-export { awsSQSSnapshotMetricTypes } from './metrics';
-
-export const awsSQS: InventoryModel = {
-  id: 'awsSQS',
+export const awsSQS = createInventoryModel('awsSQS', {
   displayName: i18n.translate('xpack.metricsData.inventoryModels.awsSQS.displayName', {
     defaultMessage: 'SQS Queues',
   }),
@@ -48,4 +45,4 @@ export const awsSQS: InventoryModel = {
     'sqsMessagesSent',
     'sqsOldestMessage',
   ],
-};
+});

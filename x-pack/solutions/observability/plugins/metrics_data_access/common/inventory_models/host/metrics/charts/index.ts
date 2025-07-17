@@ -11,6 +11,7 @@ import { memory } from './memory';
 import { network } from './network';
 import { logs } from './logs';
 import { charts as kubernetesNodeCharts } from '../../../kubernetes/node/metrics';
+import type { LensMetricChartMap } from '../../../types';
 
 export const charts = {
   cpu,
@@ -19,6 +20,6 @@ export const charts = {
   network,
   logs,
   kibernetesNode: kubernetesNodeCharts.node,
-} as const;
+} satisfies LensMetricChartMap;
 
 export type HostCharts = typeof charts;

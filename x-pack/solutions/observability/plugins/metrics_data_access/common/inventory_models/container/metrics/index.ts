@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import type { InventoryMetricsWithCharts } from '../../types';
-import { cpu } from './snapshot/cpu';
-import { memory } from './snapshot/memory';
-import { rx } from './snapshot/rx';
-import { tx } from './snapshot/tx';
-import type { ContainerFormulas } from './formulas';
-import type { ContainerCharts } from './charts';
+import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
 
-const containerSnapshotMetrics = { cpu, memory, rx, tx };
-
-export const containerSnapshotMetricTypes = Object.keys(containerSnapshotMetrics) as Array<
-  keyof typeof containerSnapshotMetrics
->;
-
-export const metrics: InventoryMetricsWithCharts<ContainerFormulas, ContainerCharts> = {
-  snapshot: containerSnapshotMetrics,
+export const metrics = createInventoryModelMetrics({
+  getAggregation: async (aggregation) =>
+    await import('./snapshot').then(({ snapshot }) => snapshot[aggregation]),
+  getAggregations: async () => await import('./snapshot').then(({ snapshot }) => snapshot),
   getFormulas: async () => await import('./formulas').then(({ formulas }) => formulas),
   getCharts: async () => await import('./charts').then(({ charts }) => charts),
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
-};
+});
