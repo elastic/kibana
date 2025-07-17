@@ -134,7 +134,9 @@ export const GridColumn = ({
       }
     >
       {({ height, isScrolling, onChildScroll, scrollTop }) => (
-        <EuiAutoSizer disableHeight>
+        // `key` is a hack to re-render the list when the number of items changes, see:
+        // https://stackoverflow.com/questions/52769760/react-virtualized-list-item-does-not-re-render-with-changed-props-until-i-scroll
+        <EuiAutoSizer disableHeight key={list.length}>
           {({ width }) => (
             <VirtualizedList
               tabIndex={-1}
