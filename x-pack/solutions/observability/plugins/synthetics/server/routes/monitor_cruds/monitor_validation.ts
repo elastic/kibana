@@ -36,7 +36,6 @@ import {
   ALLOWED_SCHEDULES_IN_MINUTES,
   DEFAULT_FIELDS,
 } from '../../../common/constants/monitor_defaults';
-import { NO_BACKTICKS_ERROR_MESSAGE } from '../../../common/translations/translations';
 
 type MonitorCodecType =
   | typeof ICMPFieldsCodec
@@ -150,14 +149,6 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
   if (monitorType === MonitorTypeEnum.BROWSER) {
     const inlineScript = monitorFields[ConfigKey.SOURCE_INLINE];
     const projectContent = monitorFields[ConfigKey.SOURCE_PROJECT_CONTENT];
-    if (inlineScript?.includes('`')) {
-      return {
-        valid: false,
-        reason: 'Monitor is not a valid monitor of type browser',
-        details: NO_BACKTICKS_ERROR_MESSAGE,
-        payload: monitorFields,
-      };
-    }
     if (!inlineScript && !projectContent) {
       return {
         valid: false,
