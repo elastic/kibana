@@ -11,7 +11,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import type {
+  FormBasedLayer,
   FormBasedPersistedState,
+  FormulaPublicApi,
   GenericIndexPatternColumn,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
@@ -32,7 +34,13 @@ import {
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
+  LensLayerQuery,
+  LensLayerQueryConfig,
 } from './types';
+import { FormattedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
+import { LensOperation } from './operation_types';
+import { getFormulaColumn } from './columns';
+import { getOperationColumn, fromOperationColumn } from './columns/operation';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -52,25 +60,16 @@ export const getDefaultReferences = (
   ];
 };
 
-export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
-  const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
+export function getLayer(ACCESSOR: string, layer: LensBaseLayer, dataView: DataView, formulaAPI?: FormulaPublicApi, baseLayer?: PersistedIndexPatternLayer, prop: string = 'value'): PersistedIndexPatternLayer {
+  if (!layer || !(prop in layer)) {
+    throw new Error(`Layer or property ${prop} is not defined`);
+  }
+  const value = layer[prop] as LensLayerQuery;
+  if (value && typeof value === 'object' && !('formula' in value)) {
+    return getOperationColumn(ACCESSOR, value as LensOperation, dataView, formulaAPI, baseLayer);
+  }
 
-  const formulaFormat: FormulaValueConfig['format'] | undefined = format
-    ? {
-        id: format,
-        params: {
-          decimals: decimals ?? 2,
-          ...(!!compact ? { compact } : undefined),
-        },
-      }
-    : undefined;
-
-  return {
-    formula: value,
-    label,
-    timeScale: normalizeByUnit,
-    format: formulaFormat,
-  };
+  return getFormulaColumn(ACCESSOR, value as FormulaValueConfig, dataView, formulaAPI, baseLayer);
 }
 
 export function buildReferences(dataviews: Record<string, DataView>) {
@@ -312,3 +311,58 @@ export const addLayerFormulaColumns = (
   };
   layer.columnOrder.push(...columns.columnOrder.map((c) => `${c}${postfix}`));
 };
+
+// utils for building LensConfig out of LensAttributes (reverse building)
+
+/** * Builds a formuka string from the accessor and layer.
+ * * @param accessor - The accessor string to identify the column.
+ * * @param layer - The layer containing the columns.
+ * * @returns The formula string if available, otherwise undefined.
+ */
+export const buildQuery = (
+  accessor: string | undefined,
+  layer: FormBasedLayer,
+  dataView: DataViewsCommon | undefined,
+  formulaAPI?: FormulaPublicApi 
+): LensLayerQuery | undefined => {
+  if (!accessor) {
+    return undefined;
+  }
+
+  const column = layer.columns[accessor];
+  if (!column) {
+    return undefined;
+  }
+
+  let formula: string | undefined;
+  if ('operationType' in column && column.operationType && column.operationType !== 'formula') {
+    // convert to formula
+    return fromOperationColumn(layer, accessor);
+  } else if (column.operationType === 'formula') {
+    formula = (column as any).params.formula as string;
+  }
+
+  const params: Partial<LensLayerQueryConfig> = {}
+  if (column.customLabel) {
+    params.label = column.label;
+  }
+
+  if (column.scale) {
+    params.scale = column.scale;
+  }
+  
+  if ((column as FormattedIndexPatternColumn).params?.format) {
+    params.format = (column as FormattedIndexPatternColumn).params?.format;
+  }
+
+  if (Object.keys(params).length === 0) {
+    return formula;
+  }
+
+  if (formula) {
+    return {
+      query: formula || '',
+      ...params,
+    };
+  }
+}

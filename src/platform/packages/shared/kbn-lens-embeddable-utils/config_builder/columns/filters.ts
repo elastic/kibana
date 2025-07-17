@@ -8,6 +8,7 @@
  */
 
 import type { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { LensBreakdownFiltersConfig } from '../types';
 
 export const getFiltersColumn = ({
   options,
@@ -27,3 +28,16 @@ export const getFiltersColumn = ({
     },
   };
 };
+
+export const fromFiltersColumn = (
+  column: FiltersIndexPatternColumn
+): LensBreakdownFiltersConfig => {
+  const { params } = column;
+  return {
+    type: 'filters',
+    filters: params.filters.map((filter) => ({
+      filter: filter.input.query as string,
+      label: filter.label,
+    })),
+  };
+}

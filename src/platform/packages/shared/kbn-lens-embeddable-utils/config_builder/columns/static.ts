@@ -42,3 +42,21 @@ export function getStaticColumn(
     incompleteColumns: {},
   };
 }
+
+export function fromStaticColumn(
+  layer: PersistedIndexPatternLayer,
+  columnId: string
+): StaticValueConfig {
+  const column = layer.columns[columnId];
+  if (!column || column.operationType !== 'static_value') {
+    throw new Error(`Column with id ${columnId} is not a static value column`);
+  }
+
+  const { label, params } = column as ReferenceBasedIndexPatternColumn;
+
+  return {
+    label,  
+    format: params?.format,
+    value: '',
+  };
+}
