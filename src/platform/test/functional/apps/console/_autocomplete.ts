@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('console autocomplete feature', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/227576
+  describe.skip('console autocomplete feature', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
