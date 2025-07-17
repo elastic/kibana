@@ -31,10 +31,13 @@ export interface SideNavPrimaryMenuItemProps {
   onClick?: () => void;
 }
 
-export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrimaryMenuItemProps>(
+export const SideNavPrimaryMenuItem = forwardRef<
+  HTMLAnchorElement | HTMLButtonElement,
+  SideNavPrimaryMenuItemProps
+>(
   (
     { children, hasContent, horizontal, href, iconType, isCollapsed, isCurrent, onClick, ...props },
-    ref: ForwardedRef<HTMLAnchorElement>
+    ref: ForwardedRef<HTMLAnchorElement | HTMLButtonElement>
   ): JSX.Element => {
     const { euiTheme } = useEuiTheme();
 
@@ -79,6 +82,7 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
     `;
 
     const buttonStyles = css`
+      width: 100%;
       position: relative;
       overflow: hidden;
       align-items: center;
@@ -142,9 +146,29 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
       }
     `;
 
-    const menuItem = (
+    const content = (
+      <>
+        <div className="iconWrapper">
+          <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+        </div>
+        {isCollapsed && !horizontal ? <EuiScreenReaderOnly>{label}</EuiScreenReaderOnly> : label}
+      </>
+    );
+
+    const menuItem = hasContent ? (
+      <button
+        ref={ref as ForwardedRef<HTMLButtonElement>}
+        css={buttonStyles}
+        onClick={handleClick}
+        data-menu-item
+        type="button"
+        {...props}
+      >
+        {content}
+      </button>
+    ) : (
       <a
-        ref={ref}
+        ref={ref as ForwardedRef<HTMLAnchorElement>}
         aria-current={isCurrent ? 'page' : undefined}
         css={buttonStyles}
         href={href}
@@ -152,14 +176,10 @@ export const SideNavPrimaryMenuItem = forwardRef<HTMLAnchorElement, SideNavPrima
         data-menu-item
         {...props}
       >
-        <div className="iconWrapper">
-          <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
-        </div>
-        {isCollapsed && !horizontal ? <EuiScreenReaderOnly>{label}</EuiScreenReaderOnly> : label}
+        {content}
       </a>
     );
 
-    // Show tooltip when collapsed and item doesn't have a submenu
     if (!horizontal && isCollapsed && !hasContent) {
       return (
         <EuiToolTip
