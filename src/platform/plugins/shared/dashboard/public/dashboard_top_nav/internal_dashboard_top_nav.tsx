@@ -410,7 +410,7 @@ const topNavStyles = {
         top: `var(--kbn-application--sticky-headers-offset, 0px)`,
         background: euiTheme.colors.backgroundBasePlain,
 
-        '@media (width <= 320px)': {
+        '@media (max-width: 320px)': {
           position: 'relative',
         },
       },
