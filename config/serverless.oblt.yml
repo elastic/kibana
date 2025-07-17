@@ -4,7 +4,7 @@
 pricing.tiers.enabled: true
 pricing.tiers.products:
   - name: observability
-    tier: complete  # Accepted values for this tier are: complete, logs_essentials
+    tier: complete # Accepted values for this tier are: complete, logs_essentials
 
 # Make sure the plugins belonging to this project type are loaded
 plugins.allowlistPluginGroups: ['platform', 'observability']
@@ -111,3 +111,4 @@ console.ui.embeddedEnabled: false
 
 # Disable role management (custom roles)
 xpack.security.roleManagementEnabled: false
+xpack.profiling.enabled: true
