@@ -229,18 +229,18 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 % This PR fixes an issue ([#193080](https://github.com/elastic/kibana/issues/193080)) where custom ranges and multi-field values were not correctly colored based on selected color mapping configurations.
 
 **Data ingestion and Fleet**:
-* Fixes export CSV in Agent list [#225050]({{kib-pull}}225050).
-* Replace call to registry when deleting kibana assets for custom packages [#224886]({{kib-pull}}224886).
-* Ensure package policy names are unique when moving across spaces [#224804]({{kib-pull}}224804).
-* Fixes bulk actions incorrectly selecting agents with namespaces filter [#224036]({{kib-pull}}224036).
-* Revert " Added instructions for installing elastic agent complete" [#223520]({{kib-pull}}223520).
+* Fixes CSV export in the agent list [#225050]({{kib-pull}}225050).
+* Replaces registry call when deleting {{kib}} assets for custom packages [#224886]({{kib-pull}}224886).
+* Ensures package policy names are unique when moving across spaces [#224804]({{kib-pull}}224804).
+* Fixes bulk actions incorrectly selecting agents when a namespace filter is applied [#224036]({{kib-pull}}224036).
+* Reverts "Added instructions for installing {{agent}} complete." [#223520]({{kib-pull}}223520).
 * Fixes styled component theme lookup issue [#221979]({{kib-pull}}221979).
-* Fixes ssl config overridden from advanced yaml in full agent policy [#219902]({{kib-pull}}219902).
-* Fixes capability required for Siem Migrations Topic [#219427]({{kib-pull}}219427).
-* Make output and fleet server non-editable for agentless policies [#218905]({{kib-pull}}218905).
-* Support integrations having secrets with multiple values [#216918]({{kib-pull}}216918).
+* Fixes SSL config being overridden by advanced YAML in full agent policy [#219902]({{kib-pull}}219902).
+* Fixes required capability for the SIEM migrations topic [#219427]({{kib-pull}}219427).
+* Makes output and {{fleet}} Server settings non-editable for agentless policies [#218905]({{kib-pull}}218905).
+* Supports integrations with secrets that contain multiple values [#216918]({{kib-pull}}216918).
 * Adds remote cluster instructions for syncing integrations [#211997]({{kib-pull}}211997).
-* Update install snippets to include all platforms [#210249]({{kib-pull}}210249).
+* Updates install snippets to include all platformss [#210249]({{kib-pull}}210249).
 
 **Discover**:
 * Fixes wrong validation on expressions between aggregations [#227989]({{kib-pull}}227989).
@@ -401,7 +401,7 @@ The 9.0.1 release contains fixes for potential security vulnerabilities. See our
 
 ### Enhancements [kibana-9.0.1-features-enhancements]
 **Data ingestion and Fleet**:
-* Reuse shared integration policies when duplicating agent policies [#217872](https://github.com/elastic/kibana/pull/217872).
+* Reuses shared integration policies when duplicating agent policies [#217872](https://github.com/elastic/kibana/pull/217872).
 
 **Elastic Security solution**:
 For the Elastic Security 9.0.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
