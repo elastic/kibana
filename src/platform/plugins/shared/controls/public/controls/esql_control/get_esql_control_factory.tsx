@@ -15,7 +15,7 @@ import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { OptionsListSelection } from '../../../common/options_list';
 import { ESQL_CONTROL } from '../../../common';
-import type { ESQLControlApi } from './types';
+import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
@@ -25,10 +25,7 @@ import {
 import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
-import {
-  OptionsListComponentApi,
-  OptionsListESQLUnusedState,
-} from '../data_controls/options_list_control/types';
+import { OptionsListComponentApi } from '../data_controls/options_list_control/types';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',

@@ -10,8 +10,7 @@
 import { Subject } from 'rxjs';
 
 import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
-import { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
-import { DefaultDataControlState } from '../../../../common';
+import { SubjectsOf, SettersOf } from '@kbn/presentation-publishing/state_manager/types';
 import type {
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -21,6 +20,7 @@ import type {
 } from '../../../../common/options_list';
 import type { DataControlApi, PublishesField } from '../types';
 import { SelectionsState } from './selections_manager';
+import { DefaultDataControlState } from '../../../../common';
 import { TemporaryState } from './temporay_state_manager';
 import { EditorState } from './editor_state_manager';
 
@@ -40,8 +40,7 @@ interface PublishesOptions {
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
-
-type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
+export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
   SelectionsState &
   EditorState &
   TemporaryState & { sort: OptionsListSortingType | undefined };
@@ -66,21 +65,3 @@ export type OptionsListComponentApi = PublishesField &
       allowExpensiveQueries$: PublishingSubject<boolean>;
     };
   };
-
-type HideExcludeUnusedState = Pick<OptionsListState, 'exclude'>;
-type HideExistsUnusedState = Pick<OptionsListState, 'existsSelected'>;
-type HideSortUnusedState = Pick<OptionsListState, 'sort'>;
-type DisableLoadSuggestionsUnusedState = Pick<
-  OptionsListState,
-  'dataLoading' | 'requestSize' | 'runPastTimeout'
->;
-type DisableMultiSelectUnusedState = Pick<OptionsListState, 'singleSelect'>;
-type DisableInvalidSelectionsUnusedState = Pick<OptionsListState, 'invalidSelections'>;
-
-export type OptionsListESQLUnusedState = HideExcludeUnusedState &
-  HideExistsUnusedState &
-  HideSortUnusedState &
-  DisableLoadSuggestionsUnusedState &
-  DisableMultiSelectUnusedState &
-  DisableInvalidSelectionsUnusedState &
-  Pick<OptionsListState, 'fieldName'>;
