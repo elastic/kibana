@@ -10,14 +10,12 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaReactOverlays } from '../overlays';
-import { KibanaReactNotifications } from '../notifications';
 
 export type KibanaServices = Partial<CoreStart>;
 
 export interface KibanaReactContextValue<Services extends KibanaServices> {
   readonly services: Services;
   readonly overlays: KibanaReactOverlays;
-  readonly notifications: KibanaReactNotifications;
 }
 
 export interface KibanaReactContext<T extends KibanaServices> {
