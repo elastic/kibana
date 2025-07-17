@@ -133,7 +133,7 @@ export async function autocomplete(
       fields: false,
     },
     {},
-    callbacks?.license
+    callbacks?.hasMinimumLicenseRequired
   );
 
   return await handleFragment(

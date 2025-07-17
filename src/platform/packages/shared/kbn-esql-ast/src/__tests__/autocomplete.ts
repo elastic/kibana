@@ -13,7 +13,6 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { uniq } from 'lodash';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
@@ -131,7 +130,7 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  license: LicenseType = 'platinum'
+  license: string = 'platinum'
 ) {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType

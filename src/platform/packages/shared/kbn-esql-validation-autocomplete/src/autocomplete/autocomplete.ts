@@ -217,6 +217,7 @@ async function getSuggestionsWithinCommandExpression(
 
   // resolve the license promise
   const license = await callbacks?.getLicense?.();
+  const hasMinimumLicenseRequired = license?.hasAtLeast;
 
   // collect all fields + userDefinedColumns to suggest
   const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
@@ -260,7 +261,7 @@ async function getSuggestionsWithinCommandExpression(
             return await callbacks.getColumnsFor!({ query });
           }
         : undefined,
-      license,
+      hasMinimumLicenseRequired,
     },
     context,
     offset

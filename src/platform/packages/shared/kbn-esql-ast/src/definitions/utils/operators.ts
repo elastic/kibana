@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import { ESQLLicenseType } from '@kbn/esql-types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
 import { listCompleteItem } from '../../commands_registry/complete_items';
@@ -55,14 +55,14 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
  */
 export const getOperatorSuggestions = (
   predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType },
-  license?: ILicense | undefined
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ): ISuggestionItem[] => {
   const filteredDefinitions = filterFunctionDefinitions(
     getTestFunctions().length
       ? [...operatorsDefinitions, ...getTestFunctions()]
       : operatorsDefinitions,
     predicates,
-    license
+    hasMinimumLicenseRequired
   );
 
   // make sure the operator has at least one signature that matches
@@ -117,7 +117,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType,
   getExpressionType,
   getColumnsByType,
-  license,
+  hasMinimumLicenseRequired,
 }: {
   queryText: string;
   location: Location;
@@ -125,7 +125,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
-  license?: ILicense;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
 }) {
   const suggestions = [];
   const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
@@ -191,7 +191,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
               values: Boolean(operator.subtype === 'binary-expression'),
             },
             {},
-            license
+            hasMinimumLicenseRequired
           ))
         );
       }

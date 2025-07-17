@@ -6,13 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ILicense } from '@kbn/licensing-plugin/public';
 import type {
   ESQLVariableType,
   IndexAutocompleteItem,
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
 } from '@kbn/esql-types';
+import { ESQLLicenseType } from '@kbn/esql-types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
@@ -125,7 +125,7 @@ export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
-  license?: ILicense;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
 }
 
 export interface ICommandContext {

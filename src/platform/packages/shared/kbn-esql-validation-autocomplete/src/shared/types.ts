@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ILicense } from '@kbn/licensing-plugin/public';
 import {
   Location,
   ESQLSourceResult,
@@ -18,7 +17,10 @@ import type {
   RecommendedQuery,
   RecommendedField,
 } from '@kbn/esql-types';
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types/src/inference_endpoint_autocomplete_types';
+import {
+  ESQLLicenseResult,
+  InferenceEndpointsAutocompleteResult,
+} from '@kbn/esql-types/src/inference_endpoint_autocomplete_types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -59,7 +61,7 @@ export interface ESQLCallbacks {
   getInferenceEndpoints?: (
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
-  getLicense?: () => Promise<ILicense | undefined>;
+  getLicense?: () => Promise<ESQLLicenseResult | undefined>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

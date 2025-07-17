@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../../types';
 import type {
@@ -185,7 +184,7 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  license?: ILicense
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -239,7 +238,7 @@ export async function getFieldsOrFunctionsSuggestions(
             returnTypes: types,
             ignored: ignoreFn,
           },
-          license
+          hasMinimumLicenseRequired
         )
       : [],
     userDefinedColumns
@@ -346,7 +345,7 @@ export async function suggestForExpression({
   location,
   preferredExpressionType,
   context,
-  license,
+  hasMinimumLicenseRequired,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
@@ -354,7 +353,7 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType: GetColumnsByTypeFn;
   context?: ICommandContext;
-  license: ILicense | undefined;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
 
@@ -402,7 +401,10 @@ export async function suggestForExpression({
     case 'after_not':
       if (expressionRoot && isFunctionExpression(expressionRoot) && expressionRoot.name === 'not') {
         suggestions.push(
-          ...getFunctionSuggestions({ location, returnTypes: ['boolean'] }, license),
+          ...getFunctionSuggestions(
+            { location, returnTypes: ['boolean'] },
+            hasMinimumLicenseRequired
+          ),
           ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
         );
       } else {
@@ -450,7 +452,7 @@ export async function suggestForExpression({
           getExpressionType: (expression) =>
             getExpressionType(expression, context?.fields, context?.userDefinedColumns),
           getColumnsByType,
-          license,
+          hasMinimumLicenseRequired,
         }))
       );
 
@@ -463,7 +465,7 @@ export async function suggestForExpression({
       });
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location }, license)
+        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired)
       );
 
       break;

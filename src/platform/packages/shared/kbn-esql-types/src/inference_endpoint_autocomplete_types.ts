@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { ESQLLicenseType } from './variables_types';
 
 export interface InferenceEndpointsAutocompleteResult {
   inferenceEndpoints: InferenceEndpointAutocompleteItem[];
@@ -15,4 +16,8 @@ export interface InferenceEndpointsAutocompleteResult {
 export interface InferenceEndpointAutocompleteItem {
   inference_id: string;
   task_type: InferenceTaskType;
+}
+
+export interface ESQLLicenseResult {
+  hasAtLeast: (minimumLicenseRequired: ESQLLicenseType) => boolean;
 }

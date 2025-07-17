@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-
 import { camelCase } from 'lodash';
 import {
   TRIGGER_SUGGESTION_COMMAND,
@@ -37,7 +35,6 @@ import {
   timeseriesIndices,
   editorExtensions,
   inferenceEndpoints,
-  mockLicense,
 } from '../../__tests__/helpers';
 
 export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
@@ -140,7 +137,7 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  license: LicenseType = 'platinum'
+  license: string = 'platinum'
 ): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -272,15 +269,13 @@ export function createCustomCallbackMocks(
     sourceIndices: string[];
     matchField: string;
     enrichFields: string[];
-  }>,
-  customLicense?: ILicense
+  }>
 ): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
     fields.filter(({ type }) => !NOT_SUGGESTED_TYPES.includes(type));
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
-  const finalLicense = customLicense || mockLicense;
 
   return {
     getColumnsFor: jest.fn(async (params) => {
@@ -304,7 +299,7 @@ export function createCustomCallbackMocks(
       return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
-    getLicense: jest.fn(async () => finalLicense || mockLicense),
+    getLicense: jest.fn(),
   };
 }
 

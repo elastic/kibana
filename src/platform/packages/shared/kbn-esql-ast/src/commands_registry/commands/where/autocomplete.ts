@@ -37,7 +37,7 @@ export async function autocomplete(
     location: Location.WHERE,
     preferredExpressionType: 'boolean',
     context,
-    license: callbacks?.license,
+    hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
   });
 
   const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(

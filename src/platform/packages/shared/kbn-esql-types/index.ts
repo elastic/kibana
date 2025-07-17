@@ -11,6 +11,7 @@ export {
   ESQLVariableType,
   EsqlControlType,
   VariableNamePrefix,
+  type ESQLLicenseType,
   type ControlWidthOptions,
   type ESQLControlState,
   type ESQLControlVariable,
