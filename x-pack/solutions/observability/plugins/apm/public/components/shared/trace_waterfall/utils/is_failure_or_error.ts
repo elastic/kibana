@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { EventOutcome, StatusCode } from '@kbn/apm-types';
 
-export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Prebuilt rules package', function () {
-    loadTestFile(require.resolve('./update_package'));
-  });
+export const isFailureOrError = (status: EventOutcome | StatusCode | undefined) => {
+  if (!status) {
+    return false;
+  }
+  return status === 'failure' || status === 'Error';
 };
