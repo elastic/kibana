@@ -120,11 +120,11 @@ export const datasetTypeSchema = z.union([
     /**
      * Name of the time field
      */
-    timeField: z.string().describe('Name of the time field'),
+    time_field: z.string().describe('Name of the time field'),
     /**
      * Runtime fields
      */
-    runtimeFields: z
+    runtime_fields: z
       .array(
         z.object({
           type: z.string(),
@@ -140,7 +140,14 @@ export const datasetTypeSchema = z.union([
      * ESQL query
      */
     query: z.string().describe('ESQL query')
-  }).describe('ESQL')
+  }).describe('ESQL'),
+  z.object({
+    type: z.literal("table"),
+    /**
+     * Kibana Datatable
+     */
+    table: z.any().describe('kibana datatable')
+  }).describe('table')
 ]).describe('Dataset type')
 
 const genericOperationOptionsSchema = z.object({
@@ -612,7 +619,7 @@ export const metricStateSchema = z.object({
         /**
          * Complementary visualization
          */
-        complementary: complementaryVizSchema.optional()
+        background_chart: complementaryVizSchema.optional()
       })
     ),
   /**
@@ -947,4 +954,12 @@ export const lensApiStateSchema = sharedPanelInfoSchema
   .and(flattenChartStatesSchema)
 
 
+export type SharedPanelInfo = z.infer<typeof sharedPanelInfoSchema>;
+export type LayerSettings = z.infer<typeof layerSettingsSchema>;
+export type LensApiState = z.infer<typeof lensApiStateSchema>;
 
+export type MetricState = z.infer<typeof metricStateSchema> & LayerSettings & SharedPanelInfo;
+
+export type FormulaLikeOperationDefinition = z.infer<typeof formulaLikeOperationDefinitionSchema>;
+
+export type NarrowByType<T, U> = T extends { type: U } ? T : never;

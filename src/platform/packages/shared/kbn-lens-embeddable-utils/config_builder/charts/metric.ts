@@ -30,6 +30,8 @@ import {
   getValueColumn,
 } from '../columns';
 
+import { MetricState } from '../zod_schema';
+
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
@@ -37,55 +39,49 @@ const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
 }
-function buildVisualizationState(config: LensMetricConfig): MetricVisualizationState {
+function buildVisualizationState(config: MetricState): MetricVisualizationState {
   const layer = config;
 
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     metricAccessor: ACCESSOR,
-    color: layer.seriesColor,
-    subtitle: layer.subtitle,
+    color: layer.primary_value?.color?.type === 'static' ? layer.primary_value.color.code : undefined,
+    subtitle: layer.primary_value?.sub_label,
     showBar: false,
 
-    ...(layer.querySecondaryMetric
+    ...(layer.secondary_value
       ? {
           secondaryMetricAccessor: getAccessorName('secondary'),
         }
       : {}),
 
-    ...(layer.queryMaxValue
+    ...(layer.primary_value?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
           showBar: true,
         }
       : {}),
 
-    ...(layer.breakdown
+    ...(layer.breakdown_by
       ? {
           breakdownByAccessor: getAccessorName('breakdown'),
         }
       : {}),
 
-    ...(layer.trendLine
+    ...(layer.primary_value.background_chart?.type === 'trend'
       ? {
           trendlineLayerId: `${DEFAULT_LAYER_ID}_trendline`,
           trendlineLayerType: 'metricTrendline',
           trendlineMetricAccessor: `${ACCESSOR}_trendline`,
           trendlineTimeAccessor: HISTOGRAM_COLUMN_NAME,
-          ...(layer.querySecondaryMetric
+          ...(layer.secondary_value
             ? {
                 trendlineSecondaryMetricAccessor: `${ACCESSOR}_secondary_trendline`,
               }
             : {}),
 
-          ...(layer.queryMaxValue
-            ? {
-                trendlineMaxAccessor: `${ACCESSOR}_max_trendline`,
-              }
-            : {}),
-
-          ...(layer.breakdown
+          ...(layer.breakdown_by
             ? {
                 trendlineBreakdownByAccessor: `${ACCESSOR}_breakdown_trendline`,
               }
@@ -96,7 +92,7 @@ function buildVisualizationState(config: LensMetricConfig): MetricVisualizationS
 }
 
 function buildFormulaLayer(
-  layer: LensMetricConfig,
+  layer: MetricState,
   i: number,
   dataView: DataView,
   formulaAPI?: FormulaPublicApi
@@ -122,15 +118,15 @@ function buildFormulaLayer(
     layer_0_trendline?: PersistedIndexPatternLayer;
   } = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer.primary_value), dataView, formulaAPI),
     },
-    ...(layer.trendLine
+    ...(layer.primary_value?.background_chart?.type === 'trend' && formulaAPI
       ? {
           [TRENDLINE_LAYER_ID]: {
             linkToLayers: [DEFAULT_LAYER_ID],
             ...getFormulaColumn(
               `${ACCESSOR}_trendline`,
-              mapToFormula(layer),
+              mapToFormula(layer.primary_value),
               dataView,
               formulaAPI,
               baseLayer
@@ -143,10 +139,10 @@ function buildFormulaLayer(
   const defaultLayer = layers[DEFAULT_LAYER_ID];
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
 
-  if (layer.breakdown) {
+  if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
     const breakdownColumn = getBreakdownColumn({
-      options: layer.breakdown,
+      options: layer.breakdown_by,
       dataView,
     });
     addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
@@ -156,11 +152,11 @@ function buildFormulaLayer(
     }
   }
 
-  if (layer.querySecondaryMetric) {
+  if (layer.secondary_value) {
     const columnName = getAccessorName('secondary');
     const formulaColumn = getFormulaColumn(
       columnName,
-      { formula: layer.querySecondaryMetric },
+      { formula: layer.secondary_value.formula },
       dataView,
       formulaAPI
     );
@@ -171,11 +167,11 @@ function buildFormulaLayer(
     }
   }
 
-  if (layer.queryMaxValue) {
+  if (layer.primary_value?.background_chart?.type === 'bar') {
     const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
-      { formula: layer.queryMaxValue },
+      { formula: layer.primary_value?.background_chart?.goal_value.formula },
       dataView,
       formulaAPI
     );
@@ -189,31 +185,29 @@ function buildFormulaLayer(
   return layers;
 }
 
-function getValueColumns(layer: LensMetricConfig) {
-  if (layer.breakdown && typeof layer.breakdown !== 'string') {
-    throw new Error('breakdown must be a field name when not using index source');
-  }
+function getValueColumns(layer: MetricState) {
+
   return [
-    ...(layer.breakdown
-      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
+    ...(layer.breakdown_by
+      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by.operation)]
       : []),
-    getValueColumn(ACCESSOR, layer.value, 'number'),
-    ...(layer.queryMaxValue
-      ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue, 'number')]
+    getValueColumn(ACCESSOR, layer.primary_value.operation, 'number'),
+    ...(layer.primary_value?.background_chart?.type === 'bar'
+      ? [getValueColumn(getAccessorName('max'), layer.primary_value.background_chart.goal_value.operation, 'number')]
       : []),
-    ...(layer.querySecondaryMetric
-      ? [getValueColumn(getAccessorName('secondary'), layer.querySecondaryMetric)]
+    ...(layer.secondary_value
+      ? [getValueColumn(getAccessorName('secondary'), layer.secondary_value.operation)]
       : []),
   ];
 }
 
 export async function buildMetric(
-  config: LensMetricConfig,
+  config: MetricState,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensMetricConfig, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as MetricState, i, dataView, formulaAPI);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,
@@ -222,7 +216,8 @@ export async function buildMetric(
     dataViewsAPI
   );
   return {
-    title: config.title,
+    title: config.title ?? '',
+    description: config.description ?? '',
     visualizationType: 'lnsMetric',
     references: buildReferences(dataviews),
     state: {
