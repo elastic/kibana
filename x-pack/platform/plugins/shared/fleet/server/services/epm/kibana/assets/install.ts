@@ -138,7 +138,7 @@ export function createSavedObjectKibanaAsset(asset: SavedObjectAsset): SavedObje
 export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   logger: Logger;
   pkgName: string;
   spaceId: string;
@@ -172,21 +172,13 @@ export async function installKibanaAssets(options: {
     // split assets into SO installs and alert rule installs
     const { asSavedObjects, asAlertRules } = createInstallGroups(assetsToInstall);
 
-    let installedAlertRules: ObjectReference[] = [];
-
-    if (alertingRulesClient) {
-      installedAlertRules = await installAlertRules({
-        logger,
-        alertingRulesClient,
-        alertRuleAssets: asAlertRules,
-        assetsChunkSize: MAX_CONCURRENT_PACKAGE_ASSETS,
-        context: { pkgName, spaceId, assetTags },
-      });
-    } else if (asAlertRules.length) {
-      logger.debug(
-        `Installing ${asAlertRules.length} alert rules will be skipped because no alert rules client was provided. This maybe due to the operation running outside of a request context.`
-      );
-    }
+    const installedAlertRules = await installAlertRules({
+      logger,
+      alertingRulesClient,
+      alertRuleAssets: asAlertRules,
+      assetsChunkSize: MAX_CONCURRENT_PACKAGE_ASSETS,
+      context: { pkgName, spaceId, assetTags },
+    });
 
     const installedAssets = await installKibanaSavedObjects({
       logger,
@@ -259,7 +251,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -330,7 +322,7 @@ export async function installKibanaAssetsAndReferences({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;

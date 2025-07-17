@@ -40,8 +40,6 @@ const mockedIsTopLevelPipeline = isTopLevelPipeline as jest.MockedFunction<
 describe('stepDeletePreviousPipelines', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
-  let alertingRulesClient: any;
-
   const getMockInstalledPackageSo = (
     installedEs: EsAssetReference[] = []
   ): SavedObject<Installation> => {
@@ -67,10 +65,6 @@ describe('stepDeletePreviousPipelines', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
-    alertingRulesClient = {
-      create: jest.fn(),
-      bulkDeleteRules: jest.fn(),
-    };
   });
   afterEach(async () => {
     jest.mocked(mockedDeletePreviousPipelines).mockReset();
@@ -137,7 +131,6 @@ describe('stepDeletePreviousPipelines', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext,
         installedPkg,
@@ -184,7 +177,6 @@ describe('stepDeletePreviousPipelines', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext,
         installedPkg,
@@ -231,7 +223,6 @@ describe('stepDeletePreviousPipelines', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext,
         installedPkg,
@@ -325,7 +316,6 @@ describe('stepDeletePreviousPipelines', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext,
         installType: 'update',
@@ -356,7 +346,6 @@ describe('stepDeletePreviousPipelines', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext,
         installType: 'reupdate',
@@ -387,7 +376,6 @@ describe('stepDeletePreviousPipelines', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext,
         installType: 'rollback',
@@ -428,7 +416,6 @@ describe('stepDeletePreviousPipelines', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext: { ...packageInstallContext, paths: ['some/path/1', 'some/path/2'] },
         installType: 'install',
@@ -470,7 +457,6 @@ describe('stepDeletePreviousPipelines', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext: { ...packageInstallContext, paths: ['some/path/1', 'some/path/2'] },
         installType: 'update',

@@ -18,10 +18,6 @@ jest.mock('./bundled_packages');
 
 const mockedInstallPackage = jest.mocked(installPackage);
 const mockedGetBundledPackageForInstallation = jest.mocked(getBundledPackageForInstallation);
-const alertingRulesClient = {
-  create: jest.fn(),
-  bulkDeleteRules: jest.fn(),
-} as any;
 
 describe('reinstallPackageForInstallation', () => {
   beforeEach(() => {
@@ -39,7 +35,6 @@ describe('reinstallPackageForInstallation', () => {
       reinstallPackageForInstallation({
         soClient,
         esClient,
-        alertingRulesClient,
         installation: {
           install_source: 'upload',
         } as Installation,
@@ -54,7 +49,6 @@ describe('reinstallPackageForInstallation', () => {
       reinstallPackageForInstallation({
         soClient,
         esClient,
-        alertingRulesClient,
         installation: {
           install_source: 'registry',
           name: 'test',
@@ -79,7 +73,6 @@ describe('reinstallPackageForInstallation', () => {
       reinstallPackageForInstallation({
         soClient,
         esClient,
-        alertingRulesClient,
         installation: {
           install_source: 'bundled',
           name: 'test_bundled',
@@ -105,7 +98,6 @@ describe('reinstallPackageForInstallation', () => {
       reinstallPackageForInstallation({
         soClient,
         esClient,
-        alertingRulesClient,
         installation: {
           install_source: 'upload',
           name: 'test_bundled',

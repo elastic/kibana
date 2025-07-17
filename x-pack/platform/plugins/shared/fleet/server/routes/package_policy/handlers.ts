@@ -226,9 +226,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const alertingRulesClient = await appContextService
-    .getAlerting()
-    .getRulesClientWithRequest(request);
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { force, id, package: pkg, ...newPolicy } = request.body;
   if ('spaceIds' in newPolicy) {
@@ -273,7 +270,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
       esClient,
-      alertingRulesClient,
       newPackagePolicy,
       {
         id,
@@ -308,7 +304,6 @@ export const createPackagePolicyHandler: FleetRequestHandler<
           .info(`rollback ${pkg!.name}-${pkg!.version} package installation after error`);
         await removeInstallation({
           savedObjectsClient: soClient,
-          alertingRulesClient,
           pkgName: pkg!.name,
           pkgVersion: pkg!.version,
           esClient,

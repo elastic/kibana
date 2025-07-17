@@ -175,7 +175,7 @@ export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
@@ -285,7 +285,7 @@ export async function handleInstallPackageFailure({
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
   keepFailedInstallation?: boolean;
@@ -408,7 +408,7 @@ interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   spaceId: string;
   force?: boolean;
   neverIgnoreVerificationError?: boolean;
@@ -432,7 +432,7 @@ interface InstallCustomPackageParams {
   pkgName: string;
   datasets: CustomPackageDatasetConfiguration[];
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   spaceId: string;
   force?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
@@ -441,7 +441,7 @@ interface InstallCustomPackageParams {
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   archiveBuffer: Buffer;
   contentType: string;
   spaceId: string;
@@ -625,7 +625,7 @@ export async function installPackageWithStateMachine(options: {
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   spaceId: string;
   force?: boolean;
   packageInstallContext: PackageInstallContext;
@@ -1341,7 +1341,7 @@ export const saveKibanaAssetsRefs = async (
 export async function ensurePackagesCompletedInstall(
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  alertingRulesClient: RulesClientApi | null
+  alertingRulesClient: RulesClientApi
 ) {
   const installingPackages = await getPackageSavedObjects(savedObjectsClient, {
     searchFields: ['install_status'],

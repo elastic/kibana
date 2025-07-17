@@ -10,7 +10,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { load, dump } from 'js-yaml';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -41,7 +40,6 @@ import { installPackageWithStateMachine } from './install';
 export async function updateCustomIntegration(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  alertingRulesClient: RulesClientApi,
   id: string,
   fields: {
     readMeData?: string;
@@ -72,7 +70,7 @@ export async function updateCustomIntegration(
   newVersion[2] = (parseInt(newVersion[2], 10) + 1).toString();
   const newVersionString = newVersion.join('.');
   // Increment the version of everything and create a new package
-  const res = await incrementVersionAndUpdate(soClient, esClient, alertingRulesClient, id, {
+  const res = await incrementVersionAndUpdate(soClient, esClient, id, {
     version: newVersionString,
     readme: fields.readMeData,
     categories: fields.categories,
@@ -86,7 +84,6 @@ export async function updateCustomIntegration(
 export async function incrementVersionAndUpdate(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  alertingRulesClient: RulesClientApi,
   pkgName: string,
   data: {
     version: string;
@@ -176,7 +173,6 @@ export async function incrementVersionAndUpdate(
     installType: 'install',
     savedObjectsClient: soClient,
     esClient,
-    alertingRulesClient,
     spaceId: 'default',
     force: true,
     paths: packageInstallContext.paths,

@@ -52,7 +52,6 @@ export const item: GetInfoResponse['item'] = {
           // path: 'okta-1.2.0/kibana/dashboard/okta-749203a0-67b1-11ea-a76f-bf44814e437d.json',
         },
       ],
-      alert: [],
       map: [
         {
           pkgkey: 'okta-1.2.0',

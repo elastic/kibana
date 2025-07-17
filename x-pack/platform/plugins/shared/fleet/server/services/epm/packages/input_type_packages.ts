@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import type { IndicesDataStream } from 'elasticsearch-8.x/lib/api/types';
 
@@ -215,10 +214,8 @@ export async function removeAssetsForInputPackagePolicy(opts: {
   logger: Logger;
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi;
 }) {
-  const { logger, packageInfo, esClient, savedObjectsClient, alertingRulesClient, datasetName } =
-    opts;
+  const { logger, packageInfo, esClient, savedObjectsClient, datasetName } = opts;
 
   if (packageInfo.type === 'input' && packageInfo.status === 'installed') {
     logger.info(`Removing assets for input package ${packageInfo.name}:${packageInfo.version}`);
@@ -260,7 +257,6 @@ export async function removeAssetsForInputPackagePolicy(opts: {
         installationToDelete,
         installation,
         esClient,
-        alertingRulesClient,
         savedObjectsClient
       );
     } catch (error) {

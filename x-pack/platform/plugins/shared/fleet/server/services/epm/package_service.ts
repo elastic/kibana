@@ -15,8 +15,8 @@ import type {
 } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from '@kbn/config-schema';
-import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -161,7 +161,7 @@ export class PackageServiceImpl implements PackageService {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
-    private readonly alertingStart: AlertingServerStart,
+    private readonly alertingRulesClient: RulesClientApi,
     private readonly logger: Logger
   ) {}
 
@@ -186,7 +186,7 @@ export class PackageServiceImpl implements PackageService {
     return new PackageClientImpl(
       this.internalEsClient,
       this.internalSoClient,
-      this.alertingStart,
+      this.alertingRulesClient,
       this.logger,
       preflightCheck,
       request
@@ -197,7 +197,7 @@ export class PackageServiceImpl implements PackageService {
     return new PackageClientImpl(
       this.internalEsClient,
       this.internalSoClient,
-      this.alertingStart,
+      this.alertingRulesClient,
       this.logger
     );
   }
@@ -209,7 +209,7 @@ class PackageClientImpl implements PackageClient {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
-    private readonly alertingStart: AlertingServerStart,
+    private readonly alertingRulesClient: RulesClientApi,
     private readonly logger: Logger,
     private readonly preflightCheck?: (
       requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']
@@ -242,15 +242,12 @@ class PackageClientImpl implements PackageClient {
     force?: boolean;
   }): Promise<EnsurePackageResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
-    const alertingRulesClient = this.request
-      ? await this.alertingStart.getRulesClientWithRequest(this.request)
-      : null;
 
     return ensureInstalledPackage({
       ...options,
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
-      alertingRulesClient,
+      alertingRulesClient: this.alertingRulesClient,
     });
   }
 
@@ -281,10 +278,6 @@ class PackageClientImpl implements PackageClient {
       : await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease: true });
     const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
 
-    const alertingRulesClient = this.request
-      ? await this.alertingStart.getRulesClientWithRequest(this.request)
-      : null;
-
     return await installPackage({
       force,
       pkgkey,
@@ -292,7 +285,7 @@ class PackageClientImpl implements PackageClient {
       installSource: 'registry',
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
-      alertingRulesClient,
+      alertingRulesClient: this.alertingRulesClient,
       neverIgnoreVerificationError: !force,
       keepFailedInstallation,
       useStreaming,
@@ -317,10 +310,6 @@ class PackageClientImpl implements PackageClient {
       force = false,
     } = options;
 
-    const alertingRulesClient = this.request
-      ? await this.alertingStart.getRulesClientWithRequest(this.request)
-      : null;
-
     return await installPackage({
       force,
       pkgName,
@@ -330,7 +319,7 @@ class PackageClientImpl implements PackageClient {
       installSource: 'custom',
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
-      alertingRulesClient,
+      alertingRulesClient: this.alertingRulesClient,
       neverIgnoreVerificationError: !force,
       authorizationHeader: this.getAuthorizationHeader(),
     });

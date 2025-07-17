@@ -332,7 +332,6 @@ export async function ensureFleetGlobalEsAssets(
         await reinstallPackageForInstallation({
           soClient,
           esClient,
-          alertingRulesClient: null,
           installation,
         }).catch((err) => {
           apm.captureError(err);

@@ -215,7 +215,6 @@ async function uninstallPackageIfInstalled(
       savedObjectsClient,
       pkgName: pkg.package_name,
       pkgVersion: pkg.package_version,
-      alertingRulesClient: null,
       esClient,
       force: false,
     });

@@ -80,7 +80,6 @@ export const item: GetInfoResponse['item'] = {
           // path: 'nginx-0.7.0/kibana/dashboard/nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519.json',
         },
       ],
-      alert: [],
       ml_module: [
         {
           pkgkey: 'nginx-0.7.0',

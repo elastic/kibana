@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import type { Installation } from '../../../types';
 import { pkgToPkgKey } from '../registry';
@@ -21,12 +20,10 @@ import { installPackage } from './install';
 export async function reinstallPackageForInstallation({
   soClient,
   esClient,
-  alertingRulesClient,
   installation,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi | null;
   installation: Installation;
 }) {
   if (installation.install_source === 'upload' || installation.install_source === 'bundled') {
@@ -47,7 +44,6 @@ export async function reinstallPackageForInstallation({
     // If the package is bundled reinstall from the registry will still use the bundled package.
     installSource: 'registry',
     savedObjectsClient: soClient,
-    alertingRulesClient,
     pkgkey: pkgToPkgKey({
       name: installation.name,
       version: installation.version,

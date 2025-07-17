@@ -59,7 +59,6 @@ const mockedDeleteKibanaAssets = deleteKibanaAssets as jest.MockedFunction<
 
 let soClient: jest.Mocked<SavedObjectsClientContract>;
 let esClient: jest.Mocked<ElasticsearchClient>;
-let alertingRulesClient: any;
 
 const packageInstallContext = {
   packageInfo: {
@@ -88,10 +87,6 @@ describe('stepInstallKibanaAssets', () => {
     soClient.get.mockImplementation(async (type, id) => {
       return { id, attributes: {} } as any;
     });
-    alertingRulesClient = {
-      create: jest.fn(),
-      bulkDeleteRules: jest.fn(),
-    };
   });
 
   esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -101,7 +96,6 @@ describe('stepInstallKibanaAssets', () => {
     const installationPromise = stepInstallKibanaAssets({
       savedObjectsClient: soClient,
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext: {
         archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -141,7 +135,6 @@ describe('stepInstallKibanaAssets', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext: {
         archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -188,7 +181,6 @@ describe('stepInstallKibanaAssetsWithStreaming', () => {
     const result = await stepInstallKibanaAssetsWithStreaming({
       savedObjectsClient: soClient,
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext: {
         archiveIterator,
@@ -257,7 +249,6 @@ describe('cleanUpKibanaAssetsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -289,7 +280,6 @@ describe('cleanUpKibanaAssetsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -317,7 +307,6 @@ describe('cleanUpKibanaAssetsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -343,7 +332,6 @@ describe('cleanUpKibanaAssetsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -370,7 +358,6 @@ describe('cleanUpKibanaAssetsStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -410,7 +397,6 @@ describe('cleanUpUnusedKibanaAssetsStep', () => {
     savedObjectsClient: soClient,
     savedObjectsImporter: jest.fn(),
     esClient,
-    alertingRulesClient,
     logger: loggerMock.create(),
     packageInstallContext,
     installType: 'install' as const,

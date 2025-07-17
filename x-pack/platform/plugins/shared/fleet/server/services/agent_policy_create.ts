@@ -10,7 +10,6 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import { getDefaultFleetServerpolicyId } from '../../common/services/agent_policies_helpers';
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
@@ -66,7 +65,6 @@ async function getFleetServerAgentPolicyId(
 async function createPackagePolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  alertingRulesClient: RulesClientApi,
   agentPolicy: AgentPolicy,
   packageToInstall: string,
   options: {
@@ -77,7 +75,7 @@ async function createPackagePolicy(
   }
 ) {
   const newPackagePolicy = await packagePolicyService
-    .buildPackagePolicyFromPackage(soClient, alertingRulesClient, packageToInstall)
+    .buildPackagePolicyFromPackage(soClient, packageToInstall)
     .catch(async (error) => {
       // rollback agent policy on error
       await agentPolicyService.delete(soClient, esClient, agentPolicy.id, {
@@ -96,7 +94,7 @@ async function createPackagePolicy(
     newPackagePolicy.supports_agentless = agentPolicy.supports_agentless;
   }
 
-  await packagePolicyService.create(soClient, esClient, alertingRulesClient, newPackagePolicy, {
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     spaceId: options.spaceId,
     user: options.user,
     bumpRevision: false,
@@ -108,7 +106,6 @@ async function createPackagePolicy(
 interface CreateAgentPolicyParams {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi;
   newPolicy: NewAgentPolicy;
   hasFleetServer?: boolean;
   withSysMonitoring: boolean;
@@ -122,7 +119,6 @@ interface CreateAgentPolicyParams {
 export async function createAgentPolicyWithPackages({
   soClient,
   esClient,
-  alertingRulesClient,
   newPolicy,
   hasFleetServer,
   withSysMonitoring,
@@ -183,36 +179,22 @@ export async function createAgentPolicyWithPackages({
 
   // Create the fleet server package policy and add it to agent policy.
   if (hasFleetServer) {
-    await createPackagePolicy(
-      soClient,
-      esClient,
-      alertingRulesClient,
-      agentPolicy,
-      FLEET_SERVER_PACKAGE,
-      {
-        spaceId,
-        user,
-        authorizationHeader,
-        force,
-      }
-    );
+    await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+    });
   }
 
   // Create the system monitoring package policy and add it to agent policy.
   if (withSysMonitoring) {
-    await createPackagePolicy(
-      soClient,
-      esClient,
-      alertingRulesClient,
-      agentPolicy,
-      FLEET_SYSTEM_PACKAGE,
-      {
-        spaceId,
-        user,
-        authorizationHeader,
-        force,
-      }
-    );
+    await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+    });
   }
 
   await ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id);

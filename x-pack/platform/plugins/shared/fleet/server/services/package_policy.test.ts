@@ -273,10 +273,6 @@ describe('Package policy service', () => {
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
-      const alertingRulesClient = {
-        create: jest.fn(),
-        bulkDeleteRules: jest.fn(),
-      } as any;
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -290,7 +286,6 @@ describe('Package policy service', () => {
       await packagePolicyService.create(
         soClient,
         esClient,
-        alertingRulesClient,
         {
           name: 'Test Package Policy',
           namespace: 'test',
@@ -321,10 +316,6 @@ describe('Package policy service', () => {
 
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
-      const alertingRulesClient = {
-        create: jest.fn(),
-        bulkDeleteRules: jest.fn(),
-      } as any;
 
       soClient.create.mockResolvedValueOnce({
         id: 'test-package-policy',
@@ -339,7 +330,6 @@ describe('Package policy service', () => {
         packagePolicyService.create(
           soClient,
           esClient,
-          alertingRulesClient,
           {
             name: 'Test Package Policy',
             namespace: 'test',

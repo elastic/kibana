@@ -62,7 +62,7 @@ import { handleState } from './state_machine';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;

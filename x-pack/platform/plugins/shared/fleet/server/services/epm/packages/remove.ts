@@ -60,7 +60,7 @@ const MAX_ASSETS_TO_DELETE = 1000;
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   pkgName: string;
   pkgVersion?: string;
   esClient: ElasticsearchClient;
@@ -151,7 +151,7 @@ export async function deleteKibanaAssets({
   spaceId = DEFAULT_SPACE_ID,
 }: {
   installedObjects: KibanaAssetReference[];
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   logger: Logger;
   packageSpecConditions?: PackageSpecConditions;
   spaceId?: string;
@@ -178,19 +178,10 @@ export async function deleteKibanaAssets({
     (installedObject) => installedObject.type === KibanaSavedObjectType.alert
   );
 
-  if (alertAssets.length > 0 && !alertingRulesClient) {
-    logger.debug(
-      'Deleting alert rules will be skipped because no alert rules client was provided. This maybe due to the operation running outside of a request context.'
-    );
-  }
-
   if (minKibana && minKibana.major >= 8) {
-    const deleteAlertRulesPromise = alertingRulesClient
-      ? bulkDeleteAlertRules(alertAssets, alertingRulesClient, logger)
-      : Promise.resolve();
     await Promise.all([
       bulkDeleteSavedObjects(soAssets, namespace, savedObjectsClient, logger),
-      deleteAlertRulesPromise,
+      bulkDeleteAlertRules(alertAssets, alertingRulesClient, logger),
     ]);
   } else {
     const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
@@ -384,7 +375,7 @@ export async function deletePrerequisiteAssets(
 
 async function deleteAssets(
   savedObjectsClient: SavedObjectsClientContract,
-  alertingRulesClient: RulesClientApi | null,
+  alertingRulesClient: RulesClientApi,
   {
     installed_es: installedEs,
     installed_kibana: installedKibana,
@@ -475,7 +466,7 @@ export async function deleteKibanaSavedObjectsAssets({
   spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi | null;
+  alertingRulesClient: RulesClientApi;
   installedPkg: SavedObject<Installation>;
   spaceId?: string;
 }) {

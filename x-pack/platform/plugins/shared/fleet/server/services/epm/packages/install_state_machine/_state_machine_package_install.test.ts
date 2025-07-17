@@ -67,7 +67,6 @@ function sleep(millis: number) {
 describe('_stateMachineInstallPackage', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
-  let alertingRulesClient: any;
 
   beforeEach(async () => {
     soClient = savedObjectsClientMock.create();
@@ -83,10 +82,6 @@ describe('_stateMachineInstallPackage', () => {
     jest.mocked(saveArchiveEntriesFromAssetsMap).mockResolvedValue({
       saved_objects: [],
     });
-    alertingRulesClient = {
-      create: jest.fn(),
-      bulkDeleteRules: jest.fn(),
-    };
   });
 
   afterEach(() => {
@@ -114,7 +109,6 @@ describe('_stateMachineInstallPackage', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext: {
         archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -177,7 +171,6 @@ describe('_stateMachineInstallPackage', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext: {
           archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -214,7 +207,6 @@ describe('_stateMachineInstallPackage', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext: {
           archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -264,7 +256,6 @@ describe('_stateMachineInstallPackage', () => {
         // @ts-ignore
         savedObjectsImporter: jest.fn(),
         esClient,
-        alertingRulesClient,
         logger: loggerMock.create(),
         packageInstallContext: {
           archiveIterator: createArchiveIteratorFromMap(new Map()),
@@ -332,7 +323,6 @@ describe('_stateMachineInstallPackage', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext: {
         packageInfo: {

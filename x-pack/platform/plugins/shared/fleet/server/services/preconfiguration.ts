@@ -99,7 +99,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     savedObjectsClient: defaultSoClient,
     esClient,
     packagesToInstall,
-    alertingRulesClient: null,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     skipIfInstalled: true, // force flag alone would reinstall packages that are already installed
     spaceId,
@@ -129,7 +128,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // will occur between upgrading the package and reinstalling the previously failed package.
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(defaultSoClient, esClient, null);
+  await ensurePackagesCompletedInstall(defaultSoClient, esClient);
 
   // Create policies specified in Kibana config
   logger.debug(`Creating preconfigured policies`);
@@ -189,7 +188,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           const updatedPolicy = await agentPolicyService.update(
             namespacedSoClient,
             esClient,
-            null,
             String(preconfiguredAgentPolicy.id),
             newFields,
             {
@@ -307,7 +305,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         await agentPolicyService.update(
           namespacedSoClient,
           esClient,
-          null,
           policy!.id,
           { is_managed: true },
           {
@@ -399,7 +396,6 @@ async function addPreconfiguredPolicyPackages(
       await addPackageToAgentPolicy(
         namespacedSoClient,
         esClient,
-        null,
         agentPolicy,
         packageInfo,
         name,
@@ -424,7 +420,7 @@ async function addPreconfiguredPolicyPackages(
         {}
       );
 
-      await packagePolicyService.create(namespacedSoClient, esClient, null, newPackagePolicy, {
+      await packagePolicyService.create(namespacedSoClient, esClient, newPackagePolicy, {
         id,
         bumpRevision: bumpAgentPolicyRevison,
         skipEnsureInstalled: true,

@@ -54,11 +54,6 @@ jest.mock('../../app_context', () => {
   };
 });
 
-const alertingRulesClient = {
-  create: jest.fn(),
-  bulkDeleteRules: jest.fn(),
-} as any;
-
 describe('installAssetsForInputPackagePolicy', () => {
   beforeEach(() => {
     jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
@@ -177,7 +172,6 @@ describe('removeAssetsForInputPackagePolicy', () => {
       datasetName: 'test',
       savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
-      alertingRulesClient,
       logger: mockedLogger,
     });
     expect(cleanupAssetsMock).not.toBeCalled();
@@ -193,7 +187,6 @@ describe('removeAssetsForInputPackagePolicy', () => {
       datasetName: 'test',
       savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
-      alertingRulesClient,
       logger: mockedLogger,
     });
     expect(cleanupAssetsMock).not.toBeCalled();
@@ -240,7 +233,6 @@ describe('removeAssetsForInputPackagePolicy', () => {
       datasetName: 'test',
       savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
-      alertingRulesClient,
       logger: mockedLogger,
     });
     expect(cleanupAssetsMock).toBeCalledWith(
@@ -299,7 +291,6 @@ describe('removeAssetsForInputPackagePolicy', () => {
       datasetName: 'test',
       savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
-      alertingRulesClient,
       logger: mockedLogger,
     });
     expect(cleanupAssetsMock).toBeCalledWith(
@@ -335,7 +326,6 @@ describe('removeAssetsForInputPackagePolicy', () => {
       datasetName: 'test',
       savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
-      alertingRulesClient,
       logger: mockedLogger,
     });
     expect(cleanupAssetsMock).not.toBeCalled();
@@ -359,7 +349,6 @@ describe('removeAssetsForInputPackagePolicy', () => {
       } as any,
       datasetName: 'test',
       savedObjectsClient: savedObjectsClientMock.create(),
-      alertingRulesClient,
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });

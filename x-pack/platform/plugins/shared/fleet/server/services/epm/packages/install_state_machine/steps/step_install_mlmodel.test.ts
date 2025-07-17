@@ -59,7 +59,6 @@ const packageInstallContext = {
 };
 let soClient: jest.Mocked<SavedObjectsClientContract>;
 let esClient: jest.Mocked<ElasticsearchClient>;
-let alertingRulesClient: any;
 
 describe('stepInstallMlModel', () => {
   const getMockInstalledPackageSo = (
@@ -87,10 +86,6 @@ describe('stepInstallMlModel', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
-    alertingRulesClient = {
-      create: jest.fn(),
-      bulkDeleteRules: jest.fn(),
-    };
   });
   afterEach(async () => {
     jest.mocked(mockedInstallMlModel).mockReset();
@@ -127,7 +122,6 @@ describe('stepInstallMlModel', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -157,7 +151,6 @@ describe('stepInstallMlModel', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -234,7 +227,6 @@ describe('cleanUpMlModelStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -293,7 +285,6 @@ describe('cleanUpMlModelStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -322,7 +313,6 @@ describe('cleanUpMlModelStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -349,7 +339,6 @@ describe('cleanUpMlModelStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -377,7 +366,6 @@ describe('cleanUpMlModelStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {

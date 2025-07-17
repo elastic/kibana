@@ -43,8 +43,6 @@ const createMockTemplate = ({ name, composedOf = [] }: { name: string; composedO
 describe('stepUpdateCurrentWriteIndices', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
   let esClient: jest.Mocked<ElasticsearchClient>;
-  let alertingRulesClient: any;
-
   const getMockInstalledPackageSo = (
     installedEs: EsAssetReference[] = []
   ): SavedObject<Installation> => {
@@ -70,10 +68,6 @@ describe('stepUpdateCurrentWriteIndices', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
-    alertingRulesClient = {
-      create: jest.fn(),
-      bulkDeleteRules: jest.fn(),
-    };
   });
   afterEach(async () => {
     jest.mocked(mockedUpdateCurrentWriteIndices).mockReset();
@@ -126,7 +120,6 @@ describe('stepUpdateCurrentWriteIndices', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -151,7 +144,6 @@ describe('stepUpdateCurrentWriteIndices', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,

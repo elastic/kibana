@@ -21,7 +21,6 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 
 import { FleetUnauthorizedError } from '../../errors';
 import type { InstallablePackage } from '../../types';
@@ -238,22 +237,13 @@ describe('PackageService', () => {
   let mockPackageService: PackageService;
   let mockEsClient: ElasticsearchClient;
   let mockSoClient: SavedObjectsClientContract;
-  let mockAlertingStart: AlertingServerStart;
   let mockLogger: MockedLogger;
 
   beforeEach(() => {
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockSoClient = savedObjectsClientMock.create();
     mockLogger = loggingSystemMock.createLogger();
-    mockAlertingStart = {
-      getRulesClientWithRequest: jest.fn(),
-    } as any;
-    mockPackageService = new PackageServiceImpl(
-      mockEsClient,
-      mockSoClient,
-      mockAlertingStart,
-      mockLogger
-    );
+    mockPackageService = new PackageServiceImpl(mockEsClient, mockSoClient, mockLogger);
   });
 
   afterEach(() => {

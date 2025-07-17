@@ -190,7 +190,6 @@ describe('schema validation', () => {
     const assets: AssetsGroupedByServiceByType = {
       kibana: {
         dashboard: [],
-        alert: [],
         visualization: [],
         search: [],
         lens: [],

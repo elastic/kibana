@@ -47,9 +47,6 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
-  const alertingRulesClient = await appContextService
-    .getAlerting()
-    .getRulesClientWithRequest(request);
   const logger = appContextService.getLogger();
   const spaceId = fleetContext.spaceId;
   const { pkgName, pkgVersion } = request.params;
@@ -84,7 +81,6 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
   for (const spaceToInstallId of spaceIds) {
     await installKibanaAssetsAndReferences({
       savedObjectsClient: appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId),
-      alertingRulesClient,
       logger,
       pkgName,
       pkgTitle: packageInfo.title,
@@ -109,9 +105,6 @@ export const deletePackageKibanaAssetsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
-  const alertingRulesClient = await appContextService
-    .getAlerting()
-    .getRulesClientWithRequest(request);
   const logger = appContextService.getLogger();
   const spaceId = fleetContext.spaceId;
   const { pkgName, pkgVersion } = request.params;
@@ -127,7 +120,6 @@ export const deletePackageKibanaAssetsHandler: FleetRequestHandler<
 
   await deleteKibanaAssetsAndReferencesForSpace({
     savedObjectsClient,
-    alertingRulesClient,
     logger,
     pkgName,
     spaceId,

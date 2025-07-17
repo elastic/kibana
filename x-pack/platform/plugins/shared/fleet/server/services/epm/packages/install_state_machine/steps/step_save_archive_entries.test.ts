@@ -41,7 +41,6 @@ const mockedRemoveArchiveEntries = removeArchiveEntries as jest.MockedFunction<
 >;
 let soClient: jest.Mocked<SavedObjectsClientContract>;
 let esClient: jest.Mocked<ElasticsearchClient>;
-let alertingRulesClient: any;
 
 const assetsMap = new Map([
   [
@@ -112,10 +111,6 @@ describe('stepSaveArchiveEntries', () => {
     soClient = savedObjectsClientMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
-    alertingRulesClient = {
-      create: jest.fn(),
-      bulkDeleteRules: jest.fn(),
-    };
   });
   afterEach(async () => {
     jest.mocked(mockedSaveArchiveEntriesFromAssetsMap).mockReset();
@@ -154,7 +149,6 @@ describe('stepSaveArchiveEntries', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -198,7 +192,6 @@ describe('stepSaveArchiveEntries', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -248,7 +241,6 @@ describe('stepSaveArchiveEntries', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg,
@@ -322,7 +314,6 @@ describe('cleanupArchiveEntriesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -351,7 +342,6 @@ describe('cleanupArchiveEntriesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -378,7 +368,6 @@ describe('cleanupArchiveEntriesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -403,7 +392,6 @@ describe('cleanupArchiveEntriesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
@@ -429,7 +417,6 @@ describe('cleanupArchiveEntriesStep', () => {
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,
-      alertingRulesClient,
       logger: loggerMock.create(),
       packageInstallContext,
       installedPkg: {
