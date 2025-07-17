@@ -14,7 +14,7 @@ import { licenseService } from '../license';
 import { outputService } from '../output';
 
 import {
-  canDeployAsAgentlessOrThrow,
+  canDeployCustomPackageAsAgentlessOrThrow,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './utils';
@@ -200,7 +200,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
-      canDeployAsAgentlessOrThrow(
+      canDeployCustomPackageAsAgentlessOrThrow(
         getTestPolicy(),
         createPackageInfoMock({ installSource: 'custom' })
       );
@@ -215,7 +215,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
-      canDeployAsAgentlessOrThrow(getTestPolicy(), createPackageInfoMock());
+      canDeployCustomPackageAsAgentlessOrThrow(getTestPolicy(), createPackageInfoMock());
     } catch (e) {
       error = e;
     }
@@ -227,7 +227,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig());
     let error = null;
     try {
-      canDeployAsAgentlessOrThrow(
+      canDeployCustomPackageAsAgentlessOrThrow(
         getTestPolicy(false),
         createPackageInfoMock({ installSource: 'upload' })
       );
@@ -242,7 +242,7 @@ describe('canDeployAsAgentlessOrThrow', () => {
     jest.spyOn(appContextService, 'getConfig').mockReturnValue(getMockConfig(true));
     let error = null;
     try {
-      canDeployAsAgentlessOrThrow(
+      canDeployCustomPackageAsAgentlessOrThrow(
         getTestPolicy(),
         createPackageInfoMock({ installSource: 'custom' })
       );
