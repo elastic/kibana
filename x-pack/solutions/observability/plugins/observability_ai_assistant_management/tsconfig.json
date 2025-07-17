@@ -30,6 +30,7 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/ml-plugin",
     "@kbn/test-jest-helpers",
+    "@kbn/inference-common"
   ],
   "exclude": [
     "target/**/*"
