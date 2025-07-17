@@ -20,8 +20,7 @@ export async function registerDocumentationFunction({
 }: FunctionRegistrationParameters) {
   const esClient = (await resources.context.core).elasticsearch.client;
   const inferenceId =
-    (await getInferenceIdFromWriteIndex(esClient)) ??
-    defaultInferenceEndpoints.ELSER;
+    (await getInferenceIdFromWriteIndex(esClient)) ?? defaultInferenceEndpoints.ELSER;
   const isProductDocAvailable =
     (await llmTasks.retrieveDocumentationAvailable({ inferenceId })) ?? false;
 
