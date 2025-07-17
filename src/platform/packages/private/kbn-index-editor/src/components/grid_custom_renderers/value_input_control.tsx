@@ -14,7 +14,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { isNil } from 'lodash';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PendingSave } from '../index_update_service';
+import type { PendingSave } from '../../index_update_service';
 import { ValueInput } from './value_input';
 
 export type OnCellValueChange = (docId: string, update: any) => void;

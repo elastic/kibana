@@ -7,10 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useState, KeyboardEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAddColumnName } from '../hooks/use_add_column_name';
+import { useAddColumnName } from '../../hooks/use_add_column_name';
+import { COLUMN_PLACEHOLDER_PREFIX } from '../../constants';
+
+export const getColumnInputRenderer = (
+  columnName: string
+): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
+  const initialColumnName = !columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX)
+    ? columnName
+    : undefined;
+
+  return ({ column }) => ({
+    ...column,
+    display: <AddColumnHeader initialColumnName={initialColumnName} />,
+    actions: false,
+    displayHeaderCellProps: {
+      className: 'custom-column--placeholder',
+    },
+  });
+};
 
 interface AddColumnHeaderProps {
   initialColumnName?: string;
