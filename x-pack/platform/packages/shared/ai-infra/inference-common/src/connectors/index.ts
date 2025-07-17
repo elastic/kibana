@@ -19,5 +19,5 @@ export {
   type InferenceConnector,
   type InferenceConnectorCapabilities,
 } from './connectors';
-export { getModelDefinition } from './connector_capabilities';
-export { getContextWindowSize, contextWindowFromModelName } from './context_window_size';
+export { getModelDefinition } from './known_models';
+export { getContextWindowSize, contextWindowFromModelName } from './connector_capabilities';

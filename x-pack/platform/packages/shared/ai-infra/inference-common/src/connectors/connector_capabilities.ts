@@ -5,126 +5,34 @@
  * 2.0.
  */
 
-interface ModelDefinition {
-  model: string;
-  provider: string;
-  contextWindow: number;
-}
+import { InferenceConnector } from './connectors';
+import { getModelDefinition } from './known_models';
+import { getConnectorDefaultModel } from './connector_config';
+import { elasticModelDictionary } from '../const';
 
 /**
- * Retrieve a model definition from the given full model name, if available.
+ * Retrieve the context window size for the default model of the given connector, if available.
  */
-export const getModelDefinition = (fullModelName: string): ModelDefinition | undefined => {
-  return knownModels.find(
-    (model) =>
-      fullModelName.includes(model.model) ||
-      fullModelName.includes(model.model.replaceAll('.', '-'))
-  );
+export const getContextWindowSize = (connector: InferenceConnector): number | undefined => {
+  if (!connector.config) {
+    return undefined;
+  }
+  if (connector.config?.contextWindowSize) {
+    return connector.config.contextWindowSize;
+  }
+
+  const defaultModel = getConnectorDefaultModel(connector);
+  if (defaultModel) {
+    return contextWindowFromModelName(defaultModel);
+  }
+
+  return undefined;
 };
 
-/**
- * List of manually maintained model definitions to use as fallback for feature detection.
- */
-const knownModels: ModelDefinition[] = [
-  {
-    model: 'gpt-4o-mini',
-    provider: 'openai',
-    contextWindow: 128000,
-  },
-  {
-    model: 'gpt-4o',
-    provider: 'openai',
-    contextWindow: 128000,
-  },
-  {
-    model: 'gpt-4.1-mini',
-    provider: 'openai',
-    contextWindow: 1000000,
-  },
-  {
-    model: 'gpt-4.1-nano',
-    provider: 'openai',
-    contextWindow: 1000000,
-  },
-  {
-    model: 'gpt-4.1',
-    provider: 'openai',
-    contextWindow: 1000000,
-  },
-  {
-    model: 'gemini-1.5-pro',
-    provider: 'google',
-    contextWindow: 1000000,
-  },
-  {
-    model: 'gemini-1.5-flash',
-    provider: 'google',
-    contextWindow: 1000000,
-  },
-  {
-    model: 'gemini-2.0-flash',
-    provider: 'google',
-    contextWindow: 1000000,
-  },
-  {
-    model: 'gemini-2.0-pro',
-    provider: 'google',
-    contextWindow: 2000000,
-  },
-  {
-    model: 'gemini-2.0-flash-lite',
-    provider: 'google',
-    contextWindow: 1000000,
-  },
-  {
-    model: 'gemini-2.5-pro',
-    provider: 'google',
-    contextWindow: 1000000,
-  },
-  {
-    model: 'gemini-2.5-flash',
-    provider: 'google',
-    contextWindow: 128000, // or 1000000 in MAX mode...
-  },
-  // Claude models
-  {
-    model: 'claude-3-sonnet',
-    provider: 'anthropic',
-    contextWindow: 200000,
-  },
-  {
-    model: 'claude-3-haiku',
-    provider: 'anthropic',
-    contextWindow: 200000,
-  },
-  {
-    model: 'claude-3-opus',
-    provider: 'anthropic',
-    contextWindow: 200000,
-  },
-  {
-    model: 'claude-3.5-sonnet',
-    provider: 'anthropic',
-    contextWindow: 200000,
-  },
-  {
-    model: 'claude-3.5-haiku',
-    provider: 'anthropic',
-    contextWindow: 200000,
-  },
-  {
-    model: 'claude-3.7-sonnet',
-    provider: 'anthropic',
-    contextWindow: 200000,
-  },
-  {
-    model: 'claude-4-sonnet',
-    provider: 'anthropic',
-    contextWindow: 200000,
-  },
-  {
-    model: 'claude-4-opus',
-    provider: 'anthropic',
-    contextWindow: 200000,
-  },
-];
+export const contextWindowFromModelName = (modelName: string): number | undefined => {
+  if (elasticModelDictionary[modelName]) {
+    modelName = elasticModelDictionary[modelName].model;
+  }
+  const modelDefinition = getModelDefinition(modelName);
+  return modelDefinition?.contextWindow;
+};

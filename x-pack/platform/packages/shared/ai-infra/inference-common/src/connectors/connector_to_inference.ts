@@ -8,7 +8,7 @@
 import { createInferenceRequestError } from '../errors';
 import type { InferenceConnector, RawConnector } from './connectors';
 import { isSupportedConnector } from './is_supported_connector';
-import { getContextWindowSize } from './context_window_size';
+import { getContextWindowSize } from './connector_capabilities';
 
 /**
  * Converts an action connector to the internal inference connector format.

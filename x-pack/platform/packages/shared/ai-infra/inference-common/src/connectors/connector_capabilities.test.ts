@@ -5,33 +5,70 @@
  * 2.0.
  */
 
-import { getModelDefinition } from './connector_capabilities';
+import { type InferenceConnector, InferenceConnectorType } from './connectors';
+import { elasticModelIds } from '../inference_endpoints';
+import { elasticModelDictionary } from '../const';
+import { getContextWindowSize } from './connector_capabilities';
+import { getModelDefinition } from './known_models';
 
-describe('getModelDefinition', () => {
-  it('returns the expected models for common openAI full model names', () => {
-    expect(getModelDefinition('gpt-4o')!.model).toBe('gpt-4o');
-    expect(getModelDefinition('gpt-4o-mini')!.model).toBe('gpt-4o-mini');
-    expect(getModelDefinition('gpt-4.1')!.model).toBe('gpt-4.1');
+const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector => {
+  return {
+    type: InferenceConnectorType.OpenAI,
+    name: 'connector',
+    connectorId: 'connectorId',
+    config: {},
+    capabilities: {},
+    ...parts,
+  };
+};
+
+describe('getContextWindowSize', () => {
+  it('returns the value from the connector config if set', () => {
+    const connector = createConnector({
+      config: {
+        contextWindowSize: 100,
+      },
+    });
+    expect(getContextWindowSize(connector)).toBe(100);
   });
 
-  it('returns the expected models for common Claude full model names', () => {
-    expect(getModelDefinition('anthropic.claude-3-opus-20240229-v1:0')!.model).toBe(
-      'claude-3-opus'
-    );
-    expect(getModelDefinition('anthropic.claude-3-5-sonnet-20241022-v2:0')!.model).toBe(
-      'claude-3.5-sonnet'
-    );
-    expect(getModelDefinition('us.anthropic.claude-3-7-sonnet-20250219-v1:0')!.model).toBe(
-      'claude-3.7-sonnet'
-    );
-    expect(getModelDefinition('us.anthropic.claude-4-sonnet-20250219-v1:0')!.model).toBe(
-      'claude-4-sonnet'
-    );
+  it('returns the value based on the config default model if set and model is known', () => {
+    const connector = createConnector({
+      config: {
+        defaultModel: 'claude-3.5-sonnet',
+      },
+    });
+
+    const expectedValue = getModelDefinition('claude-3.5-sonnet')!.contextWindow;
+
+    expect(getContextWindowSize(connector)).toBe(expectedValue);
   });
 
-  it('returns the expected models for common google full model names', () => {
-    expect(getModelDefinition('gemini-1.5-pro-preview-0409')!.model).toBe('gemini-1.5-pro');
-    expect(getModelDefinition('gemini-2.0-flash-001')!.model).toBe('gemini-2.0-flash');
-    expect(getModelDefinition('gemini-2.5-pro-001')!.model).toBe('gemini-2.5-pro');
+  it('returns undefined if default model set but unknown', () => {
+    const connector = createConnector({
+      config: {
+        defaultModel: 'not-a-real-model',
+      },
+    });
+
+    expect(getContextWindowSize(connector)).toBe(undefined);
+  });
+
+  it('returns the right value for Elastic LLMs', () => {
+    const connector = createConnector({
+      type: InferenceConnectorType.Inference,
+      config: {
+        providerConfig: {
+          model_id: elasticModelIds.RainbowSprinkles,
+        },
+        defaultModel: 'not-a-real-model',
+      },
+    });
+
+    const expectedValue = getModelDefinition(
+      elasticModelDictionary[elasticModelIds.RainbowSprinkles].model
+    )!.contextWindow;
+
+    expect(getContextWindowSize(connector)).toBe(expectedValue);
   });
 });
