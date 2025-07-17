@@ -31,7 +31,7 @@ export const createNavigationTree = ({
           ...(overviewAvailable
             ? [
                 {
-                  title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+                  title: i18n.translate('app_not_found_in_i18nrc.nav.overview', {
                     defaultMessage: 'Overview',
                   }),
                   link: 'observability-overview' as const,
@@ -39,13 +39,13 @@ export const createNavigationTree = ({
               ]
             : []),
           {
-            title: i18n.translate('xpack.serverlessObservability.nav.discover', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.discover', {
               defaultMessage: 'Discover',
             }),
             link: 'discover',
           },
           {
-            title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.dashboards', {
               defaultMessage: 'Dashboards',
             }),
             link: 'dashboards',
@@ -73,14 +73,14 @@ export const createNavigationTree = ({
               ]
             : []),
           {
-            title: i18n.translate('xpack.serverlessObservability.nav.slo', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.slo', {
               defaultMessage: 'SLOs',
             }),
             link: 'slo',
           },
           {
             link: 'observabilityAIAssistant',
-            title: i18n.translate('xpack.serverlessObservability.nav.aiAssistant', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.aiAssistant', {
               defaultMessage: 'AI Assistant',
             }),
           },
@@ -91,13 +91,10 @@ export const createNavigationTree = ({
                   withBadge: true,
                   badgeOptions: {
                     icon: 'beaker',
-                    tooltip: i18n.translate(
-                      'xpack.serverlessObservability.nav.streamsBadgeTooltip',
-                      {
-                        defaultMessage:
-                          'This functionality is experimental and not supported. It may change or be removed at any time.',
-                      }
-                    ),
+                    tooltip: i18n.translate('app_not_found_in_i18nrc.nav.streamsBadgeTooltip', {
+                      defaultMessage:
+                        'This functionality is experimental and not supported. It may change or be removed at any time.',
+                    }),
                   },
                 },
               ]
@@ -105,7 +102,7 @@ export const createNavigationTree = ({
           {
             id: 'apm',
             link: 'apm:services',
-            title: i18n.translate('xpack.serverlessObservability.nav.applications', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
@@ -114,7 +111,7 @@ export const createNavigationTree = ({
                 children: [
                   {
                     link: 'apm:services',
-                    title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
+                    title: i18n.translate('app_not_found_in_i18nrc.nav.apm.services', {
                       defaultMessage: 'Service Inventory',
                     }),
                   },
@@ -125,17 +122,14 @@ export const createNavigationTree = ({
               },
               {
                 id: 'synthetics',
-                title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
+                title: i18n.translate('app_not_found_in_i18nrc.nav.synthetics', {
                   defaultMessage: 'Synthetics',
                 }),
                 children: [
                   {
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.synthetics.overviewItem',
-                      {
-                        defaultMessage: 'Overview',
-                      }
-                    ),
+                    title: i18n.translate('app_not_found_in_i18nrc.nav.synthetics.overviewItem', {
+                      defaultMessage: 'Overview',
+                    }),
                     id: 'synthetics-overview',
                     link: 'synthetics:overview',
                     breadcrumbStatus: 'hidden',
@@ -143,7 +137,7 @@ export const createNavigationTree = ({
                   {
                     link: 'synthetics:certificates',
                     title: i18n.translate(
-                      'xpack.serverlessObservability.nav.synthetics.certificatesItem',
+                      'app_not_found_in_i18nrc.nav.synthetics.certificatesItem',
                       {
                         defaultMessage: 'TLS certificates',
                       }
@@ -158,7 +152,7 @@ export const createNavigationTree = ({
           {
             id: 'metrics',
             link: 'metrics:inventory',
-            title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.infrastructure', {
               defaultMessage: 'Infrastructure',
             }),
             renderAs: 'panelOpener',
@@ -167,15 +161,50 @@ export const createNavigationTree = ({
                 children: [
                   {
                     link: 'metrics:inventory',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.infrastructureInventory',
-                      {
-                        defaultMessage: 'Infrastructure Inventory',
-                      }
-                    ),
+                    title: i18n.translate('app_not_found_in_i18nrc.nav.infrastructureInventory', {
+                      defaultMessage: 'Infrastructure Inventory',
+                    }),
                   },
                   { link: 'metrics:hosts' },
                   { link: 'metrics:settings', sideNavStatus: 'hidden' },
+                ],
+              },
+              {
+                id: 'profiling',
+                title: i18n.translate('app_not_found_in_i18nrc.nav.profiling', {
+                  defaultMessage: 'Profiling',
+                }),
+                children: [
+                  {
+                    title: i18n.translate(
+                      'app_not_found_in_i18nrc.navigation.stacktracesLinkLabel',
+                      {
+                        defaultMessage: 'Stacktraces',
+                      }
+                    ),
+                    id: 'profiling-stacktraces',
+                    link: 'profiling:stacktraces',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'profiling:flamegraphs',
+                    title: i18n.translate(
+                      'app_not_found_in_i18nrc.navigation.flameGraphsLinkLabel',
+                      {
+                        defaultMessage: 'Flamegraphs',
+                      }
+                    ),
+                    id: 'profiling-flamegraphs',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'profiling:functions',
+                    title: i18n.translate('app_not_found_in_i18nrc.navigation.functionsLinkLabel', {
+                      defaultMessage: 'Functions',
+                    }),
+                    id: 'profiling-functions',
+                    breadcrumbStatus: 'hidden',
+                  },
                 ],
               },
             ],
@@ -183,7 +212,7 @@ export const createNavigationTree = ({
           {
             id: 'machine_learning-landing',
             renderAs: 'panelOpener',
-            title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
             children: [
@@ -199,7 +228,7 @@ export const createNavigationTree = ({
               },
               {
                 id: 'category-anomaly_detection',
-                title: i18n.translate('xpack.serverlessObservability.nav.ml.anomaly_detection', {
+                title: i18n.translate('app_not_found_in_i18nrc.nav.ml.anomaly_detection', {
                   defaultMessage: 'Anomaly detection',
                 }),
                 breadcrumbStatus: 'hidden',
@@ -214,7 +243,7 @@ export const createNavigationTree = ({
               },
               {
                 id: 'category-data_frame analytics',
-                title: i18n.translate('xpack.serverlessObservability.nav.ml.data_frame_analytics', {
+                title: i18n.translate('app_not_found_in_i18nrc.nav.ml.data_frame_analytics', {
                   defaultMessage: 'Data frame analytics',
                 }),
                 breadcrumbStatus: 'hidden',
@@ -229,7 +258,7 @@ export const createNavigationTree = ({
               },
               {
                 id: 'category-aiops_labs',
-                title: i18n.translate('xpack.serverlessObservability.nav.ml.aiops_labs', {
+                title: i18n.translate('app_not_found_in_i18nrc.nav.ml.aiops_labs', {
                   defaultMessage: 'AIOps labs',
                 }),
                 breadcrumbStatus: 'hidden',
@@ -237,7 +266,7 @@ export const createNavigationTree = ({
                   {
                     link: 'ml:logRateAnalysis',
                     title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.aiops_labs.log_rate_analysis',
+                      'app_not_found_in_i18nrc.nav.ml.aiops_labs.log_rate_analysis',
                       {
                         defaultMessage: 'Log rate analysis',
                       }
@@ -246,7 +275,7 @@ export const createNavigationTree = ({
                   {
                     link: 'ml:logPatternAnalysis',
                     title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.aiops_labs.log_pattern_analysis',
+                      'app_not_found_in_i18nrc.nav.ml.aiops_labs.log_pattern_analysis',
                       {
                         defaultMessage: 'Log pattern analysis',
                       }
@@ -255,7 +284,7 @@ export const createNavigationTree = ({
                   {
                     link: 'ml:changePointDetections',
                     title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.aiops_labs.change_point_detection',
+                      'app_not_found_in_i18nrc.nav.ml.aiops_labs.change_point_detection',
                       {
                         defaultMessage: 'Change point detection',
                       }
@@ -267,28 +296,22 @@ export const createNavigationTree = ({
           },
           {
             id: 'otherTools',
-            title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.otherTools', {
               defaultMessage: 'Other tools',
             }),
             renderAs: 'panelOpener',
             children: [
               {
                 link: 'logs:anomalies',
-                title: i18n.translate(
-                  'xpack.serverlessObservability.nav.otherTools.logsAnomalies',
-                  {
-                    defaultMessage: 'Logs anomalies',
-                  }
-                ),
+                title: i18n.translate('app_not_found_in_i18nrc.nav.otherTools.logsAnomalies', {
+                  defaultMessage: 'Logs anomalies',
+                }),
               },
               {
                 link: 'logs:log-categories',
-                title: i18n.translate(
-                  'xpack.serverlessObservability.nav.otherTools.logsCategories',
-                  {
-                    defaultMessage: 'Logs categories',
-                  }
-                ),
+                title: i18n.translate('app_not_found_in_i18nrc.nav.otherTools.logsCategories', {
+                  defaultMessage: 'Logs categories',
+                }),
               },
             ],
           },
@@ -301,7 +324,7 @@ export const createNavigationTree = ({
         id: 'observability_project_nav_footer',
         children: [
           {
-            title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.getStarted', {
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding',
@@ -309,7 +332,7 @@ export const createNavigationTree = ({
           },
           {
             id: 'devTools',
-            title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.devTools', {
               defaultMessage: 'Developer tools',
             }),
             link: 'dev_tools',
@@ -317,7 +340,7 @@ export const createNavigationTree = ({
           },
           {
             id: 'project_settings_project_nav',
-            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings', {
+            title: i18n.translate('app_not_found_in_i18nrc.nav.projectSettings', {
               defaultMessage: 'Project settings',
             }),
             icon: 'gear',
@@ -327,14 +350,14 @@ export const createNavigationTree = ({
             children: [
               {
                 id: 'management',
-                title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
+                title: i18n.translate('app_not_found_in_i18nrc.nav.mngt', {
                   defaultMessage: 'Management',
                 }),
                 spaceBefore: null,
                 renderAs: 'panelOpener',
                 children: [
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.data', {
+                    title: i18n.translate('app_not_found_in_i18nrc.nav.mngt.data', {
                       defaultMessage: 'Data',
                     }),
                     breadcrumbStatus: 'hidden',
@@ -351,7 +374,7 @@ export const createNavigationTree = ({
                     ],
                   },
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.access', {
+                    title: i18n.translate('app_not_found_in_i18nrc.nav.mngt.access', {
                       defaultMessage: 'Access',
                     }),
                     breadcrumbStatus: 'hidden',
@@ -361,19 +384,16 @@ export const createNavigationTree = ({
                       {
                         cloudLink: 'userAndRoles',
                         title: i18n.translate(
-                          'xpack.serverlessObservability.navLinks.projectSettings.mngt.usersAndRoles',
+                          'app_not_found_in_i18nrc.navLinks.projectSettings.mngt.usersAndRoles',
                           { defaultMessage: 'Manage organization members' }
                         ),
                       },
                     ],
                   },
                   {
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.mngt.alertsAndInsights',
-                      {
-                        defaultMessage: 'Alerts and insights',
-                      }
-                    ),
+                    title: i18n.translate('app_not_found_in_i18nrc.nav.mngt.alertsAndInsights', {
+                      defaultMessage: 'Alerts and insights',
+                    }),
                     breadcrumbStatus: 'hidden',
                     children: [
                       { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
@@ -391,7 +411,7 @@ export const createNavigationTree = ({
                     ],
                   },
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
+                    title: i18n.translate('app_not_found_in_i18nrc.nav.mngt.content', {
                       defaultMessage: 'Content',
                     }),
                     breadcrumbStatus: 'hidden',
@@ -404,7 +424,7 @@ export const createNavigationTree = ({
                     ],
                   },
                   {
-                    title: i18n.translate('xpack.serverlessObservability.nav.mngt.other', {
+                    title: i18n.translate('app_not_found_in_i18nrc.nav.mngt.other', {
                       defaultMessage: 'Other',
                     }),
                     breadcrumbStatus: 'hidden',
