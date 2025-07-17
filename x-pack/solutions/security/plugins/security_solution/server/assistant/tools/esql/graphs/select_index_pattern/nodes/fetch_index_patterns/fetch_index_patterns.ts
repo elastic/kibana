@@ -19,7 +19,7 @@ export const fetchIndexPatterns = ({ esClient }: { esClient: ElasticsearchClient
           expand_wildcards: 'open',
         },
         {
-          requestTimeout: 20000, // 30 seconds
+          requestTimeout: 20000, // 20 seconds
         }
       );
 
