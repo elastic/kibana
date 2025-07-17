@@ -23,12 +23,10 @@ import Papa from 'papaparse';
 import { Readable } from 'stream';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { defaultMonitoringUsersIndex } from '../../../../common/constants';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
-import {
-  defaultMonitoringUsersIndex,
-  getPrivilegedMonitorUsersIndex,
-} from '../../../../common/entity_analytics/privilege_monitoring/constants';
+import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/utils';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -77,7 +75,6 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
-
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -125,11 +122,11 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
-    // create default index source for privilege monitoring
+    // create default index source for privilege monitoring for each namespace
     const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
       type: 'index',
       managed: true,
-      indexPattern: defaultMonitoringUsersIndex,
+      indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
       name: 'default-monitoring-index',
     });
     this.log(

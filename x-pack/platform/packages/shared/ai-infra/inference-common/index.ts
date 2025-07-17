@@ -70,6 +70,7 @@ export {
   type DeanonymizationOutput,
   type DeanonymizedMessage,
   type AnonymizationSettings,
+  type AnonymizationRegexWorkerTaskPayload,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
@@ -157,4 +158,4 @@ export {
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
 
-export { aiAssistantAnonymizationSettings } from './src/ui_settings/settings_keys';
+export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';
