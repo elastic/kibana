@@ -60,7 +60,7 @@ const contextWindowField: ConfigFieldSchema = {
   isRequired: false,
   helpText: (
     <FormattedMessage
-      defaultMessage="Can be set to manually define the context length of the default model used by the connector"
+      defaultMessage="Can be set to manually define the context length of the default model used by the connector. Useful for open source models or models more recent than this version of Kibana"
       id="xpack.stackConnectors.components.genAi.contextWindowLengthTextHelpText"
     />
   ),

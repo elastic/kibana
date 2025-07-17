@@ -21,7 +21,7 @@ export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.ge
 export const CONTEXT_WINDOW_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.contextWindowLengthTextFieldLabel',
   {
-    defaultMessage: 'Context window',
+    defaultMessage: 'Context window length',
   }
 );
 
