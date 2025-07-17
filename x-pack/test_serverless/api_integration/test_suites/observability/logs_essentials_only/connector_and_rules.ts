@@ -74,5 +74,55 @@ export default function ({ getService }: FtrProviderContext) {
           message: 'Not Found',
         });
     });
+
+    it('can create a custom threshold rule', async () => {
+      const rule = {
+        tags: [],
+        params: {
+          criteria: [
+            {
+              comparator: '>',
+              metrics: [
+                {
+                  name: 'A',
+                  aggType: 'count',
+                },
+              ],
+              threshold: [100],
+              timeSize: 1,
+              timeUnit: 'm',
+            },
+          ],
+          alertOnNoData: false,
+          alertOnGroupDisappear: false,
+          searchConfiguration: {
+            query: {
+              query: '',
+              language: 'kuery',
+            },
+            index: 'befe6dd7-ec0b-4cb7-aa59-e4d5e6f39ae9',
+          },
+        },
+        schedule: {
+          interval: '1m',
+        },
+        consumer: 'logs',
+        name: 'Custom threshold rule',
+        rule_type_id: 'observability.rules.custom_threshold',
+        actions: [],
+        alert_delay: {
+          active: 1,
+        },
+      };
+
+      const resp = await supertestAdminWithCookieCredentials
+        .post('/api/alerting/rule')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send(rule);
+
+      expect(resp.status).to.equal(200);
+      expect(resp.body).to.have.property('id');
+      expect(resp.body.name).to.equal(rule.name);
+    });
   });
 }

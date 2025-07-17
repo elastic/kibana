@@ -37,6 +37,7 @@ export interface RuleStatusPanelProps {
   healthColor: string;
   statusMessage?: string | null;
   refreshToken?: RefreshToken;
+  autoRecoverAlerts?: boolean;
 }
 
 export type RuleStatusPanelWithApiProps = Pick<
@@ -56,6 +57,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
   healthColor,
   statusMessage,
   refreshToken,
+  autoRecoverAlerts,
 }) => {
   const [lastNumberOfExecutions, setLastNumberOfExecutions] = useState<number | null>(null);
   const isInitialized = useRef(false);
@@ -143,6 +145,7 @@ export const RuleStatusPanel: React.FC<RuleStatusPanelWithApiProps> = ({
               direction="row"
               isEditable={isEditable}
               hideSnoozeOption
+              autoRecoverAlerts={autoRecoverAlerts}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
