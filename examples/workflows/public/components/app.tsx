@@ -57,11 +57,11 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
     } catch (error) {
       setIsValidWorkflow(false);
     }
-    setWorkflow(workflow);
-  }
+    setWorkflowYaml(workflow);
+  };
 
   // Use React hooks to manage state.
-  const [stringWorkflow, setWorkflow] = useState<string>(
+  const [workflowYaml, setWorkflowYaml] = useState<string>(
     `
 workflow:
   name: New workflow
@@ -120,7 +120,7 @@ workflow:
     http
       .post('/api/workflows/test', {
         body: JSON.stringify({
-          workflowYaml: stringWorkflow,
+          workflowYaml: workflowYaml,
           inputs: yaml.load(workflowInputs),
         }),
       })
@@ -188,7 +188,7 @@ workflow:
                           languageId="yaml"
                           value={workflowInputs}
                           height={200}
-                          editorDidMount={() => { }}
+                          editorDidMount={() => {}}
                           onChange={setWorkflowInputs}
                           suggestionProvider={undefined}
                           dataTestSubj={'workflow-inputs-json-editor'}
@@ -196,7 +196,7 @@ workflow:
                             readOnly: true,
                             language: 'yaml',
                           }}
-                          readOnlyMessage='You cannot edit the event sent to the workflow.'
+                          readOnlyMessage="You cannot edit the event sent to the workflow."
                         />
                       </div>
                     </EuiFlexItem>
@@ -213,9 +213,9 @@ workflow:
                       >
                         <CodeEditor
                           languageId="yaml"
-                          value={stringWorkflow}
+                          value={workflowYaml}
                           height={500}
-                          editorDidMount={() => { }}
+                          editorDidMount={() => {}}
                           onChange={validateAndSetWorkflow}
                           suggestionProvider={undefined}
                           dataTestSubj={'workflow-json-editor'}
@@ -228,7 +228,12 @@ workflow:
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiButton type="submit" size="s" onClick={onClickHandler} disabled={!isValidWorkflow}>
+                  <EuiButton
+                    type="submit"
+                    size="s"
+                    onClick={onClickHandler}
+                    disabled={!isValidWorkflow}
+                  >
                     <FormattedMessage
                       id="workflowsExample.buttonText"
                       defaultMessage="Run workflow"
@@ -236,7 +241,10 @@ workflow:
                     />
                   </EuiButton>
                   {workflowExecutionId && (
-                    <WorkflowExecution workflowExecutionId={workflowExecutionId} />
+                    <WorkflowExecution
+                      workflowExecutionId={workflowExecutionId}
+                      workflowYaml={workflowYaml}
+                    />
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>

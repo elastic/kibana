@@ -21,6 +21,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
 import { WorkflowEditor } from '../../features/workflow-editor/ui';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
@@ -29,12 +30,14 @@ import { WorkflowVisualEditor } from '../../features/workflow-visual-editor/ui';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
 import { WorkflowEventModal } from '../../features/run-workflow/ui/WorkflowEventModal';
+import { TestWorkflowModal } from '../../features/run-workflow/ui/TestWorkflowModal';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
   const { data: workflow, isLoading: isLoadingWorkflow, error } = useWorkflowDetail(id);
 
   const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
+  const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   chrome!.setBreadcrumbs([
     {
@@ -138,6 +141,20 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
+          <EuiFlexGroup
+            justifyContent="flexEnd"
+            gutterSize="s"
+            css={css(`
+             padding-bottom: 10px;
+          `)}
+          >
+            <EuiButton iconType="play" size="s" onClick={() => setTestWorkflowModalOpen(true)}>
+              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Test" ignoreTag />
+            </EuiButton>
+            <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
+              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
+            </EuiButton>
+          </EuiFlexGroup>
           {workflowYamlObject?.data && <WorkflowVisualEditor workflow={workflowYamlObject.data} />}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -147,7 +164,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     if (workflow === undefined) {
       return <EuiText>Failed to load workflow</EuiText>;
     }
-    return <WorkflowExecutionList workflowId={workflow?.id} />;
+    return <WorkflowExecutionList workflow={workflow} />;
   };
 
   if (isLoadingWorkflow) {
@@ -164,9 +181,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         pageTitle={workflow?.name ?? 'Workflow Detail'}
         restrictWidth={false}
         rightSideItems={[
-          <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
-            <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
-          </EuiButton>,
           <EuiButton iconType="play" size="s" onClick={handleRunClick}>
             <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
           </EuiButton>,
@@ -192,6 +206,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         <WorkflowEventModal
           onClose={() => setWorkflowEventModalOpen(false)}
           onSubmit={handleRunWorkflow}
+        />
+      )}
+      {testWorkflowModalOpen && (
+        <TestWorkflowModal
+          workflowYaml={workflowYaml}
+          onClose={() => setTestWorkflowModalOpen(false)}
         />
       )}
     </EuiPageTemplate>

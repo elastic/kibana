@@ -18,17 +18,17 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { ExecutionStatus, EsWorkflowExecution } from '@kbn/workflows';
+import { ExecutionStatus, EsWorkflowExecution, WorkflowDetailDto } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
 import { WorkflowExecution } from '../../workflow-detail/ui/workflow-execution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
 
-export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
+export function WorkflowExecutionList({ workflow }: { workflow: WorkflowDetailDto }) {
   const {
     data: workflowExecutions,
     isLoading: isLoadingWorkflowExecutions,
     error,
-  } = useWorkflowExecutions(workflowId);
+  } = useWorkflowExecutions(workflow.id);
 
   const [selectedWorkflowExecutionId, setSelectedWorkflowExecutionId] = useState<string | null>(
     null
@@ -106,7 +106,9 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
       <EuiFlexItem>
         {selectedWorkflowExecutionId ? (
           <WorkflowExecution
+            key={selectedWorkflowExecutionId}
             workflowExecutionId={selectedWorkflowExecutionId}
+            workflowYaml={workflow.yaml}
             fields={['stepId', 'status', 'executionTimeMs']}
           />
         ) : (

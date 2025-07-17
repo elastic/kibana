@@ -20,16 +20,19 @@ import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
+import { WorkflowExecution } from '../../workflow-detail/ui/workflow-execution';
 
-export function WorkflowEventModal({
+export function TestWorkflowModal({
+  workflowYaml,
   onClose,
-  onSubmit,
 }: {
+  workflowYaml: string;
   onClose: () => void;
-  onSubmit: (event: Record<string, any>) => void;
 }) {
   const { services } = useKibana();
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
+  const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(null);
 
   // Get current user
   useEffect(() => {
@@ -67,36 +70,69 @@ export function WorkflowEventModal({
   };
 
   const handleSubmit = () => {
-    onSubmit(JSON.parse(workflowEvent));
-    onClose();
+    services.http
+      ?.post('/api/workflows/test', {
+        body: JSON.stringify({
+          workflowYaml,
+          inputs: workflowEvent,
+        }),
+      })
+      .then((res: any) => {
+        console.log('Workflow run response:', res);
+        setWorkflowExecutionId(res.workflowExecutionId);
+      });
   };
+
+  useEffect(() => {
+    handleSubmit();
+  }, []);
 
   const [workflowEvent, setWorkflowEvent] = useState<string>(getDefaultWorkflowInputs());
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal maxWidth={false} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Run Workflow</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>Test Workflow</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="l"
+          css={css`
+            height: 100%;
+            overflow: auto;
+          `}
+        >
           <EuiFlexItem>
-            <CodeEditor
-              languageId="json"
-              value={workflowEvent}
-              height={200}
-              editorDidMount={() => {}}
-              onChange={setWorkflowEvent}
-              suggestionProvider={undefined}
-              dataTestSubj={'workflow-event-json-editor'}
-              options={{
-                language: 'json',
-              }}
-            />
+            <EuiFlexGroup direction="column" gutterSize="l">
+              <EuiFlexItem grow={false}>
+                <CodeEditor
+                  languageId="json"
+                  value={workflowEvent}
+                  width={500}
+                  height={200}
+                  editorDidMount={() => {}}
+                  onChange={setWorkflowEvent}
+                  suggestionProvider={undefined}
+                  dataTestSubj={'workflow-event-json-editor'}
+                  options={{
+                    language: 'json',
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={3}>
+                <EuiButton onClick={handleSubmit}>Test Workflow</EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton onClick={handleSubmit}>Run workflow</EuiButton>
-          </EuiFlexItem>
+          {workflowExecutionId && (
+            <EuiFlexItem>
+              <WorkflowExecution
+                workflowExecutionId={workflowExecutionId}
+                workflowYaml={workflowYaml}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiModalBody>
     </EuiModal>
