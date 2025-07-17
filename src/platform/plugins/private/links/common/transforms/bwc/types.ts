@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { StoredLinksState } from "../types";
 
-export type { DashboardLink, ExternalLink, LinksState } from './content_management';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { LinksServerPlugin } = await import('./plugin');
-  return new LinksServerPlugin(initContext);
-};
+export interface StoredLinksState910 {
+  attributes: StoredLinksState;
+}

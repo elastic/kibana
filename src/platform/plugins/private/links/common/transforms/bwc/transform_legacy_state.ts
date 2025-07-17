@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
+import { StoredLinksState } from "../types";
+import { StoredLinksState910 } from "./types";
 
-export type { DashboardLink, ExternalLink, LinksState } from './content_management';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { LinksServerPlugin } = await import('./plugin');
-  return new LinksServerPlugin(initContext);
-};
+export function transformLegacyState(state: StoredLinksState910): StoredLinksState {
+  // 9.1.0 by-value state stored state under attributes
+  const { attributes, ...rest } = state;
+  return {
+    ...attributes,
+    ...rest,
+  };
+}

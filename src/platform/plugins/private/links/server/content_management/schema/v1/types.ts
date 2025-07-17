@@ -9,7 +9,8 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  linksAttributesSchema,
+  dashboardLinkSchema,
+  linksSchema,
   linksCreateOptionsSchema,
   linksCreateResultSchema,
   linksGetResultSchema,
@@ -17,7 +18,11 @@ import {
   linksUpdateOptionsSchema,
 } from './cm_services';
 
-export type LinksSavedObjectAttributes = TypeOf<typeof linksAttributesSchema>;
+export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
+export type ExternalLink = TypeOf<typeof externalLinkSchema>;
+
+export type LinksState = TypeOf<typeof linksSchema>;
+export type LinksSavedObjectAttributes = TypeOf<typeof linksSchema>;
 
 export type LinksCreateOptions = TypeOf<typeof linksCreateOptionsSchema>;
 export type LinksUpdateOptions = TypeOf<typeof linksUpdateOptionsSchema>;

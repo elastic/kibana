@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { APP_ICON, APP_NAME, CONTENT_ID, DISPLAY_NAME, LATEST_VERSION } from './constants';
+export { APP_ICON, APP_NAME, CONTENT_ID, DISPLAY_NAME, LATEST_VERSION, LINKS_EMBEDDABLE_TYPE, LINKS_SAVED_OBJECT_TYPE } from './constants';

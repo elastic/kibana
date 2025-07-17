@@ -32,9 +32,9 @@ const baseLinkSchema = {
   }),
 };
 
-const dashboardLinkSchema = schema.object({
+export const dashboardLinkSchema = schema.object({
   ...baseLinkSchema,
-  destinationRefName: schema.string({
+  destination: schema.string({
     meta: { description: 'The name of the SavedObject reference to the linked dashboard' },
   }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
@@ -62,7 +62,7 @@ const dashboardLinkSchema = schema.object({
   ),
 });
 
-const externalLinkSchema = schema.object({
+export const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string({ meta: { description: 'The external URL to link to' } }),
@@ -85,9 +85,9 @@ const externalLinkSchema = schema.object({
   ),
 });
 
-export const linksAttributesSchema = schema.object(
+export const linksSchema = schema.object(
   {
-    title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+    title: schema.string({ meta: { description: 'A human-readable title' } }),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema]), {
       meta: { description: 'The list of links to display' },
@@ -106,7 +106,7 @@ export const linksAttributesSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const linksSavedObjectSchema = savedObjectSchema(linksAttributesSchema);
+const linksSavedObjectSchema = savedObjectSchema(linksSchema);
 
 export const linksSearchOptionsSchema = schema.maybe(
   schema.object(
@@ -145,7 +145,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: linksCreateOptionsSchema,
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: linksSchema,
       },
     },
     out: {
@@ -160,7 +160,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: linksUpdateOptionsSchema, // same schema as "create"
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: linksSchema,
       },
     },
   },
