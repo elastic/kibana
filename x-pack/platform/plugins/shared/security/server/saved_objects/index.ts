@@ -10,6 +10,7 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
+import { exportTransform, getImportTransformsFactory } from './access_control_transforms';
 import { SavedObjectsSecurityExtension } from './saved_objects_security_extension';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 
@@ -56,6 +57,11 @@ export function setupSavedObjects({
           getTypeRegistry,
         })
       : undefined;
+  });
+
+  savedObjects.setAccessControlTransforms({
+    exportTransform,
+    createImportTransforms: getImportTransformsFactory(getCurrentUser),
   });
 }
 
