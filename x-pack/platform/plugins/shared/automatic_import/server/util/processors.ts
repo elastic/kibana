@@ -13,6 +13,58 @@ import type { ESProcessorItem, Pipeline } from '../../common';
 import type { KVState, SimplifiedProcessors } from '../types';
 import { KVProcessor } from '../processor_types';
 
+/**
+ * Escapes special characters in grok patterns that have special meaning in regex,
+ * while preserving valid grok pattern syntax like %{PATTERN:field}
+ * @param pattern - The grok pattern to escape
+ * @returns The escaped grok pattern
+ */
+function escapeGrokPattern(pattern: string): string {
+  // First, temporarily replace grok patterns to protect them from escaping
+  const grokPatterns: string[] = [];
+  let tempPattern = pattern;
+
+  // Find and temporarily replace grok patterns like %{PATTERN:field}
+  const grokRegex = /%\{[^}]+\}/g;
+  tempPattern = tempPattern.replace(grokRegex, (match) => {
+    const index = grokPatterns.length;
+    grokPatterns.push(match);
+    return `__GROK_PATTERN_${index}__`;
+  });
+
+  // Now escape special regex characters in the remaining text
+  // Note: We're conservative here - only escaping chars that commonly cause issues
+  const specialCharsToEscape = [
+    '[',
+    ']',
+    '(',
+    ')',
+    '{',
+    '}',
+    '<',
+    '>',
+    '*',
+    '+',
+    '?',
+    '.',
+    '^',
+    '$',
+    '|',
+  ];
+
+  for (const char of specialCharsToEscape) {
+    const regex = new RegExp(`\\${char}`, 'g');
+    tempPattern = tempPattern.replace(regex, `\\${char}`);
+  }
+
+  // Restore the grok patterns
+  grokPatterns.forEach((grokPattern, index) => {
+    tempPattern = tempPattern.replace(`__GROK_PATTERN_${index}__`, grokPattern);
+  });
+
+  return tempPattern;
+}
+
 export function combineProcessors(
   initialPipeline: Pipeline,
   processors: SimplifiedProcessors
@@ -51,13 +103,18 @@ function createAppendProcessors(processors: SimplifiedProcessors): ESProcessorIt
 // The kv graph returns a simplified grok processor for header
 // This function takes in the grok pattern string and creates the grok processor
 export function createGrokProcessor(grokPatterns: string[]): ESProcessorItem {
-  const templatesPath = joinPath(__dirname, '../templates/processors');
-  const env = new Environment(new FileSystemLoader(templatesPath), {
-    autoescape: false,
-  });
-  const template = env.getTemplate('grok.yml.njk');
-  const renderedTemplate = template.render({ grokPatterns });
-  const grokProcessor = load(renderedTemplate) as ESProcessorItem;
+  // Escape special characters in grok patterns
+  const escapedPatterns = grokPatterns.map(escapeGrokPattern);
+
+  // Build the grok processor object directly
+  const grokProcessor: ESProcessorItem = {
+    grok: {
+      field: 'message',
+      patterns: escapedPatterns,
+      tag: 'grok_header_pattern',
+    },
+  };
+
   return grokProcessor;
 }
 

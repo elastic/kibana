@@ -22,7 +22,10 @@ export async function handleUnstructuredValidate({
   const currentPattern = state.currentPattern;
   const grokPatterns = state.grokPatterns;
   const grokProcessor = createGrokProcessor([...grokPatterns, currentPattern]);
-  const pipeline = { processors: grokProcessor, on_failure: [createPassthroughFailureProcessor()] };
+  const pipeline = {
+    processors: [grokProcessor],
+    on_failure: [createPassthroughFailureProcessor()],
+  };
 
   const packageName = state.packageName;
   const dataStreamName = state.dataStreamName;
@@ -61,7 +64,7 @@ export async function handleUnstructuredValidate({
     .map((log) => log[dataStreamName])
     .map((log) => JSON.stringify(log));
   const additionalProcessors = state.additionalProcessors;
-  additionalProcessors.push(grokProcessor[0]);
+  additionalProcessors.push(grokProcessor);
 
   return {
     jsonSamples,
