@@ -74,13 +74,13 @@ export const useWorkflow = () => {
   useEffect(() => {
     const workflowFromQuery = new URLSearchParams(search).get('workflow');
     if (workflowFromQuery && isWorkflowId(workflowFromQuery)) {
-      setSelectedWorkflowId(workflowFromQuery as WorkflowId);
+      setSelectedWorkflowId(workflowFromQuery);
       return;
     }
 
     const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
     if (isWorkflowId(localStorageWorkflow)) {
-      setSelectedWorkflowId(localStorageWorkflow as WorkflowId);
+      setSelectedWorkflowId(localStorageWorkflow);
       return;
     }
 
