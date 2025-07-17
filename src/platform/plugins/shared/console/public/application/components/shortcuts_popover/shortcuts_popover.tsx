@@ -8,7 +8,14 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ShortcutLineFlexItem } from './shortcut_line';
 import { KEYS } from './keys';

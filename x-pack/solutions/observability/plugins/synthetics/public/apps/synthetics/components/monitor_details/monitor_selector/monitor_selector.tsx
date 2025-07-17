@@ -42,7 +42,9 @@ export const MonitorSelector = () => {
         closePopover={closePopover}
         aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">{GO_TO_MONITOR}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
+          {GO_TO_MONITOR}
+        </EuiPopoverTitle>
         <MonitorSearchableList closePopover={closePopover} />
       </EuiPopover>
     </Fragment>

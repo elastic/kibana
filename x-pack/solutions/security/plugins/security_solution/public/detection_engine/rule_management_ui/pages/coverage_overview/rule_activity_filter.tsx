@@ -97,7 +97,9 @@ const RuleActivityFilterComponent = ({
         panelPaddingSize="none"
         aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">{i18n.CoverageOverviewFilterPopoverTitle}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
+          {i18n.CoverageOverviewFilterPopoverTitle}
+        </EuiPopoverTitle>
         <EuiSelectable<{ label: CoverageOverviewRuleActivity }>
           data-test-subj="coverageOverviewFilterList"
           options={options}

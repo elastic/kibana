@@ -86,7 +86,11 @@ export const FieldHoverActionPopover = ({
         display={display}
         aria-labelledby={fieldHoverActionPopoverTitleId}
       >
-        <EuiPopoverTitle id={fieldHoverActionPopoverTitleId} className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
+        <EuiPopoverTitle
+          id={fieldHoverActionPopoverTitleId}
+          className="eui-textBreakWord"
+          css={{ maxWidth: '200px' }}
+        >
           {title}
         </EuiPopoverTitle>
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">

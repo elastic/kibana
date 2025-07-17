@@ -89,7 +89,12 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   );
 
   return (
-    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover} aria-labelledby={popoverTitleId}>
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
       <EuiPopoverTitle id={popoverTitleId}>
         <FormattedMessage
           id="xpack.searchIndexDocuments.result.compactCard.header.metadata.title"

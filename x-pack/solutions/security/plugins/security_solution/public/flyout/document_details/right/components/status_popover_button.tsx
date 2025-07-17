@@ -113,7 +113,9 @@ export const StatusPopoverButton = memo(
         data-test-subj="alertStatus"
         aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle id={popoverTitleId} paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="m">
+          {CHANGE_ALERT_STATUS}
+        </EuiPopoverTitle>
         <EuiContextMenu
           panels={panels}
           initialPanelId={0}

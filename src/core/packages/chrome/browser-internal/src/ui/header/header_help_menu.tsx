@@ -24,7 +24,6 @@ import {
   EuiPopoverFooter,
   withEuiTheme,
   WithEuiThemeProps,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
