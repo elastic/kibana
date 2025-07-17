@@ -10,7 +10,7 @@ import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { TINY_ELSER_INFERENCE_ID } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
+import { TINY_ELSER_INFERENCE_ID } from '../../utils/model_and_inference';
 import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
