@@ -11,7 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
-import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
+import { TriggersActionsPageProvider } from '@kbn/test-suites-xpack-platform/functional_with_es_ssl/page_objects/triggers_actions_ui_page';
 
 const log = new ToolingLog({
   level: 'info',
@@ -32,7 +32,7 @@ export default async ({ readConfigFile }) => {
     require.resolve('../../functional/config.ccs.ts')
   );
   const fleetFunctionalConfig = await readConfigFile(
-    require.resolve('../../fleet_functional/config.ts')
+    require.resolve('@kbn/test-suites-xpack-platform/fleet_functional/config')
   );
   process.env.stack_functional_integration = true;
   logAll(log);

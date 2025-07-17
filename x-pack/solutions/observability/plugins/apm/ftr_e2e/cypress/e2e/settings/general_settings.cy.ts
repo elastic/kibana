@@ -28,7 +28,8 @@ const getUnableToModifyCase = () => {
   });
 };
 
-describe('General Settings', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/228236
+describe.skip('General Settings', () => {
   describe('when logged in as a viewer', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();

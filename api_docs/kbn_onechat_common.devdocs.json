@@ -153,48 +153,6 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.createBuiltinToolId",
-        "type": "Function",
-        "tags": [],
-        "label": "createBuiltinToolId",
-        "description": [
-          "\nBuild a structured tool identifier for given builtin tool ID."
-        ],
-        "signature": [
-          "(plainId: string) => ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.StructuredToolIdentifier",
-            "text": "StructuredToolIdentifier"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.createBuiltinToolId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "plainId",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.createConversationNotFoundError",
         "type": "Function",
         "tags": [],
@@ -426,7 +384,7 @@
         "label": "createToolNotFoundError",
         "description": [],
         "signature": [
-          "({ toolId, customMessage, meta, }: { toolId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
+          "({ toolId, customMessage, meta, }: { toolId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
@@ -453,13 +411,10 @@
               {
                 "parentPluginId": "@kbn/onechat-common",
                 "id": "def-common.createToolNotFoundError.$1.toolId",
-                "type": "Uncategorized",
+                "type": "string",
                 "tags": [],
                 "label": "toolId",
                 "description": [],
-                "signature": [
-                  "`${string}::${string}`"
-                ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -513,8 +468,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolDescriptor",
-            "text": "ToolDescriptor"
+            "section": "def-common.ToolSelectionRelevantFields",
+            "text": "ToolSelectionRelevantFields"
           },
           ">(tools: TType[], toolSelection: ",
           {
@@ -647,6 +602,41 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.isBuiltInToolId",
+        "type": "Function",
+        "tags": [],
+        "label": "isBuiltInToolId",
+        "description": [
+          "\nCheck if the given ID is a built-in ID (starting with `.`)"
+        ],
+        "signature": [
+          "(id: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.isBuiltInToolId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -930,7 +920,7 @@
             "text": "MessageChunkEvent"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -951,7 +941,7 @@
               },
               "<string, any>"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -985,7 +975,7 @@
             "text": "MessageCompleteEvent"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1006,7 +996,7 @@
               },
               "<string, any>"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1066,104 +1056,6 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.isPlainAgentIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "isPlainAgentIdentifier",
-        "description": [
-          "\nCheck if the given {@link AgentIdentifier} is a {@link PlainIdAgentIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.AgentIdentifier",
-            "text": "AgentIdentifier"
-          },
-          ") => identifier is string"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.isPlainAgentIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.AgentIdentifier",
-                "text": "AgentIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.isPlainToolIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "isPlainToolIdentifier",
-        "description": [
-          "\nCheck if the given {@link ToolIdentifier} is a {@link PlainIdToolIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolIdentifier",
-            "text": "ToolIdentifier"
-          },
-          ") => identifier is string"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.isPlainToolIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolIdentifier",
-                "text": "ToolIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.isReasoningEvent",
         "type": "Function",
         "tags": [],
@@ -1187,7 +1079,7 @@
             "text": "ReasoningEvent"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1208,7 +1100,7 @@
               },
               "<string, any>"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1273,6 +1165,41 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.isReservedToolId",
+        "type": "Function",
+        "tags": [],
+        "label": "isReservedToolId",
+        "description": [
+          "\nCheck if the given ID is a reserved ID\nAtm this only checks for built-in IDs, but it will check for MCP and such later."
+        ],
+        "signature": [
+          "(id: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.isReservedToolId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.isRoundCompleteEvent",
         "type": "Function",
         "tags": [],
@@ -1296,7 +1223,7 @@
             "text": "RoundCompleteEvent"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1317,217 +1244,7 @@
               },
               "<string, any>"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.isSerializedAgentIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "isSerializedAgentIdentifier",
-        "description": [
-          "\nCheck if the given {@link AgentIdentifier} is a {@link SerializedAgentIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.AgentIdentifier",
-            "text": "AgentIdentifier"
-          },
-          ") => identifier is `${string}::${string}`"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.isSerializedAgentIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.AgentIdentifier",
-                "text": "AgentIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.isSerializedToolIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "isSerializedToolIdentifier",
-        "description": [
-          "\nCheck if the given {@link ToolIdentifier} is a {@link SerializedToolIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolIdentifier",
-            "text": "ToolIdentifier"
-          },
-          ") => identifier is `${string}::${string}`"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.isSerializedToolIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolIdentifier",
-                "text": "ToolIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.isStructuredAgentIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "isStructuredAgentIdentifier",
-        "description": [
-          "\nCheck if the given {@link AgentIdentifier} is a {@link StructuredAgentIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.AgentIdentifier",
-            "text": "AgentIdentifier"
-          },
-          ") => identifier is ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.StructuredAgentIdentifier",
-            "text": "StructuredAgentIdentifier"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.isStructuredAgentIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.AgentIdentifier",
-                "text": "AgentIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.isStructuredToolIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "isStructuredToolIdentifier",
-        "description": [
-          "\nCheck if the given {@link ToolIdentifier} is a {@link StructuredToolIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolIdentifier",
-            "text": "ToolIdentifier"
-          },
-          ") => identifier is ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.StructuredToolIdentifier",
-            "text": "StructuredToolIdentifier"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.isStructuredToolIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolIdentifier",
-                "text": "ToolIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1561,7 +1278,7 @@
             "text": "ToolCallEvent"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1582,7 +1299,7 @@
               },
               "<string, any>"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1712,7 +1429,7 @@
             "text": "ToolResultEvent"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1733,61 +1450,7 @@
               },
               "<string, any>"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.toolDescriptorToIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "toolDescriptorToIdentifier",
-        "description": [],
-        "signature": [
-          "(tool: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolDescriptor",
-            "text": "ToolDescriptor"
-          },
-          ") => ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.StructuredToolIdentifier",
-            "text": "StructuredToolIdentifier"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.toolDescriptorToIdentifier.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "tool",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolDescriptor",
-                "text": "ToolDescriptor"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1811,8 +1474,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolDescriptor",
-            "text": "ToolDescriptor"
+            "section": "def-common.ToolSelectionRelevantFields",
+            "text": "ToolSelectionRelevantFields"
           },
           ", toolSelection: ",
           {
@@ -1840,8 +1503,8 @@
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolDescriptor",
-                "text": "ToolDescriptor"
+                "section": "def-common.ToolSelectionRelevantFields",
+                "text": "ToolSelectionRelevantFields"
               }
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_selection.ts",
@@ -1873,219 +1536,161 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.toSerializedAgentIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "toSerializedAgentIdentifier",
-        "description": [
-          "\nConvert the given {@link ToolIdentifier} to a {@link SerializedToolIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.AgentIdentifier",
-            "text": "AgentIdentifier"
-          },
-          ") => `${string}::${string}`"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.toSerializedAgentIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.AgentIdentifier",
-                "text": "AgentIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.toSerializedToolIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "toSerializedToolIdentifier",
-        "description": [
-          "\nConvert the given {@link ToolIdentifier} to a {@link SerializedToolIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolIdentifier",
-            "text": "ToolIdentifier"
-          },
-          ") => `${string}::${string}`"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.toSerializedToolIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolIdentifier",
-                "text": "ToolIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.toStructuredAgentIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "toStructuredAgentIdentifier",
-        "description": [
-          "\nConvert the given {@link ToolIdentifier} to a {@link StructuredToolIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.AgentIdentifier",
-            "text": "AgentIdentifier"
-          },
-          ") => ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.StructuredAgentIdentifier",
-            "text": "StructuredAgentIdentifier"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.toStructuredAgentIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.AgentIdentifier",
-                "text": "AgentIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.toStructuredToolIdentifier",
-        "type": "Function",
-        "tags": [],
-        "label": "toStructuredToolIdentifier",
-        "description": [
-          "\nConvert the given {@link ToolIdentifier} to a {@link StructuredToolIdentifier}"
-        ],
-        "signature": [
-          "(identifier: ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolIdentifier",
-            "text": "ToolIdentifier"
-          },
-          ") => ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.StructuredToolIdentifier",
-            "text": "StructuredToolIdentifier"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.toStructuredToolIdentifier.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "identifier",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolIdentifier",
-                "text": "ToolIdentifier"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.AgentConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentConfiguration",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentConfiguration.instructions",
+            "type": "string",
+            "tags": [],
+            "label": "instructions",
+            "description": [
+              "\nCustom instruction for the agent"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentConfiguration.tools",
+            "type": "Array",
+            "tags": [],
+            "label": "tools",
+            "description": [
+              "\nList of tools exposed to the agent"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ByIdsToolSelection",
+                "text": "ByIdsToolSelection"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.AgentDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentDefinition",
+        "description": [
+          "\nDefinition of a onechat agent."
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nId of the agent"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentDefinition.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe type of the agent (only for type for now, here for future-proofing)"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.AgentType",
+                "text": "AgentType"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentDefinition.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nHuman-readable name for the agent."
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nHuman-readable description for the agent."
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.AgentDefinition.configuration",
+            "type": "Object",
+            "tags": [],
+            "label": "configuration",
+            "description": [
+              "\nConfiguration associated with this agent"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.AgentConfiguration",
+                "text": "AgentConfiguration"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.AgentDescriptor",
@@ -2095,7 +1700,7 @@
         "description": [
           "\nBase descriptor for an agent."
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2115,7 +1720,7 @@
                 "text": "AgentType"
               }
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2126,7 +1731,7 @@
             "tags": [],
             "label": "agentId",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2137,7 +1742,7 @@
             "tags": [],
             "label": "providerId",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2148,122 +1753,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.AgentProfile",
-        "type": "Interface",
-        "tags": [],
-        "label": "AgentProfile",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.AgentProfile.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nId of the agent"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.AgentProfile.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [
-              "\nHuman-readable name for the agent."
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.AgentProfile.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [
-              "\nHuman-readable description for the agent."
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.AgentProfile.customInstructions",
-            "type": "string",
-            "tags": [],
-            "label": "customInstructions",
-            "description": [
-              "\nCustom instructions that should be added to the prompts when calling the LLM."
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.AgentProfile.toolSelection",
-            "type": "Array",
-            "tags": [],
-            "label": "toolSelection",
-            "description": [
-              "\nTool selection for this profile, using the {@link ToolSelection} format."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ByIdsToolSelection",
-                "text": "ByIdsToolSelection"
-              },
-              "[]"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.AgentProfile.createdAt",
-            "type": "string",
-            "tags": [],
-            "label": "createdAt",
-            "description": [
-              "\nCreation date"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.AgentProfile.updatedAt",
-            "type": "string",
-            "tags": [],
-            "label": "updatedAt",
-            "description": [
-              "\nLast update date."
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/profiles.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2314,15 +1804,22 @@
         "children": [
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ByIdsToolSelection.provider",
-            "type": "string",
+            "id": "def-common.ByIdsToolSelection.type",
+            "type": "CompoundType",
             "tags": [],
-            "label": "provider",
+            "label": "type",
             "description": [
               "\nThe id of the provider to select tools from"
             ],
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ToolType",
+                "text": "ToolType"
+              },
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_selection.ts",
             "deprecated": false,
@@ -2330,10 +1827,10 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ByIdsToolSelection.toolIds",
+            "id": "def-common.ByIdsToolSelection.tool_ids",
             "type": "Array",
             "tags": [],
-            "label": "toolIds",
+            "label": "tool_ids",
             "description": [
               "\nList of individual tool ids to select."
             ],
@@ -2371,14 +1868,11 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.Conversation.agentId",
-            "type": "Uncategorized",
+            "id": "def-common.Conversation.agent_id",
+            "type": "string",
             "tags": [],
-            "label": "agentId",
+            "label": "agent_id",
             "description": [],
-            "signature": [
-              "`${string}::${string}`"
-            ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2416,10 +1910,10 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.Conversation.createdAt",
+            "id": "def-common.Conversation.created_at",
             "type": "string",
             "tags": [],
-            "label": "createdAt",
+            "label": "created_at",
             "description": [],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
@@ -2427,10 +1921,10 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.Conversation.updatedAt",
+            "id": "def-common.Conversation.updated_at",
             "type": "string",
             "tags": [],
-            "label": "updatedAt",
+            "label": "updated_at",
             "description": [],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
@@ -2575,6 +2069,22 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ConversationRound.trace_id",
+            "type": "string",
+            "tags": [],
+            "label": "trace_id",
+            "description": [
+              "when tracing is enabled, contains the traceId associated with this round"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2617,12 +2127,102 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.EsqlToolConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsqlToolConfig",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.EsqlToolConfig.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.EsqlToolConfig.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.EsqlToolParam",
+                "text": "EsqlToolParam"
+              },
+              "; }"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.EsqlToolParam",
+        "type": "Interface",
+        "tags": [],
+        "label": "EsqlToolParam",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.EsqlToolParam.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nThe data types of the parameter. Must be one of these"
+            ],
+            "signature": [
+              "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.EsqlToolParam.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nDescription of the parameter's purpose or expected values."
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.MessageChunkEventData",
         "type": "Interface",
         "tags": [],
         "label": "MessageChunkEventData",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2635,7 +2235,7 @@
             "description": [
               "ID of the message this chunk is bound to"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2648,7 +2248,7 @@
             "description": [
               "chunk (text delta)"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2662,7 +2262,7 @@
         "tags": [],
         "label": "MessageCompleteEventData",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2675,7 +2275,7 @@
             "description": [
               "ID of the message"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2688,7 +2288,7 @@
             "description": [
               "full text content of the message"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2760,7 +2360,7 @@
         "tags": [],
         "label": "ReasoningEventData",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2771,7 +2371,7 @@
             "tags": [],
             "label": "reasoning",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2812,7 +2412,7 @@
         "tags": [],
         "label": "RoundCompleteEventData",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2834,7 +2434,7 @@
                 "text": "ConversationRound"
               }
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2872,96 +2472,12 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.StructuredAgentIdentifier",
-        "type": "Interface",
-        "tags": [],
-        "label": "StructuredAgentIdentifier",
-        "description": [
-          "\nStructured representation of an agent identifier."
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.StructuredAgentIdentifier.agentId",
-            "type": "string",
-            "tags": [],
-            "label": "agentId",
-            "description": [
-              "The unique ID of this agent, within its provider"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.StructuredAgentIdentifier.providerId",
-            "type": "string",
-            "tags": [],
-            "label": "providerId",
-            "description": [
-              "Unique ID of the provider this agent is coming from"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.StructuredToolIdentifier",
-        "type": "Interface",
-        "tags": [],
-        "label": "StructuredToolIdentifier",
-        "description": [
-          "\nStructured representation of a tool identifier."
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.StructuredToolIdentifier.toolId",
-            "type": "string",
-            "tags": [],
-            "label": "toolId",
-            "description": [
-              "The unique ID of this tool, relative to the source"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.StructuredToolIdentifier.providerId",
-            "type": "string",
-            "tags": [],
-            "label": "providerId",
-            "description": [
-              "The type of source the tool is being provided from, e.g. builtIn or MCP"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ToolCallEventData",
         "type": "Interface",
         "tags": [],
         "label": "ToolCallEventData",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2972,7 +2488,7 @@
             "tags": [],
             "label": "tool_call_id",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2983,18 +2499,7 @@
             "tags": [],
             "label": "tool_id",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolCallEventData.tool_type",
-            "type": "string",
-            "tags": [],
-            "label": "tool_type",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3008,7 +2513,7 @@
             "signature": [
               "{ [x: string]: unknown; }"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3056,19 +2561,6 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolCallWithResult.tool_type",
-            "type": "string",
-            "tags": [],
-            "label": "tool_type",
-            "description": [
-              "\nType of the tool."
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.ToolCallWithResult.params",
             "type": "Object",
             "tags": [],
@@ -3101,97 +2593,78 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.ToolDescriptor",
+        "id": "def-common.ToolDefinition",
         "type": "Interface",
         "tags": [],
-        "label": "ToolDescriptor",
+        "label": "ToolDefinition",
         "description": [
           "\nSerializable representation of a tool, without its handler or schema.\n\nUse as a common base for browser-side and server-side tool types."
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolDefinition",
+            "text": "ToolDefinition"
+          },
+          "<TConfig>"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolDescriptor.id",
+            "id": "def-common.ToolDefinition.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [
               "\nA unique id for this tool."
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolDescriptor.description",
-            "type": "string",
+            "id": "def-common.ToolDefinition.type",
+            "type": "Enum",
             "tags": [],
-            "label": "description",
+            "label": "type",
             "description": [
-              "\nThe description for this tool, which will be exposed to the LLM."
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolDescriptor.meta",
-            "type": "Object",
-            "tags": [],
-            "label": "meta",
-            "description": [
-              "\nMeta associated with this tool"
+              "\nThe type of the tool"
             ],
             "signature": [
               {
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
                 "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolDescriptorMeta",
-                "text": "ToolDescriptorMeta"
+                "section": "def-common.ToolType",
+                "text": "ToolType"
               }
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.ToolDescriptorMeta",
-        "type": "Interface",
-        "tags": [],
-        "label": "ToolDescriptorMeta",
-        "description": [
-          "\nMetadata associated with a tool.\n\nSome of them are specified by the tool owner during registration,\nothers are automatically added by the framework."
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolDescriptorMeta.providerId",
-            "type": "string",
-            "tags": [],
-            "label": "providerId",
-            "description": [
-              "\nID of the provider this tool is exposed from."
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolDescriptorMeta.tags",
+            "id": "def-common.ToolDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nThe description for this tool, which will be exposed to the LLM."
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ToolDefinition.tags",
             "type": "Array",
             "tags": [],
             "label": "tags",
@@ -3201,7 +2674,75 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ToolDefinition.configuration",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "configuration",
+            "description": [
+              "\nThe type-specific configuration for this tool."
+            ],
+            "signature": [
+              "TConfig"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.ToolDefinitionWithSchema",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolDefinitionWithSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolDefinitionWithSchema",
+            "text": "ToolDefinitionWithSchema"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolDefinition",
+            "text": "ToolDefinition"
+          },
+          "<Record<string, unknown>>"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ToolDefinitionWithSchema.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\nthe JSON schema associated with this tool's input parameters."
+            ],
+            "signature": [
+              "{ type: \"object\"; properties: Record<string, ",
+              "JsonSchema7Type",
+              ">; additionalProperties?: boolean | ",
+              "JsonSchema7Type",
+              " | undefined; required?: string[] | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3215,7 +2756,7 @@
         "tags": [],
         "label": "ToolResultEventData",
         "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3226,7 +2767,7 @@
             "tags": [],
             "label": "tool_call_id",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3237,18 +2778,7 @@
             "tags": [],
             "label": "tool_id",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.ToolResultEventData.tool_type",
-            "type": "string",
-            "tags": [],
-            "label": "tool_type",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3259,7 +2789,7 @@
             "tags": [],
             "label": "result",
             "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3313,19 +2843,7 @@
         "description": [
           "\nExecution mode for agents."
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.ChatAgentEventType",
-        "type": "Enum",
-        "tags": [],
-        "label": "ChatAgentEventType",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3367,39 +2885,33 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      }
-    ],
-    "misc": [
+      },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.AgentIdentifier",
-        "type": "Type",
+        "id": "def-common.ToolType",
+        "type": "Enum",
         "tags": [],
-        "label": "AgentIdentifier",
-        "description": [],
-        "signature": [
-          "string | ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.StructuredAgentIdentifier",
-            "text": "StructuredAgentIdentifier"
-          }
+        "label": "ToolType",
+        "description": [
+          "\nPossible types of tools"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
+      }
+    ],
+    "misc": [
       {
         "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.AgentType",
         "type": "string",
         "tags": [],
         "label": "AgentType",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
+        "description": [
+          "\nThe type of an agent.\nOnly one type for now, this enum is mostly here for future-proofing."
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3447,17 +2959,15 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.builtinToolProviderId",
+        "id": "def-common.builtInToolIdPrefix",
         "type": "string",
         "tags": [],
-        "label": "builtinToolProviderId",
-        "description": [
-          "\nThe singleton providerId used for all builtIn tools."
-        ],
+        "label": "builtInToolIdPrefix",
+        "description": [],
         "signature": [
-          "\"built_in\""
+          "\".\""
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3468,7 +2978,9 @@
         "type": "Type",
         "tags": [],
         "label": "ChatAgentEvent",
-        "description": [],
+        "description": [
+          "\nAll types of events that can be emitted from an agent execution."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/onechat-common",
@@ -3518,29 +3030,7 @@
             "text": "RoundCompleteEvent"
           }
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.ChatAgentEventBase",
-        "type": "Type",
-        "tags": [],
-        "label": "ChatAgentEventBase",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.OnechatEvent",
-            "text": "OnechatEvent"
-          },
-          "<TEventType, TData>"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3715,34 +3205,70 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.esqlToolProviderId",
-        "type": "string",
+        "id": "def-common.ConversationWithoutRounds",
+        "type": "Type",
         "tags": [],
-        "label": "esqlToolProviderId",
-        "description": [
-          "\nThe singleton providerId used for all Esql tools."
-        ],
+        "label": "ConversationWithoutRounds",
+        "description": [],
         "signature": [
-          "\"esql\""
+          "{ id: string; title: string; user: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.UserIdAndName",
+            "text": "UserIdAndName"
+          },
+          "; created_at: string; updated_at: string; agent_id: string; }"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.FieldTypes",
+        "id": "def-common.EsqlToolDefinition",
         "type": "Type",
         "tags": [],
-        "label": "FieldTypes",
+        "label": "EsqlToolDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolDefinition",
+            "text": "ToolDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.EsqlToolConfig",
+            "text": "EsqlToolConfig"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.EsqlToolFieldTypes",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlToolFieldTypes",
         "description": [
           "\nCommon ES Field Types"
         ],
         "signature": [
           "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3767,8 +3293,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ChatAgentEventType",
-            "text": "ChatAgentEventType"
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
           },
           ".messageChunk, ",
           {
@@ -3780,7 +3306,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3805,8 +3331,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ChatAgentEventType",
-            "text": "ChatAgentEventType"
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
           },
           ".messageComplete, ",
           {
@@ -3818,7 +3344,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3928,7 +3454,10 @@
         "description": [
           "\nID of the onechat default conversational agent"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
+        "signature": [
+          "\"default\""
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4023,38 +3552,6 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.PlainIdAgentIdentifier",
-        "type": "Type",
-        "tags": [],
-        "label": "PlainIdAgentIdentifier",
-        "description": [],
-        "signature": [
-          "string"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.PlainIdToolIdentifier",
-        "type": "Type",
-        "tags": [],
-        "label": "PlainIdToolIdentifier",
-        "description": [
-          "\nRepresents a plain toolId, without source information attached to it."
-        ],
-        "signature": [
-          "string"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ReasoningEvent",
         "type": "Type",
         "tags": [],
@@ -4073,8 +3570,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ChatAgentEventType",
-            "text": "ChatAgentEventType"
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
           },
           ".reasoning, ",
           {
@@ -4086,7 +3583,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4141,8 +3638,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ChatAgentEventType",
-            "text": "ChatAgentEventType"
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
           },
           ".roundComplete, ",
           {
@@ -4154,41 +3651,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.SerializedAgentIdentifier",
-        "type": "Type",
-        "tags": [],
-        "label": "SerializedAgentIdentifier",
-        "description": [
-          "\nString representation of {@link StructuredAgentIdentifier}\nFollow a `{providerId}:{agentId}` format."
-        ],
-        "signature": [
-          "`${string}::${string}`"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/identifiers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.SerializedToolIdentifier",
-        "type": "Type",
-        "tags": [],
-        "label": "SerializedToolIdentifier",
-        "description": [
-          "\nString representation of {@link StructuredToolIdentifier}\nFollow a `{toolId}||{sourceType}||{sourceId}` format."
-        ],
-        "signature": [
-          "`${string}::${string}`"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4213,8 +3676,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ChatAgentEventType",
-            "text": "ChatAgentEventType"
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
           },
           ".toolCall, ",
           {
@@ -4226,7 +3689,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4263,45 +3726,6 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.ToolIdentifier",
-        "type": "Type",
-        "tags": [],
-        "label": "ToolIdentifier",
-        "description": [
-          "\nDefines all possible shapes for a tool identifier."
-        ],
-        "signature": [
-          "string | ",
-          {
-            "pluginId": "@kbn/onechat-common",
-            "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.StructuredToolIdentifier",
-            "text": "StructuredToolIdentifier"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.ToolProviderId",
-        "type": "Type",
-        "tags": [],
-        "label": "ToolProviderId",
-        "description": [],
-        "signature": [
-          "string"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.ToolResultEvent",
         "type": "Type",
         "tags": [],
@@ -4320,8 +3744,8 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ChatAgentEventType",
-            "text": "ChatAgentEventType"
+            "section": "def-common.ChatEventType",
+            "text": "ChatEventType"
           },
           ".toolResult, ",
           {
@@ -4333,7 +3757,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/events.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/events.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4363,17 +3787,23 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.unknownToolProviderId",
-        "type": "string",
+        "id": "def-common.ToolSelectionRelevantFields",
+        "type": "Type",
         "tags": [],
-        "label": "unknownToolProviderId",
-        "description": [
-          "\nUnknown sourceId used from converting plain Ids to structured or serialized ids."
-        ],
+        "label": "ToolSelectionRelevantFields",
+        "description": [],
         "signature": [
-          "\"unknown\""
+          "{ id: string; type: ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolType",
+            "text": "ToolType"
+          },
+          "; tags: string[]; }"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tools.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4382,184 +3812,36 @@
     "objects": [
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.BuiltinTags",
+        "id": "def-common.builtinTags",
         "type": "Object",
         "tags": [],
-        "label": "BuiltinTags",
+        "label": "builtinTags",
         "description": [
           "\nCommon set of tags used for platform tools."
         ],
+        "signature": [
+          "{ readonly retrieval: \"retrieval\"; }"
+        ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinTags.retrieval",
-            "type": "string",
-            "tags": [],
-            "label": "retrieval",
-            "description": [
-              "/**\n   * Tag associated to tools related to data retrieval\n   */"
-            ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.BuiltinToolIds",
+        "id": "def-common.builtinToolIds",
         "type": "Object",
         "tags": [],
-        "label": "BuiltinToolIds",
+        "label": "builtinToolIds",
         "description": [
           "\nIds of built-in onechat tools"
         ],
+        "signature": [
+          "{ readonly indexExplorer: \".index_explorer\"; readonly relevanceSearch: \".relevance_search\"; readonly naturalLanguageSearch: \".nl_search\"; readonly listIndices: \".list_indices\"; readonly getIndexMapping: \".get_index_mapping\"; readonly getDocumentById: \".get_document_by_id\"; readonly generateEsql: \".generate_esql\"; readonly executeEsql: \".execute_esql\"; readonly researcherAgent: \".researcher_agent\"; }"
+        ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.indexExplorer",
-            "type": "string",
-            "tags": [],
-            "label": "indexExplorer",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.relevanceSearch",
-            "type": "string",
-            "tags": [],
-            "label": "relevanceSearch",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.naturalLanguageSearch",
-            "type": "string",
-            "tags": [],
-            "label": "naturalLanguageSearch",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.listIndices",
-            "type": "string",
-            "tags": [],
-            "label": "listIndices",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.getIndexMapping",
-            "type": "string",
-            "tags": [],
-            "label": "getIndexMapping",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.getDocumentById",
-            "type": "string",
-            "tags": [],
-            "label": "getDocumentById",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.generateEsql",
-            "type": "string",
-            "tags": [],
-            "label": "generateEsql",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.executeEsql",
-            "type": "string",
-            "tags": [],
-            "label": "executeEsql",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.BuiltinToolIds.researcherAgent",
-            "type": "string",
-            "tags": [],
-            "label": "researcherAgent",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-common",
-        "id": "def-common.oneChatAgentProviderIds",
-        "type": "Object",
-        "tags": [],
-        "label": "oneChatAgentProviderIds",
-        "description": [
-          "\nIDs of the onechat default agent providers."
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.oneChatAgentProviderIds.default",
-            "type": "string",
-            "tags": [],
-            "label": "default",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/onechat-common",
-            "id": "def-common.oneChatAgentProviderIds.profile",
-            "type": "string",
-            "tags": [],
-            "label": "profile",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/agents/descriptor.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -4831,7 +4113,7 @@
             "label": "createToolNotFoundError",
             "description": [],
             "signature": [
-              "({ toolId, customMessage, meta, }: { toolId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
+              "({ toolId, customMessage, meta, }: { toolId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }) => ",
               {
                 "pluginId": "@kbn/onechat-common",
                 "scope": "common",
@@ -4853,7 +4135,7 @@
                 "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ toolId: `${string}::${string}`; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
+                  "{ toolId: string; customMessage?: string | undefined; meta?: Record<string, any> | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/errors.ts",
                 "deprecated": false,
