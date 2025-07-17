@@ -106,7 +106,7 @@ async function installAlertRule({
   logger,
   alertingRulesClient,
   alertRuleAsset,
-  context,
+  context: { pkgName, spaceId, assetTags },
 }: {
   logger: Logger;
   alertingRulesClient: RulesClient;
@@ -114,7 +114,7 @@ async function installAlertRule({
   context: InstallAlertRulesParamsContext;
 }) {
   const { template: alertRule, id } = alertRuleAsset;
-  const tags = getTags(id, context);
+  const tags = [getPackageTagId(spaceId, pkgName), getManagedTagId(spaceId)];
 
   const createData = transformToCreateAlertRule(alertRule, tags);
 
@@ -159,24 +159,6 @@ function transformToCreateAlertRule(template: AlertRuleAsset['template'], tags: 
     actions: [],
     tags: [...new Set([...baseCreateData.tags, ...tags])],
   };
-}
-
-function getTags(id: string, context: InstallAlertRulesParamsContext) {
-  const { pkgName, spaceId, assetTags } = context;
-  const tags = [getPackageTagId(spaceId, pkgName), getManagedTagId(spaceId)];
-
-  if (!assetTags || assetTags.length === 0) {
-    return tags;
-  }
-
-  const filteredAssetTags = assetTags.reduce<string[]>((_assetTags, assetTag) => {
-    if (assetTag.asset_types?.includes('alert') || assetTag.asset_ids?.includes(id)) {
-      return [..._assetTags, assetTag.text];
-    }
-    return _assetTags;
-  }, []);
-
-  return [...tags, ...filteredAssetTags];
 }
 
 function getSuccessesAndErrors(results: Array<PromiseSettledResult<ObjectReference>>) {
