@@ -1710,7 +1710,15 @@
             "section": "def-common.ChatCompletionChunkToolCall",
             "text": "ChatCompletionChunkToolCall"
           },
-          "[]; deanonymized_input?: { message: any; deanonymizations: ",
+          "[]; deanonymized_input?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1718,7 +1726,15 @@
             "section": "def-common.Deanonymization",
             "text": "Deanonymization"
           },
-          "[]; }[] | undefined; deanonymized_output?: { message: any; deanonymizations: ",
+          "[]; }[] | undefined; deanonymized_output?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -4483,13 +4499,13 @@
     "misc": [
       {
         "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.aiAssistantAnonymizationSettings",
+        "id": "def-common.aiAnonymizationSettings",
         "type": "string",
         "tags": [],
-        "label": "aiAssistantAnonymizationSettings",
+        "label": "aiAnonymizationSettings",
         "description": [],
         "signature": [
-          "\"aiAssistant:anonymizationSettings\""
+          "\"ai:anonymizationSettings\""
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/ui_settings/settings_keys.ts",
         "deprecated": false,
@@ -5112,7 +5128,15 @@
             "section": "def-common.ChatCompletionChunkToolCall",
             "text": "ChatCompletionChunkToolCall"
           },
-          "[]; deanonymized_input?: { message: any; deanonymizations: ",
+          "[]; deanonymized_input?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5120,7 +5144,15 @@
             "section": "def-common.Deanonymization",
             "text": "Deanonymization"
           },
-          "[]; }[] | undefined; deanonymized_output?: { message: any; deanonymizations: ",
+          "[]; }[] | undefined; deanonymized_output?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5161,7 +5193,15 @@
             "section": "def-common.ChatCompletionChunkToolCall",
             "text": "ChatCompletionChunkToolCall"
           },
-          "[]; deanonymized_input?: { message: any; deanonymizations: ",
+          "[]; deanonymized_input?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -5169,7 +5209,15 @@
             "section": "def-common.Deanonymization",
             "text": "Deanonymization"
           },
-          "[]; }[] | undefined; deanonymized_output?: { message: any; deanonymizations: ",
+          "[]; }[] | undefined; deanonymized_output?: { message: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Message",
+            "text": "Message"
+          },
+          "; deanonymizations: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -6730,7 +6778,7 @@
           "\nConstants for all default (preconfigured) inference endpoints."
         ],
         "signature": [
-          "{ readonly ELSER: \".elser-2-elasticsearch\"; readonly ELSER_IN_EIS_INFERENCE_ID: \".elser-v2-elastic\"; readonly MULTILINGUAL_E5_SMALL: \".multilingual-e5-small-elasticsearch\"; }"
+          "{ readonly ELSER: \".elser-2-elasticsearch\"; readonly ELSER_IN_EIS_INFERENCE_ID: \".elser-2-elastic\"; readonly MULTILINGUAL_E5_SMALL: \".multilingual-e5-small-elasticsearch\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
         "deprecated": false,

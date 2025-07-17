@@ -45,6 +45,8 @@ const createActions = ({
       if (isNewConversation) {
         // Purge the query cache since we never fetch for conversation id "new"
         queryClient.removeQueries({ queryKey });
+        // Invalidate all conversations to refresh conversation history
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       } else {
         queryClient.invalidateQueries({ queryKey });
       }
