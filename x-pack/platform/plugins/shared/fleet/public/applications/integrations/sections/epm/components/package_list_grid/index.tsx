@@ -138,7 +138,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
     [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
   );
 
-  const filteredPromotedList = useMemo(() => {
+  const filteredPromotedList: Array<IntegrationCardItem & { index: number }> = useMemo(() => {
     if (isLoading) return [];
 
     const searchResults =
@@ -150,9 +150,14 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
       ? list.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : list;
 
-    return sortByFeaturedIntegrations
+    const promotedList = sortByFeaturedIntegrations
       ? promoteFeaturedIntegrations(filteredList, selectedCategory)
       : filteredList;
+
+    return promotedList.map((item, index) => ({
+      ...item,
+      index,
+    }));
   }, [isLoading, list, localSearch, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined
@@ -291,7 +296,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             {callout}
           </>
         ) : null}
-        {spacer && <EuiSpacer size="s" />}
+        {spacer && <EuiSpacer size="m" />}
         <EuiFlexItem>
           <GridColumn
             emptyStateStyles={emptyStateStyles}

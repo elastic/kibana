@@ -42,7 +42,7 @@ import {
   shouldShowInstallationStatus,
 } from './installation_status';
 
-export type PackageCardProps = IntegrationCardItem;
+export type PackageCardProps = IntegrationCardItem & { tabIndex?: number };
 
 export function PackageCard({
   description,
@@ -75,6 +75,7 @@ export function PackageCard({
   showDescription = true,
   showReleaseBadge = true,
   hasDataStreams,
+  tabIndex,
 }: PackageCardProps) {
   const theme = useEuiTheme();
   let releaseBadge: React.ReactNode | null = null;
@@ -253,6 +254,7 @@ export function PackageCard({
             />
           }
           onClick={onClickProp ?? onCardClick}
+          tabIndex={tabIndex}
         >
           <EuiFlexGroup gutterSize="xs" wrap={true}>
             {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
