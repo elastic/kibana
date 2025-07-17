@@ -22,5 +22,13 @@ export interface LayoutFooterProps {
  * @returns The rendered LayoutFooter component.
  */
 export const LayoutFooter = ({ children }: LayoutFooterProps) => {
-  return <footer css={styles.root}>{children}</footer>;
+  return (
+    <footer
+      css={styles.root}
+      className="kbnChromeLayoutFooter"
+      data-test-subj="kbnChromeLayoutFooter"
+    >
+      {children}
+    </footer>
+  );
 };

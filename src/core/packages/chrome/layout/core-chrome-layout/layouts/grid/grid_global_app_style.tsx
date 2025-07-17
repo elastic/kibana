@@ -106,7 +106,7 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 
   // push flyout should be pushing the application area, instead of body
-  main#${APP_MAIN_SCROLL_CONTAINER_ID} {
+  #${APP_MAIN_SCROLL_CONTAINER_ID} {
     ${logicalCSS('padding-right', `var(${hackEuiPushFlyoutPaddingInlineEnd}, 0px)`)};
     ${logicalCSS('padding-left', `var(${hackEuiPushFlyoutPaddingInlineStart}, 0px)`)};
   }

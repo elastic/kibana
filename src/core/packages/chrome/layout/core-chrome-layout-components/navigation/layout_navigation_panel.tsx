@@ -23,7 +23,12 @@ export interface LayoutNavigationPanelProps {
  */
 export const LayoutNavigationPanel = ({ children, width }: LayoutNavigationPanelProps) => {
   return (
-    <nav css={styles.root} style={{ width }}>
+    <nav
+      css={styles.root}
+      style={{ width }}
+      className="kbnChromeLayoutNavigationPanel"
+      data-test-subj="kbnChromeLayoutNavigationPanel"
+    >
       {children}
     </nav>
   );
