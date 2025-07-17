@@ -28,12 +28,6 @@ export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
 
 /**
- * UI settings
- */
-
-export const CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID = 'cases:incrementalIdDisplay:enabled';
-
-/**
  * If more values are added here please also add them here: x-pack/platform/test/cases_api_integration/common/plugins
  */
 export const SAVED_OBJECT_TYPES = [
@@ -177,6 +171,8 @@ export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
  */
 
 export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
+export const ANALYTICS_BACKFILL_TASK_TYPE = 'cai:cases_analytics_index_backfill';
+export const ANALYTICS_SYNCHRONIZATION_TASK_TYPE = 'cai:cases_analytics_index_synchronization';
 
 /**
  * Telemetry

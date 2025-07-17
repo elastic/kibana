@@ -48,13 +48,12 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
-import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
+
 import {
   createCasesAnalyticsIndexes,
   registerCasesAnalyticsIndexesTasks,
   scheduleCasesAnalyticsSyncTasks,
 } from './cases_analytics';
-import { registerUiSettings } from './ui_settings';
 
 export class CasePlugin
   implements
@@ -74,7 +73,6 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
-  private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private readonly isServerless: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -136,28 +134,14 @@ export class CasePlugin
       })
     );
 
-    if (this.caseConfig.incrementalId.enabled) {
-      registerUiSettings(core);
-    }
-
-    if (plugins.taskManager) {
-      if (this.caseConfig.incrementalId.enabled) {
-        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
-          plugins.taskManager,
-          this.caseConfig.incrementalId,
-          this.logger
-        );
-      }
-
-      if (plugins.usageCollection) {
-        createCasesTelemetry({
-          core,
-          taskManager: plugins.taskManager,
-          usageCollection: plugins.usageCollection,
-          logger: this.logger,
-          kibanaVersion: this.kibanaVersion,
-        });
-      }
+    if (plugins.taskManager && plugins.usageCollection) {
+      createCasesTelemetry({
+        core,
+        taskManager: plugins.taskManager,
+        usageCollection: plugins.usageCollection,
+        logger: this.logger,
+        kibanaVersion: this.kibanaVersion,
+      });
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
@@ -221,9 +205,7 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
-      if (this.caseConfig.incrementalId.enabled) {
-        void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
-      }
+
       if (this.caseConfig.analytics.index?.enabled) {
         scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });
         createCasesAnalyticsIndexes({
