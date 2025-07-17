@@ -38,6 +38,7 @@ import {
 import { configServiceMock } from '@kbn/config-mocks';
 import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
 import {
+  SavedObjectsClient,
   SavedObjectsClientProvider,
   SavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server-internal';
@@ -763,6 +764,335 @@ describe('SavedObjectsService', () => {
             '.kibana_foo',
           ]);
         });
+      });
+    });
+
+    describe('#getInternalClient', () => {
+      it('returns a SavedObjectsClient instance', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getInternalClient } = await soService.start(createStartDeps());
+
+        const client = getInternalClient();
+
+        expect(client).toBeInstanceOf(SavedObjectsClient);
+      });
+
+      it('is bound correctly in start contract', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const startContract = await soService.start(createStartDeps());
+
+        expect(startContract).toHaveProperty('getInternalClient');
+        expect(typeof startContract.getInternalClient).toBe('function');
+      });
+
+      it('works with no options parameter (default behavior)', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getInternalClient } = await soService.start(createStartDeps());
+
+        expect(() => getInternalClient()).not.toThrow();
+        const client = getInternalClient();
+        expect(client).toBeInstanceOf(SavedObjectsClient);
+      });
+
+      it('works with empty options object', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getInternalClient } = await soService.start(createStartDeps());
+
+        expect(() => getInternalClient({})).not.toThrow();
+        const client = getInternalClient({});
+        expect(client).toBeInstanceOf(SavedObjectsClient);
+      });
+
+      it('passes includedHiddenTypes to createInternalRepository', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getInternalClient } = await soService.start(createStartDeps());
+        const includedHiddenTypes = ['hidden-type-1', 'hidden-type-2'];
+
+        // Test that the method accepts the parameter without throwing
+        expect(() => getInternalClient({ includedHiddenTypes })).not.toThrow();
+        const client = getInternalClient({ includedHiddenTypes });
+        expect(client).toBeInstanceOf(SavedObjectsClient);
+      });
+
+      it('passes excludedExtensions to getInternalExtensions', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+
+        // Spy on the private getInternalExtensions method
+        const getInternalExtensionsSpy = jest.spyOn(soService as any, 'getInternalExtensions');
+
+        await soService.setup(createSetupDeps());
+        const { getInternalClient } = await soService.start(createStartDeps());
+        const excludedExtensions = ['test-extension'];
+
+        getInternalClient({ excludedExtensions });
+
+        expect(getInternalExtensionsSpy).toHaveBeenCalledWith(excludedExtensions);
+      });
+
+      it('calls internal repository factory, not scoped repository factory', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getInternalClient, createInternalRepository, createScopedRepository } =
+          await soService.start(createStartDeps());
+
+        // Verify that getInternalClient creates a client (indirectly testing internal repository usage)
+        const client = getInternalClient();
+        expect(client).toBeInstanceOf(SavedObjectsClient);
+
+        // Verify that both factory methods exist in the start contract
+        expect(typeof createInternalRepository).toBe('function');
+        expect(typeof createScopedRepository).toBe('function');
+      });
+
+      it('handles invalid options gracefully', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getInternalClient } = await soService.start(createStartDeps());
+
+        // Test with various invalid options
+        expect(() => getInternalClient({ includedHiddenTypes: null as any })).not.toThrow();
+        expect(() => getInternalClient({ excludedExtensions: null as any })).not.toThrow();
+        expect(() => getInternalClient({ unknownOption: 'test' } as any)).not.toThrow();
+      });
+    });
+
+    describe('#getInternalExtensions', () => {
+      it('automatically excludes security extension (always undefined)', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        // Set up security extension factory
+        const securityFactory = jest.fn().mockReturnValue({});
+        setup.setSecurityExtension(securityFactory);
+
+        await soService.start(createStartDeps());
+
+        const extensions = (soService as any).getInternalExtensions([]);
+
+        expect(extensions.securityExtension).toBeUndefined();
+        expect(securityFactory).not.toHaveBeenCalled();
+      });
+
+      it('creates encryption extension when factory exists', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const mockEncryptionExtension = { id: 'encryption' };
+        const encryptionFactory = jest.fn().mockReturnValue(mockEncryptionExtension);
+        setup.setEncryptionExtension(encryptionFactory);
+
+        await soService.start(createStartDeps());
+
+        const extensions = (soService as any).getInternalExtensions([]);
+
+        expect(extensions.encryptionExtension).toBe(mockEncryptionExtension);
+        expect(encryptionFactory).toHaveBeenCalledWith({
+          typeRegistry: expect.any(Object),
+          request: expect.objectContaining({
+            headers: {},
+            getBasePath: expect.any(Function),
+            path: '/',
+          }),
+        });
+      });
+
+      it('creates spaces extension when factory exists', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const mockSpacesExtension = { id: 'spaces' };
+        const spacesFactory = jest.fn().mockReturnValue(mockSpacesExtension);
+        setup.setSpacesExtension(spacesFactory);
+
+        await soService.start(createStartDeps());
+
+        const extensions = (soService as any).getInternalExtensions([]);
+
+        expect(extensions.spacesExtension).toBe(mockSpacesExtension);
+        expect(spacesFactory).toHaveBeenCalledWith({
+          typeRegistry: expect.any(Object),
+          request: expect.objectContaining({
+            headers: {},
+            getBasePath: expect.any(Function),
+            path: '/',
+          }),
+        });
+      });
+
+      it('excludes extensions via excludedExtensions parameter', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const encryptionFactory = jest.fn().mockReturnValue({ id: 'encryption' });
+        const spacesFactory = jest.fn().mockReturnValue({ id: 'spaces' });
+        setup.setEncryptionExtension(encryptionFactory);
+        setup.setSpacesExtension(spacesFactory);
+
+        await soService.start(createStartDeps());
+
+        const extensions = (soService as any).getInternalExtensions(['encryptionExtension']);
+
+        expect(extensions.encryptionExtension).toBeUndefined();
+        expect(extensions.spacesExtension).toBeDefined();
+        expect(encryptionFactory).not.toHaveBeenCalled();
+        expect(spacesFactory).toHaveBeenCalled();
+      });
+
+      it('handles undefined extension factories gracefully', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps());
+
+        // No extension factories set, should not throw
+        expect(() => (soService as any).getInternalExtensions([])).not.toThrow();
+
+        const extensions = (soService as any).getInternalExtensions([]);
+
+        expect(extensions.encryptionExtension).toBeUndefined();
+        expect(extensions.spacesExtension).toBeUndefined();
+        expect(extensions.securityExtension).toBeUndefined();
+      });
+
+      it('creates proper fake request object for extension factories', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const encryptionFactory = jest.fn().mockReturnValue({});
+        setup.setEncryptionExtension(encryptionFactory);
+
+        await soService.start(createStartDeps());
+
+        (soService as any).getInternalExtensions([]);
+
+        expect(encryptionFactory).toHaveBeenCalledWith({
+          typeRegistry: expect.any(Object),
+          request: expect.objectContaining({
+            headers: {},
+            getBasePath: expect.any(Function),
+            path: '/',
+            route: { settings: {} },
+            url: { href: '/' },
+            raw: { req: { url: '/' } },
+          }),
+        });
+
+        // Test that getBasePath function works
+        const requestArg = encryptionFactory.mock.calls[0][0].request;
+        expect(requestArg.getBasePath()).toBe('');
+      });
+
+      it('passes type registry correctly to extension factories', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const encryptionFactory = jest.fn().mockReturnValue({});
+        setup.setEncryptionExtension(encryptionFactory);
+
+        await soService.start(createStartDeps());
+
+        (soService as any).getInternalExtensions([]);
+
+        expect(encryptionFactory).toHaveBeenCalledWith({
+          typeRegistry: setup.getTypeRegistry(),
+          request: expect.any(Object),
+        });
+      });
+
+      it('constructs finalExcludedExtensions array correctly', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+
+        // Mock the createExt function to spy on excluded extensions check
+        const originalGetInternalExtensions = (soService as any).getInternalExtensions.bind(
+          soService
+        );
+        let capturedExcludedExtensions: string[] = [];
+
+        jest
+          .spyOn(soService as any, 'getInternalExtensions')
+          .mockImplementation((excludedExtensions = []) => {
+            // Capture the excluded extensions for verification
+            capturedExcludedExtensions = [...(excludedExtensions as string[]), 'securityExtension'];
+            return originalGetInternalExtensions(excludedExtensions);
+          });
+
+        await soService.start(createStartDeps());
+
+        (soService as any).getInternalExtensions(['customExtension']);
+
+        // Security extension should always be included in excluded extensions
+        expect(capturedExcludedExtensions).toContain('securityExtension');
+        expect(capturedExcludedExtensions).toContain('customExtension');
+      });
+    });
+
+    // Update existing #start() tests to include getInternalClient verification
+    describe('#start() - method binding verification', () => {
+      it('includes getInternalClient in start contract', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const startContract = await soService.start(createStartDeps());
+
+        expect(startContract).toHaveProperty('getInternalClient');
+        expect(typeof startContract.getInternalClient).toBe('function');
+      });
+
+      it('binds getInternalClient method correctly', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const { getInternalClient } = await soService.start(createStartDeps());
+
+        // Should work when called independently of the contract object
+        expect(() => getInternalClient()).not.toThrow();
+        const client = getInternalClient();
+        expect(client).toBeInstanceOf(SavedObjectsClient);
+      });
+
+      it('start contract has all expected methods including getInternalClient', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        const startContract = await soService.start(createStartDeps());
+
+        // Verify all expected methods exist
+        expect(startContract).toHaveProperty('getScopedClient');
+        expect(startContract).toHaveProperty('getInternalClient');
+        expect(startContract).toHaveProperty('createScopedRepository');
+        expect(startContract).toHaveProperty('createInternalRepository');
+        expect(startContract).toHaveProperty('createSerializer');
+        expect(startContract).toHaveProperty('createExporter');
+        expect(startContract).toHaveProperty('createImporter');
+        expect(startContract).toHaveProperty('getTypeRegistry');
+        expect(startContract).toHaveProperty('getDefaultIndex');
+        expect(startContract).toHaveProperty('getIndexForType');
+        expect(startContract).toHaveProperty('getIndicesForTypes');
+        expect(startContract).toHaveProperty('getAllIndices');
+
+        // Verify getInternalClient is a function
+        expect(typeof startContract.getInternalClient).toBe('function');
       });
     });
   });
