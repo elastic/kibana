@@ -62,83 +62,48 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
 
   // Use React hooks to manage state.
   const [stringWorkflow, setWorkflow] = useState<string>(
-    yaml.dump(
-      {
-        id: 'example-workflow-1',
-        name: 'Example Workflow 1',
-        status: 'active',
-        triggers: [
-          {
-            id: 'detection-rule',
-            type: 'detection-rule',
-            enabled: true,
-            config: {},
-          },
-        ],
-        steps: [
-          {
-            id: 'step-with-console-log-1',
-            connectorType: 'console',
-            connectorName: 'console',
-            inputs: {
-              message: 'Step 1 executed "{{event.ruleName}}"',
-            },
-          },
-          {
-            id: 'step-with-slow-console',
-            connectorName: 'slow-console',
-            connectorType: 'console',
-            inputs: {
-              message: 'Step 2 executed "{{event.additionalData.userName}}"',
-            },
-          },
-          {
-            id: 'step-with-slack-connector',
-            needs: ['step1', 'step2'],
-            connectorType: 'slack-connector',
-            connectorName: 'slack_keep',
-            inputs: {
-              message:
-                'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
-            },
-          },
-          {
-            id: 'step-with-console-log-2',
-            needs: ['step3'],
-            connectorName: 'console',
-            connectorType: 'console',
-            inputs: {
-              message: 'Message from step 2: And this is the second step at {{ now() }}',
-            },
-          },
-          {
-            id: 'step-with-5-seconds-delay',
-            connectorName: 'delay',
-            connectorType: 'delay',
-            inputs: {
-              delay: 5000,
-            },
-          },
-        ],
-      }
-    )
+    `
+workflow:
+  name: New workflow
+  enabled: false
+  triggers:
+    - type: triggers.elastic.manual
+  steps:
+    - name: step-with-console-log-1
+      type: console
+      connector-id: console
+      with:
+        message: Step 1 executed for rule"{{event.ruleName}}"
+    
+    - name: slack-connector-step
+      type: slack.sendMessage
+      connector-id: keep-playground
+      with:
+        message: |
+          Hello from Kibana!
+          The user name from event is {{event.additionalData.userName}} and email is {{event.additionalData.user}}
+
+    - name: step-with-5-seconds-delay
+      type: delay
+      connector-id: delay
+      with:
+        delay: 5000
+    `
   );
 
   // Update workflow inputs with current user email
   const getWorkflowInputs = () => {
     const userEmail = currentUser?.email || 'workflow-user@gmail.com';
     const userName = currentUser?.username || 'workflow-user';
-    return yaml.dump(
-      {
-        event: {
-          ruleName: 'Detect vulnerabilities',
-          additionalData: {
-            user: userEmail,
-            userName,
-          },
+    return yaml.dump({
+      event: {
+        ruleName: 'Detect vulnerabilities',
+        additionalData: {
+          user: userEmail,
+          userName,
         },
-      }
-    );
+      },
+    });
   };
   const [workflowInputs, setWorkflowInputs] = useState<string>(getWorkflowInputs());
   const [isValidWorkflow, setIsValidWorkflow] = useState<boolean>(true);
@@ -153,9 +118,9 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
   const onClickHandler = () => {
     // Use the core http service to make a response to the server API.
     http
-      .post('/api/workflows/run', {
+      .post('/api/workflows/test', {
         body: JSON.stringify({
-          workflow: yaml.load(stringWorkflow),
+          workflowYaml: stringWorkflow,
           inputs: yaml.load(workflowInputs),
         }),
       })
