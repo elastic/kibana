@@ -45278,11 +45278,37 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
+          in: query
+          name: all_data
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               example:
+                aggregations:
+                  anonymized:
+                    buckets:
+                      allowed:
+                        doc_count: 1
+                      anonymized:
+                        doc_count: 1
+                      denied:
+                        doc_count: 1
+                all:
+                  - allowed: true
+                    anonymized: true
+                    createdAt: '2023-10-31T12:00:00Z'
+                    createdBy: user1
+                    field: user.name
+                    id: '1'
+                    namespace: default
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    updatedBy: user1
                 data:
                   - allowed: true
                     anonymized: true
@@ -45300,6 +45326,37 @@ paths:
               schema:
                 type: object
                 properties:
+                  aggregations:
+                    type: object
+                    properties:
+                      field_status:
+                        type: object
+                        properties:
+                          buckets:
+                            type: object
+                            properties:
+                              allowed:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              anonymized:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              denied:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                  all:
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
+                    type: array
                   data:
                     items:
                       $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
@@ -56029,7 +56086,7 @@ paths:
       summary: Read the significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
   /api/streams/{name}/significant_events/_generate:
     get:
       description: 'Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.'
@@ -56061,7 +56118,7 @@ paths:
       summary: Generate significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.2.0
   /api/streams/{name}/significant_events/_preview:
     post:
       description: 'Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.'
@@ -56121,7 +56178,7 @@ paths:
       summary: Preview significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
   /api/synthetics/monitors:
     get:
       description: |
@@ -80544,6 +80601,18 @@ components:
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_percentile_metric'
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_doc_count_metric'
+                    discriminator:
+                      mapping:
+                        avg: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        cardinality: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        doc_count: '#/components/schemas/SLOs_timeslice_metric_doc_count_metric'
+                        last_value: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        max: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        min: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        percentile: '#/components/schemas/SLOs_timeslice_metric_percentile_metric'
+                        std_deviation: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        sum: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                      propertyName: aggregation
                   type: array
                 threshold:
                   description: The threshold used to determine if the metric is a good slice or not.
