@@ -1687,7 +1687,7 @@
     "buildkite-test-collector": "^1.8.1",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
-    "chromedriver": "^137.0.0",
+    "chromedriver": "^138.0.2",
     "clean-webpack-plugin": "^4.0.0",
     "cli-progress": "^3.12.0",
     "cli-table3": "^0.6.1",
