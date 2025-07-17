@@ -207,6 +207,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Profiling is set up', () => {
       before(async () => {
         await retry.tryForTime(240000, async () => {
+          await cleanUpProfilingData({ es, logger, bettertest });
           await setupProfiling(bettertest, logger);
         });
       });
