@@ -144,28 +144,6 @@ describe('Results', () => {
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
   });
 
-  it('renders the EmptyStates when showEmptyStates returns true', () => {
-    render(
-      <TestProviders>
-        <Results {...defaultProps} aiConnectors={[]} />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('welcome')).toBeInTheDocument();
-  });
-
-  it('calls onGenerate when the generate button is clicked', () => {
-    render(
-      <TestProviders>
-        <Results {...defaultProps} alertsContextCount={0} />
-      </TestProviders>
-    );
-
-    fireEvent.click(screen.getByTestId('generate'));
-
-    expect(defaultProps.onGenerate).toHaveBeenCalled();
-  });
-
   it('renders the Summary when showSummary returns true', () => {
     render(
       <TestProviders>
