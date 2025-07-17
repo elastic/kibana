@@ -308,7 +308,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       }
 
-      await agentPolicyService.bumpRevision(namespacedSoClient, esClient, policy!.id);
+      if (packagePoliciesToAdd.length > 0 || shouldAddIsManagedFlag) {
+        await agentPolicyService.bumpRevision(namespacedSoClient, esClient, policy!.id);
+      }
     }
   }
 
