@@ -152,7 +152,8 @@ export class BackfillTaskRunner implements CancellableTask {
     return esClient.cluster.health({
       index: this.destIndex,
       wait_for_status: 'green',
-      timeout: '30s',
+      timeout: '300ms',
+      wait_for_active_shards: 'all',
     });
   }
 
