@@ -117,7 +117,7 @@ steps:
   - group: "API MKI - Entity Analytics"
     key: api_test_entity_analytics
     steps:
-      - label: Running entity_analytics:qa:serverless
+      - label: 'API MKI - entity_analytics:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:qa:serverless
         key: entity_analytics:qa:serverless
         agents:
@@ -131,7 +131,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running entity_analytics:essentials:qa:serverless
+      - label: 'API MKI - entity_analytics:essentials:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh entity_analytics:essentials:qa:serverless
         key: entity_analytics:essentials:qa:serverless
         agents:
@@ -145,7 +145,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running explore:hosts:runner:qa:serverless
+      - label: 'API MKI - explore:hosts:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:hosts:runner:qa:serverless
         key: explore:hosts:runner:qa:serverless
         agents:
@@ -159,7 +159,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running explore:network:runner:qa:serverless
+      - label: 'API MKI - explore:network:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless
         key: explore:network:runner:qa:serverless
         agents:
@@ -173,7 +173,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running explore:users:runner:qa:serverless
+      - label: 'API MKI - explore:users:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless
         key: explore:users:runner:qa:serverless
         agents:

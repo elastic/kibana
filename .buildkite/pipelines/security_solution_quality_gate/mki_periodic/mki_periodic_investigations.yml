@@ -201,7 +201,7 @@ steps:
   - group: "API MKI - Investigations"
     key: api_test_investigations
     steps:
-      - label: Running investigations:timeline:runner:qa:serverless
+      - label: 'API MKI - investigations:timeline:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:timeline:runner:qa:serverless
         key: investigations:timeline:runner:qa:serverless
         agents:
@@ -215,7 +215,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running investigations:saved-objects:runner:qa:serverless
+      - label: 'API MKI - investigations:saved-objects:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless
         key: investigations:saved-objects:runner:qa:serverless
         agents:
@@ -229,7 +229,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: Running explore:overview:runner:qa:serverless
+      - label: 'API MKI - explore:overview:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
         key: explore:overview:runner:qa:serverless
         agents:
