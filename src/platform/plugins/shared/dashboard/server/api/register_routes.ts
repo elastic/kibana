@@ -16,7 +16,6 @@ import type { Logger } from '@kbn/logging';
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import {
-  dashboardAttributesSchema,
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
@@ -146,7 +145,7 @@ export function registerAPIRoutes({
             }),
           }),
           body: schema.object({
-            attributes: dashboardAttributesSchema,
+            attributes: dashboardCreateRequestAttributesSchema,
             references: schema.maybe(schema.arrayOf(referenceSchema)),
           }),
         },

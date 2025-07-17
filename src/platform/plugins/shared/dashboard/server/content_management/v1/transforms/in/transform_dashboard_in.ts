@@ -53,7 +53,7 @@ export const transformDashboardIn = async ({
       dashboardState;
     const { panelsJSON, sections } = transformPanelsIn(panels);
 
-    const attributes = {
+    const attributes: DashboardSavedObjectAttributes = {
       ...rest,
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),
