@@ -455,8 +455,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
   }
 
-  protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
-    const ancestors = await this.dependencies.streamsClient.getAncestors(this._definition.name);
+  protected async doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]> {
+    const ancestors = getAncestorsAndSelf(this._definition.name).map(
+      (id) => this.getAncestorFromState(desiredState, id).definition
+    );
     const lifecycle = findInheritedLifecycle(this._definition, ancestors);
 
     return [
@@ -535,8 +537,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       });
     }
     const hasAncestorsWithChangedFields = getAncestors(this._definition.name).some((ancestor) => {
-      const ancestorStream = desiredState.get(ancestor) as WiredStream | undefined;
-      return ancestorStream && ancestorStream.hasChangedFields();
+      const ancestorStream = this.getAncestorFromState(desiredState, ancestor);
+      return ancestorStream.hasChangedFields();
     });
     if (this.hasChangedFields() || hasAncestorsWithChangedFields) {
       actions.push({
@@ -639,5 +641,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
     ];
+  }
+
+  private getAncestorFromState(desiredState: State, name: string) {
+    const ancestor = desiredState.get(name);
+    if (!ancestor) {
+      throw new Error(`Ancestor stream ${name} not found in desired state`);
+    }
+    return ancestor as WiredStream;
   }
 }

@@ -194,9 +194,7 @@ const importContentRoute = createServerRoute({
       inheritedFields,
     });
 
-    await streamsClient.bulkUpsert(streams);
-
-    return { errors: [], created: [] };
+    return await streamsClient.bulkUpsert(streams);
   },
 });
 
