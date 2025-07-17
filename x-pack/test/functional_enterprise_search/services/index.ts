@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { services as functionalServices } from '../../functional/services';
-import { AppSearchServiceProvider } from './app_search_service';
+import { services as functionalServices } from '@kbn/test-suites-xpack-platform/functional/services';
 
 export const services = {
   ...functionalServices,
-  appSearch: AppSearchServiceProvider,
 };
