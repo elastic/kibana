@@ -25,6 +25,7 @@ import {
 import { css } from '@emotion/react';
 
 import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
@@ -46,12 +47,11 @@ import { injectReferences } from '../../common/persistable_state';
 
 import { checkForDuplicateTitle, linksClient } from '../content_management';
 import { resolveLinks } from '../lib/resolve_links';
-import {
-  deserializeLinksSavedObject,
-  linksSerializeStateIsByReference,
-} from '../lib/deserialize_from_library';
+import { deserializeLinksSavedObject } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
 import { isParentApiCompatible } from '../actions/add_links_panel_action';
+import { coreServices } from '../services/kibana_services';
+import { createLinksSavedObjectRef, findLinksSavedObjectRef } from '../lib/saved_object_ref_utils';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
@@ -62,8 +62,10 @@ export async function deserializeState(
   const state = cloneDeep(serializedState.rawState);
   const { title, description, hidePanelTitles } = serializedState.rawState;
 
-  if (linksSerializeStateIsByReference(state)) {
-    const linksSavedObject = await linksClient.get(state.savedObjectId);
+  const savedObjectRef = findLinksSavedObjectRef(serializedState.references);
+
+  if (savedObjectRef) {
+    const linksSavedObject = await linksClient.get(savedObjectRef.id);
     const runtimeState = await deserializeLinksSavedObject(linksSavedObject.item);
     return {
       ...runtimeState,
@@ -74,7 +76,7 @@ export async function deserializeState(
   }
 
   const { attributes: attributesWithInjectedIds } = injectReferences({
-    attributes: state.attributes,
+    attributes: (state as LinksByValueSerializedState).attributes ?? {},
     references: serializedState.references ?? [],
   });
 
@@ -96,12 +98,10 @@ export const getLinksEmbeddableFactory = () => {
     type: CONTENT_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
-      const savedObjectId = linksSerializeStateIsByReference(initialState.rawState)
-        ? initialState.rawState.savedObjectId
-        : undefined;
-      const isByReference = savedObjectId !== undefined;
 
       const initialRuntimeState = await deserializeState(initialState);
+      const savedObjectId = initialRuntimeState.savedObjectId;
+      const isByReference = savedObjectId !== undefined;
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       if (!isParentApiCompatible(parentApi)) blockingError$.next(new PanelIncompatibleError());
@@ -115,13 +115,12 @@ export const getLinksEmbeddableFactory = () => {
         links: undefined,
       });
 
-      function serializeByReference(id: string) {
+      function serializeByReference(libraryId: string) {
         return {
           rawState: {
             ...titleManager.getLatestState(),
-            savedObjectId: id,
           } as LinksByReferenceSerializedState,
-          references: [],
+          references: [createLinksSavedObjectRef(libraryId)],
         };
       }
 
@@ -226,33 +225,47 @@ export const getLinksEmbeddableFactory = () => {
           });
         },
         onEdit: async () => {
-          const { openEditorFlyout } = await import('../editor/open_editor_flyout');
-          const newState = await openEditorFlyout({
-            initialState: {
-              ...stateManager.getLatestState(),
-              savedObjectId,
+          openLazyFlyout({
+            core: coreServices,
+            parentApi,
+            loadContent: async ({ closeFlyout }) => {
+              const { getEditorFlyout } = await import('../editor/get_editor_flyout');
+              return getEditorFlyout({
+                initialState: {
+                  ...stateManager.getLatestState(),
+                  savedObjectId,
+                },
+                parentDashboard: parentApi,
+                onCompleteEdit: async (newState) => {
+                  if (!newState) return;
+
+                  // if the by reference state has changed during this edit, reinitialize the panel.
+                  const nextSavedObjectId = newState?.savedObjectId;
+                  const nextIsByReference = nextSavedObjectId !== undefined;
+                  if (
+                    nextIsByReference !== isByReference &&
+                    apiIsPresentationContainer(api.parentApi)
+                  ) {
+                    const serializedState = nextIsByReference
+                      ? serializeByReference(nextSavedObjectId)
+                      : serializeByValue();
+                    (serializedState.rawState as SerializedTitles).title = newState.title;
+
+                    api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
+                      serializedState,
+                      panelType: api.type,
+                    });
+                    return;
+                  }
+                  stateManager.reinitializeState(newState);
+                },
+                closeFlyout,
+              });
             },
-            parentDashboard: parentApi,
+            flyoutProps: {
+              'data-test-subj': 'links--panelEditor--flyout',
+            },
           });
-          if (!newState) return;
-
-          // if the by reference state has changed during this edit, reinitialize the panel.
-          const nextSavedObjectId = newState?.savedObjectId;
-          const nextIsByReference = nextSavedObjectId !== undefined;
-          if (nextIsByReference !== isByReference && apiIsPresentationContainer(api.parentApi)) {
-            const serializedState = nextIsByReference
-              ? serializeByReference(nextSavedObjectId)
-              : serializeByValue();
-            (serializedState.rawState as SerializedTitles).title = newState.title;
-
-            api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
-              serializedState,
-              panelType: api.type,
-            });
-            return;
-          }
-
-          stateManager.reinitializeState(newState);
         },
       });
 

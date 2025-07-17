@@ -1054,6 +1054,31 @@ describe('metric visualization', () => {
         }
       });
     });
+
+    it('forwards secondary prefix correctly when is an empty string', () => {
+      const expression = visualization.toExpression(
+        { ...fullState, secondaryPrefix: '', collapseFn: undefined },
+        datasourceLayers
+      );
+      if (expression && typeof expression === 'object') {
+        const secondaryPrefix = expression.chain[0].arguments.secondaryPrefix[0];
+        expect(secondaryPrefix).toBe('');
+      } else {
+        fail('Expression is not an object');
+      }
+    });
+
+    it('forwards secondary prefix correctly when is undefined', () => {
+      const expression = visualization.toExpression(
+        { ...fullState, secondaryPrefix: undefined, collapseFn: undefined },
+        datasourceLayers
+      );
+      if (expression && typeof expression === 'object') {
+        expect(expression.chain[0].arguments.secondaryPrefix).toBe(undefined);
+      } else {
+        fail('Expression is not an object');
+      }
+    });
   });
 
   it('clears a layer', () => {
