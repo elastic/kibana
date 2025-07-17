@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstComment } from '../types';
+import * as esql_parser from '../antlr/esql_parser';
+import type { CstToAstConverter } from './cst_to_ast_converter';
+import type { ESQLAstComment } from '../types';
 
 /**
  * Lines of decorations per *whitespace line*. A *whitespace line* is a line
@@ -61,3 +63,27 @@ export interface ParsedFormattingLineBreakDecoration {
    */
   lines: number;
 }
+
+type Functions<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+};
+type GrammarRule = keyof Functions<InstanceType<typeof esql_parser.default>>;
+type CstToAstConversion = keyof Functions<CstToAstConverter>;
+
+/**
+ * Specifies a grammar *parsing target* for the ESQL parser. The parsing target
+ * is a grammar rule which is used to parse the source text. Picking a
+ * specific rule allows to parse any ES|QL grammar construct, such as a
+ * command, expression, or a query (instead of parsing the whole query).
+ */
+export type EsqlParsingTarget = [
+  /**
+   * ANTLR grammar rule, used to parse the source text.
+   */
+  rule: GrammarRule,
+
+  /**
+   * The conversion to use for converting the root ANTLR CST node to a Kibana AST node.
+   */
+  conversion: CstToAstConversion
+];

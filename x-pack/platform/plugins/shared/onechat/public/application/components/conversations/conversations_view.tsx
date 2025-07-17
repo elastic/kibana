@@ -12,24 +12,34 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useState } from 'react';
 import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header';
-import { ConversationSidebar } from './conversation_sidebar';
+import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
+import { useConversationList } from '../../hooks/use_conversation_list';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
+  const mainStyles = css`
+    border: none;
+  `;
   const backgroundStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
-  const headerHeight = `calc(${euiTheme.size.xxl} * 2)`;
+  const sidebarStyles = css`
+    ${backgroundStyles}
+    padding: ${euiTheme.size.base};
+    max-block-size: calc(var(--kbn-application--content-height));
+  `;
+  const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
     ${backgroundStyles}
     display: flex;
+    flex-direction: column;
     justify-content: center;
     border: none;
     block-size: ${headerHeight};
   `;
-  const mainContentStyles = css`
+  const contentStyles = css`
     ${backgroundStyles}
     width: 100%;
     height: 100%;
@@ -45,6 +55,9 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
+  // Prefetch conversations before sidebar is opened
+  const { conversations, isLoading } = useConversationList();
+
   return (
     <KibanaPageTemplate
       offset={0}
@@ -52,14 +65,23 @@ export const OnechatConversationsView: React.FC<{}> = () => {
       data-test-subj="onechatPageConversations"
       grow={false}
       panelled={false}
+      mainProps={{
+        css: mainStyles,
+      }}
+      responsive={[]}
     >
       {isSidebarOpen && (
-        <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar">
-          <ConversationSidebar />
+        <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
+          <ConversationSidebar conversations={conversations} isLoading={isLoading} />
         </KibanaPageTemplate.Sidebar>
       )}
 
-      <KibanaPageTemplate.Header css={headerStyles} bottomBorder={false} aria-label={labels.header}>
+      <KibanaPageTemplate.Header
+        css={headerStyles}
+        bottomBorder={false}
+        aria-label={labels.header}
+        paddingSize="m"
+      >
         <ConversationHeader
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => {
@@ -71,7 +93,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
         paddingSize="none"
         grow
         contentProps={{
-          css: mainContentStyles,
+          css: contentStyles,
         }}
         aria-label={labels.content}
       >

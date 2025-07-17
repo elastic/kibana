@@ -108,7 +108,7 @@
         "description": [
           "\nAPIs to access pricing tier information during the start phase.\n"
         ],
-        "path": "src/core/packages/pricing/server/src/contracts.ts",
+        "path": "src/core/packages/pricing/common/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -124,10 +124,12 @@
             "signature": [
               "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
             ],
-            "path": "src/core/packages/pricing/server/src/contracts.ts",
+            "path": "src/core/packages/pricing/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
+            "returnComment": [
+              "True if the feature is available in the current pricing tier, false otherwise"
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-pricing-server",
@@ -135,7 +137,9 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "featureId",
-                "description": [],
+                "description": [
+                  "- The identifier of the feature to check"
+                ],
                 "signature": [
                   "TFeatureId"
                 ],
@@ -144,6 +148,40 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-server",
+            "id": "def-server.PricingServiceStart.getActiveProduct",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PricingProduct",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-internal/src/pricing_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-mocks/src/pricing_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts"
+              }
+            ],
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false

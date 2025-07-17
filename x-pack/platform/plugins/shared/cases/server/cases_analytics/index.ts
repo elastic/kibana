@@ -20,6 +20,7 @@ import {
 import { createCasesAnalyticsIndex, scheduleCasesAnalyticsSyncTask } from './cases_index';
 import { createCommentsAnalyticsIndex, scheduleCommentsAnalyticsSyncTask } from './comments_index';
 import { createActivityAnalyticsIndex, scheduleActivityAnalyticsSyncTask } from './activity_index';
+import type { ConfigType } from '../config';
 
 export const createCasesAnalyticsIndexes = ({
   esClient,
@@ -69,13 +70,15 @@ export const registerCasesAnalyticsIndexesTasks = ({
   taskManager,
   logger,
   core,
+  analyticsConfig,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<CasesServerStartDependencies>;
+  analyticsConfig: ConfigType['analytics'];
 }) => {
-  registerCAIBackfillTask({ taskManager, logger, core });
-  registerCAISynchronizationTask({ taskManager, logger, core });
+  registerCAIBackfillTask({ taskManager, logger, core, analyticsConfig });
+  registerCAISynchronizationTask({ taskManager, logger, core, analyticsConfig });
 };
 
 export const scheduleCasesAnalyticsSyncTasks = ({
