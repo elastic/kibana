@@ -13,7 +13,7 @@ The CA certificate and key (`kibana_ca.crt` and `kibana_ca.key`) are used to sig
 by Kibana and not Elasticsearch. These files can be generated using the following commands:
 
 ```
-export PKI_FIXTURES=$KIBANA_HOME/x-pack/platform/test//security_api_integration/fixtures/pki
+export PKI_FIXTURES=$KIBANA_HOME/x-pack/platform/test/security_api_integration/fixtures/pki
 
 # Extract and rename CA files to kibana_ca.crt and kibana_ca.key
 bin/elasticsearch-certutil ca --ca-dn "CN=Kibana CA" --days 18250 --pem

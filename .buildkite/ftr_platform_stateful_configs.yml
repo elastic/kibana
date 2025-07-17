@@ -289,40 +289,40 @@ enabled:
   - x-pack/platform/test/saved_object_tagging/functional/config.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
-  - x-pack/platform/test//security_api_integration/anonymous_es_anonymous.config.ts
-  - x-pack/platform/test//security_api_integration/anonymous.config.ts
-  - x-pack/platform/test//security_api_integration/api_keys.config.ts
-  - x-pack/platform/test//security_api_integration/audit.config.ts
-  - x-pack/platform/test//security_api_integration/http_bearer.config.ts
-  - x-pack/platform/test//security_api_integration/http_no_auth_providers.config.ts
-  - x-pack/platform/test//security_api_integration/kerberos_anonymous_access.config.ts
-  - x-pack/platform/test//security_api_integration/kerberos.config.ts
-  - x-pack/platform/test//security_api_integration/login_selector.config.ts
-  - x-pack/platform/test//security_api_integration/oidc_implicit_flow.config.ts
-  - x-pack/platform/test//security_api_integration/oidc.config.ts
-  - x-pack/platform/test//security_api_integration/oidc.http2.config.ts
-  - x-pack/platform/test//security_api_integration/pki.config.ts
-  - x-pack/platform/test//security_api_integration/saml.config.ts
-  - x-pack/platform/test//security_api_integration/saml.http2.config.ts
-  - x-pack/platform/test//security_api_integration/saml_cloud.config.ts
-  - x-pack/platform/test//security_api_integration/chips.config.ts
-  - x-pack/platform/test//security_api_integration/features.config.ts
-  - x-pack/platform/test//security_api_integration/session_cookie.config.ts
-  - x-pack/platform/test//security_api_integration/session_idle.config.ts
-  - x-pack/platform/test//security_api_integration/session_shard_missing.config.ts
-  - x-pack/platform/test//security_api_integration/session_invalidate.config.ts
-  - x-pack/platform/test//security_api_integration/session_lifespan.config.ts
-  - x-pack/platform/test//security_api_integration/session_concurrent_limit.config.ts
-  - x-pack/platform/test//security_api_integration/token.config.ts
-  - x-pack/platform/test//security_api_integration/user_profiles.config.ts
-  - x-pack/platform/test//security_functional/login_selector.config.ts
-  - x-pack/platform/test//security_functional/oidc.config.ts
-  - x-pack/platform/test//security_functional/saml.config.ts
-  - x-pack/platform/test//security_functional/saml.http2.config.ts
-  - x-pack/platform/test//security_functional/oidc.http2.config.ts
-  - x-pack/platform/test//security_functional/insecure_cluster_warning.config.ts
-  - x-pack/platform/test//security_functional/user_profiles.config.ts
-  - x-pack/platform/test//security_functional/expired_session.config.ts
+  - x-pack/platform/test/security_api_integration/anonymous_es_anonymous.config.ts
+  - x-pack/platform/test/security_api_integration/anonymous.config.ts
+  - x-pack/platform/test/security_api_integration/api_keys.config.ts
+  - x-pack/platform/test/security_api_integration/audit.config.ts
+  - x-pack/platform/test/security_api_integration/http_bearer.config.ts
+  - x-pack/platform/test/security_api_integration/http_no_auth_providers.config.ts
+  - x-pack/platform/test/security_api_integration/kerberos_anonymous_access.config.ts
+  - x-pack/platform/test/security_api_integration/kerberos.config.ts
+  - x-pack/platform/test/security_api_integration/login_selector.config.ts
+  - x-pack/platform/test/security_api_integration/oidc_implicit_flow.config.ts
+  - x-pack/platform/test/security_api_integration/oidc.config.ts
+  - x-pack/platform/test/security_api_integration/oidc.http2.config.ts
+  - x-pack/platform/test/security_api_integration/pki.config.ts
+  - x-pack/platform/test/security_api_integration/saml.config.ts
+  - x-pack/platform/test/security_api_integration/saml.http2.config.ts
+  - x-pack/platform/test/security_api_integration/saml_cloud.config.ts
+  - x-pack/platform/test/security_api_integration/chips.config.ts
+  - x-pack/platform/test/security_api_integration/features.config.ts
+  - x-pack/platform/test/security_api_integration/session_cookie.config.ts
+  - x-pack/platform/test/security_api_integration/session_idle.config.ts
+  - x-pack/platform/test/security_api_integration/session_shard_missing.config.ts
+  - x-pack/platform/test/security_api_integration/session_invalidate.config.ts
+  - x-pack/platform/test/security_api_integration/session_lifespan.config.ts
+  - x-pack/platform/test/security_api_integration/session_concurrent_limit.config.ts
+  - x-pack/platform/test/security_api_integration/token.config.ts
+  - x-pack/platform/test/security_api_integration/user_profiles.config.ts
+  - x-pack/platform/test/security_functional/login_selector.config.ts
+  - x-pack/platform/test/security_functional/oidc.config.ts
+  - x-pack/platform/test/security_functional/saml.config.ts
+  - x-pack/platform/test/security_functional/saml.http2.config.ts
+  - x-pack/platform/test/security_functional/oidc.http2.config.ts
+  - x-pack/platform/test/security_functional/insecure_cluster_warning.config.ts
+  - x-pack/platform/test/security_functional/user_profiles.config.ts
+  - x-pack/platform/test/security_functional/expired_session.config.ts
   - x-pack/test/session_view/basic/config.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts

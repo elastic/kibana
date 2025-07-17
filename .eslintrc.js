@@ -2113,8 +2113,8 @@ module.exports = {
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/shared/security/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/test//security_api_integration/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/test//security_functional/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',

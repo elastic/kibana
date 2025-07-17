@@ -71,7 +71,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     );
     const samlIdPPlugin = path.resolve(
       __dirname,
-      '../../../../test/security_api_integration/plugins/saml_provider'
+      '../../security_api_integration/plugins/saml_provider'
     );
 
     const servers = {
