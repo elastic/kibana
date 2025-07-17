@@ -78,7 +78,7 @@ export function createEvaluateEsqlDataset({
               .criteria([
                 ...(expected.expected
                   ? [
-                      `Returns a ES|QL query that is functionally equivalent to:
+                      `Returns an ES|QL query that is functionally equivalent to:
       ${expected.expected}. It's OK if the created column names are slightly different, as long as the expected end result is the same.`,
                     ]
                   : []),
