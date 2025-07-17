@@ -41,6 +41,7 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useLinkInfo, useUpdateLinkConfig } from '../../common/links/links_hooks';
 import { PageLoader } from '../../common/components/page_loader';
+import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -110,8 +111,8 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec(); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore); // TODO: newDataViewPicker - this could be left, as the fieldMap spec is actually being used
 
   const isSourcererLoading = useMemo(
     () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),

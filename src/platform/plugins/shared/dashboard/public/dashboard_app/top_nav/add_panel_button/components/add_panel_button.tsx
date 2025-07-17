@@ -8,12 +8,10 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 
-import { AddPanelFlyout } from './add_panel_flyout';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { useDashboardApi } from '../../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../../services/kibana_services';
 
@@ -28,32 +26,30 @@ export const AddPanelButton = ({ isDisabled }: { isDisabled?: boolean }) => {
   }, [dashboardApi]);
 
   const openFlyout = useCallback(() => {
-    const overlayRef = coreServices.overlays.openFlyout(
-      toMountPoint(
-        React.createElement(function () {
-          return <AddPanelFlyout dashboardApi={dashboardApi} />;
-        }),
-        coreServices
-      ),
-      {
-        size: 'm',
-        maxWidth: 500,
-        paddingSize: 'm',
-        'aria-labelledby': 'addPanelsFlyout',
+    openLazyFlyout({
+      core: coreServices,
+      parentApi: dashboardApi,
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        const { AddPanelFlyout } = await import('./add_panel_flyout');
+        return (
+          <AddPanelFlyout
+            dashboardApi={dashboardApi}
+            closeFlyout={closeFlyout}
+            ariaLabelledBy={ariaLabelledBy}
+          />
+        );
+      },
+      flyoutProps: {
         'data-test-subj': 'dashboardPanelSelectionFlyout',
-        onClose() {
-          dashboardApi.clearOverlays();
-          overlayRef.close();
-        },
-      }
-    );
-
-    dashboardApi.openOverlay(overlayRef);
+      },
+      triggerId: 'dashboardEditorMenuButton',
+    });
   }, [dashboardApi]);
 
   return (
     <ToolbarButton
       data-test-subj="dashboardEditorMenuButton"
+      id="dashboardEditorMenuButton"
       isDisabled={isDisabled}
       iconType="plusInCircle"
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
