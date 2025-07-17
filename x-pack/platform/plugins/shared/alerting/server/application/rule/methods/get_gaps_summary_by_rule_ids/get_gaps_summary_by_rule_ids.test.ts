@@ -160,7 +160,7 @@ describe('getGapsSummaryByRuleIds', () => {
     );
 
     expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledWith('alert', ruleIds, {
-      filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
+      filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
       aggs: {
         unique_rule_ids: {
           terms: {

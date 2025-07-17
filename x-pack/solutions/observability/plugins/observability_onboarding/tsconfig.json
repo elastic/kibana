@@ -44,7 +44,8 @@
     "@kbn/logs-shared-plugin",
     "@kbn/tooling-log",
     "@kbn/ebt-tools",
-    "@kbn/apm-plugin"
+    "@kbn/apm-plugin",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*"
