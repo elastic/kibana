@@ -52099,12 +52099,12 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            dashboards:
+                            streams:
                               items:
                                 type: string
                               type: array
                           required:
-                            - dashboards
+                            - streams
                       required:
                         - objects
                     - additionalProperties: false
@@ -52118,17 +52118,12 @@ paths:
                         - all
                 name:
                   type: string
-                replaced_patterns:
-                  items:
-                    type: string
-                  type: array
                 version:
                   type: string
               required:
                 - name
                 - description
                 - version
-                - replaced_patterns
                 - include
       responses: {}
       summary: Export stream content
