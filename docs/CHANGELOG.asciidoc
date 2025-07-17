@@ -114,6 +114,52 @@ Review the following information about the {kib} 8.19.0 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 8.19.0, review the breaking changes, then mitigate the impact to your application.
 
+[discrete]
+.Now the fields / functions variables are being described with ?? in the query. The values variables use ? as before.
+[%collapsible]
+====
+*Details* +
+!!TODO!!
+
+*Impact* +
+!!TODO!!
+
+View ({kibana-pull}213916[#213916])
+====
+      
+[float]
+[[deprecations-8.19.0]]
+=== Deprecations
+
+The following functionality is deprecated in 8.19.0, and will be removed in 9.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 8.19.0.
+
+[discrete]
+.Removes Default Quick Prompts.
+[%collapsible]
+====
+*Details* +
+!!TODO!!
+
+*Impact* +
+!!TODO!!
+
+View ({kibana-pull}225536[#225536])
+====
+      
+[discrete]
+.Remove no longer used feature flags for GA features.
+[%collapsible]
+====
+*Details* +
+!!TODO!!
+
+*Impact* +
+!!TODO!!
+
+View ({kibana-pull}197684[#197684])
+====
       
 [float]
 [[features-8.19.0]]
@@ -186,6 +232,14 @@ Platform::
 !!TODO!! The above PR had a lengthy release note description:
 Adds the Create alert rule action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This allows you to generate an alert when the data on the chart crosses a certain threshold.
 ////
+Search::
+* Enable query rules by default ({kibana-pull}227226[#227226]).
+////
+!!TODO!! The above PR had a lengthy release note description:
+Added a section to enable add, update and delete Query Rules written on top of Query Rules APIs to easily pin or exclude documents to a query according to criterias you set.
+////
+Other::
+* Indicate if failure store isn't enabled for data stream ({kibana-pull}221644[#221644]).
 
 For more information about the features introduced in 8.19.0, refer to <<whats-new,What's new in 8.19>>.
 
@@ -196,7 +250,7 @@ For detailed information about the 8.19.0 release, review the enhancements and f
 
 [float]
 [[enhancement-v8.19.0]]
-=== Enhancements
+==== Enhancements
 Alerting::
 * Report UI should only show reports generated in the current space ({kibana-pull}221375[#221375]).
 * Moves rule settings to a flyout instead of a modal ({kibana-pull}216162[#216162]).
@@ -257,6 +311,7 @@ Kibana security::
 * Improved handling for operator-defined role mappings ({kibana-pull}208710[#208710]).
 * Updated `js-yaml` to `4.1.0` ({kibana-pull}190678[#190678]).
 Machine Learning::
+* Update NL-2-ESQL docs ({kibana-pull}224868[#224868]).
 * Trained Models: Hides Adaptive Allocations Toggle in Serverless ({kibana-pull}224097[#224097]).
 * Adds rare scripts job to preconfigured Security:Windows anomaly detection jobs ({kibana-pull}223041[#223041]).
 * Adds new subAction for converse and converseStream for Bedrock ({kibana-pull}223033[#223033]).
@@ -272,7 +327,6 @@ Machine Learning::
 Management::
 * Adds loader when datasources are being loaded ({kibana-pull}225005[#225005]).
 * Listing and overview page improvements ({kibana-pull}223603[#223603]).
-* Significant events view ({kibana-pull}220197[#220197]).
 * Remove enablement check in `PUT /api/streams/{id}` for classic streams ({kibana-pull}212289[#212289]).
 * Enable `/api/streams/{id}/_group` endpoints for GroupStreams ({kibana-pull}210114[#210114]).
 * Update styles for Color formatter to look like a badge ({kibana-pull}189391[#189391]).
@@ -288,12 +342,19 @@ Kibana logging's pattern layout, used by default for the console appender, will 
 
 [float]
 [[fixes-v8.19.0]]
-=== Fixes
+==== Fixes
 Alerting::
+* Reports are timing out and failing with an invalid header error ({kibana-pull}225919[#225919]).
 * Fixes ignored dynamic templates ({kibana-pull}219875[#219875]).
 * Update task state version after execution ({kibana-pull}215559[#215559]).
 * Fixes a regression that caused the cases actions to disappear from the detections engine alerts table bulk actions menu ({kibana-pull}215111[#215111]).
 Dashboards and Visualizations::
+* Forward secondary prefix correctly when state value is an empty string (`None` option) in *Lens* ({kibana-pull}228183[#228183]).
+* Fixes an issue where a Lens Partition chart (i.e. `Pie`) prevented the user from selecting a legacy palette. in *Lens* ({kibana-pull}228051[#228051]).
+* (Accessibility) Dashboard controls should be grouped as a labelled list ({kibana-pull}227633[#227633]).
+* Fixes disabled range slider tooltip, clean up delete control button ({kibana-pull}227295[#227295]).
+* Fixes secondary metric styles to prevent wrapping in *Lens* ({kibana-pull}227234[#227234]).
+* Save button is disabled in case of save error ({kibana-pull}227091[#227091]).
 * Skip all references fallback ({kibana-pull}225908[#225908]).
 * [Controls] Do not recommend adhoc dataviews ({kibana-pull}225705[#225705]).
 * Fixes Lens Embeddable defaultTitle from being overwritten by custom title after reload ({kibana-pull}225664[#225664]).
@@ -315,10 +376,19 @@ Dashboards and Visualizations::
 This PR fixes an issue ([#193080](https://github.com/elastic/kibana/issues/193080)) where custom ranges and multi-field values were not correctly colored based on selected color mapping configurations.
 ////
 Data ingestion and Fleet::
+* Fixes backfill agentless logic for all packages ({kibana-pull}225767[#225767]).
+* Fixes UI error when no tags filter is selected ({kibana-pull}225413[#225413]).
 * Revert " Added instructions for installing elastic agent complete" ({kibana-pull}223520[#223520]).
 * Fixes styled component theme lookup issue ({kibana-pull}221979[#221979]).
 Discover::
+* Fixes wrong validation on expressions between aggregations ({kibana-pull}227989[#227989]).
+* Hides lookup index hidden indices from autocomplete ({kibana-pull}227819[#227819]).
+* Adds singulars/plurals to expiration badges ({kibana-pull}227035[#227035]).
 * Fixes invalid input highlight in Data View flyout ({kibana-pull}226822[#226822]).
+* Fixes search session rename error in dev ({kibana-pull}226757[#226757]).
+* Fixes drag & drop when animations are disabled ({kibana-pull}226592[#226592]).
+* Return namespaces from update ({kibana-pull}226569[#226569]).
+* Don't change selected document when resizing flyout with keyboard ({kibana-pull}225594[#225594]).
 * Fixes edited query overwriting when a request is finished ({kibana-pull}224671[#224671]).
 * Update aria tags in patterns selected field ({kibana-pull}224224[#224224]).
 * Fixes z-index for esql query editor ({kibana-pull}222841[#222841]).
@@ -359,12 +429,16 @@ For the Elastic Observability 8.19.0 release information, refer to [Elastic Obse
 Elastic Security solution::
 For the Elastic Security 8.19.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 Kibana platform::
+* Fixes "How's the navigation working for you?" shown with each session ({kibana-pull}227199[#227199]).
+* Hide Kibana's header and side navigation when trying to print or use the dashboard export with print mode ({kibana-pull}227095[#227095]).
 * Remove listing limit warning ({kibana-pull}217945[#217945]).
 Kibana security::
 * Fixed spaces search functionality for spaces created with avatar type as image ({kibana-pull}220398[#220398]).
 * Ensure that when an SLO is created, the id is verified across all spaces ({kibana-pull}214496[#214496]).
 * Fixed image resize for image used in `xpack.security.loginAssistanceMessage` ({kibana-pull}212035[#212035]).
 Machine Learning::
+* Fixes handling of time range in embedded anomaly swim lane ({kibana-pull}225803[#225803]).
+* Anomaly Detection Rule: Fallback to the default value when `lookbackInterval` is empty ({kibana-pull}225249[#225249]).
 * Hides node allocation warning on serverless ({kibana-pull}224406[#224406]).
 * Fixes unknown fields not supported in Data Visualizer and Field Statistics ({kibana-pull}223903[#223903]).
 * Change Point Detection: Fixes 'Use full data' button issue which could cause page to crash ({kibana-pull}217291[#217291]).
@@ -375,13 +449,22 @@ Machine Learning::
 * Trained Models: Fixes further deployment of models after a failed deployment ({kibana-pull}211459[#211459]).
 * AIOps Hides saved query controls ({kibana-pull}210556[#210556]).
 Management::
+* Fixes flyout styles ({kibana-pull}228078[#228078]).
+* Display dataview pattern as tooltip during rule creation ({kibana-pull}226909[#226909]).
+* Fixes Outcome Preview Table so columns always fill width after resize ({kibana-pull}226000[#226000]).
 * Adds discernible text for refresh data preview button ({kibana-pull}225816[#225816]).
 * Fixes inability to clear Document ID in data view field editor preview ({kibana-pull}220891[#220891]).
 * Ensure the members array is unique for GroupStreamDefinitions ({kibana-pull}210089[#210089]).
 Platform::
 * Passing the correct namespace to migrateInputDocument ({kibana-pull}222313[#222313]).
 Search::
+* Fixes issue in Search Playground where context limit errors were not handled well when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 * Adjusted `z-index` of app menu header to not conflict with the portable dev console ({kibana-pull}224708[#224708]).
+Other::
+* Fixed a bug with the solution nav submenu items when the nav is collapsed ({kibana-pull}227705[#227705]).
+* Fixes false positive alerts for IM ({kibana-pull}225248[#225248]).
+* Apply chunking algorithm for getIndexBasicStats ({kibana-pull}221153[#221153]).
+* Improve finding a function ({kibana-pull}210437[#210437]).
 
 [[release-notes-8.18.3]]
 == {kib} 8.18.3
