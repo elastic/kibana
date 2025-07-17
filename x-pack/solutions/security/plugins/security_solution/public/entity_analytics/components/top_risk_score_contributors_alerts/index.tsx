@@ -10,7 +10,6 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useGroupTakeActionsItems } from '../../../detections/hooks/alerts_table/use_group_take_action_items';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   defaultGroupingOptions,
   defaultGroupStatsAggregations,
@@ -35,7 +34,7 @@ import { useUserData } from '../../../detections/components/user_info';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { RiskInformationButtonEmpty } from '../risk_information';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 export interface TopRiskScoreContributorsAlertsProps<T extends EntityType> {
   toggleStatus: boolean;
@@ -54,14 +53,11 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
 }: TopRiskScoreContributorsAlertsProps<T>) => {
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, hasIndexWrite, hasIndexMaintenance }] = useUserData();
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView(
     SourcererScopeName.detections
   );
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
-
-  const sourcererDataViewSpec = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -146,7 +142,8 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
             <GroupedAlertsTable
               accordionButtonContent={defaultGroupTitleRenderers}
               accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-              dataViewSpec={sourcererDataViewSpec}
+              dataViewSpec={oldSourcererDataViewSpec} // TODO: Should be removed after migrating to new data view picker
+              dataView={experimentalDataView}
               defaultFilters={defaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}
