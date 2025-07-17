@@ -6797,6 +6797,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.LEGACY_CUSTOM_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LEGACY_CUSTOM_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\"obs_ai_assistant_kb_inference\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ObservabilityAIAssistantAPIClientRequestParamsOf",
         "type": "Type",
         "tags": [],
@@ -14042,6 +14057,21 @@
         "description": [],
         "signature": [
           "\".elser-2-elasticsearch\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.LEGACY_CUSTOM_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LEGACY_CUSTOM_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\"obs_ai_assistant_kb_inference\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,
