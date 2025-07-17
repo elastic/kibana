@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isImpliedDefaultElserInferenceId } from './is_default_inference_endpoint';
 import { type ProductName, DocumentationProduct } from './product';
 
 const allowedProductNames: ProductName[] = Object.values(DocumentationProduct);
@@ -24,7 +25,7 @@ export const getArtifactName = ({
 }): string => {
   const ext = excludeExtension ? '' : '.zip';
   return `kb-product-doc-${productName}-${productVersion}${
-    inferenceId && inferenceId !== DEFAULT_ELSER ? `--${inferenceId}` : ''
+    inferenceId && !isImpliedDefaultElserInferenceId(inferenceId) ? `--${inferenceId}` : ''
   }${ext}`.toLowerCase();
 };
 
