@@ -26,7 +26,10 @@ async function getFileContent(path: string, ref: string) {
     ref,
   });
 
-  // @ts-expect-error
+  if (Array.isArray(response.data) || response.data.type !== 'file') {
+    throw new Error(`Expected file at ${path}`);
+  }
+
   const content = Buffer.from(response.data.content, 'base64').toString('utf8');
 
   return JSON.parse(content);
@@ -68,10 +71,11 @@ async function main() {
 
   const packageJsonChanged = changedFiles.some((file) => file === 'package.json');
   const dependenciesAdded = changedFiles.some((file) => file.match('third_party_packages.txt'));
+  const filePath = join(__dirname, 'third_party_packages.txt');
 
   // Reverting changes (if dependency was added, then removed in the same PR)
   if (!packageJsonChanged && dependenciesAdded) {
-    const filePath = join(__dirname, 'third_party_packages.txt');
+    console.info(`Reverting changes for ${filePath}`);
     execSync(`git checkout ${process.env.GITHUB_PR_MERGE_BASE} -- ${filePath}`);
 
     return;
@@ -80,10 +84,10 @@ async function main() {
   const { added, removed } = await getDependenciesDiff();
 
   if (!added.length && !removed.length) {
+    console.info('No third party packages added or removed');
     return;
   }
 
-  const filePath = join(__dirname, 'third_party_packages.txt');
   const existingContent = await readFile(filePath, 'utf8');
 
   const existingLines = new Set(existingContent.split('\n').filter(Boolean));
