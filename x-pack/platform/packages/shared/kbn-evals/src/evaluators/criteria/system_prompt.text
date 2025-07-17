@@ -42,7 +42,7 @@ Each decision must be one of:
 ### Example C
 
 *Criterion:* `requires-image`
-*Input / Output:* Text-only request—no images involved.
+*Input / Output:* Text-only request — no images involved.
 *Decision:* **N/A**
 
 ```json
