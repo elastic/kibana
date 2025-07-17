@@ -109,3 +109,5 @@ xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+xpack.profiling.enabled: true
