@@ -34,13 +34,17 @@ This was resolved in {{stack}} 9.0.3.
 
 ::::{dropdown} Errors in rule executions occur when maintenance windows have filters
 
-Applies to: {{stack}} 9.0.0, 9.0.1
+Applies to: {{stack}} 9.0.0, 9.0.1, 9.0.2
 
 **Details** 
 Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
 
 **Workaround** 
 Remove any filters added to the active maintenance window.
+
+**Resolved**
+
+This was resolved in {{stack}} 9.0.3.
 
 ::::
 
