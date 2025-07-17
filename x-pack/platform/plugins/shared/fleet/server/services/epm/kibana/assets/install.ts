@@ -87,12 +87,16 @@ const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsse
 
 export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectToBe {
   // convert that to an object
-  const so: Partial<SavedObjectToBe> = {
+  let so: Partial<SavedObjectToBe> = {
     type: asset.type,
     id: asset.id,
     attributes: asset.attributes,
     references: asset.references || [],
   };
+
+  if (asset.type === KibanaSavedObjectType.alert) {
+    so = fillAlertDefaults(so);
+  }
 
   // migrating deprecated migrationVersion to typeMigrationVersion
   if (asset.migrationVersion && asset.migrationVersion[asset.type]) {
@@ -590,4 +594,22 @@ export function toAssetReference({ id, type }: SavedObject) {
 
 function hasReferences(assetsToInstall: ArchiveAsset[]) {
   return assetsToInstall.some((asset) => asset.references?.length);
+}
+
+export function fillAlertDefaults(alertSo: Partial<SavedObjectToBe>) {
+  const currentDateTime = new Date().toISOString();
+  return {
+    ...alertSo,
+    attributes: {
+      ...(alertSo.attributes ?? {}),
+      enabled: false,
+      revision: 0,
+      executionStatus: {
+        status: 'pending',
+        lastExecutionDate: currentDateTime,
+      },
+      createdAt: currentDateTime,
+      updatedAt: currentDateTime,
+    },
+  };
 }
