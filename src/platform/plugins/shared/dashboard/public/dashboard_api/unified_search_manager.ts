@@ -43,11 +43,10 @@ import {
   tap,
 } from 'rxjs';
 import { dataService } from '../services/kibana_services';
-import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { DashboardCreationOptions } from './types';
-import { DashboardState } from '../../common';
+import { DashboardState, cleanFiltersForSerialize } from '../../common';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
@@ -105,7 +104,7 @@ export function initializeUnifiedSearchManager(
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
-  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[]) {
+  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
       unifiedSearchFilters$.next(unifiedSearchFilters);
     }
@@ -348,28 +347,15 @@ export function initializeUnifiedSearchManager(
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
-          ...lastSavedState.filters,
+          ...(lastSavedState.filters ?? []),
         ]);
-        setQuery(lastSavedState.query);
+        setQuery(lastSavedState.query ?? queryString.getDefaultQuery());
         if (lastSavedState.timeRestore) {
           setAndSyncRefreshInterval(lastSavedState.refreshInterval);
           setAndSyncTimeRange(lastSavedState.timeRange);
         }
       },
       getState,
-      // injectReferences: (dashboardState: DashboardState, references: Reference[]) => {
-      //   const searchSourceValues = injectSearchSourceReferences(
-      //     {
-      //       filter: dashboardState.filters,
-      //     },
-      //     references
-      //   );
-
-      //   return {
-      //     ...dashboardState,
-      //     filters: searchSourceValues.filter ?? dashboardState.filters,
-      //   };
-      // },
     },
     cleanup: () => {
       controlGroupSubscriptions.unsubscribe();

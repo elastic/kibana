@@ -13,19 +13,12 @@ import { getDashboardContentManagementCache } from '..';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import {
-  contentManagementService,
-  dataService,
-  savedObjectsTaggingService,
-} from '../../kibana_services';
+import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 
 export const loadDashboardState = async ({
   id,
 }: LoadDashboardFromSavedObjectProps): Promise<LoadDashboardReturn> => {
-  const {
-    query: { queryString },
-  } = dataService;
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
   const savedObjectId = id;
@@ -112,15 +105,13 @@ export const loadDashboardState = async ({
         }
       : undefined;
 
-  const filters = searchSource?.filter ?? [];
-  const query = searchSource?.query ?? queryString.getDefaultQuery();
+  const { filters, query } = searchSource || {};
 
   return {
     managed,
     references,
     resolveMeta,
     dashboardInput: {
-      ...DEFAULT_DASHBOARD_STATE,
       ...options,
       refreshInterval,
       timeRestore,

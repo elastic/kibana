@@ -13,7 +13,6 @@ import { getDashboardBackupService } from '../../services/dashboard_backup_servi
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
-import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
 import { getDashboardApi } from '../get_dashboard_api';
 import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 import { DashboardCreationOptions } from '../types';
@@ -54,7 +53,6 @@ export async function loadDashboardApi({
   })();
 
   const combinedSessionState: DashboardState = {
-    ...DEFAULT_DASHBOARD_STATE,
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
   };

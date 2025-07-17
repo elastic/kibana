@@ -19,7 +19,6 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
-import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,

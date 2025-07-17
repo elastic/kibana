@@ -75,7 +75,7 @@ export const getSerializedState = ({
     //
   }
 
-  const searchSource = { filter: filters, query };
+  const searchSource = { filters, query };
   const options = {
     useMargins,
     syncColors,

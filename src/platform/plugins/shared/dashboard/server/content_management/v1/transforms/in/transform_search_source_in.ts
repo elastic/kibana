@@ -14,6 +14,11 @@ export function transformSearchSourceIn(
   kibanaSavedObjectMeta: DashboardAttributes['kibanaSavedObjectMeta']
 ) {
   const { searchSource } = kibanaSavedObjectMeta;
-  const [extractedState, references] = extractReferences(searchSource ?? {});
+
+  // Extract references expects an object with singular `filter` and `query`.
+  // But `DashboardState` uses plural `filters` and singular `query`.
+  const [extractedState, references] = extractReferences(
+    { filter: searchSource?.filters, query: searchSource?.query } ?? {}
+  );
   return { searchSourceJSON: JSON.stringify(extractedState ?? {}), references };
 }
