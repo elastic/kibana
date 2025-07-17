@@ -2167,67 +2167,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.0.0.tgz#dba9f302c3a611440c88d7c34371a86e6f2285ae"
   integrity sha512-AIhCyMfRNz80CdKZEllVW4VgqfXQgv3wE875lt228MAmwd3tAwNh0mROp8++kWb0WJoLAYW4vypw873AMWqyEw==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@106.0.0-amsterdam.0":
-  version "106.0.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.0.0-amsterdam.0.tgz#0ddca35b842baf20931632c4ee3b168a2b84b9a0"
-  integrity sha512-BiHjVal98pAPom8ldJtmB4gSl4llpYW2ZDoz7W2Va8MWmecmURbKEQauc7IK+Verjxxdvf1VQjVE9HCMGiHQXw==
-  dependencies:
-    "@elastic/eui-theme-common" "3.0.0"
-    "@elastic/prismjs-esql" "^1.1.0"
-    "@hello-pangea/dnd" "^16.6.0"
-    "@types/lodash" "^4.14.202"
-    "@types/numeral" "^2.0.5"
-    "@types/react-window" "^1.8.8"
-    "@types/refractor" "^3.4.0"
-    chroma-js "^2.4.2"
-    classnames "^2.5.1"
-    lodash "^4.17.21"
-    mdast-util-to-hast "^10.2.0"
-    numeral "^2.0.6"
-    prop-types "^15.8.1"
-    react-dropzone "^11.7.1"
-    react-element-to-jsx-string "^15.0.0"
-    react-focus-on "^3.9.1"
-    react-is "^17.0.2"
-    react-remove-scroll-bar "^2.3.4"
-    react-virtualized-auto-sizer "^1.0.24"
-    react-window "^1.8.10"
-    refractor "^3.6.0"
-    rehype-raw "^5.1.0"
-    rehype-react "^6.2.1"
-    rehype-stringify "^8.0.0"
-    remark-breaks "^2.0.2"
-    remark-emoji "^2.1.0"
-    remark-parse-no-trim "^8.0.4"
-    remark-rehype "^8.1.0"
-    tabbable "^5.3.3"
-    text-diff "^1.0.1"
-    unified "^9.2.2"
-    unist-util-visit "^2.0.3"
-    url-parse "^1.5.10"
-    uuid "^8.3.0"
-    vfile "^4.2.1"
-
-"@elastic/eui-theme-borealis@3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.3.0.tgz#c2583fcc068d560bbd6c4cdc830bb6da202e983e"
-  integrity sha512-zWOMUtuWRcOYzN6pVgIRAqtQgUi4AJmjNRRvt1lRIwrivjo41hxGFqfZuiZvGMgrSNM6OFqKMqRZBZV88PMxUA==
-
-"@elastic/eui-theme-common@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-3.0.0.tgz#662513bdb3da068f8e6095199b0b9db493abc601"
-  integrity sha512-cgP/nyraf4nypWQymeYg9TWcNIcygwr/IFOxCnlMAJCDoUn8enVoH9DbzuUObwjKNqWdQn5PxGxttctDb+wf4Q==
-  dependencies:
-    "@types/lodash" "^4.14.202"
-    chroma-js "^2.4.2"
-    lodash "^4.17.21"
-
-"@elastic/eui@106.0.0":
+"@elastic/eui-amsterdam@file:./eui_106.0.0_flyout_update_002.tgz", "@elastic/eui@file:./eui_106.0.0_flyout_update_002.tgz":
   version "106.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.0.0.tgz#a3006394abeae98ab41d752356f2bf45162cf06e"
-  integrity sha512-vp/tA8KjmFyAHdfjlHOEjtwOcnkh/jAUF6DAw/rfM/acTbzL7WqCLkrrOEFZ21u4ysSWKcXsB1whI4nC4d0ygA==
+  resolved "file:./eui_106.0.0_flyout_update_002.tgz#f3009cef2d74f48177918edf1605738de98efd48"
   dependencies:
-    "@elastic/eui-theme-common" "3.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2262,6 +2205,18 @@
     url-parse "^1.5.10"
     uuid "^8.3.0"
     vfile "^4.2.1"
+
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.0_flyout_update_001.tgz":
+  version "3.3.0"
+  resolved "file:./eui_theme_borealis_3.3.0_flyout_update_001.tgz#2a48e042680d6eb07e56d476b9278687bbb6122e"
+
+"@elastic/eui-theme-common@file:./eui_theme_common_3.0.0_flyout_update_001.tgz":
+  version "3.0.0"
+  resolved "file:./eui_theme_common_3.0.0_flyout_update_001.tgz#f669e9e37fb7398cd1220d872642e29dcd69152e"
+  dependencies:
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
