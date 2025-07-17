@@ -108,21 +108,10 @@ async function asContentPackEntry({
   stream: Streams.WiredStream.Definition;
   assetClient: AssetClient;
 }): Promise<ContentPackStream> {
-  const dashboardsAndQueries = await assetClient.getAssetLinks(stream.name, ['dashboard', 'query']);
-  const [dashboardLinks, queryLinks] = partition(
-    dashboardsAndQueries,
-    (asset): asset is DashboardLink => asset[ASSET_TYPE] === 'dashboard'
-  );
-
-  const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);
-  const queries = queryLinks.map((query) => {
-    return query.query;
-  });
-
   return {
     type: 'stream' as const,
     name: stream.name,
-    request: { stream: { ...omit(stream, ['name']) }, dashboards, queries },
+    request: { stream: { ...omit(stream, ['name']) }, dashboards: [], queries: [] },
   };
 }
 
