@@ -13,7 +13,7 @@ import {
   SEARCH_INDICES_DETAILS_TABS_PATH,
 } from '../routes';
 
-export const RedirectWithQuery: React.FC = () => {
+export const IndexDetailsRootRedirect: React.FC = () => {
   const location = useLocation();
   const { indexName } = useParams<{ indexName: string }>();
 

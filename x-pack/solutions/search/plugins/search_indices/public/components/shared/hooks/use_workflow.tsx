@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { WORKFLOW_LOCALSTORAGE_KEY, WorkflowId } from '@kbn/search-shared-ui';
+import { useLocation } from 'react-router-dom';
 import {
   DenseVectorIngestDataCodeExamples,
   SemanticIngestDataCodeExamples,
@@ -78,6 +79,15 @@ export const useWorkflow = () => {
       setSelectedWorkflowId(onboardingTokenToWorkflowId(data.token));
     }
   }, [data, localStorageWorkflow]);
+
+  const { search } = useLocation();
+  useEffect(() => {
+    const workflowFromQuery = new URLSearchParams(search).get('workflow');
+    if (workflowFromQuery) {
+      setSelectedWorkflowId(workflowFromQuery as WorkflowId);
+    }
+  }, [search]);
+
   return {
     selectedWorkflowId,
     setSelectedWorkflowId: (newWorkflowId: WorkflowId) => {
