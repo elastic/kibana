@@ -78,36 +78,28 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Favorite a dashboard from within [#201596]({{kib-pull}}201596).
 
 **Data ingestion and Fleet**:
-* Adds bulk migrations UI [#224334]({{kib-pull}}224334).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added the ability to migrate bulk agents to another cluster via the bulk actions menu of the agent list table (experimental).
-* Enable tabular integrations UI feature flag [#222842]({{kib-pull}}222842).
-* Single agent migration UI [#222111]({{kib-pull}}222111).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added the ability to migrate a single agent to another cluster via the actions menu in Fleet. Users can enter a remote cluster URL and enrollment token, as well as customize additional parameters in order to migrate an agent.
-* Adds single agent migration endpoint [#220601]({{kib-pull}}220601).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added endpoint allowing a user to migrate an individual agent to another cluster by specifying the URL and Enrollment Token. Note: tamper protected and fleet agents can not be migrated and attempting to do so will return a `403` status code.
-* Adds integration flyout [#220229]({{kib-pull}}220229).
-* Enable feature flag enableSyncIntegrationsOnRemote [#220215]({{kib-pull}}220215).
-* Enable feature flag `enableAutomaticAgentUpgrades` [#219932]({{kib-pull}}219932).
-* Adds Edit ReadMe Functionality To Custom Integrations [#215259]({{kib-pull}}215259).
-% !!TODO!! The above PR had a lengthy release note description:
-% Adds edit functionality to custom integrations, allowing a user to edit the README file of a custom integration and save it to be persisted. Additionally, saving will automatically increment the version of the integration and update all associated policies.
-* Adds ssl fields to agent binary source settings [#213211]({{kib-pull}}213211).
-* Adds Cloud Connectors CSPM Support [#212200]({{kib-pull}}212200).
-* Expose ssl options for ES and remote ES outputs in UI [#208745]({{kib-pull}}208745).
-* Adds SSL options to fleet server hosts settings [#208091]({{kib-pull}}208091).
-* Adds action to Add tags to Agent details page [#225433]({{kib-pull}}225433).
-* Adds tooltip to Last activity column in Agent list UI [#224850]({{kib-pull}}224850).
-* Support agentless traffic filters [#222082]({{kib-pull}}222082).
-* Fleet agents tag filter is searchable and sorted [#219639]({{kib-pull}}219639).
-* Callout breaking changes on integration upgrade [#217257]({{kib-pull}}217257).
-* Adds msi installer command for fleet server and agents [#217217]({{kib-pull}}217217).
-* Optional ssl for fleet logstash output [#216216]({{kib-pull}}216216).
-* Format last activity value in fleet agent details view as datetime [#215531]({{kib-pull}}215531).
-* Support `searchAfter` and PIT (point-in-time) parameters for get agents list API [#213486]({{kib-pull}}213486).
-* Register custom integrations search provider [#213013]({{kib-pull}}213013).
+* Adds support for bulk agent migration using the **Bulk actions** menu in the agent list table [#224334]({{kib-pull}}224334).
+* Enables the **Tabular integrations** UI feature flag [#222842]({{kib-pull}}222842).
+* Adds support for single agent migration using the **Actions** menu in {{fleet}}. Users can provide a remote cluster URL and enrollment token, and customize parameters for the migration [#222111]({{kib-pull}}222111).
+* Adds an API endpoint to migrate a single agent to another cluster using a URL and enrollment token. Tamper-protected and {{fleet}}-managed agents are not supported and return a `403` response if attempted [#220601]({{kib-pull}}220601).
+* Adds a new integration flyout component [#220229]({{kib-pull}}220229).
+* Enables the `enableSyncIntegrationsOnRemote` feature flag [#220215]({{kib-pull}}220215).
+* Enables the `enableAutomaticAgentUpgrades` feature flag [#219932]({{kib-pull}}219932).
+* Adds edit functionality for custom integration READMEs. Editing a README automatically increments the integration version and updates all associated policies [#215259]({{kib-pull}}215259).
+* Adds SSL fields to agent binary source settings [#213211]({{kib-pull}}213211).
+* Adds support for Cloud Connectors in CSPM [#212200]({{kib-pull}}212200).
+* Exposes SSL options for {{es}} and remote {{es}} outputs in the UI [#208745]({{kib-pull}}208745).
+* Adds SSL options to {{fleet}} Server host settings [#208091]({{kib-pull}}208091).
+* Adds a new action to add tags from the **Agent details** page [#225433]({{kib-pull}}225433).
+* Adds a tooltip to the **Last activity** column in the agent list UI [#224850]({{kib-pull}}224850).
+* Adds support for agentless traffic filters [#222082]({{kib-pull}}222082).
+* Makes the tag filter in {{fleet}} agents searchable and sorted [#219639]({{kib-pull}}219639).
+* Adds a callout to highlight breaking changes during integration upgrades [#217257]({{kib-pull}}217257).
+* Adds MSI installer command support for {{fleet}} Server and agents [#217217]({{kib-pull}}217217).
+* Makes SSL optional for {{fleet}} Logstash outputs [#216216]({{kib-pull}}216216).
+* Formats the **Last activity** value in the {{fleet}} agent details view as a datetime [#215531]({{kib-pull}}215531).
+* Adds support for `searchAfter` and point-in-time (`pit`) parameters in the get agents list API [#213486]({{kib-pull}}213486).
+* Registers a custom integrations search provider [#213013]({{kib-pull}}213013).
 
 **Discover**:
 * Display Attributes doc viewer tab for Observability [#222391]({{kib-pull}}222391).
