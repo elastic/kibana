@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { ContentPackEntry, ContentPackStream, PARENT_STREAM_ID } from '@kbn/content-packs-schema';
@@ -12,11 +12,13 @@ import {
   getAncestors,
   getAncestorsAndSelf,
   getSegments,
+  isChildOf,
   isDescendantOf,
 } from '@kbn/streams-schema';
 
 type StreamRow = ContentPackStream & {
   level: number;
+  isParent: boolean;
 };
 
 function sortStreams(streamEntries: ContentPackStream[]): StreamRow[] {
@@ -28,10 +30,14 @@ function sortStreams(streamEntries: ContentPackStream[]): StreamRow[] {
   }
 
   const offset = getSegments(sortedEntries[0].stream.name).length;
-  return sortedEntries.map((entry) => ({
-    ...entry,
-    level: getSegments(entry.stream.name).length - offset,
-  }));
+  return sortedEntries.map((entry, index) => {
+    const next = sortedEntries[index + 1];
+    return {
+      ...entry,
+      level: getSegments(entry.stream.name).length - offset,
+      isParent: next ? isChildOf(entry.stream.name, next.stream.name) : false,
+    };
+  });
 }
 
 export function ContentPackObjectsList({
@@ -125,6 +131,18 @@ export function ContentPackObjectsList({
                 margin-left: ${item.level * 16}px;
               `}
             >
+              {item.isParent ? (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="arrowDown" />
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    margin-left: 16px;
+                  `}
+                />
+              )}
               <EuiFlexItem grow={false}>
                 <span>{name}</span>
               </EuiFlexItem>
