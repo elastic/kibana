@@ -24,8 +24,6 @@ const { getExportNamesDeep } = require('../helpers/exports');
 const ERROR_MSG =
   '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs';
 
-const programCache = new Map();
-// const fileCache = new Map();
 const sourceFileCache = new Map();
 
 /** @type {Rule} */
@@ -43,43 +41,12 @@ module.exports = {
 
         /** @type Parser */
         const parser = (path) => {
-          // let program = programCache.get(path);
-          // if (!program) {
-          // const program = ts.createProgram([path], {
-          //   allowJs: true,
-          //   target: ts.ScriptTarget.ESNext,
-          //   module: ts.ModuleKind.CommonJS,
-          // });
-            // programCache.set(path, program);
-          // }
-
-          // return program.getSourceFile(path);
-
           if (sourceFileCache.has(path)) {
-
-            // const sf = sourceFileCache.get(path);
-            // for (const statement of sf.statements) {
-            //   if (ts.isVariableStatement(statement)) {
-            //     for (const decl of statement.declarationList.declarations) {
-            //       console.log('Name:', decl.name.getText(sourceFile));
-            //       // use decl.name.escapedText or .getText(), etc.
-            //     }
-            //   }
-            // }
             return sourceFileCache.get(path);
           }
 
           const code = fs.readFileSync(path, 'utf-8');
           const sourceFile = ts.createSourceFile(path, code, ts.ScriptTarget.ESNext, true);
-
-          // for (const statement of sourceFile.statements) {
-          //   if (ts.isVariableStatement(statement)) {
-          //     for (const decl of statement.declarationList.declarations) {
-          //       console.log('Name:', decl.name.getText(sourceFile));
-          //       // use decl.name.escapedText or .getText(), etc.
-          //     }
-          //   }
-          // }
 
           sourceFileCache.set(path, sourceFile);
           return sourceFile;
