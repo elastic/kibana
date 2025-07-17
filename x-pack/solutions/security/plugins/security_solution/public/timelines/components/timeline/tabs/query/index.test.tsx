@@ -43,8 +43,12 @@ import { userEvent } from '@testing-library/user-event';
 import * as notesApi from '../../../../../notes/api/api';
 import { getMockTimelineSearchSubscription } from '../../../../../common/mock/mock_timeline_search_service';
 import * as useTimelineEventsModule from '../../../../containers';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_manager/mocks/mock_data_view';
+import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
+import { mockBrowserFields } from '@kbn/timelines-plugin/public/mock/browser_fields';
 
-jest.mock('../../../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../../../../data_view_manager/hooks/use_browser_fields');
 
 jest.mock('../../../../../common/utils/route/use_route_spy', () => {
   return {
@@ -244,6 +248,13 @@ describe('query tab with unified timeline', () => {
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
     (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
+
+    jest.mocked(useDataView).mockReturnValue({
+      dataView: getMockDataViewWithMatchedIndices(mockSourcererScope.selectedPatterns),
+      status: 'ready',
+    });
+
+    jest.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock

@@ -5,45 +5,22 @@
  * 2.0.
  */
 
+import type { DataViewFieldMap } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { FieldFormat, FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
+import { mockIndexFieldsByName } from '../../common/containers/source/mock';
 
 export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFormatsMock) =>
   new DataView({
     spec: {
       id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-      fields: {
-        'host.name': {
-          name: 'host.name',
-          type: 'keyword',
-          searchable: true,
-          aggregatable: true,
-        },
-        'source.ip': {
-          name: 'source.ip',
-          type: 'keyword',
-          searchable: true,
-          aggregatable: true,
-        },
-        'user.name': {
-          name: 'user.name',
-          type: 'keyword',
-          searchable: true,
-          aggregatable: true,
-        },
-        attrName: {
-          name: 'attrName',
-          type: 'keyword',
-          searchable: true,
-          aggregatable: true,
-        },
-      },
+      fields: mockIndexFieldsByName as DataViewFieldMap,
     },
     fieldFormats: {
       ...fieldFormats,
-      getDefaultInstance: () => ({ toJSON: () => {} } as unknown as FieldFormat),
+      getDefaultInstance: () => ({ toJSON: () => {}, convert: () => {} } as unknown as FieldFormat),
     },
   });
 
