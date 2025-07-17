@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -12,12 +13,12 @@ import {
   ViewMode,
   type PublishingSubject,
   apiHasExecutionContext,
+  findSavedObjectRef,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { RenderMode } from '@kbn/expressions-plugin/common';
-import { SavedObjectReference } from '@kbn/core/types';
 import type {
   LensEmbeddableStartServices,
   LensRuntimeState,
@@ -28,6 +29,7 @@ import { loadESQLAttributes } from './esql';
 import { DatasourceStates, GeneralDatasourceStates } from '../state_management';
 import { FormBasedPersistedState } from '../datasources/form_based/types';
 import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
+import { DOC_TYPE } from '../../common/constants';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -72,14 +74,16 @@ export async function deserializeState(
     | 'uiSettings'
   >,
   rawState: LensSerializedState,
-  references?: SavedObjectReference[]
+  references?: Reference[]
 ) {
   const fallbackAttributes = createEmptyLensState().attributes;
-  if (rawState.savedObjectId) {
+  const savedObjectRef = findSavedObjectRef(DOC_TYPE, references);
+  const savedObjectId = savedObjectRef?.id ?? rawState.savedObjectId;
+  if (savedObjectId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
-        await attributeService.loadFromLibrary(rawState.savedObjectId);
-      return { ...rawState, attributes, managed, sharingSavedObjectProps };
+        await attributeService.loadFromLibrary(savedObjectId);
+      return { ...rawState, savedObjectId, attributes, managed, sharingSavedObjectProps };
     } catch (e) {
       // return an empty Lens document if no saved object is found
       return { ...rawState, attributes: fallbackAttributes };

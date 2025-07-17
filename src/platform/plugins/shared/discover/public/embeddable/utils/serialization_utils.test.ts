@@ -83,11 +83,16 @@ describe('Serialization utils', () => {
 
       const serializedState: SerializedPanelState<SearchEmbeddableSerializedState> = {
         rawState: {
-          savedObjectId: 'savedSearch',
           title: 'test panel title',
           sort: [['order_date', 'asc']], // overwrite the saved object sort
         },
-        references: [],
+        references: [
+          {
+            id: 'savedSearch',
+            name: 'savedObjectRef',
+            type: 'search',
+          },
+        ],
       };
 
       const deserializedState = await deserializeState({
@@ -161,10 +166,14 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          rawState: {
-            savedObjectId: 'test-id',
-          },
-          references: [],
+          rawState: {},
+          references: [
+            {
+              id: 'test-id',
+              name: 'savedObjectRef',
+              type: 'search',
+            },
+          ],
         });
       });
 
@@ -184,10 +193,15 @@ describe('Serialization utils', () => {
         expect(serializedState).toEqual({
           rawState: {
             sampleSize: 500,
-            savedObjectId: 'test-id',
             sort: [['order_date', 'asc']],
           },
-          references: [],
+          references: [
+            {
+              id: 'test-id',
+              name: 'savedObjectRef',
+              type: 'search',
+            },
+          ],
         });
       });
     });

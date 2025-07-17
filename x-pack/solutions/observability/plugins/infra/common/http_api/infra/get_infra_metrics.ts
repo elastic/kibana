@@ -7,7 +7,7 @@
 
 import { createLiteralValueFromUndefinedRT, inRangeRt, isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { AssetTypeRT } from '../shared/asset_type';
+import { EntityTypeRT } from '../shared/entity_type';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
@@ -51,7 +51,7 @@ export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   }),
 ]);
 
-export const GetInfraMetricsRequestParamsRT = AssetTypeRT;
+export const GetInfraMetricsRequestParamsRT = EntityTypeRT;
 
 export const InfraAssetMetricsItemRT = rt.intersection([
   rt.type({
@@ -66,7 +66,7 @@ export const InfraAssetMetricsItemRT = rt.intersection([
 ]);
 
 export const GetInfraMetricsResponsePayloadRT = rt.intersection([
-  AssetTypeRT,
+  EntityTypeRT,
   rt.type({
     nodes: rt.array(InfraAssetMetricsItemRT),
   }),
