@@ -132,6 +132,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
             id: 'recovered',
             name: 'Recovered',
           },
+          autoRecoverAlerts: true,
           category: 'kibana',
           producer: 'alertsFixture',
           minimumLicenseRequired: 'basic',
