@@ -410,20 +410,6 @@ module.exports = {
   extends: ['@kbn/eslint-config'],
 
   overrides: [
-    // /**
-    //  * Disable parser for any dev code
-    //  */
-    // {
-    //   files: DEV_PATTERNS,
-    //   parserOptions: {
-    //     sourceType: 'module',
-    //     ecmaVersion: 2018,
-    //     ecmaFeatures: {
-    //       jsx: true,
-    //     },
-    //     project: undefined,
-    //   },
-    // },
     /**
      * Temporarily disable some react rules for specific plugins, remove in separate PRs
      */
