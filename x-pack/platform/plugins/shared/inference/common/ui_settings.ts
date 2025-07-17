@@ -68,7 +68,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       2
     ),
     description: i18n.translate('xpack.inference.anonymizationSettingsDescription', {
-      defaultMessage: `List of anonymization rules
+      defaultMessage: `<em>[technical preview]</em> List of anonymization rules
           <ul>
             <li><strong>type:</strong> "ner" or "regex"</li>
             <li><strong>entityClass:</strong> (regex type only) eg: EMAIL, URL, IP</li>
@@ -88,6 +88,5 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     type: 'json',
     requiresPageReload: true,
     solution: 'oblt',
-    technicalPreview: true,
   },
 };
