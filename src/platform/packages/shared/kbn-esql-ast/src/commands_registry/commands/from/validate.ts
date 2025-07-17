@@ -17,7 +17,7 @@ import { isColumn, isOptionNode, isSource } from '../../../ast/is';
 import type { ICommandContext } from '../../types';
 import { METADATA_FIELDS } from '../../options/metadata';
 import { getMessageFromId } from '../../../definitions/utils';
-import { validateSources } from '../../../definitions/utils/validation/sources_validation';
+import { validateSources } from '../../../definitions/utils/validation/sources';
 
 export const validate = (
   command: ESQLCommand,

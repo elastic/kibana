@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignalsQueryMap } from './get_signals_map_from_threat_index';
+import type { SignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type { ThreatMatchNamedQuery } from './types';
 
@@ -31,7 +31,7 @@ import type { ThreatMatchNamedQuery } from './types';
  *   }
  * ]
  *
- * Example of SignalsQueryMap:
+ * Example of SignalIdToMatchedQueriesMap:
  * {
  *   "eventId1": [
  *     { field: "user.name", value: "threat.indicator.user.name", queryType: "mq", id: "threatId1", index: "threatIndex1" },
@@ -53,18 +53,18 @@ import type { ThreatMatchNamedQuery } from './types';
  * 3. If ANY AND group is completely satisfied, the signal is valid
  * 4. If NO AND group is completely satisfied, the signal is invalid (filtered out)
  *
- * @param signalsQueryMap - Map of signal IDs to their matched threat queries
+ * @param signalIdToMatchedQueriesMap - Map of signal IDs to their matched threat queries
  * @param threatMapping - The threat mapping configuration defining AND/OR logic
  * @returns Object containing valid events and list of invalid signal IDs
  */
 export const validateCompleteThreatMatches = (
-  signalsQueryMap: SignalsQueryMap,
+  signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap,
   threatMapping: ThreatMapping
-): { matchedEvents: SignalsQueryMap; skippedIds: string[] } => {
-  const matchedEvents: SignalsQueryMap = new Map();
+): { matchedEvents: SignalIdToMatchedQueriesMap; skippedIds: string[] } => {
+  const matchedEvents: SignalIdToMatchedQueriesMap = new Map();
   const skippedIds: string[] = [];
 
-  signalsQueryMap.forEach((threatQueries, signalId) => {
+  signalIdToMatchedQueriesMap.forEach((threatQueries, signalId) => {
     const allMatchedThreatQueriesSet = new Set<ThreatMatchNamedQuery>();
     threatMapping.forEach((andGroup) => {
       const matchedThreatQueriesForAndGroup: ThreatMatchNamedQuery[] = [];
