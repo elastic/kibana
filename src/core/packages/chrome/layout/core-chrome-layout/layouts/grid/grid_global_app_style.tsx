@@ -10,7 +10,10 @@
 import React from 'react';
 import { css, Global } from '@emotion/react';
 import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
-import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-chrome-layout-constants';
+import {
+  APP_FIXED_VIEWPORT_ID,
+  APP_MAIN_SCROLL_CONTAINER_ID,
+} from '@kbn/core-chrome-layout-constants';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
 import {
   useHackSyncPushFlyout,
@@ -85,41 +88,32 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
   }
 
-  // adjust position of all other flyouts
-  .kbnBody .euiFlyout:not(.euiCollapsibleNav) {
-    // overlay flyout should only cover the application area
-    &[class*='right']:not([class*='push']) {
-      ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
-      ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
-      ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
-    }
-    // push flyout should only cover the application area
-    &[class*='right'][class*='push'] {
+  .kbnBody {
+    // adjust position of all the right flyouts relative to the application area, except the ones that are "above the header"
+    .euiFlyout[class*='right']:not(.euiOverlayMask[class*='aboveHeader'] .euiFlyout) {
       ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
       ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
       ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
     }
 
-    // ...
-    // no use-cases for left flyouts other then .euiCollapsibleNav, so skipping it for now
+    // overlay mask "belowHeader" should only cover the application area
+    .euiOverlayMask[class*='belowHeader'] {
+      ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
+      ${logicalCSS('left', 'var(--kbn-layout--application-left, 0px)')};
+      ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
+      ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
+    }
   }
 
   // push flyout should be pushing the application area, instead of body
-  main[class*='LayoutApplication'] {
+  main#${APP_MAIN_SCROLL_CONTAINER_ID} {
     ${logicalCSS('padding-right', `var(${hackEuiPushFlyoutPaddingInlineEnd}, 0px)`)};
     ${logicalCSS('padding-left', `var(${hackEuiPushFlyoutPaddingInlineStart}, 0px)`)};
   }
+  // this is a temporary hack to override EUI's body padding with push flyout
   .kbnBody {
     ${logicalCSS('padding-right', `0px !important`)};
     ${logicalCSS('padding-left', `0px !important`)};
-  }
-
-  // overlay mask "belowHeader" should only cover the application area
-  .kbnBody .euiOverlayMask[class*='belowHeader'] {
-    ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
-    ${logicalCSS('left', 'var(--kbn-layout--application-left, 0px)')};
-    ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
-    ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
   }
 `;
 
