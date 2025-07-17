@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButton, EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiPageHeader,
+  useEuiTheme,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -92,34 +99,40 @@ export function Wrapper({
               defaultMessage: 'Manage stream {streamId}',
               values: { streamId },
             })}
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <DiscoverBadgeButton definition={definition} />
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={true}>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <DiscoverBadgeButton definition={definition} />
+                  {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                  <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
               {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
-                <>
-                  <EuiButton
-                    size="s"
-                    iconType="importAction"
-                    onClick={() => setIsImportFlyoutOpen(true)}
-                    data-test-subj="streamsAppImportButton"
-                  >
-                    {i18n.translate('xpack.streams.importButton', {
-                      defaultMessage: 'Import',
-                    })}
-                  </EuiButton>
-                  <EuiButton
-                    size="s"
-                    iconType="exportAction"
-                    onClick={() => setIsExportFlyoutOpen(true)}
-                    data-test-subj="streamsAppExportButton"
-                  >
-                    {i18n.translate('xpack.streams.exportButton', {
-                      defaultMessage: 'Export',
-                    })}
-                  </EuiButton>
-                </>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiButton
+                      size="s"
+                      iconType="importAction"
+                      onClick={() => setIsImportFlyoutOpen(true)}
+                      data-test-subj="streamsAppImportButton"
+                    >
+                      {i18n.translate('xpack.streams.importButton', {
+                        defaultMessage: 'Import',
+                      })}
+                    </EuiButton>
+                    <EuiButton
+                      size="s"
+                      iconType="exportAction"
+                      onClick={() => setIsExportFlyoutOpen(true)}
+                      data-test-subj="streamsAppExportButton"
+                    >
+                      {i18n.translate('xpack.streams.exportButton', {
+                        defaultMessage: 'Export',
+                      })}
+                    </EuiButton>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               )}
             </EuiFlexGroup>
           </EuiFlexGroup>

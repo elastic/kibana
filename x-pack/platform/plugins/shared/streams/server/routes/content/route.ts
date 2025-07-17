@@ -10,7 +10,7 @@ import { z } from '@kbn/zod';
 import {
   ContentPack,
   ContentPackStream,
-  PARENT_STREAM_ID,
+  ROOT_STREAM_ID,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
 } from '@kbn/content-packs-schema';
@@ -167,10 +167,10 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
     const parentEntry = contentPack.entries.find(
       (entry): entry is ContentPackStream =>
-        entry.type === 'stream' && entry.name === PARENT_STREAM_ID
+        entry.type === 'stream' && entry.name === ROOT_STREAM_ID
     );
     if (!parentEntry) {
-      throw new StatusError(`[${PARENT_STREAM_ID}] definition not found`, 400);
+      throw new StatusError(`[${ROOT_STREAM_ID}] definition not found`, 400);
     }
 
     const importedStreamEntries = isIncludeAll(params.body.include)

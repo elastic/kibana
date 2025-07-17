@@ -6,7 +6,7 @@
  */
 
 import { mapValues, omit, uniq } from 'lodash';
-import { ContentPackStream, PARENT_STREAM_ID } from '@kbn/content-packs-schema';
+import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import {
   FieldDefinition,
   InheritedFieldDefinition,
@@ -30,7 +30,7 @@ export function prepareStreamsForExport({
   const streamObjects: ContentPackStream[] = [
     {
       type: 'stream' as const,
-      name: PARENT_STREAM_ID,
+      name: ROOT_STREAM_ID,
       request: {
         dashboards: [],
         queries: [],
@@ -86,7 +86,7 @@ export function prepareStreamsForImport({
   );
 
   const streamObjects = entries.map(({ name, request }) => {
-    if (name === PARENT_STREAM_ID) {
+    if (name === ROOT_STREAM_ID) {
       // merge special parent stream's routing and fields with the new root
       return {
         type: 'stream' as const,

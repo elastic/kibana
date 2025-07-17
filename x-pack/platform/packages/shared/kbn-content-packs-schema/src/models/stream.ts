@@ -7,7 +7,7 @@
 
 import { Streams } from '@kbn/streams-schema';
 
-export const PARENT_STREAM_ID = '__parent__';
+export const ROOT_STREAM_ID = '__root__';
 
 export interface ContentPackStream {
   type: 'stream';

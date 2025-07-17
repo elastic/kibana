@@ -7,7 +7,7 @@
 import { EuiBasicTable, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { ContentPackEntry, ContentPackStream, PARENT_STREAM_ID } from '@kbn/content-packs-schema';
+import { ContentPackEntry, ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import {
   getAncestors,
   getAncestorsAndSelf,
@@ -23,7 +23,7 @@ type StreamRow = ContentPackStream & {
 
 function sortStreams(streamEntries: ContentPackStream[]): StreamRow[] {
   const sortedEntries = streamEntries
-    .filter(({ name }) => name !== PARENT_STREAM_ID)
+    .filter(({ name }) => name !== ROOT_STREAM_ID)
     .sort((a, b) => a.name.localeCompare(b.name));
   if (sortedEntries.length === 0) {
     return [];
