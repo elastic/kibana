@@ -29528,15 +29528,15 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.33.0:
-  version "4.33.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.33.0.tgz#6587a9eab09bf30ad27cf27bc8d0b944457252da"
-  integrity sha512-5vRhk4iI0B9nYbEitfnCjPDXBfG6o9DNhj5DG2355eQo8idETknhj1tigqqlkHsGephSZwLZqEm/d+3e1stGUA==
+selenium-webdriver@^4.34.0:
+  version "4.34.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.34.0.tgz#0081c3e51a2f1e197d56253c647f25085b22bd62"
+  integrity sha512-zGfQFcsASAv3KrYzYh+iw4fFqB7iZAgHW7BU6rRz7isK1i1X4x3LvjmZad4bUUgHDwTnAhlqTzDh21byB+zHMg==
   dependencies:
     "@bazel/runfiles" "^6.3.1"
     jszip "^3.10.1"
     tmp "^0.2.3"
-    ws "^8.18.0"
+    ws "^8.18.2"
 
 self-signed-cert@^1.0.1:
   version "1.0.1"
