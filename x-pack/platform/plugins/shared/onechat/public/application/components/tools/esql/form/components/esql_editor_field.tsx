@@ -124,6 +124,7 @@ export const OnechatEsqlEditorField = React.memo(() => {
                 hideQueryHistory
                 hideTimeFilterInfo
                 disableAutoFocus
+                errors={[]} // Hides the initial error message, won't prevent future errors
               />
             </div>
           )}

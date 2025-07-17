@@ -15,7 +15,7 @@ describe('transformEsqlFormData', () => {
     const formData: OnechatEsqlToolFormData = {
       name: 'my-test-tool',
       description: 'A tool for testing.',
-      esql: 'FROM my_index | LIMIT 10',
+      esql: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
       params: [
         { name: 'param1', type: 'text', description: 'A string parameter.' },
         { name: 'param2', type: 'long', description: 'A number parameter.' },
@@ -27,7 +27,7 @@ describe('transformEsqlFormData', () => {
       id: 'my-test-tool',
       description: 'A tool for testing.',
       configuration: {
-        query: 'FROM my_index | LIMIT 10',
+        query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
         params: {
           param1: {
             type: 'text',
@@ -65,6 +65,38 @@ describe('transformEsqlFormData', () => {
       },
       type: ToolType.esql,
       tags: [],
+    };
+
+    const result = transformEsqlFormData(formData);
+    expect(result).toEqual(expectedPayload);
+  });
+
+  it('should filter out params that are not used in the ES|QL query', () => {
+    const formData: OnechatEsqlToolFormData = {
+      name: 'my-test-tool',
+      description: 'A tool for testing.',
+      esql: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1',
+      params: [
+        { name: 'param1', type: 'text', description: 'A string parameter.' },
+        { name: 'param2', type: 'long', description: 'A number parameter.' },
+      ],
+      tags: ['test', 'esql'],
+    };
+
+    const expectedPayload: CreateToolPayload = {
+      id: 'my-test-tool',
+      description: 'A tool for testing.',
+      configuration: {
+        query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1',
+        params: {
+          param1: {
+            type: 'text',
+            description: 'A string parameter.',
+          },
+        },
+      },
+      type: ToolType.esql,
+      tags: ['test', 'esql'],
     };
 
     const result = transformEsqlFormData(formData);
