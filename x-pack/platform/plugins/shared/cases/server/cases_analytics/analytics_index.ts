@@ -134,6 +134,11 @@ export class AnalyticsIndex {
         await this.updateIndexMapping();
       }
     } catch (error) {
+      if (error.body?.error?.type === 'resource_already_exists_exception') {
+        this.logDebug('Index already exists. Skipping creation.');
+        return;
+      }
+
       this.handleError('Failed to create the index.', error);
     }
   }

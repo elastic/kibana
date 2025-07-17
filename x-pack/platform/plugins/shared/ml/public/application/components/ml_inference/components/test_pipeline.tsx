@@ -70,9 +70,9 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
   const [showCallOut, setShowCallOut] = useState<boolean>(true);
   const mlApi = useMlApi();
   const {
-    notifications: { toasts },
     services: {
       docLinks: { links },
+      notifications: { toasts },
     },
   } = useMlKibana();
 
@@ -99,14 +99,14 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
       console.error(error);
       const errorProperties = extractErrorProperties(error);
       setSimulatePipelineError(error);
-      toasts.danger({
+      toasts.addDanger({
         title: i18n.translate(
           'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.test.errorSimulatingPipeline',
           {
             defaultMessage: 'Unable to simulate pipeline.',
           }
         ),
-        body: errorProperties.message,
+        text: errorProperties.message,
         toastLifeTimeMs: 5000,
       });
     }
