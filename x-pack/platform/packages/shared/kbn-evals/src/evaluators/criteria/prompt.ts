@@ -12,7 +12,7 @@ import userPromptText from './user_prompt.text';
 
 export const LlmCriteriaEvaluationPrompt = createPrompt({
   name: 'llm_criteria_evaluation',
-  description: 'Prompt for evaluation the LLM with a set of criteria',
+  description: 'Prompt for evaluating the LLM with a set of criteria',
   input: z.object({
     input: z.string(),
     output: z.string(),
