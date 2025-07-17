@@ -139,7 +139,7 @@ export class SyncIntegrationsTask {
     }
 
     const fakeRequest = kibanaRequestFactory({
-      headers: {},
+      headers: { authorization: `ApiKey ${taskInstance.apiKey}` },
       path: '/',
       route: { settings: {} },
       url: { href: '', hash: '' } as URL,
