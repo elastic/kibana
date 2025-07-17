@@ -19,7 +19,6 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -56,14 +55,9 @@ import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { getUsersDetailsPageFilters } from './helpers';
-import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
 import { EntityType } from '../../../../../common/entity_analytics/types';
@@ -84,7 +78,6 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
 
@@ -96,10 +89,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
-  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
@@ -132,12 +121,12 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const { dataViewSpec } = useDataViewSpec(DataViewManagerScopeName.explore);
+  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
+  const indicesExist = newDataViewPickerEnabled
+    ? experimentalDataView.hasMatchedIndices()
+    : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
@@ -146,7 +135,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     try {
       return [
         buildEsQuery(
-          dataViewSpecToViewBase(sourcererDataView),
+          newDataViewPickerEnabled
+            ? experimentalDataView
+            : dataViewSpecToViewBase(oldSourcererDataView),
           [query],
           [...usersDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -155,7 +146,15 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, sourcererDataView, query, uiSettings, usersDetailsPageFilters]);
+  }, [
+    experimentalDataView,
+    globalFilters,
+    newDataViewPickerEnabled,
+    oldSourcererDataView,
+    query,
+    uiSettings,
+    usersDetailsPageFilters,
+  ]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -235,8 +234,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
+          <FiltersGlobal>
+            <SiemSearchBar
+              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              id={InputsModelId.global}
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -324,7 +326,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}
-              dataViewSpec={sourcererDataView}
               isInitializing={isInitializing}
               userDetailFilter={usersDetailsPageFilters}
               setQuery={setQuery}
