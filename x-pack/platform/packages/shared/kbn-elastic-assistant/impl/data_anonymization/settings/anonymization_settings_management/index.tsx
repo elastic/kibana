@@ -26,7 +26,7 @@ import { useAnonymizationUpdater } from '../../../assistant/settings/use_setting
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
-import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+
 import { AssistantSettingsBottomBar } from '../../../assistant/settings/assistant_settings_bottom_bar';
 import { useAssistantContext } from '../../../assistant_context';
 import {
@@ -34,6 +34,9 @@ import {
   SAVE,
   SETTINGS_UPDATED_TOAST_TITLE,
 } from '../../../assistant/settings/translations';
+
+import { SEARCH, useTable } from './use_table';
+import { useSelection } from '../../../data_anonymization_editor/context_editor/selection/use_selection';
 
 export interface Props {
   modalMode?: boolean;
@@ -45,34 +48,61 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { http, toasts } = useAssistantContext();
-  const { data: anonymizationFields, refetch } = useFetchAnonymizationFields();
+  const { http, toasts, nameSpace } = useAssistantContext();
 
   const {
+    anonymizationFields,
+    anonymizationAllFields,
+    anonymizationFieldsStatus,
+    onTableChange,
+    pagination,
+    sorting,
+    handleSearch,
+    refetch,
+  } = useTable(nameSpace);
+
+  const {
+    handlePageReset,
+    handleRowReset,
     hasPendingChanges,
     onListUpdated,
     resetAnonymizationSettings,
     saveAnonymizationSettings,
-    updatedAnonymizationData,
+    updatedAnonymizationData: updatedAnonymizationPageData,
   } = useAnonymizationUpdater({
+    anonymizationAllFields,
     anonymizationFields,
     http,
     toasts,
   });
 
+  const { selectionActions, selectionState } = useSelection({
+    anonymizationAllFields,
+    anonymizationPageFields: anonymizationFields,
+  });
+
+  const handleTableReset = useCallback(() => {
+    resetAnonymizationSettings();
+    selectionActions?.handleUnselectAll();
+  }, [resetAnonymizationSettings, selectionActions]);
+
   const onCancelClick = useCallback(() => {
     onClose?.();
-    resetAnonymizationSettings();
-  }, [onClose, resetAnonymizationSettings]);
+    handleTableReset();
+  }, [onClose, handleTableReset]);
 
   const handleSave = useCallback(async () => {
-    await saveAnonymizationSettings();
-    toasts?.addSuccess({
-      iconType: 'check',
-      title: SETTINGS_UPDATED_TOAST_TITLE,
-    });
+    const updateSuccess = await saveAnonymizationSettings();
+    if (updateSuccess) {
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: SETTINGS_UPDATED_TOAST_TITLE,
+      });
+    }
+
     await refetch();
-  }, [refetch, saveAnonymizationSettings, toasts]);
+    selectionActions?.handleUnselectAll();
+  }, [refetch, saveAnonymizationSettings, selectionActions, toasts]);
 
   const onSaveButtonClicked = useCallback(() => {
     handleSave();
@@ -94,8 +124,9 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
 
           <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
             <Stats
+              anonymizationFieldsStatus={anonymizationFieldsStatus}
               isDataAnonymizable={true}
-              anonymizationFields={updatedAnonymizationData.data}
+              anonymizationFields={anonymizationFields.data}
               titleSize="m"
               gap={euiTheme.size.s}
             />
@@ -104,10 +135,21 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
           <EuiSpacer size="m" />
 
           <ContextEditor
-            anonymizationFields={updatedAnonymizationData}
+            anonymizationAllFields={anonymizationAllFields}
+            anonymizationPageFields={updatedAnonymizationPageData}
             compressed={false}
             onListUpdated={onListUpdated}
             rawData={null}
+            onTableChange={onTableChange}
+            pagination={pagination}
+            sorting={sorting}
+            search={SEARCH}
+            handleSearch={handleSearch}
+            handleTableReset={handleTableReset}
+            handleRowReset={handleRowReset}
+            handlePageReset={handlePageReset}
+            selectionState={selectionState}
+            selectionActions={selectionActions}
           />
         </EuiModalBody>
         <EuiModalFooter>
@@ -129,8 +171,9 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
 
         <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
           <Stats
+            anonymizationFieldsStatus={anonymizationFieldsStatus}
             isDataAnonymizable={true}
-            anonymizationFields={updatedAnonymizationData.data}
+            anonymizationFields={anonymizationAllFields.data}
             titleSize="m"
             gap={euiTheme.size.s}
           />
@@ -139,10 +182,21 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
         <EuiSpacer size="m" />
 
         <ContextEditor
-          anonymizationFields={updatedAnonymizationData}
+          anonymizationAllFields={anonymizationAllFields}
+          anonymizationPageFields={updatedAnonymizationPageData}
           compressed={false}
           onListUpdated={onListUpdated}
           rawData={null}
+          onTableChange={onTableChange}
+          pagination={pagination}
+          sorting={sorting}
+          search={SEARCH}
+          handleSearch={handleSearch}
+          handleRowReset={handleRowReset}
+          handlePageReset={handlePageReset}
+          handleTableReset={handleTableReset}
+          selectionState={selectionState}
+          selectionActions={selectionActions}
         />
       </EuiPanel>
       <AssistantSettingsBottomBar

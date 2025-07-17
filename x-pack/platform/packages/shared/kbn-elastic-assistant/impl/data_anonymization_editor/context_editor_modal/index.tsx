@@ -31,14 +31,15 @@ import {
   PerformAnonymizationFieldsBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas';
 import { find, uniqBy } from 'lodash';
-import { ContextEditor } from '../context_editor';
 import { Stats } from '../stats';
 import * as i18n from '../../data_anonymization/settings/anonymization_settings/translations';
 import { SelectedPromptContext } from '../../assistant/prompt_context/types';
 import { BatchUpdateListItem } from '../context_editor/types';
 import { updateSelectedPromptContext, getIsDataAnonymizable } from '../helpers';
 import { useAssistantContext } from '../../assistant_context';
+
 import { bulkUpdateAnonymizationFields } from '../../assistant/api/anonymization_fields/bulk_update_anonymization_fields';
+import { ContextEditor } from './context_editor';
 import { useFetchAnonymizationFields } from '../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 export interface Props {
@@ -50,11 +51,12 @@ export interface Props {
 const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptContext }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { http, toasts } = useAssistantContext();
+
   const [checked, setChecked] = useState(false);
   const checkboxId = useGeneratedHtmlId({ prefix: 'updateSettingPresetsCheckbox' });
   const modalTitleId = useGeneratedHtmlId();
 
-  const { data: anonymizationFields, refetch: anonymizationFieldsRefetch } =
+  const { data: anonymizationAllFields, refetch: anonymizationFieldsRefetch } =
     useFetchAnonymizationFields();
   const [contextUpdates, setContextUpdates] = React.useState<BatchUpdateListItem[]>([]);
   const [selectedPromptContext, setSelectedPromptContext] = React.useState(promptContext);
@@ -98,7 +100,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
       setAnonymizationFieldsBulkActions((prev) => {
         return updates.reduce<PerformAnonymizationFieldsBulkActionRequestBody>(
           (acc, item) => {
-            const persistedField = find(anonymizationFields.data, ['field', item.field]) as
+            const persistedField = find(anonymizationAllFields.data, ['field', item.field]) as
               | AnonymizationFieldResponse
               | undefined;
 
@@ -131,8 +133,8 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
         );
       });
 
-      setSelectedPromptContext((prev) =>
-        updates.reduce<SelectedPromptContext>(
+      setSelectedPromptContext((prev) => {
+        return updates.reduce<SelectedPromptContext>(
           (acc, { field, operation, update }) =>
             updateSelectedPromptContext({
               field,
@@ -141,10 +143,10 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
               update,
             }),
           prev
-        )
-      );
+        );
+      });
     },
-    [anonymizationFields]
+    [anonymizationAllFields.data]
   );
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,6 +182,7 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
               page: 1,
               perPage: 1000,
               data: [],
+              all: [],
             }
           }
           onListUpdated={onListUpdated}

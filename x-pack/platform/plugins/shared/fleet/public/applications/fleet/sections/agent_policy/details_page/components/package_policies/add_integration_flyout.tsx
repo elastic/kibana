@@ -18,6 +18,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -173,21 +174,28 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <CreatePackagePolicySinglePage
-              from="policy"
-              queryParamsPolicyId={agentPolicy.id}
-              prerelease={prerelease}
-              pkgLabel={selectedOptions[0]?.label}
-              pkgName={selectedOptions[0]?.value}
-              integration={selectedOptions[0]?.integration}
-              addIntegrationFlyoutProps={{
-                selectIntegrationStep,
-                onSubmitCompleted,
-                isSubmitted,
-                agentPolicy,
-                updateHasErrors,
-              }}
-            />
+            <>
+              <CreatePackagePolicySinglePage
+                from="policy"
+                queryParamsPolicyId={agentPolicy.id}
+                prerelease={prerelease}
+                pkgLabel={selectedOptions[0]?.label}
+                pkgName={selectedOptions[0]?.value}
+                integration={selectedOptions[0]?.integration}
+                addIntegrationFlyoutProps={{
+                  selectIntegrationStep,
+                  onSubmitCompleted,
+                  isSubmitted,
+                  agentPolicy,
+                  updateHasErrors,
+                }}
+              />
+              {isSubmitted && (
+                <EuiOverlayMask headerZindexLocation="below">
+                  <Loading />
+                </EuiOverlayMask>
+              )}
+            </>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
