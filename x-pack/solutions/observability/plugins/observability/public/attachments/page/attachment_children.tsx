@@ -40,9 +40,8 @@ export function PageAttachmentChildren({
       </EuiCallOut>
     );
   }
-  const href = url.pathAndQuery || '';
+  const href = new URL(url.pathAndQuery || '', window.location.origin).toString();
   const label = url.label;
-
   return (
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">

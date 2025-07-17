@@ -53,6 +53,7 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { Suggestions } from './suggestions/suggestion_list';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
@@ -277,6 +278,7 @@ export const CaseViewActivity = ({
               />
             </>
           ) : null}
+          <Suggestions />
           <SeveritySidebarSelector
             isDisabled={!permissions.update}
             isLoading={isLoading && loadingKey === 'severity'}

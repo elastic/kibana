@@ -7,15 +7,18 @@
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { getSyntheticsMonitorSuggestionType } from './synthetics_monitor';
 
 export const getSuggestionTypes = (dependencies: {
   savedObjectsClient: SavedObjectsClientContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  share: SharePluginStart;
 }) => {
   const syntheticsMonitorSuggestionType = getSyntheticsMonitorSuggestionType({
     savedObjectClient: dependencies.savedObjectsClient,
     encryptedSavedObjectsClient: dependencies.encryptedSavedObjectsClient,
+    share: dependencies.share,
   });
   return [syntheticsMonitorSuggestionType];
 };

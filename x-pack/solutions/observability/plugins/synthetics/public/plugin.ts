@@ -68,6 +68,7 @@ import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { ObservabilityCaseSuggestionRegistryPluginStart } from '@kbn/observability-case-suggestion-registry-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -79,6 +80,7 @@ import {
   SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
 } from './apps/embeddables/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
+import { registerCaseSuggestions } from './apps/synthetics/components/case_suggestions';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -107,6 +109,7 @@ export interface ClientPluginsStart {
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityCaseSuggestionRegistry: ObservabilityCaseSuggestionRegistryPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
   security: SecurityPluginStart;
@@ -262,6 +265,10 @@ export class SyntheticsPlugin
         observabilityRuleTypeRegistry.register(alertInitializer);
       }
     });
+
+    registerCaseSuggestions(
+      pluginsStart.observabilityCaseSuggestionRegistry.caseSuggestionRegistry
+    );
   }
 
   public stop(): void {}

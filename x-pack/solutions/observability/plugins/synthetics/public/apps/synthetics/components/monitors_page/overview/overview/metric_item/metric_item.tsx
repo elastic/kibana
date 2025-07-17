@@ -99,6 +99,12 @@ export const MetricItem = ({
       });
     }
 
+    if (!trendData) {
+      return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage.noTrendData', {
+        defaultMessage: 'No trend data available for this monitor.',
+      });
+    }
+
     return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage', {
       defaultMessage:
         'The duration statistics currently shown by the chart are: average: {avg}, median: {median}, max: {max}, min: {min}.',

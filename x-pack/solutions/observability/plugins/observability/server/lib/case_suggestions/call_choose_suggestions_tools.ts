@@ -24,7 +24,7 @@ export const callChooseSuggestionTool = ({
 }: {
   toolCall: ToolCall;
   caseSuggestionRegistry: CaseSuggestionRegistry;
-  pendingSuggestions: Map<string, unknown>;
+  pendingSuggestions: Map<string, SuggestionPayload>;
 }): Observable<ToolMessage<string, SuggestionPayload> | AssistantMessage> => {
   const toolCallId = toolCall.toolCallId;
   const toolName = toolCall.function.name;
@@ -44,7 +44,7 @@ export const callChooseSuggestionTool = ({
       const suggestionId = result.suggestionId;
       const suggestionData = result.data;
 
-      pendingSuggestions.set(suggestionId, suggestionData);
+      pendingSuggestions.set(suggestionId, result);
 
       const toolMessage: ToolMessage<
         string,

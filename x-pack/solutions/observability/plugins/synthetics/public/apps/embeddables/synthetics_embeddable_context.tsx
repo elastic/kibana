@@ -26,11 +26,9 @@ export const SyntheticsEmbeddableContext: React.FC<
   return (
     <SyntheticsSharedContext {...props} reload$={reload$} reduxStore={reduxStore}>
       <SyntheticsEmbeddableStateContextProvider>
-        <Router history={createBrowserHistory()}>
-          <SyntheticsSettingsContextProvider {...props}>
-            {children}
-          </SyntheticsSettingsContextProvider>
-        </Router>
+        {/* <Router history={createBrowserHistory()}> */}
+        <SyntheticsSettingsContextProvider {...props}>{children}</SyntheticsSettingsContextProvider>
+        {/* </Router> */}
       </SyntheticsEmbeddableStateContextProvider>
     </SyntheticsSharedContext>
   );

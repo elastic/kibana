@@ -6,7 +6,10 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SuggestionPayload } from '@kbn/observability-case-suggestion-registry-plugin/server/services/case_suggestion_registry';
+import { SuggestionPayload } from '@kbn/observability-case-suggestion-registry-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
+import type { PageAttachmentPersistedState } from '@kbn/observability-schema';
 import { getSavedObjectKqlFilter } from '../../routes/common';
 import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
@@ -15,10 +18,12 @@ export const getSyntheticsMonitorByServiceName = async ({
   savedObjectsClient,
   encryptedSavedObjectsClient,
   serviceName,
+  share,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   serviceName: string;
+  share: SharePluginStart;
 }): Promise<SuggestionPayload> => {
   const serviceNameFilter = getSavedObjectKqlFilter({
     field: 'service.name',
@@ -36,10 +41,25 @@ export const getSyntheticsMonitorByServiceName = async ({
   return {
     suggestionId: 'synthetics_monitor',
     data: {
-      attachments: result.saved_objects.map((obj) => ({
-        attachment: {},
-        payload: obj.attributes,
-      })),
+      attachments: result.saved_objects.map((obj) => {
+        const persistableStateAttachmentState: PageAttachmentPersistedState = {
+          type: 'synthetics_monitor',
+          url: {
+            label: `"${obj.attributes.name}" monitor details`,
+            actionLabel: 'View monitor',
+            iconType: 'logoObservability',
+            pathAndQuery: `app/synthetics/monitor/${obj.attributes.id}/history?locationId=us_central&dateRangeStart=2025-07-14T12:59:31.281Z&dateRangeEnd=2025-07-15T12:59:31.281Z`,
+          },
+        };
+        return {
+          attachment: {
+            persistableStateAttachmentState,
+            persistableStateAttachmentTypeId: '.page',
+            type: 'persistableState',
+          },
+          payload: obj.attributes,
+        };
+      }),
     },
   };
 };

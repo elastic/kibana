@@ -5,16 +5,12 @@
  * 2.0.
  */
 import React from 'react';
+import type { SuggestionPayload } from '../../common/types';
 
-export interface SuggestionDefinitionPublicProps<TPayload = {}, TMetadata = {}> {
-  data: {
-    attachments: Array<{
-      attachment: Array<Record<string, unknown>>;
-      payload: TPayload;
-    }>;
-    metadata?: TMetadata;
-  };
-}
+export type SuggestionDefinitionPublicProps<TPayload = {}, TMetadata = {}> = SuggestionPayload<
+  TPayload,
+  TMetadata
+>;
 
 export interface SuggestionDefinitionPublic<TPayload = {}, TMetadata = {}> {
   suggestionId: string;

@@ -8,11 +8,13 @@
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SuggestionDefinitionServer } from '@kbn/observability-case-suggestion-registry-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { getSyntheticsMonitorByServiceName } from './tool_handlers';
 
 export const getSyntheticsMonitorSuggestionType = (dependencies: {
   savedObjectClient: SavedObjectsClientContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  share: SharePluginStart;
 }): SuggestionDefinitionServer => {
   return {
     suggestionId: 'synthetic_monitor',
@@ -37,6 +39,7 @@ export const getSyntheticsMonitorSuggestionType = (dependencies: {
         return getSyntheticsMonitorByServiceName({
           savedObjectsClient: dependencies.savedObjectClient,
           encryptedSavedObjectsClient: dependencies.encryptedSavedObjectsClient,
+          share: dependencies.share,
           serviceName,
         });
       },

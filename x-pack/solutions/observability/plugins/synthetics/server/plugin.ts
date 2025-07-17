@@ -123,6 +123,7 @@ export class Plugin implements PluginType {
     const suggestionTypes = getSuggestionTypes({
       savedObjectsClient: this.savedObjectsClient,
       encryptedSavedObjectsClient: pluginsStart.encryptedSavedObjects.getClient(),
+      share: pluginsStart.share,
     });
 
     suggestionTypes.forEach((suggestionType) => {

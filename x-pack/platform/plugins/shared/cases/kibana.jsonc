@@ -40,7 +40,8 @@
       "taskManager",
       "usageCollection",
       "spaces",
-      "serverless"
+      "serverless",
+      "observabilityCaseSuggestionRegistry",
     ],
     "requiredBundles": [
       "esUiShared",

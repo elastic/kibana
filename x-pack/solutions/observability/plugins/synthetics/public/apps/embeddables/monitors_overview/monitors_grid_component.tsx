@@ -99,15 +99,15 @@ const SingleMonitorView = () => {
     }
   }, [dispatch, monitor, trendData]);
 
-  const style = { height: '100%' };
+  const style = { height: '300px' };
 
   if (!monitor) return <OverviewLoader rows={1} columns={1} style={style} />;
 
   return (
-    <>
+    <div style={{ minHeight: 200 }}>
       <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} style={style} />
       <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
-    </>
+    </div>
   );
 };
 
@@ -133,6 +133,7 @@ const MonitorsOverviewList = ({
       })
     );
   }, [dispatch, filters]);
+  console.log('view', view);
 
   if (singleMonitor && view === 'cardView') {
     return <SingleMonitorView />;
