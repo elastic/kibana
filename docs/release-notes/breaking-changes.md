@@ -36,9 +36,17 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+
+## 9.1.0 [kibana-9.1.0-breaking-changes]
+$$$kibana-213916$$$
+::::{dropdown} Now the fields / functions variables are being described with ?? in the query. The values variables use ? as before 
+% **Details**<br> Description
+% **Impact**<br> Impact of the breaking change.
+% **Action**<br> Steps for mitigating impact.
+View [#213916]({{kib-pull}}213916).
+::::
+
 ## 9.0.0 [kibana-900-breaking-changes]
-
-
 $$$kibana-193792$$$
 :::{dropdown} Access to {{kib}}'s internal APIs is blocked
 Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure that HTTP API integrations with Kibana avoid unexpected breaking changes.

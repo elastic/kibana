@@ -35,8 +35,21 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
 ## 9.1.0 [kibana-9.1.0-deprecations]
+$$$kibana-225536$$$
+::::{dropdown} Removes Default Quick Prompts 
+% **Details**<br> Description
+% **Impact**<br> Impact of the deprecation.
+% **Action**<br> Steps for mitigating impact.
+View [#225536]({{kib-pull}}225536).
+::::
 
-There are no deprecations in this version.
+$$$kibana-221419$$$
+::::{dropdown} Removal of the deprecated `visualization:useLegacyTimeAxis` advanced setting 
+% **Details**<br> Description
+% **Impact**<br> Impact of the deprecation.
+% **Action**<br> Steps for mitigating impact.
+View [#221419]({{kib-pull}}221419).
+::::
 
 ## 9.0.0 [kibana-900-deprecations]
 
