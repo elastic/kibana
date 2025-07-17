@@ -10,7 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { result } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
+import { result } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
 import type { Agent } from 'supertest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('POST /internal/cloud_security_posture/graph', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
-        'x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );
       supertestViewer = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
         useCookieHeader: true, // to avoid generating API key and use Cookie header instead
@@ -42,7 +42,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/cloud_security_posture_api/es_archives/logs_gcp_audit');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
+      );
     });
 
     describe('Authorization', () => {

@@ -14,7 +14,7 @@ import type SuperTest from 'supertest';
 
 export const setAdvancedSettings = async (
   supertest: SuperTest.Agent,
-  settings: Record<string, string[] | string | number | boolean>
+  settings: Record<string, string[] | string | number | boolean | object>
 ) => {
   return supertest
     .post('/internal/kibana/settings')

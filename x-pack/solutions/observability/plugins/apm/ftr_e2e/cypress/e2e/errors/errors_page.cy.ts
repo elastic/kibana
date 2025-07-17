@@ -93,23 +93,13 @@ describe('Errors page', () => {
       });
 
       it('sorts by ocurrences', () => {
-        cy.intercept(
-          'GET',
-          '/internal/apm/services/opbeans-java/errors/groups/main_statistics?*'
-        ).as('errorsMainStatistics');
         cy.visitKibana(javaServiceErrorsPageHref);
-        cy.wait('@errorsMainStatistics');
         cy.contains('span', 'Occurrences').click();
         cy.url().should('include', '&sortField=occurrences&sortDirection=asc');
       });
 
       it('sorts by latest occurrences', () => {
-        cy.intercept(
-          'GET',
-          '/internal/apm/services/opbeans-java/errors/groups/main_statistics?*'
-        ).as('errorsMainStatistics');
         cy.visitKibana(javaServiceErrorsPageHref);
-        cy.wait('@errorsMainStatistics');
         cy.contains('span', 'Last seen').click();
         cy.url().should('include', '&sortField=lastSeen&sortDirection=asc');
       });

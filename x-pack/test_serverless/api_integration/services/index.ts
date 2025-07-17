@@ -61,3 +61,5 @@ export type InheritedServices = InheritedFtrProviderContext extends GenericFtrPr
 >
   ? TServices
   : {};
+
+export type { SupertestWithRoleScopeType } from '../../shared/services';

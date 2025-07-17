@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 import {
   EuiFlyoutFooter,
@@ -17,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export enum SubmittingType {
   savingAsAdHoc = 'savingAsAdHoc',
@@ -76,7 +78,7 @@ export const Footer = ({
   };
 
   return (
-    <EuiFlyoutFooter className="indexPatternEditor__footer">
+    <EuiFlyoutFooter css={styles.footer}>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -134,4 +136,11 @@ export const Footer = ({
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
+};
+
+const styles = {
+  footer: css({
+    marginLeft: -euiThemeVars.euiSizeL,
+    marginRight: -euiThemeVars.euiSizeL,
+  }),
 };

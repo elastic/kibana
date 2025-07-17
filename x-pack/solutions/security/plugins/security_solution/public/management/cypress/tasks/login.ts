@@ -108,7 +108,7 @@ login.withCustomRole = (role: Role): ReturnType<typeof sendApiLoginRequest> => {
  * @param username
  * @param password
  *
- * @private
+ * @internal
  */
 const sendApiLoginRequest = (
   username: string,

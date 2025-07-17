@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiButton,
@@ -18,6 +18,7 @@ import {
   EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { gapStatus } from '@kbn/alerting-plugin/common';
@@ -30,14 +31,30 @@ export const RulesWithGapsOverviewPanel = () => {
   const {
     state: {
       filterOptions: { gapSearchRange, showRulesWithGaps },
+      lastUpdated: rulesTableLastUpdatedAt,
     },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data } = useGetRuleIdsWithGaps({
+  const { data: totalRulesWithGaps, refetch: refetchGetRuleIdsWithGaps } = useGetRuleIdsWithGaps({
     gapRange: gapSearchRange ?? defaultRangeValue,
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
   });
+  const { data: inProgressRulesWithGaps, refetch: refetchGetRuleIdsWithGapsInProgressIntervals } =
+    useGetRuleIdsWithGaps({
+      gapRange: gapSearchRange ?? defaultRangeValue,
+      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+      hasInProgressIntervals: true,
+    });
   const [isPopoverOpen, setPopover] = useState(false);
+
+  useEffect(() => {
+    refetchGetRuleIdsWithGaps();
+    refetchGetRuleIdsWithGapsInProgressIntervals();
+  }, [
+    rulesTableLastUpdatedAt,
+    refetchGetRuleIdsWithGaps,
+    refetchGetRuleIdsWithGapsInProgressIntervals,
+  ]);
 
   const rangeValueToLabel = {
     [GapRangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,
@@ -113,13 +130,21 @@ export const RulesWithGapsOverviewPanel = () => {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={data?.total === 0 ? 'success' : 'warning'}>{data?.total}</EuiBadge>
+              {inProgressRulesWithGaps && totalRulesWithGaps && (
+                <EuiToolTip position="bottom" content={i18n.RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT}>
+                  <EuiBadge color={totalRulesWithGaps?.total === 0 ? 'success' : 'warning'}>
+                    {totalRulesWithGaps?.total} {'/'} {inProgressRulesWithGaps?.total}
+                  </EuiBadge>
+                </EuiToolTip>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EuiFilterButton
+              isToggle
+              isSelected={showRulesWithGaps}
               hasActiveFilters={showRulesWithGaps}
               onClick={handleShowRulesWithGapsFilterButtonClick}
               iconType={showRulesWithGaps ? `checkInCircleFilled` : undefined}

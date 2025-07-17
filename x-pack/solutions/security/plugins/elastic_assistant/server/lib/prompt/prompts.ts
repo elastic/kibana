@@ -149,3 +149,158 @@ export const DEFAULT_CHAT_TITLE = `You are a helpful assistant for Elastic Secur
 MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
 `;
+
+export const DEFEND_INSIGHTS = {
+  INCOMPATIBLE_ANTIVIRUS: {
+    DEFAULT:
+      'You are an Elastic Security user tasked with analyzing file events from Elastic Security to identify antivirus processes. Only focus on detecting antivirus processes. Ignore processes that belong to Elastic Agent or Elastic Defend, that are not antivirus processes, or are typical processes built into the operating system. Accuracy is of the utmost importance, try to minimize false positives. Group the processes by the antivirus program, keeping track of the agent.id and _id associated to each of the individual events as endpointId and eventId respectively. If there are no events, ignore the group field. Escape backslashes to respect JSON validation. New lines must always be escaped with double backslashes, i.e. \\\\n to ensure valid JSON. Only return JSON output, as described above. Do not add any additional text to describe your output.',
+    REFINE: `You previously generated the following insights, but sometimes they include events that aren't from an antivirus program or are not grouped correctly by the same antivirus program.
+
+Review the insights below and remove any that are not from an antivirus program and combine duplicates into the same 'group'; leave any other insights unchanged:`,
+    CONTINUE: `Continue exactly where you left off in the JSON output below, generating only the additional JSON output when it's required to complete your work. The additional JSON output MUST ALWAYS follow these rules:
+1) it MUST conform to the schema above, because it will be checked against the JSON schema
+2) it MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds), because it will be parsed as JSON
+3) it MUST NOT repeat any the previous output, because that would prevent partial results from being combined
+4) it MUST NOT restart from the beginning, because that would prevent partial results from being combined
+5) it MUST NOT be prefixed or suffixed with additional text outside of the JSON, because that would prevent it from being combined and parsed as JSON:
+`,
+    GROUP: 'The program which is triggering the events',
+    EVENTS: 'The events that the insight is based on',
+    EVENTS_ID: 'The event ID',
+    EVENTS_ENDPOINT_ID: 'The endpoint ID',
+    EVENTS_VALUE: 'The process.executable value of the event',
+  },
+};
+
+export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
+
+Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
+
+export const ALERT_SUMMARY_SYSTEM_PROMPT =
+  'Return **only a single-line stringified JSON object** without any code fences, explanations, or variable assignments. Do **not** wrap the output in triple backticks or any Markdown code block. \n' +
+  '\n' +
+  'The result must be a valid stringified JSON object that can be directly parsed with `JSON.parse()` in JavaScript.\n' +
+  '\n' +
+  '**Strict rules**:\n' +
+  '- The output must **not** include any code blocks (no triple backticks).\n' +
+  '- The output must be **a string**, ready to be passed directly into `JSON.parse()`.\n' +
+  '- All backslashes (`\\`) must be escaped **twice** (`\\\\\\\\`) so that the string parses correctly in JavaScript.\n' +
+  '- The JSON must follow this structure:\n' +
+  '  {{\n' +
+  '    "summary": "Markdown-formatted summary with inline code where relevant.",\n' +
+  '    "recommendedActions": "Markdown-formatted action list starting with a `###` header."\n' +
+  '  }}\n' +
+  '- The summary text should just be text. It does not need any titles or leading items in bold.\n' +
+  '- Markdown formatting should be used inside string values:\n' +
+  '  - Use `inline code` (backticks) for technical values like file paths, process names, arguments, etc.\n' +
+  '  - Use `**bold**` for emphasis.\n' +
+  '  - Use `-` for bullet points.\n' +
+  '  - The `recommendedActions` value must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
+  '- **Do not** include any extra explanation or text. Only return the stringified JSON object.\n' +
+  '\n' +
+  'The response should look like this:\n' +
+  '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
+
+export const RULE_ANALYSIS =
+  'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
+  '- The rule name and a brief summary of its purpose.\n' +
+  '- The full detection query as published in Elastic’s official detection rules repository.\n' +
+  '- An in-depth explanation of how the query works, including key fields, logic, and detection techniques.\n' +
+  '- The relevance of the rule to modern threats or attack techniques (e.g., MITRE ATT&CK mapping).\n' +
+  '- Typical implications and recommended response actions for an organization if this rule triggers.\n' +
+  '- Any notable false positive considerations or tuning recommendations.\n' +
+  'Format your response using markdown with clear headers for each rule, code blocks for queries, and concise bullet points for explanations.';
+
+export const DATA_QUALITY_ANALYSIS =
+  'Explain the ECS incompatibility results above, and describe some options to fix incompatibilities. In your explanation, include information about remapping fields, reindexing data, and modifying data ingestion pipelines. Also, describe how ES|QL can be used to identify and correct incompatible data, including examples of using RENAME, EVAL, DISSECT, GROK, and CASE functions. Please consider using applicable tools for this request. Make sure you’ve used the right tools for this request.';
+
+export const ALERT_EVALUATION = `Evaluate the security event described above and provide a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Make sure you consider using appropriate tools available to you to fulfill this request. Your response must include:
+1. Event Description
+  - Summarize the event, including user and host risk scores from the provided context.
+  - Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
+2. Triage Steps
+  - List clear, bulleted triage steps tailored to Elastic Security workflows (e.g., alert investigation, timeline creation, entity analytics review).
+  - Highlight any relevant detection rules or anomaly findings.
+3. Recommended Actions
+  - Provide prioritized response actions, and consider using applicable tools to generate each part of the response, including:
+    - Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
+    - Example ES|QL queries for further investigation, formatted as code blocks.
+    - Example OSQuery Manager queries for further investigation, formatted as code blocks.
+    - Guidance on using Timelines and Entity Analytics for deeper context, with documentation links.
+4. MITRE ATT&CK Context
+  - Summarize the mapped MITRE ATT&CK techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
+5. Documentation Links
+  - Include direct links to all referenced Elastic Security documentation and MITRE ATT&CK pages.
+Make sure you’ve used the right tools for this request.
+Formatting Requirements:
+  - Use markdown headers, tables, and code blocks for clarity.
+  - Organize the response into visually distinct sections.
+  - Use concise, actionable language.
+  - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).
+`;
+
+export const starterPromptTitle1 = 'Alerts';
+export const starterPromptDescription1 = 'Most important alerts from the last 24 hrs';
+export const starterPromptIcon1 = 'bell';
+export const starterPromptPrompt1 = `🔍 Identify and Prioritize Today's Most Critical Alerts
+Provide a structured summary of today's most significant alerts, including:
+🛡️ Critical Alerts Overview
+Highlight the most impactful alerts based on risk scores, severity, and affected entities.
+Summarize key details such as alert name, risk score, severity, and associated users or hosts.
+📊 Risk Context
+Include user and host risk scores for each alert to provide additional context.
+Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
+🚨 Why These Alerts Matter
+Explain why these alerts are critical, focusing on potential business impact, lateral movement risks, or sensitive data exposure.
+🔧 Recommended Next Steps
+Provide actionable triage steps for each alert, such as:
+Investigating the alert in Elastic Security.
+Reviewing related events in Timelines.
+Analyzing user and host behavior using Entity Analytics.
+Suggest Elastic Defend endpoint response actions (e.g., isolate host, kill process, retrieve/delete file), with links to Elastic documentation.
+📚 Documentation and References
+Include direct links to Elastic Security documentation and relevant MITRE ATT&CK pages for further guidance.
+Make sure you use tools available to you to fulfill this request.
+Use markdown headers, tables, and code blocks for clarity. Include relevant emojis for visual distinction and ensure the response is concise, actionable, and tailored to Elastic Security workflows.`;
+export const starterPromptDescription2 = 'Latest Elastic Security Labs research';
+export const starterPromptTitle2 = 'Research';
+export const starterPromptIcon2 = 'launch';
+export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top, and consider using all tools available to you to fulfill this request. Ensure the response includes:
+Article Summaries
+Title and Link: Provide the title of each article with a hyperlink to the original content.
+Publication Date: Include the date the article was published.
+Key Insights: Summarize the main points or findings of each article in concise bullet points.
+Relevant Threats or Techniques: Highlight any specific malware, attack techniques, or adversary behaviors discussed, with references to MITRE ATT&CK techniques (include hyperlinks to the official MITRE pages).
+Practical Applications
+Detection and Response Guidance: Provide actionable steps or recommendations based on the article's content, tailored for Elastic Security workflows.
+Elastic Security Features: Highlight any Elastic Security features, detection rules, or tools mentioned in the articles, with links to relevant documentation.
+Example Queries: If applicable, include example ES|QL or OSQuery Manager queries inspired by the article's findings, formatted as code blocks.
+Documentation and Resources
+Elastic Security Labs: Include a link to the Elastic Security Labs homepage.
+Additional References: Provide links to any related Elastic documentation or external resources mentioned in the articles.
+Formatting Requirements
+Use markdown headers, tables, and code blocks for clarity.
+Organize the response into visually distinct sections.
+Use concise, actionable language. Make sure you use tools available to you to fulfill this request.`;
+export const starterPromptDescription3 = 'Generate ES|QL Queries';
+export const starterPromptTitle3 = 'Query';
+export const starterPromptIcon3 = 'esqlVis';
+export const starterPromptPrompt3 =
+  'I need an Elastic ES|QL query to achieve the following goal:\n' +
+  'Goal/Requirement:\n' +
+  '<Insert your specific requirement or goal here, e.g., "Identify all failed login attempts from a specific IP address within the last 24 hours.">\n' +
+  'Please:\n' +
+  'Use all tools available to you to fulfill this request.\n' +
+  'Generate the ES|QL Query: Provide a complete ES|QL query tailored to the stated goal.\n' +
+  'Explain the Query: Offer a brief explanation of each part of the query, including filters, fields, and logic used.\n' +
+  'Optimize for Elastic Security: Suggest additional filters, aggregations, or enhancements to make the query more efficient and actionable within Elastic Security workflows.\n' +
+  'Provide Documentation Links: Include links to relevant Elastic Security documentation for deeper understanding.\n' +
+  'Formatting Requirements:\n' +
+  'Use code blocks for the ES|QL query.\n' +
+  'Include concise explanations in bullet points for clarity.\n' +
+  'Highlight any advanced ES|QL features used in the query.\n';
+export const starterPromptDescription4 = 'Discover the types of questions you can ask';
+export const starterPromptTitle4 = 'Suggest';
+export const starterPromptIcon4 = 'sparkles';
+export const starterPromptPrompt4 =
+  'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';

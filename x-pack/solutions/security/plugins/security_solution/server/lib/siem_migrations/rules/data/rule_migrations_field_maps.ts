@@ -94,7 +94,10 @@ export const getPrebuiltRulesFieldMap: ({
   mitre_attack_ids: { type: 'keyword', array: true, required: false },
 });
 
-export const migrationsFieldMaps: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
+export const migrationsFieldMaps: FieldMap<
+  SchemaFieldMapKeys<Omit<RuleMigration, 'id' | 'last_execution'>>
+> = {
+  name: { type: 'keyword', required: true },
   created_at: { type: 'date', required: true },
   created_by: { type: 'keyword', required: true },
 };

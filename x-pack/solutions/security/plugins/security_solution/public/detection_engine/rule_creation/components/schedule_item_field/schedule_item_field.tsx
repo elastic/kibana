@@ -174,7 +174,7 @@ export function ScheduleItemField({
   );
 }
 
-const DEFAULT_TIME_DURATION_UNITS = ['s', 'm', 'h'];
+const DEFAULT_TIME_DURATION_UNITS = ['s', 'm', 'h', 'd'];
 
 function saturate(input: number, minValue: number, maxValue: number): number {
   return Math.max(minValue, Math.min(input, maxValue));

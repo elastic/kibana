@@ -7,10 +7,11 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import { ApiConfig, INVOKE_LLM_CLIENT_TIMEOUT, Replacements } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
+import * as i18n from './translations';
 
 interface SendMessageProps {
   apiConfig: ApiConfig;
@@ -39,6 +40,11 @@ export const useSendMessage = (): UseSendMessage => {
     async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
       setIsLoading(true);
 
+      const timeoutId = setTimeout(() => {
+        abortController.current.abort(i18n.FETCH_MESSAGE_TIMEOUT_ERROR);
+        abortController.current = new AbortController();
+      }, INVOKE_LLM_CLIENT_TIMEOUT);
+
       try {
         return await fetchConnectorExecuteAction({
           conversationId,
@@ -56,6 +62,7 @@ export const useSendMessage = (): UseSendMessage => {
           },
         });
       } finally {
+        clearTimeout(timeoutId);
         setIsLoading(false);
       }
     },

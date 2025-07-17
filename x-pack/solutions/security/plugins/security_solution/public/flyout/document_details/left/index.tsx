@@ -35,7 +35,7 @@ export const LeftPanelNotesTab: LeftPanelPaths = 'notes';
 export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, getFieldsData, isPreview } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, getFieldsData, isRulePreview } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
@@ -53,16 +53,16 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
       eventKind === EventKind.signal
         ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
         : [tabs.insightsTab];
-    if (canSeeNotes && !securitySolutionNotesDisabled && !isPreview) {
+    if (canSeeNotes && !securitySolutionNotesDisabled && !isRulePreview) {
       tabList.push(tabs.notesTab);
     }
-    if (visualizationInFlyoutEnabled && !isPreview) {
+    if (visualizationInFlyoutEnabled && !isRulePreview) {
       return [tabs.visualizeTab, ...tabList];
     }
     return tabList;
   }, [
     eventKind,
-    isPreview,
+    isRulePreview,
     canSeeNotes,
     securitySolutionNotesDisabled,
     visualizationInFlyoutEnabled,

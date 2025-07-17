@@ -19,7 +19,6 @@ import {
   GridData as GridDataV1,
   SavedDashboardPanel as SavedDashboardPanelV1,
 } from '../v1/types';
-import { DashboardSectionState } from '../..';
 
 export type GridData = GridDataV1 & {
   sectionId?: string;
@@ -32,6 +31,13 @@ export type SavedDashboardPanel = Omit<SavedDashboardPanelV1, 'gridData'> & {
 export type ControlGroupAttributes = ControlGroupAttributesV1 & {
   showApplySelections?: boolean;
 };
+
+interface DashboardSectionState {
+  title: string;
+  collapsed?: boolean; // if undefined, then collapsed is false
+  readonly gridData: Pick<GridData, 'i' | 'y'>;
+  id: string;
+}
 
 export type DashboardAttributes = Omit<DashboardAttributesV1, 'controlGroupInput'> & {
   controlGroupInput?: ControlGroupAttributes;

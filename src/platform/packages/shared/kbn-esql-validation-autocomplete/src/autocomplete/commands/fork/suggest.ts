@@ -19,6 +19,26 @@ import { getCommandAutocompleteDefinitions, pipeCompleteItem } from '../../compl
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import type { SuggestionRawDefinition } from '../../types';
 
+// ToDo: this is hardcoded, we should find a better way to take care of the fork commands
+const FORK_AVAILABLE_COMMANDS = [
+  'limit',
+  'sort',
+  'where',
+  'dissect',
+  'stats',
+  'eval',
+  'completion',
+  'grok',
+  'change_point',
+  'mv_expand',
+  'keep',
+  'drop',
+  'rename',
+  'sample',
+  'join',
+  'enrich',
+];
+
 export async function suggest(
   params: CommandSuggestParams<'fork'>
 ): Promise<SuggestionRawDefinition[]> {
@@ -42,9 +62,7 @@ export async function suggest(
 
   // within a branch
   if (activeBranch?.commands.length === 0 || pipePrecedesCurrentWord(params.innerText)) {
-    return getCommandAutocompleteDefinitions(
-      getCommandsByName(['limit', 'sort', 'where', 'dissect', 'stats', 'eval'])
-    );
+    return getCommandAutocompleteDefinitions(getCommandsByName(FORK_AVAILABLE_COMMANDS));
   }
 
   const subCommand = activeBranch?.commands[activeBranch.commands.length - 1];

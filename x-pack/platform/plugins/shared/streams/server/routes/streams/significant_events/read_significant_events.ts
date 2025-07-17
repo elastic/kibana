@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
@@ -15,6 +16,7 @@ import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
 import { getRuleIdFromQueryLink } from '../../../lib/streams/assets/query/helpers/query';
+import { SecurityError } from '../../../lib/streams/errors/security_error';
 
 export async function readSignificantEvents(
   params: { name: string; from: Date; to: Date; bucketSize: string },
@@ -34,72 +36,83 @@ export async function readSignificantEvents(
   const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
   const ruleIds = Object.keys(queryLinkByRuleId);
 
-  const response = await scopedClusterClient.asInternalUser.search<
-    unknown,
-    {
-      by_rule: AggregationsTermsAggregateBase<{
-        key: string;
-        doc_count: number;
-        occurrences: AggregationsMultiBucketAggregateBase<{
-          key_as_string: string;
-          key: number;
-          doc_count: 0;
-        }>;
-        change_points: {
-          type: {
-            [key in ChangePointType]: { p_value: number; change_point: number };
-          };
-        };
-      }>;
-    }
-  >({
-    index: '.alerts-streams.alerts-default',
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: from.toISOString(),
-                lte: to.toISOString(),
-              },
-            },
-          },
-          {
-            terms: {
-              'kibana.alert.rule.uuid': ruleIds,
-            },
-          },
-        ],
-      },
-    },
-    aggs: {
-      by_rule: {
-        terms: {
-          field: 'kibana.alert.rule.uuid',
-          size: 10000,
-        },
-        aggs: {
-          occurrences: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: bucketSize,
-              extended_bounds: {
-                min: from.toISOString(),
-                max: to.toISOString(),
-              },
-            },
-          },
+  const response = await scopedClusterClient.asCurrentUser
+    .search<
+      unknown,
+      {
+        by_rule: AggregationsTermsAggregateBase<{
+          key: string;
+          doc_count: number;
+          occurrences: AggregationsMultiBucketAggregateBase<{
+            key_as_string: string;
+            key: number;
+            doc_count: 0;
+          }>;
           change_points: {
-            // @ts-expect-error
-            change_point: {
-              buckets_path: 'occurrences>_count',
+            type: {
+              [key in ChangePointType]: { p_value: number; change_point: number };
+            };
+          };
+        }>;
+      }
+    >({
+      index: '.alerts-streams.alerts-default',
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: from.toISOString(),
+                  lte: to.toISOString(),
+                },
+              },
+            },
+            {
+              terms: {
+                'kibana.alert.rule.uuid': ruleIds,
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        by_rule: {
+          terms: {
+            field: 'kibana.alert.rule.uuid',
+            size: 10000,
+          },
+          aggs: {
+            occurrences: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: bucketSize,
+                extended_bounds: {
+                  min: from.toISOString(),
+                  max: to.toISOString(),
+                },
+              },
+            },
+            change_points: {
+              // @ts-expect-error
+              change_point: {
+                buckets_path: 'occurrences>_count',
+              },
             },
           },
         },
       },
-    },
-  });
+    })
+    .catch((err) => {
+      const isResponseError = err instanceof errors.ResponseError;
+      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+        throw new SecurityError(
+          `Cannot read significant events, insufficient privileges: ${err.message}`,
+          { cause: err }
+        );
+      }
+      throw err;
+    });
 
   if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
     return queryLinks.map((queryLink) => ({

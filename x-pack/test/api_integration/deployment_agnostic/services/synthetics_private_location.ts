@@ -12,7 +12,7 @@ import { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtim
 import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.2.4';
+export const INSTALLED_VERSION = '1.4.2';
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
@@ -63,7 +63,7 @@ export class PrivateLocationTestService {
     });
   }
 
-  async setTestLocations(testFleetPolicyIds: string[], spaceId?: string) {
+  async setTestLocations(testFleetPolicyIds: string[], spaceId?: string | string[]) {
     const locations: SyntheticsPrivateLocations = testFleetPolicyIds.map((id, index) => ({
       label: `Test private location ${id}`,
       agentPolicyId: id,
@@ -74,9 +74,10 @@ export class PrivateLocationTestService {
       },
       isServiceManaged: false,
     }));
+    const urlSpaceId = spaceId ? (Array.isArray(spaceId) ? spaceId[0] : spaceId) : 'default';
 
     await this.supertestWithAuth
-      .post(`/s/${spaceId || 'default'}/api/saved_objects/_bulk_create`)
+      .post(`/s/${urlSpaceId}/api/saved_objects/_bulk_create`)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'true')
       .send(
@@ -84,7 +85,7 @@ export class PrivateLocationTestService {
           type: privateLocationSavedObjectName,
           id: location.id,
           attributes: location,
-          initialNamespaces: [spaceId ? spaceId : 'default'],
+          initialNamespaces: spaceId ? (Array.isArray(spaceId) ? spaceId : [spaceId]) : ['default'],
         }))
       )
       .expect(200);

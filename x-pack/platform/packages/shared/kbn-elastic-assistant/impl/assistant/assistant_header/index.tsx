@@ -21,6 +21,8 @@ import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import * as i18n from './translations';
+import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;
@@ -169,12 +171,18 @@ export const AssistantHeader: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
               <EuiFlexItem>
-                <ConnectorSelectorInline
-                  isDisabled={isDisabled || selectedConversation === undefined}
+                <ElasticLLMCostAwarenessTour
+                  isDisabled={isDisabled}
                   selectedConnectorId={selectedConnectorId}
-                  selectedConversation={selectedConversation}
-                  onConnectorSelected={onConversationChange}
-                />
+                  storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
+                >
+                  <ConnectorSelectorInline
+                    isDisabled={isDisabled || selectedConversation === undefined}
+                    selectedConnectorId={selectedConnectorId}
+                    selectedConversation={selectedConversation}
+                    onConnectorSelected={onConversationChange}
+                  />
+                </ElasticLLMCostAwarenessTour>
               </EuiFlexItem>
               <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
                 <SettingsContextMenu

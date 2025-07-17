@@ -40,8 +40,6 @@ export const storybookAliases = {
   grouping: 'src/platform/packages/shared/kbn-grouping/.storybook',
   home: 'src/platform/plugins/shared/home/.storybook',
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
-  inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
-  investigate: 'x-pack/solutions/observability/plugins/investigate_app/.storybook',
   kibana_react: 'src/platform/plugins/shared/kibana_react/.storybook',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
@@ -52,7 +50,6 @@ export const storybookAliases = {
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:
     'x-pack/platform/plugins/shared/observability_ai_assistant/.storybook',
-  observability_inventory: 'x-pack/solutions/observability/plugins/inventory/.storybook',
   observability_shared: 'x-pack/solutions/observability/plugins/observability_shared/.storybook',
   observability_slo: 'x-pack/solutions/observability/plugins/slo/.storybook',
   observability: 'x-pack/solutions/observability/plugins/observability/.storybook',
@@ -62,6 +59,7 @@ export const storybookAliases = {
   // Skipped, please check and fix https://github.com/elastic/kibana/issues/207227
   // security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
   // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
+  ['response-ops']: 'src/platform/packages/shared/response-ops/.storybook',
   serverless: 'src/platform/packages/shared/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/solutions/security/plugins/threat_intelligence/.storybook',

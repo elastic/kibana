@@ -67,4 +67,20 @@ export {
   DEFAULT_START,
 } from './impl/alerts/get_open_and_acknowledged_alerts_query';
 
+export {
+  getAttackChainMarkdown,
+  getAttackDiscoveryMarkdown,
+  getAttackDiscoveryMarkdownFields,
+  getMarkdownFields,
+  getMarkdownWithOriginalValues,
+} from './impl/utils/get_attack_discovery_markdown';
+
+export {
+  getOriginalAlertIds,
+  getTacticLabel,
+  getTacticMetadata,
+  replaceNewlineLiterals,
+  transformInternalReplacements,
+} from './impl/utils/attack_discovery_helpers';
+
 export { getAttackDiscoveryLoadingMessage } from './impl/utils/get_attack_discovery_loading_message';

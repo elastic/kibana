@@ -11,6 +11,7 @@ import {
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import { merge } from 'lodash';
 import {
   createCrowdstrikeAgentDetailsMock,
   createCrowdstrikeGetAgentOnlineStatusDetailsMock,
@@ -19,6 +20,7 @@ import {
 import type { ResponseActionsClientOptionsMock } from '../mocks';
 import { responseActionsClientMock } from '../mocks';
 import type { NormalizedExternalConnectorClient } from '../../..';
+import type { RunScriptActionRequestBody } from '../../../../../../common/api/endpoint';
 
 export interface CrowdstrikeActionsClientOptionsMock extends ResponseActionsClientOptionsMock {
   connectorActions: NormalizedExternalConnectorClient;
@@ -101,6 +103,21 @@ const createEventSearchResponseMock = (): CrowdstrikeEventSearchResponseMock => 
   timed_out: false,
 });
 
+const createCrowdstrikeRunScriptOptionsMock = (
+  overrides: Partial<RunScriptActionRequestBody> = {}
+): RunScriptActionRequestBody => {
+  const options: RunScriptActionRequestBody = {
+    endpoint_ids: ['1-2-3'],
+    comment: 'test comment',
+    agent_type: 'crowdstrike',
+    parameters: {
+      raw: 'Write-Output "Hello from CrowdStrike script"',
+      timeout: 60000,
+    },
+  };
+  return merge(options, overrides);
+};
+
 export const CrowdstrikeMock = {
   createGetAgentsResponse: createCrowdstrikeGetAgentsApiResponseMock,
   createGetAgentOnlineStatusDetails: createCrowdstrikeGetAgentOnlineStatusDetailsMock,
@@ -108,4 +125,5 @@ export const CrowdstrikeMock = {
   createConnectorActionsClient: createConnectorActionsClientMock,
   createConstructorOptions: createConstructorOptionsMock,
   createEventSearchResponse: createEventSearchResponseMock,
+  createCrowdstrikeRunScriptOptions: createCrowdstrikeRunScriptOptionsMock,
 };

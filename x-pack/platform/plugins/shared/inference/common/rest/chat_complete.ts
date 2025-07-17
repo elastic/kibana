@@ -47,10 +47,7 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
     maxRetries,
     metadata,
     retryConfiguration,
-  }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
-    ToolOptions,
-    boolean
-  > => {
+  }: ChatCompleteOptions): ChatCompleteCompositeResponse => {
     const body: ChatCompleteRequestBody = {
       connectorId,
       system,

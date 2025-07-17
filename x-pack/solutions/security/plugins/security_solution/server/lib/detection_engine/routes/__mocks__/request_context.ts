@@ -43,6 +43,7 @@ import { detectionRulesClientMock } from '../../rule_management/logic/detection_
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
+import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -81,6 +82,7 @@ export const createMockClients = () => {
     },
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
     getInferenceClient: jest.fn(),
+    productFeaturesService: createProductFeaturesServiceMock(),
   };
 };
 
@@ -170,6 +172,10 @@ const createSecuritySolutionRequestContextMock = (
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
+    getProductFeatureService: jest.fn(() => clients.productFeaturesService),
+    getMlAuthz: jest.fn(() => ({
+      validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
+    })),
   };
 };
 

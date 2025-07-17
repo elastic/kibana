@@ -399,7 +399,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               message: gapErrorMessage,
               metrics: {
                 executionGap: remainingGap,
-                gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
+                gapRange: gap,
               },
             });
           }
@@ -559,7 +559,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
-                  gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
+                  gapRange: gap,
                   frozenIndicesQueriedCount,
                 },
                 userError: result.userError,

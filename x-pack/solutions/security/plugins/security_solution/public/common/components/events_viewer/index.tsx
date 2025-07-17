@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* TODO: (new data view picker) remove this after new picker is enabled */
+/* eslint-disable complexity  */
+
 import { css } from '@emotion/react';
 import type { SubsetDataTableModel, TableId } from '@kbn/securitysolution-data-table';
 import {
@@ -32,6 +35,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { InspectButton } from '../inspect';
 import type {
   ControlColumnProps,
@@ -67,6 +71,9 @@ import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
 import { globalFiltersQuerySelector, globalQuerySelector } from '../../store/inputs/selectors';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
@@ -143,15 +150,42 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const { uiSettings, data } = useKibana().services;
 
   const {
-    browserFields,
-    dataViewId,
-    selectedPatterns,
-    sourcererDataView,
-    dataViewId: selectedDataViewId,
-    loading: isLoadingIndexPattern,
+    browserFields: oldBrowserFields,
+    dataViewId: oldDataViewId,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+    loading: oldIsLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
+  const oldGetFieldSpec = useGetFieldSpec(sourcererScope);
 
-  const getFieldSpec = useGetFieldSpec(sourcererScope);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView: experimentalDataView, status } = useDataView(sourcererScope);
+
+  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? null : oldDataViewId;
+  const selectedDataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+
+  const runtimeMappings = useMemo(() => {
+    return newDataViewPickerEnabled
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {}
+      : (oldSourcererDataView?.runtimeFieldMap as RunTimeMappings) ?? {};
+  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]);
+
+  const experimentalGetFieldSpec = useCallback(
+    (fieldName: string) => {
+      return experimentalDataView.fields?.getByName(fieldName)?.toSpec();
+    },
+    [experimentalDataView.fields]
+  );
+  const getFieldSpec = newDataViewPickerEnabled ? experimentalGetFieldSpec : oldGetFieldSpec;
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
@@ -233,12 +267,22 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        dataViewSpec: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, browserFields, globalFilters, start, sourcererDataView, query, end]
+    [
+      esQueryConfig,
+      browserFields,
+      globalFilters,
+      start,
+      oldSourcererDataView,
+      experimentalDataView,
+      query,
+      end,
+    ]
   );
 
   const canQueryTimeline = useMemo(
@@ -280,7 +324,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       id: tableId,
       indexNames: indexNames ?? selectedPatterns,
       limit: itemsPerPage,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings,
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,

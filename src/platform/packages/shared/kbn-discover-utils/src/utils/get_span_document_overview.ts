@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, SpanDocumentOverview } from '../types';
 import { fieldConstants } from '..';
+import { getFormattedFields } from './get_formatted_fields';
 import { getFlattenedFields } from './get_flattened_fields';
 
 const fields: Array<keyof SpanDocumentOverview> = [
@@ -31,8 +34,17 @@ const fields: Array<keyof SpanDocumentOverview> = [
   fieldConstants.USER_AGENT_NAME_FIELD,
   fieldConstants.USER_AGENT_VERSION_FIELD,
   fieldConstants.PROCESSOR_EVENT_FIELD,
+  fieldConstants.OTEL_DURATION,
+  fieldConstants.OTEL_SPAN_KIND,
 ];
 
-export function getSpanDocumentOverview(doc: DataTableRecord): SpanDocumentOverview {
+export function getSpanDocumentOverview(
+  doc: DataTableRecord,
+  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
+): SpanDocumentOverview {
+  return getFormattedFields<SpanDocumentOverview>(doc, fields, { dataView, fieldFormats });
+}
+
+export function getFlattenedSpanDocumentOverview(doc: DataTableRecord): SpanDocumentOverview {
   return getFlattenedFields<SpanDocumentOverview>(doc, fields);
 }

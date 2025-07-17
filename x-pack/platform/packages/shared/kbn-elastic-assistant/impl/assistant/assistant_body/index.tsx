@@ -37,6 +37,7 @@ interface Props {
   http: HttpSetup;
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
+  setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const AssistantBody: FunctionComponent<Props> = ({
@@ -52,6 +53,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
   isSettingsModalVisible,
   isWelcomeSetup,
   setIsSettingsModalVisible,
+  setUserPrompt,
 }) => {
   const isEmptyConversation = useMemo(
     () => currentConversation?.messages.length === 0,
@@ -101,7 +103,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         {isLoading ? (
           <EuiEmptyPrompt
             data-test-subj="animatedLogo"
@@ -119,6 +121,8 @@ export const AssistantBody: FunctionComponent<Props> = ({
             isSettingsModalVisible={isSettingsModalVisible}
             setCurrentSystemPromptId={setCurrentSystemPromptId}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            setUserPrompt={setUserPrompt}
+            connectorId={currentConversation?.apiConfig?.connectorId}
           />
         ) : (
           <EuiPanel

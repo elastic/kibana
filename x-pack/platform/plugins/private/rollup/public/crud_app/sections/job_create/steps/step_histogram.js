@@ -99,7 +99,7 @@ export class StepHistogram extends Component {
               flush="right"
               href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
-              iconType="help"
+              iconType="question"
               data-test-subj="rollupJobCreateHistogramDocsButton"
             >
               <FormattedMessage

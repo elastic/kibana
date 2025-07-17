@@ -156,6 +156,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getEntityStoreApiKeyManager,
 
+      getProductFeatureService: () => productFeaturesService,
+
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
           license: licensing.license,
@@ -272,6 +274,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           apiKeyManager: getEntityStoreApiKeyManager(),
           security: startPlugins.security,
           request,
+        });
+      }),
+      getMlAuthz: memoize(() => {
+        return buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
         });
       }),
     };

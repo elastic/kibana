@@ -21,7 +21,7 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
     (prev, { context }) =>
     (params) => {
       const additionalControls = prev(params) || [];
-      const { updateESQLQuery, query, setExpandedDoc } = params;
+      const { updateESQLQuery, query, setExpandedDoc, isDocViewerEnabled } = params;
 
       const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
         ? queryContainsMetadataIgnored(query)
@@ -52,15 +52,17 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
           setExpandedDoc(props.record, { initialTabId: 'doc_view_logs_overview' });
         };
 
-      return [
-        ...additionalControls,
-        createDegradedDocsControl({
-          enabled: isDegradedDocsControlEnabled,
-          addIgnoredMetadataToQuery,
-          onClick: leadingControlClick('quality_issues'),
-        }),
-        createStacktraceControl({ onClick: leadingControlClick('stacktrace') }),
-      ];
+      return isDocViewerEnabled
+        ? [
+            ...additionalControls,
+            createDegradedDocsControl({
+              enabled: isDegradedDocsControlEnabled,
+              addIgnoredMetadataToQuery,
+              onClick: leadingControlClick('quality_issues'),
+            }),
+            createStacktraceControl({ onClick: leadingControlClick('stacktrace') }),
+          ]
+        : additionalControls;
     };
 
 const queryContainsMetadataIgnored = (query: AggregateQuery) =>

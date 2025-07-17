@@ -33,6 +33,7 @@ export {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   apiPublishesSavedSearch,
   type PublishesSavedSearch,
+  type PublishesWritableSavedSearch,
   type HasTimeRange,
   type SearchEmbeddableSerializedState,
   type SearchEmbeddableRuntimeState,
@@ -42,3 +43,4 @@ export {
 export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';
 
 export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');
+export type { DiscoverServices } from './build_services';

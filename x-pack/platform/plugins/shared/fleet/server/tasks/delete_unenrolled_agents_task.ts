@@ -117,7 +117,6 @@ export class DeleteUnenrolledAgentsTask {
                     active: false,
                   },
                 },
-                { exists: { field: 'unenrolled_at' } },
               ],
             },
           },

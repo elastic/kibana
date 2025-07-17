@@ -36,10 +36,9 @@ export const TokenField: FunctionComponent<TokenFieldProps> = ({ value, ...props
         defaultMessage: 'Token',
       })}
       value={value}
-      style={{
+      css={{
         fontFamily: euiThemeVars.euiCodeFontFamily,
         fontSize: euiThemeVars.euiFontSizeXS,
-        backgroundColor: 'transparent',
       }}
       onFocus={(event) => event.currentTarget.select()}
       readOnly

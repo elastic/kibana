@@ -29,6 +29,7 @@ import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/teleme
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { AdditionalFiltersAction } from './additional_filters_action';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 const { changeViewMode } = dataTableActions;
 
@@ -43,7 +44,12 @@ const AdditionalToolbarControlsComponent = ({
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+
   const groupId = useMemo(() => groupIdSelector(), []);
   const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
     options: [],
@@ -71,9 +77,13 @@ const AdditionalToolbarControlsComponent = ({
     [dispatch, tableType, trackGroupChange]
   );
 
-  const fields = useMemo(() => {
-    return Object.values(sourcererDataView?.fields || {});
-  }, [sourcererDataView?.fields]);
+  const fields = useMemo(
+    () =>
+      experimentalDataView
+        ? experimentalDataView.fields.map((field) => field.spec)
+        : Object.values(oldSourcererDataView.fields || {}),
+    [experimentalDataView, oldSourcererDataView.fields]
+  );
 
   const groupSelector = useGetGroupSelectorStateless({
     groupingId: tableType,

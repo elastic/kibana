@@ -179,7 +179,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryEventsSender = new TelemetryEventsSender(
+      this.logger,
+      this.config.experimentalFeatures
+    );
     this.asyncTelemetryEventsSender = new AsyncTelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
@@ -211,6 +214,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
+
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
 
@@ -595,7 +599,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-      advancedEsqlGeneration: config.experimentalFeatures.advancedEsqlGeneration,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

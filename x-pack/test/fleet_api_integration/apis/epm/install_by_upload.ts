@@ -209,7 +209,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect((res.error as HTTPError).text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of package: Error: end of central directory record signature not found. Assumed content type was application/zip, check if this matches the archive type."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of package: Error: End of central directory record signature not found. Either not a zip file, or file is truncated.. Assumed content type was application/zip, check if this matches the archive type."}'
       );
     });
 

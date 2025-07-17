@@ -204,7 +204,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'vis_type_vislib.readOnly (boolean?|never)',
         'vis_type_xy.readOnly (boolean?|never)',
         'vis_type_vega.enableExternalUrls (boolean?)',
-        'xpack.actions.email.domain_allowlist (array)',
+        'xpack.actions.email.domain_allowlist (array?)',
+        'xpack.actions.email.services.enabled (array?)',
+        'xpack.actions.webhook.ssl.pfx.enabled (boolean?)',
         'xpack.apm.serviceMapEnabled (boolean?)',
         'xpack.apm.ui.enabled (boolean?)',
         'xpack.apm.ui.maxTraceItems (number?)',
@@ -269,6 +271,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number?)',
         'xpack.fleet.integrationsHomeOverride (string?)',
         'xpack.fleet.prereleaseEnabledByDefault (boolean?)',
+        'xpack.fleet.hideDashboards (boolean?)',
         'xpack.global_search.search_timeout (duration?)',
         'xpack.global_search_bar.input_max_limit (number?)',
         'xpack.graph.canEditDrillDownUrls (boolean?)',
@@ -377,7 +380,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
-        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
         /**
          * Rule form V2 feature flags
          */

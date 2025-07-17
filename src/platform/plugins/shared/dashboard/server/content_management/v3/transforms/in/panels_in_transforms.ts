@@ -9,7 +9,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { isDashboardSection } from '../../../../../common/lib/dashboard_panel_converters';
+import { isDashboardSection } from '../../../../../common';
 import {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,

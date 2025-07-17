@@ -44,11 +44,12 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
         top: 0,
         left: 0,
       }}
+      data-test-subj="vertical-lines"
     >
       <g transform={`translate(0 ${margins.top})`}>
-        {tickPositions.map((position) => (
+        {tickPositions.map((position, index) => (
           <line
-            key={`tick-${position}`}
+            key={`tick-${position}-${index}`}
             x1={position}
             x2={position}
             y1={0}
@@ -56,9 +57,9 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             stroke={theme.eui.euiColorLightestShade}
           />
         ))}
-        {markPositions.map((position) => (
+        {markPositions.map((position, index) => (
           <line
-            key={`mark-${position}`}
+            key={`mark-${position}-${index}`}
             x1={position}
             x2={position}
             y1={0}

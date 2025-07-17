@@ -37,6 +37,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { useForm, FormProvider, useController } from 'react-hook-form';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
@@ -281,7 +283,18 @@ const InsightEditorComponent = ({
   onCancel,
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.default);
+
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.default
+  );
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+  const dataViewName = newDataViewPickerEnabled
+    ? experimentalDataView.name
+    : oldSourcererDataView.name;
+
   const {
     unifiedSearch: {
       ui: { FiltersBuilderLazy },
@@ -289,9 +302,11 @@ const InsightEditorComponent = ({
     uiSettings,
   } = useKibana().services;
 
-  const dataView = useGetScopedSourcererDataView({
+  const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
+
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
@@ -400,7 +415,7 @@ const InsightEditorComponent = ({
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
-    const index = sourcererDataView.name ?? '*';
+    const index = dataViewName ?? '*';
     return [
       {
         $state: {
@@ -414,7 +429,7 @@ const InsightEditorComponent = ({
         },
       },
     ];
-  }, [sourcererDataView]);
+  }, [dataViewName]);
   const isPlatinum = useLicense().isAtLeast('platinum');
 
   return (

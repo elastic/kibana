@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './empty_index_list_prompt.scss';
 import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,6 +25,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export const EmptyIndexListPrompt = ({
   onRefresh,
@@ -61,14 +61,11 @@ export const EmptyIndexListPrompt = ({
 
   return (
     <EuiPanel
-      className="inpEmptyState"
       data-test-subj="indexPatternEmptyState"
       color="subdued"
       hasShadow={false}
       paddingSize="xl"
-      css={css`
-        margin: auto;
-      `}
+      css={styles.wrapper}
     >
       <EuiPageHeader>
         <EuiTitle>
@@ -82,10 +79,10 @@ export const EmptyIndexListPrompt = ({
       </EuiPageHeader>
       <EuiSpacer size="xl" />
       <div>
-        <EuiFlexGrid className="inpEmptyState__cardGrid" columns={3} responsive={true}>
+        <EuiFlexGrid css={styles.cardGrid} columns={3} responsive={true}>
           <EuiFlexItem>
             <EuiCard
-              className="inpEmptyState__card"
+              css={styles.card}
               onClick={() => {
                 navigateToApp('integrations', { path: '/browse' });
               }}
@@ -107,7 +104,7 @@ export const EmptyIndexListPrompt = ({
           <EuiFlexItem>
             <EuiCard
               onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
-              className="inpEmptyState__card"
+              css={styles.card}
               icon={<EuiIcon size="xl" type="document" color="subdued" />}
               title={
                 <FormattedMessage
@@ -125,7 +122,7 @@ export const EmptyIndexListPrompt = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              className="inpEmptyState__card"
+              css={styles.card}
               onClick={() => {
                 navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
               }}
@@ -146,9 +143,9 @@ export const EmptyIndexListPrompt = ({
           </EuiFlexItem>
         </EuiFlexGrid>
         <EuiSpacer size="xxl" />
-        <div className="inpEmptyState__footer">
+        <div css={styles.footer}>
           <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false} className="inpEmptyState__footerFlexItem">
+            <EuiFlexItem grow={false} css={styles.footerItem}>
               <EuiDescriptionList
                 listItems={[
                   {
@@ -170,7 +167,7 @@ export const EmptyIndexListPrompt = ({
                 ]}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="inpEmptyState__footerFlexItem">
+            <EuiFlexItem grow={false} css={styles.footerItem}>
               <EuiDescriptionList
                 listItems={[
                   {
@@ -200,4 +197,26 @@ export const EmptyIndexListPrompt = ({
       </div>
     </EuiPanel>
   );
+};
+
+const styles = {
+  wrapper: css({
+    maxWidth: `calc(${euiThemeVars.euiSizeXXL} * 19)`,
+    margin: 'auto',
+  }),
+  cardGrid: css({
+    justifyContent: 'center',
+  }),
+  card: css({
+    minWidth: `calc(${euiThemeVars.euiSizeXL} * 6)`,
+  }),
+  footer: css({
+    backgroundColor: euiThemeVars.euiColorLightestShade,
+    margin: `0 -${euiThemeVars.euiSizeL} -${euiThemeVars.euiSizeL}`,
+    padding: euiThemeVars.euiSizeL,
+    borderRadius: `0 0 ${euiThemeVars.euiBorderRadiusSmall} ${euiThemeVars.euiBorderRadiusSmall}`,
+  }),
+  footerItem: css({
+    minWidth: `calc(${euiThemeVars.euiSizeXL} * 7)`,
+  }),
 };

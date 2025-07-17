@@ -59,6 +59,20 @@ export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL =
 export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/evaluate` as const;
 
+// Alert summary
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/alert_summary` as const;
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION =
+  `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_bulk_action` as const;
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND =
+  `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_find` as const;
+
+// Security AI Prompts (prompt integration)
+export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL =
+  `${ELASTIC_AI_ASSISTANT_URL}/security_ai_prompts` as const;
+export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND =
+  `${ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL}/_find` as const;
+
 // Defend insights
 export const DEFEND_INSIGHTS_TOOL_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
@@ -68,6 +82,7 @@ export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
 export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
   'securitySolution.assistantAttackDiscoverySchedulingEnabled' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
+export const ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID = 'siem' as const;
 
 export const ATTACK_DISCOVERY = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
 export const ATTACK_DISCOVERY_BULK = `${ATTACK_DISCOVERY}/_bulk` as const;
@@ -113,7 +128,26 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
   '.alerts-security.attack.discovery.alerts' as const;
 
 /**
- * The prefix for all ad hoc Attack discovery alerts index resources.
+ * This feature flag disables the InferenceChatModel feature.
+ *
+ * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
+ * ```
+ * feature_flags.overrides:
+ *   securitySolution.inferenceChatModelDisabled: true
+ * ```
  */
-export const ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX =
-  `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-ad-hoc` as const;
+export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
+  'securitySolution.inferenceChatModelDisabled' as const;
+
+/**
+ * The server timeout is set to 4 minutes to allow for long-running requests.
+ * The allows slower LLMs (like Llama 3.1 70B) and complex tasks such as ESQL generation to complete
+ * without being interrupted.
+ */
+export const INVOKE_LLM_SERVER_TIMEOUT = 4 * 60 * 1000; // 4 minutes
+/**
+ * The client timeout is set to 3 seconds less than the server timeout to prevent
+ * the `core-http-browser` from retrying the request.
+ *
+ */
+export const INVOKE_LLM_CLIENT_TIMEOUT = INVOKE_LLM_SERVER_TIMEOUT - 3000; // 4 minutes - 3 second

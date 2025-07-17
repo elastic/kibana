@@ -48,6 +48,8 @@ import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
@@ -76,12 +78,39 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const {
-    dataViewId,
-    loading: loadingSourcerer,
-    selectedPatterns,
-    sourcererDataView,
+    dataViewId: oldDataViewId,
+    loading: oldSourcererLoading,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const experimentalDataViewId = experimentalDataView.id ?? null;
+
+  const dataViewId = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId),
+    [experimentalDataViewId, newDataViewPickerEnabled, oldDataViewId]
+  );
+  const dataViewLoading = useMemo(
+    () => (newDataViewPickerEnabled ? status !== 'ready' : oldSourcererLoading),
+    [newDataViewPickerEnabled, oldSourcererLoading, status]
+  );
+
+  const runtimeMappings = useMemo(() => {
+    return newDataViewPickerEnabled
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings)
+      : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings);
+  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
+
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
+
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
   const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -96,12 +125,12 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const canQueryTimeline = useCallback(
     () =>
-      loadingSourcerer != null &&
-      !loadingSourcerer &&
+      dataViewLoading != null &&
+      !dataViewLoading &&
       !isEmpty(start) &&
       !isEmpty(end) &&
       !isBlankTimeline,
-    [end, isBlankTimeline, loadingSourcerer, start]
+    [end, isBlankTimeline, dataViewLoading, start]
   );
 
   const [dataLoadingState, { events, inspect, totalCount, loadNextBatch, refreshedAt, refetch }] =
@@ -115,7 +144,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       indexNames: selectedPatterns,
       language: 'eql',
       limit: sampleSize,
-      runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings,
       skip: !canQueryTimeline(),
       startDate: start,
       timerangeKind,
@@ -236,10 +265,11 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           setTimelineFullScreen={setTimelineFullScreen}
           timelineFullScreen={timelineFullScreen}
           timelineId={timelineId}
+          newDataViewPickerEnabled={newDataViewPickerEnabled}
         />
       </EuiFlexGroup>
     ),
-    [activeTab, setTimelineFullScreen, timelineFullScreen, timelineId]
+    [activeTab, newDataViewPickerEnabled, setTimelineFullScreen, timelineFullScreen, timelineId]
   );
 
   const NotesFlyoutMemo = useMemo(() => {

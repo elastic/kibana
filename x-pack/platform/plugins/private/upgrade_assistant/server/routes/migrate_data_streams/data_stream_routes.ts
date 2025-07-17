@@ -241,7 +241,7 @@ export function registerMigrateDataStreamRoutes({
       },
       options: {
         access: 'public',
-        summary: `Mark Data Stream indices as read only`,
+        summary: `Set data stream indices as read-only`,
       },
       validate: {
         body: schema.object({
@@ -283,6 +283,47 @@ export function registerMigrateDataStreamRoutes({
           return handleEsError({ error: err, response });
         }
         return mapAnyErrorToKibanaHttpResponse(err);
+      }
+    })
+  );
+  router.delete(
+    {
+      path: `${BASE_PATH}/{dataStreamName}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on elasticsearch for authorization',
+        },
+      },
+      options: {
+        access: 'public',
+        summary: `Delete data stream`,
+      },
+      validate: {
+        params: schema.object({
+          dataStreamName: schema.string(),
+        }),
+      },
+    },
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { dataStreamName } = request.params;
+      const callAsCurrentUser = esClient.asCurrentUser;
+
+      try {
+        await callAsCurrentUser.indices.deleteDataStream({
+          name: dataStreamName,
+        });
+
+        return response.ok({ body: { acknowledged: true } });
+      } catch (err) {
+        if (err instanceof errors.ResponseError) {
+          return handleEsError({ error: err, response });
+        }
+
+        return mapAnyErrorToKibanaHttpResponse(error);
       }
     })
   );

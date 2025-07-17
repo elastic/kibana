@@ -27,24 +27,19 @@ import {
   map,
   firstValueFrom,
 } from 'rxjs';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   INVENTORY_LOCATOR_ID,
   type AssetDetailsLocatorParams,
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import { ADD_LOG_STREAM_ACTION_ID, LOG_STREAM_EMBEDDABLE } from './components/log_stream/constants';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -59,7 +54,6 @@ import type {
   InfraClientStartExports,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
-import type { LogStreamSerializedState } from './components/log_stream/types';
 import {
   hostsTitle,
   inventoryTitle,
@@ -194,18 +188,6 @@ export class Plugin implements InfraClientPluginClass {
       )
     );
 
-    pluginsSetup.embeddable.registerReactEmbeddableFactory(LOG_STREAM_EMBEDDABLE, async () => {
-      const { getLogStreamEmbeddableFactory } = await import(
-        './components/log_stream/log_stream_react_embeddable'
-      );
-      const [coreStart, pluginDeps, pluginStart] = await core.getStartServices();
-      return getLogStreamEmbeddableFactory({
-        coreStart,
-        pluginDeps,
-        pluginStart,
-      });
-    });
-
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)
     );
@@ -334,49 +316,10 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    const { http, uiSettings } = core;
-    const isLogsStreamEnabled = uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
+    const { http } = core;
     const inventoryViews = this.inventoryViews.start({ http });
     const metricsExplorerViews = this.metricsExplorerViews?.start({ http });
     const telemetry = this.telemetry.start();
-
-    if (isLogsStreamEnabled) {
-      plugins.uiActions.registerAction<EmbeddableApiContext>({
-        id: ADD_LOG_STREAM_ACTION_ID,
-        grouping: [ADD_PANEL_OTHER_GROUP],
-        order: 30,
-        getDisplayName: () =>
-          i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
-            defaultMessage: 'Log stream (deprecated)',
-          }),
-        getDisplayNameTooltip: () =>
-          i18n.translate('xpack.infra.logStreamEmbeddable.description', {
-            defaultMessage:
-              'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved Discover session instead of using Log stream.',
-          }),
-        getIconType: () => 'logsApp',
-        isCompatible: async ({ embeddable }) => {
-          return apiCanAddNewPanel(embeddable);
-        },
-        execute: async ({ embeddable }) => {
-          if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-          embeddable.addNewPanel<LogStreamSerializedState>(
-            {
-              panelType: LOG_STREAM_EMBEDDABLE,
-              serializedState: {
-                rawState: {
-                  title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {
-                    defaultMessage: 'Log stream',
-                  }),
-                },
-              },
-            },
-            true
-          );
-        },
-      });
-      plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_LOG_STREAM_ACTION_ID);
-    }
 
     const startContract: InfraClientStartExports = {
       inventoryViews,

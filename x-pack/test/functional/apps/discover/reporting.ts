@@ -18,12 +18,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const { reporting, common, discover, timePicker, share, header } = getPageObjects([
+  const { reporting, common, discover, timePicker, header, exports } = getPageObjects([
     'reporting',
     'common',
     'discover',
     'timePicker',
     'share',
+    'exports',
     'header',
   ]);
   const monacoEditor = getService('monacoEditor');
@@ -106,8 +107,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await reporting.openExportTab();
+    await exports.clickExportTopNavButton();
+    await reporting.selectExportItem('CSV');
     await reporting.clickGenerateReportButton();
+    await exports.closeExportFlyout();
+    await browser.pressKeys(browser.keys.ESCAPE);
 
     const url = await reporting.getReportURL(timeout);
     const res = await reporting.getResponse(url ?? '');
@@ -119,11 +123,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getReportPostUrl = async () => {
     // click 'Copy POST URL'
-    await share.clickShareTopNavButton();
-    await reporting.openExportTab();
-    const copyButton = await testSubjects.find('shareReportingCopyURL');
+    await exports.clickExportTopNavButton();
+    await reporting.selectExportItem('CSV');
+    await reporting.clickGenerateReportButton();
+    await reporting.copyReportingPOSTURLValueToClipboard();
 
-    return decodeURIComponent((await copyButton.getAttribute('data-share-url')) ?? '');
+    const clipboardValue = decodeURIComponent(await browser.getClipboardValue());
+
+    await exports.closeExportFlyout();
+
+    return clipboardValue;
   };
 
   describe('Discover CSV Export', () => {
@@ -141,16 +150,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
-        await reporting.openExportTab();
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await share.closeShareModal();
+        await reporting.openExportPopover();
+        expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
+        await reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
         await discover.saveSearch('my search - expectEnabledGenerateReportButton');
-        await reporting.openExportTab();
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await share.closeShareModal();
+        await reporting.openExportPopover();
+        expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
+        await reporting.openExportPopover();
       });
     });
 
@@ -186,13 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // get shared URL value
         const sharedURL = await browser.getCurrentUrl();
 
-        // click 'Copy POST URL'
-        await share.clickShareTopNavButton();
-        await reporting.openExportTab();
-        const copyButton = await testSubjects.find('shareReportingCopyURL');
-        const reportURL = decodeURIComponent(
-          (await copyButton.getAttribute('data-share-url')) ?? ''
-        );
+        const reportURL = await getReportPostUrl();
 
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
@@ -270,7 +273,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
-      it('generate a report using ES|QL for relative time range as absolute dates and time params', async () => {
+      // TODO: Adjust and unskip when we have full support for toggling relative/absolute time ranges through the export UI
+      // https://github.com/elastic/kibana/issues/223171
+      it.skip('generate a report using ES|QL for relative time range as absolute dates and time params', async () => {
         const RECENT_DATA_INDEX_NAME = 'test_recent_data';
         const RECENT_DOC_COUNT = 500;
         const RECENT_DOC_END_DATE = moment().toISOString();

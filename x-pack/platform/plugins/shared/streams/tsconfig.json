@@ -6,11 +6,14 @@
   "include": [
     "../../../../../typings/**/*",
     "common/**/*",
+    "scripts/**/*",
     "server/**/*",
     "public/**/*",
     "types/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
@@ -50,6 +53,8 @@
     "@kbn/i18n",
     "@kbn/zod-helpers",
     "@kbn/core-http-server-utils",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/lock-manager",
+    "@kbn/core-pricing-common",
   ]
 }

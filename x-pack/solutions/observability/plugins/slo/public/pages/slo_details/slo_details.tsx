@@ -8,7 +8,6 @@
 import { EuiSkeletonText } from '@elastic/eui';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -16,6 +15,7 @@ import { useIsMutating } from '@tanstack/react-query';
 import dedent from 'dedent';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { usePageReady } from '@kbn/ebt-tools';
 import { LoadingState } from '../../components/loading_state';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
@@ -37,7 +37,6 @@ import type { SloDetailsPathParams } from './types';
 import { ActionModalProvider } from '../../context/action_modal';
 
 export function SloDetailsPage() {
-  const { onPageReady } = usePerformanceContext();
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -53,7 +52,11 @@ export function SloDetailsPage() {
   const { instanceId: sloInstanceId, remoteName } = useGetQueryParams();
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
-  const { isLoading, data: slo } = useFetchSloDetails({
+  const {
+    isLoading,
+    data: slo,
+    isRefetching,
+  } = useFetchSloDetails({
     sloId,
     remoteName,
     instanceId: sloInstanceId,
@@ -102,11 +105,10 @@ export function SloDetailsPage() {
     }
   }, [hasRightLicense, permissions, navigateToUrl, basePath]);
 
-  useEffect(() => {
-    if (!isLoading && slo !== undefined) {
-      onPageReady();
-    }
-  }, [onPageReady, slo, isLoading]);
+  usePageReady({
+    isReady: !isLoading && slo !== undefined,
+    isRefreshing: isRefetching,
+  });
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo), { serverless });
 

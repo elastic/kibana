@@ -2236,6 +2236,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.security.provider_etw',
+    first_supported_version: '8.19.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.provider_etw',
+      {
+        defaultMessage:
+          'Controls whether Microsoft-Windows-Security-Auditing ETW provider is enabled for security events collection. Set to false to disable the provider. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.alerts.hash.md5',
     first_supported_version: '8.16',
     documentation: i18n.translate(

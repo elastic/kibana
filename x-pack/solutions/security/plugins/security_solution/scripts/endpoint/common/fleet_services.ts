@@ -917,7 +917,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
     policy: {
       name: policyName,
       description: `Policy created by security solution tooling: ${__filename}`,
-      namespace: spaceId,
+      namespace: spaceId.replace(/-/g, '_'),
       monitoring_enabled: ['logs', 'metrics'],
     },
   });

@@ -13,8 +13,13 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import type { AppMenuItemPrimary, AppMenuItemSecondary } from '@kbn/discover-utils';
-import { AppMenuRegistry } from '@kbn/discover-utils';
+import {
+  AppMenuRegistry,
+  type AppMenuItemPrimary,
+  type AppMenuItemSecondary,
+} from '@kbn/discover-utils';
+import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -64,17 +69,31 @@ export const useTopNavLinks = ({
     fetchData();
   }, [services]);
 
+  const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
+    useGetRuleTypesPermissions({
+      http: services.http,
+      toasts: services.notifications.toasts,
+    });
+
+  const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
+    ruleTypes
+      .filter((ruleType) =>
+        Object.values(ruleType.authorizedConsumers).some((consumer) => consumer.all)
+      )
+      .map((ruleType) => ruleType.id);
+
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
       isEsqlMode,
       dataView,
       adHocDataViews,
+      authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
       onUpdateAdHocDataViews: async (adHocDataViewList) => {
         await state.actions.loadDataViewList();
         dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
       },
     }),
-    [isEsqlMode, dataView, adHocDataViews, state.actions, dispatch]
+    [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes, state.actions]
   );
 
   const defaultMenu = topNavCustomization?.defaultMenu;
@@ -89,8 +108,8 @@ export const useTopNavLinks = ({
 
       if (
         services.triggersActionsUi &&
-        services.capabilities.management?.insightsAndAlerting?.triggersActions &&
-        !defaultMenu?.alertsItem?.disabled
+        !defaultMenu?.alertsItem?.disabled &&
+        discoverParams.authorizedRuleTypeIds.length
       ) {
         const alertsAppMenuItem = getAlertsAppMenuItem({
           discoverParams,
@@ -123,7 +142,7 @@ export const useTopNavLinks = ({
           services,
           stateContainer: state,
         });
-        items.push(shareAppMenuItem);
+        items.push(...shareAppMenuItem);
       }
 
       return items;

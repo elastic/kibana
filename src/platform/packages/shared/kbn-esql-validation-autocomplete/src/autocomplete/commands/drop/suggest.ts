@@ -8,12 +8,7 @@
  */
 
 import { CommandSuggestParams } from '../../../definitions/types';
-import {
-  findPreviousWord,
-  getLastNonWhitespaceChar,
-  isColumnItem,
-  noCaseCompare,
-} from '../../../shared/helpers';
+import { getLastNonWhitespaceChar, isColumnItem } from '../../../shared/helpers';
 import type { SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { handleFragment } from '../../helper';
@@ -28,7 +23,7 @@ export async function suggest({
   if (
     /\s/.test(innerText[innerText.length - 1]) &&
     getLastNonWhitespaceChar(innerText) !== ',' &&
-    !noCaseCompare(findPreviousWord(innerText), 'drop')
+    !/drop\s+\S*$/i.test(innerText)
   ) {
     return [pipeCompleteItem, commaCompleteItem];
   }
@@ -55,12 +50,7 @@ export async function suggest({
     (fragment: string, rangeToReplace: { start: number; end: number }) => {
       // KEEP field<suggest>
       const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
-      if (fieldSuggestions.length > 1)
-        // when we fix the editor marker, this should probably be checked against 0 instead of 1
-        // this is because the last field in the AST is currently getting removed (because it contains
-        // the editor marker) so it is not included in the ignored list which is used to filter out
-        // existing fields above.
-        finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+      if (fieldSuggestions.length > 0) finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
 
       return finalSuggestions.map<SuggestionRawDefinition>((s) => ({
         ...s,

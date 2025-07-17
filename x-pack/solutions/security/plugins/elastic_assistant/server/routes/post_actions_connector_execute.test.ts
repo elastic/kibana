@@ -24,13 +24,16 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
-import { ELASTICSEARCH_ELSER_INFERENCE_ID } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import { getPrompt } from '../lib/prompt';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
+jest.mock('../lib/prompt');
+const mockGetPrompt = getPrompt as jest.Mock;
 
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
 const mockLangChainExecute = langChainExecute as jest.Mock;
@@ -94,6 +97,9 @@ const mockContext = {
       }),
     },
     core: {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       elasticsearch: {
         client: elasticsearchServiceMock.createScopedClusterClient(),
       },
@@ -126,7 +132,7 @@ const mockResponse = {
   error: jest.fn().mockImplementation((x) => x),
 };
 const mockConfig = {
-  elserInferenceId: ELASTICSEARCH_ELSER_INFERENCE_ID,
+  elserInferenceId: defaultInferenceEndpoints.ELSER,
   responseTimeout: 1000,
 };
 
@@ -465,6 +471,42 @@ describe('postActionsConnectorExecuteRoute', () => {
         }),
       },
     };
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockConfig
+    );
+  });
+
+  it('calls getPrompt with promptIds when passed in request.body', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    promptIds: { promptId: 'test-prompt-id', promptGroupId: 'test-group-id' },
+                  },
+                },
+                mockResponse
+              );
+
+              expect(mockGetPrompt).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  promptId: 'test-prompt-id',
+                  promptGroupId: 'test-group-id',
+                })
+              );
+            }),
+          };
+        }),
+      },
+    };
+
     await postActionsConnectorExecuteRoute(
       mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
       mockConfig

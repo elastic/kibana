@@ -32,11 +32,11 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
 
+const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
+
 interface DashboardViewProps {
   initialViewMode: ViewMode;
 }
-
-const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
 const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   initialViewMode,
@@ -52,7 +52,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { sourcererDataView } = useSourcererDataView();
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
 
   const { show: canReadDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
@@ -72,7 +72,10 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   return (
     <>
       <FiltersGlobal>
-        <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+        <SiemSearchBar
+          id={InputsModelId.global}
+          sourcererDataView={oldSourcererDataView} // TODO: newDataViewPickerEnabled -  Can be removed when the new data view picker is released
+        />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup

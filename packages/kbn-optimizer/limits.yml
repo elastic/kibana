@@ -39,12 +39,12 @@ pageLoadAssetSize:
   discover: 25000
   discoverEnhanced: 42730
   discoverShared: 17111
+  elasticAssistant: 279115
+  elasticAssistantSharedState: 19295
   embeddable: 24000
   embeddableAlertsTable: 19615
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
-  entityManager: 17175
-  entityManagerApp: 20378
   esql: 37000
   esqlDataGrid: 24582
   esUiShared: 326654
@@ -83,9 +83,6 @@ pageLoadAssetSize:
   inspector: 148711
   integrationAssistant: 19524
   interactiveSetup: 80000
-  inventory: 27430
-  investigate: 17970
-  investigateApp: 91898
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -147,7 +144,7 @@ pageLoadAssetSize:
   searchQueryRules: 19708
   searchSynonyms: 20262
   security: 81771
-  securitySolution: 98429
+  securitySolution: 159812
   securitySolutionEss: 36000
   securitySolutionServerless: 62488
   serverless: 16573

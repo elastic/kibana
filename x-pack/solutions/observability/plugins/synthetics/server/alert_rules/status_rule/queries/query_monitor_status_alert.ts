@@ -6,40 +6,32 @@
  */
 
 import pMap from 'p-map';
-import times from 'lodash/times';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { times } from 'lodash';
 import { intersection } from 'lodash';
-import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
+import { SavedObjectsFindResult } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
 import {
-  FINAL_SUMMARY_FILTER,
-  getRangeFilter,
-  SUMMARY_FILTER,
-} from '../../../../common/constants/client_defaults';
-import { OverviewPing } from '../../../../common/runtime_types';
-import { createEsParams, SyntheticsEsClient } from '../../../lib';
+  AlertStatusConfigs,
+  AlertStatusMetaData,
+  AlertPendingStatusConfigs,
+} from '../../../../common/runtime_types/alert_rules/common';
+import {
+  EncryptedSyntheticsMonitorAttributes,
+  OverviewPing,
+} from '../../../../common/runtime_types';
+import { SyntheticsEsClient } from '../../../lib';
+import { getSearchPingsParams } from './get_search_ping_params';
+import { ConfigStats, calculateIsValidPing, getConfigStats, getPendingConfigs } from './helpers';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
-const fields = [
-  '@timestamp',
-  'summary',
-  'monitor',
-  'observer',
-  'config_id',
-  'error',
-  'agent',
-  'url',
-  'state',
-  'tags',
-  'service',
-  'labels',
-];
-type StatusConfigs = Record<string, AlertStatusMetaData>;
-
 export interface AlertStatusResponse {
-  upConfigs: StatusConfigs;
-  downConfigs: StatusConfigs;
+  upConfigs: AlertStatusConfigs;
+  downConfigs: AlertStatusConfigs;
+  pendingConfigs: AlertPendingStatusConfigs;
   enabledMonitorQueryIds: string[];
+  configStats: Record<string, ConfigStats>;
 }
 
 export async function queryMonitorStatusAlert({
@@ -47,95 +39,50 @@ export async function queryMonitorStatusAlert({
   monitorLocationIds,
   range,
   monitorQueryIds,
-  monitorLocationsMap,
   numberOfChecks,
   includeRetests = true,
+  monitorsData,
+  monitors,
+  logger,
 }: {
   esClient: SyntheticsEsClient;
   monitorLocationIds: string[];
   range: { from: string; to: string };
   monitorQueryIds: string[];
-  monitorLocationsMap: Record<string, string[]>;
   numberOfChecks: number;
   includeRetests?: boolean;
+  monitorsData: Record<string, MonitorData>;
+  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>;
+  logger: Logger;
 }): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
-  const upConfigs: StatusConfigs = {};
-  const downConfigs: StatusConfigs = {};
+  const upConfigs: AlertStatusConfigs = {};
+  const downConfigs: AlertStatusConfigs = {};
+
+  for (let i = monitorQueryIds.length - 1; i >= 0; i--) {
+    const monitorQueryId = monitorQueryIds[i];
+    if (monitorsData[monitorQueryId] === undefined) {
+      logger.error(
+        `Monitor ${monitorQueryId} not found in monitorsData, removing from query. This should never happen.`
+      );
+      monitorQueryIds.splice(i, 1);
+    }
+  }
 
   await pMap(
     times(pageCount),
     async (i) => {
       const idsToQuery = (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize);
-      const params = createEsParams({
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                ...(includeRetests ? [SUMMARY_FILTER] : [FINAL_SUMMARY_FILTER]),
-                getRangeFilter({ from: range.from, to: range.to }),
-                {
-                  terms: {
-                    'monitor.id': idsToQuery,
-                  },
-                },
-              ] as QueryDslQueryContainer[],
-            },
-          },
-          aggs: {
-            id: {
-              terms: {
-                field: 'monitor.id',
-                size: idSize,
-              },
-              aggs: {
-                location: {
-                  terms: {
-                    field: 'observer.name',
-                    size: monitorLocationIds.length || 100,
-                  },
-                  aggs: {
-                    downChecks: {
-                      filter: {
-                        range: {
-                          'summary.down': {
-                            gte: '1',
-                          },
-                        },
-                      },
-                    },
-                    totalChecks: {
-                      top_hits: {
-                        size: numberOfChecks,
-                        sort: [
-                          {
-                            '@timestamp': {
-                              order: 'desc',
-                            },
-                          },
-                        ],
-                        _source: {
-                          includes: fields,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
 
-      if (monitorLocationIds.length > 0) {
-        params.body.query.bool.filter.push({
-          terms: {
-            'observer.name': monitorLocationIds,
-          },
-        });
-      }
+      const params = getSearchPingsParams({
+        idSize,
+        idsToQuery,
+        monitorLocationIds,
+        range,
+        numberOfChecks,
+        includeRetests,
+      });
 
       const { body: result } = await esClient.search<OverviewPing, typeof params>(
         params,
@@ -151,7 +98,7 @@ export async function queryMonitorStatusAlert({
 
         // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
         // in monitorLocationsMap but not in listOfLocations
-        const monLocations = monitorLocationsMap?.[queryId];
+        const monLocations = monitorsData[queryId].locations;
         const monQueriedLocations = intersection(monLocations, monitorLocationIds);
         monQueriedLocations?.forEach((monLocationId) => {
           const locationSummary = locationSummaries.find(
@@ -165,6 +112,12 @@ export async function queryMonitorStatusAlert({
             const isLatestPingUp = (latestPing.summary?.up ?? 0) > 0;
             const configId = latestPing.config_id;
             const monitorQueryId = latestPing.monitor.id;
+
+            const isValidPing = calculateIsValidPing({
+              scheduleInMs: monitorsData[monitorQueryId].scheduleInMs,
+              previousRunEndTimeISO: latestPing['@timestamp'],
+              previousRunDurationUs: latestPing.monitor.duration?.us,
+            });
 
             const meta: AlertStatusMetaData = {
               ping: latestPing,
@@ -182,13 +135,13 @@ export async function queryMonitorStatusAlert({
               status: 'up',
             };
 
-            if (downCount > 0) {
+            if (isValidPing && downCount > 0) {
               downConfigs[`${configId}-${monLocationId}`] = {
                 ...meta,
                 status: 'down',
               };
             }
-            if (isLatestPingUp) {
+            if (isValidPing && isLatestPingUp) {
               upConfigs[`${configId}-${monLocationId}`] = {
                 ...meta,
                 status: 'up',
@@ -201,9 +154,23 @@ export async function queryMonitorStatusAlert({
     { concurrency: 5 }
   );
 
+  const pendingConfigs = getPendingConfigs({
+    monitorQueryIds,
+    monitorLocationIds,
+    upConfigs,
+    downConfigs,
+    monitorsData,
+    monitors,
+    logger,
+  });
+
+  const configStats = getConfigStats({ downConfigs, upConfigs, pendingConfigs, monitorQueryIds });
+
   return {
     upConfigs,
     downConfigs,
+    pendingConfigs,
     enabledMonitorQueryIds: monitorQueryIds,
+    configStats,
   };
 }

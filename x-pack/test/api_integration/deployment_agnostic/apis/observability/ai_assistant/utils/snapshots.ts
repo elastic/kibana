@@ -9,7 +9,7 @@ import { Client } from '@elastic/elasticsearch';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'path';
-import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
+import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/default_configs/common_paths';
 
 export async function restoreKbSnapshot({
   log,

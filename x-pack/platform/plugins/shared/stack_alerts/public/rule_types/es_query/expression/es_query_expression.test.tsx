@@ -153,6 +153,8 @@ describe('EsQueryRuleTypeExpression', () => {
       size: [],
       timeField: [],
       timeWindowSize: [],
+      termSize: [],
+      termField: [],
     };
 
     return await act(async () =>
@@ -220,6 +222,22 @@ describe('EsQueryRuleTypeExpression', () => {
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
     expect(screen.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
+  });
+
+  test('should render EsQueryRuleTypeExpression with chosen runtime group field', async () => {
+    await setup({
+      ...defaultEsQueryExpressionParams,
+      esQuery:
+        '{\n    "query":{\n      "match_all" : {}\n    },\n    "runtime_mappings": {\n      "day_of_week": {\n        "type": "keyword",\n        "script": {\n          "source": "emit(doc[\'@timestamp\'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ENGLISH))"\n        }\n      }\n    }\n  }',
+      groupBy: 'top',
+      termField: 'day_of_week',
+      termSize: 3,
+    } as unknown as EsQueryRuleParams<SearchType.esQuery>);
+
+    fireEvent.click(screen.getByTestId('groupByExpression'));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+
+    expect(screen.getByTestId('fieldsExpressionSelect')).toHaveTextContent('day_of_week');
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {

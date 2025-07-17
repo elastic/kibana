@@ -147,7 +147,7 @@ export const fetchActionRequests = async ({
   };
 };
 
-/** @private */
+/** @internal */
 const getActionTypeFilter = (actionType: string): QueryDslBoolQuery => {
   return actionType === 'manual'
     ? {

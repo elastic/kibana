@@ -406,7 +406,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         </EuiFlexItem>
         {this.props.mustCopyOnSaveMessage && (
           <EuiFlexItem css={{ marginLeft: `-${euiThemeVars.euiSize}` }} grow={false}>
-            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+            <EuiIconTip type="info" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} />

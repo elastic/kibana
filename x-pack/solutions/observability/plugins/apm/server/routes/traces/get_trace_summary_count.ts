@@ -8,7 +8,7 @@
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { SERVICE_NAME, TRACE_ID } from '../../../common/es_fields/apm';
+import { PROCESSOR_EVENT, SERVICE_NAME, TRACE_ID } from '../../../common/es_fields/apm';
 
 export async function getTraceSummaryCount({
   apmEventClient,
@@ -21,25 +21,31 @@ export async function getTraceSummaryCount({
   end: number;
   traceId: string;
 }) {
-  const params = {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    body: {
-      track_total_hits: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
-        },
-      },
-      aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
-    },
-  };
-
   const { aggregations, hits } = await apmEventClient.search(
     'observability_overview_get_service_count',
-    params
+    {
+      apm: {
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      },
+      body: {
+        track_total_hits: true,
+        size: 0,
+        query: {
+          bool: {
+            must: [
+              { bool: { filter: [...termQuery(TRACE_ID, traceId), ...rangeQuery(start, end)] } },
+            ],
+            should: [
+              { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.span, ProcessorEvent.transaction] } },
+              { bool: { must_not: { exists: { field: PROCESSOR_EVENT } } } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
+      },
+    },
+    { skipProcessorEventFilter: true }
   );
 
   return { services: aggregations?.serviceCount.value || 0, traceEvents: hits.total.value };

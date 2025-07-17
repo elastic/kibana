@@ -306,12 +306,24 @@ export default function ({ getService }: FtrProviderContext) {
           for (const deprecatedAction of deprecatedActions) {
             if (
               isReplaceableAction(deprecatedAction) &&
-              !replacementActions.has(deprecatedAction)
+              !replacementActions.delete(deprecatedAction)
             ) {
               throw new Error(
                 `Action "${deprecatedAction}" granted by the privilege "${privilegeId}" of the deprecated feature "${feature.id}" is not properly replaced.`
               );
             }
+          }
+
+          const extraReplacementActions =
+            Array.from(replacementActions).filter(isReplaceableAction);
+          if (extraReplacementActions.length > 0) {
+            log.warning(
+              `Replacement actions for the privilege "${privilegeId}" of the deprecated feature "${
+                feature.id
+              }" grant more privileges than they were granting before: ${JSON.stringify(
+                extraReplacementActions
+              )} via ${JSON.stringify(replacedBy)}.`
+            );
           }
         }
       }

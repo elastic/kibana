@@ -250,8 +250,11 @@ describe('getAlertSummary()', () => {
                       },
                     },
                     Object {
-                      "term": Object {
-                        "kibana.space_ids": "test_default_space_id",
+                      "terms": Object {
+                        "kibana.space_ids": Array [
+                          "test_default_space_id",
+                          "*",
+                        ],
                       },
                     },
                     Object {

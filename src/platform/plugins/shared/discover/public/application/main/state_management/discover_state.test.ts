@@ -398,32 +398,6 @@ describe('Test discover state actions', () => {
     discoverServiceMock.data.search.searchSource.create = jest
       .fn()
       .mockReturnValue(savedSearchMock.searchSource);
-    discoverServiceMock.core.savedObjects.client.resolve = jest.fn().mockReturnValue({
-      saved_object: {
-        attributes: {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON:
-              '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-          },
-          title: 'The saved search that will save the world',
-          sort: [],
-          columns: ['test123'],
-          description: 'description',
-          hideChart: false,
-        },
-        id: 'the-saved-search-id',
-        type: 'search',
-        references: [
-          {
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            id: 'the-data-view-id',
-            type: 'index-pattern',
-          },
-        ],
-        namespaces: ['default'],
-      },
-      outcome: 'exactMatch',
-    });
   });
 
   afterEach(() => {

@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import type { Role } from '@kbn/security-plugin-types-common';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Notes:

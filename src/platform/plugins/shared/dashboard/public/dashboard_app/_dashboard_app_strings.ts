@@ -214,6 +214,14 @@ export const topNavStrings = {
       defaultMessage: 'Switch to view-only mode',
     }),
   },
+  export: {
+    label: i18n.translate('dashboard.topNave.exportButtonAriaLabel', {
+      defaultMessage: 'Export',
+    }),
+    description: i18n.translate('dashboard.topNave.exportConfigDescription', {
+      defaultMessage: 'Export dashboard',
+    }),
+  },
   share: {
     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
       defaultMessage: 'share',

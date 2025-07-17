@@ -51,6 +51,7 @@ import {
 } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForTimeseries } from '../autocomplete/commands/timeseries';
+import { validate as validateCompletion } from '../validation/commands/completion';
 import {
   suggest as suggestForGrok,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterGrok,
@@ -71,6 +72,10 @@ import { validate as validateRrf } from '../validation/commands/rrf';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
+import {
+  suggest as suggestForCompletion,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterCompletion,
+} from '../autocomplete/commands/completion';
 import {
   suggest as suggestForStats,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterStats,
@@ -485,7 +490,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     validate: (command: ESQLCommand, { policies }) => {
       const messages: ESQLMessage[] = [];
       const source = command.args[0] as ESQLSource;
-      const cluster = source.cluster;
+      const cluster = source.prefix;
       const index = source.index;
 
       if (index) {
@@ -578,7 +583,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage: 'Join table with another table.',
     }),
     declaration: `LOOKUP JOIN <lookup_index> ON <field_name>`,
-    preview: true,
+    preview: false,
     examples: [
       '… | LOOKUP JOIN lookup_index ON join_field',
       // TODO: Uncomment when other join types are implemented
@@ -589,7 +594,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForJoin,
   },
   {
-    hidden: true,
+    hidden: false,
     name: 'change_point',
     preview: true,
     description: i18n.translate(
@@ -708,7 +713,22 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
   },
   {
-    hidden: true,
+    hidden: false,
+    name: 'completion',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionDoc', {
+      defaultMessage:
+        'Send prompts to an LLM. Requires an inference endpoint set up for `completion` tasks.',
+    }),
+    declaration: `COMPLETION <prompt> WITH <inferenceId> (AS <targetField>)`,
+    examples: [],
+
+    suggest: suggestForCompletion,
+    validate: validateCompletion,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterCompletion,
+  },
+  {
+    hidden: false,
     name: 'sample',
     preview: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sampleDoc', {

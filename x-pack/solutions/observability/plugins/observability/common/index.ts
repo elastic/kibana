@@ -28,7 +28,6 @@ export {
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,
@@ -66,6 +65,8 @@ export const observabilityFeatureId = 'observability';
 // Name of a locator created by the uptime plugin. Intended for use
 // by other plugins as well, so defined here to prevent cross-references.
 export { uptimeOverviewLocatorID } from '@kbn/deeplinks-observability';
+export const casesOverviewLocatorID = 'OBSERVABILITY_CASES_OVERVIEW_LOCATOR';
+export const casesDetailLocatorID = 'OBSERVABILITY_CASES_DETAIL_LOCATOR';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 export const syntheticsAddMonitorLocatorID = 'SYNTHETICS_ADD_MONITOR_LOCATOR';

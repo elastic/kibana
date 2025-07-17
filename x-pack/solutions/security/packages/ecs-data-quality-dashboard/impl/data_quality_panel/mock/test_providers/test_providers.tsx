@@ -12,7 +12,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
@@ -20,6 +20,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiThemeProvider } from '@elastic/eui';
 
+import {
+  AssistantProviderProps,
+  useAssistantContextValue,
+} from '@kbn/elastic-assistant/impl/assistant_context';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -48,12 +52,14 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
   const mockAssistantAvailability: AssistantAvailability = {
+    hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,
     hasUpdateAIAssistantAnonymization: true,
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
+    isAssistantVisible: true,
   };
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -67,35 +73,40 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
       error: () => {},
     },
   });
+
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
+
+  const docLinks = docLinksServiceMock.createStartContract();
+
+  const assistantProviderProps = {
+    actionTypeRegistry,
+    assistantAvailability: mockAssistantAvailability,
+    augmentMessageCodeBlocks: {
+      mount: jest.fn().mockReturnValue(() => {}),
+    },
+    basePath: 'https://localhost:5601/kbn',
+    docLinks,
+    getComments: mockGetComments,
+    http: mockHttp,
+    navigateToApp: mockNavigateToApp,
+    productDocBase: {
+      installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+    },
+    currentAppId: 'securitySolutionUI',
+    userProfileService: jest.fn() as unknown as UserProfileService,
+    getUrlForApp: jest.fn(),
+    chrome,
+  };
 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
         <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
-            <AssistantProvider
-              actionTypeRegistry={actionTypeRegistry}
-              assistantAvailability={mockAssistantAvailability}
-              augmentMessageCodeBlocks={jest.fn()}
-              basePath={'https://localhost:5601/kbn'}
-              docLinks={{
-                ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-                DOC_LINK_VERSION: 'current',
-              }}
-              getComments={mockGetComments}
-              http={mockHttp}
-              navigateToApp={mockNavigateToApp}
-              productDocBase={{
-                installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
-              }}
-              currentAppId={'securitySolutionUI'}
-              userProfileService={jest.fn() as unknown as UserProfileService}
-              chrome={chrome}
-            >
+            <TestAssistantProvider assistantProviderProps={assistantProviderProps}>
               {children}
-            </AssistantProvider>
+            </TestAssistantProvider>
           </QueryClientProvider>
         </EuiThemeProvider>
       </I18nProvider>
@@ -106,6 +117,18 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
 TestExternalProvidersComponent.displayName = 'TestExternalProvidersComponent';
 
 export const TestExternalProviders = React.memo(TestExternalProvidersComponent);
+
+export const TestAssistantProvider = ({
+  assistantProviderProps,
+  children,
+}: {
+  assistantProviderProps: AssistantProviderProps;
+  children: React.ReactNode;
+}) => {
+  const assistantContextValue = useAssistantContextValue(assistantProviderProps);
+
+  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;
+};
 
 export interface TestDataQualityProvidersProps {
   children: React.ReactNode;

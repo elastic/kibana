@@ -75,7 +75,7 @@ export function registerAlertsFunction({
     functions.registerFunction(
       {
         name: GET_ALERTS_DATASET_INFO_NAME,
-        visibility: FunctionVisibility.AssistantOnly,
+        visibility: FunctionVisibility.All,
         description: `Use this function to get information about alerts data.`,
         parameters: {
           type: 'object',

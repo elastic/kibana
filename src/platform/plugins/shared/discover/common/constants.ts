@@ -25,3 +25,8 @@ export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => 
 
 // local storage key for the ES|QL to Dataviews transition modal
 export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
+
+/**
+ * Product feature IDs
+ */
+export const TRACES_PRODUCT_FEATURE_ID = 'discover:traces';

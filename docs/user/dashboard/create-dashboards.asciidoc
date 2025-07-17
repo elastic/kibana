@@ -108,6 +108,31 @@ include::drilldowns.asciidoc[leveloffset=-1]
 [[arrange-panels]]
 == Organize dashboard panels
 
+[[collapsible-sections]]
+=== Arrange panels in collapsible sections
+
+Organize your dashboard panels into collapsible sections to improve readability and navigation, especially for dashboards with many panels. Collapsible sections also help dashboards load faster by only loading the content from expanded sections.
+
+To add a collapsible section:
+
+. Open the dashboard and make sure that you are in **Edit** mode.
+
+. Select **Add panel** and select **Collapsible section**. The collapsible section is added at the end of the dashboard.
+
+. Optionally, edit the label of the section.
+
+. Drag and drop any panels you want into the section. +
++
+NOTE: The section must be expanded in order to place panels into it.
+
+. Just like any other panel, you can drag an drop the collapsible section to a different position in the dashboard.
+
+. Save the dashboard. 
+
+Users viewing the dashboard will find the section in the same state as when you saved the dashboard. If you saved it with the section collapsed, then it will also be collapsed by default for users.
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt8c368aecdd095010/685e8fcb9c34ed3c353812a5/collapsible_panels.gif[Collapsible sections in a dashboard]
+
 [[moving-containers]]
 [[resizing-containers]]
 === Move and resize panels
@@ -127,7 +152,7 @@ TIP: If you <<share-the-dashboard,share>> a dashboard while viewing a full scree
 [[duplicate-panels]]
 === Copy and duplicate panels
 
-To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
+To duplicate a panel and its configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
 including renaming, editing, and cloning. 
 
 [float]

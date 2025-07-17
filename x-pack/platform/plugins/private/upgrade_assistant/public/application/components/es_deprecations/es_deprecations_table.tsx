@@ -90,7 +90,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.issueColumnTitle', {
       defaultMessage: 'Issue',
     }),
-    width: '30px',
+    width: '28px',
     sortable: true,
     align: 'left',
   },
@@ -106,7 +106,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.nameColumnTitle', {
       defaultMessage: 'Name',
     }),
-    width: '24px',
+    width: '20px',
     sortable: true,
     align: 'left',
   },
@@ -114,7 +114,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.resolutionColumnTitle', {
       defaultMessage: 'Resolution',
     }),
-    width: '24px',
+    width: '20px',
     sortable: true,
     align: 'left',
   },
@@ -122,7 +122,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.actionsColumnTitle', {
       defaultMessage: 'Actions',
     }),
-    width: '30px',
+    width: '8px',
     sortable: false,
     align: 'right',
   },
@@ -385,9 +385,16 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
         ) : (
           <EuiTableBody>
             {visibleDeprecations.map((deprecation, index) => {
+              // Calculate the absolute index in the full deprecations array
+              // This ensures stable keys across pagination
+              // For example: with 10 items per page:
+              // - Page 1: firstItemIndex=0, keys will be deprecation-row-0 to deprecation-row-9
+              // - Page 2: firstItemIndex=10, keys will be deprecation-row-10 to deprecation-row-19
+              // This prevents React from reusing components incorrectly when navigating between pages
+              const absoluteIndex = pager.firstItemIndex + index;
               return (
-                <React.Fragment key={`deprecation-row-${index}`}>
-                  {renderTableRow(deprecation, mlUpgradeModeEnabled, index)}
+                <React.Fragment key={`deprecation-row-${absoluteIndex}`}>
+                  {renderTableRow(deprecation, mlUpgradeModeEnabled, absoluteIndex)}
                 </React.Fragment>
               );
             })}

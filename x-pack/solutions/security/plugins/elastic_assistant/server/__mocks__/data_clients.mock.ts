@@ -30,6 +30,7 @@ const createConversationsDataClientMock = () => {
     appendConversationMessages: jest.fn(),
     createConversation: jest.fn(),
     deleteConversation: jest.fn(),
+    deleteAllConversations: jest.fn(),
     getConversation: jest.fn(),
     updateConversation: jest.fn(),
     getReader: jest.fn(),
@@ -47,6 +48,8 @@ export const conversationsDataClientMock: {
 const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => ({
   bulkUpdateAttackDiscoveryAlerts: jest.fn(),
   createAttackDiscovery: jest.fn(),
+  getAdHocAlertsIndexPattern: jest.fn(),
+  getScheduledAndAdHocIndexPattern: jest.fn(),
   createAttackDiscoveryAlerts: jest.fn(),
   findAllAttackDiscoveries: jest.fn(),
   getAlertConnectorNames: jest.fn(),

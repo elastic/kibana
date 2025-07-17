@@ -649,14 +649,15 @@ module.exports = {
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
-        'x-pack/platform/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
+        'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
+        'x-pack/platform/test/*api_integration*/**/*',
         'x-pack/platform/test/*/*config.*ts',
         'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,deployment_agnostic,fixtures}/**/*',
         'x-pack/solutions/*/test/**/*config.*ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
-        'x-pack/test/saved_object_api_integration/*/apis/**/*',
-        'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/platform/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
@@ -1457,9 +1458,9 @@ module.exports = {
         'packages/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
-        'src/platform/plugins/**/ui_tests/**/*.ts',
-        'x-pack/platform/plugins/**/ui_tests/**/*.ts',
-        'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/scout/**/*.ts',
       ],
       excludedFiles: ['packages/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
@@ -1667,8 +1668,9 @@ module.exports = {
         'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
         'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
-        'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
-        'x-pack/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/solutions/**/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/test/rule_registry/**/*.{ts, tsx}',
         'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
@@ -1965,7 +1967,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
@@ -1974,7 +1976,7 @@ module.exports = {
         'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/spaces/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/spaces_api_integration/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 1,
@@ -2133,13 +2135,8 @@ module.exports = {
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
-        // FIXME tomsonpl @kbn/osquery-plugin depends on @kbn/security-solution-plugin (security/private) (cypress code => cypress code)
-        'x-pack/platform/plugins/shared/osquery/**',
         // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
         'x-pack/platform/plugins/shared/timelines/**',
-        // FIXME @dmlemeshko
-        `src/platform/test/api_integration/apis/guided_onboarding/get_guides.ts`,
-        `src/platform/test/api_integration/apis/guided_onboarding/put_state.ts`,
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
@@ -2159,6 +2156,100 @@ module.exports = {
         'no-console': 'off',
         // disabling it since package is marked as module and it requires extension for files written
         '@kbn/imports/uniform_imports': 'off',
+      },
+    },
+    {
+      files: ['x-pack/**/cypress/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/cypress-test-helper',
+                message:
+                  "Import from a sub-path (e.g. '@kbn/cypress-test-helper/src/utils'). Cypress uses Webpack, which requires direct file imports to avoid parse errors.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: [
+        'src/platform/plugins/**/test/scout/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/scout/**/*.ts',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@playwright/test',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+              {
+                name: 'playwright',
+                message: "Platform tests should import only from '@kbn/scout'.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/observability/plugins/**/test/scout/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/scout',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+              {
+                name: 'playwright',
+                message:
+                  "Observability solution tests should import from '@kbn/scout-oblt' instead.",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/solutions/security/plugins/**/test/scout/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/scout',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: '@playwright/test',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+              {
+                name: 'playwright',
+                message:
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
+              },
+            ],
+          },
+        ],
       },
     },
   ],

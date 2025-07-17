@@ -12,15 +12,14 @@ import {
   ATTACK_DISCOVERY_STORAGE_KEY,
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
-  HISTORY_END_LOCAL_STORAGE_KEY,
   HISTORY_QUERY_LOCAL_STORAGE_KEY,
-  HISTORY_START_LOCAL_STORAGE_KEY,
   useAssistantContext,
 } from '@kbn/elastic-assistant';
 import type { AttackDiscoveryAlert, Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import { useAttackDiscoveryHistoryTimerange } from '../../use_attack_discovery_history_timerange';
 import { AttackDiscoveryPanel } from '../attack_discovery_panel';
 import { EmptyPrompt } from '../empty_states/empty_prompt';
 import { getInitialSelection } from './get_initial_selection';
@@ -30,14 +29,13 @@ import { SearchAndFilter } from './search_and_filter';
 import { ACKNOWLEDGED, CLOSED, OPEN } from './search_and_filter/translations';
 import { Summary } from '../summary';
 import * as i18n from './translations';
+import type { SettingsOverrideOptions } from './types';
 import { useDismissAttackDiscoveryGeneration } from '../../use_dismiss_attack_discovery_generations';
 import { useIdsFromUrl } from './use_ids_from_url';
 import { useFindAttackDiscoveries } from '../../use_find_attack_discoveries';
 import { useGetAttackDiscoveryGenerations } from '../../use_get_attack_discovery_generations';
 import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
-const DEFAULT_HISTORY_END = 'now';
-const DEFAULT_HISTORY_START = 'now-24h';
 const DEFAULT_PER_PAGE = 10;
 const GET_ATTACK_DISCOVERY_GENERATIONS_SIZE = 50; // fetch up to 50 generations, with no filter by status
 const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50];
@@ -52,7 +50,7 @@ const EMPTY_QUERY = '';
 interface Props {
   aiConnectors: AIConnector[] | undefined;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
-  onGenerate: () => Promise<void>;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onToggleShowAnonymized: () => void;
   showAnonymized: boolean;
 }
@@ -68,16 +66,8 @@ const HistoryComponent: React.FC<Props> = ({
   const { assistantAvailability, http } = useAssistantContext();
 
   const { ids: filterByAlertIds, setIdsUrl: setFilterByAlertIds } = useIdsFromUrl();
-
-  // history time selection:
-  const [historyStart, setHistoryStart] = useLocalStorage<string>(
-    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${HISTORY_START_LOCAL_STORAGE_KEY}`,
-    DEFAULT_HISTORY_START
-  );
-  const [historyEnd, setHistoryEnd] = useLocalStorage<string>(
-    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${HISTORY_END_LOCAL_STORAGE_KEY}`,
-    DEFAULT_HISTORY_END
-  );
+  const { historyStart, setHistoryStart, historyEnd, setHistoryEnd } =
+    useAttackDiscoveryHistoryTimerange();
 
   // search bar query:
   const [query, setQuery] = useLocalStorage<string>(

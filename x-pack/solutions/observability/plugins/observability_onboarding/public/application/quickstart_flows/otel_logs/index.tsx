@@ -232,7 +232,7 @@ rm ./otel.yml && cp ${sampleConfigurationPath} ./otel.yml && mkdir -p ./data/ote
                       { defaultMessage: 'Configuration Information' }
                     )}
                     color="warning"
-                    iconType="iInCircle"
+                    iconType="info"
                   >
                     <p>
                       {i18n.translate(

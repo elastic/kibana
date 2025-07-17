@@ -17,5 +17,9 @@ export type { DiscoverSharedPublicSetup, DiscoverSharedPublicStart } from './typ
 export type {
   ObservabilityLogsAIAssistantFeatureRenderDeps,
   ObservabilityLogsAIAssistantFeature,
+  SecuritySolutionCellRendererFeature,
+  SecuritySolutionAppWrapperFeature,
   DiscoverFeature,
-} from './services/discover_features';
+  DiscoverFeaturesServiceSetup,
+  DiscoverFeaturesServiceStart,
+} from './services/discover_features/types';

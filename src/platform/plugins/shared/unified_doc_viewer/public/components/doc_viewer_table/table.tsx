@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './table.scss';
 import React, { useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -38,6 +37,8 @@ import {
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
   getFieldCellActions,
@@ -49,7 +50,12 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
+import {
+  LOCAL_STORAGE_KEY_SEARCH_TERM,
+  TableFilters,
+  TableFiltersProps,
+  useTableFilters,
+} from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
 import { FieldRow } from './field_row';
@@ -66,7 +72,7 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
-const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
+export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
@@ -177,7 +183,10 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
-  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters(storage);
+  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters({
+    storage,
+    storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
+  });
 
   const fieldToItem = useCallback(
     (field: string, isPinned: boolean): FieldRow => {
@@ -499,7 +508,7 @@ export const DocViewerTable = ({
       </EuiFlexItem>
 
       {rows.length === 0 ? (
-        <EuiSelectableMessage css={{ minHeight: 300 }}>
+        <EuiSelectableMessage css={styles.noFieldsFound}>
           <p>
             <EuiI18n
               token="unifiedDocViewer.docViews.table.noFieldFound"
@@ -508,13 +517,7 @@ export const DocViewerTable = ({
           </p>
         </EuiSelectableMessage>
       ) : (
-        <EuiFlexItem
-          grow={Boolean(containerHeight)}
-          css={css`
-            min-block-size: 0;
-            display: block;
-          `}
-        >
+        <EuiFlexItem grow={Boolean(containerHeight)} css={styles.fieldsGridWrapper}>
           <EuiDataGrid
             key={`fields-table-${hit.id}`}
             {...GRID_PROPS}
@@ -522,6 +525,7 @@ export const DocViewerTable = ({
               defaultMessage: 'Field values',
             })}
             className="kbnDocViewer__fieldsGrid"
+            css={styles.fieldsGrid}
             columns={gridColumns}
             toolbarVisibility={false}
             rowCount={rows.length}
@@ -534,4 +538,53 @@ export const DocViewerTable = ({
       )}
     </EuiFlexGroup>
   );
+};
+
+const styles = {
+  fieldsGridWrapper: css({
+    minBlockSize: 0,
+    display: 'block',
+
+    '.euiDataGridRow': {
+      '&:hover': {
+        // we keep using a deprecated shade until proper token is available
+        backgroundColor: euiThemeVars.euiColorLightestShade,
+      },
+    },
+  }),
+  fieldsGrid: css({
+    '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
+      borderTop: 'none',
+    },
+
+    '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
+      borderBottom: euiThemeVars.euiBorderThin,
+    },
+
+    '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
+      paddingTop: 0,
+      paddingBottom: 0,
+    },
+
+    '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
+      padding: `calc(${euiThemeVars.euiSizeXS} / 2) 0 0 ${euiThemeVars.euiSizeXS}`,
+    },
+
+    '.kbnDocViewer__fieldsGrid__pinAction': {
+      opacity: 0,
+    },
+
+    '& [data-gridcell-column-id="pin_field"]:focus-within': {
+      '.kbnDocViewer__fieldsGrid__pinAction': {
+        opacity: 1,
+      },
+    },
+
+    '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
+      opacity: 1,
+    },
+  }),
+  noFieldsFound: css({
+    minHeight: 300,
+  }),
 };

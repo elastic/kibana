@@ -64,7 +64,7 @@ interface ExtractRuleEqlQueryParams {
 
 export const extractRuleEqlQuery = (params: ExtractRuleEqlQueryParams): RuleEqlQuery => {
   return {
-    query: params.query.trim(),
+    query: params.query?.trim(),
     language: params.language,
     filters: normalizeFilterArray(params.filters),
     event_category_override: params.eventCategoryOverride,
@@ -78,7 +78,7 @@ export const extractRuleEsqlQuery = (
   language: EsqlQueryLanguage
 ): RuleEsqlQuery => {
   return {
-    query: query.trim(),
+    query: query?.trim(),
     language,
   };
 };
@@ -99,6 +99,11 @@ const normalizeFilterArray = (filters: RuleFilterArray | undefined): RuleFilterA
       ? {
           negate: filter.meta.negate,
           disabled: filter.meta.disabled !== undefined ? filter.meta.disabled : false,
+          params: filter.meta.params,
+          relation: 'relation' in filter.meta ? filter.meta?.relation : undefined,
+          type: filter.meta.type ?? 'custom',
+          alias: filter.meta.alias ?? undefined,
+          key: filter.meta.key ?? undefined,
         }
       : undefined,
   }));

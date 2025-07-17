@@ -16,7 +16,7 @@ import type { DatasourceMap, VisualizationMap } from '../types';
 import { extractReferencesFromState, getResolvedDateRange } from '../utils';
 import { getEditPath } from '../../common/constants';
 
-interface ShareableConfiguration
+export interface ShareableConfiguration
   extends Pick<
     LensAppState,
     'activeDatasourceId' | 'datasourceStates' | 'visualization' | 'filters' | 'query'
@@ -117,21 +117,16 @@ export function getLocatorParams(
   };
 }
 
-export async function getShareURL(
+export function getShareURL(
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>,
+  shareLocatorParams: LensAppLocatorParams,
   services: Pick<LensAppServices, 'application' | 'data'>,
   configuration: ShareableConfiguration,
   shareUrlEnabled: boolean,
   isDirty: boolean
 ) {
-  const { shareURL: locatorParams, reporting: reportingLocatorParams } = getLocatorParams(
-    services.data,
-    configuration,
-    isDirty
-  );
   return {
-    shareableUrl: await (shareUrlEnabled ? shortUrlService(locatorParams) : undefined),
+    shareableUrl: shareUrlEnabled ? shortUrlService(shareLocatorParams) : undefined,
     savedObjectURL: getShareURLForSavedObject(services, configuration.currentDoc),
-    reportingLocatorParams,
   };
 }

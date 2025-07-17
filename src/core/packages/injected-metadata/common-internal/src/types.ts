@@ -65,6 +65,7 @@ export interface InjectedMetadata {
   };
   featureFlags?: {
     overrides: Record<string, unknown>;
+    initialFeatureFlags: Record<string, unknown>;
   };
   anonymousStatusPage: boolean;
   i18n: {

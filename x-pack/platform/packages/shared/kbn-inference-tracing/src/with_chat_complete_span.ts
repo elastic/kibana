@@ -15,7 +15,6 @@ import {
   ToolChoice,
   ToolDefinition,
   ToolMessage,
-  ToolOptions,
   UserMessage,
   isChatCompletionMessageEvent,
   isChatCompletionTokenCountEvent,
@@ -48,7 +47,10 @@ function addEvent(span: Span, event: MessageEvent) {
   });
 }
 
-function setChoice(span: Span, { content, toolCalls }: { content: string; toolCalls: ToolCall[] }) {
+export function setChoice(
+  span: Span,
+  { content, toolCalls }: { content: string; toolCalls: ToolCall[] }
+) {
   addEvent(span, {
     name: GenAISemanticConventions.GenAIChoice,
     body: {
@@ -146,15 +148,15 @@ function mapAssistantResponse({
  * @param options
  * @param cb
  */
-export function withChatCompleteSpan<T extends ChatCompleteCompositeResponse<ToolOptions, boolean>>(
+export function withChatCompleteSpan<T extends ChatCompleteCompositeResponse>(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => T
 ): T;
 
 export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
-  cb: (span?: Span) => ChatCompleteCompositeResponse<ToolOptions, boolean>
-): ChatCompleteCompositeResponse<ToolOptions, boolean> {
+  cb: (span?: Span) => ChatCompleteCompositeResponse
+): ChatCompleteCompositeResponse {
   const { system, messages, model, toolChoice, tools, ...attributes } = options;
 
   const next = withInferenceSpan(

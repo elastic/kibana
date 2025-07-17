@@ -6,7 +6,12 @@
  */
 
 import { isNotFoundError } from '@kbn/es-errors';
-import { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import {
+  IngestStreamLifecycle,
+  Streams,
+  findInheritedLifecycle,
+  isInheritLifecycle,
+} from '@kbn/streams-schema';
 import {
   getAncestors,
   getAncestorsAndSelf,
@@ -48,7 +53,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   private _ownFieldsChanged: boolean = false;
   private _routingChanged: boolean = false;
   private _processingChanged: boolean = false;
-  private _lifeCycleChanged: boolean = false;
+  private _lifecycleChanged: boolean = false;
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
@@ -62,7 +67,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return {
       ...super.toPrintable(),
       processingChanged: this._processingChanged,
-      lifeCycleChanged: this._lifeCycleChanged,
+      lifecycleChanged: this._lifecycleChanged,
       routingChanged: this._routingChanged,
       ownFieldsChanged: this._ownFieldsChanged,
     };
@@ -122,7 +127,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         startingStateStreamDefinition.ingest.processing
       );
 
-    this._lifeCycleChanged =
+    this._lifecycleChanged =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
 
@@ -381,7 +386,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     validateSystemFields(this._definition);
 
-    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifeCycle())) {
+    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
       return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
     }
 
@@ -437,6 +442,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+    const ancestors = await this.dependencies.streamsClient.getAncestors(this._definition.name);
+    const lifecycle = findInheritedLifecycle(this._definition, ancestors);
+
     return [
       {
         type: 'upsert_component_template',
@@ -449,7 +457,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: generateIngestPipeline(this._definition.name, this._definition, {
+          isServerless: this.dependencies.isServerless,
+        }),
       },
       {
         type: 'upsert_ingest_pipeline',
@@ -472,7 +482,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'update_lifecycle',
         request: {
           name: this._definition.name,
-          lifecycle: this.getLifeCycle(),
+          lifecycle,
         },
       },
       {
@@ -486,11 +496,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return this._ownFieldsChanged;
   }
 
-  public hasChangedLifeCycle(): boolean {
-    return this._lifeCycleChanged;
+  public hasChangedLifecycle(): boolean {
+    return this._lifecycleChanged;
   }
 
-  public getLifeCycle(): IngestStreamLifecycle {
+  public getLifecycle(): IngestStreamLifecycle {
     return this._definition.ingest.lifecycle;
   }
 
@@ -500,7 +510,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     startingStateStream: WiredStream
   ): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
-    if (this.hasChangedFields() || this.hasChangedLifeCycle()) {
+    if (this.hasChangedFields()) {
       actions.push({
         type: 'upsert_component_template',
         request: generateLayer(
@@ -535,26 +545,28 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: generateIngestPipeline(this._definition.name, this._definition, {
+          isServerless: this.dependencies.isServerless,
+        }),
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();
-    let hasAncestorWithChangedLifeCycle = false;
+    let hasAncestorWithChangedLifecycle = false;
     for (const ancestor of ancestorsAndSelf) {
       const ancestorStream = desiredState.get(ancestor) as WiredStream | undefined;
       // as soon as at least one ancestor has an updated lifecycle, we need to update the lifecycle of the stream
       // once we find the ancestor actually defining the lifecycle
-      if (ancestorStream && ancestorStream.hasChangedLifeCycle()) {
-        hasAncestorWithChangedLifeCycle = true;
+      if (ancestorStream && ancestorStream.hasChangedLifecycle()) {
+        hasAncestorWithChangedLifecycle = true;
       }
       // look for the first non-inherit lifecycle, that's the one defining the effective lifecycle
-      if (ancestorStream && !('inherit' in ancestorStream.getLifeCycle())) {
-        if (hasAncestorWithChangedLifeCycle) {
+      if (ancestorStream && !isInheritLifecycle(ancestorStream.getLifecycle())) {
+        if (hasAncestorWithChangedLifecycle) {
           actions.push({
             type: 'update_lifecycle',
             request: {
               name: this._definition.name,
-              lifecycle: ancestorStream.getLifeCycle(),
+              lifecycle: ancestorStream.getLifecycle(),
             },
           });
         }

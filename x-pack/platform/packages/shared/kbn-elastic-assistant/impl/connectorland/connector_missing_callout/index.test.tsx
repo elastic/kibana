@@ -10,18 +10,15 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ConnectorMissingCallout } from '.';
 import { AssistantAvailability } from '../../..';
-import { TestProviders } from '../../mock/test_providers/test_providers';
+import { mockAssistantAvailability, TestProviders } from '../../mock/test_providers/test_providers';
 
 describe('connectorMissingCallout', () => {
   describe('when connectors and actions privileges', () => {
     describe('are `READ`', () => {
       const assistantAvailability: AssistantAvailability = {
+        ...mockAssistantAvailability,
         hasAssistantPrivilege: true,
         hasConnectorsAllPrivilege: false,
-        hasConnectorsReadPrivilege: true,
-        hasUpdateAIAssistantAnonymization: true,
-        hasManageGlobalKnowledgeBase: true,
-        isAssistantEnabled: true,
       };
 
       it('should show connector privileges required button if no connectors exist', async () => {
@@ -55,12 +52,10 @@ describe('connectorMissingCallout', () => {
 
     describe('are `NONE`', () => {
       const assistantAvailability: AssistantAvailability = {
+        ...mockAssistantAvailability,
         hasAssistantPrivilege: true,
         hasConnectorsAllPrivilege: false,
         hasConnectorsReadPrivilege: false,
-        hasUpdateAIAssistantAnonymization: true,
-        hasManageGlobalKnowledgeBase: false,
-        isAssistantEnabled: true,
       };
 
       it('should show connector privileges required button', async () => {

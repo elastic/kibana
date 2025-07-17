@@ -282,6 +282,7 @@ export default function (program) {
       devConfig: opts.devConfig,
       dev: opts.dev,
       serverless: opts.serverless || unknownOptions.serverless,
+      unknownOptions,
     });
 
     const configsEvaluated = getConfigFromFiles(configs);

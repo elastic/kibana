@@ -4,5 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export type FlyoutStep = 'initializing' | 'notStarted' | 'confirm' | 'inProgress' | 'completed';
+export type Step = 'initializing' | 'confirm' | 'inProgress' | 'completed' | 'confirmDelete';

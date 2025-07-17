@@ -102,6 +102,7 @@ export {
   getLogsLocatorsFromUrlService,
   getTimeRangeEndFromTime,
   getTimeRangeStartFromTime,
+  getNodeQuery,
 } from './locators';
 export type {
   DiscoverLogsLocatorParams,

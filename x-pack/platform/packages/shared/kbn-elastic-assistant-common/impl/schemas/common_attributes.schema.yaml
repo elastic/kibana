@@ -101,7 +101,7 @@ components:
             - "5678"
 
     PromptIds:
-      description: User screen context.
+      description: IDs for a specific prompt within a group of prompts.
       type: object
       required:
         - promptId

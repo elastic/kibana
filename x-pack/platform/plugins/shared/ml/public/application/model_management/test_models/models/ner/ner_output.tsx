@@ -47,7 +47,7 @@ const ENTITY_TYPES = {
   },
   MISC: {
     label: 'Miscellaneous',
-    icon: 'questionInCircle',
+    icon: 'question',
     color: 'euiColorVis7_behindText',
     borderColor: 'euiColorVis7',
   },
@@ -55,7 +55,7 @@ const ENTITY_TYPES = {
 
 const UNKNOWN_ENTITY_TYPE = {
   label: '',
-  icon: 'questionInCircle',
+  icon: 'question',
   color: 'euiColorVis5_behindText',
   borderColor: 'euiColorVis5',
 };

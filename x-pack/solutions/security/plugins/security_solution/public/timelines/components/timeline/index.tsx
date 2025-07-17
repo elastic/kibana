@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
@@ -30,6 +31,8 @@ import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_ful
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`
@@ -101,14 +104,28 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const { timelineFullScreen } = useTimelineFullScreen();
 
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+
+  const selectedDataViewId = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : selectedDataViewIdSourcerer),
+    [experimentalDataView.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
+  );
+
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : selectedPatternsSourcerer),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, selectedPatternsSourcerer]
+  );
+
   useEffect(() => {
     if (!savedObjectId && !initialized) {
       dispatch(
         timelineActions.createTimeline({
           id: timelineId,
           columns: defaultUdtHeaders,
-          dataViewId: selectedDataViewIdSourcerer,
-          indexNames: selectedPatternsSourcerer,
+          dataViewId: selectedDataViewId,
+          indexNames: selectedPatterns,
           show: false,
           excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
         })
@@ -121,28 +138,28 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     if (
       // timeline not initialized, so this must be initial state and not user change
       !savedObjectId ||
-      selectedDataViewIdSourcerer == null ||
+      selectedDataViewId == null ||
       // initial state will get set on create
       (selectedDataViewIdTimeline === null && selectedPatternsTimeline.length === 0) ||
       // don't update if no change
-      (selectedDataViewIdTimeline === selectedDataViewIdSourcerer &&
-        selectedPatternsTimeline.sort().join() === selectedPatternsSourcerer.sort().join())
+      (selectedDataViewIdTimeline === selectedDataViewId &&
+        selectedPatternsTimeline.sort().join() === selectedPatterns.sort().join())
     ) {
       return;
     }
     dispatch(
       timelineActions.updateDataView({
-        dataViewId: selectedDataViewIdSourcerer,
+        dataViewId: selectedDataViewId,
         id: timelineId,
-        indexNames: selectedPatternsSourcerer,
+        indexNames: selectedPatterns,
       })
     );
   }, [
     dispatch,
     savedObjectId,
-    selectedDataViewIdSourcerer,
+    selectedDataViewId,
     selectedDataViewIdTimeline,
-    selectedPatternsSourcerer,
+    selectedPatterns,
     selectedPatternsTimeline,
     timelineId,
   ]);
@@ -150,7 +167,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   useEffect(() => {
     onSourcererChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataViewIdSourcerer, selectedPatternsSourcerer]);
+  }, [selectedDataViewId, selectedPatterns]);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(

@@ -9,7 +9,13 @@
 
 import React from 'react';
 
-import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiButtonColor,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -28,10 +34,13 @@ export interface TryInConsoleButtonProps {
   consolePlugin?: ConsolePluginStart;
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
+  color?: EuiButtonColor;
   showIcon?: boolean;
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   telemetryId?: string;
   onClick?: () => void;
+  disabled?: boolean;
+  'data-test-subj'?: string;
 }
 export const TryInConsoleButton = ({
   request,
@@ -39,10 +48,13 @@ export const TryInConsoleButton = ({
   consolePlugin,
   sharePlugin,
   content = RUN_IN_CONSOLE,
+  color,
   showIcon = true,
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,
+  disabled = false,
+  'data-test-subj': dataTestSubj,
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
@@ -97,6 +109,7 @@ export const TryInConsoleButton = ({
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,
+    disabled,
   };
   const iconType = showIcon ? 'play' : undefined;
 
@@ -122,7 +135,7 @@ export const TryInConsoleButton = ({
     case 'emptyButton':
     default:
       return (
-        <EuiButtonEmpty iconType={iconType} size="s" {...commonProps}>
+        <EuiButtonEmpty iconType={iconType} color={color} size="s" {...commonProps}>
           {content}
         </EuiButtonEmpty>
       );

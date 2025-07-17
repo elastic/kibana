@@ -6,18 +6,14 @@
  */
 
 import React from 'react';
-import 'jest-styled-components';
-import {
-  disableConsoleWarning,
-  mountWithTheme,
-  mockMoment,
-  toJson,
-} from '../../../../utils/test_helpers';
+import { screen } from '@testing-library/react';
 import type { TimelineProps } from '.';
 import { TimelineAxisContainer, VerticalLinesContainer } from '.';
 import type { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
+import { mockMoment, disableConsoleWarning } from '../../../../utils/test_helpers';
+import { renderWithTheme } from '../../../../utils/test_helpers';
 
-describe.each([[TimelineAxisContainer], [VerticalLinesContainer]])(`Timeline`, (Component) => {
+describe('Timeline Components', () => {
   let consoleMock: jest.SpyInstance;
 
   beforeAll(() => {
@@ -29,55 +25,75 @@ describe.each([[TimelineAxisContainer], [VerticalLinesContainer]])(`Timeline`, (
     consoleMock.mockRestore();
   });
 
-  it(`${Component.name} should render with data`, () => {
-    const props: TimelineProps = {
-      xMax: 1000,
-      margins: {
-        top: 100,
-        left: 50,
-        right: 50,
-        bottom: 0,
+  const commonProps: TimelineProps = {
+    xMax: 1000,
+    margins: {
+      top: 100,
+      left: 50,
+      right: 50,
+      bottom: 0,
+    },
+    marks: [
+      {
+        id: 'timeToFirstByte',
+        offset: 100000,
+        type: 'agentMark',
+        verticalLine: true,
       },
-      marks: [
-        {
-          id: 'timeToFirstByte',
-          offset: 100000,
-          type: 'agentMark',
-          verticalLine: true,
-        },
-        {
-          id: 'domInteractive',
-          offset: 110000,
-          type: 'agentMark',
-          verticalLine: true,
-        },
-        {
-          id: 'domComplete',
-          offset: 190000,
-          type: 'agentMark',
-          verticalLine: true,
-        },
-      ] as AgentMark[],
-    };
+      {
+        id: 'domInteractive',
+        offset: 110000,
+        type: 'agentMark',
+        verticalLine: true,
+      },
+      {
+        id: 'domComplete',
+        offset: 190000,
+        type: 'agentMark',
+        verticalLine: true,
+      },
+    ] as AgentMark[],
+  };
 
-    const wrapper = mountWithTheme(<Component {...props} />);
+  it('renders TimelineAxisContainer with data', () => {
+    renderWithTheme(<TimelineAxisContainer {...commonProps} />);
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    const timeline = screen.getByTestId('timeline-axis-container');
+    expect(timeline).toBeInTheDocument();
+    expect(timeline).toMatchSnapshot();
   });
 
-  it(`${Component.name} should not crash if traceRootDuration is 0`, () => {
-    const props: TimelineProps = {
+  it('renders VerticalLinesContainer with data', () => {
+    renderWithTheme(<VerticalLinesContainer {...commonProps} />);
+
+    const verticalLines = screen.getByTestId('vertical-lines');
+    expect(verticalLines).toBeInTheDocument();
+    expect(verticalLines).toMatchSnapshot();
+  });
+
+  it('renders TimelineAxisContainer with zero duration', () => {
+    const zeroProps = {
+      ...commonProps,
       xMax: 0,
-      margins: {
-        top: 100,
-        left: 50,
-        right: 50,
-        bottom: 0,
-      },
+      marks: undefined,
     };
 
-    const mountTimeline = () => mountWithTheme(<Component {...props} />);
+    renderWithTheme(<TimelineAxisContainer {...zeroProps} />);
 
-    expect(mountTimeline).not.toThrow();
+    const timeline = screen.getByTestId('timeline-axis-container');
+    expect(timeline).toBeInTheDocument();
+  });
+
+  it('renders VerticalLinesContainer with zero duration', () => {
+    const zeroProps = {
+      ...commonProps,
+      xMax: 0,
+      marks: undefined,
+    };
+
+    renderWithTheme(<VerticalLinesContainer {...zeroProps} />);
+
+    const verticalLines = screen.getByTestId('vertical-lines');
+    expect(verticalLines).toBeInTheDocument();
   });
 });

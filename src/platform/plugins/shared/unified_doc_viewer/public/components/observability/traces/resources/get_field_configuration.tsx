@@ -25,54 +25,80 @@ import { TraceIdLink } from '../components/trace_id_link';
 import { Timestamp } from '../components/timestamp';
 import { HttpStatusCode } from '../components/http_status_code';
 import { TransactionNameLink } from '../components/transaction_name_link';
+import { HighlightField } from '../components/highlight_field.tsx';
 
 export type FieldConfigValue = string | number | undefined;
 
 export interface FieldConfiguration {
   title: string;
-  content: (value: FieldConfigValue) => React.ReactNode;
+  content: (value: FieldConfigValue, formattedValue?: string) => React.ReactNode;
   value: FieldConfigValue;
   fieldMetadata?: PartialFieldMetadataPlain;
+  formattedValue?: string;
 }
 
-export const getCommonFieldConfiguration = (
-  attributes: TransactionDocumentOverview | SpanDocumentOverview
-): Record<string, FieldConfiguration> => {
+export const getCommonFieldConfiguration = ({
+  attributes,
+  flattenedDoc,
+}: {
+  attributes: TransactionDocumentOverview | SpanDocumentOverview;
+  flattenedDoc: TransactionDocumentOverview | SpanDocumentOverview;
+}): Record<string, FieldConfiguration> => {
   return {
     [TRANSACTION_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.transactionName.title', {
         defaultMessage: 'Transaction name',
       }),
-      content: (value) => (
-        <TransactionNameLink
-          serviceName={attributes[SERVICE_NAME_FIELD]}
-          transactionName={value as string}
-        />
+      content: (value, formattedValue) => (
+        <HighlightField value={value} formattedValue={formattedValue}>
+          {({ content }) => (
+            <TransactionNameLink
+              serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+              transactionName={value as string}
+              renderContent={() => content}
+            />
+          )}
+        </HighlightField>
       ),
-      value: attributes[TRANSACTION_NAME_FIELD],
+      value: flattenedDoc[TRANSACTION_NAME_FIELD],
+      formattedValue: attributes[TRANSACTION_NAME_FIELD],
     },
     [SERVICE_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.service.title', {
         defaultMessage: 'Service',
       }),
-      content: (value) => (
-        <ServiceNameLink serviceName={value as string} agentName={attributes[AGENT_NAME_FIELD]} />
+      content: (value, formattedValue) => (
+        <HighlightField value={value} formattedValue={formattedValue}>
+          {({ content }) => (
+            <ServiceNameLink
+              serviceName={value as string}
+              agentName={flattenedDoc[AGENT_NAME_FIELD]}
+              formattedServiceName={content}
+            />
+          )}
+        </HighlightField>
       ),
-      value: attributes[SERVICE_NAME_FIELD],
+      value: flattenedDoc[SERVICE_NAME_FIELD],
+      formattedValue: attributes[SERVICE_NAME_FIELD],
     },
     [TRACE_ID_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.traceId.title', {
         defaultMessage: 'Trace ID',
       }),
-      content: (value) => <TraceIdLink traceId={value as string} />,
-      value: attributes[TRACE_ID_FIELD],
+      content: (value, formattedValue) => (
+        <HighlightField value={value} formattedValue={formattedValue}>
+          {({ content }) => <TraceIdLink traceId={value as string} formattedTraceId={content} />}
+        </HighlightField>
+      ),
+      value: flattenedDoc[TRACE_ID_FIELD],
+      formattedValue: attributes[TRACE_ID_FIELD],
     },
     [TIMESTAMP_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.timestamp.title', {
         defaultMessage: 'Start time',
       }),
       content: (value) => <Timestamp timestamp={value as number} />,
-      value: attributes[TIMESTAMP_FIELD],
+      value: flattenedDoc[TIMESTAMP_FIELD],
     },
     [HTTP_RESPONSE_STATUS_CODE_FIELD]: {
       title: i18n.translate(
@@ -82,7 +108,7 @@ export const getCommonFieldConfiguration = (
         }
       ),
       content: (value) => <HttpStatusCode code={value as number} />,
-      value: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD],
+      value: flattenedDoc[HTTP_RESPONSE_STATUS_CODE_FIELD],
     },
   };
 };

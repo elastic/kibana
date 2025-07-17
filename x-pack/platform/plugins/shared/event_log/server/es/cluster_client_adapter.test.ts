@@ -2598,6 +2598,165 @@ describe('queryEventsByDocumentIds', () => {
   });
 });
 
+describe('queryEventsBySavedObjectsSearchAfter', () => {
+  const defaultQuery = {
+    index: 'test-index',
+    namespace: undefined,
+    type: 'test-type',
+    ids: ['test-id'],
+    findOptions: {
+      per_page: 10,
+      sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
+    },
+  };
+
+  beforeEach(() => {
+    clusterClient.openPointInTime.mockResponse({
+      id: 'test-pit-id',
+      _shards: {
+        total: 1,
+        successful: 1,
+        failed: 0,
+        skipped: 0,
+      },
+    });
+    clusterClient.search.mockResponse({
+      hits: {
+        hits: [
+          {
+            _id: 'hit1',
+            _index: 'test-index',
+            _seq_no: 1,
+            _primary_term: 1,
+            _source: { field: 'value1' },
+            sort: ['2021-01-01T00:00:00.000Z'],
+          },
+          {
+            _id: 'hit2',
+            _index: 'test-index',
+            _seq_no: 2,
+            _primary_term: 1,
+            _source: { field: 'value2' },
+            sort: ['2021-01-01T00:00:01.000Z'],
+          },
+        ],
+        total: { value: 100, relation: 'eq' },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
+  });
+
+  test('should use seq_no_primary_term in query', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
+
+    expect(clusterClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        seq_no_primary_term: true,
+      })
+    );
+  });
+
+  test('should create new PIT when not provided', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
+
+    expect(clusterClient.openPointInTime).toHaveBeenCalledWith({
+      index: 'test-index',
+      keep_alive: '1m',
+    });
+  });
+
+  test('should not create new PIT when one is provided', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter({
+      ...defaultQuery,
+      findOptions: {
+        ...defaultQuery.findOptions,
+        pit_id: 'existing-pit-id',
+      },
+    });
+
+    expect(clusterClient.openPointInTime).not.toHaveBeenCalled();
+  });
+
+  test('should use provided search_after in query', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter({
+      ...defaultQuery,
+      findOptions: {
+        ...defaultQuery.findOptions,
+        search_after: ['2021-01-01T00:00:00.000Z'],
+      },
+    });
+
+    expect(clusterClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search_after: ['2021-01-01T00:00:00.000Z'],
+      })
+    );
+  });
+
+  test('should return properly formatted response', async () => {
+    const response = await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
+
+    expect(response).toEqual({
+      data: [
+        {
+          field: 'value1',
+          _id: 'hit1',
+          _index: 'test-index',
+          _seq_no: 1,
+          _primary_term: 1,
+        },
+        {
+          field: 'value2',
+          _id: 'hit2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+      total: 100,
+      search_after: ['2021-01-01T00:00:01.000Z'],
+      pit_id: 'test-pit-id',
+    });
+  });
+
+  test('should clean up PIT on error', async () => {
+    clusterClient.search.mockRejectedValue(new Error('Search failed'));
+
+    await expect(
+      clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery)
+    ).rejects.toThrow('Search failed');
+
+    expect(clusterClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+  });
+});
+
+describe('closePointInTime', () => {
+  test('should not call cluster when pitId is empty', async () => {
+    await clusterClientAdapter.closePointInTime('');
+    expect(clusterClient.closePointInTime).not.toHaveBeenCalled();
+  });
+
+  test('should call cluster with given pitId', async () => {
+    await clusterClientAdapter.closePointInTime('test-pit-id');
+    expect(clusterClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+  });
+
+  test('should throw and log error when cluster call fails', async () => {
+    const error = new Error('Failed to close PIT');
+    clusterClient.closePointInTime.mockRejectedValue(error);
+
+    await expect(clusterClientAdapter.closePointInTime('test-pit-id')).rejects.toThrow(error);
+    expect(logger.error).toHaveBeenCalledWith('Failed to close point in time: Failed to close PIT');
+  });
+});
+
 describe('refreshIndex', () => {
   test('should successfully refresh index', async () => {
     clusterClient.indices.refresh.mockResolvedValue({});

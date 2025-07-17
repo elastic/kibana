@@ -46,3 +46,5 @@ export interface OverviewStepProps {
   isComplete: boolean;
   setIsComplete: (isComplete: boolean) => void;
 }
+
+export type IndexRecommendedOptions = 'readonly' | 'reindex' | 'unfreeze';

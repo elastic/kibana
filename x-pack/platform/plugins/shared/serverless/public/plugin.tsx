@@ -55,20 +55,21 @@ export class ServerlessPlugin
     dependencies: ServerlessPluginStartDependencies
   ): ServerlessPluginStart {
     const { developer } = this.config;
+    const { chrome, rendering } = core;
 
     if (developer && developer.projectSwitcher && developer.projectSwitcher.enabled) {
       const { currentType } = developer.projectSwitcher;
 
-      core.chrome.navControls.registerRight({
+      chrome.navControls.registerRight({
         order: 500,
         mount: (target) => this.mountProjectSwitcher(target, core, currentType),
       });
     }
 
-    core.chrome.setChromeStyle('project');
+    chrome.setChromeStyle('project');
 
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
-    const { project } = core.chrome as InternalChromeStart;
+    const { project } = chrome as InternalChromeStart;
     const { cloud } = dependencies;
 
     if (cloud.serverless.projectName) {
@@ -79,7 +80,7 @@ export class ServerlessPlugin
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
 
-    core.chrome.navControls.registerRight({
+    chrome.navControls.registerRight({
       order: 1,
       mount: toMountPoint(
         <EuiButton
@@ -94,7 +95,7 @@ export class ServerlessPlugin
             defaultMessage: 'Give feedback',
           })}
         </EuiButton>,
-        core.rendering
+        rendering
       ),
     });
 

@@ -32,6 +32,8 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
+  KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -43,6 +45,7 @@ import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE 
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
@@ -289,24 +292,35 @@ export function ChatBody({
     ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
       setStickToBottom(true);
       switch (payload.type) {
-        case ChatActionClickType.executeEsqlQuery:
+        case ChatActionClickType.executeEsqlQuery: {
+          const now = new Date().toISOString();
           next(
-            messages.concat({
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'execute_query',
-                  arguments: JSON.stringify({
-                    query: payload.query,
-                  }),
-                  trigger: MessageRole.User,
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Display results for the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
                 },
               },
-            })
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'execute_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
           );
           break;
+        }
 
         case ChatActionClickType.updateVisualization:
           const visualizeQueryResponse = message;
@@ -330,25 +344,36 @@ export function ChatBody({
             })
           );
           break;
-        case ChatActionClickType.visualizeEsqlQuery:
+        case ChatActionClickType.visualizeEsqlQuery: {
+          const now = new Date().toISOString();
           next(
-            messages.concat({
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'visualize_query',
-                  arguments: JSON.stringify({
-                    query: payload.query,
-                    intention: VisualizeESQLUserIntention.visualizeAuto,
-                  }),
-                  trigger: MessageRole.User,
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Visualize the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
                 },
               },
-            })
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'visualize_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                      intention: VisualizeESQLUserIntention.visualizeAuto,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
           );
           break;
+        }
       }
     },
     [messages, next]
@@ -370,6 +395,20 @@ export function ChatBody({
     await archiveConversation(id, isArchived);
     conversation.refresh();
   };
+
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+
+  const showElasticLlmCalloutInChat =
+    !!elasticManagedLlm &&
+    connectors.selectedConnector === elasticManagedLlm.id &&
+    !conversationCalloutDismissed &&
+    tourCalloutDismissed;
+
+  const showKnowledgeBaseReIndexingCallout =
+    knowledgeBase.status.value?.enabled === true &&
+    knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
+    knowledgeBase.status.value?.isReIndexing === true;
 
   const isPublic = conversation.value?.public;
   const isArchived = !!conversation.value?.archived;
@@ -511,12 +550,13 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               ) : (
                 <ChatTimeline
                   conversationId={conversationId}
                   messages={messages}
-                  knowledgeBase={knowledgeBase}
                   chatService={chatService}
                   currentUser={conversationUser}
                   isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
@@ -537,6 +577,8 @@ export function ChatBody({
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
                   isArchived={isArchived}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               )}
             </EuiPanel>
@@ -667,6 +709,7 @@ export function ChatBody({
           copyUrl={copyUrl}
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
+          isConversationApp={!showLinkToConversationsApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

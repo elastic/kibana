@@ -105,7 +105,7 @@ export async function validateQuery(
 }
 
 /**
- * @private
+ * @internal
  */
 export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getColumnsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
@@ -118,6 +118,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getJoinIndices: [],
   getTimeseriesIndices: [],
   getEditorExtensions: [],
+  getInferenceEndpoints: [],
 };
 
 /**
@@ -193,8 +194,21 @@ async function validateAst(
     messages.push(...commandMessages);
   }
 
+  const parserErrors = parsingResult.errors;
+
+  /**
+   * Some changes to the grammar deleted the literal names for some tokens.
+   * This is a workaround to restore the literals that were lost.
+   *
+   * See https://github.com/elastic/elasticsearch/pull/124177 for context.
+   */
+  for (const error of parserErrors) {
+    error.message = error.message.replace(/\bLP\b/, "'('");
+    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
+  }
+
   return {
-    errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
+    errors: [...parserErrors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
   };
 }
@@ -405,7 +419,7 @@ export function validateSources(
 
     if (source.sourceType === 'index') {
       const index = source.index;
-      const sourceName = source.cluster ? source.name : index?.valueUnquoted;
+      const sourceName = source.prefix ? source.name : index?.valueUnquoted;
       if (!sourceName) continue;
 
       if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {

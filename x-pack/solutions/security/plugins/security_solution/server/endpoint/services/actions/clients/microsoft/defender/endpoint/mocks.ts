@@ -13,12 +13,16 @@ import {
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import type {
   MicrosoftDefenderEndpointAgentListResponse,
+  MicrosoftDefenderEndpointGetActionResultsResponse,
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
+  MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
-import type { NormalizedExternalConnectorClient } from '../../../../..';
+import { merge } from 'lodash';
 import { responseActionsClientMock, type ResponseActionsClientOptionsMock } from '../../../mocks';
+import type { NormalizedExternalConnectorClient } from '../../../../..';
+import type { RunScriptActionRequestBody } from '../../../../../../../../common/api/endpoint';
 
 export interface MicrosoftDefenderActionsClientOptionsMock
   extends ResponseActionsClientOptionsMock {
@@ -85,6 +89,16 @@ const createMsConnectorActionsClientMock = (): ActionsClientMock => {
               pageSize: 0,
               value: [createMicrosoftMachineActionMock()],
             },
+          });
+
+        case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createMicrosoftMachineActionMock({ type: 'LiveResponse' }),
+          });
+
+        case MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_LIBRARY_FILES:
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: createMicrosoftGetLibraryFilesApiResponseMock(),
           });
 
         default:
@@ -165,6 +179,13 @@ const createMicrosoftGetActionsApiResponseMock = (
     value: [createMicrosoftMachineActionMock(overrides)],
   };
 };
+const createMicrosoftGetActionResultsApiResponseMock =
+  (): MicrosoftDefenderEndpointGetActionResultsResponse => {
+    return {
+      '@odata.context': 'some-context',
+      value: 'http://example.com',
+    };
+  };
 
 const createMicrosoftGetMachineListApiResponseMock = (
   /** Any overrides to the 1 machine action that is included in the mock response */
@@ -180,11 +201,50 @@ const createMicrosoftGetMachineListApiResponseMock = (
   };
 };
 
+const createMicrosoftGetLibraryFilesApiResponseMock =
+  (): MicrosoftDefenderGetLibraryFilesResponse => {
+    return {
+      '@odata.context': 'some-context',
+      value: [
+        {
+          fileName: 'test-script-1.ps1',
+          description: 'Test PowerShell script for demonstration',
+          creationTime: '2023-01-01T10:00:00Z',
+          createdBy: 'user@example.com',
+        },
+        {
+          fileName: 'test-script-2.py',
+          description: 'Test Python script for automation',
+          creationTime: '2023-01-02T10:00:00Z',
+          createdBy: 'admin@example.com',
+        },
+      ],
+    };
+  };
+
+const createMicrosoftRunScriptOptionsMock = (
+  overrides: Partial<RunScriptActionRequestBody> = {}
+): RunScriptActionRequestBody => {
+  const options: RunScriptActionRequestBody = {
+    endpoint_ids: ['1-2-3'],
+    comment: 'test comment',
+    agent_type: 'microsoft_defender_endpoint',
+    parameters: {
+      scriptName: 'test-script.ps1',
+      args: 'test-args',
+    },
+  };
+  return merge(options, overrides);
+};
+
 export const microsoftDefenderMock = {
   createConstructorOptions: createMsDefenderClientConstructorOptionsMock,
   createMsConnectorActionsClient: createMsConnectorActionsClientMock,
   createMachineAction: createMicrosoftMachineActionMock,
   createMachine: createMicrosoftMachineMock,
   createGetActionsApiResponse: createMicrosoftGetActionsApiResponseMock,
+  createGetActionResultsApiResponse: createMicrosoftGetActionResultsApiResponseMock,
   createMicrosoftGetMachineListApiResponse: createMicrosoftGetMachineListApiResponseMock,
+  createGetLibraryFilesApiResponse: createMicrosoftGetLibraryFilesApiResponseMock,
+  createRunScriptOptions: createMicrosoftRunScriptOptionsMock,
 };

@@ -371,3 +371,6 @@ export interface FeatureSet {
 
 export type DataSourceExclusions = Record<string, Array<'readOnly' | 'reindex'>>;
 export type DataSourceAutoResolution = Record<string, 'readOnly'>;
+
+export type IndicesResolutionType = 'readonly' | 'reindex' | 'unfreeze' | 'delete';
+export type UpdateActions = 'readonly' | 'unfreeze' | 'delete';

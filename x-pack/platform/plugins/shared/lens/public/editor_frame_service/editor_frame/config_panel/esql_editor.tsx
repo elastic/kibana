@@ -30,6 +30,7 @@ import { MAX_NUM_OF_COLUMNS } from '../../../datasources/form_based/esql_layer/u
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
+import { useInitializeChart } from './use_initialize_chart';
 
 export type ESQLEditorProps = Simplify<
   {
@@ -93,6 +94,7 @@ export function ESQLEditor({
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const currentAttributes = useCurrentAttributes({
     textBasedMode: isTextBasedLanguage,
@@ -176,29 +178,17 @@ export function ESQLEditor({
     ]
   );
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    const initializeChart = async () => {
-      if (isTextBasedLanguage && isOfAggregateQueryType(query) && !dataGridAttrs) {
-        try {
-          await runQuery(query, abortController, Boolean(attributes?.state.needsRefresh));
-        } catch (e) {
-          setErrors([e]);
-          prevQuery.current = query;
-        }
-      }
-    };
-    initializeChart();
-  }, [
-    adHocDataViews,
-    runQuery,
-    esqlVariables,
-    query,
-    data,
-    dataGridAttrs,
-    attributes?.state.needsRefresh,
+  useInitializeChart({
     isTextBasedLanguage,
-  ]);
+    query,
+    dataGridAttrs,
+    isInitialized,
+    currentAttributes,
+    runQuery,
+    prevQueryRef: prevQuery,
+    setErrors,
+    setIsInitialized,
+  });
 
   // Early exit if it's not in TextBased mode
   if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {

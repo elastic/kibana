@@ -510,6 +510,7 @@ describe('useEsqlMode', () => {
       omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
     ).toEqual({
       columns: false,
+      hideChart: false,
       rowHeight: false,
       breakdownField: false,
     });
@@ -527,6 +528,7 @@ describe('useEsqlMode', () => {
         omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
       ).toEqual({
         columns: true,
+        hideChart: true,
         rowHeight: true,
         breakdownField: true,
       })
@@ -540,6 +542,7 @@ describe('useEsqlMode', () => {
         columns: false,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
     stateContainer.appState.update({ query: { esql: 'from pattern1' } });
@@ -554,6 +557,7 @@ describe('useEsqlMode', () => {
         columns: false,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
     documents$.next({
@@ -572,6 +576,7 @@ describe('useEsqlMode', () => {
         columns: true,
         rowHeight: true,
         breakdownField: true,
+        hideChart: true,
       })
     );
     documents$.next({
@@ -591,6 +596,7 @@ describe('useEsqlMode', () => {
       columns: false,
       rowHeight: false,
       breakdownField: false,
+      hideChart: false,
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -604,6 +610,7 @@ describe('useEsqlMode', () => {
         columns: false,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
     documents$.next({
@@ -618,6 +625,7 @@ describe('useEsqlMode', () => {
         columns: true,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
   });

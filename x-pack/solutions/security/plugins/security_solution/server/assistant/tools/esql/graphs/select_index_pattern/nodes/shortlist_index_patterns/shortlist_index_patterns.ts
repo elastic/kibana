@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-  ActionsClientChatOpenAI,
-} from '@kbn/langchain/server';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 import { z } from '@kbn/zod';
 import type { SelectIndexPatternAnnotation } from '../../state';
+import type { CreateLlmInstance } from '../../../../utils/common';
 
 const ShortlistedIndexPatterns = z
   .object({
@@ -23,19 +19,16 @@ const ShortlistedIndexPatterns = z
     'Object containing array of shortlisted index patterns that might be used to generate the query'
   );
 
-export const getShortlistIndexPatterns = ({
+export const getShortlistIndexPatterns = async ({
   createLlmInstance,
 }: {
-  createLlmInstance: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
+  createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
 
   return async (state: typeof SelectIndexPatternAnnotation.State) => {
     const systemMessage = new SystemMessage({
-      content: `You are a security analyst who is an expert in Elasticsearch and particularly writing Elastic Search queries. You have been given a list of index patterns and an explanation of the query we would like to generate. 
+      content: `You are a security analyst who is an expert in Elasticsearch and particularly writing Elastic Search queries. You have been given a list of index patterns and an explanation of the query we would like to generate.
 To generate the query we first need to identify which index pattern should be used. To do this you short list a maximum of 3 index patterns that are the most likely to contain the fields required to write the query. Select a variety index patterns.`,
     });
     const humanMessage = new HumanMessage({

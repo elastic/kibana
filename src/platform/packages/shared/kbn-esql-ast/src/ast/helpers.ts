@@ -16,6 +16,7 @@ import type {
   ESQLFunction,
   ESQLIdentifier,
   ESQLIntegerLiteral,
+  ESQLList,
   ESQLLiteral,
   ESQLParamLiteral,
   ESQLProperNode,
@@ -25,7 +26,11 @@ import type {
 import { BinaryExpressionGroup } from './constants';
 
 export const isProperNode = (node: unknown): node is ESQLProperNode =>
-  !!node && typeof node === 'object' && !Array.isArray(node);
+  !!node &&
+  typeof node === 'object' &&
+  !Array.isArray(node) &&
+  typeof (node as ESQLProperNode).type === 'string' &&
+  !!(node as ESQLProperNode).type;
 
 export const isFunctionExpression = (node: unknown): node is ESQLFunction =>
   isProperNode(node) && node.type === 'function';
@@ -72,6 +77,9 @@ export const isIntegerLiteral = (node: unknown): node is ESQLIntegerLiteral =>
 export const isDoubleLiteral = (node: unknown): node is ESQLIntegerLiteral =>
   isLiteral(node) && node.literalType === 'double';
 
+export const isBooleanLiteral = (node: unknown): node is ESQLStringLiteral =>
+  isLiteral(node) && node.literalType === 'boolean';
+
 export const isParamLiteral = (node: unknown): node is ESQLParamLiteral =>
   isLiteral(node) && node.literalType === 'param';
 
@@ -83,6 +91,9 @@ export const isSource = (node: unknown): node is ESQLSource =>
 
 export const isIdentifier = (node: unknown): node is ESQLIdentifier =>
   isProperNode(node) && node.type === 'identifier';
+
+export const isList = (node: unknown): node is ESQLList =>
+  isProperNode(node) && node.type === 'list';
 
 /**
  * Returns the group of a binary expression:
@@ -116,9 +127,9 @@ export const binaryExpressionGroup = (node: ESQLAstNode): BinaryExpressionGroup 
       case '>=':
         return BinaryExpressionGroup.comparison;
       case 'like':
-      case 'not_like':
+      case 'not like':
       case 'rlike':
-      case 'not_rlike':
+      case 'not rlike':
         return BinaryExpressionGroup.regex;
     }
   }

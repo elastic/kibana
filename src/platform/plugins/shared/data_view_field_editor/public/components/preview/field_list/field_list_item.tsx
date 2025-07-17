@@ -8,7 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -18,9 +17,9 @@ import {
   EuiButtonEmpty,
   EuiBadge,
   EuiTextColor,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { useFieldPreviewContext } from '../field_preview_context';
 import { IsUpdatingIndicator } from '../is_updating_indicator';
@@ -28,6 +27,7 @@ import { ImagePreviewModal } from '../image_preview_modal';
 import type { DocumentField } from './field_list';
 import { PreviewState } from '../types';
 import { useStateSelector } from '../../../state_utils';
+import { ITEM_HEIGHT } from './constants';
 
 export interface PreviewListItemProps {
   field: DocumentField;
@@ -50,7 +50,6 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 }) => {
   const pinButtonId = `fieldPreview.pinFieldButtonLabel.${key}`;
 
-  const { euiTheme } = useEuiTheme();
   const { controller } = useFieldPreviewContext();
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 
@@ -61,17 +60,12 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
-  const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
-    'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
-    'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
-  });
-
   const doesContainImage = formattedValue?.includes('<img');
 
   const renderName = () => {
     if (isFromScript && !Boolean(key)) {
       return (
-        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+        <span css={styles.lightWeight}>
           <EuiTextColor color="subdued">
             {i18n.translate('indexPatternFieldEditor.fieldPreview.fieldNameNotSetLabel', {
               defaultMessage: 'Field name not set',
@@ -93,7 +87,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   const renderValue = () => {
     if (isFromScript && isLoadingPreview) {
       return (
-        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+        <span css={styles.lightWeight}>
           <IsUpdatingIndicator />
         </span>
       );
@@ -113,7 +107,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
     if (isFromScript && value === undefined) {
       return (
-        <span className="indexPatternFieldEditor__previewFieldList--ligthWeight">
+        <span css={styles.lightWeight}>
           <EuiTextColor color="subdued">
             {i18n.translate('indexPatternFieldEditor.fieldPreview.valueNotSetLabel', {
               defaultMessage: 'Value not set',
@@ -140,57 +134,35 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
     if (formattedValue !== undefined) {
       return withTooltip(
         <span
-          className="indexPatternFieldEditor__previewFieldList__item__value__wrapper"
+          css={styles.keyAndValueWrapper}
           // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
           dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
         />
       );
     }
 
-    return withTooltip(
-      <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
-        {JSON.stringify(value)}
-      </span>
-    );
+    return withTooltip(<span css={styles.keyAndValueWrapper}>{JSON.stringify(value)}</span>);
   };
 
   return (
     <>
       <EuiFlexGroup
-        className={classes}
-        // highlights the field using token, TODO: migrate whole SCSS file to emotions
-        css={
-          isFromScript
-            ? css`
-                background-color: ${euiTheme.colors.backgroundBasePrimary};
-                font-weight: ${euiTheme.font.weight.bold};
-              `
-            : undefined
-        }
+        css={[styles.listItem, isFromScript ? styles.highlightedRow : undefined]}
         gutterSize="none"
         data-test-subj="listItem"
         onMouseEnter={() => setIsPinHovered(true)}
         onMouseLeave={() => setIsPinHovered(false)}
       >
-        <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
-          <div
-            className="indexPatternFieldEditor__previewFieldList__item__key__wrapper"
-            data-test-subj="key"
-          >
+        <EuiFlexItem css={styles.keyAndValue}>
+          <div css={styles.keyAndValueWrapper} data-test-subj="key">
             {renderName()}
           </div>
         </EuiFlexItem>
-        <EuiFlexItem
-          className="indexPatternFieldEditor__previewFieldList__item__value"
-          data-test-subj="value"
-        >
+        <EuiFlexItem css={styles.keyAndValue} data-test-subj="value">
           {renderValue()}
         </EuiFlexItem>
 
-        <EuiFlexItem
-          className="indexPatternFieldEditor__previewFieldList__item__actions"
-          grow={false}
-        >
+        <EuiFlexItem css={styles.actions} grow={false}>
           {toggleIsPinned && (
             <EuiButtonIcon
               onClick={(e: { detail: number }) => {
@@ -221,4 +193,37 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
       )}
     </>
   );
+};
+
+const styles = {
+  listItem: css({
+    borderBottom: euiThemeVars.euiBorderThin,
+    height: ITEM_HEIGHT,
+    alignItems: 'center',
+    overflow: 'hidden',
+  }),
+  highlightedRow: css({
+    backgroundColor: euiThemeVars.euiColorBackgroundBasePrimary,
+    fontWeight: euiThemeVars.euiFontWeightBold,
+  }),
+  lightWeight: css({
+    fontWeight: euiThemeVars.euiFontWeightRegular,
+  }),
+  keyAndValueWrapper: css({
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: 'block',
+    width: '100%',
+  }),
+  keyAndValue: css({
+    overflow: 'hidden',
+
+    '& .euiToolTipAnchor': {
+      width: '100%', // We need the tooltip <span /> to be 100% to display the text ellipsis of the field value
+    },
+  }),
+  actions: css({
+    flexBasis: `${euiThemeVars.euiSizeL} !important`,
+  }),
 };

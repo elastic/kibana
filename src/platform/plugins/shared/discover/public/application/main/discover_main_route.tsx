@@ -27,6 +27,7 @@ import type {
   AnalyticsNoDataPageKibanaDependencies,
   AnalyticsNoDataPageProps,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import type { MainHistoryLocationState } from '../../../common';
@@ -379,10 +380,12 @@ export function DiscoverMainRoute({
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
         <rootProfileState.AppWrapper>
-          <DiscoverTopNavInline
-            stateContainer={stateContainer}
-            hideNavMenuItems={loading || noDataState.showNoDataPage}
-          />
+          <QueryClientProvider client={new QueryClient()}>
+            <DiscoverTopNavInline
+              stateContainer={stateContainer}
+              hideNavMenuItems={loading || noDataState.showNoDataPage}
+            />
+          </QueryClientProvider>
           {mainContent}
         </rootProfileState.AppWrapper>
       </DiscoverMainProvider>

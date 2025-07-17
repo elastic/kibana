@@ -20,7 +20,7 @@ jest.mock('@elastic/eui', () => ({
 
 const euiColorVisGrey0 = '111';
 const euiColorVisSuccess0 = '222';
-const euiColorVisWarning0 = '333';
+const euiColorVisWarning1 = '333';
 const euiColorVisDanger0 = '444';
 
 const expectTextInBadge = (text: string) =>
@@ -36,7 +36,7 @@ describe('HttpStatusCode', () => {
           vis: {
             euiColorVisGrey0,
             euiColorVisSuccess0,
-            euiColorVisWarning0,
+            euiColorVisWarning1,
             euiColorVisDanger0,
           },
         },
@@ -88,7 +88,7 @@ describe('HttpStatusCode', () => {
 
     expect(
       screen.queryByTestId('unifiedDocViewerObservabilityTracesHttpStatusCodeBadge')
-    ).toHaveStyle(`background-color: ${euiColorVisWarning0}`);
+    ).toHaveStyle(`background-color: ${euiColorVisWarning1}`);
   });
 
   it('should return correct color for status codes starting with 5', () => {

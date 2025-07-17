@@ -79,6 +79,11 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('from a_index | STATS abs( doubleField + sum( doubleField )) ', [
               'Cannot combine aggregation and non-aggregation values in [STATS], found [abs(doubleField+sum(doubleField))]',
             ]);
+            // This is a valid expression as it is an operation on two aggregation functions
+            await expectErrors(
+              'from a_index | STATS sum(doubleField) / (min(doubleField) + max(doubleField))  ',
+              []
+            );
           });
 
           test('errors on each aggregation field, which does not contain at least one agg function', async () => {
@@ -236,7 +241,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               );
               await expectErrors(
                 'from index | stats by bucket(dateField, 1 + 30 / 10, concat("", ""), "")',
-                ['Argument of [bucket] must be [date], found value [concat("","")] type [keyword]']
+                []
               );
             });
 

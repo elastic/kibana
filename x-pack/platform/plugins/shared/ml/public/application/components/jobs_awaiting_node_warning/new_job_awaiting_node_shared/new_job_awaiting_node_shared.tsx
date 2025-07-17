@@ -32,6 +32,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
 
   const [unassignedJobCount, setUnassignedJobCount] = useState<number>(0);
   const [cloudInfo, setCloudInfo] = useState<CloudInfo | null>(null);
+  const [showNodeInfo, setShowNodeInfo] = useState<boolean>(false);
 
   const checkNodes = useCallback(async () => {
     try {
@@ -66,6 +67,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
       const resp = await mlApi.mlInfo();
       const cloudId = resp.cloudId ?? null;
       const isCloudTrial = resp.isCloudTrial === true;
+      setShowNodeInfo(resp.showNodeInfo);
       setCloudInfo({
         isCloud: cloudId !== null,
         cloudId,
@@ -106,7 +108,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <div>
           <FormattedMessage
@@ -118,6 +120,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
           />
           <EuiSpacer size="s" />
           {cloudInfo &&
+            showNodeInfo &&
             (cloudInfo.isCloud ? (
               <>
                 <FormattedMessage

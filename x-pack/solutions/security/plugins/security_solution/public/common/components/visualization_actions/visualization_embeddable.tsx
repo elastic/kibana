@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/react';
 
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../store/inputs';
@@ -19,6 +20,7 @@ import { LensEmbeddable } from './lens_embeddable';
 import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useVisualizationResponse } from './use_visualization_response';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
@@ -36,7 +38,13 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
       inputId,
       queryId: id,
     });
-  const { indicesExist } = useSourcererDataView(lensProps.scopeId);
+
+  const { indicesExist: oldIndicesExist } = useSourcererDataView(lensProps.scopeId);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView } = useDataView(lensProps.scopeId);
+
+  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
 
   const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);

@@ -535,7 +535,11 @@ Plugin server-side only. Plugin has three main functions:
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/elastic_assistant/README.md[elasticAssistant]
-|This plugin implements (only) server APIs for the Elastic AI Assistant.
+|This plugin implements server APIs for the Elastic AI Assistant. Furthermore, it registers the Elastic Assistant in the navigation bar.
+
+
+|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/elastic_assistant_shared_state/README.md[elasticAssistantSharedState]
+|This plugin acts as a reactive bridge between the elastic assistant plugin and other plugins. It exposes an RxJS-based interface where:
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/embeddable_alerts_table/README.md[embeddableAlertsTable]
@@ -556,16 +560,8 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entities_data_access/README.md[entitiesDataAccess]
-|Exposes services to access entities data.
-
-
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/entity_manager/README.md[entityManager]
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entity_manager_app/README.md[entityManagerApp]
-|This plugin provides a user interface to interact with the Entity Manager.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/event_log/README.md[eventLog]
@@ -644,18 +640,6 @@ the infrastructure monitoring use-case within Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/integration_assistant/README.md[integrationAssistant]
 |Team owner: Security Integrations Scalability
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/inventory/README.md[inventory]
-|Home of the Inventory plugin, which renders the... inventory.
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate/README.md[investigate]
-|WARNING: Missing or empty README.
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate_app/README.md[investigateApp]
-|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]

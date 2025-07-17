@@ -50,6 +50,7 @@ import {
   onMouseDownResizeHandler,
   getEditorOverwrites,
   type MonacoMessage,
+  filterDataErrors,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
@@ -57,6 +58,7 @@ import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
+  EDITOR_MAX_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
@@ -107,6 +109,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   controlsContext,
   esqlVariables,
   expandToFitQueryOnMount,
+  dataErrorsControl,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -159,7 +162,6 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -442,10 +444,18 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart, boolean]) => ({
-      timestamp: Date.now(),
-      result: getESQLSources(...args),
-    }));
+    const fn = memoize(
+      (
+        ...args: [
+          DataViewsPublicPluginStart,
+          CoreStart,
+          (() => Promise<ILicense | undefined>) | undefined
+        ]
+      ) => ({
+        timestamp: Date.now(),
+        result: getESQLSources(...args),
+      })
+    );
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
@@ -454,9 +464,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, fixedQuery);
-        const ccrFeature = license?.getFeature('ccr');
-        const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
-        const sources = await memoizedSources(dataViews, core, areRemoteIndicesAvailable).result;
+        const getLicense = kibana.services?.esql?.getLicense;
+        const sources = await memoizedSources(dataViews, core, getLicense).result;
         return sources;
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -522,11 +531,15 @@ export const ESQLEditor = memo(function ESQLEditor({
             (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
               queryString,
               activeSolutionId
-            )) ?? []
+            )) ?? { recommendedQueries: [], recommendedFields: [] }
           );
         }
-        return [];
+        return {
+          recommendedQueries: [],
+          recommendedFields: [],
+        };
       },
+      getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
     };
     return callbacks;
   }, [
@@ -534,7 +547,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     kibana.services?.esql,
     dataSourcesCache,
     fixedQuery,
-    license,
     memoizedSources,
     dataViews,
     core,
@@ -609,20 +621,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
-  useEffect(() => {
-    async function fetchLicense() {
-      try {
-        const ls = await kibana.services?.esql?.getLicense();
-        if (!isEqual(license, ls)) {
-          setLicense(ls);
-        }
-      } catch (error) {
-        // failed to fetch
-      }
-    }
-    fetchLicense();
-  }, [kibana.services?.esql, license]);
-
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
@@ -631,7 +629,11 @@ export const ESQLEditor = memo(function ESQLEditor({
       const markers = [];
 
       if (parserErrors.length) {
-        markers.push(...parserErrors);
+        if (dataErrorsControl?.enabled === false) {
+          markers.push(...filterDataErrors(parserErrors));
+        } else {
+          markers.push(...parserErrors);
+        }
       }
       if (active) {
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
@@ -639,7 +641,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         return;
       }
     },
-    [parseMessages]
+    [parseMessages, dataErrorsControl?.enabled]
   );
 
   useDebounceWithOptions(
@@ -666,7 +668,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     },
     { skipFirstRender: false },
     256,
-    [serverErrors, serverWarning, code]
+    [serverErrors, serverWarning, code, queryValidation]
   );
 
   const suggestionProvider = useMemo(
@@ -873,7 +875,11 @@ export const ESQLEditor = memo(function ESQLEditor({
                       const lineCount = editor.getModel()?.getLineCount() || 1;
                       const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
                       const height = editor.getTopForLineNumber(lineCount + 1) + padding;
-                      if (height > editorHeight) setEditorHeight(height);
+                      if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
+                        setEditorHeight(height);
+                      } else if (height >= EDITOR_MAX_HEIGHT) {
+                        setEditorHeight(EDITOR_MAX_HEIGHT);
+                      }
                     }
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
@@ -940,6 +946,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+        dataErrorsControl={dataErrorsControl}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

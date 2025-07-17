@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ConditionalToolTip renders correctly 1`] = `
+exports[`ConditionalToolTip renders correctly with node data 1`] = `
 <div
   data-test-subj="conditionalTooltipContent-host-01"
   style="min-width: 220px;"

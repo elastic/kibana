@@ -25,12 +25,14 @@ import React, { useMemo, Fragment } from 'react';
 import styled from '@emotion/styled';
 
 import { useLocation } from 'react-router-dom';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;
@@ -119,9 +121,17 @@ export const ModalInspectQuery = ({
   title,
 }: ModalInspectProps) => {
   const { pathname } = useLocation();
-  const { selectedPatterns } = useSourcererDataView(
-    inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
-  );
+  const sourcererScope =
+    inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname);
+
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(sourcererScope);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const modalTitleId = useGeneratedHtmlId();
 
@@ -155,7 +165,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="index-pattern-title">
             {i18n.INDEX_PATTERN}{' '}
-            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="info" />
           </span>
         ),
         description: (
@@ -183,7 +193,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="query-time-title">
             {i18n.QUERY_TIME}{' '}
-            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="info" />
           </span>
         ),
         description: (
@@ -200,7 +210,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="request-timestamp-title">
             {i18n.REQUEST_TIMESTAMP}{' '}
-            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="info" />
           </span>
         ),
         description: (

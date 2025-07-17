@@ -12,8 +12,8 @@ import * as http from 'http';
 import {
   createPackagePolicy,
   createCloudDefendPackagePolicy,
-} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
-import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
+} from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
+import { EsIndexDataProvider } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
 import { RoleCredentials } from '../../../../../shared/services';
 import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';

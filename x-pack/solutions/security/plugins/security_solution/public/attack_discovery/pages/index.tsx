@@ -40,13 +40,16 @@ import { deserializeQuery } from './local_storage/deserialize_query';
 import { deserializeFilters } from './local_storage/deserialize_filters';
 import { PageTitle } from './page_title';
 import { Results } from './results';
+import type { SettingsOverrideOptions } from './results/history/types';
 import { SettingsFlyout } from './settings_flyout';
+import { SETTINGS_TAB_ID } from './settings_flyout/constants';
 import { parseFilterQuery } from './settings_flyout/parse_filter_query';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
 import { useKibanaFeatureFlags } from './use_kibana_feature_flags';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const ID = 'attackDiscoveryQuery';
 
@@ -67,7 +70,11 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
-  const openFlyout = useCallback(() => setShowFlyout(true), []);
+  const [defaultSelectedTabId, setDefaultSelectedTabId] = useState<string>(SETTINGS_TAB_ID);
+  const openFlyout = useCallback((tabId: string) => {
+    setDefaultSelectedTabId(tabId);
+    setShowFlyout(true);
+  }, []);
 
   // time selection:
   const [start, setStart] = useLocalStorage<string>(
@@ -189,18 +196,20 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
-  const { sourcererDataView } = useSourcererDataView();
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+  const { dataView: experimentalDataView } = useDataView();
 
   // filterQuery is the combined search bar query and filters in ES format:
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         queries: [query ?? getDefaultQuery()], // <-- search bar query
         filters: filters ?? [], // <-- search bar filters
       }),
-    [filters, sourcererDataView, query, uiSettings]
+    [experimentalDataView, filters, oldSourcererDataView, query, uiSettings]
   );
 
   // renders a toast if the filter query is invalid:
@@ -215,29 +224,40 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
 
-  const onGenerate = useCallback(async () => {
-    const size = alertsContextCount ?? DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS;
-    const filter = parseFilterQuery({ filterQuery, kqlError });
-
-    try {
-      return await fetchAttackDiscoveries({
-        end,
-        filter, // <-- combined search bar query and filters
-        size,
-        start,
+  const onGenerate = useCallback(
+    async (overrideOptions?: SettingsOverrideOptions) => {
+      const size = getSize({
+        defaultMaxAlerts: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
+        localStorageAttackDiscoveryMaxAlerts,
       });
-    } finally {
-      invalidateGetAttackDiscoveryGenerations();
-    }
-  }, [
-    alertsContextCount,
-    end,
-    fetchAttackDiscoveries,
-    filterQuery,
-    invalidateGetAttackDiscoveryGenerations,
-    kqlError,
-    start,
-  ]);
+      const filter = parseFilterQuery({ filterQuery, kqlError });
+
+      try {
+        return await fetchAttackDiscoveries({
+          end,
+          filter, // <-- combined search bar query and filters
+          size,
+          start,
+          overrideConnectorId: overrideOptions?.overrideConnectorId,
+          overrideEnd: overrideOptions?.overrideEnd,
+          overrideFilter: overrideOptions?.overrideFilter,
+          overrideSize: overrideOptions?.overrideSize,
+          overrideStart: overrideOptions?.overrideStart,
+        });
+      } finally {
+        invalidateGetAttackDiscoveryGenerations();
+      }
+    },
+    [
+      end,
+      fetchAttackDiscoveries,
+      filterQuery,
+      invalidateGetAttackDiscoveryGenerations,
+      kqlError,
+      localStorageAttackDiscoveryMaxAlerts,
+      start,
+    ]
+  );
 
   useEffect(() => {
     setSelectedConnectorReplacements(replacements);
@@ -285,6 +305,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             onGenerate={onGenerate}
             openFlyout={openFlyout}
             stats={stats}
+            showFlyout={showFlyout}
           />
           <EuiSpacer size={attackDiscoveryAlertsEnabled ? 's' : 'm'} />
         </HeaderPage>
@@ -340,10 +361,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             {showFlyout && (
               <SettingsFlyout
                 connectorId={connectorId}
+                defaultSelectedTabId={defaultSelectedTabId}
                 end={end}
                 filters={filters}
                 onClose={onClose}
                 onConnectorIdSelected={onConnectorIdSelected}
+                onGenerate={onGenerate}
                 query={query}
                 setEnd={setEnd}
                 setFilters={setFilters}

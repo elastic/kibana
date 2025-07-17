@@ -20,6 +20,8 @@ import type {
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
@@ -131,7 +133,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
-        return renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
+        const unmountApp = renderApp({
+          ...params,
+          services,
+          store,
+          usageCollection,
+          subPluginRoutes,
+        });
+
+        return () => {
+          unmountApp();
+        };
       },
     });
 
@@ -208,14 +220,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           return;
         }
 
-        const isAssistantAvailable =
+        const shouldShowAssistantManagement =
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
+          !productFeatureKeys?.has(ProductFeatureSecurityKey.configurations) &&
           license?.hasAtLeast('enterprise');
         const assistantManagementApp = management?.sections.section.kibana.getApp(
           'securityAiAssistantManagement'
         );
 
-        if (!isAssistantAvailable) {
+        if (!shouldShowAssistantManagement) {
           assistantManagementApp?.disable();
         }
       });
@@ -223,6 +236,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     cases?.attachmentFramework.registerExternalReference(
       getExternalReferenceAttachmentEndpointRegular()
     );
+
+    this.registerDiscoverSharedFeatures(plugins);
 
     return this.contract.getSetupContract();
   }
@@ -236,6 +251,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public stop() {
     this.services.stop();
+  }
+
+  public async registerDiscoverSharedFeatures(plugins: SetupPlugins) {
+    const { discoverShared } = plugins;
+    const discoverFeatureRegistry = discoverShared.features.registry;
+    const cellRendererFeature: SecuritySolutionCellRendererFeature = {
+      id: 'security-solution-cell-renderer',
+      getRenderer: async () => {
+        const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
+        return getCellRendererForGivenRecord;
+      },
+    };
+
+    discoverFeatureRegistry.register(cellRendererFeature);
+  }
+
+  public async getLazyDiscoverSharedDeps() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "one_discover_shared_deps" */
+      './one_discover'
+    );
   }
 
   /**

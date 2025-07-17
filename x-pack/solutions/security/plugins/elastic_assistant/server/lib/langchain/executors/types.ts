@@ -61,6 +61,7 @@ export interface AgentExecutorParams<T extends boolean> {
   llmType?: string;
   isOssModel?: boolean;
   inference: InferenceServerStart;
+  inferenceChatModelDisabled?: boolean;
   logger: Logger;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;

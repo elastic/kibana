@@ -9,13 +9,8 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Observability Alerting', () => {
-    loadTestFile(require.resolve('./burn_rate_rule'));
-    loadTestFile(require.resolve('./custom_threshold'));
+    loadTestFile(require.resolve('./burn_rate'));
     loadTestFile(require.resolve('./es_query'));
-
-    describe('Synthetics Alerting', () => {
-      loadTestFile(require.resolve('./synthetics/synthetics_default_rule'));
-      loadTestFile(require.resolve('./synthetics/custom_status_rule'));
-    });
+    loadTestFile(require.resolve('./custom_threshold'));
   });
 }

@@ -190,7 +190,11 @@ describe('single line query', () => {
       });
     });
 
-    describe('RERANK', () => {
+    /**
+     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+     * get back to it after 9.1 release.
+     */
+    describe.skip('RERANK', () => {
       test('single field', () => {
         const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
 
@@ -248,17 +252,17 @@ describe('single line query', () => {
 
     describe('SAMPLE', () => {
       test('from single line', () => {
-        const { text } = reprint(`FROM index | SAMPLE 0.1 123`);
+        const { text } = reprint(`FROM index | SAMPLE 0.1`);
 
-        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+        expect(text).toBe('FROM index | SAMPLE 0.1');
       });
 
       test('from multiline', () => {
         const { text } = reprint(`FROM index
-| SAMPLE 0.1 123
+| SAMPLE 0.1
           `);
 
-        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+        expect(text).toBe('FROM index | SAMPLE 0.1');
       });
     });
 
@@ -284,6 +288,31 @@ describe('single line query', () => {
 
         expect(text).toBe(
           'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+        );
+      });
+    });
+
+    describe('COMPLETION', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(
+          `FROM kibana_sample_data_ecommerce
+                 | COMPLETION result = "prompt" WITH \`openai-completion\`
+                 | LIMIT 2
+          `
+        );
+
+        expect(text).toBe(
+          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH `openai-completion` | LIMIT 2'
         );
       });
     });
@@ -333,16 +362,10 @@ describe('single line query', () => {
         expect(text).toBe('FROM index::selector');
       });
 
-      test('single-double quoted source selector', () => {
-        const { text } = reprint('FROM index::"selector"');
+      test('single-double quoted pair source selector', () => {
+        const { text } = reprint('FROM "index::selector"');
 
-        expect(text).toBe('FROM index::"selector"');
-      });
-
-      test('triple-double quoted source selector', () => {
-        const { text } = reprint('FROM index::"""say "jump"!"""');
-
-        expect(text).toBe('FROM index::"say \\"jump\\"!"');
+        expect(text).toBe('FROM "index::selector"');
       });
     });
 
@@ -629,37 +652,57 @@ describe('single line query', () => {
       });
     });
 
-    describe('list literal expressions', () => {
-      describe('integer list', () => {
-        test('one element list', () => {
-          expect(reprint('ROW [1]').text).toBe('ROW [1]');
+    describe('list expressions', () => {
+      describe('literal lists', () => {
+        describe('integer list', () => {
+          test('one element list', () => {
+            expect(reprint('ROW [1]').text).toBe('ROW [1]');
+          });
+
+          test('multiple elements', () => {
+            expect(reprint('ROW [1, 2]').text).toBe('ROW [1, 2]');
+            expect(reprint('ROW [1, 2, -1]').text).toBe('ROW [1, 2, -1]');
+          });
         });
 
-        test('multiple elements', () => {
-          expect(reprint('ROW [1, 2]').text).toBe('ROW [1, 2]');
-          expect(reprint('ROW [1, 2, -1]').text).toBe('ROW [1, 2, -1]');
+        describe('boolean list', () => {
+          test('one element list', () => {
+            expect(reprint('ROW [true]').text).toBe('ROW [TRUE]');
+          });
+
+          test('multiple elements', () => {
+            expect(reprint('ROW [TRUE, false]').text).toBe('ROW [TRUE, FALSE]');
+            expect(reprint('ROW [false, FALSE, false]').text).toBe('ROW [FALSE, FALSE, FALSE]');
+          });
+        });
+
+        describe('string list', () => {
+          test('one element list', () => {
+            expect(reprint('ROW ["a"]').text).toBe('ROW ["a"]');
+          });
+
+          test('multiple elements', () => {
+            expect(reprint('ROW ["a", "b"]').text).toBe('ROW ["a", "b"]');
+            expect(reprint('ROW ["foo", "42", "boden"]').text).toBe('ROW ["foo", "42", "boden"]');
+          });
         });
       });
 
-      describe('boolean list', () => {
+      describe('tuple lists', () => {
+        test('empty list', () => {
+          expect(reprint('FROM a | WHERE b IN ()').text).toBe('FROM a | WHERE b IN ()');
+          expect(reprint('FROM a | WHERE b NOT IN ()').text).toBe('FROM a | WHERE b NOT IN ()');
+        });
+
         test('one element list', () => {
-          expect(reprint('ROW [true]').text).toBe('ROW [TRUE]');
+          expect(reprint('FROM a | WHERE b IN (1)').text).toBe('FROM a | WHERE b IN (1)');
+          expect(reprint('FROM a | WHERE b NOT IN (1)').text).toBe('FROM a | WHERE b NOT IN (1)');
         });
 
-        test('multiple elements', () => {
-          expect(reprint('ROW [TRUE, false]').text).toBe('ROW [TRUE, FALSE]');
-          expect(reprint('ROW [false, FALSE, false]').text).toBe('ROW [FALSE, FALSE, FALSE]');
-        });
-      });
-
-      describe('string list', () => {
-        test('one element list', () => {
-          expect(reprint('ROW ["a"]').text).toBe('ROW ["a"]');
-        });
-
-        test('multiple elements', () => {
-          expect(reprint('ROW ["a", "b"]').text).toBe('ROW ["a", "b"]');
-          expect(reprint('ROW ["foo", "42", "boden"]').text).toBe('ROW ["foo", "42", "boden"]');
+        test('three element list', () => {
+          expect(reprint('FROM a | WHERE b IN ("a", "b", "c")').text).toBe(
+            'FROM a | WHERE b IN ("a", "b", "c")'
+          );
         });
       });
     });

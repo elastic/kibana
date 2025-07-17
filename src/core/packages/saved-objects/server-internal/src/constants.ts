@@ -55,4 +55,6 @@ export const REMOVED_TYPES: string[] = [
   'upgrade-assistant-telemetry',
   // Removed in 8.8 https://github.com/elastic/kibana/pull/155204
   'endpoint:user-artifact',
+  // Removed in 8.19 https://github.com/elastic/kibana/pull/223932
+  'investigation',
 ].sort();

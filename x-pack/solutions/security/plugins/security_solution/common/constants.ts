@@ -39,6 +39,7 @@ export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
+export const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert' as const;
 export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
@@ -167,6 +168,9 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
+
+/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
+export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
@@ -522,6 +526,8 @@ export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
  */
 export const MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS = 90;
 export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
+export const MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS = 90;
+export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
 
 /*
  * Whether it is a Jest environment
@@ -535,3 +541,8 @@ export const AI_FOR_SOC_INTEGRATIONS = [
   'sentinel_one',
   'crowdstrike',
 ];
+
+/*
+ * The tag to mark promotion rules that are related to the AI for SOC integrations
+ */
+export const PROMOTION_RULE_TAG = 'Promotion';

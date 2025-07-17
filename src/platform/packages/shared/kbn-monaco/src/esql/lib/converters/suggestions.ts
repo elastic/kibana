@@ -12,9 +12,15 @@ import { MonacoAutocompleteCommandDefinition } from '../types';
 import { offsetRangeToMonacoRange } from '../shared/utils';
 import { monaco } from '../../../monaco_imports';
 
+function escapeForStringLiteral(str: string): string {
+  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 export function wrapAsMonacoSuggestions(
   suggestions: SuggestionRawDefinition[],
-  fullText: string
+  fullText: string,
+  defineRange: boolean = true,
+  escapeSpecialChars: boolean = false
 ): MonacoAutocompleteCommandDefinition[] {
   return suggestions.map<MonacoAutocompleteCommandDefinition>(
     ({
@@ -31,7 +37,7 @@ export function wrapAsMonacoSuggestions(
     }) => {
       const monacoSuggestion: MonacoAutocompleteCommandDefinition = {
         label,
-        insertText: text,
+        insertText: escapeSpecialChars ? escapeForStringLiteral(text) : text,
         filterText,
         kind:
           kind in monaco.languages.CompletionItemKind
@@ -44,7 +50,10 @@ export function wrapAsMonacoSuggestions(
         insertTextRules: asSnippet
           ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
           : undefined,
-        range: rangeToReplace ? offsetRangeToMonacoRange(fullText, rangeToReplace) : undefined,
+        range:
+          rangeToReplace && defineRange
+            ? offsetRangeToMonacoRange(fullText, rangeToReplace)
+            : undefined,
       };
       return monacoSuggestion;
     }

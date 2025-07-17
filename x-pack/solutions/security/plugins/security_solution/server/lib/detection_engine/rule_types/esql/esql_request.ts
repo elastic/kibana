@@ -29,6 +29,8 @@ export interface EsqlResultColumn {
   type: 'date' | 'keyword';
 }
 
+export type EsqlEsqlShardFailure = Record<string, unknown>;
+
 type AsyncEsqlResponse = {
   id: string;
   is_running: boolean;
@@ -39,6 +41,13 @@ export type EsqlResultRow = Array<string | null>;
 export interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
+  _clusters?: {
+    details?: {
+      [key: string]: {
+        failures?: EsqlEsqlShardFailure[];
+      };
+    };
+  };
 }
 
 export const performEsqlRequest = async ({
@@ -69,6 +78,7 @@ export const performEsqlRequest = async ({
     loggedRequests?.push({
       request: logEsqlRequest(requestBody, requestQueryParams),
       description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
+      request_type: 'findMatches',
     });
     const asyncSearchStarted = performance.now();
     const asyncEsqlResponse = await esClient.transport.request<AsyncEsqlResponse>({

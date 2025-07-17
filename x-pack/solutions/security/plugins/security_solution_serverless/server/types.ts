@@ -18,13 +18,16 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SecuritySolutionEssPluginSetup } from '@kbn/security-solution-ess/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
-import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-
+import type {
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant-plugin/server';
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
+import type { UsageReportingService } from './common/services/usage_reporting_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -44,6 +47,7 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
+  actions: ActionsPluginStartContract;
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
   features: FeaturesPluginStart;
@@ -76,6 +80,11 @@ export interface UsageSource {
 
 export type Tier = ProductTier | 'none';
 
+export interface BackfillConfig {
+  enabled: boolean;
+  maxRecords?: number;
+}
+
 export interface SecurityUsageReportingTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
@@ -86,6 +95,8 @@ export interface SecurityUsageReportingTaskSetupContract {
   taskTitle: string;
   version: string;
   meteringCallback: MeteringCallback;
+  usageReportingService: UsageReportingService;
+  backfillConfig?: BackfillConfig;
 }
 
 export interface SecurityUsageReportingTaskStartContract {

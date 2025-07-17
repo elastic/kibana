@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { asyncForEach } from '@kbn/std';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Notes:
@@ -17,7 +17,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 // kbnServerArgs: ['--xpack.spaces.maxSpaces=100'],
 //
 // Initial test coverage limited to CRUD operations and ensuring disabling features/toggling feature visibility is not possible.
-// Full coverage of x-pack/test/api_integration/apis/spaces & x-pack/test/spaces_api_integration
+// Full coverage of x-pack/test/api_integration/apis/spaces & x-pack/platform/test/spaces_api_integration
 // should be converted into a deployment agnostic suite when spaces are
 // permanently enabled in serverless.
 //

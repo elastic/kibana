@@ -8,15 +8,14 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts"
-  ],
+    "emotion.d.ts" ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",
@@ -230,6 +229,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
     "@kbn/langchain",
+    "@kbn/discover-shared-plugin",
     "@kbn/react-hooks",
     "@kbn/response-ops-alerts-fields-browser",
     "@kbn/response-ops-alerts-table",
@@ -256,5 +256,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-chrome-browser",
     "@kbn/security-plugin-types-common",
+    "@kbn/elastic-assistant-shared-state",
+    "@kbn/elastic-assistant-shared-state-plugin",
   ]
 }

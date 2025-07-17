@@ -26,8 +26,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'header', 'infraLogs']);
   const retry = getService('retry');
-  const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
 
   describe('Logs Source Configuration', function () {
     before(async () => {
@@ -46,6 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           to: DATES.metricsAndLogs.stream.endWithData,
         },
       };
+
       const formattedLocalStart = new Date(logFilter.timeRange.from).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',

@@ -89,8 +89,8 @@
       "name": "APM - Cypress"
     },
     {
-      "key": "cypress/inventory_cypress",
-      "name": "Inventory - Cypress"
+      "key": "cypress/profiling_cypress",
+      "name": "Profiling - Cypress"
     },
     {
       "key": "cypress/cloud_security_posture",

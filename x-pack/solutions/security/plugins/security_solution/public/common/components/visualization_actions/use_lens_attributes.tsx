@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { SecurityPageName } from '../../../../common/constants';
 import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -22,6 +23,8 @@ import {
   getNetworkDetailsPageFilter,
   fieldNameExistsFilter,
 } from './utils';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export const useLensAttributes = ({
   applyGlobalQueriesAndFilters = true,
@@ -34,7 +37,25 @@ export const useLensAttributes = ({
   title,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
-  const { selectedPatterns, dataViewId, indicesExist } = useSourcererDataView(scopeId);
+  const {
+    selectedPatterns: oldSelectedPatterns,
+    dataViewId: oldDataViewId,
+    indicesExist: oldIndicesExist,
+  } = useSourcererDataView(scopeId);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView: experimentalDataView } = useDataView(scopeId);
+  const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
+
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!experimentalDataView.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

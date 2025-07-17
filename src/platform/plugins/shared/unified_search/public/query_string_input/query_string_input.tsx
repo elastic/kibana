@@ -214,7 +214,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
 
   /**
    * If any element within the container is currently focused
-   * @private
+   * @internal
    */
   private isFocusWithin = false;
 
@@ -910,7 +910,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
    * check first if value has changed because of {@link formatTextAreaValue},
    * if this is just a formatting change, then skip this update by re-using current textarea value.
    * This is needed to avoid re-rendering to preserve focus and selection
-   * @private
+   * @internal
    */
   private forwardNewValueIfNeeded(newQueryString: string) {
     const oldQueryString = this.inputRef?.value ?? '';

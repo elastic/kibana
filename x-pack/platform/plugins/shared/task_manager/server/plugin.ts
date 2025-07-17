@@ -25,6 +25,8 @@ import type {
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -60,6 +62,7 @@ import {
   scheduleMarkRemovedTasksAsUnrecognizedDefinition,
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import { LicenseSubscriber } from './license_subscriber';
 
 export interface TaskManagerSetupContract {
   /**
@@ -96,6 +99,7 @@ export type TaskManagerStartContract = Pick<
   };
 
 export interface TaskManagerPluginsStart {
+  licensing: LicensingPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
 }
@@ -137,6 +141,7 @@ export class TaskManagerPlugin
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
+  private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -290,8 +295,10 @@ export class TaskManagerPlugin
 
   public start(
     { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
-    { cloud }: TaskManagerPluginsStart
+    { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
+    this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
+
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
@@ -324,6 +331,7 @@ export class TaskManagerPlugin
       requestTimeouts: this.config.request_timeouts,
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
+      getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -451,6 +459,8 @@ export class TaskManagerPlugin
   }
 
   public async stop() {
+    this.licenseSubscriber?.cleanup();
+
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
       this.taskPollingLifecycle.stop();

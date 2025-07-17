@@ -27,6 +27,7 @@ import type {
 import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
+  ACTION_CONVERT_AGG_BASED_TO_LENS,
   VisualizationsSetup,
   VisualizationsStart,
 } from '@kbn/visualizations-plugin/public';
@@ -58,7 +59,7 @@ import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -68,6 +69,7 @@ import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -134,11 +136,10 @@ import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { setupExpressions } from './expressions';
-import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
@@ -423,8 +424,9 @@ export class LensPlugin {
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
-      share.register(
-        downloadCsvShareProvider({
+      share.registerShareIntegration<ExportShare>(
+        'lens',
+        downloadCsvLensShareProvider({
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
           atLeastGold: () => {
@@ -475,7 +477,9 @@ export class LensPlugin {
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      euiIconType: 'logoKibana',
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
@@ -509,20 +513,6 @@ export class LensPlugin {
         });
       },
     });
-
-    if (globalSearch) {
-      globalSearch.registerResultProvider(
-        getSearchProvider(
-          core.getStartServices().then(
-            ([
-              {
-                application: { capabilities },
-              },
-            ]) => capabilities
-          )
-        )
-      );
-    }
 
     urlForwarding.forwardApp(APP_ID, APP_ID);
 
@@ -661,7 +651,7 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       AGG_BASED_VISUALIZATION_TRIGGER,
       convertToLensActionFactory(
-        ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
+        ACTION_CONVERT_AGG_BASED_TO_LENS,
         i18n.translate('xpack.lens.visualizeAggBasedLegend', {
           defaultMessage: 'Visualize agg based chart',
         }),

@@ -5,27 +5,15 @@
  * 2.0.
  */
 
-import type {
-  BoundPromptAPI,
-  BoundPromptOptions,
-  PromptAPI,
-  PromptOptions,
-  UnboundPromptOptions,
-} from '@kbn/inference-common';
+import type { BoundPromptAPI, BoundOptions, PromptAPI } from '@kbn/inference-common';
+import { bindApi } from '@kbn/inference-common';
 
 /**
  * Bind prompt to the provided parameters,
  * returning a bound version of the API.
  */
-export function bindPrompt(prompt: PromptAPI, boundParams: BoundPromptOptions): BoundPromptAPI;
-export function bindPrompt(prompt: PromptAPI, boundParams: BoundPromptOptions) {
-  const { connectorId, functionCalling } = boundParams;
-  return (unboundParams: UnboundPromptOptions) => {
-    const params: PromptOptions = {
-      ...unboundParams,
-      connectorId,
-      functionCalling,
-    };
-    return prompt(params);
-  };
+export function bindPrompt(promptApi: PromptAPI, boundParams: BoundOptions): BoundPromptAPI;
+
+export function bindPrompt(promptApi: PromptAPI, boundParams: BoundOptions) {
+  return bindApi(promptApi, boundParams);
 }

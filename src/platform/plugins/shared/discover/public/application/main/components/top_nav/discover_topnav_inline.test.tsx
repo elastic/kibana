@@ -12,6 +12,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { DiscoverTopNavInline } from './discover_topnav_inline';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -37,6 +38,14 @@ function getProps({ hideNavMenuItems }: { hideNavMenuItems?: boolean } = {}) {
 
 const mockUseKibana = useKibana as jest.Mock;
 
+const DiscoverTopNavInlineWrapper = ({ props }: { props: ReturnType<typeof getProps> }) => (
+  <DiscoverMainProvider value={props.stateContainer}>
+    <QueryClientProvider client={new QueryClient()}>
+      <DiscoverTopNavInline {...props} />
+    </QueryClientProvider>
+  </DiscoverMainProvider>
+);
+
 describe('DiscoverTopNavInline', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,22 +57,15 @@ describe('DiscoverTopNavInline', () => {
   it('should not render when top nav inline is not enabled', async () => {
     const props = getProps();
     props.stateContainer.customizationContext.inlineTopNav.enabled = false;
-    render(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavInline {...props} />
-      </DiscoverMainProvider>
-    );
+    render(<DiscoverTopNavInlineWrapper props={props} />);
     const topNav = screen.queryByTestId('discoverTopNavInline');
     expect(topNav).toBeNull();
   });
 
   it('should render when top nav inline is enabled and displayMode is "standalone"', async () => {
     const props = getProps();
-    render(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavInline {...props} />
-      </DiscoverMainProvider>
-    );
+    render(<DiscoverTopNavInlineWrapper props={props} />);
+
     const topNav = screen.queryByTestId('discoverTopNavInline');
     expect(topNav).not.toBeNull();
   });
@@ -71,11 +73,8 @@ describe('DiscoverTopNavInline', () => {
   it('should not render when top nav inline is enabled and displayMode is not "standalone"', async () => {
     const props = getProps();
     props.stateContainer.customizationContext.displayMode = 'embedded';
-    render(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavInline {...props} />
-      </DiscoverMainProvider>
-    );
+    render(<DiscoverTopNavInlineWrapper props={props} />);
+
     const topNav = screen.queryByTestId('discoverTopNavInline');
     expect(topNav).toBeNull();
   });
@@ -83,11 +82,8 @@ describe('DiscoverTopNavInline', () => {
   describe('nav menu items', () => {
     it('should show nav menu items when hideNavMenuItems is false', async () => {
       const props = getProps();
-      render(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
-        </DiscoverMainProvider>
-      );
+      render(<DiscoverTopNavInlineWrapper props={props} />);
+
       const topNav = screen.queryByTestId('discoverTopNavInline');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
@@ -98,11 +94,8 @@ describe('DiscoverTopNavInline', () => {
 
     it('should hide nav menu items when hideNavMenuItems is true', async () => {
       const props = getProps({ hideNavMenuItems: true });
-      render(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
-        </DiscoverMainProvider>
-      );
+      render(<DiscoverTopNavInlineWrapper props={props} />);
+
       const topNav = screen.queryByTestId('discoverTopNavInline');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
@@ -116,11 +109,8 @@ describe('DiscoverTopNavInline', () => {
     it('should render when showLogsExplorerTabs is true', async () => {
       const props = getProps();
       props.stateContainer.customizationContext.inlineTopNav.showLogsExplorerTabs = true;
-      render(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
-        </DiscoverMainProvider>
-      );
+      render(<DiscoverTopNavInlineWrapper props={props} />);
+
       const topNav = screen.queryByTestId('discoverTopNavInline');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
@@ -131,11 +121,8 @@ describe('DiscoverTopNavInline', () => {
 
     it('should not render when showLogsExplorerTabs is false', async () => {
       const props = getProps();
-      render(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
-        </DiscoverMainProvider>
-      );
+      render(<DiscoverTopNavInlineWrapper props={props} />);
+
       const topNav = screen.queryByTestId('discoverTopNavInline');
       expect(topNav).not.toBeNull();
       await waitFor(() => {

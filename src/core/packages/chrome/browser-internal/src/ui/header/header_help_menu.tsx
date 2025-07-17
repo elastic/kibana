@@ -156,7 +156,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
         })}
         onClick={this.onMenuButtonClick}
       >
-        <EuiIcon type="help" size="m" />
+        <EuiIcon type="question" size="m" />
       </EuiHeaderSectionItemButton>
     );
 

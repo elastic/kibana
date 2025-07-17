@@ -240,6 +240,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         ],
+        maintenance_windows: null,
       });
     });
   });

@@ -36,6 +36,7 @@ export {
   convertValueToString,
   createLogsContextService,
   createTracesContextService,
+  createApmErrorsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -64,9 +65,22 @@ export {
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   LogLevelBadge,
+  getDefaultSort,
+  getSort,
+  getSortArray,
+  getSortForSearchSource,
+  getEsQuerySort,
+  getTieBreakerFieldName,
 } from './src';
 
-export type { LogsContextService, TracesContextService } from './src';
+export type {
+  LogsContextService,
+  TracesContextService,
+  ApmErrorsContextService,
+  SortOrder,
+  SortInput,
+  SortPair,
+} from './src';
 
 export * from './src/types';
 

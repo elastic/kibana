@@ -31,6 +31,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
@@ -80,6 +81,7 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -108,7 +110,15 @@ export interface HostDetailsProps {
  */
 export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, scopeId }) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
@@ -380,6 +390,8 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               refetch={refetch}
               inspect={inspect}
               deleteQuery={deleteQuery}
+              scopeId={scopeId}
+              isFlyoutOpen={true}
             />
           )}
         </AnomalyTableProvider>
@@ -433,7 +445,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
                   />
                 }
               >
-                <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+                <EuiIcon color="subdued" type="info" className="eui-alignTop" />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>

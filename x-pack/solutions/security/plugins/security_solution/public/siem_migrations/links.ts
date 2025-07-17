@@ -30,10 +30,4 @@ export const siemMigrationsLinks: LinkItem = {
   skipUrlState: true,
   hideTimeline: true,
   hideWhenExperimentalKey: 'siemMigrationsDisabled',
-  isBeta: true,
-  betaOptions: {
-    text: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRules.badge', {
-      defaultMessage: 'Technical Preview',
-    }),
-  },
 };

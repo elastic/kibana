@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -21,6 +22,9 @@ import { useGetInitialUrlParamValue } from '../../../../common/utils/global_quer
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';
 export const RULE_FROM_EQL_URL_PARAM = 'createRuleFromEql';
@@ -43,9 +47,23 @@ export type SetRuleQuery = ({
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
-  const { browserFields, dataViewId, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const {
+    browserFields: oldBrowserFields,
+    dataViewId: oldDataViewId,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId;
 
   const isEql = useRef(false);
 

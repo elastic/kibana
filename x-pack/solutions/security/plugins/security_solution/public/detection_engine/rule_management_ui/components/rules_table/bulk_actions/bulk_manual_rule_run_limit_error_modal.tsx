@@ -6,41 +6,24 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-} from '@elastic/eui';
-
 import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
 import * as i18n from '../../../../common/translations';
+import { BulkActionRuleLimitErrorModal } from './bulk_action_rule_limit_error_modal';
 
 interface BulkManualRuleRunRulesLimitErrorModalProps {
   onClose: () => void;
 }
 
+const text = {
+  title: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE,
+  message: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE(MAX_MANUAL_RULE_RUN_BULK_SIZE),
+  closeButton: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON,
+};
+
 const BulkManualRuleRunLimitErrorModalComponent = ({
   onClose,
 }: BulkManualRuleRunRulesLimitErrorModalProps) => {
-  // if the amount of selected rules is more than the limit, modal window the appropriate error will be displayed
-  return (
-    <EuiModal onClose={onClose}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE}</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        {i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE(MAX_MANUAL_RULE_RUN_BULK_SIZE)}
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButton onClick={onClose} fill>
-          {i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON}
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  );
+  return <BulkActionRuleLimitErrorModal onClose={onClose} text={text} />;
 };
 
 export const BulkManualRuleRunLimitErrorModal = React.memo(

@@ -19,6 +19,7 @@ import {
   chromeServiceMock,
   coreMock,
   docLinksServiceMock,
+  notificationServiceMock,
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
@@ -48,6 +49,7 @@ import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
 import { DiscoverEBTManager } from '../plugin_imports/discover_ebt_manager';
 import { createUrlTrackerMock } from './url_tracker.mock';
+import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -168,7 +170,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
     },
     aiops: {
-      getPatternAnalysisAvailable: jest.fn().mockResolvedValue(jest.fn().mockResolvedValue(true)),
+      getPatternAnalysisAvailable: jest.fn().mockResolvedValue(jest.fn(() => true)),
       PatternAnalysisComponent: jest.fn(() => createElement('div')),
     },
     docLinks: docLinksServiceMock.createStartContract(),
@@ -181,6 +183,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
         save: false,
       },
       advancedSettings: {
+        save: true,
+      },
+      management: {
+        insightsAndAlerting: {
+          triggersActions: true,
+        },
+      },
+      indexPatterns: {
         save: true,
       },
     },
@@ -221,6 +231,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
     },
+    notifications: {
+      toasts: notificationServiceMock.createStartContract().toasts,
+    },
     expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
@@ -251,6 +264,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
+    discoverShared: discoverSharedPluginMock.createStartContract().features,
   } as unknown as DiscoverServices;
 }
 

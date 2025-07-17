@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 // To test setting validations we are using the existing 'defaultColumns' setting that is available in all serverless projects

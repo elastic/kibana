@@ -23,14 +23,42 @@ import {
   BEDROCK_CHAT_TITLE,
   GEMINI_CHAT_TITLE,
   DEFAULT_CHAT_TITLE,
+  DEFEND_INSIGHTS,
+  ALERT_SUMMARY_500,
+  ALERT_SUMMARY_SYSTEM_PROMPT,
+  RULE_ANALYSIS,
+  DATA_QUALITY_ANALYSIS,
+  ALERT_EVALUATION,
+  starterPromptTitle1,
+  starterPromptDescription1,
+  starterPromptIcon1,
+  starterPromptPrompt1,
+  starterPromptDescription2,
+  starterPromptTitle2,
+  starterPromptIcon2,
+  starterPromptPrompt2,
+  starterPromptDescription3,
+  starterPromptTitle3,
+  starterPromptIcon3,
+  starterPromptPrompt3,
+  starterPromptDescription4,
+  starterPromptTitle4,
+  starterPromptIcon4,
+  starterPromptPrompt4,
 } from './prompts';
 
 export const promptGroupId = {
   attackDiscovery: 'attackDiscovery',
   aiAssistant: 'aiAssistant',
+  defendInsights: {
+    incompatibleAntivirus: 'defendInsights-incompatibleAntivirus',
+  },
+  aiForSoc: 'aiForSoc',
 };
 
 export const promptDictionary = {
+  alertSummary: `alertSummary`,
+  alertSummarySystemPrompt: `alertSummarySystemPrompt`,
   systemPrompt: `systemPrompt`,
   userPrompt: `userPrompt`,
   chatTitle: `chatTitle`,
@@ -43,6 +71,36 @@ export const promptDictionary = {
   attackDiscoverySummaryMarkdown: `summaryMarkdown`,
   attackDiscoveryGenerationTitle: `generationTitle`,
   attackDiscoveryGenerationInsights: `generationInsights`,
+  defendInsightsIncompatibleAntivirusDefault: `defendInsights-incompatibleAntivirusDefault`,
+  defendInsightsIncompatibleAntivirusRefine: `defendInsights-incompatibleAntivirusRefine`,
+  defendInsightsIncompatibleAntivirusContinue: `defendInsights-incompatibleAntivirusContinue`,
+  defendInsightsIncompatibleAntivirusGroup: 'defendInsights-incompatibleAntivirusGroup',
+  defendInsightsIncompatibleAntivirusEvents: 'defendInsights-incompatibleAntivirusEvents',
+  defendInsightsIncompatibleAntivirusEventsId: 'defendInsights-incompatibleAntivirusEventsId',
+  defendInsightsIncompatibleAntivirusEventsEndpointId:
+    'defendInsights-incompatibleAntivirusEventsEndpointId',
+  defendInsightsIncompatibleAntivirusEventsValue: 'defendInsights-incompatibleAntivirusEventsValue',
+  // context prompts
+  alertEvaluation: `alertEvaluation`,
+  dataQualityAnalysis: 'dataQualityAnalysis',
+  ruleAnalysis: 'ruleAnalysis',
+  // starter prompts
+  starterPromptDescription1: 'starterPromptDescription1',
+  starterPromptTitle1: 'starterPromptTitle1',
+  starterPromptIcon1: 'starterPromptIcon1',
+  starterPromptPrompt1: 'starterPromptPrompt1',
+  starterPromptDescription2: 'starterPromptDescription2',
+  starterPromptTitle2: 'starterPromptTitle2',
+  starterPromptIcon2: 'starterPromptIcon2',
+  starterPromptPrompt2: 'starterPromptPrompt2',
+  starterPromptDescription3: 'starterPromptDescription3',
+  starterPromptTitle3: 'starterPromptTitle3',
+  starterPromptIcon3: 'starterPromptIcon3',
+  starterPromptPrompt3: 'starterPromptPrompt3',
+  starterPromptDescription4: 'starterPromptDescription4',
+  starterPromptTitle4: 'starterPromptTitle4',
+  starterPromptIcon4: 'starterPromptIcon4',
+  starterPromptPrompt4: 'starterPromptPrompt4',
 };
 
 export const localPrompts: Prompt[] = [
@@ -170,5 +228,176 @@ export const localPrompts: Prompt[] = [
     prompt: {
       default: GEMINI_CHAT_TITLE,
     },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusDefault,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusRefine,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.REFINE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusContinue,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusGroup,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.GROUP,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusEvents,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusEventsId,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ID,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusEventsEndpointId,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ENDPOINT_ID,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusEventsValue,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_VALUE,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummary,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: ALERT_SUMMARY_500,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummarySystemPrompt,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: ALERT_SUMMARY_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.alertEvaluation,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: ALERT_EVALUATION,
+    },
+  },
+  {
+    promptId: promptDictionary.dataQualityAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: DATA_QUALITY_ANALYSIS,
+    },
+  },
+  {
+    promptId: promptDictionary.ruleAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: RULE_ANALYSIS,
+    },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt1,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt1 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt2,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt2 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt3,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt3 },
+  },
+  {
+    promptId: promptDictionary.starterPromptDescription4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptDescription4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptTitle4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptTitle4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptIcon4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptIcon4 },
+  },
+  {
+    promptId: promptDictionary.starterPromptPrompt4,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: { default: starterPromptPrompt4 },
   },
 ];

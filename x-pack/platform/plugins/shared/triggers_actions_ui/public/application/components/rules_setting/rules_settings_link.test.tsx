@@ -24,6 +24,9 @@ jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () =>
 jest.mock('../../lib/rule_api/get_query_delay_settings', () => ({
   getQueryDelaySettings: jest.fn(),
 }));
+jest.mock('../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,7 +68,7 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
 const RulesSettingsLinkWithProviders: React.FunctionComponent<{}> = () => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
-      <RulesSettingsLink />
+      <RulesSettingsLink alertDeleteCategoryIds={['management']} />
     </QueryClientProvider>
   </IntlProvider>
 );

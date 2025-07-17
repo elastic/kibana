@@ -112,8 +112,11 @@ describe('AlertsClient', () => {
                     "type": "function",
                   },
                   Object {
-                    "term": Object {
-                      "kibana.space_ids": "space-1",
+                    "terms": Object {
+                      "kibana.space_ids": Array [
+                        "space-1",
+                        "*",
+                      ],
                     },
                   },
                   Object {
@@ -205,8 +208,11 @@ describe('AlertsClient', () => {
                     "type": "function",
                   },
                   Object {
-                    "term": Object {
-                      "kibana.space_ids": "space-1",
+                    "terms": Object {
+                      "kibana.space_ids": Array [
+                        "space-1",
+                        "*",
+                      ],
                     },
                   },
                   Object {

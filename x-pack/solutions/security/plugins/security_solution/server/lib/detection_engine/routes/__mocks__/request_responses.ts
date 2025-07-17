@@ -41,6 +41,7 @@ import {
 import {
   getBulkDisableRuleActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
+  getPerformBulkActionEditAlertSuppressionSchemaMock,
 } from '../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -178,6 +179,13 @@ export const getDeleteAsPostBulkRequest = () =>
     method: 'post',
     path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ rule_id: 'rule-1' }],
+  });
+
+export const getBulkActionEditAlertSuppressionRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionEditAlertSuppressionSchemaMock(),
   });
 
 export const getPrivilegeRequest = (options: { auth?: { isAuthenticated: boolean } } = {}) =>

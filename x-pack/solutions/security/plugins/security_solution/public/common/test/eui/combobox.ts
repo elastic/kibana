@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 export async function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
   await act(() => {
@@ -62,6 +62,28 @@ export async function selectEuiComboBoxOption({
   });
 }
 
+interface AddEuiComboBoxOptionParameters {
+  wrapper: HTMLElement;
+  optionText: string;
+}
+
+export async function addEuiComboBoxOption({
+  wrapper,
+  optionText,
+}: AddEuiComboBoxOptionParameters): Promise<void> {
+  const input = within(wrapper).getByRole('combobox');
+
+  await act(async () => {
+    fireEvent.change(input, {
+      target: { value: optionText },
+    });
+  });
+
+  await act(async () => {
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+  });
+}
+
 export function selectFirstEuiComboBoxOption({
   comboBoxToggleButton,
 }: {
@@ -70,12 +92,21 @@ export function selectFirstEuiComboBoxOption({
   return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
 }
 
-export function clearEuiComboBoxSelection({
+export async function clearEuiComboBoxSelection({
   clearButton,
 }: {
   clearButton: HTMLElement;
 }): Promise<void> {
-  return act(async () => {
+  const toggleButton = clearButton.nextElementSibling;
+
+  await act(async () => {
     fireEvent.click(clearButton);
   });
+
+  if (toggleButton) {
+    // Make sure options list gets closed
+    await act(async () => {
+      fireEvent.click(toggleButton);
+    });
+  }
 }

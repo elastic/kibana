@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
+import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { RUNTIME_FIELD_TYPES } from './constants';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH, RUNTIME_FIELD_TYPES2 } from './constants';
@@ -180,3 +180,5 @@ export const dataViewSpecSchema = schema.object({
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
   allowHidden: schema.maybe(schema.boolean()),
 });
+
+export type DataViewSpec = TypeOf<typeof dataViewSpecSchema>;

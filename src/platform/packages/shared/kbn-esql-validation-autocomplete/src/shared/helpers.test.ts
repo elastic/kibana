@@ -8,7 +8,7 @@
  */
 
 import { parse } from '@kbn/esql-ast';
-import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
+import { getExpressionType, shouldBeQuotedSource, sourceExists } from './helpers';
 import { SupportedDataType, FunctionDefinitionTypes, Location } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
@@ -83,16 +83,13 @@ describe('getExpressionType', () => {
         expression: 'NULL',
         expectedType: 'null',
       },
-      // TODO — consider whether we need to be worried about
-      // differentiating between time_duration, and date_period
-      // instead of just using time_literal
       {
         expression: '1 second',
-        expectedType: 'time_literal',
+        expectedType: 'time_duration',
       },
       {
         expression: '1 day',
-        expectedType: 'time_literal',
+        expectedType: 'time_duration',
       },
       {
         expression: '?value',
@@ -348,18 +345,71 @@ describe('getExpressionType', () => {
       }
     );
   });
-});
 
-describe('getBracketsToClose', () => {
-  it('returns the number of brackets to close', () => {
-    expect(getBracketsToClose('foo(bar(baz')).toEqual([')', ')']);
-    expect(getBracketsToClose('foo(bar[baz')).toEqual([']', ')']);
-    expect(getBracketsToClose('foo(bar[baz"bap')).toEqual(['"', ']', ')']);
-    expect(
-      getBracketsToClose(
-        'from a | eval case(integerField < 0, "negative", integerField > 0, "positive", '
-      )
-    ).toEqual([')']);
-    expect(getBracketsToClose('FROM a | WHERE ("""field: *""")')).toEqual([]);
+  describe('sourceExists', () => {
+    const mockSources = new Set(['source1', 'source2', 'source3', 'another_source']);
+
+    // Basic single index existence
+    it('should return true for an existing single source', () => {
+      expect(sourceExists('source1', mockSources)).toBe(true);
+    });
+
+    it('should return false for a non-existing single source', () => {
+      expect(sourceExists('nonExistentSource', mockSources)).toBe(false);
+    });
+
+    // Exclusion prefix
+    it('should return true for an index starting with "-" (exclusion)', () => {
+      expect(sourceExists('-sourceToExclude', mockSources)).toBe(true);
+    });
+
+    // Comma-delimited indices (all exist)
+    it('should return true for comma-delimited indices where all parts exist', () => {
+      expect(sourceExists('source1,source2', mockSources)).toBe(true);
+    });
+
+    it('should return true for comma-delimited indices with spaces where all parts exist', () => {
+      expect(sourceExists(' source1 , source2 ', mockSources)).toBe(true);
+    });
+
+    // Comma-delimited indices (some missing)
+    it('should return false for comma-delimited indices where one part is missing', () => {
+      expect(sourceExists('source1,nonExistent', mockSources)).toBe(false);
+    });
+
+    it('should return false for comma-delimited indices where all parts are missing', () => {
+      expect(sourceExists('nonExistent1,nonExistent2', mockSources)).toBe(false);
+    });
+
+    // ::data suffix removal
+    it('should return true for an index with ::data suffix if the base source exists', () => {
+      expect(sourceExists('source1::data', mockSources)).toBe(true);
+    });
+
+    it('should return false for an index with ::data suffix if the base source does not exist', () => {
+      expect(sourceExists('nonExistent::data', mockSources)).toBe(false);
+    });
+
+    // ::failures suffix removal
+    it('should return true for an index with ::failures suffix if the base source exists', () => {
+      expect(sourceExists('source2::failures', mockSources)).toBe(true);
+    });
+
+    it('should return false for an index with ::failures suffix if the base source does not exist', () => {
+      expect(sourceExists('nonExistent::failures', mockSources)).toBe(false);
+    });
+
+    // Combinations
+    it('should return true for mixed valid comma-delimited indices including suffixes', () => {
+      expect(sourceExists('source1::data,source3', mockSources)).toBe(true);
+    });
+
+    it('should return false for mixed comma-delimited indices with one missing and suffixes', () => {
+      expect(sourceExists('source1::data,nonExistent::failures', mockSources)).toBe(false);
+    });
+
+    it('should handle empty string gracefully (false)', () => {
+      expect(sourceExists('', mockSources)).toBe(false);
+    });
   });
 });

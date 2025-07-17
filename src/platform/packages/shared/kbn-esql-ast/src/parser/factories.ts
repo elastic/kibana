@@ -30,6 +30,7 @@ import {
   type InlineCastContext,
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
+  IndexStringContext,
 } from '../antlr/esql_parser';
 import { Builder, type AstNodeParserFields } from '../builder';
 import { LeafPrinter } from '../pretty_print';
@@ -119,7 +120,7 @@ export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['
   );
 
 export const createList = (ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList =>
-  Builder.expression.literal.list({ values }, createParserFields(ctx));
+  Builder.expression.list.literal({ values }, createParserFields(ctx));
 
 export const createNumericLiteral = (
   ctx: DecimalValueContext | IntegerValueContext,
@@ -238,15 +239,17 @@ export function createFunction<Subtype extends FunctionSubtype>(
   name: string,
   ctx: ParserRuleContext,
   customPosition?: ESQLLocation,
-  subtype?: Subtype
+  subtype?: Subtype,
+  args: ESQLAstItem[] = [],
+  incomplete?: boolean
 ): ESQLFunction<Subtype> {
   const node: ESQLFunction<Subtype> = {
     type: 'function',
     name,
     text: ctx.getText(),
     location: customPosition ?? getPosition(ctx.start, ctx.stop),
-    args: [],
-    incomplete: Boolean(ctx.exception),
+    args,
+    incomplete: Boolean(ctx.exception) || !!incomplete,
   };
   if (subtype) {
     node.subtype = subtype;
@@ -445,7 +448,23 @@ export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx
   return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
 }
 
-const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
+const visitQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
+  const unquotedCtx = ctx.UNQUOTED_SOURCE();
+
+  const valueUnquoted = unquotedCtx.getText();
+  const quotedString = LeafPrinter.string({ valueUnquoted });
+
+  return Builder.expression.literal.string(
+    valueUnquoted,
+    {
+      name: quotedString,
+      unquoted: true,
+    },
+    createParserFieldsFromTerminalNode(unquotedCtx)
+  );
+};
+
+const visitUnquotedOrQuotedString = (ctx: IndexStringContext): ESQLStringLiteral => {
   const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
   if (unquotedCtx) {
@@ -471,30 +490,34 @@ export function visitSource(
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
 
-  let cluster: ESQLStringLiteral | undefined;
+  let prefix: ESQLStringLiteral | undefined;
   let index: ESQLStringLiteral | undefined;
   let selector: ESQLStringLiteral | undefined;
 
   if (ctx instanceof IndexPatternContext) {
     const clusterStringCtx = ctx.clusterString();
+    const unquotedIndexString = ctx.unquotedIndexString();
     const indexStringCtx = ctx.indexString();
     const selectorStringCtx = ctx.selectorString();
 
     if (clusterStringCtx) {
-      cluster = visitUnquotedOrQuotedString(clusterStringCtx);
+      prefix = visitQuotedString(clusterStringCtx);
+    }
+    if (unquotedIndexString) {
+      index = visitQuotedString(unquotedIndexString);
     }
     if (indexStringCtx) {
       index = visitUnquotedOrQuotedString(indexStringCtx);
     }
     if (selectorStringCtx) {
-      selector = visitUnquotedOrQuotedString(selectorStringCtx);
+      selector = visitQuotedString(selectorStringCtx);
     }
   }
 
   return Builder.expression.source.node(
     {
       sourceType: type,
-      cluster,
+      prefix,
       index,
       selector,
       name: text,

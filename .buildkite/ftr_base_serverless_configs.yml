@@ -2,8 +2,14 @@ disabled:
   # Base config files, only necessary to inform config finding script
 
   # Serverless deployment-agnostic default config for api-integration tests
-  - x-pack/test/api_integration/deployment_agnostic/default_configs/serverless.config.base.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/serverless.config.base.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/default_configs/feature_flag.serverless.config.base.ts
   # Serverless base config files
   - x-pack/test_serverless/api_integration/config.base.ts
   - x-pack/test_serverless/functional/config.base.ts
   - x-pack/test_serverless/shared/config.base.ts
+  # Serverless deployment-agnostic configs to run platform api-integration tests
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/search.serverless.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/security.serverless.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts

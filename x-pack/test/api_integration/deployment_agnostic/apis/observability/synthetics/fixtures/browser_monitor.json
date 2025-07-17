@@ -56,5 +56,6 @@
   "ssl.verification_mode": "full",
   "revision": 1,
   "max_attempts": 2,
-  "labels": {}
+  "labels": {},
+  "maintenance_windows": []
 }
