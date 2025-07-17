@@ -9,7 +9,8 @@ import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const archiveEmptyIndex = 'x-pack/test/functional_search/fixtures/search-empty-index';
+const archiveEmptyIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchLandingPage = getPageObject('svlSearchLandingPage');

@@ -6,22 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { createPlayground, deletePlayground } from './utils/create_playground';
 
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects([
-    'common',
-    'svlCommonPage',
-    'searchPlayground',
-    'solutionNavigation',
-  ]);
+  const pageObjects = getPageObjects(['common', 'searchPlayground', 'solutionNavigation']);
   const log = getService('log');
-  const roleScopedSupertest = getService('roleScopedSupertest');
+  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   const createIndices = async () => {
@@ -32,13 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('Search Playground - Saved Playgrounds', function () {
-    let supertest: SupertestWithRoleScopeType;
     let testPlaygroundId: string;
     before(async () => {
-      supertest = await roleScopedSupertest.getSupertestWithRoleScope('developer', {
-        useCookieHeader: true,
-        withInternalHeaders: true,
-      });
       await createIndices();
       // Note: replace with creating playground via UI once thats supported
       testPlaygroundId = await createPlayground(
@@ -50,8 +39,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
         { log, supertest }
       );
-
-      await pageObjects.svlCommonPage.loginWithRole('developer');
     });
     after(async () => {
       if (testPlaygroundId) {
@@ -130,6 +117,51 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should support running query in query mode', async () => {
         await pageObjects.searchPlayground.PlaygroundSearchPage.runQueryInQueryMode('atwood');
         await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeResultsCodeEditor();
+      });
+    });
+    describe('Update Saved Playground', function () {
+      before(async () => {
+        expect(testPlaygroundId).not.to.be(undefined);
+
+        await pageObjects.common.navigateToUrl('searchPlayground', `p/${testPlaygroundId}`, {
+          shouldUseHashForSubUrl: false,
+        });
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
+          'FTR Search Playground'
+        );
+      });
+      it('should allow updating playground name', async () => {
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToExist();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.clickEditPlaygroundNameButton();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.setPlaygroundNameInEditModal(
+          'Test Search Playground'
+        );
+        await pageObjects.searchPlayground.SavedPlaygroundPage.savePlaygroundNameInModal();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
+          'Test Search Playground'
+        );
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.clickSavedPlaygroundSaveButton();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
+      });
+      it('should allow updating playground query fields', async () => {
+        await pageObjects.searchPlayground.PlaygroundSearchPage.selectPageMode(
+          'queryMode',
+          testPlaygroundId
+        );
+        await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeComponentsToExist();
+        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('author');
+        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('name');
+        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', true);
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
+        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', false);
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
       });
     });
   });
