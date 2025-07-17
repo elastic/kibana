@@ -53,7 +53,7 @@ export const KubernetesContainer = React.memo(() => {
         queries: [query],
         filters,
       }),
-    [filters, oldSourcererDataView, uiSettings, query]
+    [uiSettings, oldSourcererDataView, experimentalDataView, query, filters]
   );
 
   useInvalidFilterQuery({
