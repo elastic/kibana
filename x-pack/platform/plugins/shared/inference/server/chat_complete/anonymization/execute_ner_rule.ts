@@ -99,6 +99,7 @@ export async function executeNerRule({
                 const response = await esClient.ml.inferTrainedModel({
                   model_id: rule.modelId,
                   docs,
+                  timeout: '30s',
                 });
 
                 span?.setAttribute('output.value', JSON.stringify(response.inference_results));
