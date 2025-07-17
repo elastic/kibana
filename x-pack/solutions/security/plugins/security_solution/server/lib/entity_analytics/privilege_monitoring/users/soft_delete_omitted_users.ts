@@ -55,6 +55,14 @@ export const softDeleteOmittedUsers =
                           ctx._source.user.is_privileged = false;
                         }
                       }
+
+                      if (ctx._source.entity_analytics_monitoring != null && ctx._source.entity_analytics_monitoring.labels != null) {
+                        ctx._source.entity_analytics_monitoring.labels.removeIf(label -> label.source == params.to_remove);
+                        if (ctx._source.entity_analytics_monitoring.labels.isEmpty()) {
+                          ctx._source.remove('entity_analytics_monitoring');
+                        }
+                      }
+
                     `,
                     lang: 'painless',
                     params: {
