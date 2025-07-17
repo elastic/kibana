@@ -48,6 +48,7 @@ import {
 
 import { asyncMap } from '@kbn/std';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { css } from '@emotion/react';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
@@ -651,7 +652,15 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="control-editor-flyout">
+      <EuiFlyoutBody
+        data-test-subj="control-editor-flyout"
+        css={css`
+          /* Fix code editor suggestions rendering */
+          .euiFlyoutBody__overflow {
+            transform: initial;
+          }
+        `}
+      >
         <EuiForm fullWidth>
           <EuiSteps steps={steps} titleSize="xxs" />
         </EuiForm>

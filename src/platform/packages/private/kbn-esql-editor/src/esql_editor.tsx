@@ -683,7 +683,13 @@ export const ESQLEditor = memo(function ESQLEditor({
   );
 
   const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks),
+    /**
+     * If you are looking at this code trying to debug why editor suggestions are not appearing,
+     * first check if you are rendering the ESQLEditor within a flyout. There is a bug in EuiFlyout that causes
+     * editor suggestions to render behind the flyout. Try setting .euiFlyoutBody__overflow { transform: initial }
+     * and see if that fixes the problem
+     * */
+    () => ESQLLang.getSuggestionProvider(esqlCallbacks),
     [esqlCallbacks]
   );
 
