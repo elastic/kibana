@@ -14,6 +14,7 @@ import {
   EuiCallOut,
   EuiCard,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
@@ -37,7 +38,7 @@ export function AiAssistantSelectionPage() {
     setBreadcrumbs([
       {
         text: i18n.translate('aiAssistantManagementSelection.breadcrumb.index', {
-          defaultMessage: 'AI Assistant',
+          defaultMessage: 'AI Assistants',
         }),
       },
     ]);
@@ -50,7 +51,7 @@ export function AiAssistantSelectionPage() {
           {i18n.translate(
             'aiAssistantManagementSelection.aiAssistantSettingsPage.h2.aIAssistantLabel',
             {
-              defaultMessage: 'AI Assistant',
+              defaultMessage: 'AI Assistants',
             }
           )}
         </h2>
@@ -135,7 +136,16 @@ export function AiAssistantSelectionPage() {
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="xxl" type="logoObservability" />}
+            icon={
+              <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoObservability" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="xxl" type="logoEnterpriseSearch" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             isDisabled={!observabilityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',

@@ -17,7 +17,7 @@ export const SETTINGS = i18n.translate(
 export const SECURITY_AI_SETTINGS = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.securityAiSettingsTitle',
   {
-    defaultMessage: 'Security AI settings',
+    defaultMessage: 'AI Assistant for Security',
   }
 );
 

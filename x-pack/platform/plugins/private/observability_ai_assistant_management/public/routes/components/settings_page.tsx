@@ -7,8 +7,19 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { css } from '@emotion/react';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
@@ -61,7 +72,7 @@ export function SettingsPage() {
           text: i18n.translate(
             'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
             {
-              defaultMessage: 'Observability',
+              defaultMessage: 'Observability and Search',
             }
           ),
         },
@@ -108,18 +119,62 @@ export function SettingsPage() {
     router.push('/', { path: '/', query: { tab: id } });
   };
 
+  const headerIconShadow = useEuiShadow('s');
+  const { euiTheme } = useEuiTheme();
+
   return (
     <div data-test-subj="aiAssistantSettingsPage">
-      <EuiTitle size="l">
-        <h2>
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
-            {
-              defaultMessage: 'Settings',
-            }
-          )}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="none" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiAvatar
+                iconType="logoObservability"
+                iconSize="m"
+                color="plain"
+                name={i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.settingsPage.observabilityAvatarLabel',
+                  {
+                    defaultMessage: 'Observability AI',
+                  }
+                )}
+                css={css`
+                  ${headerIconShadow};
+                `}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiAvatar
+                iconType="logoEnterpriseSearch"
+                iconSize="m"
+                color="plain"
+                name={i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.settingsPage.searchAvatarLabel',
+                  {
+                    defaultMessage: 'Enterprise Search AI',
+                  }
+                )}
+                css={css`
+                  ${headerIconShadow};
+                  margin-right: ${euiTheme.base * 0.75}px;
+                `}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="m">
+            <h2>
+              {i18n.translate(
+                'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
+                {
+                  defaultMessage: 'AI Assistant for Observability and Search',
+                }
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
