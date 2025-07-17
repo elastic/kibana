@@ -874,7 +874,7 @@
         "main"
       ],
       "labels": [
-        "Team:Core",
+        "team:kibana-core",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -916,7 +916,7 @@
         "main"
       ],
       "labels": [
-        "Team:Core",
+        "team:kibana-core",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -938,7 +938,7 @@
         "main"
       ],
       "labels": [
-        "Team:Core",
+        "team:kibana-core",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -957,7 +957,7 @@
         "main"
       ],
       "labels": [
-        "Team:Core",
+        "team:kibana-core",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -976,7 +976,7 @@
         "main"
       ],
       "labels": [
-        "Team:Core",
+        "team:kibana-core",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -998,7 +998,7 @@
         "main"
       ],
       "labels": [
-        "Team:Core",
+        "team:kibana-core",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -1018,7 +1018,7 @@
         "main"
       ],
       "labels": [
-        "Team:Core",
+        "team:kibana-core",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -1207,7 +1207,7 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "Team:Core"
+        "team:kibana-core"
       ],
       "enabled": true
     },
@@ -1227,7 +1227,7 @@
         "release_note:skip",
         "backport:prev-minor",
         "Team:Operations",
-        "Team:Core"
+        "team:kibana-core"
       ],
       "enabled": true
     },
@@ -1269,7 +1269,7 @@
         "release_note:skip",
         "backport:skip",
         "Team:Operations",
-        "Team:Core"
+        "team:kibana-core"
       ],
       "enabled": true
     },
@@ -1289,7 +1289,7 @@
       "labels": [
         "release_note:skip",
         "Team:Operations",
-        "Team:Core",
+        "team:kibana-core",
         "backport:skip"
       ],
       "enabled": true
@@ -1313,7 +1313,7 @@
       "labels": [
         "release_note:skip",
         "Team:Security",
-        "Team:Core",
+        "team:kibana-core",
         "backport:prev-minor",
         "backport:prev-major"
       ],
@@ -1337,7 +1337,7 @@
       "labels": [
         "release_note:skip",
         "Team:Security",
-        "Team:Core",
+        "team:kibana-core",
         "backport:prev-minor",
         "backport:prev-major"
       ],
@@ -1360,7 +1360,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
+        "team:kibana-core",
         "backport:prev-minor",
         "backport:prev-major"
       ],
@@ -1379,7 +1379,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
+        "team:kibana-core",
         "backport:all-open"
       ],
       "enabled": true
@@ -1397,7 +1397,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
+        "team:kibana-core",
         "backport:prev-minor"
       ],
       "enabled": true
@@ -1416,7 +1416,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
+        "team:kibana-core",
         "backport:skip"
       ],
       "enabled": true
@@ -1434,7 +1434,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
+        "team:kibana-core",
         "backport:prev-minor"
       ],
       "enabled": true
@@ -1453,7 +1453,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
+        "team:kibana-core",
         "backport:prev-minor"
       ],
       "enabled": true
@@ -1473,7 +1473,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
+        "team:kibana-core",
         "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
@@ -1505,7 +1505,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "Team:Core",
+        "team:kibana-core",
         "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
@@ -3370,7 +3370,7 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },    
+    },
     {
       "groupName": "redux-actions",
       "matchDepNames": [
