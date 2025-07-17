@@ -213,13 +213,9 @@ export function DependenciesInventoryTable() {
   );
   const showRandomSamplerBadge = data?.sampled && status === FETCH_STATUS.SUCCESS;
   const fetchingStatus =
-    isPending(status) || status === undefined
+      isPending(status) || (visibleDependenciesNames?.length && isPending(timeseriesStatus))
       ? FETCH_STATUS.LOADING
-      : !visibleDependenciesNames?.length || !data?.dependencies?.length
-        ? FETCH_STATUS.SUCCESS
-        : isPending(timeseriesStatus)
-          ? FETCH_STATUS.LOADING
-          : FETCH_STATUS.SUCCESS;
+      : FETCH_STATUS.SUCCESS;
   return (
     <>
       <div
