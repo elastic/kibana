@@ -69,7 +69,7 @@ import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import { fillDescription, goToAboutStepTab } from '../../../../tasks/create_new_rule';
 import { saveEditedRule } from '../../../../tasks/edit_rule';
-describe(
+describe.only(
   'Detection rules, Prebuilt Rules Customization workflow',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
