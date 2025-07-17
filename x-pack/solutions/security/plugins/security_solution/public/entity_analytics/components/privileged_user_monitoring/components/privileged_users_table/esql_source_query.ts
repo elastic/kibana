@@ -15,6 +15,6 @@ export const getPrivilegedUsersQuery = (namespace: string) => {
       user.is_privileged = user.is_privileged,
       labels.sources = labels.sources,
       eaLabels = entity_analytics_monitoring.labels.value
-  | KEEP user.is_privileged, labels.sources, eaLabels
+  | KEEP user.is_privileged, labels.sources, eaLabels, user.name
   `;
 };
