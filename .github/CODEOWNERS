@@ -2006,7 +2006,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional/page_objects/security_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/role_mappings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/copy_saved_objects_to_space_page.ts @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/39002
-/x-pack/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
+/x-pack/platform/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/account_settings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/apps/user_profiles @elastic/kibana-security
 /x-pack/test/common/services/spaces.ts @elastic/kibana-security
@@ -2180,8 +2180,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/grok_debugger_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/grok_debugger_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/test/functional/fixtures/ingest_pipeline_example_mapping.csv @elastic/kibana-management
 /x-pack/test/functional/apps/snapshot_restore @elastic/kibana-management
 /x-pack/platform/test/functional/apps/painless_lab @elastic/kibana-management
@@ -2192,9 +2192,10 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 ^/src/platform/test/functional/services/management @elastic/kibana-management
 /x-pack/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/test/functional/apps/ingest_pipelines @elastic/kibana-management
-/x-pack/test/functional/apps/home @elastic/kibana-management
-/x-pack/test/functional/apps/license_management @elastic/kibana-management
-/x-pack/test/functional/apps/management @elastic/kibana-management
+/x-pack/platform/test/functional/apps/home @elastic/kibana-management
+/x-pack/platform/test/functional/apps/license_management @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/license_management_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/apps/management @elastic/kibana-management
 /x-pack/test/functional/apps/remote_clusters @elastic/kibana-management
 ^/src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
 ^/src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
@@ -2214,7 +2215,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 ^/src/platform/test/accessibility/apps/console.ts @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
 /x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
-/x-pack/test/functional/apps/grok_debugger @elastic/kibana-management
+/x-pack/platform/test/functional/apps/grok_debugger @elastic/kibana-management
 /x-pack/test/functional/apps/index_lifecycle_management @elastic/kibana-management
 /x-pack/test/functional/apps/index_management @elastic/kibana-management
 /x-pack/test/api_integration/services/ingest_pipelines @elastic/kibana-management
