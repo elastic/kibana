@@ -40,7 +40,7 @@ export const playgroundFormResolver: Resolver<PlaygroundForm> = async (values) =
   if (!values[PlaygroundFormFields.indices] || values[PlaygroundFormFields.indices].length === 0) {
     errors[PlaygroundFormFields.indices] = REQUIRED_ERROR;
   } else {
-    const queryFieldsCount = Object.values(values[PlaygroundFormFields.queryFields]).reduce(
+    const queryFieldsCount = Object.values(values[PlaygroundFormFields.queryFields] ?? {}).reduce(
       (count, indexQueryFields) => count + (indexQueryFields?.length || 0),
       0
     );

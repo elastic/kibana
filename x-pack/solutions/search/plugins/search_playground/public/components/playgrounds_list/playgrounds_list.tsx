@@ -112,7 +112,6 @@ export const PlaygroundsList = () => {
                     data-test-subj="newPlaygroundButton"
                     fill
                     iconType="plusInCircle"
-                    fullWidth={false}
                     onClick={onNewPlayground}
                   >
                     <FormattedMessage
