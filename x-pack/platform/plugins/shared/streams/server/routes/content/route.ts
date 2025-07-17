@@ -15,8 +15,7 @@ import {
   isIncludeAll,
 } from '@kbn/content-packs-schema';
 import { Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
-import { omit, partition } from 'lodash';
-import { DashboardLink } from '../../../common/assets';
+import { omit } from 'lodash';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
@@ -28,7 +27,6 @@ import {
   withRootPrefix,
 } from '../../lib/content/stream';
 import { AssetClient } from '../../lib/streams/assets/asset_client';
-import { ASSET_TYPE } from '../../lib/streams/assets/fields';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
