@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { errors as esErrors } from '@elastic/elasticsearch';
+import { DiagnosticResult, errors as esErrors } from '@elastic/elasticsearch';
 
 import { AnalyticsIndex } from './analytics_index';
 import type {
@@ -304,6 +304,28 @@ describe('AnalyticsIndex', () => {
       expect(nextBackOff).toBeCalledTimes(0);
       // Paths in the algorithm after the error are not called.
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
+    });
+
+    it('logs resource_already_exists_exception errors as info', async () => {
+      esClient.indices.exists.mockResolvedValueOnce(false);
+      esClient.indices.create.mockRejectedValueOnce(
+        new esErrors.ResponseError({
+          body: {
+            error: {
+              type: 'resource_already_exists_exception',
+            },
+          },
+          statusCode: 404,
+        } as unknown as DiagnosticResult)
+      );
+
+      await index.upsertIndex();
+
+      expect(logger.debug).toBeCalledWith(
+        `[${indexName}] Index already exists. Skipping creation.`,
+        { tags: ['cai-index-creation', `${indexName}`] }
+      );
+      expect(logger.error).not.toBeCalled();
     });
   });
 });
