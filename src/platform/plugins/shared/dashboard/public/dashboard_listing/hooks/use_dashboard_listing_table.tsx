@@ -205,15 +205,14 @@ export const useDashboardListingTable = ({
         references?: SavedObjectsFindOptionsReference[];
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {},
-      cursor?: string,
-      pageSize = listingLimit
+      { cursor, pageSize }: { cursor?: string; pageSize?: number } = {}
     ) => {
       const searchStartTime = window.performance.now();
 
       return dashboardContentManagementService.findDashboards
         .search({
           search: searchTerm,
-          size: pageSize,
+          size: pageSize ?? listingLimit,
           hasReference: references,
           hasNoReference: referencesToExclude,
           options: {
@@ -239,7 +238,7 @@ export const useDashboardListingTable = ({
           };
         });
     },
-    [listingLimit, dashboardContentManagementService]
+    [dashboardContentManagementService, listingLimit]
   );
 
   const deleteItems = useCallback(

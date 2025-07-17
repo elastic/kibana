@@ -106,8 +106,10 @@ export interface TableListViewTableProps<
       references?: SavedObjectsFindOptionsReference[];
       referencesToExclude?: SavedObjectsFindOptionsReference[];
     },
-    cursor?: string,
-    pageSize?: number
+    options?: {
+      cursor?: string;
+      pageSize?: number;
+    }
   ): Promise<{ total: number; hits: T[] }>;
   /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
   getDetailViewLink?: (entity: T) => string | undefined;
@@ -482,11 +484,17 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
               referencesToExclude: undefined,
             };
 
+        const options = isServerSidePaginationAndSorting
+          ? {
+              cursor,
+              pageSize: _pagination.pageSize,
+            }
+          : undefined;
+
         const response = await findItems(
           searchQueryParsed,
           { references, referencesToExclude },
-          cursor,
-          _pagination.pageSize
+          options
         );
 
         if (!isMounted.current) {
@@ -523,6 +531,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       onFetchSuccess,
       recentlyAccessed,
       _pagination.pageSize,
+      isServerSidePaginationAndSorting,
     ]
   );
 

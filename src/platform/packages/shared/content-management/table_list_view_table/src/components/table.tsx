@@ -22,8 +22,12 @@ import {
   useEuiTheme,
   EuiCode,
   EuiText,
-  EuiTablePagination,
   EuiPaginationProps,
+  EuiBasicTable,
+  EuiSearchBar,
+  EuiSearchBarProps,
+  EuiSpacer,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -126,23 +130,15 @@ export function Table<T extends UserContentCommonSchema>({
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
 
-  const pageCount = useMemo(() => {
-    return Math.ceil(totalItems / (pagination.pageSize ?? 10));
-  }, [totalItems, pagination.pageSize]);
-
-  const handlePageChange = (newPageIndex: number) => {
-    setPageIndex(newPageIndex);
-    onChangePage?.(newPageIndex);
-  };
-
-  const handleChangeItemsPerPage = useCallback(
-    (newPageSize: number) => {
-      onTableChange({
-        page: { index: 0, size: newPageSize },
-      });
-      setPageIndex(0);
+  const handleTableChange = useCallback(
+    (criteria: CriteriaWithPagination<T>) => {
+      onTableChange(criteria);
+      if (isServerSidePaginationAndSorting) {
+        setPageIndex(criteria.page.index);
+        onChangePage?.(criteria.page.index);
+      }
     },
-    [onTableChange]
+    [onTableChange, onChangePage, isServerSidePaginationAndSorting]
   );
 
   const renderToolsLeft = useCallback(() => {
@@ -388,34 +384,45 @@ export function Table<T extends UserContentCommonSchema>({
         totalActiveFilters={totalActiveFilters}
         clearTagSelection={clearTagSelection}
       >
-        <EuiInMemoryTable<T>
-          itemId="id"
-          items={visibleItems}
-          columns={tableColumns}
-          pagination={isServerSidePaginationAndSorting ? undefined : pagination}
-          loading={isFetchingItems}
-          message={noItemsMessage}
-          selection={selection}
-          search={search}
-          executeQueryOptions={{ enabled: false }}
-          sorting={sorting} // TODO: handle server-side sorting
-          onChange={onTableChange}
-          data-test-subj="itemsInMemTable"
-          rowHeader="attributes.title"
-          tableCaption={tableCaption}
-          css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          childrenBetween={favoritesFilter}
-        />
-        {/* TODO: Handle going over SAVED_OBJECTS_LIMIT_SETTING - display something? */}
-        {isServerSidePaginationAndSorting && (
-          <EuiTablePagination
-            pageCount={pageCount}
-            activePage={pageIndex}
-            itemsPerPage={pagination.pageSize}
-            itemsPerPageOptions={pagination.pageSizeOptions}
-            onChangePage={handlePageChange}
-            onChangeItemsPerPage={handleChangeItemsPerPage}
-            showPerPageOptions={true}
+        {isServerSidePaginationAndSorting ? (
+          <>
+            <EuiSearchBar {...(search as EuiSearchBarProps)} />
+            <EuiSpacer size="l" />
+            {favoritesFilter}
+            <EuiBasicTable<T>
+              itemId="id"
+              items={visibleItems}
+              columns={tableColumns}
+              pagination={{ ...pagination, pageIndex, totalItemCount: totalItems }}
+              loading={isFetchingItems}
+              noItemsMessage={noItemsMessage}
+              selection={selection}
+              sorting={sorting as EuiTableSortingType<T>} // TODO: Fix sorting
+              onChange={handleTableChange}
+              data-test-subj="itemsBasicTable"
+              rowHeader="attributes.title"
+              tableCaption={tableCaption}
+              css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
+            />
+          </>
+        ) : (
+          <EuiInMemoryTable<T>
+            itemId="id"
+            items={visibleItems}
+            columns={tableColumns}
+            pagination={pagination}
+            loading={isFetchingItems}
+            noItemsMessage={noItemsMessage}
+            selection={selection}
+            search={search}
+            executeQueryOptions={{ enabled: false }}
+            sorting={sorting}
+            onChange={handleTableChange}
+            data-test-subj="itemsInMemTable"
+            rowHeader="attributes.title"
+            tableCaption={tableCaption}
+            css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
+            childrenBetween={favoritesFilter}
           />
         )}
       </TagFilterContextProvider>
