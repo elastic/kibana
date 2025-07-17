@@ -116,25 +116,6 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('sorts by text field with keyword subfield for multiple types', async () => {
-        const query = queryString.stringify({
-          type: sortTestTypes,
-          sort_field: sortTestFields.textWithKeyword,
-        });
-        const response = await supertest.get(
-          `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
-        );
-        expect(response.status).to.eql(200, JSON.stringify(response.body));
-        expect(response.body.saved_objects.map((o: any) => o.attributes.textWithKeyword)).to.eql([
-          'victor',
-          'victor2',
-          'yankee',
-          'yankee2',
-          'zulu',
-          'zulu2',
-        ]);
-      });
-
       it('sorts by textWithKeyword.keyword for multiple types (asc)', async () => {
         const query = queryString.stringify({
           type: sortTestTypes,
@@ -155,20 +136,6 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('throws error if sorting by text field without keyword subfield for multiple types', async () => {
-        const query = queryString.stringify({
-          type: sortTestTypes,
-          sort_field: sortTestFields.text,
-        });
-        const response = await supertest.get(
-          `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
-        );
-        expect(response.status).to.eql(400);
-        expect(response.body.message).to.match(
-          /Sort field ".*\.title" is of type "text" which is not sortable\.  Sorting on text fields requires a "keyword" subfield\./
-        );
-      });
-
       it('throws error if sorting by text field for single type', async () => {
         const query = queryString.stringify({
           type: 'sortTestingType',
@@ -180,6 +147,34 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(400);
         expect(response.body.message).to.match(
           /Fielddata is disabled on \[sortTestingType.title].*Please use a keyword field instead/
+        );
+      });
+
+      it('throws error if sorting by text field without keyword subfield for multiple types', async () => {
+        const query = queryString.stringify({
+          type: sortTestTypes,
+          sort_field: sortTestFields.text,
+        });
+        const response = await supertest.get(
+          `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+        );
+        expect(response.status).to.eql(400);
+        expect(response.body.message).to.match(
+          /Sort field ".*\.title" is of type "text" which is not sortable\. Sorting on text fields requires a "keyword" subfield\./
+        );
+      });
+
+      it('throws error if sorting by text field with keyword subfield for multiple types', async () => {
+        const query = queryString.stringify({
+          type: sortTestTypes,
+          sort_field: sortTestFields.textWithKeyword,
+        });
+        const response = await supertest.get(
+          `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+        );
+        expect(response.status).to.eql(400);
+        expect(response.body.message).to.match(
+          /Sort field ".*\.textWithKeyword" is of type "text" which is not sortable\. Sorting on text fields requires a "keyword" subfield\./
         );
       });
 

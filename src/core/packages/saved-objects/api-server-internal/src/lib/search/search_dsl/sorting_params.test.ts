@@ -122,10 +122,16 @@ describe('searchDsl/getSortParams', () => {
       });
     });
     describe('sortField is simple non-root property with multiple types', () => {
-      it('returns correct params', () => {
-        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title')).toEqual({
+      it('throws error when sort field is text without explicit keyword subfield', () => {
+        expect(() => getSortingParams(MAPPINGS, ['saved', 'pending'], 'title')).toThrowError(
+          'Sort field "saved.title" is of type "text" which is not sortable. Sorting on text fields requires a "keyword" subfield.'
+        );
+      });
+
+      it('works correctly when explicitly using keyword subfield', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw')).toEqual({
           runtime_mappings: {
-            merged_title: {
+            'merged_title.raw': {
               script: {
                 source:
                   "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(\"\"); }",
@@ -133,7 +139,7 @@ describe('searchDsl/getSortParams', () => {
               type: 'keyword',
             },
           },
-          sort: [{ merged_title: { order: undefined } }],
+          sort: [{ 'merged_title.raw': { order: undefined } }],
         });
       });
     });
@@ -245,10 +251,18 @@ describe('searchDsl/getSortParams', () => {
       });
     });
     describe('sortFields is non-root simple property with multiple types', () => {
-      it('returns correct params', () => {
-        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc')).toEqual({
+      it('throws error when sort field is text without explicit keyword subfield', () => {
+        expect(() =>
+          getSortingParams(MAPPINGS, ['saved', 'pending'], 'title', 'desc')
+        ).toThrowError(
+          'Sort field "saved.title" is of type "text" which is not sortable. Sorting on text fields requires a "keyword" subfield.'
+        );
+      });
+
+      it('works correctly when explicitly using keyword subfield with direction', () => {
+        expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'title.raw', 'desc')).toEqual({
           runtime_mappings: {
-            merged_title: {
+            'merged_title.raw': {
               script: {
                 source:
                   "if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else { emit(\"\"); }",
@@ -258,7 +272,7 @@ describe('searchDsl/getSortParams', () => {
           },
           sort: [
             {
-              merged_title: {
+              'merged_title.raw': {
                 order: 'desc',
               },
             },
@@ -370,10 +384,16 @@ describe('searchDsl/getSortParams', () => {
       });
     });
 
-    it('uses keyword for text fields with keyword subfield type', () => {
-      expect(getSortingParams(MAPPINGS, ['pending', 'saved'], 'title')).toEqual({
+    it('throws error when sorting on text field without explicit keyword subfield for multi-type queries', () => {
+      expect(() => getSortingParams(MAPPINGS, ['pending', 'saved'], 'title')).toThrowError(
+        'Sort field "pending.title" is of type "text" which is not sortable. Sorting on text fields requires a "keyword" subfield.'
+      );
+    });
+
+    it('uses keyword subfield correctly when explicitly specified for multi-type queries', () => {
+      expect(getSortingParams(MAPPINGS, ['pending', 'saved'], 'title.raw')).toEqual({
         runtime_mappings: {
-          merged_title: {
+          'merged_title.raw': {
             script: {
               source:
                 "if (doc.containsKey('pending.title.raw') && doc['pending.title.raw'].size() != 0) { emit(doc['pending.title.raw'].value); } else if (doc.containsKey('saved.title.raw') && doc['saved.title.raw'].size() != 0) { emit(doc['saved.title.raw'].value); } else { emit(\"\"); }",
@@ -381,7 +401,7 @@ describe('searchDsl/getSortParams', () => {
             type: 'keyword',
           },
         },
-        sort: [{ merged_title: { order: undefined } }],
+        sort: [{ 'merged_title.raw': { order: undefined } }],
       });
     });
 

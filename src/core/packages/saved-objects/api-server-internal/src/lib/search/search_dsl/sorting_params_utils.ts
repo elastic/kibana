@@ -26,34 +26,18 @@ const NUMERIC_TYPES_SET = new Set(NUMERIC_TYPES);
 const SORTABLE_TYPES = new Set([...NUMERIC_TYPES, 'date', 'keyword', 'boolean']);
 
 /**
- * Returns true if the field mapping is sortable in Elasticsearch.
- * Only keyword, numeric, date, boolean, and similar types are sortable.
- * Text fields are not sortable unless they have keyword subfields.
+ * Returns true if the field mapping is directly sortable in Elasticsearch.
+ * Only keyword, numeric, date, and boolean field types are considered sortable.
  *
- * IMPORTANT: We explicitly reject text fields without keyword subfields to prevent
- * dangerous inconsistencies in sorting behavior:
- *
- * - Single-type sorting on text without keyword subfield: Would fail at query time
- *   because Elasticsearch cannot sort directly on analyzed text fields
- *
- * - Multi-type sorting on text without keyword subfield: Could theoretically work
- *   using runtime fields that emit keyword values from text sources, but this would
- *   create inconsistent behavior where the same field is sortable in some contexts
- *   but not others
- *
- * This inconsistency would be confusing and error-prone for users. Instead, we require
- * explicit keyword subfields for all sortable text fields, ensuring consistent behavior
- * across all sorting scenarios.
+ * Text fields are NOT considered sortable, even if we could easily use the
+ * runtime field to map them to a keyword. When text fields have a keyword
+ * subfield, users must explicitly specify the keyword subfield
+ * (e.g., 'title.keyword').
+ * This ensures consistent behavior across single and multi-type queries.
  */
 export const isValidSortingField = (fieldMapping?: SavedObjectsFieldMapping): boolean => {
   if (!fieldMapping) return false;
-  if (fieldMapping.type && SORTABLE_TYPES.has(fieldMapping.type)) return true;
-  // text fields are not sortable, but text with keyword subfield is (via the subfield)
-  return (
-    fieldMapping.type === 'text' &&
-    !!fieldMapping.fields &&
-    Object.values(fieldMapping.fields).some((subField) => subField?.type === 'keyword')
-  );
+  return !!(fieldMapping.type && SORTABLE_TYPES.has(fieldMapping.type));
 };
 
 /**
@@ -86,27 +70,16 @@ export function validateFieldTypeCompatibility(
 }
 
 /**
- * Normalizes a field mapping to its canonical type for comparison.
- * - All numeric types are normalized to 'double'
- * - Text fields with keyword subfields are normalized to 'keyword'
- * - Other types remain unchanged
+ * Normalizes numeric field types to 'double' to ensure sorting compatibility.
+ * Other types remain unchanged.
  */
-export function normalizeFieldType(fieldMapping: SavedObjectsFieldMapping): string {
+export function normalizeNumericTypes(fieldMapping: SavedObjectsFieldMapping): string {
   if (!fieldMapping.type) {
     throw new Error('Field mapping is missing required type property');
   }
 
   if (NUMERIC_TYPES_SET.has(fieldMapping.type as (typeof NUMERIC_TYPES)[number])) {
     return 'double';
-  }
-
-  // If text field has a keyword subfield, treat as keyword for sorting
-  if (
-    fieldMapping.type === 'text' &&
-    fieldMapping.fields &&
-    Object.values(fieldMapping.fields).some((sub) => sub?.type === 'keyword')
-  ) {
-    return 'keyword';
   }
 
   return fieldMapping.type;

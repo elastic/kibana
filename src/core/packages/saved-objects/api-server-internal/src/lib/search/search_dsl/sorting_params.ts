@@ -18,9 +18,8 @@ import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/s
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
 import {
-  getKeywordField,
   isValidSortingField,
-  normalizeFieldType,
+  normalizeNumericTypes,
   validateFieldTypeCompatibility,
 } from './sorting_params_utils';
 
@@ -101,7 +100,7 @@ export function getSortingParams(
           .filter(Boolean) as SavedObjectsFieldMapping[];
 
         // First normalize all field types, then validate compatibility
-        const normalizedTypes = fieldMappings.map(normalizeFieldType);
+        const normalizedTypes = fieldMappings.map(normalizeNumericTypes);
         const validationResult = validateFieldTypeCompatibility(normalizedTypes);
         if (!validationResult.isValid) {
           throw Boom.badRequest(
@@ -119,16 +118,10 @@ export function getSortingParams(
         // Use if/else if/else to ensure only one emit is called
         const scriptLines = types.map((t, idx) => {
           const fieldName = `${t}.${sortField}`;
-          const fieldMapping = getProperty(mappings, fieldName);
-          let scriptField = fieldName;
-          const keywordSubField = getKeywordField(fieldMapping);
-          if (keywordSubField) {
-            scriptField = `${fieldName}.${keywordSubField}`;
-          }
           const prefix = idx === 0 ? 'if' : 'else if';
-          return `${prefix} (doc.containsKey('${scriptField}') && doc['${scriptField}'].size() != 0) { emit(doc['${scriptField}'].value); }`;
+          return `${prefix} (doc.containsKey('${fieldName}') && doc['${fieldName}'].size() != 0) { emit(doc['${fieldName}'].value); }`;
         });
-        // Only emit else { emit("") } for keyword type, otherwise omit else for proper sorting
+        // Only emit empty string for keyword type for proper sorting on other field types
         if (mergedFieldType === 'keyword') {
           scriptLines.push('else { emit(""); }');
         }
