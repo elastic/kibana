@@ -369,7 +369,9 @@ export class SavedObjectsService
     return {
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       getInternalClient: ({ includedHiddenTypes, excludedExtensions = [] } = {}) => {
-        const extensions = this.getInternalExtensions(excludedExtensions);
+        // Ensure arrays are properly handled
+        const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
+        const extensions = this.getInternalExtensions(safeExcludedExtensions);
         const repository = repositoryFactory.createInternalRepository(
           includedHiddenTypes,
           extensions
@@ -418,7 +420,9 @@ export class SavedObjectsService
   private getInternalExtensions(excludedExtensions: string[] = []): SavedObjectsExtensions {
     // For internal clients, we automatically exclude security extension to avoid user scoping
     // and handle extensions that can work without a request context
-    const finalExcludedExtensions = [...excludedExtensions, SECURITY_EXTENSION_ID];
+    const finalExcludedExtensions = Array.isArray(excludedExtensions)
+      ? [...excludedExtensions, SECURITY_EXTENSION_ID]
+      : [SECURITY_EXTENSION_ID];
 
     const createExt = <T>(
       extensionId: string,
@@ -430,6 +434,7 @@ export class SavedObjectsService
 
       // Create a minimal request-like object for extensions that need it
       // but don't require actual user context (like encryption/spaces)
+      // Using 'unknown' cast is intentional here as we're creating a minimal fake request
       const internalRequest = {
         headers: {},
         getBasePath: () => '',
@@ -439,7 +444,10 @@ export class SavedObjectsService
         raw: { req: { url: '/' } },
       } as unknown as KibanaRequest;
 
-      return extensionFactory({ typeRegistry: this.typeRegistry, request: internalRequest });
+      return extensionFactory({
+        typeRegistry: this.typeRegistry,
+        request: internalRequest,
+      });
     };
 
     return {

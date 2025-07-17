@@ -171,7 +171,23 @@ export interface SavedObjectsServiceStart {
    * @remarks
    * This is intended for internal operations that need extension support
    * (like encryption) but should not be scoped to a specific user.
+   *
+   * **Security Note**: The security extension is automatically excluded to prevent
+   * user-based filtering. Use this only for operations that should run with
+   * system-level privileges.
+   *
    * Use this instead of creating fake requests to work around security scoping.
+   *
+   * @example
+   * ```typescript
+   * // Basic usage
+   * const client = savedObjects.getInternalClient();
+   *
+   * // With hidden types
+   * const client = savedObjects.getInternalClient({
+   *   includedHiddenTypes: ['fleet-agent-policies']
+   * });
+   * ```
    */
   getInternalClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
   /**

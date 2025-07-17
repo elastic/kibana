@@ -947,7 +947,7 @@ describe('SavedObjectsService', () => {
 
         await soService.start(createStartDeps());
 
-        const extensions = (soService as any).getInternalExtensions(['encryptionExtension']);
+        const extensions = (soService as any).getInternalExtensions(['encryptedSavedObjects']);
 
         expect(extensions.encryptionExtension).toBeUndefined();
         expect(extensions.spacesExtension).toBeDefined();
@@ -1044,6 +1044,30 @@ describe('SavedObjectsService', () => {
         // Security extension should always be included in excluded extensions
         expect(capturedExcludedExtensions).toContain('securityExtension');
         expect(capturedExcludedExtensions).toContain('customExtension');
+      });
+
+      it('never includes security extension regardless of excludedExtensions parameter', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const securityFactory = jest.fn().mockReturnValue({});
+        setup.setSecurityExtension(securityFactory);
+
+        await soService.start(createStartDeps());
+
+        // Even if we don't explicitly exclude security, it should still be excluded
+        const extensions = (soService as any).getInternalExtensions([]);
+
+        expect(extensions.securityExtension).toBeUndefined();
+        expect(securityFactory).not.toHaveBeenCalled();
+
+        // Test with different combinations of excludedExtensions
+        const extensionsWithOthers = (soService as any).getInternalExtensions([
+          'someOtherExtension',
+        ]);
+        expect(extensionsWithOthers.securityExtension).toBeUndefined();
+        expect(securityFactory).not.toHaveBeenCalled();
       });
     });
 
