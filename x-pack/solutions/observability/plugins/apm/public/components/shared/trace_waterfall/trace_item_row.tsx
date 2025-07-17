@@ -43,16 +43,24 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
   }
 
   const content = (
-    <div
-      css={css`
-        border-bottom: ${euiTheme.border.thin};
-        ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
-      `}
-    >
-      <EuiFlexGroup
-        gutterSize="none"
-        data-test-subj="trace-item-container"
+    <>
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+      <div
         css={css`
+          border-bottom: ${euiTheme.border.thin};
+          ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
+        `}
+        onClick={(e: React.MouseEvent) => {
+          if (!hasToggle && onClick) {
+            e.stopPropagation();
+            onClick(item.id);
+          }
+        }}
+      >
+        <EuiFlexGroup
+          gutterSize="none"
+          data-test-subj="trace-item-container"
+          css={css`
           margin-left: ${accordionIndent}px;
           margin-right: ${margin.right}px;
           border-left: ${
@@ -66,55 +74,56 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
             background-color: ${euiTheme.colors.lightestShade};
           }
         `}
-      >
-        {hasToggle ? (
-          <EuiFlexItem grow={false}>
-            <ToggleAccordionButton
-              isOpen={state === 'open'}
-              childrenCount={childrenCount}
-              onClick={() => onToggle(item.id)}
-            />
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>
-          <div
-            data-test-subj="trace-bar-row"
-            css={css`
-              margin-left: ${calculateMarginLeft()}px;
-            `}
-            onClick={(e: React.MouseEvent) => {
-              if (onClick) {
-                e.stopPropagation();
-                onClick(item.id);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-                // Ignore event if it comes from a link
-                if (e.target instanceof HTMLAnchorElement) {
-                  return;
+        >
+          {hasToggle ? (
+            <EuiFlexItem grow={false}>
+              <ToggleAccordionButton
+                isOpen={state === 'open'}
+                childrenCount={childrenCount}
+                onClick={() => onToggle(item.id)}
+              />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <div
+              data-test-subj="trace-bar-row"
+              css={css`
+                margin-left: ${calculateMarginLeft()}px;
+              `}
+              onClick={(e: React.MouseEvent) => {
+                if (hasToggle && onClick) {
+                  e.stopPropagation();
+                  onClick(item.id);
                 }
-                e.preventDefault(); // Prevent scroll if Space is pressed
-                onClick(item.id);
+              }}
+              onKeyDown={(e) => {
+                if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+                  // Ignore event if it comes from a link
+                  if (e.target instanceof HTMLAnchorElement) {
+                    return;
+                  }
+                  e.preventDefault(); // Prevent scroll if Space is pressed
+                  onClick(item.id);
+                }
+              }}
+              tabIndex={onClick ? 0 : -1}
+              role={onClick ? 'button' : undefined}
+              aria-label={
+                onClick
+                  ? i18n.translate('xpack.apm.traceItemRow.openDetailsButton', {
+                      defaultMessage: 'View details for {name}',
+                      values: { name: item.name },
+                    })
+                  : undefined
               }
-            }}
-            tabIndex={0}
-            role="button"
-            aria-label={
-              onClick
-                ? i18n.translate('xpack.apm.traceItemRow.openDetailsButton', {
-                    defaultMessage: 'View details for {name}',
-                    values: { name: item.name },
-                  })
-                : undefined
-            }
-          >
-            <Bar width={widthPercent} left={leftPercent} color={item.color} />
-            <BarDetails item={item} left={leftPercent} onErrorClick={onErrorClick} />
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+            >
+              <Bar width={widthPercent} left={leftPercent} color={item.color} />
+              <BarDetails item={item} left={leftPercent} onErrorClick={onErrorClick} />
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    </>
   );
 
   if (!showAccordion) {
@@ -129,6 +138,11 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
         paddingSize="none"
         forceState={state}
         arrowDisplay="none"
+        onToggle={() => {
+          if (hasToggle) {
+            onToggle(item.id);
+          }
+        }}
         buttonContentClassName="accordion__buttonContent"
         css={css`
           .accordion__buttonContent {
