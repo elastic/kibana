@@ -203,7 +203,9 @@ describe('ChangeKbModel', () => {
       const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
       dropdown.click();
 
-      const elserOption = await screen.findByText(elserTitle);
+      const elserOption = await screen.findByTestId(
+        'observabilityAiAssistantKnowledgeBaseModelDropdownOption-' + elserTitle
+      );
       elserOption.click();
 
       await waitFor(() => {
@@ -229,7 +231,9 @@ describe('ChangeKbModel', () => {
       const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
       dropdown.click();
 
-      const e5Option = await screen.findByText(e5SmallTitle);
+      const e5Option = await screen.findByTestId(
+        'observabilityAiAssistantKnowledgeBaseModelDropdownOption-' + e5SmallTitle
+      );
       e5Option.click();
 
       await waitFor(() => {
