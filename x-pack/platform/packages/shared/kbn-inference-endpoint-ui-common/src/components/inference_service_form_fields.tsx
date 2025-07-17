@@ -15,7 +15,6 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
-  EuiButtonGroup,
   EuiFieldText,
   EuiFieldTextProps,
   EuiFormControlLayout,
@@ -469,22 +468,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               error={errorMessage}
             >
               <>
-                {/* Only show filter if within applicable solution/project space */}
-                {currentSolution && Object.keys(solutionKeys).includes(currentSolution) ? (
-                  <EuiButtonGroup
-                    legend="Solution filter"
-                    idSelected={solutionFilter ?? ''}
-                    onChange={(solution) => toggleAndApplyFilter(solution as SolutionView)}
-                    options={Object.keys(solutionKeys).map((solution) => ({
-                      id: solution,
-                      label: solutionKeys[solution as SolutionView],
-                      key: solution,
-                      'data-test-subj': `filterBySolution-${solution}`,
-                    }))}
-                    type="single"
-                    color="text"
-                  />
-                ) : null}
                 <EuiSpacer size="s" />
                 <EuiInputPopover
                   id={'popoverId'}
@@ -495,9 +478,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                   className="rightArrowIcon"
                 >
                   <SelectableProvider
+                    currentSolution={currentSolution}
                     providers={updatedProviders ?? []}
                     onClosePopover={closeProviderPopover}
                     onProviderChange={onProviderChange}
+                    onSolutionFilterChange={toggleAndApplyFilter}
+                    solutionFilter={solutionFilter}
                   />
                 </EuiInputPopover>
               </>
