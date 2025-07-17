@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { tracksOverlays } from '@kbn/presentation-util';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -19,58 +19,88 @@ export async function resolveEmbeddableChangePointUserInput(
   pluginStart: AiopsPluginStartDeps,
   parentApi: unknown,
   focusedPanelId: string,
+  onConfirm: (state: ChangePointEmbeddableState) => void,
   input?: ChangePointEmbeddableState
-): Promise<ChangePointEmbeddableState> {
-  const { overlays } = coreStart;
-
-  const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
-
-  return new Promise(async (resolve, reject) => {
-    try {
-      const flyoutSession = overlays.openFlyout(
-        toMountPoint(
-          <AiopsAppContext.Provider
-            value={{
-              embeddingOrigin: 'flyout',
-              ...coreStart,
-              ...pluginStart,
+) {
+  openLazyFlyout({
+    core: coreStart,
+    parentApi,
+    flyoutProps: {
+      'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+      'aria-labelledby': 'changePointConfig',
+    },
+    uuid: focusedPanelId,
+    loadContent: async ({ closeFlyout }) => {
+      return (
+        <AiopsAppContext.Provider
+          value={{
+            embeddingOrigin: 'flyout',
+            ...coreStart,
+            ...pluginStart,
+          }}
+        >
+          <ChangePointChartInitializer
+            initialInput={input}
+            onCreate={(update) => {
+              onConfirm(update);
+              closeFlyout();
             }}
-          >
-            <ChangePointChartInitializer
-              initialInput={input}
-              onCreate={(update) => {
-                resolve(update);
-                flyoutSession.close();
-                overlayTracker?.clearOverlays();
-              }}
-              onCancel={() => {
-                reject();
-                flyoutSession.close();
-                overlayTracker?.clearOverlays();
-              }}
-            />
-          </AiopsAppContext.Provider>,
-          coreStart
-        ),
-        {
-          ownFocus: true,
-          size: 's',
-          type: 'push',
-          'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
-          'aria-labelledby': 'changePointConfig',
-          onClose: () => {
-            reject();
-            flyoutSession.close();
-            overlayTracker?.clearOverlays();
-          },
-        }
+            onCancel={() => {
+              closeFlyout();
+            }}
+          />
+        </AiopsAppContext.Provider>
       );
-
-      if (tracksOverlays(parentApi)) {
-        parentApi.openOverlay(flyoutSession, { focusedPanelId });
-      }
-    } catch (error) {
-      reject(error);
-    }
+    },
   });
+  // return new Promise(async (resolve, reject) => {
+  //   try {
+    
+
+  //     // const flyoutSession = coreStart.overlays.openFlyout(
+  //     //   toMountPoint(
+  //     //     <AiopsAppContext.Provider
+  //     //       value={{
+  //     //         embeddingOrigin: 'flyout',
+  //     //         ...coreStart,
+  //     //         ...pluginStart,
+  //     //       }}
+  //     //     >
+  //     //       <ChangePointChartInitializer
+  //     //         initialInput={input}
+  //     //         onCreate={(update) => {
+  //     //           resolve(update);
+  //     //           flyoutSession.close();
+  //     //           overlayTracker?.clearOverlays();
+  //     //         }}
+  //     //         onCancel={() => {
+  //     //           reject();
+  //     //           flyoutSession.close();
+  //     //           overlayTracker?.clearOverlays();
+  //     //         }}
+  //     //       />
+  //     //     </AiopsAppContext.Provider>,
+  //     //     coreStart
+  //     //   ),
+  //     //   {
+  //     //     ownFocus: true,
+  //     //     size: 's',
+  //     //     type: 'push',
+  //     //     'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+  //     //     'aria-labelledby': 'changePointConfig',
+  //     //     onClose: () => {
+  //     //       reject();
+  //     //       flyoutSession.close();
+  //     //       overlayTracker?.clearOverlays();
+  //     //     },
+  //     //   }
+  //     // );
+
+  //     // if (tracksOverlays(parentApi)) {
+  //     //   parentApi.openOverlay(flyoutSession, { focusedPanelId });
+  //     // }
+  //   } catch (error) {
+  //     reject(error);
+  //   }
+  // });
 }
