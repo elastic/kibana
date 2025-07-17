@@ -50,7 +50,7 @@ export function KnowledgeBaseCategoryFlyout({
   category: KnowledgeBaseEntryCategory;
   onClose: () => void;
 }) {
-  const modalTitleId = useGeneratedHtmlId();
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
@@ -113,11 +113,11 @@ export function KnowledgeBaseCategoryFlyout({
     <EuiFlyout
       onClose={onClose}
       data-test-subj="knowledgeBaseCategoryFlyout"
-      aria-labelledby={modalTitleId}
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 id={modalTitleId}>{capitalize(category.categoryKey)}</h2>
+          <h2 id={flyoutTitleId}>{capitalize(category.categoryKey)}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

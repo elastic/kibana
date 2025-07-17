@@ -40,7 +40,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
 
   const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
 
-  const modalTitleId = useGeneratedHtmlId();
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const [files, setFiles] = useState<File[]>([]);
 
@@ -88,11 +88,11 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
     <EuiFlyout
       onClose={onClose}
       data-test-subj="knowledgeBaseBulkImportFlyout"
-      aria-labelledby={modalTitleId}
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 id={modalTitleId}>
+          <h2 id={flyoutTitleId}>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.knowledgeBaseBulkImportFlyout.h2.bulkImportLabel',
               { defaultMessage: 'Import files' }
