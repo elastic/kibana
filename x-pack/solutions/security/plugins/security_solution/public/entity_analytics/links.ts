@@ -79,7 +79,7 @@ export const entityAnalyticsLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsLanding,
   title: ENTITY_ANALYTICS,
   path: ENTITY_ANALYTICS_LANDING_PATH,
-  globalNavPosition: 10,
+  globalNavPosition: 9,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
       defaultMessage: 'Entity analytics',
