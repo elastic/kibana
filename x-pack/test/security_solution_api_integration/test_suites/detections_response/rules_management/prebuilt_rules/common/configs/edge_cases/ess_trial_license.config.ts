@@ -19,6 +19,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName:
         'Rules Management - Prebuilt Rules (Common) Integration Tests - ESS Trial License',
     },
+    mochaOpts: {
+      ...functionalConfig.get('mochaOpts'),
+      timeout: 60000 * 10, // 10 minutes
+    },
   };
 
   return testConfig;

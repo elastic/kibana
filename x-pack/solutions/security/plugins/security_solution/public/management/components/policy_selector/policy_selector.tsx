@@ -260,6 +260,9 @@ export const PolicySelector = memo<PolicySelectorProps>(
       view
     );
 
+    // Store the initial unfiltered total count for consistent display
+    const [unfilteredTotalCount, setUnfilteredTotalCount] = useState<number | null>(null);
+
     const selectedCount = useMemo(() => {
       return (
         selectedPolicyIds.length +
@@ -267,12 +270,21 @@ export const PolicySelector = memo<PolicySelectorProps>(
       );
     }, [additionalListItems, selectedPolicyIds.length]);
 
+    // Set the unfiltered total count when we first get data without search
+    useEffect(() => {
+      if (policyListResponse && !userSearchValue && unfilteredTotalCount === null) {
+        setUnfilteredTotalCount(policyListResponse.total);
+      }
+    }, [policyListResponse, userSearchValue, unfilteredTotalCount]);
+
     const totalItems: number = useMemo(() => {
-      return (
-        (policyListResponse?.total ?? 0) +
-          (additionalListItems ?? []).filter((item) => !item.isGroupLabel).length ?? 0
-      );
-    }, [additionalListItems, policyListResponse?.total]);
+      // Use stored unfiltered total when available, otherwise fall back to current total
+      const baseTotalCount = unfilteredTotalCount ?? policyListResponse?.total ?? 0;
+      // Count only selectable additional items, excluding group labels
+      const selectableAdditionalItems =
+        additionalListItems?.filter((item) => !item.isGroupLabel).length ?? 0;
+      return baseTotalCount + selectableAdditionalItems;
+    }, [additionalListItems, policyListResponse?.total, unfilteredTotalCount]);
 
     // @ts-expect-error EUI does not seem to have correctly types the `windowProps` which come from React-Window `FixedSizeList` component
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
@@ -315,6 +327,9 @@ export const PolicySelector = memo<PolicySelectorProps>(
             appPath={urlPath}
             target="_blank"
             data-test-subj={getTestId(`policy-${policy.id}-policyLink`)}
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
           >
             <FormattedMessage
               id="xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel"
