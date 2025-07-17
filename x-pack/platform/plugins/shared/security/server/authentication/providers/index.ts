@@ -15,3 +15,4 @@ export { TokenAuthenticationProvider } from './token';
 export { OIDCAuthenticationProvider, OIDCLogin } from './oidc';
 export { PKIAuthenticationProvider } from './pki';
 export { HTTPAuthenticationProvider } from './http';
+export type { ProviderState as SAMLProviderState } from './saml';

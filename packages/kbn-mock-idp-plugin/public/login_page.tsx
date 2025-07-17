@@ -42,11 +42,14 @@ export const LoginPage = () => {
       if (!values.role) {
         return;
       }
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+
       await switchCurrentUser({
         username: sanitizeUsername(values.full_name),
         full_name: values.full_name,
         email: sanitizeEmail(values.full_name),
         roles: [values.role],
+        urlWithSAMLRequest: location.href,
       });
     },
   });

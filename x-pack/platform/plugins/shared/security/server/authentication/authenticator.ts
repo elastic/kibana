@@ -14,11 +14,6 @@ import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
 import { HTTPAuthorizationHeader } from './http_authentication';
-import type {
-  AuthenticationProviderOptions,
-  AuthenticationProviderSpecificOptions,
-  BaseAuthenticationProvider,
-} from './providers';
 import {
   AnonymousAuthenticationProvider,
   BasicAuthenticationProvider,
@@ -28,6 +23,12 @@ import {
   PKIAuthenticationProvider,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
+} from './providers';
+import type {
+  AuthenticationProviderOptions,
+  AuthenticationProviderSpecificOptions,
+  BaseAuthenticationProvider,
+  SAMLProviderState,
 } from './providers';
 import { Tokens } from './tokens';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
@@ -293,7 +294,7 @@ export class Authenticator {
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
 
-    // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
+    // Login attempt can target a specific provider by its name (e.g. chosen at the Login Selector UI)
     // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
     // attempts we may not know what provider exactly can handle that attempt and we have to try
     // every enabled provider of the specified type).
@@ -318,7 +319,7 @@ export class Authenticator {
     }
 
     for (const [providerName, provider] of providers) {
-      // Check if current session has been set by this provider.
+      // Check if this `provider` has set current session.
       const ownsSession =
         existingSessionValue?.provider.name === providerName &&
         existingSessionValue?.provider.type === provider.type;
@@ -513,6 +514,7 @@ export class Authenticator {
   async reauthenticate(request: KibanaRequest) {
     // Return early if request doesn't have any associated session. We retrieve session ID separately from the session
     // content because it doesn't trigger session invalidation for expired sessions.
+
     const sid = await this.session.getSID(request);
     if (!sid) {
       this.logger.debug(
@@ -792,15 +794,20 @@ export class Authenticator {
     }
 
     const isExistingSessionAuthenticated = isSessionAuthenticated(existingSessionValue);
+
     const isNewSessionAuthenticated = !!authenticationResult.user;
 
     const providerHasChanged = !!existingSessionValue && !ownsSession;
+
     const sessionHasBeenAuthenticated =
       !!existingSessionValue && !isExistingSessionAuthenticated && isNewSessionAuthenticated;
+
     const usernameHasChanged =
       isExistingSessionAuthenticated &&
       isNewSessionAuthenticated &&
       authenticationResult.user!.username !== existingSessionValue!.username;
+
+    let intermediateSessionStillNeedsToExist = false;
 
     // There are 3 cases when we SHOULD invalidate existing session and create a new one with
     // regenerated SID/AAD:
@@ -817,15 +824,35 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
-      this.logger.debug(
-        'Session is authenticated, existing unauthenticated session will be invalidated.'
-      );
-      await this.invalidateSessionValue({
-        request,
-        sessionValue: existingSessionValue,
-        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
-      });
-      existingSessionValue = null;
+      if (
+        this.isSamlProvider(provider) &&
+        this.hasRemainingRequestIds(existingSessionValue?.state as SAMLProviderState)
+      ) {
+        this.logger.debug(
+          'Existing unauthenticated session still has pending SAML requests. Keeping session alive until so all pending requestIds can complete'
+        );
+        intermediateSessionStillNeedsToExist = true;
+
+        await this.session.update(
+          request,
+          {
+            ...existingSessionValue,
+            idleTimeoutExpiration:
+              (existingSessionValue?.idleTimeoutExpiration ?? Date.now()) + 60000, // Extend idle timeout by 1 minute to allow pending SAML requests to complete
+          },
+          true
+        );
+      } else {
+        this.logger.debug(
+          'Session is authenticated, existing unauthenticated session will be invalidated.'
+        );
+        await this.invalidateSessionValue({
+          request,
+          sessionValue: existingSessionValue,
+          skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
+        });
+        existingSessionValue = null;
+      }
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
@@ -834,7 +861,7 @@ export class Authenticator {
 
     let userProfileId = existingSessionValue?.userProfileId;
 
-    // If authentication result includes user profile grant, we should try to activate user profile for this user and
+    // If the authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
     const shouldActivateProfile = authenticationResult.userProfileGrant;
 
@@ -853,7 +880,7 @@ export class Authenticator {
     }
 
     let newSessionValue: Readonly<SessionValue> | null;
-    if (!existingSessionValue) {
+    if (!existingSessionValue || intermediateSessionStillNeedsToExist) {
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
         userProfileId,
@@ -900,6 +927,20 @@ export class Authenticator {
         isNewSessionAuthenticated &&
         (providerHasChanged || usernameHasChanged),
     };
+  }
+
+  private isSamlProvider(provider: AuthenticationProvider) {
+    return provider.type === 'saml';
+  }
+
+  private hasRemainingRequestIds(state: SAMLProviderState): boolean {
+    let result = false;
+
+    if (state && state.requestIdMap && Object.keys(state.requestIdMap).length > 0) {
+      result = true;
+    }
+
+    return result;
   }
 
   /**
