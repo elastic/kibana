@@ -243,9 +243,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
           await testSubjects.click('createIndexBtn');
           await retry.tryForTime(60 * 1000, async () => {
-            expect(await browser.getCurrentUrl()).contain(
-              '/app/elasticsearch/indices/index_details?workflow=semantic'
-            );
+            expect(await browser.getCurrentUrl()).contain('data?workflow=semantic');
           });
         });
       });
