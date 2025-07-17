@@ -50,22 +50,31 @@ run(
         const result = await validator.validate(Fs.readFileSync(yamlPath).toString('utf-8'));
         if (!result.valid) {
           log.warning(`${chalk.underline(yamlPath)} is NOT valid`);
-          const errors = Array.isArray(result.errors)
-            ? result.errors.filter(
+
+          let errorMessage: undefined | string;
+          let errorCount = 0;
+
+          if (Array.isArray(result.errors)) {
+            errorMessage = result.errors
+              .filter(
                 (error) =>
                   // The below is noisey and a result of how the schema validation works. No aspect of the OAS spec should
                   // require the use of `$ref`, it's an optional optimization.
                   error.params.missingProperty !== '$ref' &&
-                  paths?.length &&
-                  paths.some((path) => error.instancePath.startsWith(path))
+                  error.params.passingSchemas !== null &&
+                  (paths?.length ? paths.some((path) => error.instancePath.startsWith(path)) : true)
               )
-            : result.errors;
-          log.warning(Util.inspect(errors, { depth: Infinity }));
-          log.warning(
-            `Found ${chalk.bold(
-              Array.isArray(errors) ? errors.length : 1
-            )} errors in ${chalk.underline(yamlPath)}`
-          );
+              .map(({ instancePath, message }) => {
+                errorCount++;
+                return `${chalk.gray(instancePath)}\n${message}`;
+              })
+              .join('\n\n');
+          } else if (typeof result.errors === 'string') {
+            errorCount = 1;
+            errorMessage = result.errors;
+          }
+          log.warning('Found the following issues\n\n' + errorMessage + '\n');
+          log.warning(`Found ${chalk.bold(errorCount)} errors in ${chalk.underline(yamlPath)}`);
           invalidSpec = true;
         } else {
           log.success(`${chalk.underline(yamlPath)} is valid`);
