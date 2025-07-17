@@ -75,9 +75,9 @@ export const uploadAllEventsFromPath = async (
   let numberOfNdjsonFilesFound = 0;
 
   if (fs.statSync(eventLogPath).isDirectory()) {
-    readFilesRecursively(eventLogPath, (filePath: string) => {
+    readFilesRecursively(eventLogPath, async (filePath: string) => {
       if (filePath.endsWith('.ndjson')) {
-        reportDataStream.addEventsFromFile(filePath);
+        await reportDataStream.addEventsFromFile(filePath);
         numberOfNdjsonFilesFound += 1;
       }
     });
@@ -92,7 +92,7 @@ export const uploadAllEventsFromPath = async (
       );
     }
   } else if (eventLogPath.endsWith('.ndjson')) {
-    reportDataStream.addEventsFromFile(eventLogPath);
+    await reportDataStream.addEventsFromFile(eventLogPath);
   }
 };
 
