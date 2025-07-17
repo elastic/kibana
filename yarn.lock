@@ -29388,7 +29388,7 @@ sass-embedded-win32-x64@1.89.2:
   resolved "https://registry.yarnpkg.com/sass-embedded-win32-x64/-/sass-embedded-win32-x64-1.89.2.tgz#9f5c71b611a8edbc40e1c8cc47bd20d8a4bdf13a"
   integrity sha512-cS2j5ljdkQsb4PaORiClaVYynE9OAPZG/XjbOMxpQmjRIf7UroY4PEIH+Waf+y47PfXFX9SyxhYuw2NIKGbEng==
 
-sass-embedded@^1.79.6:
+sass-embedded@^1.89.2:
   version "1.89.2"
   resolved "https://registry.yarnpkg.com/sass-embedded/-/sass-embedded-1.89.2.tgz#bf6cd7d6ace06f0430bbf3913c95a8be83367883"
   integrity sha512-Ack2K8rc57kCFcYlf3HXpZEJFNUX8xd8DILldksREmYXQkRHI879yy8q4mRDJgrojkySMZqmmmW1NxrFxMsYaA==
