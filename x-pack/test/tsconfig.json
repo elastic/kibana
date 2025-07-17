@@ -34,7 +34,6 @@
     "@kbn/apm-plugin",
     "@kbn/fleet-plugin",
     "@kbn/global-search-plugin",
-    "@kbn/features-plugin",
     "@kbn/global-search-plugin",
     "@kbn/infra-plugin",
     "@kbn/ml-plugin",
