@@ -43,6 +43,7 @@ export const item: GetInfoResponse['item'] = {
   ],
   assets: {
     kibana: {
+      alert: [],
       dashboard: [
         {
           pkgkey: 'okta-1.2.0',
