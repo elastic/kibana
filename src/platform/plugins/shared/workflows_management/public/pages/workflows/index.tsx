@@ -31,9 +31,8 @@ const workflowTemplate: CreateWorkflowCommand = {
   steps: [
     {
       id: 'first-step',
-      connectorType: 'console',
-      connectorName: 'console',
-      inputs: {
+      type: 'console',
+      with: {
         message: 'First step executed',
       },
     },

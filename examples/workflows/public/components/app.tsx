@@ -78,48 +78,30 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
         steps: [
           {
             id: 'step-with-console-log-1',
-            connectorType: 'console',
-            connectorName: 'console',
-            inputs: {
+            type: 'console.log',
+            with: {
               message: 'Step 1 executed "{{event.ruleName}}"',
             },
           },
           {
             id: 'step-with-slow-console',
-            connectorName: 'slow-console',
-            connectorType: 'console',
-            inputs: {
+            type: 'console.sleep',
+            with: {
+              sleepTime: 1000,
               message: 'Step 2 executed "{{event.additionalData.userName}}"',
             },
           },
           {
             id: 'step-with-slack-connector',
             needs: ['step1', 'step2'],
-            connectorType: 'slack-connector',
-            connectorName: 'slack_keep',
-            inputs: {
+            type: 'slack-connector',
+            'connector-id': 'slack_keep',
+            with: {
               message:
                 'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
             },
-          },
-          {
-            id: 'step-with-console-log-2',
-            needs: ['step3'],
-            connectorName: 'console',
-            connectorType: 'console',
-            inputs: {
-              message: 'Message from step 2: And this is the second step at {{ now() }}',
-            },
-          },
-          {
-            id: 'step-with-5-seconds-delay',
-            connectorName: 'delay',
-            connectorType: 'delay',
-            inputs: {
-              delay: 5000,
-            },
-          },
-        ],
+          }
+        ]
       }
     )
   );

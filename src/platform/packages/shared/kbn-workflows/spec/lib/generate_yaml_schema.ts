@@ -14,7 +14,6 @@ import {
   WorkflowSchema,
   getForEachStepSchema,
   getIfStepSchema,
-  getAtomicStepSchema,
   getParallelStepSchema,
   getMergeStepSchema,
   WorkflowYamlSchema,
@@ -62,7 +61,6 @@ function createRecursiveStepSchema(connectors: ConnectorContract[]): z.ZodType {
     // Create step schemas with the recursive reference
     const forEachSchema = getForEachStepSchema(stepSchema);
     const ifSchema = getIfStepSchema(stepSchema);
-    const atomicSchema = getAtomicStepSchema(stepSchema);
     const parallelSchema = getParallelStepSchema(stepSchema);
     const mergeSchema = getMergeStepSchema(stepSchema);
 
@@ -70,7 +68,6 @@ function createRecursiveStepSchema(connectors: ConnectorContract[]): z.ZodType {
     return z.discriminatedUnion('type', [
       forEachSchema,
       ifSchema,
-      atomicSchema,
       parallelSchema,
       mergeSchema,
       ...connectorSchemas,

@@ -1,19 +1,24 @@
 import nunjucks from 'nunjucks';
 import Mustache from 'mustache';
 
-export class TemplatingEngine {
+export class WorkflowTemplatingEngine {
+  private syntax: 'mustache' | 'nunjucks';
+
+  constructor(syntax: 'mustache' | 'nunjucks' = 'nunjucks') {
+    this.syntax = syntax;
+  }
+
   public render(
-    syntax: 'mustache' | 'nunjucks',
     template: string,
     context: Record<string, any>
   ): string {
-    switch (syntax) {
+    switch (this.syntax) {
       case 'nunjucks':
         return this.renderNunjucks(template, context);
       case 'mustache':
         return this.renderMustache(template, context);
       default:
-        throw new Error(`Unsupported syntax: ${syntax}`);
+        throw new Error(`Unsupported syntax: ${this.syntax}`);
     }
   }
 

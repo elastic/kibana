@@ -51,9 +51,9 @@ export interface Provider {
 
 export const EsWorkflowStepSchema = z.object({
   id: z.string(),
-  connectorType: z.string(),
-  connectorName: z.string(),
-  inputs: z.record(z.any()),
+  type: z.string(),
+  'connector-id': z.string().optional(),
+  with: z.record(z.any()),
   needs: z.array(z.string()).optional(),
 });
 

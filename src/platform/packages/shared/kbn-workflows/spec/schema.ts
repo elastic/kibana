@@ -68,7 +68,7 @@ export const WorkflowOnFailureSchema = z.object({
 });
 
 // Base step schema, with recursive steps property
-const BaseStepSchema = z.object({
+export const BaseStepSchema = z.object({
   name: z.string().min(1),
   if: z.string().optional(),
   foreach: z.string().optional(),
@@ -78,11 +78,12 @@ const BaseStepSchema = z.object({
 });
 
 export const BaseConnectorStepSchema = BaseStepSchema.extend({
+  type: z.string().min(1),
   'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
   with: z.record(z.string(), z.any()).optional(),
 });
 
-const ForEachStepSchema = BaseStepSchema.extend({
+export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.string(),
   steps: z.array(BaseStepSchema).min(1),
@@ -96,7 +97,7 @@ export const getForEachStepSchema = (stepSchema: z.ZodType) => {
   });
 };
 
-const IfStepSchema = BaseStepSchema.extend({
+export const IfStepSchema = BaseStepSchema.extend({
   type: z.literal('if'),
   condition: z.string(),
   steps: z.array(BaseStepSchema),
@@ -111,19 +112,7 @@ export const getIfStepSchema = (stepSchema: z.ZodType) => {
   });
 };
 
-const AtomicStepSchema = BaseStepSchema.extend({
-  type: z.literal('atomic'),
-  steps: z.array(BaseStepSchema).optional(), // allow nesting even for atomic steps
-});
-
-export const getAtomicStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
-    type: z.literal('atomic'),
-    steps: z.array(stepSchema).optional(), // allow nesting even for atomic steps
-  });
-};
-
-const ParallelStepSchema = BaseStepSchema.extend({
+export const ParallelStepSchema = BaseStepSchema.extend({
   type: z.literal('parallel'),
   branches: z.array(
     z.object({
@@ -140,7 +129,7 @@ export const getParallelStepSchema = (stepSchema: z.ZodType) => {
   });
 };
 
-const MergeStepSchema = BaseStepSchema.extend({
+export const MergeStepSchema = BaseStepSchema.extend({
   type: z.literal('merge'),
   sources: z.array(z.string()), // references to branches or steps to merge
   steps: z.array(BaseStepSchema), // steps to run after merge
@@ -209,7 +198,6 @@ const StepSchema = z.lazy(() =>
   z.discriminatedUnion('type', [
     ForEachStepSchema,
     IfStepSchema,
-    AtomicStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     // ConnectorStepSchema,

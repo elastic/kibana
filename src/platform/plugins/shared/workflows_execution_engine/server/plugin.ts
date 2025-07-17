@@ -20,15 +20,15 @@ import type {
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-import { StepRunner } from './step-runner/step-runner';
-import { TemplatingEngine } from './templating-engine';
+
 
 import { ConnectorExecutor } from './connector-executor';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../common';
+import { StepFactory } from './step/step-factory';
+import { WorkflowContextManager } from './workflow-context-manager/workflow-context-manager';
 
 export class WorkflowsExecutionEnginePlugin
-  implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
-{
+  implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart> {
   private readonly logger: Logger;
   private esClient: Client = new Client({
     node: 'http://localhost:9200', // or your ES URL
@@ -76,21 +76,21 @@ export class WorkflowsExecutionEnginePlugin
       });
 
       try {
-        const stepRunner = new StepRunner(
-          new ConnectorExecutor(
-            context.connectorCredentials,
-            await plugins.actions.getUnsecuredActionsClient()
-          ),
-          new TemplatingEngine()
+        const connectorExecutor = new ConnectorExecutor(
+          context.connectorCredentials,
+          await plugins.actions.getUnsecuredActionsClient()
         );
 
-        const stepsContext: any = {
+        const contextManager = new WorkflowContextManager({
           workflowRunId,
+          workflow: workflow as any,
+          stepResults: {},
           event: context.event,
-          steps: {},
-        };
+          esApiKey: context.esApiKey,
+        });
 
         for (const currentStep of workflow.steps) {
+          const step = StepFactory.create(currentStep, contextManager, connectorExecutor);
           const workflowExecutionId = `${workflowRunId}-${currentStep.id}`;
           const stepStartedAt = new Date();
 
@@ -108,9 +108,8 @@ export class WorkflowsExecutionEnginePlugin
             } as WorkflowStepExecution,
           });
 
-          const stepResult = await stepRunner.runStep(currentStep, stepsContext);
-
-          stepsContext.steps[currentStep.id] = { outputs: stepResult.output };
+          // const stepResult = await stepRunner.runStep(currentStep, stepsContext);
+          const stepResult = await step.run();
 
           let stepStatus: ExecutionStatus;
 
@@ -167,5 +166,5 @@ export class WorkflowsExecutionEnginePlugin
     };
   }
 
-  public stop() {}
+  public stop() { }
 }
