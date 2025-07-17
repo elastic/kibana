@@ -50,6 +50,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerStandalone: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
+      excludeDataStreamTypes: true,
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
@@ -292,6 +293,9 @@ export const config: PluginConfigDescriptor = {
             },
           }
         ),
+        excludeDataStreamTypes: schema.arrayOf(schema.string(), {
+          defaultValue: () => [],
+        }),
       }),
       enabled: schema.boolean({ defaultValue: true }),
       /**

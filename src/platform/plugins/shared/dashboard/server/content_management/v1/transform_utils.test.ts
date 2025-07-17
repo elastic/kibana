@@ -64,7 +64,6 @@ describe('savedObjectToItem', () => {
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
           id: '1',
           panelIndex: '1',
-          panelRefName: 'ref1',
           title: 'title1',
           type: 'type1',
           version: '2',
@@ -118,7 +117,6 @@ describe('savedObjectToItem', () => {
               title: 'title1',
             },
             panelIndex: '1',
-            panelRefName: 'ref1',
             type: 'type1',
             version: '2',
           },
@@ -245,6 +243,7 @@ describe('savedObjectToItem', () => {
       data: {
         title: 'title',
         description: 'my description',
+        references: [],
         spaces: ['default'],
         version: 'WzEwLDFd',
       },
@@ -320,7 +319,7 @@ describe('savedObjectToItem', () => {
         allowedReferences: [],
       });
       const data = response && 'data' in response ? response.data : undefined;
-      expect(data?.references).toBeUndefined();
+      expect(data?.references).toEqual([]);
     }
   });
 });

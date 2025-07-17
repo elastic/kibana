@@ -5959,7 +5959,7 @@ paths:
               deleteAgentConfigurationRequest1:
                 $ref: '#/components/examples/APM_UI_agent_configuration_intake_object_delete_request1'
             schema:
-              $ref: '#/components/schemas/APM_UI_service_object'
+              $ref: '#/components/schemas/APM_UI_delete_service_object'
         required: true
       responses:
         '200':
@@ -45278,11 +45278,37 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
+          in: query
+          name: all_data
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               example:
+                aggregations:
+                  anonymized:
+                    buckets:
+                      allowed:
+                        doc_count: 1
+                      anonymized:
+                        doc_count: 1
+                      denied:
+                        doc_count: 1
+                all:
+                  - allowed: true
+                    anonymized: true
+                    createdAt: '2023-10-31T12:00:00Z'
+                    createdBy: user1
+                    field: user.name
+                    id: '1'
+                    namespace: default
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    updatedBy: user1
                 data:
                   - allowed: true
                     anonymized: true
@@ -45300,6 +45326,37 @@ paths:
               schema:
                 type: object
                 properties:
+                  aggregations:
+                    type: object
+                    properties:
+                      field_status:
+                        type: object
+                        properties:
+                          buckets:
+                            type: object
+                            properties:
+                              allowed:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              anonymized:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              denied:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                  all:
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
+                    type: array
                   data:
                     items:
                       $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
@@ -64287,6 +64344,14 @@ components:
         result:
           description: Result
           type: string
+    APM_UI_delete_service_object:
+      description: Service
+      type: object
+      properties:
+        service:
+          $ref: '#/components/schemas/APM_UI_service_object'
+      required:
+        - service
     APM_UI_search_agent_configuration_object:
       type: object
       properties:
@@ -80504,6 +80569,18 @@ components:
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_percentile_metric'
                       - $ref: '#/components/schemas/SLOs_timeslice_metric_doc_count_metric'
+                    discriminator:
+                      mapping:
+                        avg: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        cardinality: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        doc_count: '#/components/schemas/SLOs_timeslice_metric_doc_count_metric'
+                        last_value: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        max: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        min: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        percentile: '#/components/schemas/SLOs_timeslice_metric_percentile_metric'
+                        std_deviation: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                        sum: '#/components/schemas/SLOs_timeslice_metric_basic_metric_with_field'
+                      propertyName: aggregation
                   type: array
                 threshold:
                   description: The threshold used to determine if the metric is a good slice or not.

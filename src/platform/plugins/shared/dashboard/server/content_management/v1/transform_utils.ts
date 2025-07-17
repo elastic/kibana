@@ -11,7 +11,7 @@ import { pick } from 'lodash';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import { transformDashboardOut } from './transforms';
+import { transformDashboardOut, transformReferencesOut } from './transforms';
 import type { DashboardItem, PartialDashboardItem } from './types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
@@ -59,17 +59,16 @@ export function savedObjectToItem(
     attributes,
     error,
     namespaces,
-    references,
     version,
     managed,
   } = savedObject;
   try {
-    const dashboardState = transformDashboardOut(attributes, references, getTagNamesFromReferences);
-
-    // if includeReferences is provided, only include references of those types
-    const referencesOut = allowedReferences
-      ? references?.filter((reference) => allowedReferences.includes(reference.type))
-      : references;
+    const dashboardState = transformDashboardOut(
+      attributes,
+      savedObject.references,
+      getTagNamesFromReferences
+    );
+    const references = transformReferencesOut(savedObject.references ?? []);
 
     const attributesOut = allowedAttributes
       ? pick(dashboardState, allowedAttributes)
@@ -88,7 +87,9 @@ export function savedObjectToItem(
       item: {
         data: {
           ...attributesOut,
-          references: referencesOut,
+          references: allowedReferences
+            ? references?.filter((reference) => allowedReferences.includes(reference.type))
+            : references,
           spaces: namespaces,
           version,
         },
@@ -99,7 +100,7 @@ export function savedObjectToItem(
           updatedBy,
           createdAt,
           createdBy,
-          managed,
+          ...(managed ? { managed } : {}),
         },
       },
       error: null,
