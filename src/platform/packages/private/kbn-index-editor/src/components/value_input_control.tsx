@@ -8,11 +8,12 @@
  */
 
 import React, { type FunctionComponent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isNil } from 'lodash';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PendingSave } from '../index_update_service';
 import { ValueInput } from './value_input';
 
@@ -25,7 +26,8 @@ export const getCellValueRenderer =
     editingCell: { row: number | null; col: string | null },
     savingDocs: PendingSave | undefined,
     onEditStart: (update: { row: number | null; col: string | null }) => void,
-    onValueChange: OnCellValueChange
+    onValueChange: OnCellValueChange,
+    isIndexCreated: boolean
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, columnId }) => {
     const row = rows[rowIndex];
@@ -35,9 +37,9 @@ export const getCellValueRenderer =
 
     let cellValue;
 
-    const isSaving = !isNil(pendingSaveValue);
+    const isPendingToBeSaved = !isNil(pendingSaveValue);
 
-    if (isSaving) {
+    if (isPendingToBeSaved) {
       // If there is a pending save, use the value from the pending save
       cellValue = pendingSaveValue;
     } else if (row.flattened) {
@@ -49,7 +51,7 @@ export const getCellValueRenderer =
 
     if (isEditing) {
       return (
-        <div style={{ display: 'flex', height: '100%' }}>
+        <div css={{ display: 'flex', height: '100%' }}>
           <ValueInput
             onBlur={() => {
               onEditStart({ row: null, col: null });
@@ -66,25 +68,44 @@ export const getCellValueRenderer =
       );
     }
 
+    const onEditStartHandler = () => {
+      const columnExists = columns.some((col) => col.id === columnId);
+      if (columnExists) {
+        onEditStart({ row: rowIndex, col: columnId });
+      }
+    };
+
     return (
       <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
         <EuiFlexItem>
           <div
             tabIndex={0}
-            style={{
+            css={{
               cursor: 'pointer',
               height: '100%',
               width: '100%',
             }}
-            onClick={() => onEditStart({ row: rowIndex, col: columnId })}
+            onClick={onEditStartHandler}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onEditStart({ row: rowIndex, col: columnId });
+              if (e.key === 'Enter') onEditStartHandler();
             }}
           >
-            {cellValue}
+            {
+              // Only check for undefined, other falsy values might be user inputs
+              cellValue === undefined ? (
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="indexEditor.flyout.grid.cell.default"
+                    defaultMessage="Add value…"
+                  />
+                </EuiText>
+              ) : (
+                cellValue
+              )
+            }
           </div>
         </EuiFlexItem>
-        {isSaving ? (
+        {isPendingToBeSaved && isIndexCreated ? (
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="s" />
           </EuiFlexItem>

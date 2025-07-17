@@ -17,7 +17,8 @@ import { DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public'
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -39,9 +40,11 @@ import {
   tap,
   timer,
   withLatestFrom,
+  firstValueFrom,
 } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { parsePrimitive } from './utils';
-
+import { ROW_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
 const UNDO_EMIT_MS = 500; // 0.5 seconds
@@ -83,7 +86,7 @@ export class IndexUpdateService {
   public setIndexCreated(created: boolean) {
     this._indexCrated$.next(created);
   }
-  public getIndexCreated(): boolean {
+  public isIndexCreated(): boolean {
     return this._indexCrated$.getValue();
   }
 
@@ -100,7 +103,7 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedFields$.asObservable();
 
   /** ES Documents */
-  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
+  private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([this.buildPlaceholderRow()]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
   private readonly _totalHits$ = new BehaviorSubject<number>(0);
@@ -130,12 +133,15 @@ export class IndexUpdateService {
     shareReplay(1) // keep latest buffer for retries
   );
 
-  /** Docs that are currently being saved */
+  /** Docs that are pending to be saved*/
   public readonly savingDocs$: Observable<PendingSave> = this.bufferState$.pipe(
     map((updates) => {
       return updates.reduce((acc, update) => {
         if (update.id) {
-          acc.set(update.id, update.value);
+          acc.set(update.id, {
+            ...acc.get(update.id),
+            ...update.value,
+          });
         }
         return acc;
       }, new Map() as PendingSave);
@@ -145,6 +151,7 @@ export class IndexUpdateService {
 
   // Observable to track the number of milliseconds left to allow undo of the last change
   public readonly undoTimer$: Observable<number> = this.actions$.pipe(
+    skipWhile(() => !this.isIndexCreated()),
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
@@ -247,6 +254,7 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
+          skipWhile(() => !this.isIndexCreated()),
           tap((updates) => {
             this._isSaving$.next(updates.length > 0);
           }),
@@ -316,6 +324,7 @@ export class IndexUpdateService {
         this._refreshSubject$,
       ])
         .pipe(
+          skipWhile(() => !this.isIndexCreated()),
           tap(() => {
             this._isFetching$.next(true);
           }),
@@ -392,6 +401,12 @@ export class IndexUpdateService {
     );
   }
 
+  private buildPlaceholderRow(): DataTableRecord {
+    return buildDataTableRecord({
+      _id: `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`,
+    });
+  }
+
   public refresh() {
     this._isFetching$.next(true);
     this._refreshSubject$.next(Date.now());
@@ -423,6 +438,10 @@ export class IndexUpdateService {
     return response;
   }
 
+  public addEmptyRow() {
+    this._rows$.next([this.buildPlaceholderRow(), ...this._rows$.getValue()]);
+  }
+
   /* Partial doc update */
   public updateDoc(id: string, update: Record<string, unknown>) {
     const parsedUpdate = Object.entries(update).reduce<Record<string, unknown>>(
@@ -440,27 +459,31 @@ export class IndexUpdateService {
    * @param updates
    */
   public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
+    const groupedOperations = groupBy(updates, (update) =>
+      update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX) ? 'updates' : 'newDocs'
+    );
+
+    const updateOperations =
+      groupedOperations?.updates?.map((update) => [
+        { update: { _id: update.id } },
+        { doc: update.value },
+      ]) || [];
+
+    const newDocs =
+      groupedOperations?.newDocs?.reduce<Record<string, Record<string, any>>>((acc, update) => {
+        const docId = update.id || 'new-row';
+        acc[docId] = { ...acc[docId], ...update.value };
+        return acc;
+      }, {}) || {};
+
+    const newDocOperations = Object.entries(newDocs).map(([id, doc]) => {
+      return [{ index: {} }, doc];
+    });
+
+    const operations: BulkRequest['operations'] = [...updateOperations, ...newDocOperations];
+
     const body = JSON.stringify({
-      operations: (
-        updates.map((update) => {
-          if (update.id) {
-            return [
-              {
-                update: { _id: update.id },
-              },
-              {
-                doc: update.value,
-              },
-            ];
-          }
-          return [
-            {
-              index: {},
-            },
-            update.value,
-          ];
-        }) as BulkRequest['operations']
-      )?.flat(),
+      operations: operations.flat(),
     });
 
     return this.http.post<BulkResponse>(
@@ -496,5 +519,23 @@ export class IndexUpdateService {
 
   public destroy() {
     this._subscription.unsubscribe();
+  }
+
+  public async createIndex() {
+    try {
+      this._isSaving$.next(true);
+
+      const updates = await firstValueFrom(this.bufferState$);
+
+      await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+      await this.bulkUpdate(updates);
+
+      this.setIndexCreated(true);
+      this.actions$.next({ type: 'discard-unsaved-columns' });
+    } catch (error) {
+      throw error;
+    } finally {
+      this._isSaving$.next(false);
+    }
   }
 }

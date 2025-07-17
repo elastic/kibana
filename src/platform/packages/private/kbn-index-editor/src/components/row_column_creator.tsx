@@ -16,17 +16,29 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AddColumnPanel } from './add_column_panel';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextExtra } from '../types';
 import { AddRowPanel } from './add_row_panel';
+import { AddColumnPanel } from './add_column_panel';
 
 type ToggleMode = 'add-row' | 'add-column';
 
 export const RowColumnCreator = () => {
   const [activeMode, setActiveMode] = useState<ToggleMode | null>(null);
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { indexUpdateService },
+  } = useKibana<KibanaContextExtra>();
+
+  const isIndexCreated = useObservable(indexUpdateService.indexCreated$);
 
   const toggleAddRow = () => {
-    setActiveMode('add-row');
+    if (isIndexCreated) {
+      setActiveMode('add-row');
+    } else {
+      indexUpdateService.addEmptyRow();
+    }
   };
 
   const toggleAddColumn = () => {
@@ -57,7 +69,7 @@ export const RowColumnCreator = () => {
             size="s"
             disabled={activeMode === 'add-column'}
           >
-            <FormattedMessage defaultMessage="Add column" id="indexEditor.addColumn" />
+            <FormattedMessage defaultMessage="Add field" id="indexEditor.addColumn" />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

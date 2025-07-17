@@ -32,7 +32,7 @@ export const IndexName: FC = () => {
 
   const isIndexCreated = useObservable<boolean>(
     indexUpdateService.indexCreated$,
-    indexUpdateService.getIndexCreated()
+    indexUpdateService.isIndexCreated()
   );
 
   const {
@@ -117,6 +117,7 @@ export const IndexName: FC = () => {
         setIsLoading(false);
         if (!indexExists) {
           setIndexValidationStatus(STATUS.COMPLETED);
+          indexUpdateService.setIndexName(value);
           setFileUploadIndexName(value);
           setError([]);
           return true;

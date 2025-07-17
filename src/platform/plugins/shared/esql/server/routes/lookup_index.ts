@@ -10,7 +10,10 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-export const registerBulkUpdateRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
+export const registerLookupIndexRoutes = (
+  router: IRouter,
+  { logger }: PluginInitializerContext
+) => {
   router.post(
     {
       path: '/internal/esql/lookup_index/{indexName}/update',
@@ -39,6 +42,45 @@ export const registerBulkUpdateRoute = (router: IRouter, { logger }: PluginIniti
         const result = await client.bulk({
           index: indexName,
           operations: request.body.operations,
+        });
+
+        return response.ok({
+          body: result,
+        });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/esql/lookup_index/{indexName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+    },
+    async (requestHandlerContext, request, response) => {
+      try {
+        const core = await requestHandlerContext.core;
+        const client = core.elasticsearch.client.asCurrentUser;
+
+        const indexName = request.params.indexName;
+
+        const result = await client.indices.create({
+          index: indexName,
+          settings: {
+            mode: 'lookup',
+          },
         });
 
         return response.ok({

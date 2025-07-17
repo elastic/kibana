@@ -65,7 +65,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     }
   );
 
-  const noResults = !isLoading && rows.length === 0;
+  const noResults = !isLoading && dataViewColumns?.length === 0;
 
   return (
     <KibanaContextProvider
@@ -109,7 +109,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
                 ) : null}
 
                 <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
-                  {!noResults && dataView && dataViewColumns ? (
+                  {dataView && dataViewColumns ? (
                     <DataGridLazy
                       {...props}
                       dataView={dataView}
@@ -123,7 +123,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             </FileDropzone>
           </EuiFlyoutBody>
 
-          <FlyoutFooter indexUpdateService={deps.indexUpdateService} onClose={props.onClose} />
+          <FlyoutFooter onClose={props.onClose} />
         </FileUploadContext.Provider>
       </CellActionsProvider>
       <UnsavedChangesModal onClose={props.onClose} />
