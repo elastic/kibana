@@ -282,7 +282,10 @@ export class StreamsClient {
 
     await Promise.all(streams.map(({ name, request }) => this.syncAssets(name, request)));
 
-    return { acknowledged: true, result: result.changes };
+    return {
+      acknowledged: true,
+      result: { created: result.changes.created, updated: result.changes.updated },
+    };
   }
 
   /**
