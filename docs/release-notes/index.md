@@ -53,29 +53,22 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Implement functionality to add observables, procedures and custom fields to alerts for TheHive [#207255]({{kib-pull}}207255).
 
 **Dashboards and Visualizations**:
-* Adds internal CRUD api routes in *Lens* [#223296]({{kib-pull}}223296).
-* Adds collapsible sections [#220877]({{kib-pull}}220877).
-% !!TODO!! The above PR had a lengthy release note description:
-% Adds collapsible sections to Dashboard, which allow panels to be grouped into sections that will not load their contents when their assigned section is collapsed.
-* Migrate by-term `palettes` to `colorMapping` configs in *Lens* [#220296]({{kib-pull}}220296).
-% !!TODO!! The above PR had a lengthy release note description:
-% The **Color Mapping** feature is now GA. Previous Lens `palette` definitions are deprecated and will continue to function normally with no visual change to existing visualizations. Toggling off legacy mode will replace the palette with an equivalent color mapping configuration.
-* "Compare to" badge for Metric chart in *Lens* [#214811]({{kib-pull}}214811).
-* Enable read only editor mode to inspect panel's configuration in *Lens* [#208554]({{kib-pull}}208554).
-* [dashboard] Basic keyboard interaction [#208286]({{kib-pull}}208286).
-* Shiny add panel highlight [#223614]({{kib-pull}}223614).
-* Adds point visibility option for area/line charts in *Lens* [#222187]({{kib-pull}}222187).
-* [Data Table] Add settings for data grid density in *Lens* [#220252]({{kib-pull}}220252).
-* Flatten grid layout [#218900]({{kib-pull}}218900).
-* Adds "Open in lens" in the same tab [#217528]({{kib-pull}}217528).
-* Adds ability to open links in *Vega* in new window [#216200]({{kib-pull}}216200).
-* Inject / extract tag references [#214788]({{kib-pull}}214788).
-* Globe projection [#212437]({{kib-pull}}212437).
-* Keeps the chart configuration changes done by the user when changing the query whenever it is possible [#210780]({{kib-pull}}210780).
-* Update @elastic/charts to v70, remove legacy time axis support [#210579]({{kib-pull}}210579).
-% !!TODO!! The above PR had a lengthy release note description:
-% Updates time based charts to use the multi-layer time axis by default, providing a better time window context and improved label positioning.
-* Favorite a dashboard from within [#201596]({{kib-pull}}201596).
+* Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This allows you to generate an alert when the data on the chart crosses a certain threshold [#217719]({{kib-pull}}217719).
+* Adds collapsible sections to **Dashboard**. Collapsible sections allow you to group panels into logical groups, and to help your dashboards load faster by only loading their content when expanded [#220877]({{kib-pull}}220877).
+* Adds ability to mark a dashboard as favorite from within the dashboard in addition to the **Dashboards** page [#201596]({{kib-pull}}201596).
+* Adds the ability to resize and move dashboard panels using a keyboard [#208286]({{kib-pull}}208286).
+* Adds highlight effect when adding a panel to a dashboard [#223614]({{kib-pull}}223614).
+* Adds CRUD API routes for **Lens** [#223296]({{kib-pull}}223296).
+* The **Color Mapping** feature is now GA. Previous **Lens** palette definitions are deprecated and will continue to function normally with no visual change to existing visualizations. Toggling off legacy mode will replace the palette with an equivalent color mapping configuration [#220296]({{kib-pull}}220296).
+* Adds "Compare to" badge for Metric charts in **Lens** [#214811]({{kib-pull}}214811).
+* Updates time-based charts to use the multi-layer time axis by default, providing a better time window context and improved label positioning. [#210579]({{kib-pull}}210579).
+* Enables read-only editor mode to inspect a panel's configuration in **Lens** [#208554]({{kib-pull}}208554).
+* Adds a **Point visibility** option to Area and Line charts in **Lens** [#222187]({{kib-pull}}222187).
+* Adds a settings to control the data table density in **Lens** [#220252]({{kib-pull}}220252).
+* When clicking "Open in Lens" from a visualization, **Lens** now opens in the same tab [#217528]({{kib-pull}}217528).
+* Adds the ability to open links from **Vega** visualizations in a new tab by specifying the `"target": "_blank"` option for the `usermeta.embedOptions.loader` property of the Vega chart configuration [#216200]({{kib-pull}}216200).
+* Adds globe projection improvements to **Maps** [#212437]({{kib-pull}}212437).
+* Keeps the chart configuration when possible after editing the {{esql}} visualization's query [#210780]({{kib-pull}}210780).
 
 **Data ingestion and Fleet**:
 * Adds bulk migrations UI [#224334]({{kib-pull}}224334).
@@ -178,11 +171,8 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Enable `/api/streams/{id}/_group` endpoints for GroupStreams [#210114]({{kib-pull}}210114).
 * Update styles for Color formatter to look like a badge [#189391]({{kib-pull}}189391).
 
-**Platform**:
-* Create a rule from a dashboard ES|QL visualization [#217719]({{kib-pull}}217719).
-% !!TODO!! The above PR had a lengthy release note description:
-% Adds the Create alert rule action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This allows you to generate an alert when the data on the chart crosses a certain threshold.
-* Added an option to User Settings that allows the Kibana interface to display in a high contrast mode [#216242]({{kib-pull}}216242).
+**Personal settings**:
+* Adds an option to User Settings that allows to display the Kibana interface in high contrast mode [#216242]({{kib-pull}}216242).
 
 **Search**:
 * Enable query rules by default [#227226]({{kib-pull}}227226).
@@ -211,30 +201,25 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixes a regression that caused the cases actions to disappear from the detections engine alerts table bulk actions menu [#215111]({{kib-pull}}215111).
 
 **Dashboards and Visualizations**:
-* Forward secondary prefix correctly when state value is an empty string (`None` option) in *Lens* [#228183]({{kib-pull}}228183).
-* Fixes an issue where a Lens Partition chart (i.e. `Pie`) prevented the user from selecting a legacy palette. in *Lens* [#228051]({{kib-pull}}228051).
-* (Accessibility) Dashboard controls should be grouped as a labelled list [#227633]({{kib-pull}}227633).
+* Forwards the secondary prefix correctly when the state value is an empty string (`None` option) in **Lens** [#228183]({{kib-pull}}228183).
+* Fixes an issue where a **Lens** Partition chart (i.e. `Pie`) prevented the user from selecting a legacy palette [#228051]({{kib-pull}}228051).
+* Fixes an accessibility issue where dashboard controls should be grouped as a labelled list [#227633]({{kib-pull}}227633).
 * Fixes disabled range slider tooltip, clean up delete control button [#227295]({{kib-pull}}227295).
-* Fixes secondary metric styles to prevent wrapping in *Lens* [#227234]({{kib-pull}}227234).
-* Save button is disabled in case of save error [#227091]({{kib-pull}}227091).
-* Hide Select All checkbox from single select controls [#226311]({{kib-pull}}226311).
-* Remove kebab case warnings [#226114]({{kib-pull}}226114).
-* Skip all references fallback [#225908]({{kib-pull}}225908).
-* [Controls] Do not recommend adhoc dataviews [#225705]({{kib-pull}}225705).
-* Fixes Lens Embeddable defaultTitle from being overwritten by custom title after reload [#225664]({{kib-pull}}225664).
-* Small visual fixes [#225430]({{kib-pull}}225430).
-* Fixes panel title sync with saved object when using defaultTitle [#225237]({{kib-pull}}225237).
-* Refresh "Values from a query" options on dashboard reload [#225101]({{kib-pull}}225101).
-* Fixes a performance issue in the Lens ES|QL charts in case of errors in the query. in *Lens* [#225067]({{kib-pull}}225067).
-* Fixes for controls selections causing multiple fetches [#224761]({{kib-pull}}224761).
-* Adds saved object version for collapsible sections [#222450]({{kib-pull}}222450).
-* Fixes coloring/palette assignment on partition charts in *Lens* [#215426]({{kib-pull}}215426).
+* Fixes secondary metric styles to prevent wrapping in **Lens** [#227234]({{kib-pull}}227234).
+* Keeps the **Save** button enabled in case of save error [#227091]({{kib-pull}}227091).
+* Hides the **Select All** checkbox from single select controls [#226311]({{kib-pull}}226311).
+* Removes `kebab-case` warnings [#226114]({{kib-pull}}226114).
+* Fixes an issue with dashboards not saving due to exceptionally high number of references in the request payload [#225908]({{kib-pull}}225908).
+* Prevents Dashboard from recommending adhoc data views [#225705]({{kib-pull}}225705).
+* Prevents Lens Embeddable `defaultTitle` from being overwritten with a custom title after reload [#225664]({{kib-pull}}225664).
+* Fixes panel title synchronization with corresponding saved object when using `defaultTitle` [#225237]({{kib-pull}}225237).
+* Fixes visual issues causing labels to be truncated [#225430]({{kib-pull}}225430).
+* Refreshes "Values from a query" options for {{esql}} controls on dashboard reload [#225101]({{kib-pull}}225101).
+* Fixes a performance issue with ES|QL visualizations in case of errors in the query [#225067]({{kib-pull}}225067).
+* Fixes dashboard control value changes causing multiple fetches [#224761]({{kib-pull}}224761).
+* Fixes an issue in **Lens** where reordering the groups within a layer would incorrectly assign the color mapping to a group other than the first [#215426]({{kib-pull}}215426).
 * Fixes invalid dashboard displayed as 404 instead of showing validation error [#211661]({{kib-pull}}211661).
-* Adds `useCustomDragHandle` prop [#210463]({{kib-pull}}210463).
-* Fixes presentation panel styles [#210113]({{kib-pull}}210113).
-* Store assignments as raw/serialized values [#207957]({{kib-pull}}207957).
-% !!TODO!! The above PR had a lengthy release note description:
-% This PR fixes an issue ([#193080](https://github.com/elastic/kibana/issues/193080)) where custom ranges and multi-field values were not correctly colored based on selected color mapping configurations.
+* Fixes an issue where custom ranges and multi-field values were not correctly colored based on selected color mapping configurations [#207957]({{kib-pull}}207957).
 
 **Data ingestion and Fleet**:
 * Fixes export CSV in Agent list [#225050]({{kib-pull}}225050).
