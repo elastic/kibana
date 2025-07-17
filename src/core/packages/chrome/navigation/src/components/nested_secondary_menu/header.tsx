@@ -12,14 +12,16 @@ import React, { FC } from 'react';
 import { css } from '@emotion/react';
 
 import { useNestedMenu } from '../../hooks/use_nested_menu';
+import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 
-export interface BackButtonProps {
+export interface HeaderProps {
   title?: string;
 }
 
-export const BackButton: FC<BackButtonProps> = ({ title }) => {
+export const Header: FC<HeaderProps> = ({ title }) => {
   const { goBack } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
+  const headerStyle = useMenuHeaderStyle();
 
   const titleStyle = css`
     align-items: center;
@@ -27,11 +29,7 @@ export const BackButton: FC<BackButtonProps> = ({ title }) => {
     border-radius: ${euiTheme.border.radius.medium};
     display: flex;
     gap: ${euiTheme.size.s};
-    padding: ${euiTheme.size.base} ${euiTheme.size.m};
-    padding-bottom: ${euiTheme.size.xs};
-    position: sticky;
-    top: 0;
-    z-index: 1;
+    ${headerStyle}
   `;
 
   return (

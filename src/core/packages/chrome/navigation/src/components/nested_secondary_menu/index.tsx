@@ -12,7 +12,7 @@ import React, { useState, useCallback, ReactNode, FC } from 'react';
 import { SecondaryMenu } from '../secondary_menu';
 import { NestedMenuContext } from '../../hooks/use_nested_menu';
 import { Panel } from './menu_panel';
-import { BackButton } from './back_button';
+import { Header } from './header';
 import { Item } from './menu_item';
 import { PrimaryMenuItem } from './primary_menu_item';
 
@@ -56,7 +56,7 @@ const NestedSecondaryMenuRoot: FC<NestedSecondaryMenuProps> = ({
 
 interface NestedSecondaryMenuComponent extends FC<NestedSecondaryMenuProps> {
   Panel: typeof Panel;
-  BackButton: typeof BackButton;
+  Header: typeof Header;
   Item: typeof Item;
   PrimaryMenuItem: typeof PrimaryMenuItem;
   Section: typeof SecondaryMenu.Section;
@@ -66,7 +66,7 @@ export const NestedSecondaryMenu: NestedSecondaryMenuComponent =
   NestedSecondaryMenuRoot as NestedSecondaryMenuComponent;
 
 NestedSecondaryMenu.Panel = Panel;
-NestedSecondaryMenu.BackButton = BackButton;
+NestedSecondaryMenu.Header = Header;
 NestedSecondaryMenu.Item = Item;
 NestedSecondaryMenu.PrimaryMenuItem = PrimaryMenuItem;
 NestedSecondaryMenu.Section = SecondaryMenu.Section;
