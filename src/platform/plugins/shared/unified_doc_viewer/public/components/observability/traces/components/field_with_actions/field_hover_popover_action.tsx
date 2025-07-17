@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   PopoverAnchorPosition,
   type EuiPopoverProps,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { useUIFieldActions } from '../../../../../hooks/use_field_actions';
@@ -44,6 +45,7 @@ export const FieldHoverActionPopover = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
   const uiFieldActions = useUIFieldActions({ field, value, formattedValue, mapping });
+  const fieldHoverActionPopoverTitleId = useGeneratedHtmlId();
 
   const clearTimeoutIfExists = () => {
     if (leaveTimer.current) {
@@ -82,8 +84,9 @@ export const FieldHoverActionPopover = ({
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
         display={display}
+        aria-labelledby={fieldHoverActionPopoverTitleId}
       >
-        <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
+        <EuiPopoverTitle id={fieldHoverActionPopoverTitleId} className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
           {title}
         </EuiPopoverTitle>
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">

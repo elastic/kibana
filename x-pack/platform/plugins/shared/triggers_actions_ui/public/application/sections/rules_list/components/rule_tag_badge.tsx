@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiBadge, EuiPopoverTitle, EuiFlexGroup } from '@elastic/eui';
+import { EuiPopover, EuiBadge, EuiPopoverTitle, EuiFlexGroup, useGeneratedHtmlId } from '@elastic/eui';
 
 const tagTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.rules_list.rules_tag_badge.tagTitle',
@@ -53,6 +53,8 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
     tagItemDataTestSubj = getTagItemDataTestSubj,
   } = props;
   const { isOpen, onClose, onClick } = props as RuleTagBadgeBasicOptions;
+
+  const popoverTitleId = useGeneratedHtmlId();
 
   const badge = useMemo(() => {
     return (
@@ -102,8 +104,9 @@ export const RuleTagBadge = <T extends RuleTagBadgeOptions>(props: RuleTagBadgeP
       anchorPosition="upCenter"
       isOpen={isOpen} // The props exists as it's required in props types
       closePopover={onClose}
+      aria-labelledby={popoverTitleId}
     >
-      <EuiPopoverTitle data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId} data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
       <div style={containerStyle}>{tagBadges}</div>
     </EuiPopover>
   );

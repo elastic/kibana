@@ -24,6 +24,7 @@ import {
   EuiPopoverFooter,
   withEuiTheme,
   WithEuiThemeProps,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -139,6 +140,7 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
   public render() {
     const { kibanaVersion, theme } = this.props;
 
+    const popoverTitleId = htmlIdGenerator()('popoverTitle');
     const defaultContent = this.renderDefaultContent();
     const globalCustomContent = this.renderGlobalCustomContent();
     const customContent = this.renderCustomContent();
@@ -169,11 +171,12 @@ class HelpMenu extends Component<Props & WithEuiThemeProps, State> {
         id="headerHelpMenu"
         isOpen={this.state.isOpen}
         repositionOnScroll
+        aria-labelledby={popoverTitleId}
       >
         <EuiPopoverTitle>
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem>
-              <h2>
+              <h2 id={popoverTitleId}>
                 <FormattedMessage
                   id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
                   defaultMessage="Help"

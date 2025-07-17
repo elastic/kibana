@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiPopover, EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ShortcutLineFlexItem } from './shortcut_line';
 import { KEYS } from './keys';
@@ -20,6 +20,8 @@ interface ShortcutsPopoverProps {
 }
 
 export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopoverProps) => {
+  const popoverTitleId = useGeneratedHtmlId();
+
   return (
     <EuiPopover
       button={button}
@@ -27,9 +29,10 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
       closePopover={closePopover}
       anchorPosition="downRight"
       data-test-subj="consoleShortcutsPopover"
+      aria-labelledby={popoverTitleId}
     >
       <EuiTitle size="xxs">
-        <h5>
+        <h5 id={popoverTitleId}>
           {i18n.translate('console.shortcuts.navigationShortcutsSubtitle', {
             defaultMessage: 'Navigation shortcuts',
           })}

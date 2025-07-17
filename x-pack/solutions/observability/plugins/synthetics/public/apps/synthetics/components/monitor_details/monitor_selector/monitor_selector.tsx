@@ -6,12 +6,13 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MonitorSearchableList } from './monitor_searchable_list';
 
 export const MonitorSelector = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -39,8 +40,9 @@ export const MonitorSelector = () => {
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
+        aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle paddingSize="s">{GO_TO_MONITOR}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">{GO_TO_MONITOR}</EuiPopoverTitle>
         <MonitorSearchableList closePopover={closePopover} />
       </EuiPopover>
     </Fragment>

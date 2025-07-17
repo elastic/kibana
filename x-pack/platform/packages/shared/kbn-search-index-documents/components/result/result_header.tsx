@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-
 import {
   EuiButton,
   EuiButtonIcon,
@@ -17,6 +16,7 @@ import {
   EuiPopoverTitle,
   EuiTextColor,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -48,6 +48,8 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
 
+  const popoverTitleId = useGeneratedHtmlId();
+
   const metaDataIcon = (
     <EuiButtonIcon
       display="empty"
@@ -66,8 +68,13 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
   );
 
   return (
-    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
+      <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('xpack.searchIndexDocuments.result.header.metadata.title', {
           defaultMessage: 'Document metadata',
         })}

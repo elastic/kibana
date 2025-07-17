@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiPopoverTitle, useGeneratedHtmlId } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getFieldFormat } from '../utils/get_field_format';
@@ -102,6 +102,8 @@ export const StatusPopoverButton = memo(
       return button;
     }
 
+    const popoverTitleId = useGeneratedHtmlId();
+
     return (
       <EuiPopover
         button={button}
@@ -109,8 +111,9 @@ export const StatusPopoverButton = memo(
         closePopover={closePopover}
         panelPaddingSize="none"
         data-test-subj="alertStatus"
+        aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
         <EuiContextMenu
           panels={panels}
           initialPanelId={0}
