@@ -88,8 +88,6 @@ export const useWorkflow = () => {
       setSelectedWorkflowId(onboardingTokenToWorkflowId(data.token));
       return;
     }
-
-    setSelectedWorkflowId(DEFAULT_WORKFLOW_ID);
   }, [search, data]);
 
   return {
