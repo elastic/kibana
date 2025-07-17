@@ -50,7 +50,9 @@ describe('SORT Autocomplete', () => {
   // test for replacement range in NULLS FIRST/LAST in all possible positions
   //  including after whitespace... test that replacement range gets added to all suggestions
   //  and IS NULL/IS NOT NULL scenarios
+  //  and after a field name starting with an N
   // test for suggestions right after a column name
+  //  Both after SORT and after a comma
   // test for comma replacement range after whitespace
 
   describe('SORT <column> ...', () => {

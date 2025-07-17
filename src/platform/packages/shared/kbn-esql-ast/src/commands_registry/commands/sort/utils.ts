@@ -100,10 +100,10 @@ export const getSuggestionsAfterCompleteExpression = (
   expressionRoot: ESQLSingleAstItem | undefined
 ): ISuggestionItem[] => {
   let sortCommandKeywordSuggestions = [
-    sortModifierSuggestions.ASC,
-    sortModifierSuggestions.DESC,
-    sortModifierSuggestions.NULLS_FIRST,
-    sortModifierSuggestions.NULLS_LAST,
+    { ...sortModifierSuggestions.ASC },
+    { ...sortModifierSuggestions.DESC },
+    { ...sortModifierSuggestions.NULLS_FIRST },
+    { ...sortModifierSuggestions.NULLS_LAST },
   ];
 
   const pipeSuggestion = { ...pipeCompleteItem, sortText: 'AAA' };
@@ -126,7 +126,8 @@ export const getSuggestionsAfterCompleteExpression = (
   else if (
     isColumn(expressionRoot) &&
     // this prevents the branch from being entered for something like "SORT column NULLS LA/"
-    /sort\s+\S+$/i.test(innerText)
+    // where the "NULLS LA" won't be in the AST so expressionRoot will just be the column
+    /(?:sort|,)\s+\S+$/i.test(innerText)
   ) {
     const { fragment, rangeToReplace } = getFragmentData(innerText);
 
@@ -150,8 +151,7 @@ export const getSuggestionsAfterCompleteExpression = (
 };
 
 const IS_REGEX = /(?:I+S*\s+(?:N+O*T*\s+)?(N(U(L(L)?)?)?)?)\s*$/i;
-
-const NULLS_REGEX = /(?<nulls>NU?L?L?S?\s+(FI?R?S?T?|LA?S?T?)?)$/i;
+const NULLS_REGEX = /(?<nulls>NULLS\s+(FI?R?S?T?|LA?S?T?)?)$/i;
 
 /**
  * The nulls clauses are tricky because they contain whitespace.
