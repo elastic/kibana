@@ -60,21 +60,21 @@ export const REVERTING_RULE_CALLOUT_MESSAGE = i18n.translate(
   }
 );
 
-export const BASE_VERSION_FLYOUT_UPDATES_TAB_TITLE = i18n.translate(
+export const RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.baseVersionFlyout.updatesTabTitle',
   {
     defaultMessage: 'Elastic rule diff overview',
   }
 );
 
-export const BASE_VERSION_FLYOUT_UPDATES_TAB_TOOLTIP = i18n.translate(
+export const RULE_CUSTOMIZATIONS_FLYOUT_UPDATES_TAB_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.baseVersionFlyout.updatesTabTooltip',
   {
     defaultMessage: 'See all changes made to the rule',
   }
 );
 
-export const BASE_VERSION_FLYOUT_JSON_TAB_TOOLTIP = i18n.translate(
+export const RULE_CUSTOMIZATIONS_FLYOUT_JSON_TAB_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.baseVersionFlyout.jsonTabTooltip',
   {
     defaultMessage: 'See all changes made to the rule in JSON format',
