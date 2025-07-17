@@ -50,12 +50,16 @@ run(
         const result = await validator.validate(Fs.readFileSync(yamlPath).toString('utf-8'));
         if (!result.valid) {
           log.warning(`${chalk.underline(yamlPath)} is NOT valid`);
-          const errors =
-            paths?.length && Array.isArray(result.errors)
-              ? result.errors.filter((error) =>
+          const errors = Array.isArray(result.errors)
+            ? result.errors.filter(
+                (error) =>
+                  // The below is noisey and a result of how the schema validation works. No aspect of the OAS spec should
+                  // require the use of `$ref`, it's an optional optimization.
+                  error.params.missingProperty !== '$ref' &&
+                  paths?.length &&
                   paths.some((path) => error.instancePath.startsWith(path))
-                )
-              : result.errors;
+              )
+            : result.errors;
           log.warning(Util.inspect(errors, { depth: Infinity }));
           log.warning(
             `Found ${chalk.bold(
