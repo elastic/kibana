@@ -11,8 +11,7 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSpacer, EuiSteps } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import type { UploadStatus, FileAnalysis } from '@kbn/file-upload';
-import { STATUS } from '@kbn/file-upload';
+import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FileStatus } from './file_status';
 
 export const OverallUploadStatus: FC = () => {

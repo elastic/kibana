@@ -21,7 +21,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ServerSettings } from '@kbn/file-upload-common/src/utils';
+import type { ServerSettings } from '@kbn/file-upload/src/utils';
 import { Overrides } from './overrides';
 
 interface Props {

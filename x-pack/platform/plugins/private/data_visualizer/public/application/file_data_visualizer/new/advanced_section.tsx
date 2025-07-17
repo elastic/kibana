@@ -20,7 +20,7 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline } from '@kbn/file-upload-plugin/common';
-import { UPLOAD_TYPE, useFileUploadContext } from '@kbn/file-upload-common';
+import { useFileUploadContext, UPLOAD_TYPE } from '@kbn/file-upload';
 import { Mappings } from './file_status/mappings';
 import { Settings } from './file_status/settings';
 import type { CombinedField } from '../../common/components/combined_fields';

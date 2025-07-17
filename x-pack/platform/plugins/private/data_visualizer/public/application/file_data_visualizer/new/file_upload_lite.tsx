@@ -8,13 +8,9 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import {
-  useFileUpload,
-  type OpenFileUploadLiteContext,
-  FileUploadContext,
-} from '@kbn/file-upload-common';
+import { type OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { CoreStart } from '@kbn/core/public';
-import { FileUploadManager } from '@kbn/file-upload-common/src/file_manager';
+import { FileUploadManager, useFileUpload, FileUploadContext } from '@kbn/file-upload';
 import type { ResultLinks } from '../../../../common/app';
 import { FileUploadLiteView } from './file_upload_lite_view';
 import type { GetAdditionalLinks } from '../../common/components/results_links';
@@ -51,6 +47,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
         fileUpload,
         coreStart.http,
         data.dataViews,
+        coreStart.notifications,
         autoAddInference ?? null,
         autoCreateDataView,
         true,
@@ -61,6 +58,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
       autoAddInference,
       autoCreateDataView,
       coreStart.http,
+      coreStart.notifications,
       data.dataViews,
       existingIndex,
       fileUpload,
@@ -72,8 +70,9 @@ export const FileDataVisualizerLite: FC<Props> = ({
     fileUploadManager,
     data,
     coreStart.application,
-    onUploadComplete,
-    coreStart.http
+    coreStart.http,
+    coreStart.notifications,
+    onUploadComplete
   );
 
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;

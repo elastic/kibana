@@ -8,8 +8,8 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useState } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { useFileUpload, type FileUploadResults, FileUploadContext } from '@kbn/file-upload-common';
-import { FileUploadManager } from '@kbn/file-upload-common/src/file_manager';
+import { FileUploadManager, useFileUpload, FileUploadContext } from '@kbn/file-upload';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../../common/app';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
@@ -53,6 +53,7 @@ export const FileDataVisualizer: FC<Props> = ({
       fileUpload,
       coreStart.http,
       data.dataViews,
+      services.notifications,
       autoAddInference ?? null,
       autoCreateDataView,
       true,
@@ -67,6 +68,7 @@ export const FileDataVisualizer: FC<Props> = ({
     existingIndex,
     fileUpload,
     indexSettings,
+    services.notifications,
   ]);
 
   const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager>(() =>
@@ -77,8 +79,9 @@ export const FileDataVisualizer: FC<Props> = ({
     fileUploadManager,
     data,
     coreStart.application,
-    undefined,
-    coreStart.http
+    coreStart.http,
+    coreStart.notifications,
+    undefined
   );
 
   const reset = useCallback(() => {

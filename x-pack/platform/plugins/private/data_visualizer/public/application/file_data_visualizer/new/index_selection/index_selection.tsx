@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { EuiRadioGroup, EuiSpacer, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFileUploadContext, UPLOAD_TYPE } from '@kbn/file-upload-common';
+import { useFileUploadContext, UPLOAD_TYPE } from '@kbn/file-upload';
 import { IndexInput } from './index_input';
 
 interface Props {

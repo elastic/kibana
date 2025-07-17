@@ -9,8 +9,8 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileClash } from '@kbn/file-upload-common/src/file_manager';
-import { CLASH_ERROR_TYPE, CLASH_TYPE } from '@kbn/file-upload-common/src/file_manager';
+import { CLASH_ERROR_TYPE, CLASH_TYPE } from '@kbn/file-upload';
+import type { FileClash } from '@kbn/file-upload/file_upload_manager';
 
 interface Props {
   fileClash: FileClash;

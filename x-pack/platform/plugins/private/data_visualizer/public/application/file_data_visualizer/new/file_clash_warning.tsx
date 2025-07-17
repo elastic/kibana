@@ -9,8 +9,7 @@ import React from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFileUploadContext } from '@kbn/file-upload-common';
-import { CLASH_TYPE } from '@kbn/file-upload-common/src/file_manager';
+import { useFileUploadContext, CLASH_TYPE } from '@kbn/file-upload';
 
 export const FileClashWarning: FC = () => {
   const { uploadStatus, fileUploadManager } = useFileUploadContext();

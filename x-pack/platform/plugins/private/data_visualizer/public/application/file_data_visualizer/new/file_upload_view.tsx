@@ -9,8 +9,8 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elast
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { useFileUploadContext, type FileUploadResults } from '@kbn/file-upload-common';
-import { STATUS } from '@kbn/file-upload-common/src/file_manager';
+import { useFileUploadContext, STATUS } from '@kbn/file-upload';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../../../common/app';
 import { FileClashWarning } from './file_clash_warning';
 import { FilePicker } from './file_picker';
@@ -37,7 +37,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
     filesStatus,
     uploadStatus,
     fileClashes,
-    uploadInProgress,
+    uploadStarted,
     onImportClick,
     canImport,
     importResults,
@@ -95,7 +95,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
             <IndexSelection />
           </>
         ) : null}
-        {uploadInProgress ? (
+        {uploadStarted ? (
           <>
             <UploadImage />
 

@@ -7,7 +7,7 @@
 import type { EuiFilePickerProps } from '@elastic/eui';
 import { EuiFormRow, EuiFilePicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import type { FileUploadManager } from '@kbn/file-upload-common';
+import type { FileUploadManager } from '@kbn/file-upload';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useCallback, useRef } from 'react';

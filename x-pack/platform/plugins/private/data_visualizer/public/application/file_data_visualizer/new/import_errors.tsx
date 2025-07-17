@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { useFileUploadContext } from '@kbn/file-upload-common';
+import { useFileUploadContext } from '@kbn/file-upload';
 import type { FC } from 'react';
 import React from 'react';
 

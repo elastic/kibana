@@ -22,8 +22,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
-import { useFileUploadContext, type OpenFileUploadLiteContext } from '@kbn/file-upload-common';
-import { STATUS } from '@kbn/file-upload-common/src/file_manager';
+import { type OpenFileUploadLiteContext } from '@kbn/file-upload-common';
+import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FileClashWarning } from './file_clash_warning';
 import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
@@ -49,7 +49,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
     uploadStatus,
     fileClashes,
     fullFileUpload,
-    uploadInProgress,
+    uploadStarted,
     onImportClick,
     canImport,
   } = useFileUploadContext();
@@ -154,7 +154,7 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
               ) : null}
             </>
           ) : null}
-          {uploadInProgress ? (
+          {uploadStarted ? (
             <>
               <UploadImage />
 
