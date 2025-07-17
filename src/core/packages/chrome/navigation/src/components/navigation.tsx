@@ -271,6 +271,7 @@ export const Navigation = ({
                   onKeyDown={(e) => handleFooterItemKeyDown(item, e)}
                   label={item.label}
                   iconType={item.iconType}
+                  href={item.href}
                 />
               }
             >
