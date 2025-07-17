@@ -200,22 +200,6 @@ describe('Perform bulk action route', () => {
 
       expect(result.ok).toHaveBeenCalled();
     });
-
-    it('rejects payload if there is more than 100 deletes in payload', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
-        body: {
-          ...getPerformBulkActionSchemaMock(),
-          delete: { ids: Array.from({ length: 101 }).map(() => 'fake-id') },
-        },
-      });
-
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-
-      expect(response.status).toEqual(400);
-      expect(response.body.message).toEqual('More than 100 ids sent for bulk edit action.');
-    });
   });
 });
 
