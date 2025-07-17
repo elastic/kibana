@@ -12,6 +12,7 @@ import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
+import { Callbacks } from '@langchain/core/callbacks/manager';
 import { generateChatTitle } from './nodes/generate_chat_title';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
@@ -28,6 +29,7 @@ import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
 import { agentRunnableFactory } from './agentRunnable';
+import { EsqlTelemetryTracer } from '../../tracers/esql_telemetry_tracer/esql_telemetry_tracer';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -281,6 +283,30 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     provider: provider ?? '',
   };
 
+  const callbacks: Callbacks = [
+    new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger),
+    ...(traceOptions?.tracers ?? []),
+    ...(telemetryParams
+      ? [
+          new TelemetryTracer(
+            {
+              elasticTools: tools.map(({ name }) => name),
+              totalTools: tools.length,
+              telemetry,
+              telemetryParams,
+            },
+            logger
+          ),
+          new EsqlTelemetryTracer(
+            {
+              telemetry,
+              telemetryParams,
+            },
+            logger
+          ),
+        ]
+      : []),
+  ];
   // make a fire and forget async call to generateChatTitle
   void (async () => {
     const model = await createLlmInstance();
@@ -303,7 +329,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   if (isStream) {
     return streamGraph({
-      apmTracer,
       assistantGraph,
       inputs,
       inferenceChatModelDisabled,
@@ -313,18 +338,17 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       onLlmResponse,
       request,
       telemetry,
-      telemetryTracer,
       traceOptions,
+      callbacks,
     });
   }
 
   const graphResponse = await invokeGraph({
-    apmTracer,
     assistantGraph,
     inputs,
     onLlmResponse,
-    telemetryTracer,
     traceOptions,
+    callbacks,
   });
 
   const { prunedContentReferencesStore, prunedContent } = pruneContentReferences(
