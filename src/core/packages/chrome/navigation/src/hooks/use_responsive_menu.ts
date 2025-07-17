@@ -16,7 +16,7 @@ import { MenuItem, NavigationStructure } from '../../types';
  */
 const EXPANDED_MENU_ITEM_HEIGHT = 67;
 const COLLAPSED_MENU_ITEM_HEIGHT = 32;
-const MAX_MENU_ITEMS = 9;
+const MAX_MENU_ITEMS = 10;
 
 interface ResponsiveMenuState {
   primaryMenuRef: RefObject<HTMLElement>;
