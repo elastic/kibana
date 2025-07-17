@@ -77,7 +77,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
       },
       {
         label: i18n.translate('console.helpPopover.runTourLabel', {
-          defaultMessage: 'Run getting started guide',
+          defaultMessage: 'Start introduction tour',
         }),
         css: styles.listItem,
         onClick: resetTour,
@@ -87,7 +87,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
           onClick: resetTour,
           'data-test-subj': 'consoleRunTourButton',
           'aria-label': i18n.translate('console.helpPopover.runTourButtonAriaLabel', {
-            defaultMessage: 'Run getting started guide button',
+            defaultMessage: 'Start introduction tour button',
           }),
         },
       },
