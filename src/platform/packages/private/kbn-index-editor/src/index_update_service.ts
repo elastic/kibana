@@ -18,6 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -41,10 +42,10 @@ import {
   withLatestFrom,
   firstValueFrom,
 } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { difference } from 'lodash';
-import { ROW_PLACEHOLDER_PREFIX } from './types';
 import { parsePrimitive } from './utils';
-
+import { ROW_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
 const UNDO_EMIT_MS = 500; // 0.5 seconds
@@ -76,8 +77,6 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
-  private _rowPlaceholderCount = 0;
-
   private _indexName$ = new BehaviorSubject<string | null>(null);
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
@@ -88,7 +87,7 @@ export class IndexUpdateService {
   public setIndexCreated(created: boolean) {
     this._indexCrated$.next(created);
   }
-  public getIndexCreated(): boolean {
+  public isIndexCreated(): boolean {
     return this._indexCrated$.getValue();
   }
 
@@ -153,7 +152,7 @@ export class IndexUpdateService {
 
   // Observable to track the number of milliseconds left to allow undo of the last change
   public readonly undoTimer$: Observable<number> = this.actions$.pipe(
-    skipWhile(() => !this.getIndexCreated()),
+    skipWhile(() => !this.isIndexCreated()),
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
       action.type === 'add'
@@ -258,7 +257,7 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
-          skipWhile(() => !this.getIndexCreated()),
+          skipWhile(() => !this.isIndexCreated()),
           tap((updates) => {
             this._isSaving$.next(updates.length > 0);
           }),
@@ -328,7 +327,7 @@ export class IndexUpdateService {
         this._refreshSubject$,
       ])
         .pipe(
-          skipWhile(() => !this.getIndexCreated()),
+          skipWhile(() => !this.isIndexCreated()),
           tap(() => {
             this._isFetching$.next(true);
           }),
@@ -422,7 +421,7 @@ export class IndexUpdateService {
 
   private buildPlaceholderRow(): DataTableRecord {
     return buildDataTableRecord({
-      _id: `${ROW_PLACEHOLDER_PREFIX}${this._rowPlaceholderCount++}`,
+      _id: `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`,
     });
   }
 
@@ -478,19 +477,22 @@ export class IndexUpdateService {
    * @param updates
    */
   public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
-    // Prepare update operations for existing documents
-    const updateOperations = updates
-      .filter((update) => update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX))
-      .map((update) => [{ update: { _id: update.id } }, { doc: update.value }]);
+    const groupedOperations = groupBy(updates, (update) =>
+      update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX) ? 'updates' : 'newDocs'
+    );
 
-    // Group updates by update.id and create new doc operations
-    const newDocs = updates
-      .filter((update) => !update.id || update.id.startsWith(ROW_PLACEHOLDER_PREFIX))
-      .reduce<Record<string, Record<string, any>>>((acc, update) => {
+    const updateOperations =
+      groupedOperations?.updates?.map((update) => [
+        { update: { _id: update.id } },
+        { doc: update.value },
+      ]) || [];
+
+    const newDocs =
+      groupedOperations?.newDocs?.reduce<Record<string, Record<string, any>>>((acc, update) => {
         const docId = update.id || 'new-row';
         acc[docId] = { ...acc[docId], ...update.value };
         return acc;
-      }, {});
+      }, {}) || {};
 
     const newDocOperations = Object.entries(newDocs).map(([id, doc]) => {
       return [{ index: {} }, doc];
@@ -538,13 +540,20 @@ export class IndexUpdateService {
   }
 
   public async createIndex() {
-    const updates = await firstValueFrom(this.bufferState$);
+    try {
+      this._isSaving$.next(true);
 
-    await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
-    await this.bulkUpdate(updates);
-    this.setIndexCreated(true);
-    this.actions$.next({ type: 'discard-unsaved-columns' });
+      const updates = await firstValueFrom(this.bufferState$);
 
-    // TODO: error management, should be done here or in the calling component?
+      await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+      await this.bulkUpdate(updates);
+
+      this.setIndexCreated(true);
+      this.actions$.next({ type: 'discard-unsaved-columns' });
+    } catch (error) {
+      throw error;
+    } finally {
+      this._isSaving$.next(false);
+    }
   }
 }

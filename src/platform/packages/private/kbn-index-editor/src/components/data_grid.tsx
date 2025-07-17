@@ -22,7 +22,8 @@ import {
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, times } from 'lodash';
-import { COLUMN_PLACEHOLDER_PREFIX, KibanaContextExtra } from '../types';
+import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
+import { KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './value_input_control';
 import { AddColumnHeader } from './add_column_header';
 
@@ -64,7 +65,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
 
-  const isIndexCreated = useObservable(indexUpdateService.indexCreated$, false);
+  const isIndexCreated = useObservable(
+    indexUpdateService.indexCreated$,
+    indexUpdateService.isIndexCreated()
+  );
 
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
@@ -114,7 +118,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - props.columns.length;
     const addColumnPlaceholders =
       missingPlaceholders > 0
-        ? times(missingPlaceholders, (idx) => `${COLUMN_PLACEHOLDER_PREFIX}-${idx}`)
+        ? times(missingPlaceholders, (idx) => `${COLUMN_PLACEHOLDER_PREFIX}${idx}`)
         : [];
 
     return [...newColumns, ...preservedOrder, ...addColumnPlaceholders];
@@ -183,13 +187,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             className: 'custom-column--placeholder',
           },
         });
-      } else {
-        acc[columnName] = ({ column }) => ({
-          ...column,
-          displayHeaderCellProps: {
-            className: 'custom-column',
-          },
-        });
       }
       return acc;
     }, {} as CustomGridColumnsConfiguration);
@@ -240,14 +237,12 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
             width: 100%;
             display: block;
           }
-          .custom-column {
-            justify-content: center;
+          .euiDataGridHeaderCell {
+            align-items: center;
+            display: flex;
           }
           .custom-column--placeholder {
             padding: 0;
-            &:after {
-              display: none;
-            }
           }
         `}
       />

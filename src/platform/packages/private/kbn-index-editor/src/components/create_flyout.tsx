@@ -52,7 +52,7 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
 
     props.onClose?.({
       indexName: indexUpdateService.getIndexName()!,
-      indexCreatedDuringFlyout: props.doesIndexExist ? false : indexUpdateService.getIndexCreated(),
+      indexCreatedDuringFlyout: props.doesIndexExist ? false : indexUpdateService.isIndexCreated(),
     });
 
     indexUpdateService.destroy();

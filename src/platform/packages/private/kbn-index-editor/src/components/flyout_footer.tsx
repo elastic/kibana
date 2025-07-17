@@ -19,17 +19,25 @@ import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { IndexUpdateService } from '../index_update_service';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextExtra } from '../types';
 
 export interface FlyoutFooterProps {
-  indexUpdateService: IndexUpdateService;
   onClose: () => void;
 }
 
-export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClose }) => {
+export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
+  const {
+    services: { indexUpdateService, notifications },
+  } = useKibana<KibanaContextExtra>();
+
   const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
-  const isIndexCreated = useObservable(indexUpdateService.indexCreated$, false);
+  const isIndexCreated = useObservable(
+    indexUpdateService.indexCreated$,
+    indexUpdateService.isIndexCreated()
+  );
   const docsPendingToBeSaved = useObservable(indexUpdateService.savingDocs$, new Map());
 
   const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
@@ -37,9 +45,19 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
   const undoInSeconds = undoTimeLeft ? `${Math.floor(undoTimeLeft / 1000)}s` : null;
 
   const createIndex = async () => {
-    await indexUpdateService.createIndex();
-    onClose();
+    try {
+      await indexUpdateService.createIndex();
+      onClose();
+    } catch (error) {
+      notifications.toasts.addError(error as Error, {
+        title: i18n.translate('indexEditor.saveIndex.ErrorTitle', {
+          defaultMessage: 'An error occurred while saving the index',
+        }),
+      });
+    }
   };
+
+  const isSaveButtonVisible = !canImport && !isIndexCreated && !isSaving;
 
   return (
     <EuiFlyoutFooter>
@@ -76,7 +94,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
               </EuiFlexItem>
             ) : null}
 
-            {!canImport && !isIndexCreated ? (
+            {isSaveButtonVisible ? (
               <EuiFlexItem grow={false}>
                 <EuiButton onClick={createIndex} disabled={!docsPendingToBeSaved.size}>
                   <FormattedMessage

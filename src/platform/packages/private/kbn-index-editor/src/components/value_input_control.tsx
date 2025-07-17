@@ -51,7 +51,7 @@ export const getCellValueRenderer =
 
     if (isEditing) {
       return (
-        <div style={{ display: 'flex', height: '100%' }}>
+        <div css={{ display: 'flex', height: '100%' }}>
           <ValueInput
             onBlur={() => {
               onEditStart({ row: null, col: null });
@@ -80,7 +80,7 @@ export const getCellValueRenderer =
         <EuiFlexItem>
           <div
             tabIndex={0}
-            style={{
+            css={{
               cursor: 'pointer',
               height: '100%',
               width: '100%',
