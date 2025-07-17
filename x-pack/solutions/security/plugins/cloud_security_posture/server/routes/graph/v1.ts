@@ -13,6 +13,7 @@ import type {
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import type { MappedAssetProps } from '@kbn/cloud-security-posture-common/types/assets';
+import { entityTypeMappings } from './entity_type_constants';
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
@@ -235,5 +236,18 @@ export const mapEntityDataToNodeProps = (params: EntityDataToNodePropsParams): M
  * @returns The standardized icon name
  */
 export const transformEntityTypeToIcon = (entityType: string | undefined): string | undefined => {
-  return 'user';
+  if (!entityType) {
+    return undefined;
+  }
+
+  // Convert to lowercase for case-insensitive comparison
+  const entityTypeLower = entityType.toLowerCase();
+
+  // Find the first matching mapping where the entity type is in the values array
+  const mappingResult = entityTypeMappings.find((mapping) =>
+    mapping.values.some((type: string) => entityTypeLower === type.toLowerCase())
+  );
+
+  // Return the icon name if found, otherwise default to 'question'
+  return mappingResult?.icon ?? undefined;
 };
