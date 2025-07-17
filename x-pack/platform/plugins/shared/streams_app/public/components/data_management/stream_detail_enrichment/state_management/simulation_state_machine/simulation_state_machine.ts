@@ -6,11 +6,11 @@
  */
 import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
+import { FlattenRecord } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { processorConverter } from '../../utils';
+import { isValidProcessor } from '../../utils';
 import {
   SimulationInput,
   SimulationContext,
@@ -35,8 +35,6 @@ export interface ProcessorEventParams {
 
 const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
-const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
-  isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
 const hasValidProcessors = (processors: ProcessorDefinitionWithUIAttributes[]) =>
   processors.every(isValidProcessor);
 

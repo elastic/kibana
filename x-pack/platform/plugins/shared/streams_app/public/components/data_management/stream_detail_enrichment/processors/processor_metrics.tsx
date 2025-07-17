@@ -67,7 +67,7 @@ export const ProcessorMetricBadges = ({
       )}
       {failedRate && (
         <EuiBadge
-          color="hollow"
+          color="danger"
           iconType="warning"
           title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.failedRate', {
             defaultMessage: '{failedRate} of the sampled documents were not parsed due to an error',

@@ -13,6 +13,8 @@ import {
   ProcessorDefinitionWithId,
   ProcessorType,
   getProcessorType,
+  isSchema,
+  processorDefinitionSchema,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
@@ -402,3 +404,6 @@ export const recalcColumnWidths = ({
 
   return next;
 };
+
+export const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
+  isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));

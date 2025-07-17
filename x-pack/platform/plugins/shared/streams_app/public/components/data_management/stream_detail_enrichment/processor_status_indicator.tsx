@@ -16,7 +16,10 @@ import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ProcessorConfigurationProps } from './processors';
-import { useSimulatorSelector } from './state_management/stream_enrichment_state_machine';
+import {
+  useSimulatorSelector,
+  useStreamEnrichmentSelector,
+} from './state_management/stream_enrichment_state_machine';
 
 export const ProcessorStatusIndicator = ({
   processorRef,
@@ -39,8 +42,28 @@ export const ProcessorStatusIndicator = ({
       !snapshot.context.simulation.processors_metrics[processorRef.id]
   );
   const isFailing = useSimulatorSelector((snapshot) =>
-    Boolean(snapshot.context.simulation?.processors_metrics[processorRef.id]?.failed_rate === 1)
+    Boolean(
+      snapshot.context.simulation?.processors_metrics[processorRef.id]?.errors.some(
+        (e) => e.type === 'generic_simulation_failure'
+      )
+    )
   );
+  const isAnyProcessorBeforePersisted = useStreamEnrichmentSelector((state) => {
+    // Check if any new processoris positioned before persisted processors
+    return state.context.processorsRefs
+      .map((ref) => ref.getSnapshot())
+      .some((snapshot, id, processorSnapshots) => {
+        // Skip if this processor is already persisted
+        if (!snapshot.context.isNew) return false;
+
+        // Check if there are persisted processors after this position
+        const hasPersistedAfter = processorSnapshots
+          .slice(id + 1)
+          .some(({ context }) => !context.isNew);
+
+        return hasPersistedAfter;
+      });
+  });
 
   let variant:
     | (EuiAvatarProps & {
@@ -48,7 +71,43 @@ export const ProcessorStatusIndicator = ({
       })
     | null = null;
 
-  if (isParticipatingInSimulation) {
+  if (isAnyProcessorBeforePersisted) {
+    const name = i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.mixedProcessorTooltip',
+      {
+        defaultMessage:
+          'Currently, is not possible to simulate persisted and new processors together. Move the new processors after the persisted processors to restore the simulation behavior.',
+      }
+    );
+    variant = {
+      name,
+      iconType: 'dot',
+      color: euiTheme.colors.backgroundBaseDisabled,
+      tooltipContent: name,
+    };
+  } else if (!isParticipatingInSimulation) {
+    const name = isNew
+      ? i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.skippedNewProcessorTooltip',
+          {
+            defaultMessage:
+              'This processor is skipped since it comes after the processor under edit.',
+          }
+        )
+      : i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.skippedConfiguredProcessorTooltip',
+          {
+            defaultMessage: 'This processor is skipped since it is persisted already.',
+          }
+        );
+
+    variant = {
+      name,
+      iconType: 'dot',
+      color: euiTheme.colors.backgroundBaseDisabled,
+      tooltipContent: name,
+    };
+  } else {
     if (isSimulationRunning) {
       const name = i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.simulatingProcessorTooltip',
@@ -98,28 +157,6 @@ export const ProcessorStatusIndicator = ({
         tooltipContent: name,
       };
     }
-  } else {
-    const name = isNew
-      ? i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.skippedNewProcessorTooltip',
-          {
-            defaultMessage:
-              'This processor is skipped since it comes after the processor under edit.',
-          }
-        )
-      : i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.skippedConfiguredProcessorTooltip',
-          {
-            defaultMessage: 'This processor is skipped since it is persisted already.',
-          }
-        );
-
-    variant = {
-      name,
-      iconType: 'dot',
-      color: euiTheme.colors.backgroundBaseDisabled,
-      tooltipContent: name,
-    };
   }
 
   if (!variant) {
