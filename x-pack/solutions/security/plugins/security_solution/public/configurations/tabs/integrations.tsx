@@ -11,7 +11,6 @@ import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
 import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
-import { useGetPackageVerificationKeyId } from '@kbn/fleet-plugin/public';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { useEnhancedIntegrationCards } from '../../common/lib/search_ai_lake/hooks';
 import { ConfigurationTabs, IntegrationsFacets } from '../constants';
@@ -24,9 +23,6 @@ export interface IntegrationsPageProps {
 
 export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
   ({ useAvailablePackages }) => {
-    const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
-    console.log('retrieved packageVerificationKeyId', packageVerificationKeyId);
-
     const { filteredCards, isLoading, searchTerm, setSearchTerm } = useAvailablePackages({
       prereleaseIntegrationsEnabled: true,
     });

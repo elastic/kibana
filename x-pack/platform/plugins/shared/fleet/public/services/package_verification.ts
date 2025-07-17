@@ -17,21 +17,12 @@ export function isPackageUnverified(
 ) {
   if (!('installationInfo' in pkg) || !pkg.installationInfo) return false;
 
-  console.log(pkg.name, 'packageVerificationKeyId', packageVerificationKeyId);
-
   const { verification_status: verificationStatus, verification_key_id: verificationKeyId } =
     pkg?.installationInfo;
 
-  console.log(pkg.name, 'installationInfo', pkg.installationInfo);
-
   const isKeyOutdated = !!verificationKeyId && verificationKeyId !== packageVerificationKeyId;
-
-  console.log(pkg.name, 'isKeyOutdated', isKeyOutdated);
-
   const isUnverified =
     verificationStatus === 'unverified' || (verificationStatus === 'verified' && isKeyOutdated);
-
-  console.log(pkg.name, 'isPackageUnverified', isUnverified);
   return isUnverified;
 }
 
