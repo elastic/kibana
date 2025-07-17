@@ -420,7 +420,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
         | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
               criteria: [
-                'The query provided by the Assistant uses the ESQL functions LENGTH and CASE, not the SPL functions len and if',
+                'The query provided by the Assistant uses the ES|QL functions LENGTH and CASE, not the SPL functions len and if',
               ],
               execute: false,
             },
