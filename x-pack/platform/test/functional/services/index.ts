@@ -35,7 +35,6 @@ export const services = {
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
   spaces: kibanaXPackApiIntegrationServices.spaces,
-  apmSynthtraceKibanaClient: kibanaXPackApiIntegrationServices.apmSynthtraceKibanaClient,
   userMenu: UserMenuProvider,
   aceEditor: AceEditorProvider,
   rules: RulesServiceProvider,
