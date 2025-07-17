@@ -138,7 +138,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
     [selectedCategory, setSelectedSubCategory, setUrlandPushHistory]
   );
 
-  const filteredPromotedList: Array<IntegrationCardItem & { index: number }> = useMemo(() => {
+  const filteredPromotedList: IntegrationCardItem[] = useMemo(() => {
     if (isLoading) return [];
 
     const searchResults =
@@ -150,14 +150,9 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
       ? list.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : list;
 
-    const promotedList = sortByFeaturedIntegrations
+    return sortByFeaturedIntegrations
       ? promoteFeaturedIntegrations(filteredList, selectedCategory)
       : filteredList;
-
-    return promotedList.map((item, index) => ({
-      ...item,
-      index,
-    }));
   }, [isLoading, list, localSearch, searchTerm, selectedCategory, sortByFeaturedIntegrations]);
   const splitSubcategories = (
     subcategories: CategoryFacet[] | undefined

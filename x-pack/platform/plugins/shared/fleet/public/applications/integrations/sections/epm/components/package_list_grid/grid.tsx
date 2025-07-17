@@ -27,7 +27,7 @@ import type { IntegrationCardItem } from '../../screens/home';
 import { PackageCard } from '../package_card';
 
 interface GridColumnProps {
-  list: Array<IntegrationCardItem & { index: number }>;
+  list: IntegrationCardItem[];
   isLoading: boolean;
   showMissingIntegrationMessage?: boolean;
   showCardLabels?: boolean;
