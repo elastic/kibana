@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
-export * from './create_notifications';
+import type { Reference } from '@kbn/content-management-utils';
+
+export const SAVED_OBJECT_REF_NAME = 'savedObjectRef';
+
+export function findSavedObjectRef(savedObjectType: string, references?: Reference[]) {
+  return references
+    ? references.find((ref) => savedObjectType === ref.type && ref.name === SAVED_OBJECT_REF_NAME)
+    : undefined;
+}
