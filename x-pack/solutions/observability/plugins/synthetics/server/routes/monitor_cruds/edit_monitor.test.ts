@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { syncEditedMonitor } from './edit_monitor';
+import { syncEditedMonitor, uiMonitorContainsBacktickInInlineScript } from './edit_monitor';
 import { SavedObject } from '@kbn/core/server';
 import {
   EncryptedSyntheticsMonitorAttributes,
@@ -80,5 +80,40 @@ describe('syncEditedMonitor', () => {
         enabled: true,
       })
     );
+  });
+});
+
+describe('uiMonitorContainsBacktickInInlineScript', () => {
+  const baseBrowserMonitor = {
+    type: 'browser',
+    origin: 'ui',
+  } as any;
+
+  it('returns true when inline script contains a backtick', () => {
+    const monitor = {
+      ...baseBrowserMonitor,
+      'source.inline.script': 'step(`foo`, () => {})',
+    } as any;
+
+    expect(uiMonitorContainsBacktickInInlineScript(monitor)).toBe(true);
+  });
+
+  it('returns false when inline script does not contain a backtick', () => {
+    const monitor = {
+      ...baseBrowserMonitor,
+      'source.inline.script': 'step("foo", () => {})',
+    } as any;
+
+    expect(uiMonitorContainsBacktickInInlineScript(monitor)).toBe(false);
+  });
+
+  it('returns false for non-browser monitors', () => {
+    const monitor = {
+      type: 'http',
+      origin: 'ui',
+      urls: 'https://elastic.co',
+    } as any;
+
+    expect(uiMonitorContainsBacktickInInlineScript(monitor)).toBe(false);
   });
 });

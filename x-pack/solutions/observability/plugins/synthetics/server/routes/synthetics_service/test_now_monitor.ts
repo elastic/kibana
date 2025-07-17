@@ -47,16 +47,11 @@ export const triggerTestNow = async (
   try {
     const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
 
-    // Narrow SyntheticsMonitor to the browser variant that contains an inline script
-    const hasInlineScript = (
-      m: SyntheticsMonitor
-    ): m is SyntheticsMonitor & {
-      [ConfigKey.SOURCE_INLINE]: string;
-    } => typeof (m as any)[ConfigKey.SOURCE_INLINE] === 'string';
-
     const monitorAttrs = normalizedMonitor.attributes as SyntheticsMonitor;
 
-    if (hasInlineScript(monitorAttrs) && monitorAttrs[ConfigKey.SOURCE_INLINE].includes('`')) {
+    const inlineScript = (monitorAttrs as any)[ConfigKey.SOURCE_INLINE] as string | undefined;
+
+    if (typeof inlineScript === 'string' && inlineScript.includes('`')) {
       return response.badRequest({
         body: {
           message: NO_BACKTICKS_ERROR_MESSAGE,

@@ -34,7 +34,7 @@ export interface SourceFieldProps {
 }
 
 export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: SourceFieldProps) => {
-  const { control, clearErrors } = useFormContext();
+  const { control } = useFormContext();
   const [sourceType, setSourceType] = useState<SourceType>(
     value.type === 'inline' ? SourceType.INLINE : SourceType.SCRIPT_RECORDER
   );
@@ -123,9 +123,6 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Sou
                 onChange={(code) => {
                   field.onChange(code);
                   setConfig((prev) => ({ ...prev, script: code }));
-                  if (!code.includes('`')) {
-                    clearErrors(ConfigKey.SOURCE_INLINE);
-                  }
                   onBlur(ConfigKey.SOURCE_INLINE);
                 }}
               />

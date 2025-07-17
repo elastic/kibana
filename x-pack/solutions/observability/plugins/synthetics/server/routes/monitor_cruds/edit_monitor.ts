@@ -76,13 +76,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     if (monitor.origin && monitor.origin !== 'ui') {
       return response.badRequest(getInvalidOriginError(monitor));
     }
-    if (
-      monitor.type &&
-      monitor.type === 'browser' &&
-      monitor.origin === 'ui' &&
-      (monitor as BrowserFields)?.[ConfigKey.SOURCE_INLINE] &&
-      (monitor as BrowserFields)[ConfigKey.SOURCE_INLINE].includes('`')
-    ) {
+    if (uiMonitorContainsBacktickInInlineScript(monitor)) {
       return response.badRequest({
         body: {
           message: NO_BACKTICKS_ERROR_MESSAGE,
@@ -222,6 +216,15 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     }
   },
 });
+
+export const uiMonitorContainsBacktickInInlineScript = (monitor: SyntheticsMonitor): boolean => {
+  return !!(
+    monitor.origin === 'ui' &&
+    monitor.type === 'browser' &&
+    (monitor as BrowserFields)?.[ConfigKey.SOURCE_INLINE] &&
+    (monitor as BrowserFields)[ConfigKey.SOURCE_INLINE].includes('`')
+  );
+};
 
 const rollbackUpdate = async ({
   routeContext,
