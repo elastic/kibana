@@ -45,5 +45,7 @@
     "@kbn/es",
     "@kbn/cypress-test-helper",
     "@kbn/fleet-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/session-view-plugin",
   ]
 }

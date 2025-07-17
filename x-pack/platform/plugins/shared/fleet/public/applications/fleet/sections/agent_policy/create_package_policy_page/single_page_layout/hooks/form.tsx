@@ -43,6 +43,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
 import { getMaxPackageName } from '../../../../../../../../common/services';
+import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -55,7 +56,6 @@ import {
   getCloudFormationPropsFromPackagePolicy,
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
-import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
@@ -404,12 +404,19 @@ export function useOnSubmit({
 
   const newInputs = useMemo(() => {
     return packagePolicy.inputs.map((input, i) => {
-      if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
+      if (
+        isInputAllowedForDeploymentMode(
+          input,
+          isAgentlessSelected ? 'agentless' : 'default',
+          packageInfo
+        )
+      ) {
+        return input;
+      } else {
         return { ...input, enabled: false };
       }
-      return packagePolicy.inputs[i];
     });
-  }, [packagePolicy.inputs, isAgentlessSelected]);
+  }, [packagePolicy.inputs, isAgentlessSelected, packageInfo]);
 
   useEffect(() => {
     if (prevSetupTechnology !== selectedSetupTechnology) {
