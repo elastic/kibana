@@ -8,13 +8,16 @@
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 
-const usePreferredSchema = () => {
-  const [preferredSchema, setPreferredSchema] = useState<Array<'ecs' | 'semconv'>>(['semconv']);
+export type SchemaType = 'ecs' | 'semconv';
 
-  const updatePreferredSchema = useCallback((schema: Array<'ecs' | 'semconv'>) => {
+const usePreferredSchema = () => {
+  const [preferredSchema, setPreferredSchema] = useState<SchemaType>('semconv' as SchemaType);
+
+  const updatePreferredSchema = useCallback((schema: SchemaType) => {
+    console.log('Updating preferred schema to:', schema);
     setPreferredSchema(schema);
   }, []);
-
+  console.log('Current preferred schema:', preferredSchema);
   return {
     preferredSchema,
     updatePreferredSchema,

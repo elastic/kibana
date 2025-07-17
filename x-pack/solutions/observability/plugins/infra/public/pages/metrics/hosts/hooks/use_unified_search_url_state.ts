@@ -36,6 +36,7 @@ const INITIAL_HOSTS_STATE: HostsState = {
   panelFilters: [],
   dateRange: INITIAL_DATE_RANGE,
   limit: DEFAULT_HOST_LIMIT,
+  preferredSchema: 'semconv',
 };
 
 export type HostsStateAction =
@@ -43,7 +44,8 @@ export type HostsStateAction =
   | { type: 'SET_LIMIT'; limit: number }
   | { type: 'SET_FILTERS'; filters: HostsState['filters'] }
   | { type: 'SET_QUERY'; query: HostsState['query'] }
-  | { type: 'SET_PANEL_FILTERS'; panelFilters: HostsState['panelFilters'] };
+  | { type: 'SET_PANEL_FILTERS'; panelFilters: HostsState['panelFilters'] }
+  | { type: 'SET_PREFERRED_SCHEMA'; preferredSchema: HostsState['preferredSchema'] };
 
 const reducer = (state: HostsState, action: HostsStateAction): HostsState => {
   switch (action.type) {
@@ -57,6 +59,8 @@ const reducer = (state: HostsState, action: HostsStateAction): HostsState => {
       return { ...state, query: action.query };
     case 'SET_PANEL_FILTERS':
       return { ...state, panelFilters: action.panelFilters };
+    case 'SET_PREFERRED_SCHEMA':
+      return { ...state, preferredSchema: action.preferredSchema };
     default:
       return state;
   }
@@ -74,6 +78,7 @@ export const useHostsUrlState = (): [HostsState, Dispatch<HostsStateAction>] => 
       ...INITIAL_HOSTS_STATE,
       dateRange: getTime(),
       limit: localStorageHostLimit ?? INITIAL_HOSTS_STATE.limit,
+      preferredSchema: 'semconv',
     },
     decodeUrlState,
     encodeUrlState,
@@ -141,6 +146,7 @@ const HostsStateRT = rt.type({
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   limit: rt.number,
+  preferredSchema: rt.union([rt.literal('ecs'), rt.literal('semconv')]),
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;

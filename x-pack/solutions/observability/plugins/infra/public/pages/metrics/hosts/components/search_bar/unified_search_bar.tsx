@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -17,18 +17,79 @@ import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
+import { SchemaSelector } from '../../../../../components/schema_selector';
+import { useTimeRangeMetadata } from '../../../../../hooks/use_time_range_metadata';
+import type { HostsState } from '../../hooks/use_unified_search_url_state';
+import { useHostsUrlState } from '../../hooks/use_unified_search_url_state';
 
 export const UnifiedSearchBar = () => {
   const {
     services: { unifiedSearch },
   } = useKibanaContextForPlugin();
   const { metricsView } = useMetricsDataViewContext();
-  const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit } =
-    useUnifiedSearchContext();
+  const {
+    searchCriteria,
+    onLimitChange,
+    onPanelFiltersChange,
+    onSubmit,
+    onPreferredSchemaChange,
+    parsedDateRange,
+  } = useUnifiedSearchContext();
   const { onPageRefreshStart } = usePerformanceContext();
+
+  const { data: timeRangeMetadata } = useTimeRangeMetadata({
+    dataSource: 'host',
+    start: parsedDateRange.from,
+    end: parsedDateRange.to,
+  });
 
   const { SearchBar } = unifiedSearch.ui;
 
+  // const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
+  const [hostsState, setHostsState] = useHostsUrlState();
+
+  const schemas = useMemo(() => timeRangeMetadata?.schemas || [], [timeRangeMetadata]);
+
+  // Set preferredSchema in URL if not set or not available
+  useEffect(() => {
+    if (!schemas.length) return;
+    const current = hostsState.preferredSchema;
+    if (!current || !schemas.includes(current)) {
+      const next = schemas.includes('semconv') ? 'semconv' : schemas[0];
+      setHostsState({
+        ...hostsState,
+        preferredSchema: next,
+        type: 'SET_PREFERRED_SCHEMA',
+      });
+    }
+  }, [schemas, hostsState, setHostsState]);
+
+  console.log('UnifiedSearchBar searchCriteria:', searchCriteria.preferredSchema);
+
+  const handleSchemaChange = useCallback(
+    (selected: HostsState['preferredSchema']) => {
+      setHostsState({
+        ...hostsState,
+        preferredSchema: selected,
+        type: 'SET_PREFERRED_SCHEMA',
+      });
+      console.log('UnifiedSearchBar handleSchemaChange:', selected);
+      if (onPreferredSchemaChange) {
+        onPreferredSchemaChange(selected);
+      }
+    },
+    [hostsState, setHostsState, onPreferredSchemaChange]
+  );
+
+  // Prepare options for SchemaSelector
+  const schemaOptions = useMemo(
+    () =>
+      schemas.map((schema) => ({
+        text: schema,
+        value: schema,
+      })),
+    [schemas]
+  );
   const handleRefresh = useCallback(
     (payload: { dateRange: TimeRange }, isUpdate?: boolean) => {
       // This makes sure `onSubmit` is only called when the submit button is clicked
@@ -43,6 +104,13 @@ export const UnifiedSearchBar = () => {
   return (
     <StickyContainer>
       <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <SchemaSelector
+            onChange={handleSchemaChange}
+            options={schemaOptions}
+            value={hostsState.preferredSchema}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <SearchBar
             appName={'Infra Hosts'}

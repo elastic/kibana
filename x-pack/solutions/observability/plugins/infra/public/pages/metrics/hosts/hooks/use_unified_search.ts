@@ -28,7 +28,14 @@ import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
 ) => {
-  const { panelFilters, filters, parsedDateRange, query: queryObj, limit } = hostState;
+  const {
+    panelFilters,
+    filters,
+    parsedDateRange,
+    query: queryObj,
+    limit,
+    preferredSchema,
+  } = hostState;
 
   return {
     control_filter_fields: retrieveFieldsFromFilter(panelFilters),
@@ -36,6 +43,7 @@ const buildQuerySubmittedPayload = (
     interval: telemetryTimeRangeFormatter(parsedDateRange.to - parsedDateRange.from),
     with_query: !!queryObj.query,
     limit,
+    preferred_schema: preferredSchema,
   };
 };
 
@@ -89,6 +97,15 @@ export const useUnifiedSearch = () => {
   const onLimitChange = useCallback(
     (limit: number) => {
       setSearch({ type: 'SET_LIMIT', limit });
+      updateReloadRequestTime();
+    },
+    [setSearch, updateReloadRequestTime]
+  );
+
+  const onPreferredSchemaChange = useCallback(
+    (preferredSchema: HostsState['preferredSchema']) => {
+      console.log(`USE - Setting preferred schema to ${preferredSchema}`);
+      setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
       updateReloadRequestTime();
     },
     [setSearch, updateReloadRequestTime]
@@ -227,6 +244,7 @@ export const useUnifiedSearch = () => {
     onDateRangeChange,
     onLimitChange,
     onPanelFiltersChange,
+    onPreferredSchemaChange,
   };
 };
 

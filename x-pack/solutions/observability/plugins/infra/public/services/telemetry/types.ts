@@ -38,6 +38,7 @@ export interface HostsViewQuerySubmittedParams {
   interval: string;
   with_query: boolean;
   limit: number;
+  preferred_schema: 'ecs' | 'semconv' | null;
 }
 
 export interface HostEntryClickedParams {
