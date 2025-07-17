@@ -269,6 +269,7 @@ export function getTextBasedDatasource({
         layers: {
           ...state.layers,
           [newLayerId]: {
+            type: 'esql' as const,
             index,
             query,
             columns: newColumns ?? [],
@@ -719,6 +720,7 @@ export function getTextBasedDatasource({
 
 function blankLayer(index: string, query?: AggregateQuery) {
   return {
+    type: 'esql' as const,
     index,
     query,
     columns: [],
