@@ -307,7 +307,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe(`with data loaded and using KQL filter`, () => {
-      describe('transaction_duration: with data loaded and using KQL filter', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/228495
+      describe.skip('transaction_duration: with data loaded and using KQL filter', () => {
         let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
         before(async () => {
