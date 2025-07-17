@@ -60,6 +60,10 @@ export interface ImportSavedObjectsOptions {
    * If provided, Kibana will apply the given option to the `managed` property.
    */
   managed?: boolean;
+  /** The request originating the import operation */
+  request: KibanaRequest;
+  /** The factory function for creating the access control import transforms */
+  createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
   log: Logger;
 }
 
@@ -82,6 +86,8 @@ export async function importSavedObjectsFromStream({
   compatibilityMode,
   managed,
   log,
+  request,
+  createAccessControlImportTransforms,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
   log.debug(
     `Importing with overwrite ${overwrite ? 'enabled' : 'disabled'} and size limit ${objectLimit}`
@@ -95,6 +101,9 @@ export async function importSavedObjectsFromStream({
     objectLimit,
     supportedTypes,
     managed,
+    request,
+    typeRegistry,
+    createAccessControlImportTransforms,
   });
   log.debug(
     `Importing types: ${[

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable } from 'stream';
+import { Readable, Transform } from 'stream';
 import {
   SavedObjectsImportRetry,
   SavedObjectsImportWarning,
   SavedObjectsImportResponse,
+  SavedObjectsImportFailure,
 } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '..';
+import { KibanaRequest } from '@kbn/core-http-server';
+import type { ISavedObjectTypeRegistry, SavedObject } from '..';
 
 /**
  * Utility class used to import savedObjects.
@@ -78,6 +80,8 @@ export interface SavedObjectsImportOptions {
    * make their edits to the copy.
    */
   managed?: boolean;
+  /** The http request initiating the import. */
+  request: KibanaRequest;
 }
 
 /**
@@ -137,3 +141,14 @@ export interface SavedObjectsImportHookResult {
 export type SavedObjectsImportHook<T = unknown> = (
   objects: Array<SavedObject<T>>
 ) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;
+
+export interface AccessControlImportTransforms {
+  filterStream: Transform;
+  // mapStream: Transform;
+}
+
+export type AccessControlImportTransformsFactory = (
+  request: KibanaRequest,
+  typeRegistry: ISavedObjectTypeRegistry,
+  errors: SavedObjectsImportFailure[]
+) => AccessControlImportTransforms;

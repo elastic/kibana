@@ -131,7 +131,7 @@ export const performBulkCreate = async <T>(
       typeSupportsAccessControl && createdBy
         ? {
             owner: createdBy,
-            accessMode,
+            accessMode: object.accessControl?.accessMode ?? options.accessControl?.accessMode,
           }
         : undefined;
     return right({

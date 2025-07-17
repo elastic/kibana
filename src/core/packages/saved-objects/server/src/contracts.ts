@@ -22,9 +22,14 @@ import type {
 } from './client_factory';
 import type { SavedObjectsType } from './saved_objects_type';
 import type { ISavedObjectTypeRegistry } from './type_registry';
-import type { ISavedObjectsExporter } from './export';
+import type { ISavedObjectsExporter, SavedObjectsExportTransform } from './export';
 import type { ISavedObjectsImporter, SavedObjectsImporterOptions } from './import';
 import type { SavedObjectsExtensions } from './extensions/extensions';
+
+export interface SavedObjectsAccessControlTransforms {
+  exportTransform: SavedObjectsExportTransform;
+  createImportTransforms: AccessControlImportTransformsFactory;
+}
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -83,6 +88,11 @@ export interface SavedObjectsServiceSetup {
    * Sets the {@link SavedObjectsSpacesExtensionFactory spaces extension factory}.
    */
   setSpacesExtension: (factory: SavedObjectsSpacesExtensionFactory) => void;
+
+  /**
+   * Sets the {@link SavedObjectsAccessControlTransforms access control transforms}.
+   */
+  setAccessControlTransforms: (transforms: SavedObjectsAccessControlTransforms) => void;
 
   /**
    * Register a {@link SavedObjectsType | savedObjects type} definition.

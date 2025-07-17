@@ -31,6 +31,8 @@ interface CollectExportedObjectOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   /** logger to use to log potential errors */
   logger: Logger;
+  /** the export transform to apply to exported objects that support access control */
+  accessCOntrolExportTransform?: SavedObjectsExportTransform;
 }
 
 interface CollectExportedObjectResult {
@@ -55,6 +57,7 @@ export const collectExportedObjects = async ({
   typeRegistry,
   savedObjectsClient,
   logger,
+  accessControlExportTransform,
 }: CollectExportedObjectOptions): Promise<CollectExportedObjectResult> => {
   const exportTransforms = buildTransforms(typeRegistry);
   const isExportable = buildIsExportable(typeRegistry);
@@ -119,7 +122,9 @@ export const collectExportedObjects = async ({
   } while (includeReferences && currentObjects.length);
 
   return {
-    objects: collectedObjects,
+    objects: accessControlExportTransform
+      ? accessControlExportTransform({ request }, collectedObjects)
+      : collectedObjects,
     excludedObjects: collectedNonExportableObjects,
     missingRefs: collectedMissingRefs,
   };

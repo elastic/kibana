@@ -62,6 +62,7 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
@@ -123,6 +124,7 @@ export class SavedObjectsService
   private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
   private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
+  private accessControlTransforms?: SavedObjectsAccessControlTransforms;
 
   private migrator$ = new Subject<IKibanaMigrator>();
 
@@ -219,6 +221,17 @@ export class SavedObjectsService
           throw new Error('spaces extension is already set, and can only be set once');
         }
         this.spacesExtensionFactory = factory;
+      },
+      setAccessControlTransforms: (transforms) => {
+        if (this.started) {
+          throw new Error('cannot call `setAccessControlTransforms` after service startup.');
+        }
+        if (this.accessControlTransforms) {
+          throw new Error(
+            'access control tranforms have already been set, and can only be set once'
+          );
+        }
+        this.accessControlTransforms = transforms;
       },
       registerType: (type) => {
         if (this.started) {
@@ -386,6 +399,7 @@ export class SavedObjectsService
           typeRegistry: this.typeRegistry,
           exportSizeLimit: this.config!.maxImportExportSize,
           logger: this.logger.get('exporter'),
+          accessControlExportTransform: this.accessControlTransforms?.exportTransform,
         }),
       createImporter: (savedObjectsClient, options) =>
         new SavedObjectsImporter({
@@ -393,6 +407,7 @@ export class SavedObjectsService
           typeRegistry: this.typeRegistry,
           importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
           logger: this.logger.get('importer'),
+          createAccessControlImportTransforms: this.accessControlTransforms?.createImportTransforms,
         }),
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,

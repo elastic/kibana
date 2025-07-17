@@ -72,10 +72,12 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   managed?: boolean;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
-
   /**
-   * Access control settings for the saved object.
-   * We specifically don't get the owner as that is set during the operation.
+   * Access control settings for the create operation. These settings will be
+   * applied to any of the incoming objects which support access control that
+   * do not already contain the accessControl property.
+   * We specifically exclude the owner peroprety, as that is set during the operation
+   * using the current user's profile ID.
    */
   accessControl?: Pick<SavedObjectAccessControl, 'accessMode'>;
 }
