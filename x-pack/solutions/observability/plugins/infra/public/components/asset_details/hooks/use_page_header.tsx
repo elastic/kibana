@@ -88,18 +88,18 @@ export const useTemplateHeaderBreadcrumbs = () => {
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = useMemo(
     () => ({
       nodeDetails: (
-        <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
+        <LinkToNodeDetails entityId={entity.id} entityName={entity.name} entityType={entity.type} />
       ),
       alertRule: (
         <CreateAlertRuleButton data-test-subj="infraAssetDetailsPageHeaderCreateAlertsRuleButton" />
       ),
     }),
-    [asset.id, asset.name, asset.type]
+    [entity.id, entity.name, entity.type]
   );
 
   const rightSideItems = useMemo(

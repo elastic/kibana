@@ -37,7 +37,12 @@ export const getHandlerWrapper =
         if (isOnechatError(e)) {
           logger.error(e);
           return res.customError({
-            body: { message: e.message },
+            body: {
+              message: e.message,
+              attributes: {
+                trace_id: e.meta?.traceId,
+              },
+            },
             statusCode: e.meta?.statusCode ?? 500,
           });
         } else {
