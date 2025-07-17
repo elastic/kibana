@@ -912,6 +912,7 @@ x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
 x-pack/platform/plugins/private/file_upload @elastic/kibana-presentation @elastic/ml-ui
+x-pack/platform/plugins/private/gen_ai_settings @elastic/appex-ai-infra
 x-pack/platform/plugins/private/global_search_bar @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
