@@ -55,9 +55,8 @@ const TAG_COLORS = [
   '#A0A0A0',
 ];
 
-export const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
-export const getPackageTagId = (spaceId: string, pkgName: string) =>
-  `fleet-pkg-${pkgName}-${spaceId}`;
+const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
+const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgName}-${spaceId}`;
 const getLegacyPackageTagId = (pkgName: string) => pkgName;
 
 /*
@@ -86,12 +85,12 @@ interface TagAssetsParams {
   pkgTitle: string;
   pkgName: string;
   spaceId: string;
-  importedAssets: Array<ObjectReference | SavedObjectsImportSuccess>;
+  importedAssets: SavedObjectsImportSuccess[];
   assetTags?: PackageSpecTags[];
 }
 
-const getNewId = (asset: ObjectReference | SavedObjectsImportSuccess) =>
-  'destinationId' in asset && asset?.destinationId ? asset.destinationId : asset.id;
+const getNewId = (asset: SavedObjectsImportSuccess) =>
+  asset?.destinationId ? asset.destinationId : asset.id;
 
 export async function tagKibanaAssets(opts: TagAssetsParams) {
   const { savedObjectTagAssignmentService, importedAssets } = opts;
@@ -148,7 +147,7 @@ export async function tagKibanaAssets(opts: TagAssetsParams) {
   }
 }
 
-function getTaggableAssets(importedAssets: Array<ObjectReference | SavedObjectsImportSuccess>) {
+function getTaggableAssets(importedAssets: SavedObjectsImportSuccess[]) {
   return importedAssets.filter((asset) => taggableTypes.includes(asset.type));
 }
 
@@ -207,7 +206,7 @@ async function ensurePackageTag(
 
 // Ensure that asset tags coming from the kibana/tags.yml file are correctly parsed and created
 async function getPackageSpecTags(
-  taggableAssets: Array<ObjectReference | SavedObjectsImportSuccess>,
+  taggableAssets: SavedObjectsImportSuccess[],
   opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient' | 'pkgName' | 'assetTags'>
 ): Promise<PackageSpecTagsAssets[]> {
   const { spaceId, savedObjectTagClient, pkgName, assetTags } = opts;
@@ -242,7 +241,7 @@ async function getPackageSpecTags(
 // Get all the assets of types defined in tag.asset_types from taggable kibanaAssets
 const getAssetTypesObjectReferences = (
   assetTypes: string[] | undefined,
-  taggableAssets: Array<ObjectReference | SavedObjectsImportSuccess>
+  taggableAssets: SavedObjectsImportSuccess[]
 ): ObjectReference[] => {
   if (!assetTypes || assetTypes.length === 0) return [];
 
@@ -256,7 +255,7 @@ const getAssetTypesObjectReferences = (
 // Get the references to ids defined in tag.asset_ids from taggable kibanaAssets
 const getAssetIdsObjectReferences = (
   assetIds: string[] | undefined,
-  taggableAssets: Array<ObjectReference | SavedObjectsImportSuccess>
+  taggableAssets: SavedObjectsImportSuccess[]
 ): ObjectReference[] => {
   if (!assetIds || assetIds.length === 0) return [];
 
