@@ -178,12 +178,17 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     }, {} as CustomCellRenderer);
   }, [CellValueRenderer, renderedColumns]);
 
+  // We render an editable header for columns that are not saved in the index.
   const customGridColumnsConfiguration = useMemo(() => {
     return renderedColumns.reduce((acc, columnName) => {
-      if (columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX)) {
+      if (!props.dataView.fields.getByName(columnName)) {
+        const initialColumnName = !columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX)
+          ? columnName
+          : undefined;
+
         acc[columnName] = ({ column }) => ({
           ...column,
-          display: <AddColumnHeader />,
+          display: <AddColumnHeader initialColumnName={initialColumnName} />,
           actions: false,
           displayHeaderCellProps: {
             className: 'custom-column--placeholder',
@@ -192,7 +197,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       }
       return acc;
     }, {} as CustomGridColumnsConfiguration);
-  }, [renderedColumns]);
+  }, [renderedColumns, props.dataView]);
 
   return (
     <>

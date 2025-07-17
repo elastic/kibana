@@ -12,20 +12,30 @@ import React, { useState, KeyboardEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAddColumnName } from '../hooks/use_add_column_name';
 
-export const AddColumnHeader = () => {
+interface AddColumnHeaderProps {
+  initialColumnName?: string;
+}
+
+export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
+  const { columnName, setColumnName, saveColumn, validationError } =
+    useAddColumnName(initialColumnName);
+
   const [isEditing, setIsEditing] = useState(false);
-  const { columnName, setColumnName, saveNewColumn, validationError } = useAddColumnName();
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!validationError) {
-      await saveNewColumn();
+      await saveColumn();
       setColumnName('');
       setIsEditing(false);
     }
   };
+
+  const columnLabel = initialColumnName || (
+    <FormattedMessage id="indexEditor.flyout.grid.columnHeader.add" defaultMessage="Add a field…" />
+  );
 
   if (isEditing) {
     return (
@@ -78,10 +88,7 @@ export const AddColumnHeader = () => {
         if (e.key === 'Enter') setIsEditing(true);
       }}
     >
-      <FormattedMessage
-        id="indexEditor.flyout.grid.columnHeader.default"
-        defaultMessage="Add a field…"
-      />
+      {columnLabel}
     </EuiButtonEmpty>
   );
 };

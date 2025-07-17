@@ -17,17 +17,17 @@ interface AddColumnPanelProps {
 }
 
 export const AddColumnPanel: React.FC<AddColumnPanelProps> = ({ onHide }) => {
-  const { columnName, setColumnName, saveNewColumn, validationError } = useAddColumnName();
+  const { columnName, setColumnName, saveColumn, validationError } = useAddColumnName();
 
   const onSubmit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       if (!validationError) {
-        await saveNewColumn();
+        await saveColumn();
         onHide();
       }
     },
-    [saveNewColumn, onHide, validationError]
+    [saveColumn, onHide, validationError]
   );
 
   return (
