@@ -25,10 +25,16 @@ import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDet
 import { WorkflowEditor } from '../../features/workflow-editor/ui';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 import { WorkflowExecutionList } from '../../features/workflow-execution-list/ui';
+import { WorkflowVisualEditor } from '../../features/workflow-visual-editor/ui';
+import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
+import { WorkflowEventModal } from '../../features/run-workflow/ui/WorkflowEventModal';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
   const { data: workflow, isLoading: isLoadingWorkflow, error } = useWorkflowDetail(id);
+
+  const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
 
   chrome!.setBreadcrumbs([
     {
@@ -46,6 +52,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
+
+  const workflowYamlObject = useMemo(
+    () => (workflowYaml ? parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE) : null),
+    [workflowYaml]
+  );
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -73,9 +84,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     });
   };
 
-  const handleRunWorkflow = () => {
+  const handleRunClick = () => {
+    setWorkflowEventModalOpen(true);
+  };
+
+  const handleRunWorkflow = (event: Record<string, any>) => {
     runWorkflow.mutate(
-      { id, inputs: {} },
+      { id, inputs: event },
       {
         onSuccess: () => {
           notifications?.toasts.addSuccess('Workflow run started', {
@@ -113,12 +128,19 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiText>Failed to load workflow</EuiText>;
     }
     return (
-      <WorkflowEditor
-        workflowId={workflow?.id}
-        value={workflowYaml}
-        onChange={handleChange}
-        hasChanges={hasChanges}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <WorkflowEditor
+            workflowId={workflow?.id}
+            value={workflowYaml}
+            onChange={handleChange}
+            hasChanges={hasChanges}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {workflowYamlObject?.data && <WorkflowVisualEditor workflow={workflowYamlObject.data} />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
   const renderWorkflowExecutions = () => {
@@ -145,7 +167,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
             <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
           </EuiButton>,
-          <EuiButton iconType="play" size="s" onClick={handleRunWorkflow}>
+          <EuiButton iconType="play" size="s" onClick={handleRunClick}>
             <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
           </EuiButton>,
         ]}
@@ -166,6 +188,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiPageTemplate.Section restrictWidth={false}>
         {buttonGroupSelectedId === 'workflow' ? renderWorkflowEditor() : renderWorkflowExecutions()}
       </EuiPageTemplate.Section>
+      {workflowEventModalOpen && (
+        <WorkflowEventModal
+          onClose={() => setWorkflowEventModalOpen(false)}
+          onSubmit={handleRunWorkflow}
+        />
+      )}
     </EuiPageTemplate>
   );
 }

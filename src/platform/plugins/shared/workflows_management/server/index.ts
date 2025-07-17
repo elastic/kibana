@@ -8,6 +8,7 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
+export { config } from './config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.

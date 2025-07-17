@@ -109,6 +109,7 @@ export const getIfStepSchema = (stepSchema: z.ZodType) => {
     type: z.literal('if'),
     condition: z.string(),
     steps: z.array(stepSchema).min(1),
+    else: z.array(stepSchema).optional(),
   });
 };
 

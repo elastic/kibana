@@ -7,7 +7,7 @@
     "id": "featureFlagsExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["developerExamples", "workflows"],
+    "requiredPlugins": ["developerExamples"],
     "optionalPlugins": []
   }
 }
