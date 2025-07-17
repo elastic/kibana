@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
@@ -55,30 +56,33 @@ export function createAddChangePointChartAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      try {
-        const { resolveEmbeddableChangePointUserInput } = await import(
-          '../embeddables/change_point_chart/resolve_change_point_config_input'
-        );
-
-         resolveEmbeddableChangePointUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          context.embeddable.uuid,
-          (initialState) => {
-            presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
-              panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-              serializedState: {
-                rawState: initialState,
-              },
-            });
-          },
-        );
-
-   
-      } catch (e) {
-        return Promise.reject();
-      }
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+          'aria-labelledby': 'changePointConfig',
+        },
+        uuid: context.embeddable.uuid,
+        loadContent: async ({ closeFlyout }) => {
+          const { getEmbeddableChangePointUserInput } = await import(
+            '../embeddables/change_point_chart/resolve_change_point_config_input'
+          );
+          return getEmbeddableChangePointUserInput(
+            coreStart,
+            pluginStart,
+            (initialState) => {
+              presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
+                panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+                serializedState: {
+                  rawState: initialState,
+                },
+              });
+            },
+            closeFlyout
+          );
+        },
+      });
     },
   };
 }
