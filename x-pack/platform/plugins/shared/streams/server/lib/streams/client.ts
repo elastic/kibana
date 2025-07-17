@@ -651,7 +651,7 @@ export class StreamsClient {
       // in serverless, Elasticsearch doesn't natively support streams yet
       return false;
     }
-    const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+    const response = (await this.dependencies.scopedClusterClient.asInternalUser.transport.request({
       method: 'GET',
       path: '/_streams/status',
     })) as { logs: { enabled: boolean } };
@@ -668,19 +668,6 @@ export class StreamsClient {
 
     if (Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined) {
       throw new StatusError('Cannot delete root stream', 400);
-    }
-
-    const access =
-      definition && Streams.GroupStream.Definition.is(definition)
-        ? { write: true, read: true }
-        : await checkAccess({
-            name,
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-          });
-
-    // Can/should State manage access control as well?
-    if (!access.write) {
-      throw new SecurityError(`Cannot delete stream, insufficient privileges`);
     }
 
     await State.attemptChanges(

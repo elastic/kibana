@@ -198,4 +198,4 @@ export const PrivilegedUserMonitoringValidationStep: React.FC<PrivilegedUserMoni
     );
   });
 
-PrivilegedUserMonitoringValidationStep.displayName = 'privilegedUserMonitoring.validationStep';
+PrivilegedUserMonitoringValidationStep.displayName = 'PrivilegedUserMonitoringValidationStep';
