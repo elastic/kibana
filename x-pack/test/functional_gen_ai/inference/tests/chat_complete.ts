@@ -143,7 +143,8 @@ export const chatCompleteSuite = (
         expect(message).to.eql({
           type: 'error',
           code: 'requestError',
-          message: "No connector found for id 'do-not-exist'",
+          message:
+            "No connector found for id 'do-not-exist'\nSaved object [action/do-not-exist] not found",
         });
       });
     });
@@ -252,7 +253,8 @@ export const chatCompleteSuite = (
             type: 'error',
             error: {
               code: 'requestError',
-              message: "No connector found for id 'do-not-exist'",
+              message:
+                "No connector found for id 'do-not-exist'\nSaved object [action/do-not-exist] not found",
               meta: {
                 status: 400,
               },
