@@ -149,6 +149,8 @@ export const getSuggestionsAfterCompleteExpression = (
   return [...sortCommandKeywordSuggestions, pipeSuggestion, commaSuggestion];
 };
 
+const IS_REGEX = /(?:I+S*\s+(?:N+O*T*\s+)?(N(U(L(L)?)?)?)?)\s*$/i;
+
 const NULLS_REGEX = /(?<nulls>NU?L?L?S?\s+(FI?R?S?T?|LA?S?T?)?)$/i;
 
 /**
@@ -173,6 +175,11 @@ const NULLS_REGEX = /(?<nulls>NU?L?L?S?\s+(FI?R?S?T?|LA?S?T?)?)$/i;
 export const getNullsPrefixRange = (
   innerText: string
 ): { start: number; end: number } | undefined => {
+  if (IS_REGEX.test(innerText)) {
+    // we're in an IS NULL or IS NOT NULL context, so we don't need to return a range
+    return undefined;
+  }
+
   const matchResult = innerText.match(NULLS_REGEX);
   const nulls = matchResult?.groups?.nulls;
 
