@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-export interface TraceItem {
-  id: string;
-  timestampUs: number;
-  name: string;
-  traceId: string;
-  duration: number;
-  hasError?: boolean;
-  parentId?: string;
-  serviceName: string;
-  spanType?: string;
+export enum WaterfallLegendType {
+  ServiceName = 'serviceName',
+  SpanType = 'spanType',
+}
+export interface IWaterfallLegend {
+  type: WaterfallLegendType;
+  value: string | undefined;
+  color: string;
 }
