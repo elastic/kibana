@@ -213,19 +213,19 @@ export function getObservabilitySystemPrompt({
         isFunctionAvailable(GET_APM_DATASET_INFO_FUNCTION_NAME))
     ) {
       usage.push(
-        `**Prerequisites for the \`${QUERY_FUNCTION_NAME}\` tool:** Before calling the \`${QUERY_FUNCTION_NAME}\` tool, you **MUST** first call ${datasetTools.join(
+        `**Prerequisites for the \`${QUERY_FUNCTION_NAME}\` tool:** Before calling the \`${QUERY_FUNCTION_NAME}\` tool, you **SHOULD** first call ${datasetTools.join(
           ' or '
-        )} to understand the available data streams, indices, and fields. Use the index information returned by these functions when calling the \`${QUERY_FUNCTION_NAME}\` tool.
-        Exception: If the user provides a full, valid query including the \`FROM\` clause specifying the index/data stream, you might proceed directly, but obtaining dataset info first is safer.
-          2.1 **IMPORTANT**: If you already have the dataset information used for previous queries, only attempt to get additional dataset information if the user is interested in other data.
-
-        * If a user asks for an "example query" and the dataset tools (such as ${datasetTools.join(
-          ' or '
-        )}) do not find a matching index or fields, you must follow these steps:
-          *  **Infer Intent:** Analyze the user's message to determine the likely search criteria they had in mind.
-          *  **Generate Example:** Use the inferred criteria to call the \`${QUERY_FUNCTION_NAME}\` tool and generate a valid example query.
-          *  **Present the Query:** Show the user the generated example.
-          *  **Add Clarification:** Explain that since no direct match was found, you have generated an example based on your interpretation of their request.`
+        )} to discover indices, data streams and fields. These instructions better describe the process:
+        * When to fetch dataset info:
+         * Do it once per dataset. Re-use previously fetched dataset information unless the user asks about new data.
+         * Skip it only when the user already supplied a complete query that includes a valid \`FROM <index>\` clause in the query.
+        * Example query and syntax conversion requests:
+          * If the user doesn't ask for specific data, but rather asks for the query, you can consider it an example query in this context. 
+          * If dataset lookup yields nothing, you **MUST** still call \`${QUERY_FUNCTION_NAME}\`
+          * Make a sensible index and field assumptions from the user's request. Notify the user of the assumptions you used.
+          * Do **NOT** ask them to supply index or field names first.
+        * If dataset info is missing *after* the lookup and the request is not an example or syntax conversion, ask the user which index / data stream or fields to use **before** calling \`${QUERY_FUNCTION_NAME}\`.
+     `
       );
     }
 

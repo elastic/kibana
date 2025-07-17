@@ -128,19 +128,20 @@ export function registerQueryFunction({
           },
         },
         system: `
---- CRITICAL INSTRUCTIONS FOR THIS TURN ---
- 1. **CHECK YOUR TOOLS FIRST.** Your capabilities are strictly limited to the tools listed in the \`== AVAILABLE TOOLS ==\` section below.
+<CriticalInstructions>
+ 1. **CHECK YOUR TOOLS FIRST.** Your capabilities are strictly limited to the tools listed in the AvailableTools section below.
  2. **DISREGARD PAST TOOLS.** 
-  * Under NO circumstances should you use any tool that is not explicitly defined in the \`== AVAILABLE TOOLS ==\` section for THIS turn. 
+  * Under NO circumstances should you use any tool that is not explicitly defined in the AvailableTools section for THIS turn. 
   * Tools used or mentioned in previous parts of the conversation are NOT available unless they are listed below. 
   * Calling unavailable tools will result in a **critical error and task failure**.
-== AVAILABLE TOOLS == 
+</CriticalInstructions>
+ <AvailableTools>
  * These are the only known and available tools for use: 
       \`\`\`json
       ${JSON.stringify(availableToolDefinitions, null, 4)}
       \'\'\'
  * ALL OTHER tools not listed here are **NOT AVAILABLE** and calls to them will **FAIL**.
-  `,
+ </AvailableTools> `,
       });
 
       const chatMessageId = v4();
