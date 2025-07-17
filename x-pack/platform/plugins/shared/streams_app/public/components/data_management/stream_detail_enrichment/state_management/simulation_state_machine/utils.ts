@@ -13,32 +13,41 @@ import { DetectedField, Simulation } from './types';
 import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function getSourceFields(processors: ProcessorDefinitionWithUIAttributes[]): string[] {
-  return processors
-    .map((processor) => {
-      const config = getProcessorConfig(processor);
-      if ('field' in config) {
-        return config.field.trim();
-      }
-      return '';
-    })
-    .filter(Boolean);
+export function getSourceField(processor: ProcessorDefinitionWithUIAttributes) {
+  const config = getProcessorConfig(processor);
+  if ('field' in config) {
+    const trimmedField = config.field.trim();
+    return trimmedField.length > 0 ? trimmedField : undefined;
+  }
+  return undefined;
 }
 
-export function getTableColumns(
-  processors: ProcessorDefinitionWithUIAttributes[],
-  fields: DetectedField[],
-  filter: PreviewDocsFilterOption
-) {
-  const uniqueProcessorsFields = uniq(getSourceFields(processors));
+export function getTableColumns({
+  currentProcessor,
+  detectedFields = [],
+  previewDocsFilter,
+  allColumns,
+}: {
+  currentProcessor?: ProcessorDefinitionWithUIAttributes;
+  detectedFields?: DetectedField[];
+  previewDocsFilter: PreviewDocsFilterOption;
+  allColumns: string[];
+}) {
+  if (!currentProcessor) return [];
 
-  if (filter === 'outcome_filter_failed' || filter === 'outcome_filter_skipped') {
-    return uniqueProcessorsFields;
+  const processorSourceField = getSourceField(currentProcessor);
+
+  if (!processorSourceField || !allColumns.includes(processorSourceField)) {
+    return [];
   }
 
-  const uniqueDetectedFields = uniq(fields.map((field) => field.name));
+  if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
+    return [processorSourceField];
+  }
 
-  return uniq([...uniqueProcessorsFields, ...uniqueDetectedFields]);
+  const uniqueDetectedFields = uniq(detectedFields.map((field) => field.name));
+
+  return uniq([processorSourceField, ...uniqueDetectedFields]);
 }
 
 type SimulationDocReport = Simulation['documents'][number];

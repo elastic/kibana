@@ -38,6 +38,7 @@ import {
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { isProcessorUnderEdit } from './state_management/processor_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 import { WithUIAttributes } from './types';
 import { isGrokProcessor } from './utils';
@@ -196,7 +197,6 @@ const PreviewDocumentsGroupBy = () => {
 };
 
 const OutcomePreviewTable = () => {
-  const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
   const previewColumnsSorting = useSimulatorSelector(
@@ -220,6 +220,13 @@ const OutcomePreviewTable = () => {
   );
 
   const dataSourceRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
+  const currentProcessor = useStreamEnrichmentSelector((state) => {
+    const currentProcessorRef = state.context.processorsRefs.find((processorRef) =>
+      isProcessorUnderEdit(processorRef.getSnapshot())
+    );
+
+    return currentProcessorRef?.getSnapshot().context.processor;
+  });
 
   const { dependencies } = useKibana();
   const { unifiedDocViewer } = dependencies.start;
@@ -276,13 +283,21 @@ const OutcomePreviewTable = () => {
   const grokField = grokMode
     ? (draftProcessor.processor as WithUIAttributes<GrokProcessorDefinition>).grok.field
     : undefined;
+  const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
 
   const previewColumns = useMemo(() => {
-    let cols = getTableColumns(processors, detectedFields ?? [], previewDocsFilter);
-    if (grokField) {
-      // If we are in Grok mode, we exclude the detected fields and only use the Grok field
-      // sine it is highlighting extracted values
-      cols = [grokField];
+    let cols = getTableColumns({
+      currentProcessor,
+      detectedFields,
+      previewDocsFilter,
+      allColumns,
+    });
+    /**
+     * If we are in Grok mode and the field matches an existing field,
+     * we exclude the detected fields and only use the Grok field since it is highlighting extracted values
+     */
+    if (validGrokField) {
+      cols = [validGrokField];
     }
     if (cols.length === 0) {
       // If no columns are detected, we fall back to all fields from the preview documents
@@ -302,9 +317,9 @@ const OutcomePreviewTable = () => {
     detectedFields,
     explicitlyDisabledPreviewColumns,
     explicitlyEnabledPreviewColumns,
-    grokField,
+    validGrokField,
     previewDocsFilter,
-    processors,
+    currentProcessor,
   ]);
 
   const setVisibleColumns = (visibleColumns: string[]) => {
@@ -426,7 +441,7 @@ const OutcomePreviewTable = () => {
         onRowSelected={onRowSelected}
         selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
         displayColumns={previewColumns}
-        rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
+        rowHeightsOptions={validGrokField ? { defaultHeight: 'auto' } : undefined}
         toolbarVisibility
         setVisibleColumns={setVisibleColumns}
         sorting={previewColumnsSorting}
@@ -436,7 +451,7 @@ const OutcomePreviewTable = () => {
           grokMode
             ? (document, columnId) => {
                 const value = document[columnId];
-                if (typeof value === 'string' && columnId === grokField) {
+                if (typeof value === 'string' && columnId === validGrokField) {
                   return (
                     <Sample
                       grokCollection={grokCollection}

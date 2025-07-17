@@ -23,6 +23,7 @@ import {
   EnrichmentDataSource,
 } from '../../../../../../common/url_schema';
 import { dataSourceConverter, processorConverter } from '../../utils';
+import { isProcessorUnderEdit } from '../processor_state_machine';
 
 export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
   type: 'random-samples',
@@ -95,9 +96,7 @@ export function getProcessorsForSimulation(context: StreamEnrichmentContextType)
     .filter((snapshot) => snapshot.context.isNew);
 
   // Find if any processor is currently being edited
-  const editingProcessorIndex = newProcessorsSnapshots.findIndex(
-    (snapshot) => snapshot.matches({ configured: 'editing' }) || snapshot.matches('draft')
-  );
+  const editingProcessorIndex = newProcessorsSnapshots.findIndex(isProcessorUnderEdit);
 
   // If a processor is being edited, set new processors up to and including the one being edited
   if (editingProcessorIndex !== -1) {

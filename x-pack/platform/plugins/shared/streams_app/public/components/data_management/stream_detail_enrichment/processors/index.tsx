@@ -55,6 +55,7 @@ import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
+import { isProcessorUnderEdit } from '../state_management/processor_state_machine';
 
 export interface ProcessorConfigurationProps {
   dragHandleProps: DraggableProvidedDragHandleProps | null;
@@ -67,10 +68,7 @@ export function ProcessorConfiguration({
   processorRef,
   processorMetrics,
 }: ProcessorConfigurationProps) {
-  const isOpen = useSelector(
-    processorRef,
-    (snapshot) => snapshot.matches('draft') || snapshot.matches({ configured: 'editing' })
-  );
+  const isOpen = useSelector(processorRef, isProcessorUnderEdit);
 
   if (!isOpen) {
     return (
