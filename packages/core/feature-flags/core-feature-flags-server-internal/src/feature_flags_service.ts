@@ -172,7 +172,7 @@ export class FeatureFlagsService {
         ? (this.overrides[flagName] as T)
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
-    apm.addLabels({ [`flag_${flagName}`]: value });
+    apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
     // TODO: increment usage counter
     return value;
   }
