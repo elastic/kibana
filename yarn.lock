@@ -8165,6 +8165,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/validate-oas@link:src/platform/packages/private/kbn-validate-oas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/vis-default-editor-plugin@link:src/platform/plugins/private/vis_default_editor":
   version "0.0.0"
   uid ""
@@ -10135,6 +10139,16 @@
   integrity sha512-UDAOQJtJDxZHQ5Nm1olycBIsz2wdGX8SdzyGVHmD8EOQYAeDZQyIlQYohDe9nazdIOQLZCIc3fU0G9gqVLkaGQ==
   dependencies:
     "@sentry/types" "7.120.3"
+
+"@seriousme/openapi-schema-validator@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@seriousme/openapi-schema-validator/-/openapi-schema-validator-2.4.1.tgz#09d44527e7cd5c78c72ab51ef29956eb309fcd30"
+  integrity sha512-OX15CKLV2JFGcoXxFVD/CMtWzys+r6G9gArKY8iaUqOkIEqp80ispclk5c8j5i1iEIIlyCRJ0R0N5MddHFg2xg==
+  dependencies:
+    ajv "^8.17.1"
+    ajv-draft-04 "^1.0.0"
+    ajv-formats "^3.0.1"
+    js-yaml "^4.1.0"
 
 "@sideway/address@^4.1.5":
   version "4.1.5"
@@ -13643,6 +13657,13 @@ ajv-formats@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ajv-formats/-/ajv-formats-2.1.1.tgz#6e669400659eb74973bbf2e33327180a0996b520"
   integrity sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==
+  dependencies:
+    ajv "^8.0.0"
+
+ajv-formats@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/ajv-formats/-/ajv-formats-3.0.1.tgz#3d5dc762bca17679c3c2ea7e90ad6b7532309578"
+  integrity sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==
   dependencies:
     ajv "^8.0.0"
 

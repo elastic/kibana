@@ -2192,6 +2192,8 @@
       "@kbn/v8-profiler-examples-plugin/*": ["examples/v8_profiler_examples/*"],
       "@kbn/validate-next-docs-cli": ["packages/kbn-validate-next-docs-cli"],
       "@kbn/validate-next-docs-cli/*": ["packages/kbn-validate-next-docs-cli/*"],
+      "@kbn/validate-oas": ["src/platform/packages/private/kbn-validate-oas"],
+      "@kbn/validate-oas/*": ["src/platform/packages/private/kbn-validate-oas/*"],
       "@kbn/vis-default-editor-plugin": ["src/platform/plugins/private/vis_default_editor"],
       "@kbn/vis-default-editor-plugin/*": ["src/platform/plugins/private/vis_default_editor/*"],
       "@kbn/vis-type-gauge-plugin": ["src/platform/plugins/private/vis_types/gauge"],
