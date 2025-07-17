@@ -9,7 +9,10 @@
     "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/spaces-utils",
+    "@kbn/spaces-plugin",
+    "@kbn/shared-ux-router"
   ],
   "exclude": ["target/**/*"]
 }
