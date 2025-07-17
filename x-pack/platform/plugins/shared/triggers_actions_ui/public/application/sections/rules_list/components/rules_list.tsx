@@ -422,8 +422,7 @@ export const RulesList = ({
     isReady: !rulesState?.initialLoad,
     isRefreshing: rulesState?.isLoading,
     meta: {
-      description:
-        '[ttfmp_rules_list] The Observability Rules List overview page has loaded successfully.',
+      description: '[ttfmp_rules_list] The Rules List overview page has loaded successfully.',
     },
   });
 
