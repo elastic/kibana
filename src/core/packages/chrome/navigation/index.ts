@@ -8,4 +8,4 @@
  */
 
 export { Navigation } from './src/components/navigation';
-export { NavigationProvider, useNavigation } from './src/hooks/use_navigation';
+export { useNavigation } from './src/hooks/use_navigation';
