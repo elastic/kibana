@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { DeprecationBadge, WarningLevels } from './deprecation_badge';
+export enum MIGRATION_DEPRECATION_LEVEL {
+  NONE = 'none',
+  INFO = 'info',
+  WARNING = 'warning',
+  CRITICAL = 'critical',
+}
