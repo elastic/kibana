@@ -103,7 +103,6 @@ export const GridColumn = ({
             <EuiFlexGroup gutterSize="m">
               {items.map((item) => (
                 <EuiFlexItem
-                  tabIndex={item.index}
                   key={item.id}
                   // Ensure that cards wrapped in EuiTours/EuiPopovers correctly inherit the full grid row height
                   css={css`
@@ -112,6 +111,7 @@ export const GridColumn = ({
                       height: 100%;
                     }
                   `}
+                  tabIndex={-1}
                 >
                   <PackageCard {...item} showLabels={showCardLabels} />
                 </EuiFlexItem>
