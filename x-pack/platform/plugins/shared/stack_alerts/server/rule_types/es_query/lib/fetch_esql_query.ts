@@ -20,6 +20,7 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
+import { i18n } from '@kbn/i18n';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -85,7 +86,10 @@ export async function fetchEsqlQuery({
   const isPartial = response.is_partial ?? false;
 
   if (ruleResultService && isPartial) {
-    const warning = `The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.`;
+    const warning = i18n.translate('xpack.stackAlerts.esQuery.isPartialWarning', {
+      defaultMessage:
+        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.',
+    });
     const hasResults = results.esResult?.hits?.hits?.length > 0;
 
     if (!isGroupAgg && !hasResults) {
