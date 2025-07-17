@@ -15,6 +15,7 @@ import {
 import {
   deleteDataStream,
   updateDataStreamsLifecycle,
+  updateDataStreamsMappings,
   updateOrRolloverDataStream,
   upsertDataStream,
 } from '../../data_streams/manage_data_streams';
@@ -37,6 +38,7 @@ import type {
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
   ElasticsearchAction,
+  UpdateDataStreamMappingsAction,
   UpdateLifecycleAction,
   UpsertComponentTemplateAction,
   UpsertDatastreamAction,
@@ -74,6 +76,7 @@ export class ExecutionPlan {
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
+      update_data_stream_mappings: [],
     };
   }
 
@@ -158,6 +161,7 @@ export class ExecutionPlan {
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
+        update_data_stream_mappings,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -181,6 +185,7 @@ export class ExecutionPlan {
       await Promise.all([
         this.upsertWriteIndexOrRollover(upsert_write_index_or_rollover),
         this.updateLifecycle(update_lifecycle),
+        this.updateDataStreamMappingsAndRollover(update_data_stream_mappings),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -235,6 +240,7 @@ export class ExecutionPlan {
         updateOrRolloverDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
+          forceRollover: action.request.forceRollover,
           name: action.request.name,
         })
       )
@@ -250,6 +256,20 @@ export class ExecutionPlan {
           names: [action.request.name],
           lifecycle: action.request.lifecycle,
           isServerless: this.dependencies.isServerless,
+        })
+      )
+    );
+  }
+
+  private async updateDataStreamMappingsAndRollover(actions: UpdateDataStreamMappingsAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateDataStreamsMappings({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          name: action.request.name,
+          mappings: action.request.mappings,
+          forceRollover: action.request.forceRollover,
         })
       )
     );

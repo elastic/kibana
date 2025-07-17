@@ -14,15 +14,20 @@ import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
 import { Validation, validation } from '../validation/validation';
 import { ModelValidation, modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
+import { FieldDefinition, fieldDefinitionSchema } from '../../fields';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
 export interface IngestUnwired {
-  unwired: {};
+  unwired: {
+    field_overrides?: FieldDefinition;
+  };
 }
 
 export const IngestUnwired: z.Schema<IngestUnwired> = z.object({
-  unwired: z.object({}),
+  unwired: z.object({
+    field_overrides: z.optional(fieldDefinitionSchema),
+  }),
 });
 
 export type UnwiredIngest = IngestBase & IngestUnwired;

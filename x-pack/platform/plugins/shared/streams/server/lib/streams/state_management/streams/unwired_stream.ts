@@ -13,6 +13,7 @@ import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
+import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
@@ -26,15 +27,18 @@ import type {
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
+import { validateUnwiredFields } from '../../helpers/validate_fields';
 
 interface UnwiredStreamChanges extends StreamChanges {
   processing: boolean;
+  field_overrides: boolean;
   lifecycle: boolean;
 }
 
 export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Definition> {
   protected _changes: UnwiredStreamChanges = {
     processing: false,
+    field_overrides: false,
     lifecycle: false,
   };
 
@@ -80,6 +84,13 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     this._changes.lifecycle =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+
+    this._changes.field_overrides =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.ingest.unwired.field_overrides,
+        startingStateStreamDefinition.ingest.unwired.field_overrides
+      );
 
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }
@@ -138,6 +149,8 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       }
     }
 
+    validateUnwiredFields(this._definition);
+
     return { isValid: true, errors: [] };
   }
 
@@ -163,6 +176,18 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
         request: {
           name: this._definition.name,
           lifecycle: this.getLifecycle(),
+        },
+      });
+    }
+    if (Object.keys(this._definition.ingest.unwired.field_overrides || {}).length > 0) {
+      actions.push({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: this._definition.name,
+          mappings: this._definition.ingest.unwired.field_overrides! as Record<
+            string,
+            MappingProperty
+          >,
         },
       });
     }
@@ -224,12 +249,42 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       });
     }
 
+    if (this._changes.field_overrides) {
+      actions.push({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: this._definition.name,
+          mappings:
+            (this._definition.ingest.unwired.field_overrides as Record<string, MappingProperty>) ||
+            {},
+          forceRollover: this.fieldOverridesRemoved(startingState),
+        },
+      });
+    }
+
     actions.push({
       type: 'upsert_dot_streams_document',
       request: this._definition,
     });
 
     return actions;
+  }
+
+  private fieldOverridesRemoved(startingState: State): boolean {
+    const startingStateStreamDefinition = startingState.get(this._definition.name)?.definition;
+    if (
+      !startingStateStreamDefinition ||
+      !Streams.UnwiredStream.Definition.is(startingStateStreamDefinition)
+    ) {
+      return false;
+    }
+    const previousFieldOverrides = Object.keys(
+      startingStateStreamDefinition.ingest.unwired.field_overrides || {}
+    );
+    const currentFieldOverrides = Object.keys(
+      this._definition.ingest.unwired.field_overrides || {}
+    );
+    return _.difference(previousFieldOverrides, currentFieldOverrides).length > 0;
   }
 
   private async createUpsertPipelineActions(): Promise<ElasticsearchAction[]> {

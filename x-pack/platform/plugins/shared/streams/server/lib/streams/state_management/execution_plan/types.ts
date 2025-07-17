@@ -10,6 +10,7 @@ import type {
   IndicesPutIndexTemplateRequest,
   IngestProcessorContainer,
   IngestPutPipelineRequest,
+  MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 
@@ -77,6 +78,7 @@ export interface UpsertDatastreamAction {
 export interface UpsertWriteIndexOrRolloverAction {
   type: 'upsert_write_index_or_rollover';
   request: {
+    forceRollover?: boolean;
     name: string;
   };
 }
@@ -86,6 +88,15 @@ export interface UpdateLifecycleAction {
   request: {
     name: string;
     lifecycle: IngestStreamLifecycle;
+  };
+}
+
+export interface UpdateDataStreamMappingsAction {
+  type: 'update_data_stream_mappings';
+  request: {
+    name: string;
+    forceRollover?: boolean;
+    mappings: Record<string, MappingProperty>;
   };
 }
 
@@ -122,7 +133,8 @@ export type ElasticsearchAction =
   | UpdateLifecycleAction
   | DeleteDatastreamAction
   | UpsertDotStreamsDocumentAction
-  | DeleteDotStreamsDocumentAction;
+  | DeleteDotStreamsDocumentAction
+  | UpdateDataStreamMappingsAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -139,4 +151,5 @@ export interface ActionsByType {
   delete_datastream: DeleteDatastreamAction[];
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
+  update_data_stream_mappings: UpdateDataStreamMappingsAction[];
 }

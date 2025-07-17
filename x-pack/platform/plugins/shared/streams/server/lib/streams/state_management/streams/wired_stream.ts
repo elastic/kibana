@@ -543,6 +543,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'upsert_write_index_or_rollover',
         request: {
           name: this._definition.name,
+          forceRollover: this.fieldsRemoved(startingState),
         },
       });
     }
@@ -598,6 +599,19 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     return actions;
+  }
+
+  private fieldsRemoved(startingState: State): boolean {
+    const startingStateStreamDefinition = startingState.get(this._definition.name)?.definition;
+    if (
+      !startingStateStreamDefinition ||
+      !Streams.WiredStream.Definition.is(startingStateStreamDefinition)
+    ) {
+      return false;
+    }
+    const previousFieldOverrides = Object.keys(startingStateStreamDefinition.ingest.wired.fields);
+    const currentFieldOverrides = Object.keys(this._definition.ingest.wired.fields);
+    return _.difference(previousFieldOverrides, currentFieldOverrides).length > 0;
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {

@@ -21,6 +21,23 @@ describe('UnwiredStream', () => {
           unwired: {},
         },
       },
+      {
+        name: 'unwired-stream',
+        description: '',
+        ingest: {
+          lifecycle: {
+            inherit: {},
+          },
+          processing: [],
+          unwired: {
+            field_overrides: {
+              xxx: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
     ])('is valid', (val) => {
       expect(UnwiredStream.Definition.is(val)).toBe(true);
       expect(UnwiredStream.Definition.right.parse(val)).toEqual(val);

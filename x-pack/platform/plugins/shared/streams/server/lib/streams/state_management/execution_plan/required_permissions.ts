@@ -65,6 +65,7 @@ export function getRequiredPermissionsForActions({
     update_lifecycle,
     upsert_write_index_or_rollover,
     delete_datastream,
+    update_data_stream_mappings,
     // we don't need to validate permissions for these actions
     // since they are done by the kibana system user
     upsert_dot_streams_document,
@@ -133,6 +134,17 @@ export function getRequiredPermissionsForActions({
     const indexPermissions: Record<string, string[]> = {};
     upsert_datastream.forEach((action) => {
       indexPermissions[action.request.name] = ['create_index'];
+    });
+    permissions.push({
+      cluster: [],
+      index: indexPermissions,
+    });
+  }
+
+  if (update_data_stream_mappings.length > 0) {
+    const indexPermissions: Record<string, string[]> = {};
+    update_data_stream_mappings.forEach((action) => {
+      indexPermissions[action.request.name] = ['manage'];
     });
     permissions.push({
       cluster: [],

@@ -79,6 +79,18 @@ export function validateSystemFields(definition: Streams.WiredStream.Definition)
   }
 }
 
+export function validateUnwiredFields(definition: Streams.UnwiredStream.Definition) {
+  if (
+    Object.values(definition.ingest.unwired.field_overrides || {}).some(
+      (field) => field.type === 'system'
+    )
+  ) {
+    throw new MalformedFieldsError(
+      `Stream ${definition.name} is not allowed to have system fields`
+    );
+  }
+}
+
 export function validateDescendantFields({
   descendants,
   fields,
