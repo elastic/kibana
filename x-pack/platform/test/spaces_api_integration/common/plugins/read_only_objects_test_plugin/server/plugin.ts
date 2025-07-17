@@ -25,6 +25,9 @@ export class ReadOnlyObjectsPlugin implements Plugin {
           description: { type: 'text' },
         },
       },
+      management: {
+        importableAndExportable: true,
+      },
     });
 
     core.savedObjects.registerType({
@@ -36,6 +39,9 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         properties: {
           description: { type: 'text' },
         },
+      },
+      management: {
+        importableAndExportable: true,
       },
     });
 
