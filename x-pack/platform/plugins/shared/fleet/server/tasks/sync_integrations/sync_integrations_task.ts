@@ -7,17 +7,14 @@
 import { keyBy } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type {
   ConcreteTaskInstance,
-  RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
@@ -71,7 +68,7 @@ export class SyncIntegrationsTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: RunContext) => {
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
               return this.runTask(taskInstance, core);
@@ -138,20 +135,9 @@ export class SyncIntegrationsTask {
       return;
     }
 
-    const fakeRequest = kibanaRequestFactory({
-      headers: { authorization: `ApiKey ${taskInstance.apiKey}` },
-      path: '/',
-      route: { settings: {} },
-      url: { href: '', hash: '' } as URL,
-      raw: { req: { url: '/' } } as any,
-    });
-
-    core.http.basePath.set(fakeRequest, DEFAULT_SPACE_ID);
-
-    const [coreStart, startDeps, { packageService }] = (await core.getStartServices()) as any;
+    const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-    const alertingRulesClient = startDeps.alerting.getRulesClientWithRequest(fakeRequest);
 
     try {
       // write integrations on main cluster
@@ -161,7 +147,6 @@ export class SyncIntegrationsTask {
       await syncIntegrationsOnRemote(
         esClient,
         soClient,
-        alertingRulesClient,
         packageService.asInternalUser,
         this.abortController,
         this.logger

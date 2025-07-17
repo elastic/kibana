@@ -13,7 +13,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
@@ -71,7 +71,6 @@ export interface PackagePolicyClient {
   create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    alertingRulesClientApi: RulesClientApi,
     packagePolicy: NewPackagePolicy,
     options?: {
       spaceId?: string;
@@ -206,7 +205,6 @@ export interface PackagePolicyClient {
 
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    alertingRulesClientApi: RulesClientApi,
     pkgName: string,
     options?: { logger?: Logger; installMissingPackage?: boolean }
   ): Promise<NewPackagePolicy | undefined>;
