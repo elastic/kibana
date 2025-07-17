@@ -60,19 +60,22 @@ export function createAddChangePointChartAction(
           '../embeddables/change_point_chart/resolve_change_point_config_input'
         );
 
-        const initialState = await resolveEmbeddableChangePointUserInput(
+         resolveEmbeddableChangePointUserInput(
           coreStart,
           pluginStart,
           context.embeddable,
-          context.embeddable.uuid
+          context.embeddable.uuid,
+          (initialState) => {
+            presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
+              panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+              serializedState: {
+                rawState: initialState,
+              },
+            });
+          },
         );
 
-        presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
-          panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-          serializedState: {
-            rawState: initialState,
-          },
-        });
+   
       } catch (e) {
         return Promise.reject();
       }
