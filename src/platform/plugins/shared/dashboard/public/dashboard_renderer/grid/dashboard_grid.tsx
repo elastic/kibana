@@ -293,6 +293,9 @@ const dashboardGridStyles = {
           '.embPanel--dragHandle, ~.kbnGridPanel--resizeHandle': {
             visibility: 'hidden',
           },
+          '~.kbnGridPanel--resizeHandle': {
+            visibility: 'hidden',
+          }
         },
     }),
 };

@@ -8,6 +8,8 @@
  */
 
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -150,7 +152,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 width: 100%;
                 [data-test-subj='markdown_editor_preview_button'] {
                   display: none;
-                }
+                };
               `}
               value={value}
               onChange={(v) => onChange(v)}
@@ -173,48 +175,39 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                 padding: 4px;
               `}
             >
-              <EuiFlexItem>
-                <EuiToolTip
-                  content={i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableSave', {
-                    defaultMessage: 'Save',
-                  })}
-                >
-                  <EuiButtonIcon
-                    iconType={'check'}
-                    color="success"
-                    display="base"
+               <EuiFlexItem>
+             
+                  <EuiButtonEmpty
+                    color="primary"
+                    // display="base"
                     size="xs"
-                    iconSize="m"
-                    aria-label="Save"
-                    onClick={() => {
-                      markdownStateManager.api.setContent(value);
-                      isEditing$.next(false);
-                      parentApi.focusedPanelId$.next();
-                    }}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-
-              <EuiFlexItem>
-                <EuiToolTip
-                  content={i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableCancel', {
-                    defaultMessage: 'Cancel',
-                  })}
-                >
-                  <EuiButtonIcon
-                    color="danger"
-                    display="base"
-                    size="xs"
-                    iconSize="m"
-                    iconType={'cross'}
-                    aria-label="Cancel"
+                    // iconSize="m"
+                    // iconType={'cross'}
+                    aria-label="Discard"
                     onClick={() => {
                       // markdownStateManager.api.setContent(value);
                       isEditing$.next(false);
                       parentApi.focusedPanelId$.next();
                     }}
-                  />
-                </EuiToolTip>
+                  >Discard
+                  </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+             
+                  <EuiButton
+                  size="xs"
+                    iconType={'check'}
+                    color="primary"
+                    display="fill"
+                    fill
+                    aria-label="Apply"
+                    onClick={() => {
+                      markdownStateManager.api.setContent(value);
+                      isEditing$.next(false);
+                      parentApi.focusedPanelId$.next();
+                    }}
+                  >Apply
+                  </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
@@ -223,6 +216,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
             css={css`
               padding: ${euiTheme.size.m};
               overflow: scroll;
+              img {
+                max-inline-size: 100%;
+              }
             `}
           >
             {content ?? ''}
