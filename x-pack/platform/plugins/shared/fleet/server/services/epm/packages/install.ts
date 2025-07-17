@@ -751,7 +751,6 @@ export async function installPackageWithStateMachine(options: {
       savedObjectTagAssignmentService,
       savedObjectTagClient,
       esClient,
-      alertingRulesClient,
       logger,
       installedPkg,
       packageInstallContext,

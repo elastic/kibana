@@ -16,21 +16,13 @@ import { INSTALL_STATES } from '../../../../../../common/types';
 import { installKibanaAssetsWithStreaming } from '../../../kibana/assets/install_with_streaming';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
-  const {
-    savedObjectsClient,
-    alertingRulesClient,
-    logger,
-    installedPkg,
-    packageInstallContext,
-    spaceId,
-  } = context;
+  const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
   const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
     installKibanaAssetsAndReferencesMultispace({
       savedObjectsClient,
-      alertingRulesClient,
       pkgName,
       pkgTitle,
       packageInstallContext,
@@ -48,7 +40,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
 }
 
 export async function stepInstallKibanaAssetsWithStreaming(context: InstallContext) {
-  const { savedObjectsClient, alertingRulesClient, packageInstallContext, spaceId } = context;
+  const { savedObjectsClient, packageInstallContext, spaceId } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -57,7 +49,6 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
     () =>
       installKibanaAssetsWithStreaming({
         savedObjectsClient,
-        alertingRulesClient,
         pkgName,
         packageInstallContext,
         spaceId,

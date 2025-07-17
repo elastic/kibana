@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 
 import type { PackageInstallContext } from '../../../../../common/types';
 import type { KibanaAssetReference, KibanaAssetType } from '../../../../types';
@@ -29,7 +28,6 @@ interface InstallKibanaAssetsWithStreamingArgs {
   packageInstallContext: PackageInstallContext;
   spaceId: string;
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClient;
 }
 
 const MAX_ASSETS_TO_INSTALL_IN_PARALLEL = 100;
