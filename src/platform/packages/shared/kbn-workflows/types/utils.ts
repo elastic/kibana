@@ -21,6 +21,17 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     'triggers.elastic.manual': 'manual',
   };
 
+  const connectorTypeMap = {
+    console: 'console',
+    'slack.sendMessage': 'slack-connector',
+    delay: 'delay',
+  };
+
+  const defaultConnectorNameMap = {
+    console: 'console',
+    delay: 'delay',
+  };
+
   // TODO: handle merge, if, foreach, etc.
 
   return {
@@ -36,9 +47,12 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     })),
     steps: steps?.map((step) => ({
       id: step.name,
-      connectorType: step.type,
+      connectorType: connectorTypeMap[step.type as keyof typeof connectorTypeMap],
       // @ts-expect-error TODO: fix once the schema is stable
-      connectorName: step?.['connector-id'] ?? undefined,
+      connectorName:
+        step?.['connector-id'] ??
+        defaultConnectorNameMap?.[step.type as keyof typeof defaultConnectorNameMap] ??
+        undefined,
       // @ts-expect-error TODO: fix once the schema is stable
       inputs: step?.with ?? {},
     })),
@@ -52,6 +66,12 @@ export function transformEsWorkflowToYamlJson(workflow: Omit<EsWorkflow, 'id'>):
     manual: 'triggers.elastic.manual',
   };
 
+  const connectorTypeMap = {
+    console: 'console',
+    'slack-connector': 'slack.sendMessage',
+    delay: 'delay',
+  };
+
   return {
     workflow: {
       name: workflow.name,
@@ -62,7 +82,7 @@ export function transformEsWorkflowToYamlJson(workflow: Omit<EsWorkflow, 'id'>):
       })),
       steps: workflow.steps.map((step) => ({
         name: step.id,
-        type: step.connectorType,
+        type: connectorTypeMap[step.connectorType as keyof typeof connectorTypeMap],
         'connector-id': step.connectorName,
         with: step.inputs,
       })),

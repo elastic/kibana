@@ -16,10 +16,17 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiToolTip,
+  EuiDescriptionList,
+  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { ExecutionStatus, EsWorkflowStepExecution } from '@kbn/workflows';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
+import { WorkflowVisualEditor } from '../../workflow-visual-editor/ui';
+import { useWorkflowDetail } from '../../../entities/workflows/model/useWorkflowDetail';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common';
 
 interface WorkflowExecutionProps {
   workflowExecutionId: string;
@@ -36,6 +43,8 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     error,
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
+
+  const { data: workflow } = useWorkflowDetail(workflowExecution?.workflowId ?? '');
 
   const columns = useMemo<Array<EuiBasicTableColumn<EsWorkflowStepExecution>>>(
     () =>
@@ -92,6 +101,34 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     return () => clearInterval(intervalId);
   }, [workflowExecution, refetch]);
 
+  const workflowYamlObject = useMemo(() => {
+    if (!workflow) {
+      return null;
+    }
+    return parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE)?.data;
+  }, [workflow]);
+
+  const executionProps = useMemo(() => {
+    return [
+      {
+        title: 'Status',
+        description: <StatusBadge status={workflowExecution?.status} />,
+      },
+      {
+        title: 'Started At',
+        description: workflowExecution?.startedAt?.toLocaleString() ?? 'N/A',
+      },
+      {
+        title: 'Finished At',
+        description: workflowExecution?.finishedAt?.toLocaleString() ?? 'N/A',
+      },
+      {
+        title: 'Duration',
+        description: `${workflowExecution?.duration} ms`,
+      },
+    ];
+  }, [workflowExecution]);
+
   if (isLoading) {
     return (
       <EuiFlexGroup justifyContent={'center'} alignItems={'center'}>
@@ -111,31 +148,21 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
 
   return (
     <div>
-      <EuiText>
+      <EuiTitle size="xs">
         <h3>Workflow Execution Details</h3>
-        {workflowExecution?.status && (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <strong>Status:</strong>
-            <StatusBadge status={workflowExecution?.status} />
-          </EuiFlexGroup>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList type="column" listItems={executionProps} compressed />
+      <EuiSpacer size="s" />
+      <div css={{ height: '500px' }}>
+        {workflowYamlObject && (
+          <WorkflowVisualEditor
+            workflow={workflowYamlObject}
+            stepExecutions={workflowExecution?.stepExecutions}
+          />
         )}
-        {workflowExecution?.startedAt && (
-          <div>
-            <strong>Started At:</strong>
-            {workflowExecution?.startedAt?.toLocaleString()}
-          </div>
-        )}
-        {workflowExecution?.finishedAt && (
-          <div>
-            <strong>Finished At:</strong> {workflowExecution?.finishedAt?.toLocaleString()}
-          </div>
-        )}
-        {workflowExecution?.duration !== undefined && (
-          <div>
-            <strong>Duration:</strong> {workflowExecution?.duration} ms
-          </div>
-        )}
-      </EuiText>
+      </div>
+      <EuiSpacer size="m" />
       <EuiBasicTable
         columns={columns}
         items={workflowExecution?.stepExecutions ?? []}

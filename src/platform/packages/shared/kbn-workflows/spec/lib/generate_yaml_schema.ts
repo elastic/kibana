@@ -51,7 +51,10 @@ function generateStepSchemaForConnector(connector: ConnectorContract) {
 
   return BaseConnectorStepSchema.extend({
     type: z.literal(connector.type),
-    with: z.object(paramSchema).optional(),
+    with: z.object(paramSchema),
+    ...(connector.availableConnectorIds
+      ? { 'connector-id': z.enum(connector.availableConnectorIds) }
+      : {}),
   });
 }
 
