@@ -135,17 +135,20 @@ export const getChangePointChartEmbeddableFactory = (
             },
             uuid,
             loadContent: async ({ closeFlyout }) => {
-              const { getEmbeddableChangePointUserInput } = await import(
-                './resolve_change_point_config_input'
+              const { EmbeddableChangePointUserInput } = await import(
+                './change_point_config_input'
               );
-              return getEmbeddableChangePointUserInput(
-                coreStart,
-                pluginStart,
-                (result) => {
-                  changePointManager.api.updateUserInput(result);
-                },
-                closeFlyout,
-                changePointManager.getLatestState()
+              return (
+                <EmbeddableChangePointUserInput
+                  coreStart={coreStart}
+                  pluginStart={pluginStart}
+                  onConfirm={(result) => {
+                    changePointManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  closeFlyout={closeFlyout}
+                  input={changePointManager.getLatestState()}
+                />
               );
             },
           });
