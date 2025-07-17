@@ -16,6 +16,7 @@ import {
   raise,
   cancel,
   stateIn,
+  SnapshotFrom,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, ProcessorDefinition, Streams } from '@kbn/streams-schema';
@@ -59,6 +60,7 @@ import { selectPreviewRecords } from '../simulation_state_machine/selectors';
 import { moveArrayItem } from '../../../../../util/move_array_item';
 
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
+export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
 
 export const streamEnrichmentMachine = setup({
   types: {

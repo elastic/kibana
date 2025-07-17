@@ -20,6 +20,7 @@ import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { selectWhetherAnyProcessorBeforePersisted } from './state_management/stream_enrichment_state_machine/selectors';
 
 export const ProcessorStatusIndicator = ({
   processorRef,
@@ -48,22 +49,9 @@ export const ProcessorStatusIndicator = ({
       )
     )
   );
-  const isAnyProcessorBeforePersisted = useStreamEnrichmentSelector((state) => {
-    // Check if any new processoris positioned before persisted processors
-    return state.context.processorsRefs
-      .map((ref) => ref.getSnapshot())
-      .some((snapshot, id, processorSnapshots) => {
-        // Skip if this processor is already persisted
-        if (!snapshot.context.isNew) return false;
-
-        // Check if there are persisted processors after this position
-        const hasPersistedAfter = processorSnapshots
-          .slice(id + 1)
-          .some(({ context }) => !context.isNew);
-
-        return hasPersistedAfter;
-      });
-  });
+  const isAnyProcessorBeforePersisted = useStreamEnrichmentSelector(
+    selectWhetherAnyProcessorBeforePersisted
+  );
 
   let variant:
     | (EuiAvatarProps & {

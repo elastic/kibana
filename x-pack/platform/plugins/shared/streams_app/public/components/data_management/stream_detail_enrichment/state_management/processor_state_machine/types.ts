@@ -15,7 +15,7 @@ export type ProcessorToParentEvent =
   | { type: 'processor.change'; id: string }
   | { type: 'processor.delete'; id: string }
   | { type: 'processor.edit' }
-  | { type: 'processor.save' };
+  | { type: 'processor.save'; id: string };
 
 export interface ProcessorInput {
   parentRef: ProcessorParentActor;

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { createSelector } from 'reselect';
 import { StreamEnrichmentContextType } from './types';
+import { StreamEnrichmentActorSnapshot } from './stream_enrichment_state_machine';
 
 /**
  * Selects the processor marked as the draft processor.
@@ -18,3 +20,25 @@ export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
     resources: snapshot?.context.resources,
   };
 };
+
+/**
+ * Selects the documents used for the data preview table.
+ */
+export const selectWhetherAnyProcessorBeforePersisted = createSelector(
+  [(snapshot: StreamEnrichmentActorSnapshot) => snapshot.context.processorsRefs],
+  (processorsRefs) => {
+    return processorsRefs
+      .map((ref) => ref.getSnapshot())
+      .some((snapshot, id, processorSnapshots) => {
+        // Skip if this processor is already persisted
+        if (!snapshot.context.isNew) return false;
+
+        // Check if there are persisted processors after this position
+        const hasPersistedAfter = processorSnapshots
+          .slice(id + 1)
+          .some(({ context }) => !context.isNew);
+
+        return hasPersistedAfter;
+      });
+  }
+);

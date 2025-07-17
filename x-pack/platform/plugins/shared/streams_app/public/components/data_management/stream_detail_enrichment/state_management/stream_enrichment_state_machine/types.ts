@@ -12,7 +12,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { GrokCollection } from '@kbn/grok-ui';
 import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
 import {
   PreviewDocsFilterOption,
