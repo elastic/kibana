@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../definitions/utils/test_mocks';
+import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
-import { expectErrors } from '../../../definitions/utils/test_functions';
+import { expectErrors } from '../../../__tests__/validation';
 import { METADATA_FIELDS } from '../../options/metadata';
 
 const tsExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
