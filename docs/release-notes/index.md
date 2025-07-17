@@ -28,17 +28,11 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 ### Features and enhancements [kibana-9.1.0-features-enhancements]
 
 **Alerting**:
-* Added the ability to schedule reports with a recurring schedule and view previously scheduled reports [#224849]({{kib-pull}}224849).
-* Cases analytics index [#223405]({{kib-pull}}223405).
-% !!TODO!! The above PR had a lengthy release note description:
-% Four dedicated case analytics indexes were created, allowing users to build dashboards and metrics over case data. These indexes are created on Kibana startup and updated periodically with cases, comments, attachments, and activity data.
-* New kibana setting `xpack.actions.email.services.enabled` to enable/disable email services for email connector [#223363]({{kib-pull}}223363).
-* New `xpack.actions.webhook.ssl.pfx.enabled` config [#222507]({{kib-pull}}222507).
-% !!TODO!! The above PR had a lengthy release note description:
-% New `xpack.actions.webhook.ssl.pfx.enabled` Kibana setting to disable Webhook connector PFX file support for SSL client authentication
-* `xpack.actions.email.services.ses.host/port` kibana config [#221389]({{kib-pull}}221389).
-% !!TODO!! The above PR had a lengthy release note description:
-% New AWS SES Email configuration options `xpack.actions.email.services.ses.host` and `xpack.actions.email.services.ses.port`.
+* Adds the ability to schedule reports on a recurring basis and view previously scheduled reports [#224849]({{kib-pull}}224849).
+* Adds four dedicated case analytics indices that allow users to build dashboards and metrics using case data. These indices are automtically created when {{kib}} starts up and are updated periodically with cases, comments, attachments, and activity data [#223405]({{kib-pull}}223405).
+* Adds the `xpack.actions.email.services.enabled` {{kib}} setting, which allows you to to enable or disable email services for email connectors [#223363]({{kib-pull}}223363).
+* Adds the  `xpack.actions.webhook.ssl.pfx.enabled` {{kib}} setting, which allows you to disable Webhook connector PFX file support for SSL client authentication [#222507]({{kib-pull}}222507).
+* Adds the `xpack.actions.email.services.ses.host` {{kib}} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {{kib}} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors.[#221389]({{kib-pull}}221389). 
 * Scheduled Reports [#221028]({{kib-pull}}221028).
 * Support rrule for task scheduling [#217728]({{kib-pull}}217728).
 * Publish new public APIs for the Maintenance Window [#216756]({{kib-pull}}216756).
@@ -140,19 +134,19 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 
 **Machine Learning**:
 * Moves job and trained model management features into Stack Management [#204290]({{kib-pull}}204290).
-* Update NL-2-ESQL docs [#224868]({{kib-pull}}224868).
+* Updates NL-2-ESQL docs [#224868]({{kib-pull}}224868).
 * Trained Models: Hides Adaptive Allocations Toggle in Serverless [#224097]({{kib-pull}}224097).
 * Adds rare scripts job to preconfigured Security:Windows anomaly detection jobs [#223041]({{kib-pull}}223041).
 * Adds new subAction for converse and converseStream for Bedrock [#223033]({{kib-pull}}223033).
 * ES|QL pattern formatting [#222871]({{kib-pull}}222871).
-* AIOps: Adds ability to disable AIOps features in Kibana [#221286]({{kib-pull}}221286).
-* Anomaly Explorer: New severity colors alignment & New UX for filtering anomalies [#221081]({{kib-pull}}221081).
-* Trained Models: Prevents download of models already present in other spaces and shows warning [#220238]({{kib-pull}}220238).
-* AIOps: Enhances `No Results` state for Change Point Detection [#219072]({{kib-pull}}219072).
+* Adds ability to disable AIOps features in Kibana [#221286]({{kib-pull}}221286).
+* New severity colors alignment and new UX for filtering anomalies [#221081]({{kib-pull}}221081).
+* Prevents the download of models already present in other spaces and shows a warning [#220238]({{kib-pull}}220238).
+* Enhances `No Results` state for Change Point Detection [#219072]({{kib-pull}}219072).
 * Fixes some OpenAI models not accepting temperature for Inference service [#218887]({{kib-pull}}218887).
 * Adds Voyage AI and DeepSeek icons [#216651]({{kib-pull}}216651).
-* Anomalies table: Enhances display for anomaly time function values [#216142]({{kib-pull}}216142).
-* Trained models: Improves UX for deploy action [#205699]({{kib-pull}}205699).
+* Enhances the display for anomaly time function values in anomaly tables [#216142]({{kib-pull}}216142).
+* Improves the UX for deploying trained models [#205699]({{kib-pull}}205699).
 
 **Management**:
 * These changes add autocompletion for ESQL query requests in Console [#219980]({{kib-pull}}219980).
@@ -190,7 +184,7 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.1.0-fixes]
 
 **Alerting**:
-* Fixes a regression that caused the cases actions to disappear from the detections engine alerts table bulk actions menu [#215111]({{kib-pull}}215111).
+* Fixes a regression that caused the cases actions to disappear from the Alerts table **Bulk actions** menu [#215111]({{kib-pull}}215111).
 
 **Dashboards and Visualizations**:
 * Forwards the secondary prefix correctly when the state value is an empty string (`None` option) in **Lens** [#228183]({{kib-pull}}228183).
