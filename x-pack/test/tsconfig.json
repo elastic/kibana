@@ -147,5 +147,6 @@
     "@kbn/dev-proc-runner",
     "@kbn/core-provider-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/test-suites-xpack",
   ]
 }
