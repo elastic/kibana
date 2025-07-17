@@ -7,29 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, ForwardedRef } from 'react';
+import React, { KeyboardEvent, MouseEvent, forwardRef, ForwardedRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType } from '@elastic/eui';
 
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'> {
-  isCurrent: boolean;
-  onClick: () => void;
-  onKeyDown?: (e: React.KeyboardEvent) => void;
-  label: string;
-  iconType?: IconType;
   hasContent?: boolean;
+  href?: string;
+  iconType?: IconType;
+  isCurrent: boolean;
+  label: string;
+  onClick: () => void;
+  onKeyDown?: (e: KeyboardEvent) => void;
 }
 
 /**
  * Toggle button pattern: https://eui.elastic.co/docs/components/navigation/buttons/button/#toggle-button
  */
 export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
-  ({ isCurrent, label, iconType, hasContent, ...props }, ref: ForwardedRef<HTMLDivElement>) => {
+  (
+    { hasContent, iconType, isCurrent, label, onClick, ...props },
+    ref: ForwardedRef<HTMLDivElement>
+  ) => {
     const wrapperStyles = css`
       display: flex;
       justify-content: center;
       width: 100%;
     `;
+
+    const handleClick = (e: MouseEvent) => {
+      e.preventDefault();
+      onClick();
+    };
 
     const menuItem = (
       <EuiButtonIcon
@@ -37,6 +46,7 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
         color={isCurrent ? 'primary' : 'text'}
         display={isCurrent ? 'base' : 'empty'}
         iconType={iconType || 'empty'}
+        onClick={handleClick}
         size="s"
         {...props}
       />
