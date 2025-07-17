@@ -6,15 +6,14 @@
  */
 
 import { EuiBasicTable, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { sum } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAddFilter } from '../../../../../common/hooks/use_add_filter';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { EntityType, RiskScoreFields } from '../../../../../../common/search_strategy';
+import { EntityType } from '../../../../../../common/search_strategy';
 import { ChartLabel } from '../../../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { DonutChart } from '../../../../../common/components/charts/donutchart';
 import { HeaderSection } from '../../../../../common/components/header_section';
@@ -66,15 +65,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
         value: count,
       })),
     [severityTableData]
-  );
-
-  const addFilter = useAddFilter();
-
-  const onDonutPartitionClicked = useCallback(
-    (level: string) => {
-      addFilter({ field: RiskScoreFields.userRisk, value: level });
-    },
-    [addFilter]
   );
 
   useQueryInspector({
@@ -149,7 +139,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                   }
                   title={<ChartLabel count={total} />}
                   totalCount={total}
-                  onPartitionClick={onDonutPartitionClicked}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

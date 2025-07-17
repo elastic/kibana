@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
+import { enablePrivmonSetting } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
@@ -16,8 +17,10 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
+    const kibanaServer = getService('kibanaServer');
     before(async () => {
       await dataView.create('security-solution');
+      await enablePrivmonSetting(kibanaServer);
     });
 
     after(async () => {
