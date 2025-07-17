@@ -14,7 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ExportMenu } from './export_integrations';
 import type { IShareContext } from '../context';
-import type { ExportShareConfig } from '../../types';
+import type { ExportShareConfig, ShareConfigs } from '../../types';
 
 const mockShareContext: IShareContext = {
   shareMenuItems: [
@@ -86,6 +86,66 @@ describe('Export Integrations', () => {
 
     ['CSV', 'PNG'].forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
+    });
+  });
+
+  describe('Export Derivatives', () => {
+    const exportDerivativeLabel = 'Export derivative';
+    const getMockExportDerivativeConfig = (shouldRender: boolean): ShareConfigs => ({
+      shareType: 'integration',
+      groupId: 'exportDerivatives',
+      id: 'anExampleExportDerivative',
+      config: {
+        shouldRender: () => shouldRender,
+        label: () => <span>{exportDerivativeLabel}</span>,
+        flyoutContent: () => <div />,
+        icon: 'empty',
+      },
+    });
+
+    it('render export derivatives with passing shouldRender predicates', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <ExportPopoverRender
+          shareContext={{
+            ...mockShareContext,
+            shareMenuItems: [
+              ...mockShareContext.shareMenuItems,
+              getMockExportDerivativeConfig(true),
+            ],
+          }}
+        />
+      );
+
+      await user.click(screen.getByText('click me'));
+
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByText(exportDerivativeLabel)).toBeInTheDocument();
+    });
+
+    it('does not render export derivatives with non-passing shouldRender predicates', async () => {
+      const user = userEvent.setup();
+      const label = 'Export derivative';
+
+      render(
+        <ExportPopoverRender
+          shareContext={{
+            ...mockShareContext,
+            shareMenuItems: [
+              ...mockShareContext.shareMenuItems,
+              getMockExportDerivativeConfig(false),
+            ],
+          }}
+        />
+      );
+
+      await user.click(screen.getByText('click me'));
+
+      await waitForEuiPopoverOpen();
+
+      expect(screen.queryByText(label)).not.toBeInTheDocument();
     });
   });
 

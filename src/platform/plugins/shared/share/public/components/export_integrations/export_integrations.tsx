@@ -263,8 +263,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
   const availableExportDerivatives = useMemo(
     () =>
       exportDerivatives.filter((exportDerivative) =>
-        exportDerivative.config.shouldRender?.({ availableExportItems: exportIntegrations })
-      ) ?? true,
+        exportDerivative.config.shouldRender({ availableExportItems: exportIntegrations })
+      ),
     [exportDerivatives, exportIntegrations]
   );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
