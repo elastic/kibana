@@ -207,8 +207,8 @@ The **Color Mapping** feature is now GA. Previous Lens `palette` definitions are
 * "Compare to" badge for Metric chart in *Lens* ({kibana-pull}214811[#214811]).
 * [dashboard] Basic keyboard interaction ({kibana-pull}208286[#208286]).
 Data ingestion and Fleet::
-* Enable feature flag `enableAutomaticAgentUpgrades` ({kibana-pull}219932[#219932]).
-* Adds Cloud Connectors CSPM Support ({kibana-pull}212200[#212200]).
+* Enables the `enableAutomaticAgentUpgrades` feature flag ({kibana-pull}219932[#219932]).
+* Adds support for Cloud Connectors in CSPM ({kibana-pull}212200[#212200]).
 Discover::
 * Display Attributes doc viewer tab for Observability ({kibana-pull}222391[#222391]).
 * Show partial results after timeout ({kibana-pull}219027[#219027]).
@@ -272,7 +272,7 @@ Dashboards and Visualizations::
 Updates time based charts to use the multi-layer time axis by default, providing a better time window context and improved label positioning.
 ////
 Data ingestion and Fleet::
-* Reuse shared integration policies when duplicating agent policies ({kibana-pull}217872[#217872]).
+* Reuses shared integration policies when duplicating agent policies ({kibana-pull}217872[#217872]).
 Discover::
 * Expand to fit the query on editor mount ({kibana-pull}225509[#225509]).
 * Flip LOOKUP JOIN to GA in docs ({kibana-pull}225117[#225117]).
@@ -376,10 +376,11 @@ Dashboards and Visualizations::
 This PR fixes an issue ([#193080](https://github.com/elastic/kibana/issues/193080)) where custom ranges and multi-field values were not correctly colored based on selected color mapping configurations.
 ////
 Data ingestion and Fleet::
-* Fixes backfill agentless logic for all packages ({kibana-pull}225767[#225767]).
-* Fixes UI error when no tags filter is selected ({kibana-pull}225413[#225413]).
-* Revert " Added instructions for installing elastic agent complete" ({kibana-pull}223520[#223520]).
+* Fixes backfill logic for agentless support across all packages ({kibana-pull}225767[#225767]).
+* Fixes a UI error that occurred when no tag filter was selected ({kibana-pull}225413[#225413]).
+* Reverts "Added instructions for installing {{agent}} complete" ({kibana-pull}223520[#223520]).
 * Fixes styled component theme lookup issue ({kibana-pull}221979[#221979]).
+
 Discover::
 * Fixes wrong validation on expressions between aggregations ({kibana-pull}227989[#227989]).
 * Hides lookup index hidden indices from autocomplete ({kibana-pull}227819[#227819]).
