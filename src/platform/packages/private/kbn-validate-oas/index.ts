@@ -9,7 +9,6 @@
 
 import Path from 'node:path';
 import Fs from 'node:fs';
-import Util from 'node:util';
 import chalk from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
