@@ -23,7 +23,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.1.0 [kibana-9.1.0-release-notes]
 
-If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19](https://www.elastic.co/guide/en/kibana/8.19/release-notes-8.19.0.html) or [9.0](#900-kibana-900-release-notes).
+If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19](https://www.elastic.co/guide/en/kibana/8.19/release-notes-8.19.0.html) or [9.0](#kibana-900-release-notes).
 
 ### Features and enhancements [kibana-9.1.0-features-enhancements]
 
