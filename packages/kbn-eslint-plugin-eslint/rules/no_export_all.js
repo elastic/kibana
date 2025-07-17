@@ -26,6 +26,7 @@ const ERROR_MSG =
 
 const programCache = new Map();
 // const fileCache = new Map();
+const sourceFileCache = new Map();
 
 /** @type {Rule} */
 module.exports = {
@@ -42,21 +43,46 @@ module.exports = {
 
         /** @type Parser */
         const parser = (path) => {
-          let program = programCache.get(path);
-          if (!program) {
-            program = ts.createProgram([path], {
-              allowJs: true,
-              target: ts.ScriptTarget.ESNext,
-              module: ts.ModuleKind.CommonJS,
-            });
-            programCache.set(path, program);
+          // let program = programCache.get(path);
+          // if (!program) {
+          // const program = ts.createProgram([path], {
+          //   allowJs: true,
+          //   target: ts.ScriptTarget.ESNext,
+          //   module: ts.ModuleKind.CommonJS,
+          // });
+            // programCache.set(path, program);
+          // }
+
+          // return program.getSourceFile(path);
+
+          if (sourceFileCache.has(path)) {
+
+            // const sf = sourceFileCache.get(path);
+            // for (const statement of sf.statements) {
+            //   if (ts.isVariableStatement(statement)) {
+            //     for (const decl of statement.declarationList.declarations) {
+            //       console.log('Name:', decl.name.getText(sourceFile));
+            //       // use decl.name.escapedText or .getText(), etc.
+            //     }
+            //   }
+            // }
+            return sourceFileCache.get(path);
           }
 
-          return program.getSourceFile(path);
+          const code = fs.readFileSync(path, 'utf-8');
+          const sourceFile = ts.createSourceFile(path, code, ts.ScriptTarget.ESNext, true);
 
-          // const code = fs.readFileSync(path, 'utf-8');
-          // const sourceFile = ts.createSourceFile(path, code, ts.ScriptTarget.ESNext, true);
-          // return sourceFile;
+          // for (const statement of sourceFile.statements) {
+          //   if (ts.isVariableStatement(statement)) {
+          //     for (const decl of statement.declarationList.declarations) {
+          //       console.log('Name:', decl.name.getText(sourceFile));
+          //       // use decl.name.escapedText or .getText(), etc.
+          //     }
+          //   }
+          // }
+
+          sourceFileCache.set(path, sourceFile);
+          return sourceFile;
         };
 
         const exportSet = getExportNamesDeep(parser, context.getFilename(), tsnode);
