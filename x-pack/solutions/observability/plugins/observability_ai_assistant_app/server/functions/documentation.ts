@@ -18,7 +18,12 @@ export async function registerDocumentationFunction({
   resources,
   pluginsStart: { llmTasks },
 }: FunctionRegistrationParameters) {
-  const isProductDocAvailable = (await llmTasks.retrieveDocumentationAvailable()) ?? false;
+  const esClient = (await resources.context.core).elasticsearch.client;
+  const inferenceId =
+    (await getInferenceIdFromWriteIndex(esClient, resources.logger)) ??
+    defaultInferenceEndpoints.ELSER;
+  const isProductDocAvailable =
+    (await llmTasks.retrieveDocumentationAvailable({ inferenceId })) ?? false;
 
   if (isProductDocAvailable) {
     functions.registerInstruction(({ availableFunctionNames }) => {
@@ -66,12 +71,6 @@ export async function registerDocumentationFunction({
       } as const,
     },
     async ({ arguments: { query, product }, connectorId, simulateFunctionCalling }) => {
-      const esClient = (await resources.context.core).elasticsearch.client;
-
-      const inferenceId =
-        (await getInferenceIdFromWriteIndex(esClient, resources.logger)) ??
-        defaultInferenceEndpoints.ELSER;
-
       const response = await llmTasks!.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,
