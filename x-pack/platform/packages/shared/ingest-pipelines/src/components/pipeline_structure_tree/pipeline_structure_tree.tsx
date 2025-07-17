@@ -6,14 +6,18 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTreeView, useEuiTheme } from "@elastic/eui";
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTreeView, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PipelineTreeNode } from './types';
 import { createTreeNodesFromPipelines } from './create_tree_nodes';
 import { getStyles } from './styles';
-import { FormattedMessage } from "@kbn/i18n-react";
 
 export interface PipelineStructureTreeProps {
   pipelineTree: PipelineTreeNode;
+  /**
+   * Specifies whether the tree is an extension of the main tree; i.e. displayed
+   * when the user clicks on the last "+X more pipelines" tree node.
+   */
   isSecondary: boolean;
 }
 
