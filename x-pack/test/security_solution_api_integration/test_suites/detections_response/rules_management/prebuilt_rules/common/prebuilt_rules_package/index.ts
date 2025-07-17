@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Prebuilt rules package', function () {
-    loadTestFile(require.resolve('./bootstrap_prebuilt_rules'));
     loadTestFile(require.resolve('./update_package'));
   });
 };
