@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiForm, useEuiTheme, EuiButtonIcon, EuiFlexItem } from '
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { ValueInput } from './grid_custom_renderers/value_input';
+import { ValueInput } from './value_input';
 import { KibanaContextExtra } from '../types';
 
 interface AddRowPanelProps {
