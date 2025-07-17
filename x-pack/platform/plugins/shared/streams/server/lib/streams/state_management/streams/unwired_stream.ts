@@ -28,6 +28,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { validateUnwiredFields } from '../../helpers/validate_fields';
+import { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 
 interface UnwiredStreamChanges extends StreamChanges {
   processing: boolean;
@@ -146,6 +147,42 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
           };
         }
         throw error;
+      }
+    }
+
+    // necessary or not?
+    if (this._changes.field_overrides) {
+      const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request(
+        {
+          method: 'PUT',
+          path: `/_data_stream/${this._definition.name}/_mappings?dry_run=true`,
+          body: {
+            properties: this._definition.ingest.unwired.field_overrides,
+            _meta: {
+              managed_by: 'streams',
+            },
+          },
+        }
+      )) as DataStreamMappingsUpdateResponse;
+      if (response.data_streams.length === 0) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Cannot create Unwired stream ${this.definition.name} due to existing Data Stream mappings`
+            ),
+          ],
+        };
+      }
+      if (response.data_streams[0].error) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Cannot create Unwired stream ${this.definition.name} due to error in Data Stream mappings: ${response.data_streams[0].error}`
+            ),
+          ],
+        };
       }
     }
 

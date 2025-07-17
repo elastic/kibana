@@ -145,7 +145,7 @@ export async function updateOrRolloverDataStream({
 }
 
 // TODO: Remove once client lib has been updated
-interface DataStreamMappingsUpdateResponse {
+export interface DataStreamMappingsUpdateResponse {
   data_streams: Array<{
     name: string;
     applied_to_data_stream: boolean;
