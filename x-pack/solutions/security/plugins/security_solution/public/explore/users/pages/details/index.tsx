@@ -19,7 +19,6 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import { dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -57,12 +56,8 @@ import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { getUsersDetailsPageFilters } from './helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { timelineDefaults } from '../../../../timelines/store/defaults';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
 import { EntityType } from '../../../../../common/entity_analytics/types';
@@ -94,10 +89,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
-  );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
