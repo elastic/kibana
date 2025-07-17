@@ -45,69 +45,6 @@ async function evaluateEsqlQuery({
 
 describe('ES|QL query generation', () => {
   describe('ES|QL scenarios with data', () => {
-    describe('Packetbeat dataset', () => {
-      before(async () => {
-        await esClient.indices.create({
-          index: 'packetbeat-8.11.3',
-          mappings: {
-            properties: {
-              '@timestamp': {
-                type: 'date',
-              },
-              destination: {
-                type: 'object',
-                properties: {
-                  domain: {
-                    type: 'keyword',
-                  },
-                },
-              },
-              url: {
-                type: 'object',
-                properties: {
-                  domain: {
-                    type: 'keyword',
-                  },
-                },
-              },
-            },
-          },
-        });
-
-        await esClient.index({
-          index: 'packetbeat-8.11.3',
-          document: {
-            '@timestamp': '2024-01-23T12:30:00.000Z',
-            destination: {
-              domain: 'observability.ai.assistant',
-            },
-            url: {
-              domain: 'elastic.co',
-            },
-          },
-        });
-      });
-
-      after(async () => {
-        await esClient.indices.delete({
-          index: 'packetbeat-8.11.3',
-          allow_no_indices: true,
-        });
-      });
-
-      it('top 10 unique domains', async () => {
-        await evaluateEsqlQuery({
-          question:
-            'For standard Elastic ECS compliant packetbeat data view, show me the top 10 unique destination.domain with the most docs',
-          expected: `FROM packetbeat-*
-          | STATS doc_count = COUNT(*) BY destination.domain
-          | SORT doc_count DESC
-          | LIMIT 10`,
-          execute: true,
-        });
-      });
-    });
-
     describe('APM dataset', () => {
       before(async () => {
         const myServiceInstance = apm
@@ -219,6 +156,69 @@ describe('ES|QL query generation', () => {
           criteria: [
             'The Assistant uses KEEP, to make sure the AT LEAST the formatted date, processor event and message fields are displayed. More columns are fine, fewer are not',
           ],
+        });
+      });
+    });
+
+    describe('Packetbeat dataset', () => {
+      before(async () => {
+        await esClient.indices.create({
+          index: 'packetbeat-8.11.3',
+          mappings: {
+            properties: {
+              '@timestamp': {
+                type: 'date',
+              },
+              destination: {
+                type: 'object',
+                properties: {
+                  domain: {
+                    type: 'keyword',
+                  },
+                },
+              },
+              url: {
+                type: 'object',
+                properties: {
+                  domain: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        await esClient.index({
+          index: 'packetbeat-8.11.3',
+          document: {
+            '@timestamp': '2024-01-23T12:30:00.000Z',
+            destination: {
+              domain: 'observability.ai.assistant',
+            },
+            url: {
+              domain: 'elastic.co',
+            },
+          },
+        });
+      });
+
+      after(async () => {
+        await esClient.indices.delete({
+          index: 'packetbeat-8.11.3',
+          allow_no_indices: true,
+        });
+      });
+
+      it('top 10 unique domains', async () => {
+        await evaluateEsqlQuery({
+          question:
+            'For standard Elastic ECS compliant packetbeat data view, show me the top 10 unique destination.domain with the most docs',
+          expected: `FROM packetbeat-*
+          | STATS doc_count = COUNT(*) BY destination.domain
+          | SORT doc_count DESC
+          | LIMIT 10`,
+          execute: true,
         });
       });
     });
