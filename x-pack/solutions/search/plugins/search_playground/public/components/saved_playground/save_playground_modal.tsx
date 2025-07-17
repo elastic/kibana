@@ -82,6 +82,17 @@ export const SavePlaygroundModal = ({
         onSuccess: (data) => {
           onClose();
           reset(newPlayground);
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.title', {
+              defaultMessage: 'Playground saved',
+            }),
+            text: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.text', {
+              defaultMessage: "'{name}' was saved.",
+              values: {
+                name: newPlayground.name,
+              },
+            }),
+          });
           onNavigateToNewPlayground(data._meta.id);
         },
         onError: (error) => {
