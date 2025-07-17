@@ -26,12 +26,14 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { kubernetesSessionsHeaders } from './constants';
 import { dataViewSpecToIndexPattern } from './utils/data_view_spec_to_index_pattern';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
 
   const { globalFullScreen } = useGlobalFullScreen();
-  const { sourcererDataView, dataViewId } = useSourcererDataView();
+  const { sourcererDataView: oldSourcererDataView, dataViewId } = useSourcererDataView();
+  const { dataView: experimentalDataView } = useDataView();
   const { from, to } = useGlobalTime();
 
   const getGlobalFiltersQuerySelector = useMemo(
@@ -46,11 +48,12 @@ export const KubernetesContainer = React.memo(() => {
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         queries: [query],
         filters,
       }),
-    [filters, sourcererDataView, uiSettings, query]
+    [uiSettings, oldSourcererDataView, experimentalDataView, query, filters]
   );
 
   useInvalidFilterQuery({
@@ -82,10 +85,10 @@ export const KubernetesContainer = React.memo(() => {
       {kubernetesSecurity.getKubernetesPage({
         filter: (
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={oldSourcererDataView} />
           </FiltersGlobal>
         ),
-        indexPattern: dataViewSpecToIndexPattern(sourcererDataView),
+        indexPattern: dataViewSpecToIndexPattern(oldSourcererDataView),
         globalFilter: {
           filterQuery,
           startDate: from,
