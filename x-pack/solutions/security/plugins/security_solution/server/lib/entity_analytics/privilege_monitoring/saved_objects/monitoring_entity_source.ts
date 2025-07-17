@@ -22,7 +22,6 @@ export class MonitoringEntitySourceDescriptorClient {
 
   async create(attributes: CreateMonitoringEntitySource) {
     await this.assertNameUniqueness(attributes);
-
     const { id, attributes: created } =
       await this.dependencies.soClient.create<CreateMonitoringEntitySource>(
         monitoringEntitySourceTypeName,

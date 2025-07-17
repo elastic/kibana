@@ -66,7 +66,8 @@ import { softDeleteOmittedUsers } from './users/soft_delete_omitted_users';
 import { privilegedUserParserTransform } from './users/privileged_user_parse_transform';
 import type { Accumulator } from './users/bulk/utils';
 import { accumulateUpsertResults } from './users/bulk/utils';
-import type { PrivMonBulkUser, PrivMonUserSource } from './types';
+import type { BulkOperation, PrivMonBulkUser, PrivMonUserSource } from './types';
+import type { MonitoringEntitySourceDescriptor } from './saved_objects';
 import {
   PrivilegeMonitoringEngineDescriptorClient,
   MonitoringEntitySourceDescriptorClient,
@@ -444,64 +445,74 @@ export class PrivilegeMonitoringDataClient {
    */
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
-    const indexSources = await this.monitoringIndexSourceClient.findByIndex();
-    if (indexSources.length === 0) {
+    const monitoringIndexSources: MonitoringEntitySourceDescriptor[] =
+      await this.monitoringIndexSourceClient.findByIndex();
+    const allStaleUsers: PrivMonBulkUser[] = [];
+
+    if (monitoringIndexSources.length === 0) {
       this.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
     }
-    const allStaleUsers: PrivMonBulkUser[] = [];
 
-    for (const source of indexSources) {
-      // eslint-disable-next-line no-continue
-      if (!source.indexPattern) continue; // if no index pattern, skip this source
-      const index: string = source.indexPattern;
-
-      try {
-        const batchUserNames = await this.syncUsernamesFromIndex({
-          indexName: index,
-          kuery: source.filter?.kuery,
-        });
-        // collect stale users
-        const staleUsers = await this.findStaleUsersForIndex(index, batchUserNames);
-        allStaleUsers.push(...staleUsers);
-      } catch (error) {
-        if (
-          error?.meta?.body?.error?.type === 'index_not_found_exception' ||
-          error?.message?.includes('index_not_found_exception')
-        ) {
-          this.log('warn', `Index "${index}" not found — skipping.`);
-          // eslint-disable-next-line no-continue
-          continue;
+    for (const source of monitoringIndexSources) {
+      if (!source.indexPattern) {
+        this.log('debug', `Skipping source "${source.name}" with no index pattern.`);
+      } else {
+        const index: string = source.indexPattern;
+        const syncedUsernames = await this.ingestUsersFromIndexSource(source, index);
+        if (syncedUsernames) {
+          allStaleUsers.push(...(await this.findStaleUsersForIndex(index, syncedUsernames)));
         }
-        this.log('error', `Unexpected error during sync for index "${index}": ${error.message}`);
       }
     }
-    // Soft delete stale users
-    this.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
-    if (allStaleUsers.length > 0) {
-      const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
-      await this.esClient.bulk({ body: ops });
+    if (allStaleUsers.length > 0) await this.bulkDeleteStaleUsers(allStaleUsers);
+  }
+
+  public async ingestUsersFromIndexSource(
+    source: MonitoringEntitySourceDescriptor,
+    index: string
+  ): Promise<string[] | null> {
+    try {
+      const usernames = await this.fetchUsernamesFromIndex({
+        indexName: index,
+        kuery: source.filter?.kuery,
+      });
+
+      const result = await this.bulkUpsertMonitoredUsers({
+        usernames,
+        indexName: index,
+      });
+
+      if (!result) {
+        this.log('debug', `No monitored users ingested for index "${index}"`);
+        return null;
+      }
+
+      return result;
+    } catch (error) {
+      const isIndexNotFound =
+        error?.meta?.body?.error?.type === 'index_not_found_exception' ||
+        error?.message?.includes('index_not_found_exception');
+
+      const level = isIndexNotFound ? 'warn' : 'error';
+      const msg = isIndexNotFound
+        ? `Index "${index}" not found — skipping.`
+        : `Unexpected error during sync for index "${index}": ${error.message}`;
+
+      this.log(level, msg);
+      return null;
     }
   }
 
   /**
-   * Synchronizes usernames from a specified index by collecting them in batches
-   * and performing create or update operations in the privileged user index.
+   * Fetches usernames from a specified index using a query.
+   * It retrieves usernames in batches, handling pagination with `search_after`.
    *
-   * This method:
-   * - Executes a paginated search on the provided index (with optional KQL filter).
-   * - Extracts `user.name` values from each document.
-   * - Checks for existing monitored users to determine if each username should be created or updated.
-   * - Performs bulk operations to insert or update users in the internal privileged user index.
-   *
-   * Designed to support large indices through pagination (`search_after`) and batching.
-   * Logs each step and handles errors during bulk writes.
-   *
-   * @param indexName - Name of the Elasticsearch index to pull usernames from.
-   * @param kuery - Optional KQL filter to narrow down results.
-   * @returns A list of all usernames processed from the source index.
+   * @param indexName - The name of the index to search.
+   * @param kuery - Optional KQL query to filter results.
+   * @returns A promise that resolves to an array of usernames.
    */
-  public async syncUsernamesFromIndex({
+  public async fetchUsernamesFromIndex({
     indexName,
     kuery,
   }: {
@@ -513,6 +524,7 @@ export class PrivilegeMonitoringDataClient {
     const batchSize = 100;
 
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+
     while (true) {
       const response = await this.searchUsernamesInIndex({
         indexName,
@@ -524,49 +536,79 @@ export class PrivilegeMonitoringDataClient {
       const hits = response.hits.hits;
       if (hits.length === 0) break;
 
-      // Collect usernames from the hits
       for (const hit of hits) {
         const username = hit._source?.user?.name;
         if (username) batchUsernames.push(username);
       }
-
-      const existingUserRes = await this.getMonitoredUsers(batchUsernames);
-
-      const existingUserMap = new Map<string, string | undefined>();
-      for (const hit of existingUserRes.hits.hits) {
-        const username = hit._source?.user?.name;
-        this.log('debug', `Found existing user: ${username} with ID: ${hit._id}`);
-        if (username) existingUserMap.set(username, hit._id);
-      }
-
-      const usersToWrite: PrivMonBulkUser[] = batchUsernames.map((username) => ({
-        username,
-        indexName,
-        existingUserId: existingUserMap.get(username),
-      }));
-
-      if (usersToWrite.length === 0) return batchUsernames;
-
-      const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
-      this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
-      try {
-        this.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
-        await this.esClient.bulk({ body: ops });
-      } catch (error) {
-        this.log('error', `Error executing bulk operations: ${error}`);
-      }
       searchAfter = hits[hits.length - 1].sort;
     }
+
     return batchUsernames;
   }
 
-  private async findStaleUsersForIndex(
+  public async bulkDeleteStaleUsers(staleUsernames: PrivMonBulkUser[]) {
+    try {
+      this.log('debug', `Found ${staleUsernames.length} stale users to soft delete`);
+      const ops = this.bulkOperationsForSoftDeleteUsers(staleUsernames, this.getIndex());
+      await this.esClient.bulk({ refresh: 'wait_for', body: ops });
+    } catch (error) {
+      this.log('error', `Error executing bulk soft delete operations: ${error}`);
+    }
+  }
+
+  /**
+   * Synchronizes a list of usernames with the monitoring index.
+   * It checks for existing users, updates them if they exist, or creates new ones if they don't.
+   *
+   * @param usernames - An array of usernames to sync.
+   * @param indexName - The name of the index to associate with the users.
+   * @returns A promise that resolves to an array of usernames that were synced.
+   */
+  public async bulkUpsertMonitoredUsers({
+    usernames,
+    indexName,
+  }: {
+    usernames: string[];
+    indexName: string;
+  }): Promise<string[] | null> {
+    if (usernames.length === 0) {
+      this.log('debug', 'No usernames to sync');
+      return null;
+    }
+
+    const existingUserRes = await this.getMonitoredUsers(usernames);
+
+    const existingUserMap = new Map<string, string | undefined>();
+    for (const hit of existingUserRes.hits.hits) {
+      const username = hit._source?.user?.name;
+      this.log('debug', `Found existing user: ${username} with ID: ${hit._id}`);
+      if (username) existingUserMap.set(username, hit._id);
+    }
+
+    const usersToWrite: PrivMonBulkUser[] = usernames.map((username) => ({
+      username,
+      indexName,
+      existingUserId: existingUserMap.get(username),
+    }));
+
+    const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
+    this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
+
+    try {
+      this.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
+      await this.esClient.bulk({ refresh: 'wait_for', body: ops });
+    } catch (error) {
+      this.log('error', `Error executing bulk operations: ${error}`);
+    }
+    return usernames;
+  }
+  public async findStaleUsersForIndex(
     indexName: string,
     userNames: string[]
   ): Promise<PrivMonBulkUser[]> {
     const response = await this.esClient.search<MonitoredUserDoc>({
       index: this.getIndex(),
-      size: 10, // check this
+      size: 10,
       _source: ['user.name', 'labels.source_indices'],
       query: {
         bool: {
@@ -614,8 +656,11 @@ export class PrivilegeMonitoringDataClient {
    * @param userIndexName - Name of the Elasticsearch index where user documents are stored.
    * @returns An array of bulk operations suitable for the Elasticsearch Bulk API.
    */
-  public buildBulkOperationsForUsers(users: PrivMonBulkUser[], userIndexName: string): object[] {
-    const ops: object[] = [];
+  public buildBulkOperationsForUsers(
+    users: PrivMonBulkUser[],
+    userIndexName: string
+  ): BulkOperation[] {
+    const ops: BulkOperation[] = [];
     this.log('info', `Building bulk operations for ${users.length} users`);
     for (const user of users) {
       if (user.existingUserId) {
