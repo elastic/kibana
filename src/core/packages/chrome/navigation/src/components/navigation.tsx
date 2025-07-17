@@ -8,6 +8,7 @@
  */
 
 import React, { KeyboardEvent } from 'react';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 
 import { MenuItem, NavigationStructure } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
@@ -29,12 +30,15 @@ interface NavigationProps {
 }
 
 export const Navigation = ({
-  isCollapsed,
+  isCollapsed: isCollapsedProp,
   items,
   logoLabel,
   logoType,
   setWidth,
 }: NavigationProps) => {
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
+  const isCollapsed = isMobile || isCollapsedProp;
+
   const { currentPage, currentSubpage, isSidePanelOpen, navigateTo, sidePanelContent } =
     useNavigation({
       initialMenuItem: items.primaryItems[0],
