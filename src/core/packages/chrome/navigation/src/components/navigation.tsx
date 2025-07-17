@@ -94,6 +94,7 @@ export const Navigation = ({
               container={document.documentElement}
               hasContent={getHasSubmenu(item)}
               isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
+              label={item.label}
               trigger={
                 <SideNav.PrimaryMenuItem
                   href={item.href}
@@ -141,6 +142,7 @@ export const Navigation = ({
               container={document.documentElement}
               hasContent
               isSidePanelOpen={false}
+              label="More" // TODO: translate
               persistent
               trigger={
                 <SideNav.PrimaryMenuItem
@@ -259,8 +261,9 @@ export const Navigation = ({
           {items.footerItems.slice(0, FOOTER_ITEM_LIMIT).map((item) => (
             <SideNav.Popover
               key={item.id}
-              isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
               hasContent={getHasSubmenu(item)}
+              isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
+              label={item.label}
               persistent={false}
               container={document.documentElement}
               trigger={

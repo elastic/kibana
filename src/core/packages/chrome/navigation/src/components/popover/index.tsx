@@ -35,6 +35,7 @@ export interface SideNavPopoverProps {
   children?: ReactNode | ((closePopover: () => void) => ReactNode);
   hasContent: boolean;
   isSidePanelOpen: boolean;
+  label: string;
   trigger: ReactElement<{
     ref?: React.Ref<HTMLElement>;
     onClick?: (e: React.MouseEvent) => void;
@@ -47,12 +48,13 @@ export interface SideNavPopoverProps {
 }
 
 export const SideNavPopover = ({
-  container,
   children,
+  container,
   hasContent,
   isSidePanelOpen,
-  trigger,
+  label,
   persistent = false,
+  trigger,
 }: SideNavPopoverProps): JSX.Element => {
   const popoverRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement>(null);
@@ -137,6 +139,7 @@ export const SideNavPopover = ({
       onBlur={blurPopover(triggerRef, popoverRef, handleClose)}
     >
       <EuiPopover
+        aria-label={label}
         anchorPosition="rightUp"
         buffer={[TOP_BAR_HEIGHT + TOP_BAR_POPOVER_GAP, 0, BOTTOM_POPOVER_GAP, POPOVER_OFFSET]}
         button={enhancedTrigger}
