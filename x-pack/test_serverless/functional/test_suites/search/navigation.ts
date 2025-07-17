@@ -17,7 +17,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const solutionNavigation = getPageObject('solutionNavigation');
-  const console = getPageObject('console');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const header = getPageObject('header');

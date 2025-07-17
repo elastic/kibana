@@ -12,7 +12,7 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation, console } = getPageObjects([
+  const { common, solutionNavigation } = getPageObjects([
     'common',
     'solutionNavigation',
     'console',
