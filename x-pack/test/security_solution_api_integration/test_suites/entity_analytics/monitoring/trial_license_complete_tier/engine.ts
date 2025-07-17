@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { privilegeMonitoringTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/privilege_monitoring/saved_objects/privilege_monitoring_type';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { privilegeMonitoringRouteHelpersFactory } from '../../utils/privilege_monitoring';
@@ -13,10 +14,11 @@ import { privilegeMonitoringRouteHelpersFactory } from '../../utils/privilege_mo
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
-  // const kibanaServer = getService('kibanaServer');
+  const kibanaServer = getService('kibanaServer');
   const privmon = privilegeMonitoringRouteHelpersFactory(supertest);
   const log = getService('log');
   const es = getService('es');
+  const spaceName = 'monitoring-space';
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
@@ -64,11 +66,28 @@ export default ({ getService }: FtrProviderContext) => {
         // Probable do not need cleanup before AND after. Debugging WIP
         await es.indices.delete({ index: indexName }, { ignore: [404] });
         await privmon.deleteIndexSource(entitySource.name, { ignore404: true });
+        await es.indices.delete({ index: 'default-monitoring-index' }, { ignore: [404] });
         await privmon.deleteIndexSource('default-monitoring-index', { ignore404: true });
       });
       before(async () => {
         // Ensure index does not exist before creating it
         await es.indices.delete({ index: indexName }, { ignore: [404] });
+        await es.indices.delete({ index: 'default-monitoring-index' }, { ignore: [404] });
+        await privmon.deleteIndexSource('default-monitoring-index', { ignore404: true });
+        const soId = await kibanaServer.savedObjects.find<{
+          type: typeof privilegeMonitoringTypeName;
+          space: string;
+        }>({
+          type: privilegeMonitoringTypeName,
+          space: spaceName,
+        });
+        if (soId.saved_objects.length !== 0) {
+          await kibanaServer.savedObjects.delete({
+            type: privilegeMonitoringTypeName,
+            space: spaceName,
+            id: soId.saved_objects[0].id,
+          });
+        }
         // Delete quickly any existing source with the same name
         await privmon.deleteIndexSource(entitySource.name, { ignore404: true });
         // await privmon.deleteIndexSource(entitySource.name);
