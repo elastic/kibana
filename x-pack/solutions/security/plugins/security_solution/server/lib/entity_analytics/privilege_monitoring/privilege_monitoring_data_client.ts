@@ -122,11 +122,11 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
-    // create default index source for privilege monitoring
+    // create default index source for privilege monitoring for each namespace
     const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
       type: 'index',
       managed: true,
-      indexPattern: defaultMonitoringUsersIndex,
+      indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
       name: `default-monitoring-index-${this.opts.namespace}`,
     });
     this.log(

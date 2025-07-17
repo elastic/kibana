@@ -520,4 +520,7 @@ export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
 /*
  * The tag to mark promotion rules that are related to the AI for SOC integrations
  */
-export const PROMOTION_RULE_TAG = 'Promotion';
+export const PROMOTION_RULE_TAGS = [
+  'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live
+  'Promotion: External Alerts',
+];
