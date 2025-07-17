@@ -78,7 +78,9 @@ export function getObservabilitySystemPrompt({
   const corePrinciples: string[] = [];
 
   // Core Principles: Be Proactive but Clear
-  let firstCorePrinciple = `1. **Be Proactive but Clear:** Try to fulfill the user's request directly.`;
+  let firstCorePrinciple = `${
+    corePrinciples.length + 1
+  }. **Be Proactive but Clear:** Try to fulfill the user's request directly.`;
   if (toolsWithTimeRange.length) {
     firstCorePrinciple +=
       ` If essential information like a time range is missing for tools like ${toolsWithTimeRange.join(
@@ -94,25 +96,42 @@ export function getObservabilitySystemPrompt({
 
   // Core Principles: Ask When Necessary
   corePrinciples.push(
-    `2. **Ask Only When Necessary:** If key information is missing or ambiguous, or if using a default seems inappropriate for the specific request, ask the user for clarification. **Exception:**  as mentioned, time range can be missing and you can assume the default time range.`
+    `${
+      corePrinciples.length + 1
+    }. **Ask Only When Necessary:** If key information is missing or ambiguous, or if using a default seems inappropriate for the specific request, ask the user for clarification. **Exception:**  as mentioned, time range can be missing and you can assume the default time range.`
   );
 
   // Core Principles: Confirm Tool Use
   corePrinciples.push(
-    `3. **Confirm Tool Use (If Uncertain):** If you are unsure which specific tool to use or what non-standard arguments are needed${
+    `${
+      corePrinciples.length + 1
+    }. **Confirm Tool Use (If Uncertain):** If you are unsure which specific tool to use or what non-standard arguments are needed${
       isFunctionAvailable(CONTEXT_FUNCTION_NAME) ? ' even after checking context' : ''
     }, ask the user for clarification.`
   );
 
   // Core Principles: Format Responses
-  corePrinciples.push(`4. **Format Responses:** Use Github-flavored Markdown for your responses.`);
+  corePrinciples.push(
+    `${
+      corePrinciples.length + 1
+    }. **Format Responses:** Use Github-flavored Markdown for your responses.`
+  );
 
   // Core Principles: Single Tool Call Only
   if (availableFunctionNames.length) {
     corePrinciples.push(
-      `5. **Single Tool Call:** Only call one tool per turn. Wait for the tool's result before deciding on the next step or tool call.`
+      `${
+        corePrinciples.length + 1
+      }. **Single Tool Call:** Only call one tool per turn. Wait for the tool's result before deciding on the next step or tool call.`
     );
   }
+
+  // Core Principles: Summarize Results Clearly
+  corePrinciples.push(
+    `${
+      corePrinciples.length + 1
+    }. **Summarize Results Clearly:** After returning raw output from any tool, always add a concise, user-friendly summary that highlights key findings, anomalies, trends, and actionable insights. When helpful, format the information using tables, bullet lists, or code blocks to maximize readability.`
+  );
 
   promptSections.push('\n## Core Principles\n\n' + corePrinciples.join('\n\n'));
 
@@ -160,9 +179,9 @@ export function getObservabilitySystemPrompt({
 
     if (toolsWithTimeRange.length) {
       usage.push(
-        `**Time Range Handling:** As stated in Core Principles, for tools requiring time ranges${toolsWithTimeRange.join(
+        `**Time Range Handling:** As stated in Core Principles, for tools requiring time ranges (${toolsWithTimeRange.join(
           ', '
-        )}, ${
+        )}), ${
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
             ? `first try \`${CONTEXT_FUNCTION_NAME}\` to find time range. If no time range is found in context,`
             : ''
