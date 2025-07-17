@@ -34,7 +34,6 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
     const menuItem = (
       <EuiButtonIcon
         aria-label={label}
-        aria-pressed={isCurrent}
         color={isCurrent ? 'primary' : 'text'}
         display={isCurrent ? 'base' : 'empty'}
         iconType={iconType || 'empty'}
