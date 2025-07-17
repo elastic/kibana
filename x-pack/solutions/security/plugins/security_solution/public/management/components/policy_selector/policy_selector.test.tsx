@@ -390,6 +390,11 @@ describe('PolicySelector component', () => {
     beforeEach(() => {
       props.additionalListItems = [
         {
+          label: 'group 1',
+          isGroupLabel: true,
+          'data-test-subj': 'customGroupLabel',
+        },
+        {
           label: 'Item 1',
           checked: 'on', // << This one is selected
           'data-test-subj': 'customItem1',
@@ -398,6 +403,12 @@ describe('PolicySelector component', () => {
           label: 'Item 2',
           checked: undefined,
           'data-test-subj': 'customItem2',
+        },
+        {
+          label: 'Item 3',
+          checked: 'on',
+          disabled: true,
+          'data-test-subj': 'customItem3',
         },
       ];
     });
@@ -408,7 +419,7 @@ describe('PolicySelector component', () => {
       expect(getByTestId('customItem1')).toBeTruthy();
       expect(getByTestId('customItem2')).toBeTruthy();
       expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
-        '1 of 52 selected'
+        '2 of 53 selected'
       );
     });
 
@@ -431,6 +442,11 @@ describe('PolicySelector component', () => {
         [],
         [
           {
+            label: 'group 1',
+            isGroupLabel: true,
+            'data-test-subj': 'customGroupLabel',
+          },
+          {
             label: 'Item 1',
             checked: undefined,
             'data-test-subj': 'customItem1',
@@ -440,16 +456,89 @@ describe('PolicySelector component', () => {
             checked: undefined,
             'data-test-subj': 'customItem2',
           },
+          {
+            label: 'Item 3',
+            checked: 'on',
+            disabled: true,
+            'data-test-subj': 'customItem3',
+          },
+        ]
+      );
+    });
+
+    it('should not update disabled items when Select All is clicked', async () => {
+      await render();
+      testUtils.clickOnSelectAll();
+
+      expect(props.onChange).toHaveBeenCalledWith(
+        [testPolicyId1, testPolicyId2, testPolicyId3],
+        [
+          {
+            label: 'group 1',
+            isGroupLabel: true,
+            'data-test-subj': 'customGroupLabel',
+          },
+          {
+            label: 'Item 1',
+            checked: 'on',
+            'data-test-subj': 'customItem1',
+          },
+          {
+            label: 'Item 2',
+            checked: 'on',
+            'data-test-subj': 'customItem2',
+          },
+          {
+            label: 'Item 3',
+            checked: 'on',
+            disabled: true,
+            'data-test-subj': 'customItem3',
+          },
+        ]
+      );
+    });
+
+    it('should not update disabled items when Un-Select All is clicked', async () => {
+      await render();
+      testUtils.clickOnUnSelectAll();
+
+      expect(props.onChange).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            label: 'group 1',
+            isGroupLabel: true,
+            'data-test-subj': 'customGroupLabel',
+          },
+          {
+            label: 'Item 1',
+            checked: undefined,
+            'data-test-subj': 'customItem1',
+          },
+          {
+            label: 'Item 2',
+            checked: undefined,
+            'data-test-subj': 'customItem2',
+          },
+          {
+            label: 'Item 3',
+            checked: 'on',
+            disabled: true,
+            'data-test-subj': 'customItem3',
+          },
         ]
       );
     });
 
     it('should display with a checkbox when "useCheckbox" prop is true', async () => {
       props.useCheckbox = true;
-      const { getByTestId } = await render();
+      const { getByTestId, queryByTestId } = await render();
 
       expect(getByTestId('test-customItem1-checkbox')).toBeTruthy();
       expect(getByTestId('test-customItem2-checkbox')).toBeTruthy();
+
+      // EUI Selectable Group Label item should NOT have the checkbox
+      expect(queryByTestId('test-customGroupLabel-checkbox')).toBeNull();
     });
 
     it('should exclude group labels from total count calculation', async () => {
