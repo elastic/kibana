@@ -39,6 +39,7 @@ import type {
   PackageSpecManifest,
   AssetsMap,
   PackagePolicyAssetsMap,
+  RegistryPolicyIntegrationTemplate,
 } from '../../../../common/types';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -71,6 +72,8 @@ import { auditLoggingService } from '../../audit_logging';
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
+
+import type { RegistryPolicyTemplate } from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
 import {
@@ -596,14 +599,20 @@ function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | 
     );
     // filter out matching types e.g. nginx/metrics
     filteredPolicyTemplates = packageInfo.policy_templates?.reduce(
-      (acc: any[], policyTemplate: any) => {
-        const filteredInputs = policyTemplate.inputs?.filter((input: any) => {
-          const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
-            input.type.includes(excludedType)
-          );
-          return shouldInclude;
-        });
-        acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
+      (acc: RegistryPolicyTemplate[], policyTemplate: RegistryPolicyTemplate) => {
+        const policyTemplateIntegrationTemplate =
+          policyTemplate as RegistryPolicyIntegrationTemplate;
+        if (policyTemplateIntegrationTemplate.inputs) {
+          const filteredInputs = policyTemplateIntegrationTemplate.inputs.filter((input: any) => {
+            const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
+              input.type.includes(excludedType)
+            );
+            return shouldInclude;
+          });
+          acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
+        } else {
+          acc.push(policyTemplate);
+        }
         return acc;
       },
       []
