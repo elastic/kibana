@@ -52,19 +52,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       after(async () => {
         // Clean up space created
         await cleanUp();
-        await esDeleteAllIndices(indexName);
+        await esDeleteAllIndices(['test-*', 'search-*']);
       });
 
       describe('search home page', () => {
         beforeEach(async () => {
-          await esDeleteAllIndices(indexName);
+          await esDeleteAllIndices(['test-*', 'search-*']);
           await pageObjects.searchNavigation.navigateToElasticsearchOverviewPage(
             `/s/${spaceCreated.id}`
           );
         });
 
         afterEach(async () => {
-          await esDeleteAllIndices(indexName);
+          await esDeleteAllIndices(['test-*', 'search-*']);
         });
 
         it('should have embedded dev console', async () => {
@@ -95,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         after(async () => {
-          await esDeleteAllIndices(indexName);
+          await esDeleteAllIndices(['test-*', 'search-*']);
         });
 
         describe('Elasticsearch endpoint and API Keys', function () {

@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   const deleteAllTestIndices = async () => {
-    await esDeleteAllIndices(['test-*']);
+    await esDeleteAllIndices(['test-*', 'search-*']);
   };
 
   const testSubjects = getService('testSubjects');
