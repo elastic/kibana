@@ -32,6 +32,13 @@ export const forkStreamsRoute = createServerRoute({
     }),
     body: z.object({ stream: z.object({ name: z.string() }), if: conditionSchema }),
   }),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,
@@ -61,6 +68,13 @@ export const resyncStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
   handler: async ({ request, getScopedClients }): Promise<ResyncStreamsResponse> => {
     const { streamsClient } = await getScopedClients({ request });
 
@@ -78,7 +92,14 @@ export const getStreamsStatusRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean | 'conflict' }> => {
+  responses: {
+    200: {
+      description: 'Example Response - TODO: Add at least one response to statisfy OpenAPI Spec',
+      body: z.looseObject({}),
+      bodyContentType: 'application/json',
+    },
+  },
+  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {
     const { streamsClient } = await getScopedClients({ request });
 
     return { enabled: await streamsClient.checkStreamStatus() };
