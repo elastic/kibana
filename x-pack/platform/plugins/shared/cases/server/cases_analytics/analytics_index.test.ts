@@ -7,7 +7,8 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { DiagnosticResult, errors as esErrors } from '@elastic/elasticsearch';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { AnalyticsIndex } from './analytics_index';
 import type {
