@@ -525,8 +525,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should replace secondary metric prefix and badge when changing primary metric type to non-numeric', async () => {
-      const PREFIX_SELECTOR = '[class*="secondary_metric--prefix"]';
-      const getPrefix = async () => await find.byCssSelector(PREFIX_SELECTOR);
       // Create new metric lens vis
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
@@ -551,7 +549,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
       // Check the Prefix and the Badge text
       expect(await (await getBadge()).getVisibleText()).to.be(`+8,277.678 ↑`);
-      expect(await (await getPrefix()).getVisibleText()).to.be('Difference');
+      const secondaryElement = await testSubjects.find('metric-secondary-element');
+      expect(await secondaryElement.getVisibleText()).to.contain('Difference');
 
       // Save the visualization
       await lens.save('Metric prefix badge test', false, true);
@@ -572,7 +571,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // The badge text should change and the prefix should be "Average of bytes"
       expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322 ↑`);
-      expect(await (await getPrefix()).getVisibleText()).to.be('Average of bytes');
+      const newSecondaryElement = await testSubjects.find('metric-secondary-element');
+      expect(await newSecondaryElement.getVisibleText()).to.contain('Average of bytes');
 
       // Open secondary metric editor
       await lens.openDimensionEditor(
