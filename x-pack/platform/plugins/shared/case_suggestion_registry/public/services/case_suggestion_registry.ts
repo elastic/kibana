@@ -25,7 +25,7 @@ export interface SuggestionDefinitionPublic<TPayload = {}, TMetadata = {}> {
   >;
 }
 
-export class CaseSuggestionRegistry {
+export class Registry {
   private registry: Map<string, SuggestionDefinitionPublic> = new Map();
 
   public register(suggestion: SuggestionDefinitionPublic): void {

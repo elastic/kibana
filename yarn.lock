@@ -4065,6 +4065,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/case-suggestion-registry-example-plugin@link:x-pack/examples/case_suggestion_registry_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/case-suggestion-registry-plugin@link:x-pack/platform/plugins/shared/case_suggestion_registry":
   version "0.0.0"
   uid ""

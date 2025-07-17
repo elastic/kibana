@@ -218,6 +218,7 @@
     "@kbn/calculate-auto": "link:src/platform/packages/shared/kbn-calculate-auto",
     "@kbn/calculate-width-from-char-count": "link:src/platform/packages/shared/kbn-calculate-width-from-char-count",
     "@kbn/canvas-plugin": "link:x-pack/platform/plugins/private/canvas",
+    "@kbn/case-suggestion-registry-example-plugin": "link:x-pack/examples/case_suggestion_registry_example",
     "@kbn/case-suggestion-registry-plugin": "link:x-pack/platform/plugins/shared/case_suggestion_registry",
     "@kbn/cases-api-integration-test-plugin": "link:x-pack/platform/test/cases_api_integration/common/plugins/cases",
     "@kbn/cases-components": "link:src/platform/packages/shared/kbn-cases-components",

@@ -6,11 +6,11 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { observabilityCaseSuggestionRegistryConfigSchema } from '../common/config';
+import { caseSuggestionRegistryConfigSchema } from '../common/config';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
   },
-  schema: observabilityCaseSuggestionRegistryConfigSchema,
+  schema: caseSuggestionRegistryConfigSchema,
 };

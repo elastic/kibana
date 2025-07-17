@@ -5,40 +5,41 @@
  * 2.0.
  */
 import { PluginInitializerContext, Plugin as PluginType } from '@kbn/core/server';
-import { CaseSuggestionRegistry } from './services/case_suggestion_registry';
-import { ObservabilityCaseSuggestionRegistryConfig } from '../common/config';
+import { Registry } from './services/case_suggestion_registry';
+import { CaseSuggestionRegistryConfig } from '../common/config';
 
-export interface ObservabilityCaseSuggestionRegistryPluginSetup {
-  config: ObservabilityCaseSuggestionRegistryConfig;
-  caseSuggestionRegistry: CaseSuggestionRegistry;
+export interface CaseSuggestionRegistryServerSetup {
+  config: CaseSuggestionRegistryConfig;
+  registry: Registry;
 }
 
-export interface ObservabilityCaseSuggestionRegistryPluginStart {
-  config: ObservabilityCaseSuggestionRegistryConfig;
-  caseSuggestionRegistry: CaseSuggestionRegistry;
+export interface CaseSuggestionRegistryServerStart {
+  config: CaseSuggestionRegistryConfig;
+  registry: Registry;
 }
 
-export class ObservabilitySharedPlugin implements PluginType {
-  private config?: ObservabilityCaseSuggestionRegistryConfig;
-  private caseSuggestionRegistry?: CaseSuggestionRegistry;
+export class CaseSuggestionRegistryPlugin implements PluginType {
+  private config: CaseSuggestionRegistryConfig;
+  private registry: Registry;
 
   constructor(
-    private readonly initContext: PluginInitializerContext<ObservabilityCaseSuggestionRegistryConfig>
-  ) {}
+    private readonly initContext: PluginInitializerContext<CaseSuggestionRegistryConfig>
+  ) {
+    this.registry = new Registry();
+    this.config = this.initContext.config.get<CaseSuggestionRegistryConfig>();
+  }
 
   public setup() {
-    this.config = this.initContext.config.get<ObservabilityCaseSuggestionRegistryConfig>();
-    this.caseSuggestionRegistry = new CaseSuggestionRegistry();
     return {
       config: this.config,
-      caseSuggestionRegistry: this.caseSuggestionRegistry,
+      registry: this.registry,
     };
   }
 
   public start() {
     return {
-      config: this.config || {},
-      caseSuggestionRegistry: this.caseSuggestionRegistry,
+      config: this.config,
+      registry: this.registry,
     };
   }
 

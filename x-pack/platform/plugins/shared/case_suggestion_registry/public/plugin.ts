@@ -7,36 +7,31 @@
 
 import type { Plugin } from '@kbn/core/public';
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { ObservabilityCaseSuggestionRegistryBrowserConfig } from '../common/config';
-import { CaseSuggestionRegistry } from './services/case_suggestion_registry';
+import { CaseSuggestionRegistryBrowserConfig } from '../common/config';
+import { Registry } from './services/case_suggestion_registry';
 
-export type ObservabilityCaseSuggestionRegistryPluginSetup = ReturnType<
-  ObservabilityCaseSuggestionRegistryPlugin['setup']
->;
-export type ObservabilityCaseSuggestionRegistryPluginStart = ReturnType<
-  ObservabilityCaseSuggestionRegistryPlugin['start']
->;
+export type CaseSuggestionRegistryPublicSetup = ReturnType<CaseSuggestionRegistryPlugin['setup']>;
+export type CaseSuggestionRegistryPublicStart = ReturnType<CaseSuggestionRegistryPlugin['start']>;
 
-export class ObservabilityCaseSuggestionRegistryPlugin implements Plugin {
-  private config?: ObservabilityCaseSuggestionRegistryBrowserConfig;
-  private caseSuggestionRegistry?: CaseSuggestionRegistry;
+export class CaseSuggestionRegistryPlugin implements Plugin {
+  private config: CaseSuggestionRegistryBrowserConfig;
+  private registry: Registry;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<CaseSuggestionRegistryBrowserConfig>();
+    this.registry = new Registry();
+  }
 
   public setup() {
-    this.config =
-      this.initializerContext.config.get<ObservabilityCaseSuggestionRegistryBrowserConfig>();
-    this.caseSuggestionRegistry = new CaseSuggestionRegistry();
-
     return {
-      caseSuggestionRegistry: this.caseSuggestionRegistry,
+      registry: this.registry,
       config: this.config,
     };
   }
 
   public start() {
     return {
-      caseSuggestionRegistry: this.caseSuggestionRegistry!,
+      registry: this.registry,
       config: this.config,
     };
   }

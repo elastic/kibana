@@ -20,7 +20,7 @@ export interface SuggestionDefinitionServer<TPayload = {}, TMetadata = {}> {
   toolHandlers: Record<string, ToolHandler<TPayload, TMetadata>>; // Handlers for tools, keyed to match the tool name
 }
 
-export class CaseSuggestionRegistry {
+export class Registry {
   private registry: Map<string, SuggestionDefinitionServer> = new Map();
   private tools: Map<string, ToolDefinition> = new Map();
   private toolHandlers: Map<string, ToolHandler> = new Map();

@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-export const observabilityCaseSuggestionRegistryConfigSchema = schema.object({
+export const caseSuggestionRegistryConfigSchema = schema.object({
   unsafe: schema.maybe(
     schema.object({
       caseSuggestionsEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
@@ -15,10 +15,8 @@ export const observabilityCaseSuggestionRegistryConfigSchema = schema.object({
   ),
 });
 
-export type ObservabilityCaseSuggestionRegistryConfig = TypeOf<
-  typeof observabilityCaseSuggestionRegistryConfigSchema
->;
-export type ObservabilityCaseSuggestionRegistryBrowserConfig = Pick<
-  TypeOf<typeof observabilityCaseSuggestionRegistryConfigSchema>,
+export type CaseSuggestionRegistryConfig = TypeOf<typeof caseSuggestionRegistryConfigSchema>;
+export type CaseSuggestionRegistryBrowserConfig = Pick<
+  TypeOf<typeof caseSuggestionRegistryConfigSchema>,
   'unsafe'
 >;

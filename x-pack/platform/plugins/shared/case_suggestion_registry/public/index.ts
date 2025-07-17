@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { PluginInitializerContext } from '@kbn/core/public';
-import { ObservabilityCaseSuggestionRegistryPlugin } from './plugin';
+import { CaseSuggestionRegistryPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new ObservabilityCaseSuggestionRegistryPlugin(initializerContext);
+  return new CaseSuggestionRegistryPlugin(initializerContext);
 };
 
 export type { SuggestionPayload } from '../common/types';
@@ -19,6 +19,6 @@ export type {
 } from './services/case_suggestion_registry';
 
 export type {
-  ObservabilityCaseSuggestionRegistryPluginSetup,
-  ObservabilityCaseSuggestionRegistryPluginStart,
+  CaseSuggestionRegistryPublicSetup,
+  CaseSuggestionRegistryPublicStart,
 } from './plugin';
