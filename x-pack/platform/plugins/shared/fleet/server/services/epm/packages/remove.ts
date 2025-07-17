@@ -331,7 +331,6 @@ export async function deletePrerequisiteAssets(
       concurrency: MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
     });
   } catch (err) {
-    logger.debug(`Deletion error: ${err}`);
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(err);
