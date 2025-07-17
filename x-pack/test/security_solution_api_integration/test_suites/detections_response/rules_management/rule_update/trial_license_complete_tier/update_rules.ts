@@ -450,7 +450,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.eql({
             error: 'Bad Request',
             message: '[request body]: threshold.field: Array must contain at most 5 element(s)',
-            status_code: 400,
+            statusCode: 400,
           });
         });
 
