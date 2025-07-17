@@ -60,6 +60,8 @@ import { comparisonFunctions } from '../../all_operators';
 import { correctQuerySyntax, findAstPosition } from '../ast';
 import { parse } from '../../../parser';
 import { Walker } from '../../../walker';
+import { getSuggestionsToRightOfOperatorExpression } from '../operators';
+import { getExpressionType } from '../expressions';
 
 function checkContentPerDefinition(fn: ESQLFunction, def: FunctionDefinitionTypes): boolean {
   const fnDef = getFunctionDefinition(fn.name);
@@ -515,7 +517,7 @@ export const getInsideFunctionsSuggestions = async (
       }
     },
   });
-  const { node, command } = findAstPosition(ast, cursorPosition ?? 0);
+  const { node, command, containingFunction } = findAstPosition(ast, cursorPosition ?? 0);
   if (!node) {
     return undefined;
   }
@@ -525,6 +527,24 @@ export const getInsideFunctionsSuggestions = async (
     return [];
   }
   if (node.type === 'function') {
+    // For now, we don't suggest for expressions within any function besides CASE
+    // e.g. CASE(field != /)
+    //
+    // So, it is handled as a special branch...
+    if (
+      containingFunction?.name === 'case' &&
+      !Array.isArray(node) &&
+      node?.subtype === 'binary-expression'
+    ) {
+      return await getSuggestionsToRightOfOperatorExpression({
+        queryText: innerText,
+        location: getLocationFromCommandOrOptionName(command.name),
+        rootOperator: node,
+        getExpressionType: (expression) =>
+          getExpressionType(expression, context?.fields, context?.userDefinedColumns),
+        getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
+      });
+    }
     if (['in', 'not in'].includes(node.name)) {
       // // command ... a in ( <here> )
       // return { type: 'list' as const, command, node, option, containingFunction };
