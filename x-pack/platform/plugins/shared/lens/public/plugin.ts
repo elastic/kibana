@@ -400,14 +400,20 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
+          const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
           container.addNewPanel(
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
-                references: savedObject.references,
+                rawState: {},
+                references: [
+                  ...savedObject.references,
+                  {
+                    name: SAVED_OBJECT_REF_NAME,
+                    type: LENS_EMBEDDABLE_TYPE,
+                    id: savedObject.id,
+                  },
+                ],
               },
             },
             true

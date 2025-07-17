@@ -1,0 +1,210 @@
+{
+  "id": "sampleDataIngest",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "sampleDataIngest",
+      "id": "def-public.SampleDataIngestPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SampleDataIngestPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "sampleDataIngest",
+      "id": "def-public.SampleDataIngestPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SampleDataIngestPluginStart",
+      "description": [],
+      "signature": [
+        {
+          "pluginId": "sampleDataIngest",
+          "scope": "public",
+          "docId": "kibSampleDataIngestPluginApi",
+          "section": "def-public.SampleDataIngestPluginStart",
+          "text": "SampleDataIngestPluginStart"
+        },
+        " extends Pick<",
+        "InstallationAPI",
+        ", \"install\" | \"getStatus\">"
+      ],
+      "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.InstallResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "InstallResponse",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.InstallResponse.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"error\" | \"installing\" | \"installed\" | \"uninstalled\""
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.InstallResponse.indexName",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.StatusResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "StatusResponse",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.StatusResponse.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"error\" | \"installing\" | \"installed\" | \"uninstalled\""
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.StatusResponse.indexName",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.DatasetSampleType",
+        "type": "Enum",
+        "tags": [],
+        "label": "DatasetSampleType",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.INSTALL_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INSTALL_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/sample_data_ingest/install\""
+        ],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.internalElserInferenceId",
+        "type": "string",
+        "tags": [],
+        "label": "internalElserInferenceId",
+        "description": [
+          "\nThe id of the inference endpoint we're creating for our product doc indices."
+        ],
+        "signature": [
+          "\".elser-2-elasticsearch\""
+        ],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.STATUS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "STATUS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/sample_data_ingest/status\""
+        ],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

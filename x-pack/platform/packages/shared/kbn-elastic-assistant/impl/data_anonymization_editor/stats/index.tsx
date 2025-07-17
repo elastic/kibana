@@ -22,6 +22,11 @@ const StatFlexItem = styled(EuiFlexItem)`
 `;
 
 interface Props {
+  anonymizationFieldsStatus?: {
+    allowed?: { doc_count: number };
+    anonymized?: { doc_count: number };
+    denied?: { doc_count: number };
+  };
   isDataAnonymizable: boolean;
   anonymizationFields?: AnonymizationFieldResponse[];
   rawData?: string | Record<string, string[]>;
@@ -32,6 +37,7 @@ interface Props {
 }
 
 const StatsComponent: React.FC<Props> = ({
+  anonymizationFieldsStatus,
   isDataAnonymizable,
   anonymizationFields,
   rawData,
@@ -43,11 +49,12 @@ const StatsComponent: React.FC<Props> = ({
   const { allowed, anonymized, total } = useMemo(
     () =>
       getStats({
+        anonymizationFieldsStatus,
         anonymizationFields,
         rawData,
         replacements,
       }),
-    [anonymizationFields, rawData, replacements]
+    [anonymizationFieldsStatus, anonymizationFields, rawData, replacements]
   );
 
   return (
