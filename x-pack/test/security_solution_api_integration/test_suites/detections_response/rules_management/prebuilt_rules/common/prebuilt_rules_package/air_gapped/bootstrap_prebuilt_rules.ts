@@ -10,12 +10,8 @@ import {
   PREBUILT_RULES_PACKAGE_NAME,
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import {
-  deleteAllPrebuiltRuleAssets,
-  deleteEndpointFleetPackage,
-  deletePrebuiltRulesFleetPackage,
-} from '../../../../utils';
+import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
+import { deleteEndpointFleetPackage, deletePrebuiltRulesFleetPackage } from '../../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -24,15 +20,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const retryService = getService('retry');
   const securitySolutionApi = getService('securitySolutionApi');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/202037
-  describe.skip('@ess @serverless @skipInServerlessMKI Bootstrap Prebuilt Rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI Bootstrap Prebuilt Rules', () => {
     beforeEach(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
       await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
       await deleteEndpointFleetPackage({ supertest, es, log, retryService });
     });
 
-    it('should install fleet packages required for detection engine to function', async () => {
+    it('installs required Fleet packages required for detection engine to function', async () => {
       const { body } = await securitySolutionApi.bootstrapPrebuiltRules().expect(200);
 
       expect(body).toMatchObject({
@@ -49,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should skip installing fleet packages if they are already installed', async () => {
+    it('skips packages installation when the package has been already installed', async () => {
       // Install the packages
       await securitySolutionApi.bootstrapPrebuiltRules().expect(200);
       // Try to install the packages again
