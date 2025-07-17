@@ -8,18 +8,9 @@
     "id": "onechat",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "onechat"
-    ],
-    "requiredPlugins": [
-      "actions",
-      "inference",
-      "features"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
+    "configPath": ["xpack", "onechat"],
+    "requiredPlugins": ["actions", "inference", "features"],
+    "requiredBundles": ["kibanaReact"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }
