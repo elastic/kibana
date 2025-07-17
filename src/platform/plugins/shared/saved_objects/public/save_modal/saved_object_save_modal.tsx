@@ -59,7 +59,7 @@ export interface SaveDashboardReturn {
 }
 
 interface Props {
-  onSave: (props: OnSaveProps) => Promise<SaveDashboardReturn>;
+  onSave: (props: OnSaveProps) => void;
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
@@ -278,6 +278,9 @@ class SavedObjectSaveModalComponent extends React.Component<
       isLoading: true,
     });
 
+    // Although `onSave` is an asynchronous function, it is typed as returning `void`
+    // somewhere deeper in the call chain, which causes its asynchronous nature to be lost.
+    // We still need to treat it as async here to properly handle the loading state.
     try {
       await this.props.onSave({
         newTitle: this.state.title,
