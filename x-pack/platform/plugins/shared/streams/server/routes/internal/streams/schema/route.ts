@@ -7,6 +7,9 @@
 import { getFlattenedObject } from '@kbn/std';
 import { SampleDocument, fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { SearchHit } from '@kbn/es-types';
+import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
@@ -60,6 +63,12 @@ export const unmappedFieldsRoute = createServerRoute({
 
     // Mapped fields from the stream's definition and inherited from ancestors
     const mappedFields = new Set<string>();
+
+    if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
+      Object.keys(streamDefinition.ingest.unwired.field_overrides || {}).forEach((name) =>
+        mappedFields.add(name)
+      );
+    }
 
     if (Streams.WiredStream.Definition.is(streamDefinition)) {
       Object.keys(streamDefinition.ingest.wired.fields).forEach((name) => mappedFields.add(name));
@@ -179,32 +188,11 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       ),
     }));
 
-    const simulationBody = {
-      docs: sampleResultsAsSimulationDocs,
-      component_template_substitutions: {
-        [`${params.path.name}@stream.layer`]: {
-          template: {
-            mappings: {
-              dynamic: 'strict',
-              properties: propertiesForSimulation,
-            },
-          },
-        },
-      },
-      // prevent double-processing
-      pipeline_substitutions: {
-        [`${params.path.name}@stream.processing`]: {
-          processors: [],
-        },
-      },
-    };
-
-    // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
-    const simulation = (await scopedClusterClient.asCurrentUser.transport.request({
-      method: 'POST',
-      path: `_ingest/_simulate`,
-      body: simulationBody,
-    })) as any;
+    const simulation = await simulateIngest(
+      sampleResultsAsSimulationDocs,
+      propertiesForSimulation,
+      scopedClusterClient
+    );
 
     const hasErrors = simulation.docs.some((doc: any) => doc.doc.error !== undefined);
 
@@ -276,3 +264,33 @@ export const internalSchemaRoutes = {
   ...unmappedFieldsRoute,
   ...schemaFieldsSimulationRoute,
 };
+
+const DUMMY_PIPELINE_NAME = '__dummy_pipeline__';
+
+async function simulateIngest(
+  sampleResultsAsSimulationDocs: Array<SearchHit<unknown>>,
+  propertiesForSimulation: Record<string, MappingProperty>,
+  scopedClusterClient: IScopedClusterClient
+) {
+  const simulationBody = {
+    docs: sampleResultsAsSimulationDocs,
+    mapping_addition: {
+      properties: propertiesForSimulation,
+    },
+    // prevent double-processing
+    pipeline_substitutions: {
+      [DUMMY_PIPELINE_NAME]: {
+        processors: [],
+      },
+    },
+  };
+
+  // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
+  const simulation = (await scopedClusterClient.asCurrentUser.transport.request({
+    method: 'POST',
+    path: `_ingest/_simulate?pipeline=${DUMMY_PIPELINE_NAME}`,
+    body: simulationBody,
+  })) as any;
+
+  return simulation;
+}

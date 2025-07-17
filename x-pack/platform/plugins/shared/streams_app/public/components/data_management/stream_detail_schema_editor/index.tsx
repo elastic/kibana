@@ -11,23 +11,22 @@ import { SchemaEditor } from '../schema_editor';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 
 interface SchemaEditorProps {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const { loading } = useStreamDetail();
 
-  const { fields, isLoadingUnmappedFields, refreshFields, unmapField, updateField } =
-    useSchemaFields({
-      definition,
-      refreshDefinition,
-    });
+  const { fields, isLoadingFields, refreshFields, unmapField, updateField } = useSchemaFields({
+    definition,
+    refreshDefinition,
+  });
 
   return (
     <SchemaEditor
       fields={fields}
-      isLoading={loading || isLoadingUnmappedFields}
+      isLoading={loading || isLoadingFields}
       stream={definition.stream}
       onFieldUnmap={unmapField}
       onFieldUpdate={updateField}
