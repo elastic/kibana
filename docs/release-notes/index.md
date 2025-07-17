@@ -71,36 +71,28 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Keeps the chart configuration when possible after editing the {{esql}} visualization's query [#210780]({{kib-pull}}210780).
 
 **Data ingestion and Fleet**:
-* Adds bulk migrations UI [#224334]({{kib-pull}}224334).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added the ability to migrate bulk agents to another cluster via the bulk actions menu of the agent list table (experimental).
-* Enable tabular integrations UI feature flag [#222842]({{kib-pull}}222842).
-* Single agent migration UI [#222111]({{kib-pull}}222111).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added the ability to migrate a single agent to another cluster via the actions menu in Fleet. Users can enter a remote cluster URL and enrollment token, as well as customize additional parameters in order to migrate an agent.
-* Adds single agent migration endpoint [#220601]({{kib-pull}}220601).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added endpoint allowing a user to migrate an individual agent to another cluster by specifying the URL and Enrollment Token. Note: tamper protected and fleet agents can not be migrated and attempting to do so will return a `403` status code.
-* Adds integration flyout [#220229]({{kib-pull}}220229).
-* Enable feature flag enableSyncIntegrationsOnRemote [#220215]({{kib-pull}}220215).
-* Enable feature flag `enableAutomaticAgentUpgrades` [#219932]({{kib-pull}}219932).
-* Adds Edit ReadMe Functionality To Custom Integrations [#215259]({{kib-pull}}215259).
-% !!TODO!! The above PR had a lengthy release note description:
-% Adds edit functionality to custom integrations, allowing a user to edit the README file of a custom integration and save it to be persisted. Additionally, saving will automatically increment the version of the integration and update all associated policies.
-* Adds ssl fields to agent binary source settings [#213211]({{kib-pull}}213211).
-* Adds Cloud Connectors CSPM Support [#212200]({{kib-pull}}212200).
-* Expose ssl options for ES and remote ES outputs in UI [#208745]({{kib-pull}}208745).
-* Adds SSL options to fleet server hosts settings [#208091]({{kib-pull}}208091).
-* Adds action to Add tags to Agent details page [#225433]({{kib-pull}}225433).
-* Adds tooltip to Last activity column in Agent list UI [#224850]({{kib-pull}}224850).
-* Support agentless traffic filters [#222082]({{kib-pull}}222082).
-* Fleet agents tag filter is searchable and sorted [#219639]({{kib-pull}}219639).
-* Callout breaking changes on integration upgrade [#217257]({{kib-pull}}217257).
-* Adds msi installer command for fleet server and agents [#217217]({{kib-pull}}217217).
-* Optional ssl for fleet logstash output [#216216]({{kib-pull}}216216).
-* Format last activity value in fleet agent details view as datetime [#215531]({{kib-pull}}215531).
-* Support `searchAfter` and PIT (point-in-time) parameters for get agents list API [#213486]({{kib-pull}}213486).
-* Register custom integrations search provider [#213013]({{kib-pull}}213013).
+* Adds support for bulk agent migration using the **Bulk actions** menu in the agent list table [#224334]({{kib-pull}}224334).
+* Enables the **Tabular integrations** UI feature flag [#222842]({{kib-pull}}222842).
+* Adds support for single agent migration using the **Actions** menu in {{fleet}}. Users can provide a remote cluster URL and enrollment token, and customize parameters for the migration [#222111]({{kib-pull}}222111).
+* Adds an API endpoint to migrate a single agent to another cluster using a URL and enrollment token. Tamper-protected and {{fleet}}-managed agents are not supported and return a `403` response if attempted [#220601]({{kib-pull}}220601).
+* Adds a new integration flyout component [#220229]({{kib-pull}}220229).
+* Enables the `enableSyncIntegrationsOnRemote` feature flag [#220215]({{kib-pull}}220215).
+* Enables the `enableAutomaticAgentUpgrades` feature flag [#219932]({{kib-pull}}219932).
+* Adds edit functionality for custom integration READMEs. Editing a README automatically increments the integration version and updates all associated policies [#215259]({{kib-pull}}215259).
+* Adds SSL fields to agent binary source settings [#213211]({{kib-pull}}213211).
+* Adds support for Cloud Connectors in CSPM [#212200]({{kib-pull}}212200).
+* Exposes SSL options for {{es}} and remote {{es}} outputs in the UI [#208745]({{kib-pull}}208745).
+* Adds SSL options to {{fleet}} Server host settings [#208091]({{kib-pull}}208091).
+* Adds a new action to add tags from the **Agent details** page [#225433]({{kib-pull}}225433).
+* Adds a tooltip to the **Last activity** column in the agent list UI [#224850]({{kib-pull}}224850).
+* Adds support for agentless traffic filters [#222082]({{kib-pull}}222082).
+* Makes the tag filter in {{fleet}} agents searchable and sorted [#219639]({{kib-pull}}219639).
+* Adds a callout to highlight breaking changes during integration upgrades [#217257]({{kib-pull}}217257).
+* Adds MSI installer command support for {{fleet}} Server and agents [#217217]({{kib-pull}}217217).
+* Makes SSL optional for {{fleet}} Logstash outputs [#216216]({{kib-pull}}216216).
+* Formats the **Last activity** value in the {{fleet}} agent details view as a datetime [#215531]({{kib-pull}}215531).
+* Adds support for `searchAfter` and point-in-time (`pit`) parameters in the get agents list API [#213486]({{kib-pull}}213486).
+* Registers a custom integrations search provider [#213013]({{kib-pull}}213013).
 
 **Discover**:
 * Display Attributes doc viewer tab for Observability [#222391]({{kib-pull}}222391).
@@ -222,18 +214,18 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixes an issue where custom ranges and multi-field values were not correctly colored based on selected color mapping configurations [#207957]({{kib-pull}}207957).
 
 **Data ingestion and Fleet**:
-* Fixes export CSV in Agent list [#225050]({{kib-pull}}225050).
-* Replace call to registry when deleting kibana assets for custom packages [#224886]({{kib-pull}}224886).
-* Ensure package policy names are unique when moving across spaces [#224804]({{kib-pull}}224804).
-* Fixes bulk actions incorrectly selecting agents with namespaces filter [#224036]({{kib-pull}}224036).
-* Revert " Added instructions for installing elastic agent complete" [#223520]({{kib-pull}}223520).
+* Fixes CSV export in the agent list [#225050]({{kib-pull}}225050).
+* Replaces registry call when deleting {{kib}} assets for custom packages [#224886]({{kib-pull}}224886).
+* Ensures package policy names are unique when moving across spaces [#224804]({{kib-pull}}224804).
+* Fixes bulk actions incorrectly selecting agents when a namespace filter is applied [#224036]({{kib-pull}}224036).
+* Reverts "Added instructions for installing {{agent}} complete." [#223520]({{kib-pull}}223520).
 * Fixes styled component theme lookup issue [#221979]({{kib-pull}}221979).
-* Fixes ssl config overridden from advanced yaml in full agent policy [#219902]({{kib-pull}}219902).
-* Fixes capability required for Siem Migrations Topic [#219427]({{kib-pull}}219427).
-* Make output and fleet server non-editable for agentless policies [#218905]({{kib-pull}}218905).
-* Support integrations having secrets with multiple values [#216918]({{kib-pull}}216918).
+* Fixes SSL config being overridden by advanced YAML in full agent policy [#219902]({{kib-pull}}219902).
+* Fixes required capability for the SIEM migrations topic [#219427]({{kib-pull}}219427).
+* Makes output and {{fleet}} Server settings non-editable for agentless policies [#218905]({{kib-pull}}218905).
+* Supports integrations with secrets that contain multiple values [#216918]({{kib-pull}}216918).
 * Adds remote cluster instructions for syncing integrations [#211997]({{kib-pull}}211997).
-* Update install snippets to include all platforms [#210249]({{kib-pull}}210249).
+* Updates install snippets to include all platformss [#210249]({{kib-pull}}210249).
 
 **Discover**:
 * Fixes wrong validation on expressions between aggregations [#227989]({{kib-pull}}227989).
@@ -394,7 +386,7 @@ The 9.0.1 release contains fixes for potential security vulnerabilities. See our
 
 ### Enhancements [kibana-9.0.1-features-enhancements]
 **Data ingestion and Fleet**:
-* Reuse shared integration policies when duplicating agent policies [#217872](https://github.com/elastic/kibana/pull/217872).
+* Reuses shared integration policies when duplicating agent policies [#217872](https://github.com/elastic/kibana/pull/217872).
 
 **Elastic Security solution**:
 For the Elastic Security 9.0.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
