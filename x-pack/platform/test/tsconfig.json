@@ -24,14 +24,9 @@
     "./api_integration/apis/logstash/pipeline/fixtures/*.json",
     "./api_integration/apis/logstash/pipelines/fixtures/*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
-    "./monitoring_api_integration/fixtures/**/*.json",
+    "./monitoring_api_integration/fixtures/**/*.json"
   ],
-  "exclude": [
-    "target/**/*",
-    "*/plugins/**/*",
-    "*/packages/**/*",
-    "*/*/packages/**/*"
-  ],
+  "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
     "@kbn/test-suites-src",
     "@kbn/telemetry-collection-manager-plugin",
@@ -127,6 +122,7 @@
     "@kbn/core-provider-plugin",
     "@kbn/reporting-plugin",
     "@kbn/kibana-usage-collection-plugin",
+    "@kbn/apm-synthtrace",
     "@kbn/aiops-change-point-detection",
     "@kbn/aiops-plugin",
     "@kbn/ml-category-validator",
@@ -138,5 +134,11 @@
     "@kbn/data-visualizer-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/ci-stats-reporter",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-deprecations-common",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/sse-utils-server",
+    "@kbn/inference-common",
+    "@kbn/rule-registry-plugin"
   ]
 }
