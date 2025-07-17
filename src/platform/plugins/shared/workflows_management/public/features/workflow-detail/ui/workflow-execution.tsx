@@ -45,6 +45,14 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
 
+  const sortedStepExecutions = useMemo(() => {
+    return (
+      workflowExecution?.stepExecutions?.sort(
+        (a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime()
+      ) || []
+    );
+  }, [workflowExecution?.stepExecutions]);
+
   const columns = useMemo<Array<EuiBasicTableColumn<EsWorkflowStepExecution>>>(
     () =>
       [
@@ -165,11 +173,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
         </>
       )}
 
-      <EuiBasicTable
-        columns={columns}
-        items={workflowExecution?.stepExecutions ?? []}
-        responsiveBreakpoint={false}
-      />
+      <EuiBasicTable columns={columns} items={sortedStepExecutions} responsiveBreakpoint={false} />
     </div>
   );
 };
