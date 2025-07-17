@@ -87,8 +87,8 @@ run(
     }
   },
   {
-    description: `Validate Kibana OAS YAML files (in oas_docs/output)`,
-    usage: `node ./scripts/validate_oas_docs.js`,
+    description: 'Validate Kibana OAS YAML files (in oas_docs/output)',
+    usage: 'node ./scripts/validate_oas_docs.js',
     flags: {
       string: ['path', 'only'],
       help: `

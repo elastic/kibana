@@ -3,5 +3,6 @@
   "id": "@kbn/validate-oas",
   "owner": "@elastic/kibana-core",
   "group": "platform",
-  "visibility": "private"
+  "visibility": "private",
+  "devOnly": true
 }
