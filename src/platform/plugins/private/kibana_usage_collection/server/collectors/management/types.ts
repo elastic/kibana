@@ -50,6 +50,7 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'onechat:mcpServer:enabled': boolean;
+  'ai:anonymizationSettings': string;
   'onechat:ui:enabled': boolean;
   'onechat:tools:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
