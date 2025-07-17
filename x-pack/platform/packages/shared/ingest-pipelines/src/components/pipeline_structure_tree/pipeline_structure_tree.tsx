@@ -18,7 +18,7 @@ export interface PipelineStructureTreeProps {
    * Specifies whether the tree is an extension of the main tree; i.e. displayed
    * when the user clicks on the last "+X more pipelines" tree node.
    */
-  isSecondary: boolean;
+  isExtension: boolean;
 }
 
 /**
@@ -29,10 +29,10 @@ export interface PipelineStructureTreeProps {
  */
 export const PipelineStructureTree = ({
   pipelineTree,
-  isSecondary,
+  isExtension,
 }: PipelineStructureTreeProps) => {
   const { euiTheme } = useEuiTheme();
-  const styles = getStyles(euiTheme, isSecondary);
+  const styles = getStyles(euiTheme, isExtension);
 
   const [selectedPipeline, setSelectedPipeline] = useState(pipelineTree.pipelineName);
 
@@ -44,7 +44,7 @@ export const PipelineStructureTree = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-      {isSecondary && (
+      {isExtension && (
         <EuiFlexItem>
           <EuiButtonEmpty iconType="arrowLeft" onClick={() => {}}>
             <FormattedMessage
@@ -54,7 +54,7 @@ export const PipelineStructureTree = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
-      <EuiFlexItem css={{ marginLeft: isSecondary ? euiTheme.size.l : '0' }}>
+      <EuiFlexItem css={{ marginLeft: isExtension ? euiTheme.size.l : '0' }}>
         <EuiTreeView items={[treeNode]} showExpansionArrows={true} css={styles} />
       </EuiFlexItem>
     </EuiFlexGroup>

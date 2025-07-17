@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import { EuiThemeComputed } from '@elastic/eui';
 
-export const getStyles = (euiTheme: EuiThemeComputed, isSecondary: boolean) => css`
+export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => css`
   [class*='cssTreeNode-'] {
     background-color: ${euiTheme.colors.backgroundBasePlain};
     padding: ${euiTheme.size.base} ${euiTheme.size.m};
@@ -22,7 +22,7 @@ export const getStyles = (euiTheme: EuiThemeComputed, isSecondary: boolean) => c
   }
 
   [class*='cssTreeNode-children'] {
-    margin-left: ${isSecondary ? euiTheme.size.xl : euiTheme.size.l};
+    margin-left: ${isExtension ? euiTheme.size.xl : euiTheme.size.l};
   }
 
   // We want to disable EUI's logic for activating nodes but EuiTreeViewItems's

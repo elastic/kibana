@@ -13,8 +13,8 @@ const meta: Meta<typeof PipelineStructureTree> = {
   component: PipelineStructureTree,
   title: 'Ingest Pipelines/Pipeline Structure Tree',
   argTypes: {
-    isSecondary: {
-      name: 'Is tree secondary?',
+    isExtension: {
+      name: 'Is the tree an extension of the main tree?',
     },
   },
 };
@@ -86,6 +86,6 @@ const pipelineTree = {
 export const Primary: Story = {
   args: {
     pipelineTree,
-    isSecondary: false,
+    isExtension: false,
   },
 };
