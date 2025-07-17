@@ -19,6 +19,7 @@ import {
   ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
   ASSET_INVENTORY_DATA_VIEW_NAME,
   ASSET_INVENTORY_GENERIC_INDEX_PREFIX,
+  ASSET_INVENTORY_GENERIC_LOOKBACK_PERIOD,
   ASSET_INVENTORY_INDEX_PATTERN,
 } from './constants';
 
@@ -147,11 +148,30 @@ export class AssetInventoryDataClient {
       const entityEngineStatus = entityStoreStatus.status;
 
       let entityStoreEnablementResponse;
+
+      // For Asset Inventory onboarding, the Generic Entities should be initialized with a lookback period of 26 hours
+      // to account for the fact that entity extraction integrations have a default ingest window time of 24 hours
+      // and we want to cover the ingest window time with a buffer of 2 hours.
+      const genericRequestBody: InitEntityStoreRequestBody = {
+        ...requestBodyOverrides,
+        lookbackPeriod: ASSET_INVENTORY_GENERIC_LOOKBACK_PERIOD,
+      };
+
       // If the entity store is not installed, we need to install it.
       if (entityEngineStatus === 'not_installed') {
+        const nonGenericEntityStoreRequestBody: InitEntityStoreRequestBody = {
+          ...requestBodyOverrides,
+          entityTypes: [EntityType.enum.host, EntityType.enum.user, EntityType.enum.service],
+        };
+
+        await secSolutionContext
+          .getEntityStoreDataClient()
+          .enable(nonGenericEntityStoreRequestBody);
+
         entityStoreEnablementResponse = await secSolutionContext
           .getEntityStoreDataClient()
-          .enable(requestBodyOverrides);
+          // @ts-ignore-next-line TS2345
+          .init(EntityType.enum.generic, genericRequestBody);
       } else {
         // If the entity store is already installed, we need to check if the generic engine is installed.
         const genericEntityEngine = entityStoreStatus.engines.find(this.isGenericEntityEngine);
@@ -161,7 +181,7 @@ export class AssetInventoryDataClient {
           entityStoreEnablementResponse = await secSolutionContext
             .getEntityStoreDataClient()
             // @ts-ignore-next-line TS2345
-            .init(EntityType.enum.generic, requestBodyOverrides);
+            .init(EntityType.enum.generic, genericRequestBody);
         }
       }
 
