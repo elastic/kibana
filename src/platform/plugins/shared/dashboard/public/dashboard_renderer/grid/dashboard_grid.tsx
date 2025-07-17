@@ -290,7 +290,7 @@ const dashboardGridStyles = {
       // drag handle visibility when dashboard is in edit mode or a panel is expanded
       '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred, .dshDashboardGrid__item--focused':
         {
-          '.embPanel--dragHandle': {
+          '.embPanel--dragHandle, ~.kbnGridPanel--resizeHandle': {
             visibility: 'hidden',
           },
         },
