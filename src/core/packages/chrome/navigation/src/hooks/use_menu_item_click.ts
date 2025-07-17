@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback } from 'react';
+import { MouseEvent, useCallback } from 'react';
 
 /**
  * Custom hook for handling menu item clicks with CMD + Click support
@@ -17,7 +17,7 @@ import { useCallback } from 'react';
  */
 export const useMenuItemClick = (onClick?: () => void) => {
   return useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
+    (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
       // Check for CMD + Click (Mac) or Ctrl + Click (Windows/Linux)
       // Let the browser handle these cases naturally for new tab opening
       if (event.metaKey || event.ctrlKey) {
