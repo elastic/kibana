@@ -14,49 +14,49 @@ xpack.fleet.packages:
     version: latest
 # Filter out some observability and security integrations
 xpack.fleet.internal.registry.excludePackages: [
-    # Security integrations
-    'endpoint',
-    'beaconing',
-    'cloud_security_posture',
-    'cloud_defend',
-    'security_detection_engine',
+  # Security integrations
+  'endpoint',
+  'beaconing',
+  'cloud_security_posture',
+  'cloud_defend',
+  'security_detection_engine',
 
-    # Oblt integrations
-    'apm',
-    'synthetics',
-    'synthetics_dashboards',
+  # Oblt integrations
+  'apm',
+  'synthetics',
+  'synthetics_dashboards',
 
-    # Removed in 8.11 integrations
-    'cisco',
-    'microsoft',
-    'symantec',
-    'cyberark',
+  # Removed in 8.11 integrations
+  'cisco',
+  'microsoft',
+  'symantec',
+  'cyberark',
 
-    # Profiling integrations
-    'profiler_agent',
+  # Profiling integrations
+  'profiler_agent',
 
-    # Search connectors
-    'elastic_connectors',
-  ]
+  # Search connectors
+  'elastic_connectors',
+]
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboards feature is moved from Analytics category to the Search one.
-  dashboard_v2.category: 'enterpriseSearch'
+  dashboard_v2.category: "enterpriseSearch"
   ### Dev Tools feature is moved from Analytics category to the Search one.
-  dev_tools.category: 'enterpriseSearch'
+  dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the Search one.
-  discover_v2.category: 'enterpriseSearch'
+  discover_v2.category: "enterpriseSearch"
   ### Machine Learning feature is moved from Analytics category to the Management one.
-  ml.category: 'management'
+  ml.category: "management"
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
   stackAlerts:
-    name: 'Alerts'
-    category: 'enterpriseSearch'
+    name: "Alerts"
+    category: "enterpriseSearch"
   ### Observability AI Assistant feature is moved to Search and renamed
   observabilityAIAssistant:
-    name: 'AI Assistant'
-    category: 'enterpriseSearch'
+    name: "AI Assistant"
+    category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
@@ -72,19 +72,7 @@ telemetry.labels.serverless: search
 
 # Alerts and LLM config
 xpack.actions.enabledActionTypes:
-  [
-    '.email',
-    '.index',
-    '.slack',
-    '.slack_api',
-    '.jira',
-    '.webhook',
-    '.teams',
-    '.gen-ai',
-    '.bedrock',
-    '.gemini',
-    '.inference',
-  ]
+  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
@@ -128,8 +116,8 @@ xpack.searchHomepage.enabled: true
 xpack.observabilityAIAssistant.enabled: true
 xpack.searchAssistant.enabled: true
 xpack.searchAssistant.ui.enabled: true
-xpack.observabilityAIAssistant.scope: 'search'
-aiAssistantManagementSelection.preferredAIAssistantType: 'observability'
+xpack.observabilityAIAssistant.scope: "search"
+aiAssistantManagementSelection.preferredAIAssistantType: "observability"
 
 # Query Rules UI
 xpack.searchQueryRules.enabled: true
@@ -144,8 +132,8 @@ xpack.actions.preconfigured:
     actionTypeId: .inference
     exposeConfig: true
     config:
-      provider: 'elastic'
-      taskType: 'chat_completion'
-      inferenceId: '.rainbow-sprinkles-elastic'
+      provider: "elastic"
+      taskType: "chat_completion"
+      inferenceId: ".rainbow-sprinkles-elastic"
       providerConfig:
-        model_id: 'rainbow-sprinkles'
+        model_id: "rainbow-sprinkles"
