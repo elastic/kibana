@@ -168,6 +168,9 @@
           "id": "kibDevTutorialSavedObject"
         },
         {
+          "id": "kibDevTutorialElasticsearchClient"
+        },
+        {
           "id": "kibDevTutorialVersioningHTTPAPIs",
           "label": "Versioning HTTP APIs"
         },

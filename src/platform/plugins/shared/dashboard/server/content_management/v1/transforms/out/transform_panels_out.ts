@@ -90,7 +90,6 @@ function transformPanelProperties(
     gridData: rest,
     panelConfig: transformedPanelConfig ? transformedPanelConfig : panelConfig,
     panelIndex,
-    panelRefName,
     type: panelType,
     version,
   };
