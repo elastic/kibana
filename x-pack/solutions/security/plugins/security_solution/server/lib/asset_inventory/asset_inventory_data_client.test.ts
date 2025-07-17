@@ -512,9 +512,27 @@ describe('AssetInventoryDataClient', () => {
   });
 
   describe('enable function', () => {
+    const mockEntityStoreDataClient = {
+      status: jest.fn(),
+      enable: jest.fn(),
+      init: jest.fn(),
+    };
+
+    const mockDataViewService = {
+      get: jest.fn(),
+      createAndSave: jest.fn(),
+    };
+
     beforeEach(() => {
       jest.clearAllMocks();
       uiSettingsClientMock.get.mockResolvedValue(true);
+      (mockSecSolutionContext.getEntityStoreDataClient as jest.Mock).mockReturnValue(
+        mockEntityStoreDataClient
+      );
+      (mockSecSolutionContext.getDataViewsService as jest.Mock).mockReturnValue(
+        mockDataViewService
+      );
+      (mockSecSolutionContext.getSpaceId as jest.Mock).mockReturnValue('default');
     });
 
     it('throws error when uisetting is disabled', async () => {
@@ -523,6 +541,182 @@ describe('AssetInventoryDataClient', () => {
       await expect(
         client.enable(mockSecSolutionContext, {} as InitEntityStoreRequestBody)
       ).rejects.toThrowError('uiSetting');
+    });
+
+    it('enables entity store and generic engine when entity store is not installed', async () => {
+      const requestBodyOverrides = {
+        filter: JSON.stringify({ range: { '@timestamp': { gte: 'now-1d' } } }),
+      } as InitEntityStoreRequestBody;
+
+      mockEntityStoreDataClient.status.mockResolvedValue({
+        status: 'not_installed',
+        engines: [],
+      });
+
+      mockEntityStoreDataClient.enable.mockResolvedValue({ success: true });
+      mockEntityStoreDataClient.init.mockResolvedValue({ success: true });
+
+      // Mock data view installation success
+      mockDataViewService.createAndSave.mockResolvedValue({ id: 'test-data-view' });
+
+      const result = await client.enable(mockSecSolutionContext, requestBodyOverrides);
+
+      // Verify entity store is enabled with non-generic entity types first
+      expect(mockEntityStoreDataClient.enable).toHaveBeenCalledWith({
+        filter: JSON.stringify({ range: { '@timestamp': { gte: 'now-1d' } } }),
+        entityTypes: ['host', 'user', 'service'],
+      });
+
+      // Verify generic engine is initialized with 26h lookback period
+      expect(mockEntityStoreDataClient.init).toHaveBeenCalledWith('generic', {
+        filter: JSON.stringify({ range: { '@timestamp': { gte: 'now-1d' } } }),
+        lookbackPeriod: '26h',
+      });
+
+      // Verify data view installation is attempted (installDataView directly calls createAndSave)
+      expect(mockDataViewService.createAndSave).toHaveBeenCalledWith(
+        {
+          id: 'asset-inventory-default',
+          title: '.entities.*.latest.security_*_default',
+          name: 'Asset Inventory Data View - default',
+          namespaces: ['default'],
+          allowNoIndex: true,
+          timeFieldName: '@timestamp',
+          allowHidden: true,
+        },
+        false,
+        true
+      );
+
+      expect(result).toEqual({ success: true });
+    });
+
+    it('initializes generic engine when entity store is installed but generic engine is missing', async () => {
+      const requestBodyOverrides = {
+        filter: JSON.stringify({ range: { '@timestamp': { gte: 'now-2d' } } }),
+      } as InitEntityStoreRequestBody;
+
+      mockEntityStoreDataClient.status.mockResolvedValue({
+        status: 'installed',
+        engines: [
+          { type: 'host', status: 'started' },
+          { type: 'user', status: 'started' },
+        ],
+      });
+
+      mockEntityStoreDataClient.init.mockResolvedValue({ success: true });
+
+      // Mock data view installation success
+      mockDataViewService.createAndSave.mockResolvedValue({ id: 'test-data-view' });
+
+      const result = await client.enable(mockSecSolutionContext, requestBodyOverrides);
+
+      // Verify entity store enable is NOT called since it's already installed
+      expect(mockEntityStoreDataClient.enable).not.toHaveBeenCalled();
+
+      // Verify generic engine is initialized with 26h lookback period
+      expect(mockEntityStoreDataClient.init).toHaveBeenCalledWith('generic', {
+        filter: JSON.stringify({ range: { '@timestamp': { gte: 'now-2d' } } }),
+        lookbackPeriod: '26h',
+      });
+
+      // Verify data view installation is attempted
+      expect(mockDataViewService.createAndSave).toHaveBeenCalled();
+
+      expect(result).toEqual({ success: true });
+    });
+
+    it('does not initialize generic engine when it already exists', async () => {
+      const requestBodyOverrides = {
+        filter: JSON.stringify({ range: { '@timestamp': { gte: 'now-3d' } } }),
+      } as InitEntityStoreRequestBody;
+
+      mockEntityStoreDataClient.status.mockResolvedValue({
+        status: 'installed',
+        engines: [
+          { type: 'host', status: 'started' },
+          { type: 'user', status: 'started' },
+          { type: 'generic', status: 'started' },
+        ],
+      });
+
+      // Mock data view installation success
+      mockDataViewService.createAndSave.mockResolvedValue({ id: 'test-data-view' });
+
+      const result = await client.enable(mockSecSolutionContext, requestBodyOverrides);
+
+      // Verify entity store enable is NOT called since it's already installed
+      expect(mockEntityStoreDataClient.enable).not.toHaveBeenCalled();
+
+      // Verify generic engine init is NOT called since it already exists
+      expect(mockEntityStoreDataClient.init).not.toHaveBeenCalled();
+
+      // Data view installation should still be attempted
+      expect(mockDataViewService.createAndSave).toHaveBeenCalled();
+
+      expect(result).toBeUndefined();
+    });
+
+    it('handles data view installation errors gracefully', async () => {
+      const requestBodyOverrides = {} as InitEntityStoreRequestBody;
+
+      mockEntityStoreDataClient.status.mockResolvedValue({
+        status: 'not_installed',
+        engines: [],
+      });
+
+      mockEntityStoreDataClient.enable.mockResolvedValue({ success: true });
+      mockEntityStoreDataClient.init.mockResolvedValue({ success: true });
+
+      // Mock data view installation failure
+      mockDataViewService.createAndSave.mockRejectedValue(new Error('Data view creation failed'));
+
+      const result = await client.enable(mockSecSolutionContext, requestBodyOverrides);
+
+      // Verify entity store operations still proceed despite data view error
+      expect(mockEntityStoreDataClient.enable).toHaveBeenCalledWith({
+        entityTypes: ['host', 'user', 'service'],
+      });
+
+      expect(mockEntityStoreDataClient.init).toHaveBeenCalledWith('generic', {
+        lookbackPeriod: '26h',
+      });
+
+      // Verify error is logged but doesn't prevent function completion
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        'Error installing asset inventory data view: Data view creation failed'
+      );
+
+      expect(result).toEqual({ success: true });
+    });
+
+    it('preserves custom request body overrides while adding lookback period', async () => {
+      const requestBodyOverrides = {
+        filter: JSON.stringify({ range: { '@timestamp': { gte: 'now-1h' } } }),
+        indexPattern: 'custom-pattern-*',
+      } as InitEntityStoreRequestBody;
+
+      mockEntityStoreDataClient.status.mockResolvedValue({
+        status: 'installed',
+        engines: [{ type: 'host', status: 'started' }],
+      });
+
+      mockEntityStoreDataClient.init.mockResolvedValue({ success: true });
+
+      // Mock data view installation success
+      mockDataViewService.createAndSave.mockResolvedValue({ id: 'test-data-view' });
+
+      await client.enable(mockSecSolutionContext, requestBodyOverrides);
+
+      // Verify generic engine is initialized with both custom overrides and lookback period
+      expect(mockEntityStoreDataClient.init).toHaveBeenCalledWith('generic', {
+        filter: JSON.stringify({ range: { '@timestamp': { gte: 'now-1h' } } }),
+        indexPattern: 'custom-pattern-*',
+        lookbackPeriod: '26h',
+      });
+
+      // Verify data view installation is attempted
+      expect(mockDataViewService.createAndSave).toHaveBeenCalled();
     });
   });
 
