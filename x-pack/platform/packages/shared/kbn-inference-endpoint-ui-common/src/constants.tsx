@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FieldsConfiguration } from './types/types';
 import { FieldType } from './types/types';
+import { gemini, DOCUMENTATION_BASE as DOCUMENTATION } from './translations';
 
 export enum ServiceProviderKeys {
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
@@ -31,17 +31,6 @@ export enum ServiceProviderKeys {
   voyageai = 'voyageai',
   watsonxai = 'watsonxai',
 }
-
-export const gemini = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
-  defaultMessage: 'Google Gemini',
-});
-
-const DOCUMENTATION = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.gemini.documentation',
-  {
-    defaultMessage: 'documentation',
-  }
-);
 
 export const GEMINI_REGION_DOC_LINK = (
   <EuiLink

@@ -79,7 +79,7 @@ export const PROVIDER_REQUIRED = i18n.translate(
 );
 
 export const DOCUMENTATION = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.documentation',
+  'xpack.inferenceEndpointUICommon.components.inferenceDocumentation',
   {
     defaultMessage: 'Inference API documentation',
   }
@@ -182,5 +182,16 @@ export const ENDPOINT_UPDATE_FAILED = i18n.translate(
   'xpack.inferenceEndpointUICommon.components.endpointUpdateFailure',
   {
     defaultMessage: 'Inference endpoint update failed',
+  }
+);
+
+export const gemini = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
+  defaultMessage: 'Google Gemini',
+});
+
+export const DOCUMENTATION_BASE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.documentation',
+  {
+    defaultMessage: 'documentation',
   }
 );
