@@ -13,5 +13,4 @@ echo "--- Uptime @elastic/synthetics Tests"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "Uptime @elastic/synthetics Tests" \
-  node plugins/uptime/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+node plugins/uptime/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"

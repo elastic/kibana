@@ -442,7 +442,6 @@
     "@cypress/grep": "^3.1.5",
     "@cypress/webpack-preprocessor": "^5.12.2",
     "@elastic/eslint-plugin-eui": "0.0.2",
-    "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^6.1.1",
     "@elastic/synthetics": "~1.0.0",
     "@emotion/babel-preset-css-prop": "^11.11.0",

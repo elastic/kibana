@@ -10,5 +10,4 @@ source .buildkite/scripts/common/util.sh
 # If files are more than 200 we will skip it and just use
 # the further ci steps that already check linting and file casing for the entire repo.
 echo --- Quick commit checks
-checks-reporter-with-killswitch "Quick commit checks" \
-  "$(dirname "${0}")/commit_check_runner.sh"
+"$(dirname "${0}")/commit_check_runner.sh"

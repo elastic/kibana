@@ -11,10 +11,9 @@ echo "--- Default CI Group $CI_GROUP"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "X-Pack Chrome Functional tests / Group ${CI_GROUP}" \
-  node scripts/functional_tests \
-    --bail \
-    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --include-tag "ciGroup$CI_GROUP"
+node scripts/functional_tests \
+  --bail \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+  --include-tag "ciGroup$CI_GROUP"
 
 cd "$KIBANA_DIR"

@@ -5,7 +5,6 @@
   "private": true,
   "license": "Elastic-License",
   "scripts": {
-    "github-checks-reporter": "../node_modules/.bin/github-checks-reporter",
     "kbn": "node ../scripts/kbn",
     "start": "node ../scripts/kibana --dev",
     "build": "node --preserve-symlinks ../node_modules/.bin/gulp build",
