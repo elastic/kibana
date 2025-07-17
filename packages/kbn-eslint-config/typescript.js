@@ -13,6 +13,7 @@ const allowedNameRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 module.exports = {
   overrides: [
     {
+      files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
       plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
@@ -39,7 +40,7 @@ module.exports = {
         // https://github.com/typescript-eslint/typescript-eslint/pull/361
         project: undefined,
       },
-      files: ['**/*.{ts,tsx}'],
+      
       // NOTE: we can't override the extends option here to apply
       // all the recommend rules as it is not allowed yet
       // more info on: https://github.com/eslint/rfcs/pull/13 and
