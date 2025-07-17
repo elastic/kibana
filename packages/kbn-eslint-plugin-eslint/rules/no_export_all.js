@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const fs = require('fs');
 const ts = require('typescript');
 const { getExportCode, getExportNamedNamespaceCode } = require('../helpers/codegen');
 
@@ -23,6 +24,9 @@ const { getExportNamesDeep } = require('../helpers/exports');
 const ERROR_MSG =
   '`export *` is not allowed in the index files of plugins to prevent accidentally exporting too many APIs';
 
+const programCache = new Map();
+// const fileCache = new Map();
+
 /** @type {Rule} */
 module.exports = {
   meta: {
@@ -38,13 +42,21 @@ module.exports = {
 
         /** @type Parser */
         const parser = (path) => {
-          const program = ts.createProgram([path], {
-            allowJs: true,
-            target: ts.ScriptTarget.ESNext,
-            module: ts.ModuleKind.CommonJS,
-          });
+          let program = programCache.get(path);
+          if (!program) {
+            program = ts.createProgram([path], {
+              allowJs: true,
+              target: ts.ScriptTarget.ESNext,
+              module: ts.ModuleKind.CommonJS,
+            });
+            programCache.set(path, program);
+          }
 
           return program.getSourceFile(path);
+
+          // const code = fs.readFileSync(path, 'utf-8');
+          // const sourceFile = ts.createSourceFile(path, code, ts.ScriptTarget.ESNext, true);
+          // return sourceFile;
         };
 
         const exportSet = getExportNamesDeep(parser, context.getFilename(), tsnode);

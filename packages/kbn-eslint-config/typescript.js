@@ -40,7 +40,7 @@ module.exports = {
         // https://github.com/typescript-eslint/typescript-eslint/pull/361
         project: undefined,
       },
-      
+
       // NOTE: we can't override the extends option here to apply
       // all the recommend rules as it is not allowed yet
       // more info on: https://github.com/eslint/rfcs/pull/13 and
