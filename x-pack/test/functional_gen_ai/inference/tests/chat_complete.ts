@@ -14,7 +14,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import type SuperTest from 'supertest';
-import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export const setAdvancedSettings = async (
@@ -29,6 +29,13 @@ export const setAdvancedSettings = async (
     .send({ changes: settings })
     .expect(200);
 };
+
+export const setAiAnonymizationSettings = async (supertest: SuperTest.Agent, rules: object) => {
+  return setAdvancedSettings(supertest, {
+    [aiAnonymizationSettings]: JSON.stringify(rules, null, 2),
+  });
+};
+
 const emailRule = {
   entityClass: 'EMAIL',
   type: 'RegExp',
@@ -175,14 +182,10 @@ export const chatCompleteSuite = (
 
       describe('anonymization enabled', () => {
         before(async () => {
-          await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [emailRule] }, null, 2),
-          });
+          await setAiAnonymizationSettings(supertest, { rules: [emailRule] });
         });
         after(async () => {
-          await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
-          });
+          await setAiAnonymizationSettings(supertest, { rules: [] });
         });
         it('returns a chat completion message with deanonymization data', async () => {
           const response = await supertest
@@ -207,9 +210,7 @@ export const chatCompleteSuite = (
       });
       describe('anonymization disabled', () => {
         before(async () => {
-          await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
-          });
+          await setAiAnonymizationSettings(supertest, { rules: [] });
         });
         it('returns a chat completion message without deanonymization data', async () => {
           const response = await supertest
@@ -348,9 +349,7 @@ export const chatCompleteSuite = (
 
       describe('anonymization disabled', () => {
         before(async () => {
-          await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
-          });
+          await setAiAnonymizationSettings(supertest, { rules: [] });
         });
         it('returns events without deanonymization data and streams', async () => {
           const response = supertest
@@ -379,14 +378,10 @@ export const chatCompleteSuite = (
 
       describe('anonymization enabled', () => {
         before(async () => {
-          await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [emailRule] }, null, 2),
-          });
+          await setAiAnonymizationSettings(supertest, { rules: [emailRule] });
         });
         after(async () => {
-          await setAdvancedSettings(supertest, {
-            [aiAssistantAnonymizationSettings]: JSON.stringify({ rules: [] }),
-          });
+          await setAiAnonymizationSettings(supertest, { rules: [] });
         });
         it('returns a chat completion message with deanonymization data and does not stream the response', async () => {
           const response = supertest
