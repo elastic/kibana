@@ -192,7 +192,7 @@ export const Navigation = ({
                         key={`submenu-${item.id}`}
                         id={`submenu-${item.id}`}
                       >
-                        <NestedSecondaryMenu.BackButton title={item.label} />
+                        <NestedSecondaryMenu.Header title={item.label} />
                         {item.sections?.map((section) => (
                           <NestedSecondaryMenu.Section
                             key={section.id}

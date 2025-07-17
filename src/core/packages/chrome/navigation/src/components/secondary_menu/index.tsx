@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 
 import { SecondaryMenuItem } from './item';
 import { SecondaryMenuSection } from './section';
+import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 
 export interface SecondaryMenuProps {
   children: ReactNode;
@@ -30,28 +31,24 @@ interface SecondaryMenuComponent extends FC<SecondaryMenuProps> {
  */
 export const SecondaryMenu: SecondaryMenuComponent = ({ children, isPanel = false, title }) => {
   const { euiTheme } = useEuiTheme();
+  const headerStyle = useMenuHeaderStyle();
 
   return (
-    <div>
+    <>
       <EuiTitle
         css={css`
-          position: sticky;
-          top: 0;
-          z-index: 1;
+          ${headerStyle}
           background: ${isPanel
             ? euiTheme.colors.backgroundBaseSubdued
             : euiTheme.colors.backgroundBasePlain};
           border-radius: ${euiTheme.border.radius.medium};
-          // move into one declaration; 20px is forced by dividers
-          padding: ${euiTheme.size.base} 20px;
-          padding-bottom: ${euiTheme.size.xs};
         `}
         size="xs"
       >
         <h4>{title}</h4>
       </EuiTitle>
       {children}
-    </div>
+    </>
   );
 };
 
