@@ -5482,6 +5482,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/default-tracer@link:src/platform/packages/shared/kbn-default-tracer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/delete-managed-asset-callout@link:src/platform/packages/shared/kbn-management/delete_managed_assets_callout":
   version "0.0.0"
   uid ""
@@ -8043,6 +8047,10 @@
   uid ""
 
 "@kbn/tracing-config@link:src/platform/packages/shared/kbn-tracing-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/tracing-utils@link:src/platform/packages/shared/kbn-tracing-utils":
   version "0.0.0"
   uid ""
 
