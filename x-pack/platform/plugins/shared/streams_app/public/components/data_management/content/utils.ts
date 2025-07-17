@@ -28,5 +28,5 @@ export function prepareIncludePayload(
     })
     .map((entry) => entry.name);
 
-  return { objects: { streams, dashboards: [] } };
+  return { objects: { streams } };
 }
