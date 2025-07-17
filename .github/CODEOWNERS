@@ -46,7 +46,6 @@ examples/v8_profiler_examples @elastic/response-ops
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
-src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
@@ -381,6 +380,7 @@ src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
+src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
 src/platform/packages/private/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/types @elastic/appex-sharedux
