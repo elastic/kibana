@@ -9,20 +9,9 @@
     "id": "aiAssistantManagementSelection",
     "browser": true,
     "server": true,
-    "configPath": [
-      "aiAssistantManagementSelection"
-    ],
-    "requiredPlugins": [
-      "management",
-    ],
-    "optionalPlugins": [
-      "home",
-      "serverless",
-      "features",
-      "cloud"
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "configPath": ["aiAssistantManagementSelection"],
+    "requiredPlugins": ["management"],
+    "optionalPlugins": ["home", "serverless", "features", "cloud", "spaces"],
+    "requiredBundles": ["kibanaReact"]
   }
 }

@@ -12,7 +12,8 @@ import { type CoreSetup, Plugin, type CoreStart, PluginInitializerContext } from
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
@@ -30,8 +31,9 @@ export interface SetupDependencies {
   serverless?: ServerlessPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDependencies {}
+export interface StartDependencies {
+  spaces?: SpacesPluginStart;
+}
 
 export class AIAssistantManagementPlugin
   implements
@@ -58,6 +60,29 @@ export class AIAssistantManagementPlugin
       return {};
     }
 
+    // Check if current space solution is classic - only enable for classic spaces
+    core.getStartServices().then(async ([coreStart, { spaces }]) => {
+      if (spaces) {
+        const currentSpace = await firstValueFrom(spaces.getActiveSpace$());
+        const isClassicSpace =
+          currentSpace?.solution === 'classic' || currentSpace?.solution === undefined;
+        console.log('currentSpace: ', currentSpace);
+        if (!isClassicSpace) {
+          // Don't register for non-classic spaces (oblt, security, es)
+          return;
+        }
+      }
+
+      this.registerPlugin(core, { home, management });
+    });
+
+    return {};
+  }
+
+  private registerPlugin(
+    core: CoreSetup<StartDependencies, AIAssistantManagementSelectionPluginPublicStart>,
+    { home, management }: Pick<SetupDependencies, 'home' | 'management'>
+  ) {
     if (home) {
       home.featureCatalogue.register({
         id: 'ai_assistant',
