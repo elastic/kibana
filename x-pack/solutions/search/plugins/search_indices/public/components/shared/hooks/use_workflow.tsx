@@ -67,26 +67,30 @@ function onboardingTokenToWorkflowId(token: string | undefined | null): Workflow
 const DEFAULT_WORKFLOW_ID: WorkflowId = 'semantic';
 
 export const useWorkflow = () => {
-  const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
-  const workflowId = isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : null;
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(
-    workflowId || DEFAULT_WORKFLOW_ID
-  );
   const { data } = useOnboardingTokenQuery();
-
-  useEffect(() => {
-    if (data?.token && !localStorageWorkflow) {
-      setSelectedWorkflowId(onboardingTokenToWorkflowId(data.token));
-    }
-  }, [data, localStorageWorkflow]);
-
   const { search } = useLocation();
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(DEFAULT_WORKFLOW_ID);
+
   useEffect(() => {
     const workflowFromQuery = new URLSearchParams(search).get('workflow');
-    if (workflowFromQuery) {
+    if (workflowFromQuery && isWorkflowId(workflowFromQuery)) {
       setSelectedWorkflowId(workflowFromQuery as WorkflowId);
+      return;
     }
-  }, [search]);
+
+    const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
+    if (isWorkflowId(localStorageWorkflow)) {
+      setSelectedWorkflowId(localStorageWorkflow as WorkflowId);
+      return;
+    }
+
+    if (data?.token) {
+      setSelectedWorkflowId(onboardingTokenToWorkflowId(data.token));
+      return;
+    }
+
+    setSelectedWorkflowId(DEFAULT_WORKFLOW_ID);
+  }, [search, data]);
 
   return {
     selectedWorkflowId,
