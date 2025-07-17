@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { Command } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import zodToJsonSchema from 'zod-to-json-schema';
 import type { CreateLlmInstance } from '../../../../utils/common';
 import type { AnalyzeIndexPatternAnnotation } from '../../state';
 import { buildContext } from './utils';
@@ -29,25 +30,40 @@ export const getExplorePartialIndexMappingResponder = async ({
 
     const lastMessage = messages[messages.length - 1];
 
-    const result = await llm
-      .withStructuredOutput(structuredOutput, { name: 'indexMappingAnalysis' })
-      .invoke([
-        new SystemMessage({
-          content:
-            'You are an expert at parsing text. You have been given a text and need to parse it into the provided schema.',
-        }),
-        new HumanMessage({
-          content: lastMessage.content,
-        }),
-      ]);
+    try {
+      const result = await llm
+        .withStructuredOutput(structuredOutput, { name: 'indexMappingAnalysis' })
+        .withRetry({
+          stopAfterAttempt: 3,
+        })
+        .invoke([
+          new SystemMessage({
+            content: `You are an expert at parsing text. You have been given a text and need to parse it into the following schema.\n\n${JSON.stringify(
+              zodToJsonSchema(structuredOutput)
+            )}`,
+          }),
+          new HumanMessage({
+            content: lastMessage.content,
+          }),
+        ]);
 
-    return new Command({
-      update: {
-        output: {
-          containsRequiredFieldsForQuery: result.containsRequiredFieldsForQuery,
-          context: JSON.stringify(buildContext(messages)),
+      return new Command({
+        update: {
+          output: {
+            containsRequiredFieldsForQuery: result.containsRequiredFieldsForQuery,
+            context: JSON.stringify(buildContext(messages)),
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      new Command({
+        update: {
+          output: {
+            containsRequiredFieldsForQuery: false,
+            context: JSON.stringify(buildContext(messages)),
+          },
+        },
+      });
+    }
   };
 };
