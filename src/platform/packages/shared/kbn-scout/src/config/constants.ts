@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-const SECURITY_TEST_PATH = resolve(REPO_ROOT, 'x-pack/test/security_api_integration');
+const SECURITY_TEST_PATH = resolve(REPO_ROOT, 'x-pack/platform/test//security_api_integration');
 
 export const SAML_IDP_PLUGIN_PATH = resolve(SECURITY_TEST_PATH, 'plugins/saml_provider');
 
