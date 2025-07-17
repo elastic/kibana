@@ -46,7 +46,7 @@ export async function createConnectorFixture({
     });
   }
 
-  log.info(`Deleting existing connector`);
+  log.info(`Deleting existing connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
 
   await deleteConnector();
 
@@ -66,5 +66,6 @@ export async function createConnectorFixture({
   await use(connectorWithUuid);
 
   // teardown
+  log.info(`Deleting connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
   await deleteConnector();
 }

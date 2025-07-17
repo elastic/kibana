@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import Path from 'path';
 import pLimit from 'p-limit';
 import { PhoenixClient, createClient } from '@arizeai/phoenix-client';
 import { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
@@ -106,18 +105,7 @@ export class KibanaPhoenixClient {
     return await withInferenceSpan('run_experiment', async (span) => {
       const { datasetId } = await this.syncDataSet(dataset);
 
-      // Because of a bug in the CommonJS distribution of
-      // @arizeai/phoenix, we have to import the ESM one,
-      // which means we also have to trick Node.js into
-      // allowing us to import it.
-      const path = Path.join(
-        Path.dirname(require.resolve('@arizeai/phoenix-client')),
-        '../esm/experiments/index.js'
-      );
-
-      const experiments = (await import(
-        path
-      )) as typeof import('@arizeai/phoenix-client/experiments');
+      const experiments = await import('@arizeai/phoenix-client/experiments');
 
       const ranExperiment = await experiments.runExperiment({
         client: this.phoenixClient,
@@ -127,6 +115,7 @@ export class KibanaPhoenixClient {
           model: this.options.model,
           runId: this.options.runId,
         },
+        setGlobalTracerProvider: false,
         evaluators: evaluators.map((evaluator) => {
           return {
             ...evaluator,

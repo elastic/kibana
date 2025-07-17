@@ -104,7 +104,21 @@ Now run the tests exactly like a normal Scout/Playwright suite in another termin
 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
 ```
 
-The helper will spin up one `local` project per available connector so results are isolated per model.
+### LLM-as-a-judge
+
+Some of the evals will use LLM-as-a-judge. For consistent results, you should specify `EVALUATION_CONNECTOR_ID` as an environment variable, in order for the evaluations to always be judged by the same LLM:
+
+```bash
+EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+```
+
+### Testing a specific connector
+
+The helper will spin up one `local` project per available connector so results are isolated per model. Each project is named after the connector id. To run the evaluations only for a specific connector, use `--project`:
+
+```bash
+node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
+```
 
 ## Regenerating Phoenix GraphQL types
 

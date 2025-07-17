@@ -51,7 +51,7 @@ export const evaluate = base.extend<
     },
     { scope: 'worker' },
   ],
-  evaluationConnector: [
+  connector: [
     async ({ fetch, log }, use, testInfo) => {
       const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
         .connector;
@@ -62,12 +62,14 @@ export const evaluate = base.extend<
       scope: 'worker',
     },
   ],
-  connector: [
-    async ({ fetch, log }, use, testInfo) => {
+  evaluationConnector: [
+    async ({ fetch, log, connector }, use, testInfo) => {
       const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
         .connector;
 
-      await createConnectorFixture({ predefinedConnector, fetch, log, use });
+      if (predefinedConnector.id !== connector.id) {
+        await createConnectorFixture({ predefinedConnector, fetch, log, use });
+      }
     },
     {
       scope: 'worker',

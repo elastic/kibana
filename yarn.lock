@@ -154,17 +154,41 @@
   resolved "https://registry.yarnpkg.com/@appland/sql-parser/-/sql-parser-1.5.1.tgz#331d644364899858ba7aa6e884e2492596990626"
   integrity sha512-R2FBHUOdzdBPUCCiL6WvXT9Fu+Xaj89exa1g+wMlatIe5z6vqitzLkY5a9zGDL3IByTiwbR0jiYuvFMfhp1Q+Q==
 
+"@arizeai/openinference-core@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@arizeai/openinference-core/-/openinference-core-1.0.4.tgz#8764b487a964e0a2db93c11421d7b02796ae36c0"
+  integrity sha512-8YiEZdUQKUztb4L5QkyqlW2a/J2yo4KcogfgyCmtxo7NoUmfKHf+YcOqy33rADtV6bN8NNyOuMMci2PgoiEMuQ==
+  dependencies:
+    "@arizeai/openinference-semantic-conventions" "2.1.0"
+    "@opentelemetry/api" "^1.9.0"
+    "@opentelemetry/core" "^1.25.1"
+
+"@arizeai/openinference-semantic-conventions@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@arizeai/openinference-semantic-conventions/-/openinference-semantic-conventions-2.1.0.tgz#cb9fe6b77811f36431e7b5e326bd287c734dbebe"
+  integrity sha512-SN8vNn5F45TbA8c+cxXV+nGHeUFzV1KaZKU0R2Ke2JKauIPyHi9VB3DvbeOy4WPScMrcSkGWq3XXQvPm9CDjgA==
+
 "@arizeai/openinference-semantic-conventions@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@arizeai/openinference-semantic-conventions/-/openinference-semantic-conventions-1.1.0.tgz#8bb41a4e213295ba9fc21faf1b7d282bf2d898ef"
   integrity sha512-rxRYnUWjt28DlVXnWukcQAyGhPYQ3ckmKrjEdUjmUNnvvv4k8Dabbp5h6AEjNy7YzN9jL2smNRJnbLIVtkrLEg==
 
-"@arizeai/phoenix-client@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@arizeai/phoenix-client/-/phoenix-client-2.2.0.tgz#eaf8eb3fdc390cdb1bfdd8a1470c0684a9b4698c"
-  integrity sha512-Clj7E/bvau43hb+e/k8TJAObGCuHZg8lOJEi0EKuHkpB8DloNtrfQ6P3GTLmME7EvsbPGGFtESnIZQEZq6CsIQ==
+"@arizeai/openinference-vercel@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@arizeai/openinference-vercel/-/openinference-vercel-2.3.1.tgz#1759ad911f84f26f016e360f5ceb3e773b5d213a"
+  integrity sha512-LkBtqUvGw2uV89uelVuHePzhCTeNJqL2fLh1v3+XRCgq1D3FSmLtZs04uJYObh894ukcQxtoALpFMtQXCmq6Xg==
+  dependencies:
+    "@arizeai/openinference-core" "1.0.4"
+    "@arizeai/openinference-semantic-conventions" "2.1.0"
+    "@opentelemetry/core" "^1.30.1"
+
+"@arizeai/phoenix-client@^2.3.4":
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/@arizeai/phoenix-client/-/phoenix-client-2.3.4.tgz#d98c3ae78544377e9b491c9d2642098e40db8a88"
+  integrity sha512-X+XA+/OCDnozcTNYaI7UloqzmT/xN7HvPLN24xaNoVcyLz+gGGi7QdyFlEGAOZMgk5FCb4eL3MeFQPwNSP6xVA==
   dependencies:
     "@arizeai/openinference-semantic-conventions" "^1.1.0"
+    "@arizeai/openinference-vercel" "^2.3.1"
     "@opentelemetry/api" "^1.9.0"
     "@opentelemetry/core" "^1.25.1"
     "@opentelemetry/exporter-trace-otlp-proto" "^0.57.2"
@@ -9235,7 +9259,7 @@
   dependencies:
     "@opentelemetry/semantic-conventions" "1.27.0"
 
-"@opentelemetry/core@1.30.1", "@opentelemetry/core@^1.11.0", "@opentelemetry/core@^1.25.1":
+"@opentelemetry/core@1.30.1", "@opentelemetry/core@^1.11.0", "@opentelemetry/core@^1.25.1", "@opentelemetry/core@^1.30.1":
   version "1.30.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.30.1.tgz#a0b468bb396358df801881709ea38299fc30ab27"
   integrity sha512-OOCM2C/QIURhJMuKaekP3TRBxBKxG/TWWA0TL2J6nXUtDnuCtccy49LUJF8xPFXMX+0LMcxFpCo8M9cGY1W6rQ==

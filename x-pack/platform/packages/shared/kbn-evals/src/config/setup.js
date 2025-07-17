@@ -11,18 +11,9 @@ import Path from 'path';
 // these child processes.
 const requireArg = Path.join(__dirname, './require_init_apm.js');
 
-process.env.NODE_OPTIONS = [
-  process.env.NODE_OPTIONS,
-  // '--trace-deprecation',
-  // '--trace-warnings',
-  `--require ${requireArg}`,
-]
+process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, `--require ${requireArg}`]
   .filter(Boolean)
   .join(' ');
-
-process.on('warning', (warning) => {
-  console.log(warning.stack);
-});
 
 export default function globalSetup() {
   // we export a dummy function so playwright doesn't complain
