@@ -611,46 +611,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/plugin.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/platform/plugins/shared/data/public/plugin.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/components/visualizations/actions/register.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
               },
@@ -701,18 +661,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/public/plugin.ts"
-              },
-              {
-                "plugin": "discoverEnhanced",
-                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
-              },
-              {
-                "plugin": "discoverEnhanced",
-                "path": "x-pack/platform/plugins/private/discover_enhanced/public/plugin.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -737,10 +685,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/app/actions/register.ts"
-              },
-              {
-                "plugin": "inputControlVis",
-                "path": "src/platform/plugins/private/input_control_vis/public/plugin.ts"
               },
               {
                 "plugin": "@kbn/test-suites-src",
