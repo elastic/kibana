@@ -237,6 +237,44 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       }
     }
   );
+  router.post(
+    {
+      path: '/api/workflows/test',
+      security: {
+        authz: {
+          requiredPrivileges: ['all'],
+        },
+      },
+      validate: {
+        body: schema.object({
+          inputs: schema.recordOf(schema.string(), schema.any()),
+          workflowYaml: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const workflowExecutionId = await api.testWorkflow(
+          request.body.workflowYaml,
+          request.body.inputs
+        );
+
+        return response.ok({
+          body: {
+            workflowExecutionId,
+          },
+        });
+      } catch (error) {
+        console.error(error);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
   router.get(
     {
       path: '/api/workflowExecutions',
