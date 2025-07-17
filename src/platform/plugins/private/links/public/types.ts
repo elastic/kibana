@@ -42,9 +42,8 @@ export type LinksApi = HasType<typeof CONTENT_ID> &
   HasEditCapabilities &
   HasLibraryTransforms<LinksByReferenceSerializedState, LinksByValueSerializedState>;
 
-export interface LinksByReferenceSerializedState {
-  savedObjectId: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface LinksByReferenceSerializedState {}
 
 export interface LinksByValueSerializedState {
   attributes: LinksAttributes;
@@ -53,13 +52,12 @@ export interface LinksByValueSerializedState {
 export type LinksSerializedState = SerializedTitles &
   (LinksByReferenceSerializedState | LinksByValueSerializedState);
 
-export interface LinksRuntimeState
-  extends Partial<LinksByReferenceSerializedState>,
-    SerializedTitles {
+export interface LinksRuntimeState extends SerializedTitles {
   links?: ResolvedLink[];
   layout?: LinksLayoutType;
   defaultTitle?: string;
   defaultDescription?: string;
+  savedObjectId?: string;
 }
 
 export type ResolvedLink = Link & {
