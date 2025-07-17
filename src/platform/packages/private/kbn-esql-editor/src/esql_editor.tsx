@@ -111,7 +111,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   esqlVariables,
   expandToFitQueryOnMount,
   dataErrorsControl,
-  label,
+  formLabel,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -788,7 +788,7 @@ export const ESQLEditor = memo(function ESQLEditor({
           `}
         >
           <EuiFlexItem grow={false}>
-            {label && (
+            {formLabel && (
               <EuiFormLabel
                 isFocused={labelInFocus && !isDisabled}
                 isDisabled={isDisabled}
@@ -803,7 +803,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                 }}
                 htmlFor={htmlId}
               >
-                {label}
+                {formLabel}
               </EuiFormLabel>
             )}
           </EuiFlexItem>
@@ -858,7 +858,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               <div css={styles.editorContainer}>
                 <CodeEditor
                   htmlId={htmlId}
-                  aria-label={label}
+                  aria-label={formLabel}
                   languageId={ESQL_LANG_ID}
                   classNameCss={getEditorOverwrites(theme)}
                   value={code}

@@ -277,7 +277,7 @@ export function ValueControlForm({
             isDisabled={false}
             isLoading={false}
             hasOutline
-            label={i18n.translate('esql.flyout.valuesQueryEditor.label', {
+            formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
               defaultMessage: 'Values query',
             })}
           />

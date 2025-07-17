@@ -100,7 +100,7 @@ export interface ESQLEditorProps {
   /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
   dataErrorsControl?: DataErrorsControl;
   /** Optional form field label to show above the query editor */
-  label?: string;
+  formLabel?: string;
 }
 
 interface ESQLVariableService {
