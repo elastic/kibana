@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       );
       expect(geoPointFieldStats.count).to.be(71);
-      expect(geoPointFieldStats.index_count).to.be(13);
+      expect(geoPointFieldStats.index_count).to.be(14);
 
       const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: estypes.ClusterStatsFieldTypes) => {
