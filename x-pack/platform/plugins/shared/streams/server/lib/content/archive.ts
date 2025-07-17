@@ -74,8 +74,8 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
         case 'stream': {
           const subDir = SUPPORTED_ENTRY_TYPE.stream;
           zip.addFile(
-            path.join(rootDir, subDir, `${object.stream.name}.json`),
-            Buffer.from(JSON.stringify(object.stream, null, 2))
+            path.join(rootDir, subDir, `${object.name}.json`),
+            Buffer.from(JSON.stringify({ name: object.name, request: object.request }, null, 2))
           );
           return;
         }
@@ -144,14 +144,21 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
 
         case 'stream':
           return readEntry(entry).then((data) => {
-            const stream = JSON.parse(data.toString()) as Streams.all.Definition;
-            if (!Streams.all.Definition.is(stream)) {
+            const stream = JSON.parse(data.toString()) as {
+              name: string;
+              request: Streams.WiredStream.UpsertRequest;
+            };
+            if (!stream.name || !Streams.WiredStream.UpsertRequest.is(stream.request)) {
               throw new InvalidContentPackError(
                 `Invalid stream definition in entry [${entry.entryName}]`
               );
             }
 
-            return { type: 'stream', id: stream.name, stream } as ContentPackStream;
+            return {
+              type: 'stream',
+              name: stream.name,
+              request: stream.request,
+            } as ContentPackStream;
           });
 
         default:

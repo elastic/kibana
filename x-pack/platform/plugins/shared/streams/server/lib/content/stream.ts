@@ -11,7 +11,6 @@ import {
   FieldDefinition,
   InheritedFieldDefinition,
   RoutingDefinition,
-  Streams,
   getAncestorsAndSelf,
 } from '@kbn/streams-schema';
 
@@ -20,45 +19,50 @@ export function prepareStreamsForExport({
   descendants,
   inheritedFields,
 }: {
-  root: Streams.WiredStream.Definition;
-  descendants: Streams.WiredStream.Definition[];
+  root: ContentPackStream;
+  descendants: ContentPackStream[];
   inheritedFields: InheritedFieldDefinition;
-}) {
+}): ContentPackStream[] {
   const prepareIncludedDestinations = prepareRouting(descendants, (destination) =>
     withoutRootPrefix(root.name, destination)
   );
 
   const streamObjects: ContentPackStream[] = [
     {
-      type: 'stream',
-      id: PARENT_STREAM_ID,
-      stream: {
-        ...root,
-        name: PARENT_STREAM_ID,
-        ingest: {
-          ...root.ingest,
-          wired: {
-            ...root.ingest.wired,
-            routing: prepareIncludedDestinations(root.ingest.wired.routing),
-            fields: {
-              ...root.ingest.wired.fields,
-              ...mapValues(inheritedFields, (field) => omit(field, ['from'])),
+      type: 'stream' as const,
+      name: PARENT_STREAM_ID,
+      request: {
+        dashboards: [],
+        queries: [],
+        stream: {
+          ...root.request.stream,
+          ingest: {
+            ...root.request.stream.ingest,
+            wired: {
+              ...root.request.stream.ingest.wired,
+              routing: prepareIncludedDestinations(root.request.stream.ingest.wired.routing),
+              fields: {
+                ...root.request.stream.ingest.wired.fields,
+                ...mapValues(inheritedFields, (field) => omit(field, ['from'])),
+              },
             },
           },
         },
       },
     },
-    ...descendants.map((stream) => ({
+    ...descendants.map((entry) => ({
       type: 'stream' as const,
-      id: stream.name,
-      stream: {
-        ...stream,
-        name: withoutRootPrefix(root.name, stream.name),
-        ingest: {
-          ...stream.ingest,
-          wired: {
-            ...stream.ingest.wired,
-            routing: prepareIncludedDestinations(stream.ingest.wired.routing),
+      name: withoutRootPrefix(root.name, entry.name),
+      request: {
+        ...entry.request,
+        stream: {
+          ...entry.request.stream,
+          ingest: {
+            ...entry.request.stream.ingest,
+            wired: {
+              ...entry.request.stream.ingest.wired,
+              routing: prepareIncludedDestinations(entry.request.stream.ingest.wired.routing),
+            },
           },
         },
       },
@@ -73,34 +77,44 @@ export function prepareStreamsForImport({
   entries,
   inheritedFields,
 }: {
-  root: Streams.WiredStream.Definition;
+  root: ContentPackStream;
   entries: ContentPackStream[];
   inheritedFields: InheritedFieldDefinition;
-}) {
-  const prepareIncludedDestinations = prepareRouting(
-    entries.map((entry) => entry.stream),
-    (destination) => withRootPrefix(root.name, destination)
+}): ContentPackStream[] {
+  const prepareIncludedDestinations = prepareRouting(entries, (destination) =>
+    withRootPrefix(root.name, destination)
   );
 
-  const definitions: Streams.WiredStream.Definition[] = entries.map(({ stream }) => {
-    if (stream.name === PARENT_STREAM_ID) {
+  const streamObjects = entries.map(({ name, request }) => {
+    if (name === PARENT_STREAM_ID) {
+      // merge special parent stream's routing and fields with the new root
       return {
-        ...root,
-        ingest: {
-          ...root.ingest,
-          wired: {
-            ...root.ingest.wired,
-            routing: root.ingest.wired.routing.concat(
-              prepareIncludedDestinations(stream.ingest.wired.routing)
-            ),
-            fields: {
-              ...root.ingest.wired.fields,
-              ...Object.keys(stream.ingest.wired.fields)
-                .filter((key) => !root.ingest.wired.fields[key] && !inheritedFields[key])
-                .reduce((acc, key) => {
-                  acc[key] = { ...stream.ingest.wired.fields[key] };
-                  return acc;
-                }, {} as FieldDefinition),
+        type: 'stream' as const,
+        name: root.name,
+        request: {
+          ...root.request,
+          stream: {
+            ...root.request.stream,
+            ingest: {
+              ...root.request.stream.ingest,
+              wired: {
+                ...root.request.stream.ingest.wired,
+                routing: root.request.stream.ingest.wired.routing.concat(
+                  prepareIncludedDestinations(request.stream.ingest.wired.routing)
+                ),
+                fields: {
+                  ...root.request.stream.ingest.wired.fields,
+                  ...Object.keys(request.stream.ingest.wired.fields)
+                    .filter(
+                      (key) =>
+                        !root.request.stream.ingest.wired.fields[key] && !inheritedFields[key]
+                    )
+                    .reduce((acc, key) => {
+                      acc[key] = { ...request.stream.ingest.wired.fields[key] };
+                      return acc;
+                    }, {} as FieldDefinition),
+                },
+              },
             },
           },
         },
@@ -108,23 +122,29 @@ export function prepareStreamsForImport({
     }
 
     return {
-      ...stream,
-      name: withRootPrefix(root.name, stream.name),
-      ingest: {
-        ...stream.ingest,
-        wired: {
-          ...stream.ingest.wired,
-          routing: prepareIncludedDestinations(stream.ingest.wired.routing),
+      type: 'stream' as const,
+      name: withRootPrefix(root.name, name),
+      request: {
+        ...request,
+        stream: {
+          ...request.stream,
+          ingest: {
+            ...request.stream.ingest,
+            wired: {
+              ...request.stream.ingest.wired,
+              routing: prepareIncludedDestinations(request.stream.ingest.wired.routing),
+            },
+          },
         },
       },
     };
   });
 
-  return definitions;
+  return streamObjects;
 }
 
 const prepareRouting =
-  (descendants: Streams.WiredStream.Definition[], prepareDestination: (name: string) => string) =>
+  (descendants: ContentPackStream[], prepareDestination: (name: string) => string) =>
   (routing: RoutingDefinition[]) => {
     return routing
       .filter((routing) =>

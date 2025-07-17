@@ -261,20 +261,7 @@ export class StreamsClient {
       }
     );
 
-    const { dashboards, queries } = request;
-
-    // sync dashboards as before
-    await this.dependencies.assetClient.syncAssetList(
-      stream.name,
-      dashboards.map((dashboard) => ({
-        [ASSET_ID]: dashboard,
-        [ASSET_TYPE]: 'dashboard' as const,
-      })),
-      'dashboard'
-    );
-
-    // sync rules with asset links
-    await this.dependencies.queryClient.syncQueries(stream.name, queries);
+    await this.syncAssets(stream.name, request);
 
     return {
       acknowledged: true,
@@ -282,13 +269,21 @@ export class StreamsClient {
     };
   }
 
-  async bulkChanges(changes: StreamChange[]) {
-    await State.attemptChanges(changes, {
-      ...this.dependencies,
-      streamsClient: this,
-    });
+  async bulkUpsert(streams: { name: string; request: Streams.all.UpsertRequest }[]) {
+    const result = await State.attemptChanges(
+      streams.map(({ name, request }) => ({
+        type: 'upsert',
+        definition: { ...request.stream, name } as Streams.all.Definition,
+      })),
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
 
-    return { acknowledged: true };
+    await Promise.all(streams.map(({ name, request }) => this.syncAssets(name, request)));
+
+    return { acknowledged: true, result: result.changes };
   }
 
   /**
@@ -728,5 +723,22 @@ export class StreamsClient {
         },
       },
     }).then((streams) => streams.filter(Streams.WiredStream.Definition.is));
+  }
+
+  private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
+    const { dashboards, queries } = request;
+
+    // sync dashboards as before
+    await this.dependencies.assetClient.syncAssetList(
+      name,
+      dashboards.map((dashboard) => ({
+        [ASSET_ID]: dashboard,
+        [ASSET_TYPE]: 'dashboard' as const,
+      })),
+      'dashboard'
+    );
+
+    // sync rules with asset links
+    await this.dependencies.queryClient.syncQueries(name, queries);
   }
 }

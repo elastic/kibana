@@ -15,6 +15,8 @@ import {
   isIncludeAll,
 } from '@kbn/content-packs-schema';
 import { Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
+import { omit, partition } from 'lodash';
+import { DashboardLink } from '../../../common/assets';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
@@ -25,6 +27,8 @@ import {
   resolveAncestors,
   withRootPrefix,
 } from '../../lib/content/stream';
+import { AssetClient } from '../../lib/streams/assets/asset_client';
+import { ASSET_TYPE } from '../../lib/streams/assets/fields';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -52,7 +56,7 @@ const exportContentRoute = createServerRoute({
     },
   },
   async handler({ params, request, response, getScopedClients, context }) {
-    const { streamsClient } = await getScopedClients({ request });
+    const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -78,8 +82,10 @@ const exportContentRoute = createServerRoute({
         });
 
     const streamObjects = prepareStreamsForExport({
-      root,
-      descendants: exportedDescendants,
+      root: await asContentPackEntry({ stream: root, assetClient }),
+      descendants: await Promise.all(
+        exportedDescendants.map((stream) => asContentPackEntry({ stream, assetClient }))
+      ),
       inheritedFields: getInheritedFieldsFromAncestors(ancestors),
     });
 
@@ -94,6 +100,31 @@ const exportContentRoute = createServerRoute({
     });
   },
 });
+
+async function asContentPackEntry({
+  stream,
+  assetClient,
+}: {
+  stream: Streams.WiredStream.Definition;
+  assetClient: AssetClient;
+}): Promise<ContentPackStream> {
+  const dashboardsAndQueries = await assetClient.getAssetLinks(stream.name, ['dashboard', 'query']);
+  const [dashboardLinks, queryLinks] = partition(
+    dashboardsAndQueries,
+    (asset): asset is DashboardLink => asset[ASSET_TYPE] === 'dashboard'
+  );
+
+  const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);
+  const queries = queryLinks.map((query) => {
+    return query.query;
+  });
+
+  return {
+    type: 'stream' as const,
+    name: stream.name,
+    request: { stream: { ...omit(stream, ['name']) }, dashboards, queries },
+  };
+}
 
 const importContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/import 2023-10-31',
@@ -124,7 +155,7 @@ const importContentRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }) {
-    const { streamsClient } = await getScopedClients({ request });
+    const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient
       .getStream(params.path.name)
@@ -136,7 +167,7 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
     const parentEntry = contentPack.entries.find(
       (entry): entry is ContentPackStream =>
-        entry.type === 'stream' && entry.stream.name === PARENT_STREAM_ID
+        entry.type === 'stream' && entry.name === PARENT_STREAM_ID
     );
     if (!parentEntry) {
       throw new StatusError(`[${PARENT_STREAM_ID}] definition not found`, 400);
@@ -148,8 +179,7 @@ const importContentRoute = createServerRoute({
           parentEntry,
           ...resolveAncestors(params.body.include.objects.streams).map((name) => {
             const descendant = contentPack.entries.find(
-              (entry): entry is ContentPackStream =>
-                entry.type === 'stream' && entry.stream.name === name
+              (entry): entry is ContentPackStream => entry.type === 'stream' && entry.name === name
             );
             if (!descendant) {
               throw new StatusError(`Could not find definition for stream [${name}]`, 400);
@@ -158,18 +188,13 @@ const importContentRoute = createServerRoute({
           }),
         ];
 
-    const definitions = prepareStreamsForImport({
-      root,
-      inheritedFields,
+    const streams = prepareStreamsForImport({
+      root: await asContentPackEntry({ stream: root, assetClient }),
       entries: importedStreamEntries,
+      inheritedFields,
     });
 
-    await streamsClient.bulkChanges(
-      definitions.map((definition) => ({
-        type: 'upsert',
-        definition,
-      }))
-    );
+    await streamsClient.bulkUpsert(streams);
 
     return { errors: [], created: [] };
   },

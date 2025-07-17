@@ -23,19 +23,19 @@ type StreamRow = ContentPackStream & {
 
 function sortStreams(streamEntries: ContentPackStream[]): StreamRow[] {
   const sortedEntries = streamEntries
-    .filter(({ stream }) => stream.name !== PARENT_STREAM_ID)
-    .sort((a, b) => a.stream.name.localeCompare(b.stream.name));
+    .filter(({ name }) => name !== PARENT_STREAM_ID)
+    .sort((a, b) => a.name.localeCompare(b.name));
   if (sortedEntries.length === 0) {
     return [];
   }
 
-  const offset = getSegments(sortedEntries[0].stream.name).length;
+  const offset = getSegments(sortedEntries[0].name).length;
   return sortedEntries.map((entry, index) => {
     const next = sortedEntries[index + 1];
     return {
       ...entry,
-      level: getSegments(entry.stream.name).length - offset,
-      isParent: next ? isChildOf(entry.stream.name, next.stream.name) : false,
+      level: getSegments(entry.name).length - offset,
+      isParent: next ? isChildOf(entry.name, next.name) : false,
     };
   });
 }
@@ -54,12 +54,11 @@ export function ContentPackObjectsList({
       objects.filter((entry): entry is ContentPackStream => entry.type === 'stream')
     );
     const selection: Record<string, boolean> = {};
-    rows.forEach(({ stream }) => (selection[stream.name] = true));
+    rows.forEach(({ name }) => (selection[name] = true));
     setSelectedItems(selection);
     onSelectionChange(
       objects.filter(
-        (entry): entry is ContentPackStream =>
-          entry.type === 'stream' && selection[entry.stream.name]
+        (entry): entry is ContentPackStream => entry.type === 'stream' && selection[entry.name]
       )
     );
 
@@ -77,28 +76,24 @@ export function ContentPackObjectsList({
           width: '40px',
           render: (_, item: StreamRow) => (
             <EuiCheckbox
-              id={`stream-checkbox-${item.stream.name}`}
-              checked={!!selectedItems[item.stream.name]}
+              id={`stream-checkbox-${item.name}`}
+              checked={!!selectedItems[item.name]}
               onChange={(e) => {
                 const selection = { ...selectedItems };
                 if (e.target.checked) {
                   [
-                    ...getAncestorsAndSelf(item.stream.name),
-                    ...Object.keys(selection).filter((name) =>
-                      isDescendantOf(item.stream.name, name)
-                    ),
+                    ...getAncestorsAndSelf(item.name),
+                    ...Object.keys(selection).filter((name) => isDescendantOf(item.name, name)),
                   ].forEach((name) => {
                     selection[name] = true;
                   });
                 } else {
                   const streamNames = Object.keys(selection);
                   streamNames
-                    .filter(
-                      (name) => name === item.stream.name || isDescendantOf(item.stream.name, name)
-                    )
+                    .filter((name) => name === item.name || isDescendantOf(item.name, name))
                     .forEach((name) => (selection[name] = false));
 
-                  getAncestors(item.stream.name)
+                  getAncestors(item.name)
                     .reverse()
                     .forEach((ancestor) => {
                       const hasSelectedChild = streamNames.some(
@@ -112,7 +107,7 @@ export function ContentPackObjectsList({
                 onSelectionChange(
                   objects.filter(
                     (entry): entry is ContentPackStream =>
-                      entry.type === 'stream' && selection[entry.stream.name]
+                      entry.type === 'stream' && selection[entry.name]
                   )
                 );
               }}
@@ -120,7 +115,7 @@ export function ContentPackObjectsList({
           ),
         },
         {
-          field: 'stream.name',
+          field: 'name',
           name: 'Stream',
           render: (name: string, item: StreamRow) => (
             <EuiFlexGroup

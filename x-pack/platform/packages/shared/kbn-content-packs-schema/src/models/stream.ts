@@ -11,6 +11,6 @@ export const PARENT_STREAM_ID = '__parent__';
 
 export type ContentPackStream = {
   type: 'stream';
-  id: string;
-  stream: Streams.WiredStream.Definition;
+  name: string;
+  request: Streams.WiredStream.UpsertRequest;
 };

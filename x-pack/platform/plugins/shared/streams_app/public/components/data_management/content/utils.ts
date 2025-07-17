@@ -22,12 +22,11 @@ export function prepareIncludePayload(
       return (
         selectedEntry.type === 'stream' &&
         !allEntries.some(
-          (entry) =>
-            entry.type === 'stream' && isDescendantOf(selectedEntry.stream.name, entry.stream.name)
+          (entry) => entry.type === 'stream' && isDescendantOf(selectedEntry.name, entry.name)
         )
       );
     })
-    .map((entry) => entry.stream.name);
+    .map((entry) => entry.name);
 
   return { objects: { streams, dashboards: [] } };
 }
