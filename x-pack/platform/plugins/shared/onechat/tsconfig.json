@@ -47,5 +47,9 @@
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-server",
     "@kbn/utility-types",
+    "@kbn/inference-tracing",
+    "@kbn/std",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-utils",
   ]
 }

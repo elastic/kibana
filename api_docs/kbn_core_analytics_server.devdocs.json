@@ -2210,6 +2210,10 @@
                 "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
+              },
+              {
                 "plugin": "discover",
                 "path": "src/platform/plugins/shared/discover/public/ebt_manager/discover_ebt_manager.test.ts"
               },
