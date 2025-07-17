@@ -27,12 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
       },
     };
 
-    before(async () => {
-      await kibanaServer.uiSettings.update({
-        'onechat:api:enabled': true,
-      });
-    });
-
     after(async () => {
       for (const toolId of createdToolIds) {
         try {

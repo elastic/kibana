@@ -7,8 +7,15 @@
 
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('OneChat Endpoints', function () {
+    const kibanaServer = getService('kibanaServer');
+
+    before(async () => {
+      await kibanaServer.uiSettings.update({
+        'onechat:api:enabled': true,
+      });
+    });
     loadTestFile(require.resolve('./esql_tools.ts'));
   });
 }
