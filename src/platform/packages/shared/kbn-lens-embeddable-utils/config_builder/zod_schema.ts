@@ -902,8 +902,17 @@ const tableChartStateSchema = z.object({
             ),
             alignment: z
               .union([
+                /**
+                 * Left aligns label to the left
+                 */
                 z.literal("left"),
+                /**
+                 * Right aligns label to the right
+                 */
                 z.literal("right"),
+                /**
+                 * Center aligns label to the center
+                 */
                 z.literal("center")
               ])
               .optional(),

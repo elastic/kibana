@@ -15,6 +15,13 @@ const test: MetricState = {
     operation: 'min',
     field: 'test',
   },
+  breakdown_by: {
+    operation: 'terms',
+    fields: ['test'],
+    size: 5,
+    increase_accuracy: true,
+    collapse_by: 'avg',
+  },
   ignore_global_filters: true,
   samplings: 1,
 }
