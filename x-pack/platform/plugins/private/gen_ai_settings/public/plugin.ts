@@ -41,7 +41,7 @@ export class GenAiSettingsPlugin
   private isServerless: boolean = false;
 
   constructor(private initializerContext: PluginInitializerContext) {
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
