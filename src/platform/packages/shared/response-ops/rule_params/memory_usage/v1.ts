@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './search_configuration_schema';
-export * from './stack_monitoring_common_schema';
-export * from './thread_pool_rejections_common_schema';
-export { dataViewSpecSchema, type DataViewSpec } from './data_view_spec_schema';
-export { MAX_GROUPS } from './constants';
-export { ComparatorFns } from './utils';
+import type { TypeOf } from '@kbn/config-schema';
+import { stackMonitoringCommonSchema } from '../common';
+
+export const memoryUsageParamsSchema = stackMonitoringCommonSchema.extends({});
+export type MemoryUsageParams = TypeOf<typeof memoryUsageParamsSchema>;
