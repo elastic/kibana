@@ -12,13 +12,19 @@ import type { AiopsPluginStartDeps } from '../../types';
 import { ChangePointChartInitializer } from './change_point_chart_initializer';
 import type { ChangePointEmbeddableState } from './types';
 
-export async function getEmbeddableChangePointUserInput(
-  coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps,
-  onConfirm: (state: ChangePointEmbeddableState) => void,
-  closeFlyout: () => void,
-  input?: ChangePointEmbeddableState
-) {
+export function EmbeddableChangePointUserInput({
+  coreStart,
+  pluginStart,
+  onConfirm,
+  closeFlyout,
+  input,
+}: {
+  coreStart: CoreStart;
+  pluginStart: AiopsPluginStartDeps;
+  onConfirm: (state: ChangePointEmbeddableState) => void;
+  closeFlyout: () => void;
+  input?: ChangePointEmbeddableState;
+}) {
   return (
     <AiopsAppContext.Provider
       value={{
@@ -33,9 +39,7 @@ export async function getEmbeddableChangePointUserInput(
           onConfirm(update);
           closeFlyout();
         }}
-        onCancel={() => {
-          closeFlyout();
-        }}
+        onCancel={closeFlyout}
       />
     </AiopsAppContext.Provider>
   );

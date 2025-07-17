@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
@@ -65,21 +66,23 @@ export function createAddChangePointChartAction(
         },
         uuid: context.embeddable.uuid,
         loadContent: async ({ closeFlyout }) => {
-          const { getEmbeddableChangePointUserInput } = await import(
-            '../embeddables/change_point_chart/resolve_change_point_config_input'
+          const { EmbeddableChangePointUserInput } = await import(
+            '../embeddables/change_point_chart/change_point_config_input'
           );
-          return getEmbeddableChangePointUserInput(
-            coreStart,
-            pluginStart,
-            (initialState) => {
-              presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
-                panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-                serializedState: {
-                  rawState: initialState,
-                },
-              });
-            },
-            closeFlyout
+          return (
+            <EmbeddableChangePointUserInput
+              coreStart={coreStart}
+              pluginStart={pluginStart}
+              onConfirm={(initialState) => {
+                presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
+                  panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+                  serializedState: {
+                    rawState: initialState,
+                  },
+                });
+              }}
+              closeFlyout={closeFlyout}
+            />
           );
         },
       });
