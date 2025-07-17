@@ -51,7 +51,7 @@ export const transformDashboardIn = async ({
 
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } =
       dashboardState;
-    const { panelsJSON, sections } = transformPanelsIn(panels);
+    const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
     const attributes = {
       ...rest,
@@ -69,7 +69,11 @@ export const transformDashboardIn = async ({
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
       }),
     };
-    return { attributes, references: tagReferences, error: null };
+    return {
+      attributes,
+      references: [...tagReferences, ...panelReferences],
+      error: null,
+    };
   } catch (e) {
     return { attributes: null, references: null, error: e };
   }
