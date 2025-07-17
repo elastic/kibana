@@ -28,7 +28,7 @@ import {
   SO_SEARCH_LIMIT,
   USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../constants';
-import { ElasticsearchAssetType } from '../../../types';
+import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type {
   AssetReference,
   AssetType,
@@ -154,7 +154,7 @@ export async function deleteKibanaAssets({
   spaceId?: string;
 }) {
   const savedObjectsClient = new SavedObjectsClient(
-    appContextService.getSavedObjects().createInternalRepository()
+    appContextService.getSavedObjects().createInternalRepository([KibanaSavedObjectType.alert])
   );
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
@@ -331,6 +331,7 @@ export async function deletePrerequisiteAssets(
       concurrency: MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
     });
   } catch (err) {
+    logger.debug(`Deletion error: ${err}`);
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(err);
@@ -447,7 +448,6 @@ export async function deleteKibanaSavedObjectsAssets({
   const assetsToDelete = refsToDelete
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
-
   try {
     const packageInfo = await getPackageInfo({
       savedObjectsClient,
@@ -463,6 +463,7 @@ export async function deleteKibanaSavedObjectsAssets({
       logger,
     });
   } catch (err) {
+    logger.debug(`Deletion error: ${err}`);
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       logger.error(err);
