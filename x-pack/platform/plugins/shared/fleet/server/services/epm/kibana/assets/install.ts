@@ -16,7 +16,7 @@ import type {
   SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import { createListStream } from '@kbn/utils';
 import { partition, chunk, once } from 'lodash';
 
@@ -138,7 +138,7 @@ export function createSavedObjectKibanaAsset(asset: SavedObjectAsset): SavedObje
 export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
   spaceId: string;
@@ -270,7 +270,7 @@ export async function installKibanaAssetsAndReferencesMultispace({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -341,7 +341,7 @@ export async function installKibanaAssetsAndReferences({
   installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -357,12 +357,7 @@ export async function installKibanaAssetsAndReferences({
   const kibanaAssetsArchiveIterator = getKibanaAssetsArchiveIterator(packageInstallContext);
 
   if (installedPkg) {
-    await deleteKibanaSavedObjectsAssets({
-      savedObjectsClient,
-      alertingRulesClient,
-      installedPkg,
-      spaceId,
-    });
+    await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   }
   let installedKibanaAssetsRefs: KibanaAssetReference[] = [];
 
@@ -410,14 +405,12 @@ export async function installKibanaAssetsAndReferences({
 
 export async function deleteKibanaAssetsAndReferencesForSpace({
   savedObjectsClient,
-  alertingRulesClient,
   logger,
   pkgName,
   installedPkg,
   spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  alertingRulesClient: RulesClientApi;
   logger: Logger;
   pkgName: string;
   installedPkg: SavedObject<Installation>;
@@ -432,12 +425,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
       'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
     );
   }
-  await deleteKibanaSavedObjectsAssets({
-    savedObjectsClient,
-    alertingRulesClient,
-    installedPkg,
-    spaceId,
-  });
+  await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, true);
 }
 

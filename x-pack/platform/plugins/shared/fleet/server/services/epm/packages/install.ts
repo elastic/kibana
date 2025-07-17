@@ -21,7 +21,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type {
   KibanaAssetReference,
@@ -175,7 +175,7 @@ export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
@@ -285,7 +285,7 @@ export async function handleInstallPackageFailure({
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   spaceId: string;
   authorizationHeader?: HTTPAuthorizationHeader | null;
   keepFailedInstallation?: boolean;
@@ -327,13 +327,7 @@ export async function handleInstallPackageFailure({
       if (keepFailedInstallation) {
         return;
       }
-      await removeInstallation({
-        savedObjectsClient,
-        alertingRulesClient,
-        pkgName,
-        pkgVersion,
-        esClient,
-      });
+      await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
       return;
     }
 
@@ -408,7 +402,7 @@ interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   spaceId: string;
   force?: boolean;
   neverIgnoreVerificationError?: boolean;
@@ -432,7 +426,7 @@ interface InstallCustomPackageParams {
   pkgName: string;
   datasets: CustomPackageDatasetConfiguration[];
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   spaceId: string;
   force?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
@@ -441,7 +435,7 @@ interface InstallCustomPackageParams {
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   archiveBuffer: Buffer;
   contentType: string;
   spaceId: string;
@@ -625,7 +619,7 @@ export async function installPackageWithStateMachine(options: {
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   spaceId: string;
   force?: boolean;
   packageInstallContext: PackageInstallContext;
@@ -1341,7 +1335,7 @@ export const saveKibanaAssetsRefs = async (
 export async function ensurePackagesCompletedInstall(
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  alertingRulesClient: RulesClientApi
+  alertingRulesClient: RulesClient
 ) {
   const installingPackages = await getPackageSavedObjects(savedObjectsClient, {
     searchFields: ['install_status'],

@@ -7,7 +7,7 @@
 import { chunk } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { createBodySchemaV1 as alertRuleBodySchema } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 
 import { KibanaSavedObjectType, type PackageSpecTags } from '../../../../types';
@@ -33,7 +33,7 @@ interface InstallAlertRulesParamsContext {
 
 interface InstallAlertRulesParams {
   logger: Logger;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   alertRuleAssets: AlertRuleAsset[];
   context: InstallAlertRulesParamsContext;
   assetsChunkSize?: number;
@@ -91,7 +91,7 @@ async function installAlertRuleChunk({
   context,
 }: {
   logger: Logger;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   alertRuleAssets: AlertRuleAsset[];
   context: InstallAlertRulesParamsContext;
 }) {
@@ -109,7 +109,7 @@ async function installAlertRule({
   context,
 }: {
   logger: Logger;
-  alertingRulesClient: RulesClientApi;
+  alertingRulesClient: RulesClient;
   alertRuleAsset: AlertRuleAsset;
   context: InstallAlertRulesParamsContext;
 }) {
