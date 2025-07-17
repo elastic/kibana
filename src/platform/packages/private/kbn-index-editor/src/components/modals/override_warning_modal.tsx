@@ -47,7 +47,7 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
   };
 
   return (
-    <EuiModal style={{ width: 700 }} onClose={onCancel}>
+    <EuiModal css={{ width: 700 }} onClose={onCancel}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
