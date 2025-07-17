@@ -303,7 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
           // regardless of whether the field is mapped as short or long.
           const values = response.body.saved_objects.map((o: any) => o.attributes.numericValue);
           // All values should be sorted numerically
-          const s = [...values].sort((a: number, b: number) => a - b);
+          const sorted = [...values].sort((a: number, b: number) => a - b);
           expect(values).to.eql(sorted);
         });
       });
