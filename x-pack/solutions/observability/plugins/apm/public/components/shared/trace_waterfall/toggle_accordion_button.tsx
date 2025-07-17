@@ -18,11 +18,12 @@ interface Props {
 export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props) {
   return (
     <EuiFlexGroup
+      data-test-subj="irene"
       gutterSize="xs"
       alignItems="center"
       justifyContent="center"
       responsive={false}
-      css={{ position: 'relative', display: 'flex', width: `${TOGGLE_BUTTON_WIDTH}px` }}
+      css={{ position: 'relative', width: `${TOGGLE_BUTTON_WIDTH}px` }}
     >
       <EuiFlexItem grow={false}>
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
