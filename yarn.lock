@@ -2168,12 +2168,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.1.0.tgz#20296c12b3f79623217699a42d500e336b7e470f"
   integrity sha512-xDTSJTkI7i9+PreDaaMU/I607aoVkWmVSJsXNj29iHhuNDhT+a2nZoE7FFVt51XaJe/LhbGM2xUaLBJeGEg92A==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@105.0.0-amsterdam.0":
-  version "105.0.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-105.0.0-amsterdam.0.tgz#acbabca4f50e42ac4679fe797703e7b7d2a27709"
-  integrity sha512-QH9x02EH+pPC8gZjcrIgfNPjfEvdfu0zjkici56eLsptLugDsu2k6toyYAp8c3dimNLfLwjS0mWODbAvSLUeTQ==
+"@elastic/eui-amsterdam@file:./elastic-eui-106.0.0-3e7b9d781.tgz", "@elastic/eui@file:./elastic-eui-106.0.0-3e7b9d781.tgz":
+  version "106.0.0"
+  resolved "file:./elastic-eui-106.0.0-3e7b9d781.tgz#4aad5ab50f225d28c5baf0a6a2fb5ffc82ad5e95"
   dependencies:
-    "@elastic/eui-theme-common" "2.2.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2209,60 +2207,17 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.2.0.tgz#be8b294c8f9fbd20b46eb3f6587adb770a1c4a7f"
-  integrity sha512-9Sh4szzjKIOchpW8uOl+6E35OyrVFLB4e0ikW8wivxjxeHHc1QVQSCVwFoU1Lfh9wFNVRVw3P1qdMVEnrjKetg==
+"@elastic/eui-theme-borealis@file:./elastic-eui-theme-borealis-3.3.0-3e7b9d781.tgz":
+  version "3.3.0"
+  resolved "file:./elastic-eui-theme-borealis-3.3.0-3e7b9d781.tgz#63669b1e662bdb39c419e6df25ca0c166dee766a"
 
-"@elastic/eui-theme-common@2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-2.2.0.tgz#d46d0f4f557fe573902ef72b1a69f94acdee0b7f"
-  integrity sha512-8IUs6foUaUs3LrR7ocveUCnm2WpWX3Nu5ivoXaB6HccNWN7g2JujmTgTle/vP+IbQFXEZ/EXvi763hEdf164VA==
+"@elastic/eui-theme-common@file:./elastic-eui-theme-common-3.0.0-3e7b9d781.tgz":
+  version "3.0.0"
+  resolved "file:./elastic-eui-theme-common-3.0.0-3e7b9d781.tgz#fe78f24ceb68ab7f527bc1cd80f2e7c913f41c2c"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
-
-"@elastic/eui@105.0.0":
-  version "105.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-105.0.0.tgz#db199d09172095ba7b4696178ed5084321000149"
-  integrity sha512-iPSwfQxmF5sDj9c2iWuewdaYaibz0o/DUtzjNg7jTVrjnhcwCKeHUVkPpZLRUrhPmt8x+MwtKHSWo9J9/SRLtA==
-  dependencies:
-    "@elastic/eui-theme-common" "2.2.0"
-    "@elastic/prismjs-esql" "^1.1.0"
-    "@hello-pangea/dnd" "^16.6.0"
-    "@types/lodash" "^4.14.202"
-    "@types/numeral" "^2.0.5"
-    "@types/react-window" "^1.8.8"
-    "@types/refractor" "^3.4.0"
-    chroma-js "^2.4.2"
-    classnames "^2.5.1"
-    lodash "^4.17.21"
-    mdast-util-to-hast "^10.2.0"
-    numeral "^2.0.6"
-    prop-types "^15.8.1"
-    react-dropzone "^11.7.1"
-    react-element-to-jsx-string "^15.0.0"
-    react-focus-on "^3.9.1"
-    react-is "^17.0.2"
-    react-remove-scroll-bar "^2.3.4"
-    react-virtualized-auto-sizer "^1.0.24"
-    react-window "^1.8.10"
-    refractor "^3.6.0"
-    rehype-raw "^5.1.0"
-    rehype-react "^6.2.1"
-    rehype-stringify "^8.0.0"
-    remark-breaks "^2.0.2"
-    remark-emoji "^2.1.0"
-    remark-parse-no-trim "^8.0.4"
-    remark-rehype "^8.1.0"
-    tabbable "^5.3.3"
-    text-diff "^1.0.1"
-    unified "^9.2.2"
-    unist-util-visit "^2.0.3"
-    url-parse "^1.5.10"
-    uuid "^8.3.0"
-    vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
