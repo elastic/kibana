@@ -56,7 +56,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     },
   });
 
-  describe('preview chart transaction duration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/228503
+  // Failing: See https://github.com/elastic/kibana/issues/228478
+  // Failing: See https://github.com/elastic/kibana/issues/228392
+  describe.skip('preview chart transaction duration', () => {
     describe(`without data loaded`, () => {
       it('transaction_duration (without data)', async () => {
         const options = getOptions();
