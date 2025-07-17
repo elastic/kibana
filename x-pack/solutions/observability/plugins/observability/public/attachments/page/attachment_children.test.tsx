@@ -72,12 +72,13 @@ describe('PageAttachmentChildren', () => {
         notifications: { toasts: { addDanger: jest.fn() } },
       },
     });
+    const label = 'External Dashboard';
     const externalUrlState: PageAttachmentPersistedState = {
       type: 'mockType',
       url: {
         actionLabel: 'View in Dashboards',
         pathAndQuery: 'https://external.com/test/path?query=1',
-        label: 'External Dashboard',
+        label,
         iconType: 'link',
       },
     };
@@ -86,5 +87,6 @@ describe('PageAttachmentChildren', () => {
 
     const callout = screen.getByText('External URL detected');
     expect(callout).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: label })).not.toBeInTheDocument();
   });
 });
