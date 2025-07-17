@@ -9,12 +9,21 @@
 
 import { EuiPopover, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useRef, useMemo, useCallback, cloneElement, ReactNode, ReactElement } from 'react';
+import React, {
+  useRef,
+  useMemo,
+  useCallback,
+  cloneElement,
+  ReactNode,
+  ReactElement,
+  useEffect,
+} from 'react';
 
-import { usePopoverOpen, useSidePanelEffect } from '../../hooks/use_popover';
-import { useFocusBlur, useFocusFirst } from '../../hooks/use_focus_management';
-import { useKeyboardManagement } from '../../hooks/use_keyboard_management';
+import { focusFirstElement } from '../../utils/focus_first_element';
 import { useClickOutside, useClickToggle, useHover } from '../../hooks/use_mouse_management';
+import { blurPopover } from './blur_popover';
+import { usePopoverOpen } from './use_popover_open';
+import { useKeyboardManagement } from './use_keyboard_management';
 
 const TOP_BAR_HEIGHT = 48;
 const TOP_BAR_POPOVER_GAP = 8;
@@ -56,8 +65,6 @@ export const SideNavPopover = ({
     clearClickOpened();
   }, [close, clearClickOpened]);
 
-  const focusFirst = useFocusFirst(popoverRef);
-
   const { handleMouseEnter, handleMouseLeave, clearTimeout } = useHover(
     persistent,
     isOpenedByClick,
@@ -77,11 +84,31 @@ export const SideNavPopover = ({
     }
   }, [persistent, isOpen, isOpenedByClick, handleClose, clearTimeout, open, setClickOpened]);
 
-  const handleBlur = useFocusBlur(triggerRef, popoverRef, handleClose);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        trigger.props.onKeyDown?.(e);
+        if (hasContent && !e.defaultPrevented) {
+          e.preventDefault();
+          open();
+          setTimeout(() => focusFirstElement(popoverRef), 0);
+        }
+      } else {
+        trigger.props.onKeyDown?.(e);
+      }
+    },
+    [trigger, hasContent, open]
+  );
 
   useKeyboardManagement(isOpen, handleClose, triggerRef, popoverRef);
   useClickOutside(isOpen, persistent, popoverRef, triggerRef, handleClose);
-  useSidePanelEffect(isSidePanelOpen, handleClose, clearTimeout);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout();
+      handleClose();
+    };
+  }, [clearTimeout, handleClose]);
 
   const enhancedTrigger = useMemo(
     () =>
@@ -94,20 +121,9 @@ export const SideNavPopover = ({
           trigger.props.onClick?.(e);
           handleTriggerClick();
         },
-        onKeyDown: (e: React.KeyboardEvent) => {
-          if (e.key === 'Enter') {
-            trigger.props.onKeyDown?.(e);
-            if (hasContent && !e.defaultPrevented) {
-              e.preventDefault();
-              open();
-              setTimeout(() => focusFirst(), 0);
-            }
-          } else {
-            trigger.props.onKeyDown?.(e);
-          }
-        },
+        onKeyDown: handleKeyDown,
       }),
-    [trigger, hasContent, isOpen, handleTriggerClick, open, focusFirst]
+    [trigger, hasContent, isOpen, handleKeyDown, handleTriggerClick]
   );
 
   return (
@@ -118,7 +134,7 @@ export const SideNavPopover = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
-      onBlur={handleBlur}
+      onBlur={blurPopover(triggerRef, popoverRef, handleClose)}
     >
       <EuiPopover
         anchorPosition="rightUp"
