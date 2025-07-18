@@ -13,7 +13,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   return {
@@ -43,7 +43,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.enableExperimental=${JSON.stringify([
           'agentTamperProtectionEnabled',
           'subfeaturePrivileges',
-          'useSpaceAwareness',
         ])}`,
 
         `--logging.loggers=${JSON.stringify([
