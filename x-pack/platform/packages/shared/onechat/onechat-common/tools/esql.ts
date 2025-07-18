@@ -10,17 +10,20 @@ import type { ToolDefinition } from './definition';
 /**
  * Common ES Field Types
  */
-export type EsqlToolFieldTypes =
-  | 'text'
-  | 'keyword'
-  | 'long'
-  | 'integer'
-  | 'double'
-  | 'float'
-  | 'boolean'
-  | 'date'
-  | 'object'
-  | 'nested';
+export enum EsqlToolFieldType {
+  TEXT = 'text',
+  KEYWORD = 'keyword',
+  LONG = 'long',
+  INTEGER = 'integer',
+  DOUBLE = 'double',
+  FLOAT = 'float',
+  BOOLEAN = 'boolean',
+  DATE = 'date',
+  OBJECT = 'object',
+  NESTED = 'nested',
+}
+
+export type EsqlToolFieldTypes = `${EsqlToolFieldType}`;
 
 export interface EsqlToolParam {
   /**

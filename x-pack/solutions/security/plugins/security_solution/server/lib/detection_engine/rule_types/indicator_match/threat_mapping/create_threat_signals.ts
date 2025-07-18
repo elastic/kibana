@@ -334,7 +334,6 @@ export const createThreatSignals = async ({
           threatPitId,
           wrapSuppressedHits,
           allowedFieldsForTermsQuery,
-          threatMatchedFields,
           inputIndexFields,
           threatIndexFields,
           sortOrder,

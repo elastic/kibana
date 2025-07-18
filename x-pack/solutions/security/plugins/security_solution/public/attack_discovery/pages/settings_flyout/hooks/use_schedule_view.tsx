@@ -74,7 +74,7 @@ export const useScheduleView = (): UseScheduleView => {
             data-test-subj="createNewSchedule"
             fill
             onClick={openFlyout}
-            size="s"
+            size="m"
             iconType="plusInCircle"
           >
             {i18n.CREATE_NEW_SCHEDULE}
