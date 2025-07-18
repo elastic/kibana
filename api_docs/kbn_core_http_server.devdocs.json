@@ -3861,8 +3861,8 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "sampleDataIngest",
+                "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
               },
               {
                 "plugin": "searchprofiler",
@@ -6569,12 +6569,8 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_permissions_route.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
-              },
-              {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "sampleDataIngest",
+                "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
               },
               {
                 "plugin": "searchprofiler",
@@ -6727,6 +6723,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -14485,7 +14485,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
@@ -14493,11 +14497,15 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
               },
               {
                 "plugin": "onechat",
@@ -15424,11 +15432,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "osquery",
@@ -16207,6 +16215,10 @@
               },
               {
                 "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+              },
+              {
+                "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
@@ -16216,10 +16228,6 @@
               {
                 "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
-              },
-              {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
               },
               {
                 "plugin": "onechat",
@@ -17081,11 +17089,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "onechat",

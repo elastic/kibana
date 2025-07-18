@@ -7,6 +7,7 @@
 
 import type { ZodObject } from '@kbn/zod';
 import { createBadRequestError } from '@kbn/onechat-common';
+import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   ToolHandlerContext,
   ScopedRunnerRunToolsParams,
@@ -38,18 +39,25 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
     TResult
   >;
 
-  const validation = tool.schema.safeParse(toolParams);
-  if (validation.error) {
-    throw createBadRequestError(
-      `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
-    );
-  }
+  const toolReturn = await withExecuteToolSpan({ name: tool.id, input: toolParams }, async () => {
+    const validation = tool.schema.safeParse(toolParams);
+    if (validation.error) {
+      throw createBadRequestError(
+        `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
+      );
+    }
 
-  const toolHandlerContext = await createToolHandlerContext<TParams>({
-    toolExecutionParams,
-    manager,
+    const toolHandlerContext = await createToolHandlerContext<TParams>({
+      toolExecutionParams,
+      manager,
+    });
+    const toolReturnInternal = await tool.handler(
+      validation.data as Record<string, any>,
+      toolHandlerContext
+    );
+
+    return toolReturnInternal;
   });
-  const toolReturn = await tool.handler(validation.data as Record<string, any>, toolHandlerContext);
 
   return {
     runId: manager.context.runId,

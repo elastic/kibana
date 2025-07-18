@@ -42392,6 +42392,122 @@
         ]
       }
     },
+    "/api/fleet/space_settings": {
+      "get": {
+        "operationId": "get-fleet-space-settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allowed_namespace_prefixes": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "managed_by": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "allowed_namespace_prefixes"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get space settings",
+        "tags": [],
+        "x-state": "Generally available"
+      },
+      "put": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-all.",
+        "operationId": "put-fleet-space-settings",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "allowed_namespace_prefixes": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allowed_namespace_prefixes": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "managed_by": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "allowed_namespace_prefixes"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create space settings",
+        "tags": [],
+        "x-state": "Generally available"
+      }
+    },
     "/api/fleet/uninstall_tokens": {
       "get": {
         "description": "List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
