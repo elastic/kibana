@@ -68,7 +68,7 @@ export function StackTraces({
   const isTracesType = type === TopNType.Traces;
   const [selectedSubchart, setSelectedSubchart] = useState<TopNSubchart | undefined>(undefined);
   const isExecutableType = type === TopNType.Executables;
-  const displayAgentCallout = charts.length && charts[0].Category === 'Other';
+  const displayAgentCallout = charts.length === 1 && charts[0]?.Category === 'Other';
 
   function handleChartClick(selectedChart: TopNSubchart) {
     // When clicking on the charts on the Traces view, the flyout must open
