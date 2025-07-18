@@ -18,8 +18,8 @@ import supertest from 'supertest';
 import {
   RoleScopedSupertestProvider,
   SupertestWithRoleScope,
-} from '../../../api_integration_deployment_agnostic/services/role_scoped_supertest';
-import { CustomRoleScopedSupertestProvider } from '../../../api_integration_deployment_agnostic/services/custom_role_scoped_supertest';
+} from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
+import { CustomRoleScopedSupertestProvider } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/custom_role_scoped_supertest';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
   ? [TArgs] | []
@@ -150,6 +150,26 @@ export async function getAdminApiClient<TServerRouteRepository extends ServerRou
   st: ReturnType<typeof RoleScopedSupertestProvider>
 ): Promise<RepositorySupertestClient<TServerRouteRepository>> {
   const supertestWithRoleScoped = await st.getSupertestWithRoleScope('admin', {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithRoleScoped);
+}
+
+export async function getEditorApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<RepositorySupertestClient<TServerRouteRepository>> {
+  const supertestWithRoleScoped = await st.getSupertestWithRoleScope('editor', {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithRoleScoped);
+}
+
+export async function getViewerApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<RepositorySupertestClient<TServerRouteRepository>> {
+  const supertestWithRoleScoped = await st.getSupertestWithRoleScope('viewer', {
     useCookieHeader: true,
     withInternalHeaders: true,
   });
