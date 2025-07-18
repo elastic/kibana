@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const HOVER_DELAY = 100;
 
@@ -21,39 +21,6 @@ export const useClickToggle = () => {
   const clearClickOpened = useCallback(() => setIsOpenedByClick(false), []);
 
   return { isOpenedByClick, setClickOpened, clearClickOpened };
-};
-
-/**
- * Hook for click outside detection
- */
-export const useClickOutside = (
-  isOpen: boolean,
-  persistent: boolean,
-  popoverRef: RefObject<HTMLElement>,
-  triggerRef: RefObject<HTMLElement>,
-  onClose: () => void
-) => {
-  const handleClickOutside = useCallback(
-    (e: MouseEvent) => {
-      if (!persistent || !isOpen) return;
-
-      const target = e.target as Node;
-      const isOutsidePopover = popoverRef.current && !popoverRef.current.contains(target);
-      const isOutsideTrigger = triggerRef.current && !triggerRef.current.contains(target);
-
-      if (isOutsidePopover && isOutsideTrigger) {
-        onClose();
-      }
-    },
-    [persistent, isOpen, popoverRef, triggerRef, onClose]
-  );
-
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isOpen, handleClickOutside]);
 };
 
 /**
