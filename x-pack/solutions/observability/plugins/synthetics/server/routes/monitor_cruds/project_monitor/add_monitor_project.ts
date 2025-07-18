@@ -77,9 +77,8 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
     try {
       const [spaceId, permissionError] = await Promise.all([
-        validProjectMultiSpace(routeContext, monitors),
-        validatePermissions(routeContext, monitors),
         validMultiSpacePrivileges(routeContext, monitors),
+        checkPublicLocationsPermissions(routeContext, monitors),
       ]);
 
       if (permissionError) {
@@ -169,10 +168,11 @@ const validMultiSpacePrivileges = async (
   monitors: ProjectMonitor[]
 ) => {
   const { spaceId, request, response, server } = routeContext;
+
   const spacesList = monitors.flatMap((monitor) => monitor.spaces ?? []);
   if (spacesList.length === 0 || (spacesList.length === 1 && spacesList[0] === spaceId)) {
     // If there are no spaces or only the current space, no need to check privileges
-    return;
+    return validProjectMultiSpace(routeContext, monitors);
   }
 
   const checkSavedObjectsPrivileges =
@@ -192,9 +192,11 @@ const validMultiSpacePrivileges = async (
       },
     });
   }
+
+  return validProjectMultiSpace(routeContext, monitors);
 };
 
-export const validatePermissions = async (
+export const checkPublicLocationsPermissions = async (
   { server, request }: RouteContext,
   projectMonitors: ProjectMonitor[]
 ) => {
