@@ -17,7 +17,7 @@ import { services } from '../functional/services';
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
