@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import semverCompare from 'semver/functions/compare';
+import semverValid from 'semver/functions/valid';
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import semverGte from 'semver/functions/gte';
 import {
   EuiAccordion,
@@ -20,58 +24,49 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import {
-  SetupTechnology,
-  NamespaceComboBox,
-  SetupTechnologySelector,
-} from '@kbn/fleet-plugin/public';
+import { SetupTechnology, NamespaceComboBox } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
+import type { CloudSetup as CloudSetupType } from '@kbn/cloud-plugin/public';
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
-import { CloudSetup } from '@kbn/cloud-security-posture';
-import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
-import { SubscriptionNotAllowed } from '../subscription_not_allowed';
-import { assert } from '../../../common/utils/helpers';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
-import {
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_VULN_MGMT_AWS,
-  SUPPORTED_POLICY_TEMPLATES,
-} from '../../../common/constants';
+import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
+// import { assert } from '../../../common/utils/helpers';
+import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
+import { CLOUDBEAT_AWS, SUPPORTED_POLICY_TEMPLATES, AZURE_CREDENTIALS_TYPE } from './constants';
 import {
   getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
-  getVulnMgmtCloudFormationDefaultValue,
-  isPostureInput,
+  // isPostureInput,
+  isBelowMinVersion,
+  type NewPackagePolicyPostureInput,
   hasErrors,
   POLICY_TEMPLATE_FORM_DTS,
   getCloudDefaultAwsCredentialConfig,
   getCloudConnectorRemoteRoleTemplate,
 } from './utils';
-import {
-  PolicyTemplateInfo,
-  PolicyTemplateInputSelector,
-  PolicyTemplateSelector,
-  PolicyTemplateVarsForm,
-} from './policy_template_selectors';
-import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
+import { PolicyTemplateInputSelector } from './policy_template_selectors';
+import { usePackagePolicyList } from './hooks/use_package_policy_list';
+// import {
+//   GCP_CREDENTIALS_TYPE,
+//   gcpField,
+//   getInputVarsFields,
+// } from './gcp_credentials_form/gcp_credential_form';
+// import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
-import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
-import { useKibana } from '../../common/hooks/use_kibana';
+import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_select';
+import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_select';
+import { AzureAccountTypeSelect } from './azure_credentials_form/azure_account_type_select';
+import { IntegrationSettings } from './integration_settings';
+// import { useKibana } from '../../common/hooks/use_kibana';
 
 const DEFAULT_INPUT_TYPE = {
-  kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
-  vuln_mgmt: CLOUDBEAT_VULN_MGMT_AWS,
 } as const;
 
 const EditScreenStepTitle = () => (
@@ -88,26 +83,6 @@ const EditScreenStepTitle = () => (
   </>
 );
 
-interface IntegrationInfoFieldsProps {
-  fields: Array<{ id: string; value: string; label: React.ReactNode; error: string[] | null }>;
-  onChange(field: string, value: string): void;
-}
-
-const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) => (
-  <div>
-    {fields.map(({ value, id, label, error }) => (
-      <EuiFormRow key={id} id={id} fullWidth label={label} isInvalid={!!error} error={error}>
-        <EuiFieldText
-          isInvalid={!!error}
-          fullWidth
-          value={value}
-          onChange={(event) => onChange(id, event.target.value)}
-        />
-      </EuiFormRow>
-    ))}
-  </div>
-);
-
 const usePolicyTemplateInitialName = ({
   isEditPage,
   integration,
@@ -117,7 +92,7 @@ const usePolicyTemplateInitialName = ({
   setCanFetchIntegration,
 }: {
   isEditPage: boolean;
-  integration: CloudSecurityPolicyTemplate | undefined;
+  integration: string | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
   updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
@@ -163,8 +138,8 @@ const getSelectedOption = (
     options.find((i) => i.policy_template === policyTemplate) ||
     options[0];
 
-  assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
-  assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
+  // assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
+  // assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
 
   return selectedOption;
 };
@@ -173,45 +148,51 @@ const getSelectedOption = (
  * Update CloudFormation template and stack name in the Agent Policy
  * based on the selected policy template
  */
-const useCloudFormationTemplate = ({
-  packageInfo,
-  newPolicy,
-  updatePolicy,
-}: {
-  packageInfo: PackageInfo;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-}) => {
-  useEffect(() => {
-    const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
+// const useCloudFormationTemplate = ({
+//   packageInfo,
+//   newPolicy,
+//   updatePolicy,
+// }: {
+//   packageInfo: PackageInfo;
+//   newPolicy: NewPackagePolicy;
+//   updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+// }) => {
+//   useEffect(() => {
+//     const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
 
-    // If the template is not available, do not update the policy
-    if (templateUrl === '') return;
+//     // If the template is not available, do not update the policy
+//     if (templateUrl === '') return;
 
-    const checkCurrentTemplate = newPolicy?.inputs?.find(
-      (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
-    )?.config?.cloud_formation_template_url?.value;
+//     const checkCurrentTemplate = newPolicy?.inputs?.find(
+//       (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
+//     )?.config?.cloud_formation_template_url?.value;
 
-    // If the template is already set, do not update the policy
-    if (checkCurrentTemplate === templateUrl) return;
+//     // If the template is already set, do not update the policy
+//     if (checkCurrentTemplate === templateUrl) return;
 
-    updatePolicy?.({
-      ...newPolicy,
-      inputs: newPolicy.inputs.map((input) => {
-        if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
-          return {
-            ...input,
-            config: { cloud_formation_template_url: { value: templateUrl } },
-          };
-        }
-        return input;
-      }),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
+//     updatePolicy?.({
+//       ...newPolicy,
+//       inputs: newPolicy.inputs.map((input) => {
+//         if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
+//           return {
+//             ...input,
+//             config: { cloud_formation_template_url: { value: templateUrl } },
+//           };
+//         }
+//         return input;
+//       }),
+//     });
+//     // eslint-disable-next-line react-hooks/exhaustive-deps
+//   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
+// };
+
+type CloudSetupProps = PackagePolicyReplaceDefineStepExtensionComponentProps & {
+  cloud: CloudSetupType;
+  cloudConnectorsEnabled: boolean;
+  namespaceSupportEnabled?: boolean;
 };
 
-export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
+export const CloudSetup = memo<CloudSetupProps>(
   ({
     newPolicy,
     onChange,
@@ -223,26 +204,22 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     defaultSetupTechnology,
     integrationToEnable,
     setIntegrationToEnable,
+    cloud,
+    cloudConnectorsEnabled,
+    namespaceSupportEnabled = false,
   }) => {
-    const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration =
       integrationToEnable &&
       SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
         ? integrationToEnable
         : undefined;
-    const isParentSecurityPosture = !integrationParam;
 
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-    const { cloud, uiSettings } = useKibana().services;
-    const cloudConnectorsEnabled =
-      uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
     const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
 
     const isServerless = !!cloud.serverless.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
-    const getIsSubscriptionValid = useIsSubscriptionStatusValid();
-    const isSubscriptionValid = !!getIsSubscriptionValid.data;
     const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
       isAgentlessEnabled,
@@ -256,47 +233,47 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
 
-    const getDefaultCloudCredentialsType = (
-      isAgentless: boolean,
-      inputType: Extract<
-        PostureInput,
-        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-      >
-    ) => {
-      const credentialsTypes: Record<
-        Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
-        {
-          [key: string]: {
-            value: string | boolean;
-            type: 'text' | 'bool';
-          };
-        }
-      > = {
-        'cloudbeat/cis_aws': getCloudDefaultAwsCredentialConfig({
-          isAgentless,
-          showCloudConnectors,
-          packageInfo,
-        }),
-        'cloudbeat/cis_gcp': {
-          'gcp.credentials.type': {
-            value: isAgentless
-              ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
-              : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
-            type: 'text',
-          },
-        },
-        'cloudbeat/cis_azure': {
-          'azure.credentials.type': {
-            value: isAgentless
-              ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
-              : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
-            type: 'text',
-          },
-        },
-      };
+    // const getDefaultCloudCredentialsType = (
+    //   isAgentless: boolean,
+    //   inputType: Extract<
+    //     PostureInput,
+    //     'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+    //   >
+    // ) => {
+    //   const credentialsTypes: Record<
+    //     Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
+    //     {
+    //       [key: string]: {
+    //         value: string | boolean;
+    //         type: 'text' | 'bool';
+    //       };
+    //     }
+    //   > = {
+    //     'cloudbeat/cis_aws': getCloudDefaultAwsCredentialConfig({
+    //       isAgentless,
+    //       showCloudConnectors,
+    //       packageInfo,
+    //     }),
+    //     'cloudbeat/cis_gcp': {
+    //       'gcp.credentials.type': {
+    //         value: isAgentless
+    //           ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
+    //           : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
+    //         type: 'text',
+    //       },
+    //     },
+    //     'cloudbeat/cis_azure': {
+    //       'azure.credentials.type': {
+    //         value: isAgentless
+    //           ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+    //           : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
+    //         type: 'text',
+    //       },
+    //     },
+    //   };
 
-      return credentialsTypes[inputType];
-    };
+    //   return credentialsTypes[inputType];
+    // };
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
@@ -355,19 +332,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
-    useEffect(() => {
-      setIsLoading(getIsSubscriptionValid.isLoading);
-    }, [getIsSubscriptionValid.isLoading]);
-
     const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
       enabled: canFetchIntegration,
     });
-
-    useEffect(() => {
-      if (!isServerless) {
-        setIsValid(isSubscriptionValid);
-      }
-    }, [isServerless, isSubscriptionValid]);
 
     useEffect(() => {
       if (isEditPage) return;
@@ -391,16 +358,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
-    useCloudFormationTemplate({
-      packageInfo,
-      updatePolicy,
-      newPolicy,
-    });
+    // useCloudFormationTemplate({
+    //   packageInfo,
+    //   updatePolicy,
+    //   newPolicy,
+    // });
 
     usePolicyTemplateInitialName({
       packagePolicyList: packagePolicyList?.items,
       isEditPage,
-      integration: integration as CloudSecurityPolicyTemplate,
+      integration,
       newPolicy,
       updatePolicy,
       setCanFetchIntegration,
@@ -416,97 +383,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       );
     }
 
-    const integrationFields = [
-      {
-        id: 'name',
-        value: newPolicy.name,
-        error: validationResults?.name || null,
-        label: (
-          <FormattedMessage
-            id="xpack.csp.fleetIntegration.integrationNameLabel"
-            defaultMessage="Name"
-          />
-        ),
-      },
-      {
-        id: 'description',
-        value: newPolicy.description || '',
-        error: validationResults?.description || null,
-        label: (
-          <FormattedMessage
-            id="xpack.csp.fleetIntegration.integrationDescriptionLabel"
-            defaultMessage="Description"
-          />
-        ),
-      },
-    ];
-
-    if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
-      return <SubscriptionNotAllowed />;
-    }
-
-    if (
-      input.type === 'cloudbeat/cis_aws' ||
-      input.type === 'cloudbeat/cis_azure' ||
-      input.type === 'cloudbeat/cis_gcp'
-    ) {
-      // If the input type is one of the cloud providers, we need to render the account type selector
-      return (
-        <>
-          {isEditPage && <EditScreenStepTitle />}
-          {isParentSecurityPosture && (
-            <>
-              <PolicyTemplateSelector
-                selectedTemplate={input.policy_template}
-                policy={newPolicy}
-                setPolicyTemplate={(template) => {
-                  setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
-                  setIntegrationToEnable?.(template);
-                }}
-                disabled={isEditPage}
-              />
-              <EuiSpacer size="l" />
-            </>
-          )}
-          <CloudSetup
-            input={input}
-            newPolicy={newPolicy}
-            onChange={onChange}
-            packageInfo={packageInfo}
-            isEditPage={isEditPage}
-            setEnabledPolicyInput={setEnabledPolicyInput}
-            setIntegrationToEnable={setIntegrationToEnable}
-            integrationFields={integrationFields}
-            validationResults={validationResults}
-            isServerless={isServerless}
-            setupTechnology={setupTechnology}
-            updateSetupTechnology={updateSetupTechnology}
-            isAgentlessEnabled={isAgentlessEnabled}
-            cloud={cloud}
-            cloudConnectorsEnabled={cloudConnectorsEnabled}
-            namespaceSupportEnabled={cloudSecurityNamespaceSupportEnabled}
-          />
-        </>
-      );
-    }
     return (
       <>
         {isEditPage && <EditScreenStepTitle />}
-        {/* Defines the enabled policy template */}
-        {isParentSecurityPosture && (
-          <>
-            <PolicyTemplateSelector
-              selectedTemplate={input.policy_template}
-              policy={newPolicy}
-              setPolicyTemplate={(template) => {
-                setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
-                setIntegrationToEnable?.(template);
-              }}
-              disabled={isEditPage}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
 
         {isEditPage && (
           <>
@@ -529,22 +408,21 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         )}
 
         {/* Shows info on the active policy template */}
-        <PolicyTemplateInfo postureType={input.policy_template} />
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.configureCspmIntegrationDescription"
+          defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
+        />
         <EuiSpacer size="l" />
         {/* Defines the single enabled input of the active policy template */}
-        {input.type === 'cloudbeat/cis_eks' || input.type === 'cloudbeat/cis_k8s' ? null : (
-          <>
-            <PolicyTemplateInputSelector
-              input={input}
-              setInput={setEnabledPolicyInput}
-              disabled={isEditPage}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
+        <PolicyTemplateInputSelector
+          input={input}
+          setInput={setEnabledPolicyInput}
+          disabled={isEditPage}
+        />
+        <EuiSpacer size="l" />
 
         {/* AWS account type selection box */}
-        {/* {input.type === 'cloudbeat/cis_aws' && (
+        {input.type === 'cloudbeat/cis_aws' && (
           <AwsAccountTypeSelect
             input={input}
             newPolicy={newPolicy}
@@ -552,9 +430,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             packageInfo={packageInfo}
             disabled={isEditPage}
           />
-        )} */}
+        )}
 
-        {/* {input.type === 'cloudbeat/cis_gcp' && (
+        {input.type === 'cloudbeat/cis_gcp' && (
           <GcpAccountTypeSelect
             input={input}
             newPolicy={newPolicy}
@@ -573,20 +451,17 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             disabled={isEditPage}
             setupTechnology={setupTechnology}
           />
-        )} */}
-
-        {input.type === 'cloudbeat/vuln_mgmt_aws' ? null : (
-          <>
-            <EuiSpacer size="l" />
-          </>
         )}
+
+        <EuiSpacer size="l" />
         <IntegrationSettings
-          fields={integrationFields}
+          newPolicy={newPolicy}
+          validationResults={validationResults}
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
 
         {/* Namespace selector */}
-        {!input.type.includes('vuln_mgmt') && (
+        {namespaceSupportEnabled && (
           <>
             <EuiSpacer size="m" />
             <EuiAccordion
@@ -624,38 +499,33 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             </EuiAccordion>
           </>
         )}
-        {shouldRenderAgentlessSelector && (
-          <>
-            <EuiSpacer size="m" />
-            <SetupTechnologySelector
-              showLimitationsMessage={!isServerless}
-              disabled={isEditPage}
-              setupTechnology={setupTechnology}
-              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
-              onSetupTechnologyChange={(value) => {
-                updateSetupTechnology(value);
-                updatePolicy(
-                  getPosturePolicy(
-                    newPolicy,
-                    input.type,
-                    getDefaultCloudCredentialsType(
-                      value === SetupTechnology.AGENTLESS,
-                      input.type as Extract<
-                        PostureInput,
-                        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                      >
-                    )
+        {/* {shouldRenderAgentlessSelector && (
+          <SetupTechnologySelector
+            showLimitationsMessage={!isServerless}
+            disabled={isEditPage}
+            setupTechnology={setupTechnology}
+            isAgentless={!!newPolicy?.supports_agentless}
+            onSetupTechnologyChange={(value) => {
+              updateSetupTechnology(value);
+              updatePolicy(
+                getPosturePolicy(
+                  newPolicy,
+                  input.type,
+                  getDefaultCloudCredentialsType(
+                    value === SetupTechnology.AGENTLESS,
+                    input.type as Extract<
+                      PostureInput,
+                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                    >
                   )
-                );
-              }}
-              showBetaBadge={false}
-              useDescribedFormGroup={false}
-            />
-          </>
-        )}
+                )
+              );
+            }}
+          />
+        )} */}
 
         {/* Defines the vars of the enabled input of the active policy template */}
-        <PolicyTemplateVarsForm
+        {/* <PolicyTemplateVarsForm
           input={input}
           newPolicy={newPolicy}
           updatePolicy={updatePolicy}
@@ -667,14 +537,14 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           isEditPage={isEditPage}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           showCloudConnectors={showCloudConnectors}
-        />
+        /> */}
         <EuiSpacer />
       </>
     );
   }
 );
 
-CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
+CloudSetup.displayName = 'CloudSetup';
 
 // eslint-disable-next-line import/no-default-export
-export { CspPolicyTemplateForm as default };
+export { CloudSetup as default };

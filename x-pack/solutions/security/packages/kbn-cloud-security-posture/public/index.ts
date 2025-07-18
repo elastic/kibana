@@ -10,6 +10,7 @@ export * from './src/constants/navigation';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
 export { encodeQuery, decodeQuery } from './src/utils/query_utils';
+export { CloudSetup } from './src/components/fleet_extensions/cloud_setup';
 export { CspEvaluationBadge } from './src/components/csp_evaluation_badge';
 export { getSeverityStatusColor, getCvsScoreColor } from './src/utils/get_finding_colors';
 export { getSeverityText } from './src/utils/get_vulnerability_text';
