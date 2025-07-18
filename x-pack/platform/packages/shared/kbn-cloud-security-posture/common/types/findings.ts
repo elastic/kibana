@@ -40,7 +40,7 @@ interface CspFindingCspm extends CspFindingBase {
   orchestrator?: never;
 }
 
-// KSPM findings contain cluster-specific fields  
+// KSPM findings contain cluster-specific fields
 // Note: cis_eks is treated as KSPM based on functional test evidence showing
 // "0 cloud accounts" when grouped by cloud account ID, indicating it uses
 // orchestrator.cluster rather than cloud fields
