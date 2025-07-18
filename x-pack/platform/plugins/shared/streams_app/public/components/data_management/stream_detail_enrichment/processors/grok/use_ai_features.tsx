@@ -12,6 +12,7 @@ import {
   useElasticLlmCalloutDismissed,
   getElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
 export function useAIFeatures() {
@@ -21,19 +22,29 @@ export function useAIFeatures() {
     },
     core,
   } = useKibana();
-  const genAiConnectors = observabilityAIAssistant.useGenAIConnectors();
+
+  const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
+
+  const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
   const license = useObservable(licensing.license$);
   const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
     ElasticLlmCalloutKey.TOUR_CALLOUT
   );
-  const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors.connectors);
 
-  if (genAiConnectors.loading) {
-    return undefined;
+  if (
+    !isAIAvailableForTier ||
+    !observabilityAIAssistant ||
+    !genAiConnectors ||
+    genAiConnectors.loading
+  ) {
+    return null;
   }
+
+  const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors.connectors);
 
   const enabled =
     observabilityAIAssistant.service.isEnabled() && !isEmpty(genAiConnectors.connectors);
+
   const couldBeEnabled = Boolean(
     license?.hasAtLeast('enterprise') && core.application.capabilities.actions?.save
   );

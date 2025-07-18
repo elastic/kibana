@@ -10,7 +10,22 @@
 type ApmPageId = 'services' | 'traces' | 'dependencies';
 type InfraPageId = 'hosts';
 type OnboardingPageId = 'onboarding';
+type AlertingPageId = 'alerts';
+type AlertDetailsPageId = 'alert_details';
+type SloPageId = 'slos';
+type SyntheticsPageId = 'synthetics';
+type RulesListPageId = 'rules_list';
+type RuleDetailsPageId = 'rule_details';
 
-export type Key = `${ApmPageId}` | `${InfraPageId}` | `${OnboardingPageId}`;
+export type Key =
+  | `${ApmPageId}`
+  | `${InfraPageId}`
+  | `${OnboardingPageId}`
+  | `${AlertingPageId}`
+  | `${AlertDetailsPageId}`
+  | `${SloPageId}`
+  | `${SyntheticsPageId}`
+  | `${RulesListPageId}`
+  | `${RuleDetailsPageId}`;
 
 export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;

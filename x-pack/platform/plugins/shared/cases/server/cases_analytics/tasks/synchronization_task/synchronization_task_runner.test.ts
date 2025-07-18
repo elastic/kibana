@@ -47,6 +47,12 @@ describe('SynchronizationTaskRunner', () => {
 
   let taskRunner: SynchronizationTaskRunner;
 
+  const analyticsConfig = {
+    index: {
+      enabled: true,
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(newAttemptTime);
@@ -87,6 +93,7 @@ describe('SynchronizationTaskRunner', () => {
       logger,
       getESClient,
       taskInstance,
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -95,8 +102,7 @@ describe('SynchronizationTaskRunner', () => {
     expect(esClient.cluster.health).toBeCalledWith({
       index: destIndex,
       wait_for_status: 'green',
-      timeout: '300ms',
-      wait_for_active_shards: 'all',
+      timeout: '30s',
     });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
     expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });
@@ -176,6 +182,7 @@ describe('SynchronizationTaskRunner', () => {
         ...taskInstance,
         state: {},
       },
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -250,6 +257,7 @@ describe('SynchronizationTaskRunner', () => {
       logger,
       getESClient,
       taskInstance,
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -273,6 +281,7 @@ describe('SynchronizationTaskRunner', () => {
       logger,
       getESClient,
       taskInstance,
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -347,6 +356,7 @@ describe('SynchronizationTaskRunner', () => {
         logger,
         getESClient,
         taskInstance,
+        analyticsConfig,
       });
 
       try {
@@ -370,6 +380,7 @@ describe('SynchronizationTaskRunner', () => {
         logger,
         getESClient,
         taskInstance,
+        analyticsConfig,
       });
 
       try {
@@ -382,6 +393,31 @@ describe('SynchronizationTaskRunner', () => {
         '[.internal.cases] Synchronization reindex failed. Error: My unrecoverable error',
         { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
       );
+    });
+  });
+
+  describe('Analytics index disabled', () => {
+    const analyticsConfigDisabled = {
+      index: {
+        enabled: false,
+      },
+    };
+
+    it('does not call the reindex API if analytics is disabled', async () => {
+      const getESClient = async () => esClient;
+
+      taskRunner = new SynchronizationTaskRunner({
+        logger,
+        getESClient,
+        taskInstance,
+        analyticsConfig: analyticsConfigDisabled,
+      });
+
+      await taskRunner.run();
+
+      expect(esClient.tasks.get).not.toBeCalled();
+      expect(esClient.cluster.health).not.toBeCalled();
+      expect(esClient.reindex).not.toBeCalled();
     });
   });
 });

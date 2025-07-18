@@ -5280,6 +5280,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.StatusCode",
+        "type": "Type",
+        "tags": [],
+        "label": "StatusCode",
+        "description": [],
+        "signature": [
+          "\"Error\" | \"Ok\" | \"Unset\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/otel/status_code.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.TELEMETRY_SDK_LANGUAGE",
         "type": "string",
         "tags": [],

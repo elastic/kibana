@@ -15,49 +15,82 @@ describe('getMessageVariables', () => {
   it('should return `context.attack.alertIds` action variable', () => {
     const variables = getMessageVariables().context;
     expect(variables).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: 'attack.alertIds' })])
+      expect.arrayContaining([{ description: expect.anything(), name: 'attack.alertIds' }])
     );
   });
 
   it('should return `context.attack.detailsMarkdown` action variable', () => {
     const variables = getMessageVariables().context;
     expect(variables).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: 'attack.detailsMarkdown' })])
+      expect.arrayContaining([
+        {
+          description: expect.anything(),
+          name: 'attack.detailsMarkdown',
+          useWithTripleBracesInTemplates: true,
+        },
+      ])
     );
   });
 
   it('should return `context.attack.summaryMarkdown` action variable', () => {
     const variables = getMessageVariables().context;
     expect(variables).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: 'attack.summaryMarkdown' })])
+      expect.arrayContaining([
+        {
+          description: expect.anything(),
+          name: 'attack.summaryMarkdown',
+          useWithTripleBracesInTemplates: true,
+        },
+      ])
     );
   });
 
   it('should return `context.attack.title` action variable', () => {
     const variables = getMessageVariables().context;
     expect(variables).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: 'attack.title' })])
+      expect.arrayContaining([{ description: expect.anything(), name: 'attack.title' }])
     );
   });
 
   it('should return `context.attack.timestamp` action variable', () => {
     const variables = getMessageVariables().context;
     expect(variables).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: 'attack.timestamp' })])
+      expect.arrayContaining([{ description: expect.anything(), name: 'attack.timestamp' }])
     );
   });
 
   it('should return `context.attack.entitySummaryMarkdown` action variable', () => {
     const variables = getMessageVariables().context;
     expect(variables).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: 'attack.entitySummaryMarkdown' })])
+      expect.arrayContaining([
+        {
+          description: expect.anything(),
+          name: 'attack.entitySummaryMarkdown',
+          useWithTripleBracesInTemplates: true,
+        },
+      ])
     );
   });
 
   it('should return `context.attack.mitreAttackTactics` action variable', () => {
     const variables = getMessageVariables().context;
     expect(variables).toEqual(
-      expect.arrayContaining([expect.objectContaining({ name: 'attack.mitreAttackTactics' })])
+      expect.arrayContaining([
+        { description: expect.anything(), name: 'attack.mitreAttackTactics' },
+      ])
+    );
+  });
+
+  it('should return `context.attack.detailsUrl` action variable', () => {
+    const variables = getMessageVariables().context;
+    expect(variables).toEqual(
+      expect.arrayContaining([
+        {
+          description: expect.anything(),
+          name: 'attack.detailsUrl',
+          useWithTripleBracesInTemplates: true,
+        },
+      ])
     );
   });
 });

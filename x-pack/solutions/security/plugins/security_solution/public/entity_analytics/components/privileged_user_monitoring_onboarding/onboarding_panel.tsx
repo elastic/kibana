@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddDataSourcePanel } from './components/add_data_source';
 import privilegedUserMonitoringOnboardingPageIllustration from '../../../common/images/information_light.png';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface PrivilegedUserMonitoringOnboardingPanelProps {
   onComplete: (userCount: number) => void;
@@ -29,6 +30,8 @@ interface PrivilegedUserMonitoringOnboardingPanelProps {
 export const PrivilegedUserMonitoringOnboardingPanel = ({
   onComplete,
 }: PrivilegedUserMonitoringOnboardingPanelProps) => {
+  const { docLinks } = useKibana().services;
+
   return (
     <EuiPanel paddingSize="none">
       <EuiPanel paddingSize="xl" color="subdued" hasShadow={false} hasBorder={false}>
@@ -84,10 +87,11 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
                         defaultMessage="Want to learn more?"
                       />
                       <EuiLink
-                        css={{ color: '#FF007F' }} // TODO DELETE THIS WHEN THE HREF LINK IS READY
                         external={true}
                         data-test-subj="learnMoreLink"
-                        href="??????" // TODO Add Link to docs
+                        href={
+                          docLinks?.links.securitySolution.entityAnalytics.privilegedUserMonitoring
+                        }
                         target="_blank"
                       >
                         <FormattedMessage

@@ -22,19 +22,19 @@ import AlertsStatusFilter from './alerts_status_filter';
 import { useAssetDetailsUrlState } from '../../asset_details/hooks/use_asset_details_url_state';
 
 interface AlertsOverviewProps {
-  assetId: string;
+  entityId: string;
   dateRange: TimeRange;
   onLoaded: (alertsCount?: AlertsCount) => void;
   onRangeSelection?: (dateRange: TimeRange) => void;
-  assetType?: InventoryItemType;
+  entityType?: InventoryItemType;
 }
 
 export const AlertsOverview = ({
-  assetId,
+  entityId,
   dateRange,
   onLoaded,
   onRangeSelection,
-  assetType,
+  entityType,
 }: AlertsOverviewProps) => {
   const { services } = useKibanaContextForPlugin();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
@@ -44,6 +44,14 @@ export const AlertsOverview = ({
   const {
     charts,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    cases,
+    settings,
   } = services;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -52,22 +60,22 @@ export const AlertsOverview = ({
     () =>
       createAlertsEsQuery({
         dateRange,
-        assetIds: [assetId],
+        entityIds: [entityId],
         status: alertStatus,
-        assetType,
+        entityType,
       }),
-    [dateRange, assetId, alertStatus, assetType]
+    [dateRange, entityId, alertStatus, entityType]
   );
 
   const alertsEsQuery = useMemo(
     () =>
       createAlertsEsQuery({
         dateRange,
-        assetIds: [assetId],
+        entityIds: [entityId],
         status: ALERT_STATUS_ALL,
-        assetType,
+        entityType,
       }),
-    [assetId, assetType, dateRange]
+    [entityId, entityType, dateRange]
   );
 
   const summaryTimeRange = useSummaryTimeRange(dateRange);
@@ -126,6 +134,16 @@ export const AlertsOverview = ({
           consumers={INFRA_ALERT_CONSUMERS}
           query={alertsEsQueryByStatus}
           initialPageSize={5}
+          services={{
+            data,
+            http,
+            notifications,
+            fieldFormats,
+            application,
+            licensing,
+            cases,
+            settings,
+          }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

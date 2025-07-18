@@ -10,13 +10,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
-import { css } from '@emotion/react';
-import { EuiComboBox } from '@elastic/eui';
-import { apiPublishesESQLVariables, type ESQLControlState } from '@kbn/esql-types';
-import { useBatchedPublishingSubjects, apiHasParentApi } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
+import { apiPublishesESQLVariables, ESQLControlState } from '@kbn/esql-types';
+import { initializeStateManager } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { OptionsListSelection } from '../../../common/options_list';
 import { ESQL_CONTROL } from '../../../common';
-import type { ESQLControlApi } from './types';
+import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
@@ -24,6 +23,9 @@ import {
   initializeDefaultControlManager,
 } from '../default_control_manager';
 import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
+import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
+import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
+import { OptionsListComponentApi } from '../data_controls/options_list_control/types';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
@@ -37,13 +39,11 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
     getDisplayName: () => displayName,
     buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
       const defaultControlManager = initializeDefaultControlManager(initialState);
-      const selections = initializeESQLControlSelections(initialState);
+      const selections = initializeESQLControlSelections(
+        initialState,
+        controlGroupApi.controlFetch$(uuid)
+      );
 
-      const closeOverlay = () => {
-        if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
-          controlGroupApi.parentApi.clearOverlays();
-        }
-      };
       const onSaveControl = (updatedState: ESQLControlState) => {
         controlGroupApi?.replacePanel(uuid, {
           panelType: 'esqlControl',
@@ -51,7 +51,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             rawState: updatedState,
           },
         });
-        closeOverlay();
       };
 
       function serializeState() {
@@ -103,7 +102,6 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
               controlType: initialState.controlType,
               esqlVariables: variablesInParent,
               onSaveControl,
-              onCancelControl: closeOverlay,
               initialState: state,
             });
           } catch (e) {
@@ -114,50 +112,56 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         serializeState,
       });
 
-      const inputCss = css`
-        .euiComboBox__inputWrap {
-          box-shadow: none;
-        }
-      `;
+      const componentStaticState = {
+        singleSelect: true,
+        exclude: false,
+        existsSelected: false,
+        requestSize: 0,
+        dataLoading: false,
+        sort: undefined,
+        runPastTimeout: false,
+        invalidSelections: new Set<OptionsListSelection>(),
+        fieldName: initialState.variableName,
+      };
+      // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
+      const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(
+        componentStaticState,
+        componentStaticState
+      );
+
+      const componentApi: OptionsListComponentApi = {
+        ...api,
+        ...selections.internalApi,
+        uuid,
+        makeSelection(key?: string) {
+          if (key) selections.internalApi.setSelectedOptions([key]);
+        },
+        // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
+        ...componentStaticStateManager.api,
+        deselectOption: () => {},
+        selectAll: () => {},
+        deselectAll: () => {},
+        loadMoreSubject: new BehaviorSubject<void>(undefined),
+        fieldFormatter: new BehaviorSubject((v: string) => v),
+      };
+
       return {
         api,
-        Component: ({ className: controlPanelClassName }) => {
-          const [availableOptions, selectedOptions] = useBatchedPublishingSubjects(
-            selections.internalApi.availableOptions$,
-            selections.internalApi.selectedOptions$
-          );
-
-          return (
-            <div className={controlPanelClassName}>
-              <EuiComboBox
-                aria-label={i18n.translate('controls.controlGroup.manageControl.esql.ariaLabel', {
-                  defaultMessage: 'ES|QL variable control',
-                })}
-                placeholder={i18n.translate(
-                  'controls.controlGroup.manageControl.esql.placeholder',
-                  {
-                    defaultMessage: 'Select a single value',
-                  }
-                )}
-                inputPopoverProps={{
-                  css: inputCss,
-                  className: 'esqlControlValuesCombobox',
-                }}
-                data-test-subj="esqlControlValuesDropdown"
-                singleSelection={{ asPlainText: true }}
-                options={availableOptions.map((option) => ({ label: option }))}
-                selectedOptions={selectedOptions.map((option) => ({ label: option }))}
-                compressed
-                fullWidth
-                isClearable={false}
-                onChange={(options) => {
-                  const selectedValues = options.map((option) => option.label);
-                  selections.internalApi.setSelectedOptions(selectedValues);
-                }}
-              />
-            </div>
-          );
-        },
+        Component: ({ className: controlPanelClassName }) => (
+          <OptionsListControlContext.Provider
+            value={{
+              componentApi,
+              displaySettings: {
+                hideActionBar: false,
+                hideExclude: true,
+                hideExists: true,
+                hideSort: true,
+              },
+            }}
+          >
+            <OptionsListControl controlPanelClassName={controlPanelClassName} />
+          </OptionsListControlContext.Provider>
+        ),
       };
     },
   };

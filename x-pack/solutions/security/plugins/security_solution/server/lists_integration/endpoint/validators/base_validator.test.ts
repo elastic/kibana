@@ -154,6 +154,8 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
   });
 
   it('should validate policy ids for by policy artifacts', async () => {
+    const getActiveSpaceMock = jest.spyOn(endpointAppContextServices, 'getActiveSpace');
+    getActiveSpaceMock.mockResolvedValue({ id: 'default', name: 'default', disabledFeatures: [] });
     packagePolicyService.getByIDs.mockResolvedValue([
       {
         id: '123',
@@ -165,6 +167,8 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
   });
 
   it('should throw if policy ids for by policy artifacts are not valid', async () => {
+    const getActiveSpaceMock = jest.spyOn(endpointAppContextServices, 'getActiveSpace');
+    getActiveSpaceMock.mockResolvedValue({ id: 'default', name: 'default', disabledFeatures: [] });
     packagePolicyService.getByIDs.mockResolvedValue([]);
 
     await expect(initValidator()._validateByPolicyItem(exceptionLikeItem)).rejects.toBeInstanceOf(

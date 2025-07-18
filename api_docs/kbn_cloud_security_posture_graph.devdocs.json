@@ -5,6 +5,55 @@
     "functions": [
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.getNodeDocumentMode",
+        "type": "Function",
+        "tags": [],
+        "label": "getNodeDocumentMode",
+        "description": [
+          "\nReturns the node document mode, or 'na' if documentsData is missing or empty.\nWhen this function returns a value other than 'na', documentsData is guaranteed to be a non-empty array."
+        ],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-graph",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+            "section": "def-public.NodeViewModel",
+            "text": "NodeViewModel"
+          },
+          ") => \"na\" | \"single-alert\" | \"single-event\" | \"single-entity\" | \"grouped-events\" | \"grouped-entities\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.getNodeDocumentMode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-graph",
+                "scope": "public",
+                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+                "section": "def-public.NodeViewModel",
+                "text": "NodeViewModel"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.Graph",
         "type": "Function",
         "tags": [
@@ -114,6 +163,55 @@
               "GraphPopoverProps"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.hasNodeDocumentsData",
+        "type": "Function",
+        "tags": [],
+        "label": "hasNodeDocumentsData",
+        "description": [
+          "\nType guard: Returns true if node.documentsData is a non-empty array.\nThis only narrows node.documentsData to a non-empty array, not to a specific document type."
+        ],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-graph",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+            "section": "def-public.NodeViewModel",
+            "text": "NodeViewModel"
+          },
+          ") => boolean"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.hasNodeDocumentsData.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-graph",
+                "scope": "public",
+                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+                "section": "def-public.NodeViewModel",
+                "text": "NodeViewModel"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -283,7 +381,7 @@
             "section": "def-public.EntityNodeViewModel",
             "text": "EntityNodeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; } & { id: string; shape: \"ellipse\" | \"rectangle\" | \"hexagon\" | \"pentagon\" | \"diamond\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
+          " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; documentsData?: Readonly<{ index?: string | undefined; } & { id: string; type: \"alert\" | \"event\"; }>[] | undefined; } & { id: string; shape: \"ellipse\" | \"rectangle\" | \"hexagon\" | \"pentagon\" | \"diamond\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
@@ -476,7 +574,7 @@
             "section": "def-public.LabelNodeViewModel",
             "text": "LabelNodeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; parentId?: string | undefined; } & { id: string; shape: \"label\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
+          " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; documentsData?: Readonly<{ index?: string | undefined; } & { id: string; type: \"alert\" | \"event\"; }>[] | undefined; parentId?: string | undefined; } & { id: string; shape: \"label\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
@@ -536,7 +634,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ", string>, \"id\" | \"data\" | \"width\" | \"height\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\"> & Required<Pick<",
+          ", string | undefined>, \"id\" | \"data\" | \"width\" | \"height\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\"> & Required<Pick<",
           "Node",
           "<",
           {
@@ -546,7 +644,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ", string>, \"type\" | \"draggable\" | \"selectable\" | \"selected\" | \"zIndex\" | \"dragging\" | \"deletable\">> & { isConnectable: boolean; positionAbsoluteX: number; positionAbsoluteY: number; }"
+          ", string | undefined>, \"type\" | \"draggable\" | \"selectable\" | \"selected\" | \"zIndex\" | \"dragging\" | \"deletable\">> & { isConnectable: boolean; positionAbsoluteX: number; positionAbsoluteY: number; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,

@@ -61,6 +61,7 @@ import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager'
 import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
+import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -137,6 +138,8 @@ export class DiscoverPlugin
         })
       );
     }
+
+    plugins.inspector.registerView(getProfilesInspectorView());
 
     const {
       setTrackedUrl,
@@ -395,12 +398,20 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
+        const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel(
           {
             panelType: SEARCH_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: { savedObjectId: savedObject.id },
-              references: savedObject.references,
+              rawState: {},
+              references: [
+                ...savedObject.references,
+                {
+                  name: SAVED_OBJECT_REF_NAME,
+                  type: SEARCH_EMBEDDABLE_TYPE,
+                  id: savedObject.id,
+                },
+              ],
             },
           },
           true

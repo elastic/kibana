@@ -1156,7 +1156,13 @@
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -1274,7 +1280,13 @@
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -1725,7 +1737,13 @@
           "; } & { uiSettings: ",
           "UiSettingsFixture",
           "; } & ",
-          "SynthtraceFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SynthtraceFixture",
+            "text": "SynthtraceFixture"
+          },
           " & { apiServices: ",
           {
             "pluginId": "@kbn/scout",
@@ -4610,7 +4628,7 @@
               "\nAllows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),\n[ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and\n[accessible name](https://w3c.github.io/accname/#dfn-accessible-name).\n\n**Usage**\n\nConsider the following DOM structure.\n\n```html\n<h3>Sign up</h3>\n<label>\n  <input type=\"checkbox\" /> Subscribe\n</label>\n<br/>\n<button>Submit</button>\n```\n\nYou can locate each element by it's implicit role:\n\n```js\nawait expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();\n\nawait page.getByRole('checkbox', { name: 'Subscribe' }).check();\n\nawait page.getByRole('button', { name: /submit/i }).click();\n```\n\n**Details**\n\nRole selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback\nabout the ARIA guidelines.\n\nMany html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)\nthat is recognized by the role selector. You can find all the\n[supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**\nduplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values."
             ],
             "signature": [
-              "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"generic\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
+              "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
@@ -4627,7 +4645,7 @@
                   "Required aria role."
                 ],
                 "signature": [
-                  "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"generic\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
+                  "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"application\" | \"form\" | \"grid\" | \"group\" | \"status\" | \"code\" | \"main\" | \"article\" | \"blockquote\" | \"button\" | \"caption\" | \"dialog\" | \"figure\" | \"img\" | \"menu\" | \"menuitem\" | \"meter\" | \"option\" | \"strong\" | \"table\" | \"time\" | \"switch\" | \"alertdialog\" | \"banner\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"directory\" | \"document\" | \"feed\" | \"gridcell\" | \"heading\" | \"listbox\" | \"listitem\" | \"marquee\" | \"math\" | \"menubar\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"tab\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
                 "deprecated": false,
@@ -8003,7 +8021,17 @@
             "label": "apmSynthtraceEsClient",
             "description": [],
             "signature": [
-              "SynthtraceFixtureEsClient<",
+              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
+              "Readable",
+              " | ",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.SynthtraceGenerator",
+                "text": "SynthtraceGenerator"
+              },
+              "<",
               {
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
@@ -8011,7 +8039,9 @@
                 "section": "def-common.ApmFields",
                 "text": "ApmFields"
               },
-              ">"
+              ">>, pipelineCallback?: ((base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
@@ -8025,7 +8055,17 @@
             "label": "infraSynthtraceEsClient",
             "description": [],
             "signature": [
-              "SynthtraceFixtureEsClient<",
+              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
+              "Readable",
+              " | ",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.SynthtraceGenerator",
+                "text": "SynthtraceGenerator"
+              },
+              "<",
               {
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
@@ -8033,31 +8073,127 @@
                 "section": "def-common.InfraDocument",
                 "text": "InfraDocument"
               },
-              ">"
+              ">>, pipelineCallback?: ((base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.SynthtraceFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "SynthtraceFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SynthtraceFixture.apmSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "apmSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
+              "Readable",
+              " | ",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.SynthtraceGenerator",
+                "text": "SynthtraceGenerator"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmFields",
+                "text": "ApmFields"
+              },
+              ">>, pipelineCallback?: ((base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutWorkerFixtures.otelSynthtraceEsClient",
+            "id": "def-common.SynthtraceFixture.infraSynthtraceEsClient",
             "type": "Object",
             "tags": [],
-            "label": "otelSynthtraceEsClient",
+            "label": "infraSynthtraceEsClient",
             "description": [],
             "signature": [
-              "SynthtraceFixtureEsClient<",
+              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
+              "Readable",
+              " | ",
               {
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
                 "docId": "kibKbnApmSynthtraceClientPluginApi",
-                "section": "def-common.ApmOtelFields",
-                "text": "ApmOtelFields"
+                "section": "def-common.SynthtraceGenerator",
+                "text": "SynthtraceGenerator"
               },
-              ">"
+              "<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.InfraDocument",
+                "text": "InfraDocument"
+              },
+              ">>, pipelineCallback?: ((base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SynthtraceFixture.logsSynthtraceEsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "logsSynthtraceEsClient",
+            "description": [],
+            "signature": [
+              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
+              "Readable",
+              " | ",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.SynthtraceGenerator",
+                "text": "SynthtraceGenerator"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.LogDocument",
+                "text": "LogDocument"
+              },
+              ">>, pipelineCallback?: ((base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/synthtrace.ts",
             "deprecated": false,
             "trackAdoption": false
           }
