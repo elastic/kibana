@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolDefinition } from '@kbn/onechat-common';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDeleteToolModal } from '../../../hooks/tools/use_delete_tools';
 import { useEsqlTools } from '../../../hooks/tools/use_tools';
 import { useToasts } from '../../../hooks/use_toasts';
@@ -29,7 +29,7 @@ import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { OnechatToolTags } from '../tags/tool_tags';
 import { OnechatCreateEsqlToolFlyout } from './create_esql_tool_flyout';
 
-const columns = ({
+const getColumns = ({
   deleteTool,
 }: {
   deleteTool: (toolId: string) => void;
@@ -136,6 +136,8 @@ export const OnechatEsqlTools: React.FC = () => {
     setIsFlyoutOpen(true);
   }, []);
 
+  const columns = useMemo(() => getColumns({ deleteTool }), [deleteTool]);
+
   const deleteEsqlToolTitleId = useGeneratedHtmlId({
     prefix: 'deleteEsqlToolTitle',
   });
@@ -186,7 +188,7 @@ export const OnechatEsqlTools: React.FC = () => {
         <EuiHorizontalRule margin="xs" />
         <EuiInMemoryTable
           loading={isLoadingTools}
-          columns={columns({ deleteTool })}
+          columns={columns}
           items={tools}
           itemId="id"
           error={errorMessage}
