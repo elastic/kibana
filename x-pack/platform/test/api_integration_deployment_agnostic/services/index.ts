@@ -32,7 +32,7 @@ export const services = {
   roleScopedSupertest: RoleScopedSupertestProvider,
   customRoleScopedSupertest: CustomRoleScopedSupertestProvider,
   // create a new deployment-agnostic service and load here
-  alertingApi: AlertingApiProvider,
+  alertingApiCommon: AlertingApiProvider,
 };
 
 export type SupertestWithRoleScopeType = SupertestWithRoleScope;
