@@ -42,11 +42,7 @@ function findPackageDir(filePath: string): string | null {
   let dir = path.dirname(path.resolve(process.cwd(), filePath));
   const root = process.cwd();
   while (dir && dir !== root) {
-    if (
-      fs.existsSync(path.join(dir, 'package.json')) ||
-      fs.existsSync(path.join(dir, 'kibana.jsonc')) ||
-      fs.existsSync(path.join(dir, 'jest.config.js'))
-    ) {
+    if (fs.existsSync(path.join(dir, 'jest.config.js'))) {
       return dir;
     }
     dir = path.dirname(dir);
