@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import {
-  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -228,7 +228,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(packageSOres.attributes.version).to.eql(newPkgVersion);
         expect(packageSOres.attributes.previous_version).to.eql(oldPkgVersion);
         const packagePolicySORes = await kibanaServer.savedObjects.find({
-          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         });
         // Cannot predict order of SO creation.
         expect(packagePolicySORes.saved_objects.map((so) => so.id).sort()).to.eql([
