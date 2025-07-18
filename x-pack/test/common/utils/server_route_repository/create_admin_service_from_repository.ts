@@ -18,8 +18,8 @@ import supertest from 'supertest';
 import {
   RoleScopedSupertestProvider,
   SupertestWithRoleScope,
-} from '../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
-import { CustomRoleScopedSupertestProvider } from '../../../api_integration/deployment_agnostic/services/custom_role_scoped_supertest';
+} from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
+import { CustomRoleScopedSupertestProvider } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/custom_role_scoped_supertest';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
   ? [TArgs] | []

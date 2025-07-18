@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
 
 import { ActionsSection } from './actions_section';
 
 describe('ActionsSection', () => {
-  const onSkipResultChange = jest.fn(() => {});
-  const onSkipModelUpdateChange = jest.fn(() => {});
+  const onSkipResultChange = jest.fn();
+  const onSkipModelUpdateChange = jest.fn();
 
   const requiredProps = {
     onSkipResultChange,
@@ -27,9 +26,9 @@ describe('ActionsSection', () => {
       actions: [],
     };
 
-    const component = shallowWithIntl(<ActionsSection {...props} />);
+    const { container } = renderWithI18n(<ActionsSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders with skip_result selected', () => {
@@ -38,13 +37,13 @@ describe('ActionsSection', () => {
       actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
     };
 
-    const component = shallowWithIntl(<ActionsSection {...props} />);
+    const { container } = renderWithI18n(<ActionsSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders with skip_result and skip_model_update selected', () => {
-    const component = shallowWithIntl(
+    const { container } = renderWithI18n(
       <ActionsSection
         actions={[ML_DETECTOR_RULE_ACTION.SKIP_RESULT, ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE]}
         onSkipResultChange={() => {}}
@@ -52,6 +51,6 @@ describe('ActionsSection', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

@@ -1,6 +1,6 @@
 # PERCENTILE
 
-The PERCENTILE function calculates the value at a specified percentile of observed values.
+The `PERCENTILE` function calculates the value at which a specified percentage of observed values occur. For example, the 95th percentile is the value greater than 95% of the observed values, while the 50th percentile corresponds to the `MEDIAN`.
 
 ## Syntax
 
@@ -8,28 +8,35 @@ The PERCENTILE function calculates the value at a specified percentile of observ
 
 ### Parameters
 
-#### number
+#### `number`
 
-The numeric expression that represents the set of values to be analyzed.
+The numeric field or expression for which the percentile is calculated.
 
-#### percentile
+#### `percentile`
 
-The percentile to compute. The value should be between 0 and 100.
+The percentile value to calculate (e.g., 0 for the minimum, 50 for the median, 100 for the maximum).
 
 ## Examples
+
+Basic Percentile Calculation
 
 ```esql
 FROM employees
 | STATS p0 = PERCENTILE(salary, 0), p50 = PERCENTILE(salary, 50), p99 = PERCENTILE(salary, 99)
 ```
 
+This example calculates the 0th percentile (minimum), 50th percentile (median), and 99th percentile of the `salary` field.
+
+Using Inline Functions
+
 ```esql
 FROM employees
 | STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)
 ```
 
+This example calculates the 80th percentile of the maximum values in a multivalued column `salary_change`. The `MV_MAX` function is used to determine the maximum value per row before applying the `PERCENTILE` function.
+
 ## Notes
 
 - PERCENTILE is usually approximate.
-
 - PERCENTILE is also non-deterministic. This means you can get slightly different results using the same data.

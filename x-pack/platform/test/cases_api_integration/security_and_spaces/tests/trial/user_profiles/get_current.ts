@@ -26,7 +26,6 @@ import {
 import { getCaseUserActions } from '../../../../common/lib/api/user_actions';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');

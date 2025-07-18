@@ -25,13 +25,18 @@ describe('deduplicateAttackDiscoveries', () => {
   const uuid1 = 'test-uuid-1';
   const uuid2 = 'test-uuid-2';
   const [attack1, attack2] = mockAttackDiscoveries;
+  const ownerInfo = {
+    id: 'test-owner-1',
+    isSchedule: false,
+  };
   const defaultProps = {
     attackDiscoveries: mockAttackDiscoveries,
     connectorId: 'test-connector-1',
     esClient: mockEsClient,
     indexPattern: '.test.alerts-*,.adhoc.alerts-*',
     logger: mockLogger,
-    ownerId: 'test-owner-1',
+    ownerInfo,
+    replacements: undefined,
     spaceId: 'test-space',
   };
 
@@ -95,7 +100,7 @@ describe('deduplicateAttackDiscoveries', () => {
     expect(result).toEqual([attack1]);
   });
 
-  it('should log when duplicates are found', async () => {
+  it('should log when duplicates are found for ad-hoc run', async () => {
     mockEsClient.search.mockResponse({
       hits: {
         hits: [{ _source: { 'kibana.alert.instance.id': uuid1 } }],
@@ -103,7 +108,32 @@ describe('deduplicateAttackDiscoveries', () => {
     } as unknown as estypes.SearchResponse);
     await deduplicateAttackDiscoveries(defaultProps);
     expect(mockLogger.info).toHaveBeenCalledWith(
-      'Found 1 duplicate alert(s), skipping report for those.'
+      'Ad-hoc Attack Discovery: Found 1 duplicate alert(s), skipping report for those.'
+    );
+    expect((mockLogger.debug as jest.Mock).mock.calls[0][0]()).toBe(
+      `Ad-hoc Attack Discovery: Duplicated alerts:\n ${JSON.stringify([uuid1].sort(), null, 2)}`
+    );
+  });
+
+  it('should log when duplicates are found for scheduled run', async () => {
+    mockEsClient.search.mockResponse({
+      hits: {
+        hits: [{ _source: { 'kibana.alert.instance.id': uuid1 } }],
+      },
+    } as unknown as estypes.SearchResponse);
+    await deduplicateAttackDiscoveries({
+      ...defaultProps,
+      ownerInfo: { ...ownerInfo, isSchedule: true },
+    });
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'Attack Discovery Schedule [test-owner-1]: Found 1 duplicate alert(s), skipping report for those.'
+    );
+    expect((mockLogger.debug as jest.Mock).mock.calls[0][0]()).toBe(
+      `Attack Discovery Schedule [test-owner-1]: Duplicated alerts:\n ${JSON.stringify(
+        [uuid1].sort(),
+        null,
+        2
+      )}`
     );
   });
 });

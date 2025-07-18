@@ -30,7 +30,6 @@ import {
 } from '../../../../../common/lib/authentication/users';
 import { assertWarningHeader } from '../../../../../common/lib/validation';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');

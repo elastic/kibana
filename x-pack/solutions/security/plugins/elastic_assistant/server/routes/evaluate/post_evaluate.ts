@@ -22,7 +22,7 @@ import {
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
   PostEvaluateResponse,
-  INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
@@ -176,8 +176,8 @@ export const postEvaluateRoute = (
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           const { featureFlags } = await context.core;
-          const inferenceChatModelEnabled = await featureFlags.getBooleanValue(
-            INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+          const inferenceChatModelDisabled = await featureFlags.getBooleanValue(
+            INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
             false
           );
 
@@ -274,7 +274,7 @@ export const postEvaluateRoute = (
               const isOpenAI = llmType === 'openai' && !isOssModel;
               const llmClass = getLlmClass(llmType);
               const createLlmInstance = async () =>
-                inferenceChatModelEnabled
+                !inferenceChatModelDisabled
                   ? inference.getChatModel({
                       request,
                       connectorId: connector.id,
@@ -420,7 +420,7 @@ export const postEvaluateRoute = (
               const agentRunnable = await agentRunnableFactory({
                 llm: chatModel,
                 llmType,
-                inferenceChatModelEnabled,
+                inferenceChatModelDisabled,
                 isOpenAI,
                 tools,
                 isStream: false,

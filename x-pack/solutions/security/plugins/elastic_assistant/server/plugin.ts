@@ -194,7 +194,7 @@ export class ElasticAssistantPlugin
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
     };
@@ -220,7 +220,7 @@ export class ElasticAssistantPlugin
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
       registerFeatures: (pluginName: string, features: Partial<AssistantFeatures>) => {
