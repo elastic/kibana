@@ -18,7 +18,7 @@ import { PrivateLocationTestService } from '../../services/synthetics_private_lo
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('CreateProjectMonitorsMultiSpace', function () {
-    this.tags(['skipCloud', 'skipMKI']);
+    this.tags(['skipCloud']);
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const testPrivateLocations = new PrivateLocationTestService(getService);

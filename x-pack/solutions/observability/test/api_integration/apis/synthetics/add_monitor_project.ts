@@ -700,11 +700,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({ monitors: [multiSpaceMonitor] });
 
-        expect([403, 404]).to.contain(resp.status);
-        expect([
-          `Kibana space does not exist, Error: Unauthorized to get ${SPACE_ID_2} space`,
-          'You do not have sufficient permissions to update monitors in all required spaces.',
-        ]).to.contain(resp.body.message);
+        expect(resp.status).to.eql(403);
+        expect(resp.body.message).to.eql(
+          'You do not have sufficient permissions to update monitors in all required spaces.'
+        );
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID_1);
         await security.user.delete(username);
@@ -762,14 +761,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({ monitors: [multiSpaceMonitor] });
 
-        expect([403, 404]).to.contain(resp.status);
-        const msg = resp.body.message || '';
-        const isPermissionError = msg.includes(
-          'You do not have sufficient permissions to update monitors in all required spaces'
+        expect(resp.status).to.eql(403);
+        expect(resp.body.message).to.eql(
+          'You do not have sufficient permissions to update monitors in all required spaces.'
         );
-        const isUnauthorizedSpaceError =
-          msg.includes('Kibana space does not exist') || msg.includes('Unauthorized to get');
-        expect(isPermissionError || isUnauthorizedSpaceError).to.be(true);
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, project, SPACE_ID_1);
         await security.user.delete(username);
