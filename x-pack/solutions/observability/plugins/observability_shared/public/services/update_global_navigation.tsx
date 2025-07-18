@@ -11,6 +11,7 @@ import {
   ApplicationStart,
   AppDeepLink,
   type PricingServiceStart,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
@@ -78,6 +79,13 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    visibleIn: someVisible ? ['sideNav', 'globalSearch', 'home', 'kibanaOverview'] : [],
+    visibleIn: someVisible
+      ? ([
+          'sideNav',
+          'home',
+          'kibanaOverview',
+          ...(isCompleteOverviewEnabled ? ['globalSearch'] : []),
+        ] as AppDeepLinkLocations[])
+      : [],
   }));
 }
