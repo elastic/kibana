@@ -63,7 +63,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
   messageVariables,
   executionMode,
 }) => {
-  const { toasts } = useKibana().notifications;
+  const { toasts } = useKibana().services.notifications;
   const isTest = executionMode === ActionConnectorMode.Test;
   const incident = useMemo(
     () =>
@@ -121,7 +121,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
 
   useEffect(() => {
     if (playbooksError) {
-      toasts.danger({ title: translations.PLAYBOOKS_ERROR, body: playbooksError.message });
+      toasts.addDanger({ title: translations.PLAYBOOKS_ERROR, text: playbooksError.message });
       setPlaybooks([]);
     } else {
       setPlaybooks(fetchedPlaybooks);
@@ -136,7 +136,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
       if (selectedPlaybook) {
         setSelectedPlaybookOption(createOption(selectedPlaybook));
       } else {
-        toasts.warning({ title: translations.PLAYBOOK_NOT_FOUND_WARNING });
+        toasts.addWarning({ title: translations.PLAYBOOK_NOT_FOUND_WARNING });
         editAction(
           'subActionParams',
           { ...incident, playbookId: undefined, createInvestigation: false },
@@ -203,6 +203,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
         helpText={translations.PLAYBOOK_HELP}
       >
         <EuiComboBox
+          isInvalid={!!errors.playbook?.length && selectedPlaybookOption !== undefined}
           aria-label={translations.PLAYBOOK_ARIA_LABEL}
           placeholder={translations.PLAYBOOK_PLACEHOLDER}
           singleSelection={{ asPlainText: true }}
