@@ -2168,10 +2168,11 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.1.0.tgz#20296c12b3f79623217699a42d500e336b7e470f"
   integrity sha512-xDTSJTkI7i9+PreDaaMU/I607aoVkWmVSJsXNj29iHhuNDhT+a2nZoE7FFVt51XaJe/LhbGM2xUaLBJeGEg92A==
 
-"@elastic/eui-amsterdam@file:./elastic-eui-106.0.0-3e7b9d781.tgz", "@elastic/eui@file:./elastic-eui-106.0.0-3e7b9d781.tgz":
+"@elastic/eui-amsterdam@file:./elastic-eui-106.0.0-fd7aec9d2-i18n.tgz", "@elastic/eui@file:./elastic-eui-106.0.0-fd7aec9d2-i18n.tgz":
   version "106.0.0"
-  resolved "file:./elastic-eui-106.0.0-3e7b9d781.tgz#4aad5ab50f225d28c5baf0a6a2fb5ffc82ad5e95"
+  resolved "file:./elastic-eui-106.0.0-fd7aec9d2-i18n.tgz#103bf56fc47ac851670c38c53dca1f54ac5cadd1"
   dependencies:
+    "@elastic/eui-theme-common" "3.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2210,6 +2211,14 @@
 "@elastic/eui-theme-borealis@file:./elastic-eui-theme-borealis-3.3.0-3e7b9d781.tgz":
   version "3.3.0"
   resolved "file:./elastic-eui-theme-borealis-3.3.0-3e7b9d781.tgz#63669b1e662bdb39c419e6df25ca0c166dee766a"
+
+"@elastic/eui-theme-common@3.0.0":
+  version "3.0.0"
+  resolved "file:./elastic-eui-theme-common-3.0.0-3e7b9d781.tgz#fe78f24ceb68ab7f527bc1cd80f2e7c913f41c2c"
+  dependencies:
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
 
 "@elastic/eui-theme-common@file:./elastic-eui-theme-common-3.0.0-fd7aec9d2.tgz":
   version "3.0.0"
