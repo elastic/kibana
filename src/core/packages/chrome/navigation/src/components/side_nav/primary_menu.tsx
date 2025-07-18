@@ -11,21 +11,25 @@ import { css } from '@emotion/react';
 import React, { forwardRef, ForwardedRef, ReactNode } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
+import { useRovingIndex } from '../../utils/use_roving_index';
+
 export interface SideNavPrimaryMenuProps {
   children: ReactNode;
   isCollapsed: boolean;
 }
 
 export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProps>(
-  ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
+  ({ children, isCollapsed }, forwardedRef: ForwardedRef<HTMLElement>): JSX.Element => {
     const { euiTheme } = useEuiTheme();
+
+    useRovingIndex(forwardedRef);
 
     return (
       <nav
         id="primary-navigation"
         // TODO: translate
         aria-label="Main navigation"
-        ref={ref}
+        ref={forwardedRef}
         css={css`
           align-items: center;
           display: flex;
