@@ -9,7 +9,7 @@ import React, { useEffect, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiPageHeader, EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { Section } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
@@ -141,9 +141,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 
   const indexManagementTabs = (
     <>
-      <EuiScreenReaderOnly>
-        <div id="live-region" aria-live="polite" aria-atomic="true"></div>
-      </EuiScreenReaderOnly>
       <EuiPageHeader
         data-test-subj="indexManagementHeaderContent"
         pageTitle={
