@@ -54,11 +54,9 @@ describe('SORT Autocomplete', () => {
   //  including after whitespace... test that replacement range gets added to all suggestions
   //  and IS NULL/IS NOT NULL scenarios
   //  and after a field name starting with an N
-  // test for suggestions right after a column name
-  //  Both after SORT and after a comma
   // test for comma replacement range after whitespace
 
-  describe('SORT <column> ...', () => {
+  describe('SORT <expression> ...', () => {
     test('suggests column', async () => {
       await sortExpectSuggestions('from a | sort ', [
         ...expectedFieldSuggestions,
@@ -68,6 +66,36 @@ describe('SORT Autocomplete', () => {
         ...expectedFieldSuggestions,
         ...expectedFunctionSuggestions,
       ]);
+      await sortExpectSuggestions('from a | sort keywordField, ', [
+        ...expectedFieldSuggestions,
+        ...expectedFunctionSuggestions,
+      ]);
+      await sortExpectSuggestions('from a | sort keywordField, doubl', [
+        ...expectedFieldSuggestions,
+        ...expectedFunctionSuggestions,
+      ]);
+    });
+
+    it('suggests modifers after complete column name', async () => {
+      await sortExpectSuggestions('from a | sort keywordField', [
+        'keywordField, ',
+        'keywordField | ',
+        'keywordField ASC',
+        'keywordField DESC',
+        'keywordField NULLS FIRST',
+        'keywordField NULLS LAST',
+      ]);
+      await sortExpectSuggestions('from a | sort keywordField, doubleField', [
+        'doubleField, ',
+        'doubleField | ',
+        'doubleField ASC',
+        'doubleField DESC',
+        'doubleField NULLS FIRST',
+        'doubleField NULLS LAST',
+      ]);
+    });
+
+    it('suggests modifers and expression operators after column + whitespace', async () => {
       await sortExpectSuggestions('from a | sort keywordField ', [
         ', ',
         '| ',
@@ -77,23 +105,15 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ...expressionOperatorSuggestions,
       ]);
-    });
-    it('suggests subsequent column after comma', async () => {
-      await sortExpectSuggestions('from a | sort keywordField, ', [
-        ...expectedFieldSuggestions,
-        ...expectedFunctionSuggestions,
-      ]);
-      await sortExpectSuggestions('from a | sort keywordField, doubl', [
-        ...expectedFieldSuggestions,
-        ...expectedFunctionSuggestions,
-      ]);
-      await sortExpectSuggestions('from a | sort keywordField, doubleField', [
-        'doubleField, ',
-        'doubleField | ',
-        'doubleField ASC',
-        'doubleField DESC',
-        'doubleField NULLS FIRST',
-        'doubleField NULLS LAST',
+
+      await sortExpectSuggestions('from a | sort doubleField ASC, keywordField ', [
+        ', ',
+        '| ',
+        'ASC',
+        'DESC',
+        'NULLS FIRST',
+        'NULLS LAST',
+        ...expressionOperatorSuggestions,
       ]);
     });
   });
