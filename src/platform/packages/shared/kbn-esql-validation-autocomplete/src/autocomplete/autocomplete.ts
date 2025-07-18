@@ -17,7 +17,8 @@ import {
   getCommandAutocompleteDefinitions,
   ESQL_VARIABLES_PREFIX,
 } from '@kbn/esql-ast';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
+import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import {
   getControlSuggestionIfSupported,
   buildFieldsDefinitionsWithMetadata,
@@ -30,13 +31,12 @@ import {
   ISuggestionItem,
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { ESQLVariableType } from '@kbn/esql-types';
-import type { EditorContext } from './types';
 import { isSourceCommand } from '../shared/helpers';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import { getAstContext } from '../shared/context';
 import { getFieldsByTypeHelper, getSourcesHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
-import { getQueryForFields, correctQuerySyntax } from './helper';
+import { getQueryForFields } from './helper';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
 import { getCommandContext } from './get_command_context';
 
@@ -45,7 +45,6 @@ type GetFieldsMapFn = () => Promise<Map<string, ESQLFieldWithMetadata>>;
 export async function suggest(
   fullText: string,
   offset: number,
-  context: EditorContext,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
   // Partition out to inner ast / ast context for the latest command
