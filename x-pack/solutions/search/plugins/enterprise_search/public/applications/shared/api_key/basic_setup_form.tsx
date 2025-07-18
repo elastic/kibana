@@ -57,6 +57,7 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
         })}
       >
         <EuiFieldText
+          isInvalid={!name}
           fullWidth
           isLoading={isLoading}
           value={name}
