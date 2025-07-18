@@ -35,3 +35,9 @@ export interface NavigationStructure {
   primaryItems: MenuItem[];
   footerItems: MenuItem[];
 }
+
+export interface MenuCalculations {
+  availableHeight: number;
+  itemGap: number;
+  maxVisibleItems: number;
+}
