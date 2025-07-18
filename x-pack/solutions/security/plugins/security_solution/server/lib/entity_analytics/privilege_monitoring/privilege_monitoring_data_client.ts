@@ -23,6 +23,7 @@ import Papa from 'papaparse';
 import { Readable } from 'stream';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { CreateMonitoringEntitySource } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { defaultMonitoringUsersIndex } from '../../../../common/constants';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
@@ -123,7 +124,7 @@ export class PrivilegeMonitoringDataClient {
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
 
-    await this.createDefaultIndexSourceIfNotExists();
+    await this.createOrUpdateDefaultDataSource();
 
     try {
       this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
@@ -726,26 +727,32 @@ export class PrivilegeMonitoringDataClient {
     });
   }
 
-  private createDefaultIndexSourceIfNotExists = async () => {
+  private createOrUpdateDefaultDataSource = async () => {
     const DEFAULT_INDEX_SOURCE_NAME = 'default-monitoring-index';
+
+    const defaultIndexSource: CreateMonitoringEntitySource = {
+      type: 'index',
+      managed: true,
+      indexPattern: defaultMonitoringUsersIndex,
+      name: DEFAULT_INDEX_SOURCE_NAME,
+    };
 
     const existingSources = await this.monitoringIndexSourceClient.find({
       name: DEFAULT_INDEX_SOURCE_NAME,
     });
 
     if (existingSources.saved_objects.length > 0) {
-      this.log('info', 'Default index source already exists, skipping creation.');
-      return existingSources.saved_objects[0].attributes;
+      this.log('info', 'Default index source already exists, updating it.');
+      const existingSource = existingSources.saved_objects[0];
+      await this.monitoringIndexSourceClient.update({
+        id: existingSource.id,
+        ...defaultIndexSource,
+      });
     }
 
     this.log('info', 'Creating default index source for privilege monitoring.');
 
-    const indexSource = this.monitoringIndexSourceClient.create({
-      type: 'index',
-      managed: true,
-      indexPattern: defaultMonitoringUsersIndex,
-      name: DEFAULT_INDEX_SOURCE_NAME,
-    });
+    const indexSource = this.monitoringIndexSourceClient.create(defaultIndexSource);
 
     this.log(
       'debug',
