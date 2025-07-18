@@ -14,9 +14,9 @@ import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
 import type { RuleFormData } from '@kbn/response-ops-rule-form';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { RuleTypeRegistryContract, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
-import type { ServiceDependencies } from './rule_flyout_component';
 import { getRuleFlyoutComponent } from './rule_flyout_component';
 import { buildAdditionalQuery } from './build_additional_query';
+import type { ServiceDependencies } from './rule_flyout_component';
 
 export const loadAlertRuleFlyoutContent = async ({
   embeddable,
@@ -108,7 +108,7 @@ export const loadAlertRuleFlyoutContent = async ({
     };
   }
 
-  const ruleFlyoutComponent = getRuleFlyoutComponent(
+  const ruleFlyoutComponent = await getRuleFlyoutComponent(
     startDependencies,
     ruleTypeRegistry,
     actionTypeRegistry,
