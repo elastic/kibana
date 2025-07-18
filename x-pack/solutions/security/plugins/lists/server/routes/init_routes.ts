@@ -24,6 +24,7 @@ import {
   deleteListRoute,
   duplicateExceptionsRoute,
   exportExceptionListRoute,
+  exportExceptionListsRoute,
   exportListItemRoute,
   findEndpointListItemRoute,
   findExceptionListItemRoute,
@@ -84,6 +85,7 @@ export const initRoutes = (
 
   // exceptions import/export
   exportExceptionListRoute(router);
+  exportExceptionListsRoute(router);
   importExceptionsRoute(router, config);
 
   // exception lists
