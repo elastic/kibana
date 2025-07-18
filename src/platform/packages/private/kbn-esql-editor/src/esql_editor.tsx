@@ -16,8 +16,8 @@ import {
   EuiToolTip,
   EuiButton,
   type EuiButtonColor,
-  EuiFormLabel,
   useGeneratedHtmlId,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -111,7 +111,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   esqlVariables,
   expandToFitQueryOnMount,
   dataErrorsControl,
-  label,
+  formLabel,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -164,7 +164,6 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -422,6 +421,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const onEditorFocus = useCallback(() => {
     setIsCodeEditorExpandedFocused(true);
     showSuggestionsIfEmptyQuery();
+    setLabelInFocus(true);
   }, [showSuggestionsIfEmptyQuery]);
 
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
@@ -447,10 +447,18 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart, boolean]) => ({
-      timestamp: Date.now(),
-      result: getESQLSources(...args),
-    }));
+    const fn = memoize(
+      (
+        ...args: [
+          DataViewsPublicPluginStart,
+          CoreStart,
+          (() => Promise<ILicense | undefined>) | undefined
+        ]
+      ) => ({
+        timestamp: Date.now(),
+        result: getESQLSources(...args),
+      })
+    );
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
@@ -459,9 +467,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, fixedQuery);
-        const ccrFeature = license?.getFeature('ccr');
-        const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
-        const sources = await memoizedSources(dataViews, core, areRemoteIndicesAvailable).result;
+        const getLicense = kibana.services?.esql?.getLicense;
+        const sources = await memoizedSources(dataViews, core, getLicense).result;
         return sources;
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -543,7 +550,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     kibana.services?.esql,
     dataSourcesCache,
     fixedQuery,
-    license,
     memoizedSources,
     dataViews,
     core,
@@ -617,20 +623,6 @@ export const ESQLEditor = memo(function ESQLEditor({
       setQueryToTheCache();
     }
   }, [isLoading, isQueryLoading, parseMessages, code]);
-
-  useEffect(() => {
-    async function fetchLicense() {
-      try {
-        const ls = await kibana.services?.esql?.getLicense();
-        if (!isEqual(license, ls)) {
-          setLicense(ls);
-        }
-      } catch (error) {
-        // failed to fetch
-      }
-    }
-    fetchLicense();
-  }, [kibana.services?.esql, license]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
@@ -778,49 +770,62 @@ export const ESQLEditor = memo(function ESQLEditor({
     [isDisabled]
   );
 
-  const formId = useGeneratedHtmlId({ prefix: 'esql-editor' });
+  const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
+  const [labelInFocus, setLabelInFocus] = useState(false);
   const editorPanel = (
     <>
-      {Boolean(editorIsInline) && !hideRunQueryButton && (
+      {Boolean(editorIsInline) && (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
           justifyContent="spaceBetween"
-          alignItems="center"
+          alignItems={hideRunQueryButton ? 'flexEnd' : 'center'}
           css={css`
-            padding: ${theme.euiTheme.size.s};
+            padding: ${theme.euiTheme.size.s} 0;
           `}
         >
           <EuiFlexItem grow={false}>
-            {label && (
+            {formLabel && (
               <EuiFormLabel
-                onClick={() => document.getElementById(formId)?.focus()}
-                htmlFor={formId}
+                isFocused={labelInFocus && !isDisabled}
+                isDisabled={isDisabled}
+                aria-invalid={Boolean(editorMessages.errors.length)}
+                isInvalid={Boolean(editorMessages.errors.length)}
+                onClick={() => {
+                  // HTML `for` doesn't correctly transfer click behavior to the code editor hint, so apply it manually
+                  const editorElement = document.getElementById(htmlId);
+                  if (editorElement) {
+                    editorElement.click();
+                  }
+                }}
+                htmlFor={htmlId}
               >
-                {label}
+                {formLabel}
               </EuiFormLabel>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={i18n.translate('esqlEditor.query.runQuery', {
-                defaultMessage: 'Run query',
-              })}
-            >
-              <EuiButton
-                color={queryRunButtonProperties.color as EuiButtonColor}
-                onClick={onQuerySubmit}
-                iconType={queryRunButtonProperties.iconType}
-                size="s"
-                isLoading={isLoading && !allowQueryCancellation}
-                isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                data-test-subj="ESQLEditor-run-query-button"
-                aria-label={queryRunButtonProperties.label}
+            {!hideRunQueryButton && (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('esqlEditor.query.runQuery', {
+                  defaultMessage: 'Run query',
+                })}
               >
-                {queryRunButtonProperties.label}
-              </EuiButton>
-            </EuiToolTip>
+                <EuiButton
+                  color={queryRunButtonProperties.color as EuiButtonColor}
+                  onClick={onQuerySubmit}
+                  iconType={queryRunButtonProperties.iconType}
+                  size="s"
+                  isLoading={isLoading && !allowQueryCancellation}
+                  isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+                  data-test-subj="ESQLEditor-run-query-button"
+                  aria-label={queryRunButtonProperties.label}
+                >
+                  {queryRunButtonProperties.label}
+                </EuiButton>
+              </EuiToolTip>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -849,8 +854,8 @@ export const ESQLEditor = memo(function ESQLEditor({
             >
               <div css={styles.editorContainer}>
                 <CodeEditor
-                  htmlId={formId}
-                  aria-label={label}
+                  htmlId={htmlId}
+                  aria-label={formLabel}
                   languageId={ESQL_LANG_ID}
                   classNameCss={getEditorOverwrites(theme)}
                   value={code}
@@ -866,6 +871,8 @@ export const ESQLEditor = memo(function ESQLEditor({
                     },
                   }}
                   onChange={onQueryUpdate}
+                  onFocus={() => setLabelInFocus(true)}
+                  onBlur={() => setLabelInFocus(false)}
                   editorDidMount={(editor) => {
                     editor1.current = editor;
                     const model = editor.getModel();

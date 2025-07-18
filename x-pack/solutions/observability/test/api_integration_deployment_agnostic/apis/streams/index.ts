@@ -27,5 +27,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./migration_on_read'));
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./conflicts'));
+    loadTestFile(require.resolve('./permissions'));
   });
 }

@@ -94,7 +94,6 @@ const services = {
   uiSettings: {
     get: () => true,
   },
-  savedObjects: action('savedObjects'),
   notifications: action('notifications'),
   http: {
     basePath: {

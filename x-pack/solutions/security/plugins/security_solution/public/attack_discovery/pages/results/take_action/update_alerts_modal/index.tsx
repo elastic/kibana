@@ -28,7 +28,13 @@ interface Props {
   attackDiscoveriesCount: number;
   onCancel: () => void;
   onClose: () => void;
-  onConfirm: (updateAlerts: boolean) => void;
+  onConfirm: ({
+    updateAlerts,
+    workflowStatus,
+  }: {
+    updateAlerts: boolean;
+    workflowStatus: 'open' | 'acknowledged' | 'closed';
+  }) => Promise<void>;
   workflowStatus: 'open' | 'acknowledged' | 'closed';
 }
 
@@ -45,12 +51,12 @@ const UpdateAlertsModalComponent: React.FC<Props> = ({
   const titleId = useGeneratedHtmlId();
 
   const markDiscoveriesOnly = useCallback(() => {
-    onConfirm(false);
-  }, [onConfirm]);
+    onConfirm({ updateAlerts: false, workflowStatus });
+  }, [onConfirm, workflowStatus]);
 
   const markAlertsAndDiscoveries = useCallback(() => {
-    onConfirm(true);
-  }, [onConfirm]);
+    onConfirm({ updateAlerts: true, workflowStatus });
+  }, [onConfirm, workflowStatus]);
 
   const confirmButtons = useMemo(
     () => (

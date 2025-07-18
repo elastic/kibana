@@ -21,9 +21,10 @@ import {
 import { DiamondHoverShape, DiamondShape } from './shapes/diamond_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { Label } from './label';
+import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 
-const NODE_WIDTH = 99;
-const NODE_HEIGHT = 98;
+const NODE_SHAPE_WIDTH = 99;
+const NODE_SHAPE_HEIGHT = 98;
 
 export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
@@ -34,9 +35,9 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
       <NodeShapeContainer>
         {interactive && (
           <NodeShapeOnHoverSvg
-            width={NODE_WIDTH}
-            height={NODE_HEIGHT}
-            viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
+            width={NODE_SHAPE_WIDTH}
+            height={NODE_SHAPE_HEIGHT}
+            viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -63,7 +64,7 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
               color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
               x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize}px`}
-              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2 - 4}px`}
+              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
             />
           </>
         )}
