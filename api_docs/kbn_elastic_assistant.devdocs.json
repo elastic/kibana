@@ -616,7 +616,7 @@
         "label": "getNewSelectedPromptContext",
         "description": [],
         "signature": [
-          "({\n  anonymizationFields,\n  promptContext,\n}: { anonymizationFields?: { page: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; total: number; } | undefined; promptContext: ",
+          "({\n  anonymizationFields,\n  promptContext,\n}: { anonymizationFields?: { page: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; total: number; all?: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined; aggregations?: { field_status?: { buckets?: { allowed?: { doc_count: number; } | undefined; anonymized?: { doc_count: number; } | undefined; denied?: { doc_count: number; } | undefined; } | undefined; } | undefined; } | undefined; } | undefined; promptContext: ",
           {
             "pluginId": "@kbn/elastic-assistant",
             "scope": "public",
@@ -651,7 +651,7 @@
                 "label": "anonymizationFields",
                 "description": [],
                 "signature": [
-                  "{ page: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; total: number; } | undefined"
+                  "{ page: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; total: number; all?: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined; aggregations?: { field_status?: { buckets?: { allowed?: { doc_count: number; } | undefined; anonymized?: { doc_count: number; } | undefined; denied?: { doc_count: number; } | undefined; } | undefined; } | undefined; } | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/data_anonymization/get_new_selected_prompt_context/index.ts",
                 "deprecated": false,
@@ -1198,13 +1198,14 @@
         "type": "Function",
         "tags": [],
         "label": "useFetchAnonymizationFields",
-        "description": [],
+        "description": [
+          "\nAPI call for fetching anonymization fields for current spaceId\n"
+        ],
         "signature": [
-          "(payload?: ",
+          "(params?: ",
           "UseFetchAnonymizationFieldsParams",
           " | undefined) => ",
-          "DefinedUseQueryResult",
-          "<{ page: number; data: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; perPage: number; total: number; }, unknown>"
+          "FetchAnonymizationFields"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields.ts",
         "deprecated": false,
@@ -1215,7 +1216,7 @@
             "id": "def-public.useFetchAnonymizationFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "payload",
+            "label": "params",
             "description": [],
             "signature": [
               "UseFetchAnonymizationFieldsParams",
@@ -1227,7 +1228,9 @@
             "isRequired": false
           }
         ],
-        "returnComment": [],
+        "returnComment": [
+          "hook for getting the status of the anonymization fields"
+        ],
         "initialIsOpen": false
       },
       {

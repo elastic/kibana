@@ -7,6 +7,7 @@
 
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
+import { diff } from 'jest-diff';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -237,6 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
               'actions_log_management_all',
               'actions_log_management_read',
               'all',
+              'global_artifact_management_all',
               'blocklist_all',
               'blocklist_read',
               'endpoint_list_all',
@@ -434,13 +436,22 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200)
           .expect((res: any) => {
+            let errorPointerMessage = '';
             // when comparing privileges, the order of the privileges doesn't matter.
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
             const success = isEqualWith(res.body, expected, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
-                return isEqual(value.sort(), other.sort());
+                const isArrayEqual = isEqual(value.sort(), other.sort());
+
+                if (!isArrayEqual) {
+                  errorPointerMessage = `Received value for property [${String(
+                    key
+                  )}] does not match expected value:\n${diff(other, value)}`;
+                }
+
+                return isArrayEqual;
               }
 
               // Lodash types aren't correct, `undefined` should be supported as a return value here and it
@@ -450,7 +461,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             if (!success) {
               throw new Error(
-                `Expected ${util.inspect(res.body)} to equal ${util.inspect(expected)}`
+                `${errorPointerMessage ? errorPointerMessage + '\n\n' : ''}Expected ${util.inspect(
+                  res.body
+                )} to equal ${util.inspect(expected)}`
               );
             }
           })
