@@ -2279,6 +2279,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test_serverless/api_integration/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/chat/ @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
+/x-pack/platform/test/onechat_api_integration @elastic/search-kibana @elastic/workchat-eng
+
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
