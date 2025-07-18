@@ -194,6 +194,9 @@ export const getLinksEmbeddableFactory = () => {
                     });
                     return;
                   }
+                  
+                  defaultDescription$.next(newState.description);
+                  defaultTitle$.next(newState.title);
                   layout$.next(newState.layout);
                   resolvedLinks$.next(newState.links ?? []);
                 },

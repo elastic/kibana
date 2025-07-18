@@ -36,11 +36,6 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
       onTitleDuplicate,
       isTitleDuplicateConfirmed,
     }: OnSaveProps): Promise<SaveResult> => {
-      const stateFromSaveModal = {
-        title: newTitle,
-        description: newDescription,
-      };
-
       if (
         !(await checkForDuplicateTitle({
           title: newTitle,
@@ -56,7 +51,8 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
       const newAttributes = {
         ...newState,
         links: serializeResolvedLinks(newState.links ?? []),
-        ...stateFromSaveModal,
+        title: newTitle,
+        description: newDescription,
       };
 
       try {
@@ -67,6 +63,8 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
         });
         resolve({
           ...newState,
+          title: newTitle,
+          description: newDescription,
           savedObjectId: id,
         });
         return { id };
