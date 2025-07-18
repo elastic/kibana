@@ -11,7 +11,6 @@ export {
   ESQLVariableType,
   EsqlControlType,
   VariableNamePrefix,
-  type ESQLLicenseType,
   type ControlWidthOptions,
   type ESQLControlState,
   type ESQLControlVariable,
@@ -36,5 +35,7 @@ export {
   type InferenceEndpointsAutocompleteResult,
   type InferenceEndpointAutocompleteItem,
 } from './src/inference_endpoint_autocomplete_types';
+
+export type { ESQLLicenseType, ESQLSignatureLicenseType, ESQLLicenseResult } from './src/license';
 
 export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';

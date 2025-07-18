@@ -103,7 +103,6 @@ export const filterFunctionDefinitions = (
     if (!!hasMinimumLicenseRequired && hasRestrictedSignature) {
       const availableSignatures = signatures.filter((signature) => {
         if (!signature.license) return true;
-        // signature.license is capitalized, so we need to lowercase it to match the license type passed to the function
         return hasMinimumLicenseRequired
           ? hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType)
           : false;

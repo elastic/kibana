@@ -52,7 +52,6 @@ import {
   getEditorOverwrites,
   type MonacoMessage,
   filterDataErrors,
-  getESQLLicense,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
@@ -544,7 +543,17 @@ export const ESQLEditor = memo(function ESQLEditor({
         };
       },
       getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
-      getLicense: () => getESQLLicense(kibana.services?.esql?.getLicense),
+      getLicense: async () => {
+        const ls = await kibana.services?.esql?.getLicense();
+
+        if (!ls) {
+          return undefined;
+        }
+
+        return {
+          hasAtLeast: ls.hasAtLeast.bind(ls), // keep the original context this
+        };
+      },
     };
     return callbacks;
   }, [

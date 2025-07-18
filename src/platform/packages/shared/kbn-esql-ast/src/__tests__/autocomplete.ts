@@ -13,6 +13,7 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { uniq } from 'lodash';
+import { ESQLLicenseType } from '@kbn/esql-types';
 import {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
@@ -130,7 +131,8 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  license: string = 'platinum'
+  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
+    license === 'platinum'
 ) {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -161,7 +163,9 @@ export function getFunctionSignaturesByReturnType(
       if (hasRestrictedSignature) {
         const availableSignatures = signatures.filter((signature) => {
           if (!signature.license) return true;
-          return license === (signature.license.toLocaleLowerCase() as string);
+          return hasMinimumLicenseRequired(
+            signature.license.toLocaleLowerCase() as ESQLLicenseType
+          );
         });
 
         if (availableSignatures.length === 0) {

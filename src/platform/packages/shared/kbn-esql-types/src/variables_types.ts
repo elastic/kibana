@@ -44,7 +44,6 @@ export interface PublishesESQLVariable {
 }
 
 export type ControlWidthOptions = 'small' | 'medium' | 'large';
-export type ESQLLicenseType = 'basic' | 'standard' | 'gold' | 'platinum' | 'enterprise' | 'trial';
 
 export interface ESQLControlState {
   grow?: boolean;

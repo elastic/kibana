@@ -16,11 +16,9 @@ import type {
   IndexAutocompleteItem,
   RecommendedQuery,
   RecommendedField,
-} from '@kbn/esql-types';
-import {
-  ESQLLicenseResult,
   InferenceEndpointsAutocompleteResult,
-} from '@kbn/esql-types/src/inference_endpoint_autocomplete_types';
+  ESQLLicenseResult,
+} from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;

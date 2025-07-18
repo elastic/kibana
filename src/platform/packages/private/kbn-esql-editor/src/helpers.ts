@@ -278,20 +278,6 @@ export const getESQLSources = async (
   return [...localIndices, ...remoteIndices, ...integrations];
 };
 
-export const getESQLLicense = async (
-  getLicense: (() => Promise<ILicense | undefined>) | undefined
-) => {
-  const ls = await getLicense?.();
-
-  if (!ls) {
-    return undefined;
-  }
-
-  return {
-    hasAtLeast: ls.hasAtLeast.bind(ls), // keep the original context this
-  };
-};
-
 export const onMouseDownResizeHandler = (
   mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent,
   height: number,

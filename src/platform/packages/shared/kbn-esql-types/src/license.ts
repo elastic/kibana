@@ -6,13 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
-export interface InferenceEndpointsAutocompleteResult {
-  inferenceEndpoints: InferenceEndpointAutocompleteItem[];
-}
+export type ESQLLicenseType = 'basic' | 'gold' | 'platinum' | 'enterprise' | 'trial';
+export type ESQLSignatureLicenseType = 'PLATINUM'; // TODO: add new license types as needed
 
-export interface InferenceEndpointAutocompleteItem {
-  inference_id: string;
-  task_type: InferenceTaskType;
+export interface ESQLLicenseResult {
+  hasAtLeast: (minimumLicenseRequired: ESQLLicenseType) => boolean;
 }
