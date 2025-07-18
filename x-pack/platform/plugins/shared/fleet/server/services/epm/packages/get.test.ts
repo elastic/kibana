@@ -40,6 +40,8 @@ import {
   getPackageUsageStats,
 } from './get';
 
+const mockPackagePolicySavedObjectType = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
+
 jest.mock('../registry');
 jest.mock('../../settings');
 jest.mock('../../audit_logging');
@@ -52,6 +54,11 @@ jest.mock('../archive/storage', () => {
       .mockImplementation((...args) =>
         jest.requireActual('../archive/storage').getEsPackage(...args)
       ),
+  };
+});
+jest.mock('../../package_policy', () => {
+  return {
+    getPackagePolicySavedObjectType: () => mockPackagePolicySavedObjectType,
   };
 });
 

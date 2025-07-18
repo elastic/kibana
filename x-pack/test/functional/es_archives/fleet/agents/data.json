@@ -160,3 +160,59 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agent-policies:policy1",
+    "index": ".kibana_ingest",
+    "source": {
+      "type": "fleet-agent-policies",
+      "namespaces": ["default"],
+      "fleet-agent-policies": {
+        "name": "Test policy",
+        "namespace": "default",
+        "description": "Policy 1",
+        "status": "active",
+        "is_default": true,
+        "is_protected": false,
+        "supports_agentless": false,
+        "monitoring_enabled": [
+          "logs",
+          "metrics"
+        ],
+        "revision": 2,
+        "updated_at": "2020-05-07T19:34:42.533Z",
+        "updated_by": "system"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agent-policies:policy2",
+    "index": ".kibana_ingest",
+    "source": {
+      "type": "fleet-agent-policies",
+      "namespaces": ["default"],
+      "fleet-agent-policies": {
+        "name": "Test policy 2",
+        "namespace": "default",
+        "description": "Policy 2",
+        "status": "active",
+        "is_default": true,
+        "is_protected": false,
+        "supports_agentless": false,
+        "monitoring_enabled": [
+          "logs",
+          "metrics"
+        ],
+        "revision": 2,
+        "updated_at": "2020-05-07T19:34:42.533Z",
+        "updated_by": "system"
+      }
+    }
+  }
+}

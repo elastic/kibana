@@ -27,16 +27,16 @@ import { MaintenanceWindowsPageProvider } from '@kbn/test-suites-xpack-platform/
 import { BannersPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/banners_page';
 import { NavigationalSearchPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/navigational_search';
 import { TagManagementPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/tag_management_page';
-import { ApiKeysPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/api_keys_page';
 import { CrossClusterReplicationPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/cross_cluster_replication_page';
 import { GrokDebuggerPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/grok_debugger_page';
 import { LicenseManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/license_management_page';
+import { ApiKeysPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/api_keys_page';
+import { IndexManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_management_page';
 import { AssetDetailsProvider } from './asset_details';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { GeoFileUploadPageObject } from './geo_file_upload';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
-import { IndexManagementPageProvider } from './index_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
@@ -52,13 +52,7 @@ import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchQueryRulesPageProvider } from './search_query_rules_page';
-import { SearchClassicNavigationProvider } from './search_classic_navigation';
 import { SearchStartProvider } from './search_start';
-import { SearchApiKeysProvider } from './search_api_keys';
-import { SearchIndexDetailPageProvider } from './search_index_details_page';
-import { SearchOverviewProvider } from './search_overview_page';
-import { SearchHomePageProvider } from './search_homepage';
-import { SearchNavigationProvider } from './search_navigation';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -94,13 +88,7 @@ export const pageObjects = {
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
-  searchApiKeys: SearchApiKeysProvider,
-  searchClassicNavigation: SearchClassicNavigationProvider,
   searchStart: SearchStartProvider,
-  searchIndexDetailsPage: SearchIndexDetailPageProvider,
-  searchNavigation: SearchNavigationProvider,
-  searchOverview: SearchOverviewProvider,
-  searchHomePage: SearchHomePageProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
