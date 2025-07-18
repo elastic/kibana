@@ -107,7 +107,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Custom threshold - Rule visibility - consumer observability', () => {
-      const consumer = 'observability';
+      // Custom roles not yet supported in MKI
+      this.tags(['failsOnMKI']);
+
       it('creates rule successfully', async () => {
         const createdRule = await alertingApi.createRule({
           roleAuthc,
