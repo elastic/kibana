@@ -48,13 +48,6 @@ import type {
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
-import { Navigation } from '@kbn/core-chrome-navigation';
-import {
-  LOGO,
-  PRIMARY_MENU_ITEMS,
-  PRIMARY_MENU_FOOTER_ITEMS,
-} from '@kbn/core-chrome-navigation/src/constants/observability';
-
 import { Logger } from '@kbn/logging';
 import { isPrinting$ } from './utils/printing_observable';
 import { DocTitleService } from './doc_title';
@@ -67,6 +60,7 @@ import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
 import { handleSystemColorModeChange } from './handle_system_colormode_change';
 import { AppMenuBar } from './ui/project/app_menu';
+import { Navigation as SideNavV2Navigation } from './ui/sidenav_v2/navigation';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -531,6 +525,7 @@ export class ChromeService {
         prependBasePath={http.basePath.prepend}
         isSideNavCollapsed$={this.isSideNavCollapsed$}
         toggleSideNav={setIsSideNavCollapsed}
+        includeSideNavCollapseButton={!includeSideNavigation}
       >
         {includeSideNavigation ? getProjectSideNavComponent() : null}
       </ProjectHeader>
@@ -622,34 +617,14 @@ export class ChromeService {
       });
     };
 
-    const getProjectSideNavigationV2Component = ({
-      setWidth,
-    }: {
-      setWidth: (width: number) => void;
-    }) => {
-      const demoItems = {
-        primaryItems: PRIMARY_MENU_ITEMS,
-        footerItems: PRIMARY_MENU_FOOTER_ITEMS,
-      };
-
-      const Component = () => {
-        const isCollapsed = useObservable(
-          this.isSideNavCollapsed$,
-          this.isSideNavCollapsed$.getValue()
-        );
-
-        return (
-          <Navigation
-            isCollapsed={isCollapsed}
-            items={demoItems}
-            logoLabel={LOGO.label}
-            logoType={LOGO.logoType}
-            setWidth={setWidth}
-          />
-        );
-      };
-
-      return <Component />;
+    const getProjectSideNavV2Component = ({ setWidth }: { setWidth: (width: number) => void }) => {
+      return (
+        <SideNavV2Navigation
+          isSideNavCollapsed$={this.isSideNavCollapsed$}
+          setWidth={setWidth}
+          history={application.history}
+        />
+      );
     };
 
     return {
@@ -658,7 +633,7 @@ export class ChromeService {
       getLegacyHeaderComponentForFixedLayout,
       getClassicHeaderComponentForGridLayout,
       getProjectHeaderComponentForGridLayout,
-      getProjectSideNavigationV2Component,
+      getProjectSideNavV2Component,
       getHeaderBanner: () => {
         return (
           <HeaderTopBanner

@@ -67,7 +67,7 @@ export interface InternalChromeStart extends ChromeStart {
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectSideNavigationV2Component(opts: { setWidth: (width: number) => void }): JSX.Element;
+  getProjectSideNavV2Component(opts: { setWidth: (width: number) => void }): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header banner UI
