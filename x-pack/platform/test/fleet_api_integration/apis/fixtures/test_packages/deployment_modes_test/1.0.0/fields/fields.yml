@@ -1,0 +1,12 @@
+- name: '@timestamp'
+  type: date
+  description: Event timestamp
+- name: message
+  type: keyword
+  description: Log message
+- name: input.type
+  type: keyword
+  description: Type of input
+- name: agent.name
+  type: keyword
+  description: Agent name
