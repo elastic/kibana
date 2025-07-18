@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ReactNode } from 'react';
 import { GuideId } from '../../../..';
@@ -32,46 +30,6 @@ export interface GuideCardConstants {
 }
 
 export const guideCards: GuideCardConstants[] = [
-  {
-    solution: 'search',
-    icon: 'database',
-    title: (
-      <FormattedMessage
-        id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-        defaultMessage="Search across databases {lineBreak} and business systems"
-        values={{
-          lineBreak: <br />,
-        }}
-      />
-    ),
-    guideId: 'databaseSearch',
-    telemetryId: 'onboarding--search--database',
-    order: 1,
-  },
-  {
-    solution: 'search',
-    icon: 'vector',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title', {
-      defaultMessage: 'Set up vector search',
-    }),
-    navigateTo: {
-      appId: 'enterpriseSearchVectorSearch',
-    },
-    telemetryId: 'onboarding--search--vector',
-    order: 4,
-  },
-  {
-    solution: 'search',
-    icon: 'magnifyWithPlus',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.aiSearch.title', {
-      defaultMessage: 'Build an AI-powered search experience',
-    }),
-    navigateTo: {
-      appId: 'enterpriseSearchAISearch',
-    },
-    telemetryId: 'onboarding--search--ai',
-    order: 7,
-  },
   {
     solution: 'security',
     icon: 'securitySignal',
