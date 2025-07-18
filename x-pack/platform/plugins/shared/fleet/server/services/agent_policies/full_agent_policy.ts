@@ -148,62 +148,40 @@ export async function getFullAgentPolicy(
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
-  const inputs = (
-    await storedPackagePoliciesToAgentInputs(
-      agentPolicy.package_policies as PackagePolicy[],
-      packageInfoCache,
-      getOutputIdForAgentPolicy(dataOutput),
-      agentPolicy.namespace,
-      agentPolicy.global_data_tags
-    )
-  ).map((input) => {
-    // fix output id for default output
-    const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
-    if (output) {
-      input.use_output = getOutputIdForAgentPolicy(output);
-    }
-    if (input.type === 'fleet-server' && fleetServerHost) {
-      const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
-      if (sslInputConfig) {
-        input = {
-          ...input,
-          ...sslInputConfig,
-          ...(bootstrapOutputConfig
-            ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
-            : {}),
-        };
+  const agentInputs = await storedPackagePoliciesToAgentInputs(
+    agentPolicy.package_policies as PackagePolicy[],
+    packageInfoCache,
+    getOutputIdForAgentPolicy(dataOutput),
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags
+  );
+
+  const otelcolConfig = generateOtelcolConfig(agentInputs);
+
+  const inputs = agentInputs
+    // filter out the otelcol inputs, they will be added at the root of the policy
+    .filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE)
+    .map((input) => {
+      // fix output id for default output
+      const output = outputs.find(({ id: outputId }) => input.use_output === outputId);
+      if (output) {
+        input.use_output = getOutputIdForAgentPolicy(output);
       }
-    } else if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-      // Generate OTel Collector input structure
-      const otelInputs: OTelCollectorConfig[] = (input?.otelcol_config ?? []).flatMap((config) => {
-        return {
-          ...(config?.compiled_stream?.receivers
-            ? { receivers: config?.compiled_stream?.receivers }
-            : {}),
-          ...(config?.compiled_stream?.service
-            ? { service: config?.compiled_stream?.service }
-            : {}),
-          ...(config?.compiled_stream?.extensions
-            ? { service: config?.compiled_stream?.extensions }
-            : {}),
-          ...(config?.compiled_stream?.processors
-            ? { service: config?.compiled_stream?.processors }
-            : {}),
-        };
-      });
-      input = {
-        id: input.id,
-        type: input.type,
-        name: input.name,
-        revision: input.revision,
-        use_output: input.use_output,
-        package_policy_id: input.package_policy_id,
-        data_stream: input.data_stream,
-        ...(otelInputs && otelInputs?.length > 0 ? otelInputs : {}),
-      };
-    }
-    return input;
-  });
+      if (input.type === 'fleet-server' && fleetServerHost) {
+        const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
+        if (sslInputConfig) {
+          input = {
+            ...input,
+            ...sslInputConfig,
+            ...(bootstrapOutputConfig
+              ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
+              : {}),
+          };
+        }
+      }
+      return input;
+    });
+
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
     return acc;
@@ -234,6 +212,7 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs,
+    ...otelcolConfig,
     secret_references: [
       ...outputSecretReferences,
       ...fleetserverHostSecretReferences,
@@ -888,4 +867,34 @@ export function getBinarySourceSettings(
     };
   }
   return config;
+}
+
+function generateOtelcolConfig(inputs: FullAgentPolicyInput[]) {
+  const otelConfig = inputs.flatMap((input) => {
+    if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+      // Generate OTel Collector input structure
+      const otelInputs: OTelCollectorConfig[] = (input?.otelcol_config ?? [])
+        .filter((config) => config.enabled === true)
+        .flatMap((config) => {
+          return {
+            ...(config?.compiled_stream?.receivers
+              ? { receivers: config?.compiled_stream?.receivers }
+              : {}),
+            ...(config?.compiled_stream?.service
+              ? { service: config?.compiled_stream?.service }
+              : {}),
+            ...(config?.compiled_stream?.extensions
+              ? { service: config?.compiled_stream?.extensions }
+              : {}),
+            ...(config?.compiled_stream?.processors
+              ? { service: config?.compiled_stream?.processors }
+              : {}),
+          };
+        });
+
+      return otelInputs;
+    }
+  });
+
+  return otelConfig.length > 0 ? otelConfig[0] : {};
 }

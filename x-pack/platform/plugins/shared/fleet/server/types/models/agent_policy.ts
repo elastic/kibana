@@ -341,7 +341,16 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
   totalAgents: schema.number(),
 });
 
+// todo: improve schema
+export const OtelCollectorConfigSchema = {
+  extensions: schema.maybe(schema.any()),
+  receivers: schema.maybe(schema.any()),
+  processors: schema.maybe(schema.any()),
+  service: schema.maybe(schema.any()),
+};
+
 export const FullAgentPolicyResponseSchema = schema.object({
+  ...OtelCollectorConfigSchema,
   id: schema.string(),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
   outputs: schema
@@ -534,3 +543,4 @@ export const GetAgentPolicyOutputsResponseSchema = schema.object({
 export const GetListAgentPolicyOutputsResponseSchema = schema.object({
   items: schema.arrayOf(OutputsForAgentPolicySchema),
 });
+
