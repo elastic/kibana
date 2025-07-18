@@ -98,6 +98,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
     isError: privilegedUsersError,
   } = useQuery({
     queryKey: ['privileged-users-table', privilegedUsersTableQuery, filterQueryWithoutTimerange],
+    enabled: toggleStatus,
     queryFn: async () => {
       return getESQLResults({
         esqlQuery: privilegedUsersTableQuery,
@@ -143,6 +144,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   } = useAssetCriticalityFetchList({
     idField: 'user.name',
     idValues: records.map((user) => user['user.name']),
+    skip: !toggleStatus,
   });
 
   const assetCriticalityRecords =
