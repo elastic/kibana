@@ -26,7 +26,7 @@ const projectDefaultRoles = new Map<string, Role>([
   ['chat', 'developer'], // TODO: double check if it's really 'developer'
 ]);
 
-const projectTypesWithCustomRolesEnabled = ['es', 'security'];
+const projectTypesWithCustomRolesEnabled = ['es', 'security', 'oblt'];
 
 const getDefaultServerlessRole = (projectType: string) => {
   if (projectDefaultRoles.has(projectType)) {
@@ -45,13 +45,13 @@ export class ServerlessAuthProvider implements AuthProvider {
     const options = getopts(config.get('kbnTestServer.serverArgs'), {
       boolean: ['xpack.security.roleManagementEnabled'],
       default: {
-        'xpack.security.roleManagementEnabled': false,
+        'xpack.security.roleManagementEnabled': true, // defaults to true if undefined
       },
     });
     this.projectType = options.serverless as ServerlessProjectType;
 
-    // Indicates whether role management was explicitly enabled using
-    // the `--xpack.security.roleManagementEnabled=true` flag.
+    // Indicates whether role management was not explicitly overridden using
+    // the `--xpack.security.roleManagementEnabled=false` flag.
     this.roleManagementEnabled = options['xpack.security.roleManagementEnabled'];
 
     if (!isServerlessProjectType(this.projectType)) {
