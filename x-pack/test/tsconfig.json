@@ -84,7 +84,6 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-provider-plugin",
-    "@kbn/logging",
     "@kbn/response-ops-rule-params",
     "@kbn/ml-string-hash",
     "@kbn/uptime-plugin",
