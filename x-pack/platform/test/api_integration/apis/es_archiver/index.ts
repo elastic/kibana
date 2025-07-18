@@ -15,10 +15,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('esArchiver', function () {
     beforeEach(async () => {
-      // const indexExistsResponse = await es.indices.exists({
-      //   index: 'myfakeindex-3',
-      // });
-      // logger.info('index exists', indexExistsResponse);
+      const indexExistsResponse = await es.indices.exists({
+        index: 'myfakeindex-3',
+      });
+      logger.info('index exists', indexExistsResponse);
+
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
       );
