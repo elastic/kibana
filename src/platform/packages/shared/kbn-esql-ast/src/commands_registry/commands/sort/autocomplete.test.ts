@@ -12,6 +12,7 @@ import {
   expectSuggestions,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
+  suggest,
 } from '../../../__tests__/autocomplete';
 import { ICommandCallbacks, Location } from '../../types';
 
@@ -115,6 +116,17 @@ describe('SORT Autocomplete', () => {
         'NULLS LAST',
         ...expressionOperatorSuggestions,
       ]);
+    });
+
+    it('suggests within functions', async () => {
+      const suggestions = await suggest(
+        'FROM a | SORT TRIM(',
+        undefined,
+        'sort',
+        undefined,
+        autocomplete
+      );
+      expect(suggestions).not.toHaveLength(0);
     });
   });
 
@@ -224,12 +236,18 @@ describe('SORT Autocomplete', () => {
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField NULLS FI', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
     });
 
@@ -239,12 +257,18 @@ describe('SORT Autocomplete', () => {
         'DESC',
         'NULLS LAST',
         'NULLS FIRST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField NULLS LAS', [
         'ASC',
         'DESC',
         'NULLS LAST',
         'NULLS FIRST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
     });
 

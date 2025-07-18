@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import {
   columnExists as _columnExists,
   getFragmentData,
@@ -41,6 +42,16 @@ export async function autocomplete(
   }
   const innerText = query.substring(0, cursorPosition);
   const prependSpace = (s: ISuggestionItem) => ({ ...s, text: ' ' + s.text });
+
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    innerText,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (functionsSpecificSuggestions) {
+    return functionsSpecificSuggestions;
+  }
 
   const commandText = innerText.slice(command.location.min);
 
