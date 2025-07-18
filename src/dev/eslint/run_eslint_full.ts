@@ -9,7 +9,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
 const batchSize = 250;
@@ -83,13 +83,13 @@ function getLintableFileBatches() {
 }
 
 async function lintFileBatch({
-  batch,
-  bail,
-  idx,
-  eslintArgs,
-  batchCount,
-  log,
-}: {
+                               batch,
+                               bail,
+                               idx,
+                               eslintArgs,
+                               batchCount,
+                               log,
+                             }: {
   batch: string[];
   bail: boolean;
   idx: number;
@@ -106,6 +106,7 @@ async function lintFileBatch({
     env: {
       // Disable CI stats for individual runs, to avoid overloading ci-stats
       CI_STATS_DISABLED: 'true',
+      NODE_OPTIONS: '--max-old-space-size=8192',
     },
     reject: bail, // Don't throw on non-zero exit code
   });
