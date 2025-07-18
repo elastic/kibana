@@ -89,6 +89,7 @@
     "@kbn/content-management-plugin",
     "@kbn/esql-types",
     "@kbn/elastic-assistant-common",
+    "@kbn/ebt-tools",
     "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
