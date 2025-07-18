@@ -64,7 +64,6 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
 
   const mockedContext = createAppRootMockRenderer();
   const { coreStart, depsStart, queryClient, startServices } = mockedContext;
-  // @ts-expect-error TS2589
   const store = createFleetContextReduxStore({
     coreStart,
     depsStart,
