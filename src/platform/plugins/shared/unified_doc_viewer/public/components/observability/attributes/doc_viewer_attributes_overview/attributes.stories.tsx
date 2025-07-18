@@ -10,8 +10,8 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { Meta, StoryObj } from '@storybook/react';
 import AttributesOverview from '.';
-import basicFixture from './__fixtures__/basic.json';
-import redisSpanFixture from './__fixtures__/redis_span.json';
+import basicFixture from '../../../../../__fixtures__/attributes_basic.json';
+import redisSpanFixture from '../../../../../__fixtures__/attributes_redis_span.json';
 
 const meta: Meta<typeof AttributesOverview> = {
   title: 'Attributes',

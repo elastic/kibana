@@ -9,7 +9,7 @@
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { Meta, StoryObj } from '@storybook/react';
-import httpServerOtelFixture from './__fixtures__/http_server_otel.json';
+import httpServerOtelFixture from '../../../../../__fixtures__/transaction_http_server_otel.json';
 import { TransactionOverview } from './transaction_overview';
 
 const meta = {

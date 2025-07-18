@@ -9,9 +9,9 @@
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { Meta, StoryObj } from '@storybook/react';
-import minimalAPMFixture from './__fixtures__/apm/minimal.json';
-import minimalOtelFixture from './__fixtures__/otel/minimal.json';
-import redisClientOtelFixture from './__fixtures__/otel/redis_client_processed.json';
+import minimalAPMFixture from '../../../../../__fixtures__/span_apm_minimal.json';
+import minimalOtelFixture from '../../../../../__fixtures__/span_otel_minimal.json';
+import redisClientOtelFixture from '../../../../../__fixtures__/span_otel_redis_client.json';
 import { SpanOverview } from './span_overview';
 
 const meta = {

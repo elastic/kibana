@@ -9,7 +9,7 @@
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { Meta, StoryObj } from '@storybook/react';
-import otelExampleFixture from './__fixtures__/otel_example.json';
+import otelExampleFixture from '../../../__fixtures__/logs_otel_example.json';
 import { LogsOverview } from './logs_overview';
 
 const meta: Meta<typeof LogsOverview> = {
