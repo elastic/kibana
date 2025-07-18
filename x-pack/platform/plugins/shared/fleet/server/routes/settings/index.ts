@@ -48,6 +48,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           );
         },
         summary: `Get space settings`,
+        options: {
+          availability: {
+            since: '9.1.0',
+            stability: 'stable',
+          },
+        },
       })
       .addVersion(
         {
@@ -73,6 +79,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           },
         },
         summary: `Create space settings`,
+        options: {
+          availability: {
+            since: '9.1.0',
+            stability: 'stable',
+          },
+        },
       })
       .addVersion(
         {
