@@ -30,7 +30,8 @@ async function getFileContent(path: string, ref: string) {
     throw new Error(`Expected file at ${path}`);
   }
 
-  const content = Buffer.from(response.data.content as string, 'base64').toString('utf8');
+  // @ts-ignore ts-node doesn't infer the type of response.data.content
+  const content = Buffer.from(response.data.content, 'base64').toString('utf8');
 
   return JSON.parse(content);
 }
