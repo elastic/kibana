@@ -40,14 +40,32 @@ export async function deleteIndex(options: {
     return resp.statusCode === 404 ? indices : Object.keys(resp.body);
   };
 
+  const checkIndicesExist = async (indicesToDelete: string[]) => {
+    const resp = await client.indices.exists(
+      {
+        index: indicesToDelete,
+      },
+      {
+        ignore: [404],
+        headers: ES_CLIENT_HEADERS,
+        meta: true,
+      }
+    );
+
+    log.info('indices exists', resp.body);
+  };
+
   try {
     const indicesToDelete = await getIndicesToDelete();
+    await checkIndicesExist(indicesToDelete);
+    log.info('deleting indices', indicesToDelete);
     await client.indices.delete(
       { index: indicesToDelete },
       {
         headers: ES_CLIENT_HEADERS,
       }
     );
+    await checkIndicesExist(indicesToDelete);
     for (const index of indices) {
       stats.deletedIndex(index);
     }
