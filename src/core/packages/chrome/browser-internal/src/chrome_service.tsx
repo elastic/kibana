@@ -617,11 +617,10 @@ export class ChromeService {
       });
     };
 
-    const getProjectSideNavV2Component = ({ setWidth }: { setWidth: (width: number) => void }) => {
+    const getProjectSideNavV2Component = () => {
       return (
         <SideNavV2Navigation
           isSideNavCollapsed$={this.isSideNavCollapsed$}
-          setWidth={setWidth}
           history={application.history}
         />
       );
