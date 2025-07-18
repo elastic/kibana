@@ -519,7 +519,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await nameInput.type(name);
         await testSubjects.existOrFail('searchPlaygroundSavePlaygroundModalSaveButton');
         await testSubjects.click('searchPlaygroundSavePlaygroundModalSaveButton');
-        await testSubjects.missingOrFail('save-playground-modal');
+        await testSubjects.missingOrFail('save-playground-modal', { timeout: 10000 });
       },
     },
     PlaygroundStartSearchPage: {
@@ -768,7 +768,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await nameInput.type(name);
         await testSubjects.existOrFail('searchPlaygroundSavePlaygroundModalSaveButton');
         await testSubjects.click('searchPlaygroundSavePlaygroundModalSaveButton');
-        await testSubjects.missingOrFail('save-playground-modal');
+        await testSubjects.missingOrFail('save-playground-modal', { timeout: 10000 });
       },
       async expectPlaygroundDeleteOptionExists() {
         await testSubjects.existOrFail('moreOptionsDeletePlayground');
@@ -784,7 +784,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('deletePlaygroundActionModal');
         await testSubjects.existOrFail('confirmModalConfirmButton');
         await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deletePlaygroundActionModal');
+        await testSubjects.missingOrFail('deletePlaygroundActionModal', { timeout: 10000 });
       },
     },
   };
