@@ -409,7 +409,7 @@ describe('AssetInventoryDataClient', () => {
         {
           id: 'asset-inventory-default',
           title: '.entities.*.latest.security_*_default',
-          name: 'Asset Inventory Data View - default ',
+          name: 'Asset Inventory Data View - default',
           namespaces: ['default'],
           allowNoIndex: true,
           timeFieldName: '@timestamp',
@@ -481,7 +481,7 @@ describe('AssetInventoryDataClient', () => {
         {
           id: 'asset-inventory-custom-space',
           title: '.entities.*.latest.security_*_custom-space',
-          name: 'Asset Inventory Data View - custom-space ',
+          name: 'Asset Inventory Data View - custom-space',
           namespaces: ['custom-space'],
           allowNoIndex: true,
           timeFieldName: '@timestamp',
