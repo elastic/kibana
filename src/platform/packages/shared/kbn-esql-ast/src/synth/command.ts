@@ -8,7 +8,7 @@
  */
 
 import { ParseOptions, Parser } from '../parser';
-import { makeSynthNode, createSynthMethod } from './helpers';
+import { createTag, makeSynthNode } from './tag';
 import type { SynthGenerator } from './types';
 import type { ESQLCommand } from '../types';
 
@@ -29,4 +29,9 @@ const generator: SynthGenerator<ESQLCommand> = (
   return command;
 };
 
-export const cmd = createSynthMethod<ESQLCommand>(generator);
+export const command = createTag<ESQLCommand>(generator);
+
+/**
+ * Short 3-letter alias for DX convenience.
+ */
+export const cmd = command;
