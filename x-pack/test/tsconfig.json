@@ -62,8 +62,6 @@
     "@kbn/visualizations-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/apm-synthtrace-client",
-    "@kbn/security-api-integration-helpers",
-    "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/server-route-repository",
     "@kbn/core-http-common",
