@@ -148,6 +148,5 @@
     "@kbn/sse-utils-server",
     "@kbn/inference-common",
     "@kbn/rule-registry-plugin",
-    "@kbn/test-suites-xpack-platform"
   ]
 }
