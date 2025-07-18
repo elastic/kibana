@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
+
+import { useHoverTimeout } from './use_hover_timeout';
 
 const HOVER_DELAY = 100;
 
@@ -21,32 +23,6 @@ export const useClickToggle = () => {
   const clearClickOpened = useCallback(() => setIsOpenedByClick(false), []);
 
   return { isOpenedByClick, setClickOpened, clearClickOpened };
-};
-
-/**
- * Hook for managing hover timeouts
- */
-const useHoverTimeout = () => {
-  const timeoutRef = useRef<number | null>(null);
-
-  const clearTimeout = useCallback(() => {
-    if (timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  }, []);
-
-  const setTimeout = useCallback(
-    (callback: () => void, delay: number) => {
-      clearTimeout();
-      timeoutRef.current = window.setTimeout(callback, delay);
-    },
-    [clearTimeout]
-  );
-
-  useEffect(() => clearTimeout, [clearTimeout]);
-
-  return { setTimeout, clearTimeout };
 };
 
 /**
