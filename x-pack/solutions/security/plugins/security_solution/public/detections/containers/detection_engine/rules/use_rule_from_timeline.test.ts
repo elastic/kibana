@@ -17,11 +17,11 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import type { TimelineModel } from '../../../..';
 import type { ResolveTimelineResponse } from '../../../../../common/api/timeline';
-import { useDataView } from '@kbn/security-solution-plugin/public/data_view_manager/hooks/use_data_view';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import {
   getMockDataView,
   getMockDataViewWithMatchedIndices,
-} from '@kbn/security-solution-plugin/public/data_view_manager/mocks/mock_data_view';
+} from '../../../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/utils/global_query_string/helpers');
