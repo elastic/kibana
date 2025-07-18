@@ -1313,7 +1313,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 # Global Experience
 
 ### Reporting
-/x-pack/test/functional/apps/dashboard/reporting/ @elastic/response-ops
+/x-pack/platform/test/functional/apps/dashboard/reporting/ @elastic/response-ops
 /x-pack/test/functional/apps/reporting/ @elastic/response-ops
 /x-pack/platform/test/functional/apps/reporting_management/ @elastic/response-ops
 /x-pack/platform/test/examples/screenshotting/ @elastic/response-ops
@@ -1655,7 +1655,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/functional/fixtures/es_archiver/dashboard @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
 /src/platform/test/accessibility/apps/dashboard.ts @elastic/kibana-presentation
 /src/platform/test/accessibility/apps/filter_panel.ts @elastic/kibana-presentation
-/x-pack/test/functional/apps/dashboard @elastic/kibana-presentation
+/x-pack/platform/test/functional/apps/dashboard @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/maps.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_panel_options.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_links.ts  @elastic/kibana-presentation
