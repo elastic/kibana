@@ -8,7 +8,9 @@
  */
 
 import React, { createContext, useMemo } from 'react';
+import { isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, map, merge } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
 import { EuiListGroup, EuiPanel, UseEuiTheme } from '@elastic/eui';
 
 import { PanelIncompatibleError, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -102,7 +104,22 @@ export const getLinksEmbeddableFactory = () => {
           return {
             ...titleComparators,
             layout: isByReference ? 'skip' : 'referenceEquality',
-            links: isByReference ? 'skip' : 'deepEquality',
+            links: isByReference
+              ? 'skip'
+              : (aLinks, bLinks) => {
+                  if (aLinks?.length !== bLinks?.length) {
+                    return false;
+                  }
+
+                  const hasLinkDifference = (aLinks ?? []).some((linkFromA, index) => {
+                    const linkFromB = bLinks?.[index];
+                    return !deepEqual(
+                      omitBy(linkFromA, isUndefined),
+                      omitBy(linkFromB, isUndefined)
+                    );
+                  });
+                  return !hasLinkDifference;
+                },
             savedObjectId: 'skip',
           };
         },
