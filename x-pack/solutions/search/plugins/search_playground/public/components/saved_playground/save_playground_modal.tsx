@@ -87,7 +87,7 @@ export const SavePlaygroundModal = ({
               defaultMessage: 'Playground saved',
             }),
             text: i18n.translate('xpack.searchPlayground.savedPlayground.saveSuccess.text', {
-              defaultMessage: "'{name}' was saved.",
+              defaultMessage: '{name} was saved.',
               values: {
                 name: newPlayground.name,
               },
