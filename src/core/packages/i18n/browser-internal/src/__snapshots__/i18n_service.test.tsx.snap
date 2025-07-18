@@ -125,7 +125,6 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiFlyoutCloseButton.ariaLabel\\": \\"Close this dialog\\",
     \\"euiFlyout.screenReaderModalDialog\\": \\"You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.\\",
     \\"euiFlyout.screenReaderNonModalDialog\\": \\"You are in a non-modal dialog. To close the dialog, press Escape.\\",
-    \\"euiFlyout.screenReaderFixedHeaders\\": \\"You can still continue tabbing through the page headers in addition to the dialog.\\",
     \\"euiForm.addressFormErrors\\": \\"Please address the highlighted errors.\\",
     \\"euiFormControlLayoutClearButton.label\\": \\"Clear input\\",
     \\"euiFormControlLayoutDelimited.delimiterLabel\\": \\"to\\",
@@ -296,7 +295,8 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiSaturation.roleDescription\\": \\"HSV color mode saturation and value 2-axis slider.\\",
     \\"euiHue.ariaValueText\\": \\"Hue\\",
     \\"euiHue.ariaRoleDescription\\": \\"Hue slider\\",
-    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\"
+    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\",
+    \\"euiFlyout.screenReaderFocusTrapShards\\": \\"You can still continue tabbing through other global page landmarks.\\"
   }
 }"
 `;
