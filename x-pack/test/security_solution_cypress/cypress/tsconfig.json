@@ -19,7 +19,6 @@
     },
     "@kbn/rison",
     "@kbn/datemath",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/alerting-plugin",
     "@kbn/cases-plugin",
     "@kbn/data-plugin",
