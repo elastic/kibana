@@ -359,27 +359,9 @@ export const getDefaultGcpHiddenVars = (
  * Input vars that are hidden from the user
  */
 export const getPostureInputHiddenVars = (
-  inputType: PostureInput,
-  packageInfo: PackageInfo,
-  setupTechnology: SetupTechnology,
-  showCloudConnectors: boolean
+  inputType: PostureInput
 ): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
-    case 'cloudbeat/cis_aws':
-      return getCloudDefaultAwsCredentialConfig({
-        isAgentless: setupTechnology === SetupTechnology.AGENTLESS,
-        packageInfo,
-        showCloudConnectors,
-      });
-    case 'cloudbeat/cis_azure':
-      return {
-        'azure.credentials.type': {
-          value: getDefaultAzureCredentialsType(packageInfo, setupTechnology),
-          type: 'text',
-        },
-      };
-    case 'cloudbeat/cis_gcp':
-      return getDefaultGcpHiddenVars(packageInfo, setupTechnology);
     case 'cloudbeat/cis_eks':
       return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP, type: 'text' } };
     default:

@@ -27,13 +27,13 @@ import {
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { useAwsCredentialsForm } from './hooks';
-import { AWS_ORGANIZATION_ACCOUNT } from '../policy_template_form';
-import { AwsCredentialsType } from '../../../../common/types_old';
+import { AWS_ORGANIZATION_ACCOUNT } from '../constants';
+import { AwsCredentialsType } from '../types';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-} from '../../test_subjects';
+} from '../test_subjects';
 
 interface AWSSetupInfoContentProps {
   info: ReactNode;
@@ -93,6 +93,7 @@ export interface AwsFormProps {
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
   showCloudConnectors: boolean;
+  cloud: CloudSetup | undefined;
 }
 
 const CloudFormationSetup = ({

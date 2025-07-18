@@ -15,16 +15,14 @@ import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
 
 import {
-  getTemplateUrlFromPackageInfo,
-  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-} from '../../../common/utils/get_template_url_package_info';
-import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import {
+  AWS_CREDENTIALS_TYPE,
   CLOUD_CREDENTIALS_PACKAGE_VERSION,
   ORGANIZATION_ACCOUNT,
   SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-} from '../../../../common/constants';
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+  cspIntegrationDocsNavigation,
+} from '../constants';
 import {
   getAgentlessCredentialsType,
   getAwsAgentlessFormOptions,
@@ -34,6 +32,7 @@ import {
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
 import {
+  getTemplateUrlFromPackageInfo,
   getAwsCredentialsType,
   getCloudConnectorRemoteRoleTemplate,
   getCloudCredentialVarsConfig,
@@ -45,11 +44,9 @@ import {
   AWSSetupInfoContent,
   AwsCredentialTypeSelector,
   ReadDocumentation,
-  AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form';
 
-import { useKibana } from '../../../common/hooks/use_kibana';
-import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from '../../test_subjects';
+import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from '../test_subjects';
 
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
@@ -93,8 +90,8 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           id="xpack.csp.agentlessForm.cloudFormation.steps.credentials"
           defaultMessage="Copy {accessKeyId} and {secretAccessKey} then paste the credentials below"
           values={{
-            accessKeyId: <strong>Access Key Id</strong>,
-            secretAccessKey: <strong>Secret Access Key</strong>,
+            accessKeyId: <strong>{'Access Key Id'}</strong>,
+            secretAccessKey: <strong>{'Secret Access Key'}</strong>,
           }}
         />
       ),
@@ -126,8 +123,8 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           id="xpack.csp.agentlessForm.cloudFormation.steps.credentials"
           defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
           values={{
-            role: <strong>Role ARN</strong>,
-            external_id: <strong> External ID</strong>,
+            role: <strong>{'Role ARN'}</strong>,
+            external_id: <strong>{'External ID'}</strong>,
           }}
         />
       ),
@@ -146,7 +143,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
                 id="xpack.csp.agentlessForm.cloudFormation.guide.steps.organizationLogin"
                 defaultMessage="Log in as an {admin} in the management account of the AWS Organization you want to onboard"
                 values={{
-                  admin: <strong>admin</strong>,
+                  admin: <strong>{'admin'}</strong>,
                 }}
               />
             </li>
@@ -156,7 +153,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
                 id="xpack.csp.agentlessForm.cloudFormation.guide.steps.singleLogin"
                 defaultMessage="Log in as an {admin} in the AWS account you want to onboard"
                 values={{
-                  admin: <strong>admin</strong>,
+                  admin: <strong>{'admin'}</strong>,
                 }}
               />
             </li>
@@ -167,7 +164,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
               id="xpack.csp.agentlessForm.cloudFormation.guide.steps.launch"
               defaultMessage="Click the {launchCloudFormation} button below."
               values={{
-                launchCloudFormation: <strong>Launch CloudFormation</strong>,
+                launchCloudFormation: <strong>{'Launch CloudFormation'}</strong>,
               }}
             />
           </li>
@@ -177,7 +174,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
               id="xpack.csp.agentlessForm.cloudFormation.steps.region"
               defaultMessage="(Optional) Change the {amazonRegion} in the upper right corner to the region you want to deploy your stack to"
               values={{
-                amazonRegion: <strong>AWS region</strong>,
+                amazonRegion: <strong>{'AWS region'}</strong>,
               }}
             />
           </li>
@@ -212,7 +209,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
               id="xpack.csp.agentlessForm.cloudFormation.steps.create"
               defaultMessage="Click {createStack}."
               values={{
-                createStack: <strong>Create stack</strong>,
+                createStack: <strong>{'Create stack'}</strong>,
               }}
             />
           </li>
@@ -222,7 +219,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
               id="xpack.csp.agentlessForm.cloudFormation.steps.stackStatus"
               defaultMessage="Once  stack status is {createComplete} then click the Outputs tab"
               values={{
-                createComplete: <strong>CREATE_COMPLETE</strong>,
+                createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
               }}
             />
           </li>
@@ -244,9 +241,8 @@ export const AwsCredentialsFormAgentless = ({
   setupTechnology,
   hasInvalidRequiredVars,
   showCloudConnectors,
+  cloud,
 }: AwsFormProps) => {
-  const { cloud } = useKibana().services;
-
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
   const awsCredentialsType = getAgentlessCredentialsType(input, showCloudConnectors);
@@ -285,11 +281,11 @@ export const AwsCredentialsFormAgentless = ({
   const cloudFormationSettings: Record<string, { accordianTitleLink: any; templateUrl?: string }> =
     {
       [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
-        accordianTitleLink: <EuiLink>Steps to Generate AWS Account Credentials</EuiLink>,
+        accordianTitleLink: <EuiLink>{'Steps to Generate AWS Account Credentials'}</EuiLink>,
         templateUrl: automationCredentialTemplate,
       },
       [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
-        accordianTitleLink: <EuiLink>Steps to Generate Cloud Connection</EuiLink>,
+        accordianTitleLink: <EuiLink>{'Steps to Generate Cloud Connection'}</EuiLink>,
         templateUrl: cloudConnectorRemoteRoleTemplate,
       },
     };

@@ -4,19 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import semverCompare from 'semver/functions/compare';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import semverGte from 'semver/functions/gte';
 import {
   EuiAccordion,
   EuiCallOut,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -24,40 +18,37 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology, NamespaceComboBox } from '@kbn/fleet-plugin/public';
+import { NamespaceComboBox, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
 import type { CloudSetup as CloudSetupType } from '@kbn/cloud-plugin/public';
-import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
-import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 // import { assert } from '../../../common/utils/helpers';
 import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
-import { CLOUDBEAT_AWS, SUPPORTED_POLICY_TEMPLATES, AZURE_CREDENTIALS_TYPE } from './constants';
+import { CLOUDBEAT_AWS, SUPPORTED_POLICY_TEMPLATES } from './constants';
 import {
   getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
   // isPostureInput,
-  isBelowMinVersion,
-  type NewPackagePolicyPostureInput,
   hasErrors,
   POLICY_TEMPLATE_FORM_DTS,
-  getCloudDefaultAwsCredentialConfig,
   getCloudConnectorRemoteRoleTemplate,
+  getDefaultCloudCredentialsType,
 } from './utils';
-import { PolicyTemplateInputSelector } from './policy_template_selectors';
+import { PolicyTemplateInputSelector, PolicyTemplateVarsForm } from './policy_template_selectors';
 import { usePackagePolicyList } from './hooks/use_package_policy_list';
 // import {
 //   GCP_CREDENTIALS_TYPE,
 //   gcpField,
 //   getInputVarsFields,
 // } from './gcp_credentials_form/gcp_credential_form';
-// import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
+import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_select';
 import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_select';
@@ -232,48 +223,6 @@ export const CloudSetup = memo<CloudSetupProps>(
 
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
-
-    // const getDefaultCloudCredentialsType = (
-    //   isAgentless: boolean,
-    //   inputType: Extract<
-    //     PostureInput,
-    //     'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-    //   >
-    // ) => {
-    //   const credentialsTypes: Record<
-    //     Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
-    //     {
-    //       [key: string]: {
-    //         value: string | boolean;
-    //         type: 'text' | 'bool';
-    //       };
-    //     }
-    //   > = {
-    //     'cloudbeat/cis_aws': getCloudDefaultAwsCredentialConfig({
-    //       isAgentless,
-    //       showCloudConnectors,
-    //       packageInfo,
-    //     }),
-    //     'cloudbeat/cis_gcp': {
-    //       'gcp.credentials.type': {
-    //         value: isAgentless
-    //           ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
-    //           : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
-    //         type: 'text',
-    //       },
-    //     },
-    //     'cloudbeat/cis_azure': {
-    //       'azure.credentials.type': {
-    //         value: isAgentless
-    //           ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
-    //           : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
-    //         type: 'text',
-    //       },
-    //     },
-    //   };
-
-    //   return credentialsTypes[inputType];
-    // };
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
@@ -499,11 +448,10 @@ export const CloudSetup = memo<CloudSetupProps>(
             </EuiAccordion>
           </>
         )}
-        {/* {shouldRenderAgentlessSelector && (
+        {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
             showLimitationsMessage={!isServerless}
             disabled={isEditPage}
-            setupTechnology={setupTechnology}
             isAgentless={!!newPolicy?.supports_agentless}
             onSetupTechnologyChange={(value) => {
               updateSetupTechnology(value);
@@ -516,16 +464,18 @@ export const CloudSetup = memo<CloudSetupProps>(
                     input.type as Extract<
                       PostureInput,
                       'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                    >
+                    >,
+                    packageInfo,
+                    showCloudConnectors
                   )
                 )
               );
             }}
           />
-        )} */}
+        )}
 
         {/* Defines the vars of the enabled input of the active policy template */}
-        {/* <PolicyTemplateVarsForm
+        <PolicyTemplateVarsForm
           input={input}
           newPolicy={newPolicy}
           updatePolicy={updatePolicy}
@@ -537,7 +487,8 @@ export const CloudSetup = memo<CloudSetupProps>(
           isEditPage={isEditPage}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           showCloudConnectors={showCloudConnectors}
-        /> */}
+          cloud={cloud}
+        />
         <EuiSpacer />
       </>
     );

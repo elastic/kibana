@@ -20,7 +20,7 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
-import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../test_subjects';
+import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../test_subjects';
 
 export const SetupTechnologySelector = ({
   disabled,
@@ -29,7 +29,6 @@ export const SetupTechnologySelector = ({
   showLimitationsMessage = true,
 }: {
   disabled: boolean;
-  setupTechnology: SetupTechnology;
   isAgentless: boolean;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
   showLimitationsMessage?: boolean;
@@ -115,7 +114,7 @@ export const SetupTechnologySelector = ({
             href="https://www.elastic.co/guide/en/cloud-enterprise/current/ece-traffic-filtering-deployment-configuration.html"
             target="_blank"
           >
-            Traffic filtering
+            {'Traffic filtering'}
           </EuiLink>
         ),
       }}

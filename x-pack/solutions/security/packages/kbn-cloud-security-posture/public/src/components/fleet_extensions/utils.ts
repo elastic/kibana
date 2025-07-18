@@ -34,6 +34,7 @@ import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+  CLOUD_SECURITY_POSTURE_INTEGRATIONS,
 } from './constants';
 import type {
   AwsCredentialsType,
@@ -41,16 +42,12 @@ import type {
   CloudSecurityPolicyTemplate,
   CredentialsType,
 } from './types';
-import { cloudPostureIntegrations } from './constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form/get_aws_credentials_form_options';
-
-// Posture policies only support the default namespace
-export const POSTURE_NAMESPACE = 'default';
 
 type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }
@@ -167,6 +164,50 @@ export const hasPolicyTemplateInputs = (
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyTemplateWithInputs => {
   return Object.hasOwn(policyTemplate, 'inputs');
+};
+
+export const getDefaultCloudCredentialsType = (
+  isAgentless: boolean,
+  inputType: Extract<
+    PostureInput,
+    'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+  >,
+  packageInfo: PackageInfo,
+  showCloudConnectors: boolean
+) => {
+  const credentialsTypes: Record<
+    Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
+    {
+      [key: string]: {
+        value: string | boolean;
+        type: 'text' | 'bool';
+      };
+    }
+  > = {
+    'cloudbeat/cis_aws': getCloudDefaultAwsCredentialConfig({
+      isAgentless,
+      showCloudConnectors,
+      packageInfo,
+    }),
+    'cloudbeat/cis_gcp': {
+      'gcp.credentials.type': {
+        value: isAgentless
+          ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
+          : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
+        type: 'text',
+      },
+    },
+    'cloudbeat/cis_azure': {
+      'azure.credentials.type': {
+        value: isAgentless
+          ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+          : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
+        type: 'text',
+      },
+    },
+  };
+
+  return credentialsTypes[inputType];
 };
 
 export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
@@ -343,7 +384,7 @@ export const getPostureInputHiddenVars = (
 };
 
 export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolicyTemplate) =>
-  cloudPostureIntegrations[policyTemplate].options.map((o) => ({
+  CLOUD_SECURITY_POSTURE_INTEGRATIONS[policyTemplate].options.map((o) => ({
     tooltip: o.tooltip,
     value: o.type,
     id: o.type,

@@ -5,16 +5,25 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { CloudPostureIntegrations } from './types';
 import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
+
+// Posture policies only support the default namespace
+export const POSTURE_NAMESPACE = 'default';
+export const ORGANIZATION_ACCOUNT = 'organization-account';
+export const SINGLE_ACCOUNT = 'single-account';
+
+const CSPM_POLICY_TEMPLATE = 'cspm';
+
+// Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
+export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
 
 export const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
 export const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';
 export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
 
-export const AWS_SINGLE_ACCOUNT = 'single-account';
-export const AWS_ORGANIZATION_ACCOUNT = 'organization-account';
+export const AWS_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const AWS_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
 export const AWS_CREDENTIALS_TYPE = {
   CLOUD_CONNECTORS: 'cloud_connectors',
   ASSUME_ROLE: 'assume_role',
@@ -24,16 +33,16 @@ export const AWS_CREDENTIALS_TYPE = {
   CLOUD_FORMATION: 'cloud_formation',
 } as const;
 
-export const GCP_SINGLE_ACCOUNT = 'single-account';
-export const GCP_ORGANIZATION_ACCOUNT = 'organization-account';
+export const GCP_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const GCP_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
 export const GCP_CREDENTIALS_TYPE = {
   CREDENTIALS_FILE: 'credentials-file',
   CREDENTIALS_JSON: 'credentials-json',
   CREDENTIALS_NONE: 'credentials-none',
 } as const;
 
-export const AZURE_SINGLE_ACCOUNT = 'single-account';
-export const AZURE_ORGANIZATION_ACCOUNT = 'organization-account';
+export const AZURE_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
+export const AZURE_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
 export const AZURE_CREDENTIALS_TYPE = {
   ARM_TEMPLATE: 'arm_template',
   MANUAL: 'manual',
@@ -57,7 +66,7 @@ export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
   CLOUD_FORMATION_CLOUD_CONNECTORS: 'cloud_formation_cloud_connectors_template',
 };
 
-export const cloudPostureIntegrations: CloudPostureIntegrations = {
+export const CLOUD_SECURITY_POSTURE_INTEGRATIONS: CloudPostureIntegrations = {
   cspm: {
     policyTemplate: CSPM_POLICY_TEMPLATE,
     name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
@@ -101,5 +110,17 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         testId: 'cisAzureTestId',
       },
     ],
+  },
+};
+
+const ELASTIC_BASE_SHORT_URL = 'https://ela.st';
+
+export const cspIntegrationDocsNavigation = {
+  cspm: {
+    overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}`,
+    getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}-get-started`,
+    awsGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
+    gcpGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
+    azureGetStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
   },
 };
