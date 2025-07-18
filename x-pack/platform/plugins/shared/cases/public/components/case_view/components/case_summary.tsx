@@ -35,3 +35,5 @@ export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseData }) => {
     </EuiFlexItem>
   );
 };
+
+CaseSummary.displayName = 'CaseSummary';

@@ -28,8 +28,8 @@ function buildCaseSummaryPrompt(caseData: CaseUI): string {
     category,
     assignees = [],
     status,
-    created_at: createdAt,
-    updated_at: updatedAt,
+    createdAt,
+    updatedAt,
 
     totalAlerts = 0,
     totalComment = 0,
@@ -59,7 +59,7 @@ function buildCaseSummaryPrompt(caseData: CaseUI): string {
 
   let prompt = `You are an expert Site Reliability Engineering (SRE) assistant specialized in incident investigation and observability data analysis.
 
-Create a concise, structured summary in markdown format of the following case for a senior SRE. Focus on investigation-relevant details and avoid referring to specific users.\n\n`;
+Create a short and concise, structured summary in markdown format of the following case for a senior SRE. Focus on investigation-relevant details and avoid referring to specific users.\n\n`;
 
   // Basic case information
   prompt += `## Case Overview\n`;
@@ -109,7 +109,7 @@ Create a concise, structured summary in markdown format of the following case fo
 }
 
 export const useCaseSummary = ({ onSuccess, onChunk, caseData }: UseCaseSummaryProps) => {
-  const [summary, setSummary] = useState<string | null>(null);
+  const [summary, setSummary] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const abortControllerRef = useRef(new AbortController());
 
@@ -140,7 +140,7 @@ export const useCaseSummary = ({ onSuccess, onChunk, caseData }: UseCaseSummaryP
           }
           if (result.type === 'chatCompletionChunk' && result.message.content) {
             setIsLoading(false);
-            setSummary(result.message.content);
+            setSummary((prev) => prev + result.message.content);
             onChunk?.(result.message.content);
           }
         },
