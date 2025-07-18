@@ -127,7 +127,6 @@ describe('Export Integrations', () => {
 
     it('does not render export derivatives with non-passing shouldRender predicates', async () => {
       const user = userEvent.setup();
-      const label = 'Export derivative';
 
       render(
         <ExportPopoverRender
@@ -145,7 +144,7 @@ describe('Export Integrations', () => {
 
       await waitForEuiPopoverOpen();
 
-      expect(screen.queryByText(label)).not.toBeInTheDocument();
+      expect(screen.queryByText(exportDerivativeLabel)).not.toBeInTheDocument();
     });
   });
 
