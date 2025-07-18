@@ -13,6 +13,7 @@ import type {
   DataGridDensity,
   UnifiedDataTableProps,
   DataGridPaginationMode,
+  CustomGridColumnsConfiguration,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
@@ -55,11 +56,32 @@ export interface PaginationConfigExtension {
  * Parameters passed to the app menu extension
  */
 export interface AppMenuExtensionParams {
+  /**
+   * Available actions for the app menu
+   */
+  actions: {
+    /**
+     * Updates the ad hoc data views list
+     * @param adHocDataViews The new ad hoc data views to set
+     */
+    updateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+  };
+  /**
+   * True if Discover is in ESQL mode
+   */
   isEsqlMode: boolean;
+  /**
+   * The current data view
+   */
   dataView: DataView | undefined;
+  /**
+   * The available ad hoc data views
+   */
   adHocDataViews: DataView[];
+  /**
+   * The authorized alerting rule type IDs for the current user
+   */
   authorizedRuleTypeIds: string[];
-  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
 }
 
 /**
@@ -165,6 +187,9 @@ export interface CellRenderersExtensionParams {
    * Available actions for cell renderers
    */
   actions: {
+    /**
+     * Adds a filter to the current search in data view mode, or a where clause in ESQL mode
+     */
     addFilter?: DocViewFilterFn;
   };
   /**
@@ -186,27 +211,28 @@ export interface CellRenderersExtensionParams {
  */
 export interface RowControlsExtensionParams {
   /**
+   * Available actions for row controls
+   */
+  actions: {
+    /**
+     * Updates the current ES|QL query
+     */
+    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
+    /**
+     * Sets the expanded document, which is displayed in a flyout
+     * @param record - The record to display in the flyout
+     * @param options.initialTabId - The tabId to display in the flyout
+     */
+    setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  };
+  /**
    * The current data view
    */
   dataView: DataView;
   /**
    * The current query
    */
-  updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-  /**
-   * The current query
-   */
   query?: DiscoverAppState['query'];
-  /**
-   * Function to set the expanded document, which is displayed in a flyout
-   * @param record - The record to display in the flyout
-   * @param options.initialTabId - The tabId to display in the flyout
-   */
-  setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
-  /**
-   * Flag to indicate if Flyout opening controls must be rendered or not
-   */
-  isDocViewerEnabled: boolean;
 }
 
 /**
@@ -406,4 +432,10 @@ export interface Profile {
    * @returns The app menu extension
    */
   getAppMenu: (params: AppMenuExtensionParams) => AppMenuExtension;
+
+  /**
+   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
+   * Example use case is to overwrite the column header display name or to add icons to the column headers.
+   */
+  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
 }

@@ -51,9 +51,9 @@ describe('CrowdstrikeActionsClient class', () => {
     > = {}
   ) => responseActionsClientMock.createIsolateOptions({ ...overrides, agent_type: 'crowdstrike' });
 
-  const createCrowdstrikeRunscrtiptOptions = (
+  const createCrowdstrikeRunscriptOptions = (
     overrides: Omit<
-      Parameters<typeof responseActionsClientMock.createIsolateOptions>[0],
+      Parameters<typeof responseActionsClientMock.createRunScriptOptions>[0],
       'agent_type'
     > = {}
   ) =>
@@ -77,6 +77,11 @@ describe('CrowdstrikeActionsClient class', () => {
 
       return BaseDataGenerator.toEsSearchResponse([]);
     });
+
+    (
+      classConstructorOptions.endpointService.getInternalFleetServices()
+        .ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it.each([
@@ -192,7 +197,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },
@@ -366,7 +383,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: expect.any(String),
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: expect.any(String),
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },
@@ -501,9 +530,9 @@ describe('CrowdstrikeActionsClient class', () => {
   describe('#runscript()', () => {
     it('should send action to Crowdstrike', async () => {
       await crowdstrikeActionsClient.runscript(
-        createCrowdstrikeRunscrtiptOptions({
+        createCrowdstrikeRunscriptOptions({
           actionId: '123-456-789',
-          endpoint_ids: ['1-2-3-cs-agent'],
+          endpoint_ids: ['1-2-3'],
           comment: 'test runscript comment',
           parameters: {
             raw: 'echo "Hello World"',
@@ -516,7 +545,7 @@ describe('CrowdstrikeActionsClient class', () => {
           subAction: SUB_ACTION.EXECUTE_ADMIN_RTR,
           subActionParams: {
             command: 'runscript --Raw=```echo "Hello World"```',
-            endpoint_ids: ['1-2-3-cs-agent'],
+            endpoint_ids: ['1-2-3'],
             actionParameters: {
               comment:
                 'Action triggered from Elastic Security by user [foo] for action [runscript (action id: 123-456-789)]: test runscript comment',
@@ -549,7 +578,19 @@ describe('CrowdstrikeActionsClient class', () => {
             input_type: 'crowdstrike',
             type: 'INPUT_ACTION',
           },
-          agent: { id: ['1-2-3'] },
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: '6f12b025-fcb0-4db4-99e5-4927e3502bb8',
+                elasticAgentId: 'fleet-agent-id-123',
+                integrationPolicyId: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              },
+            ],
+          },
+          originSpaceId: 'default',
+          tags: [],
           meta: {
             hostName: 'Crowdstrike-1460',
           },
@@ -637,9 +678,9 @@ describe('CrowdstrikeActionsClient class', () => {
         (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
 
         await crowdstrikeActionsClient.runscript(
-          createCrowdstrikeRunscrtiptOptions({
+          createCrowdstrikeRunscriptOptions({
             actionId: '123-abc-678',
-            endpoint_ids: ['1-2-3-cs-agent'],
+            endpoint_ids: ['1-2-3'],
             comment: 'test runscript comment',
             parameters: {
               raw: 'echo "Hello World"',
@@ -666,7 +707,7 @@ describe('CrowdstrikeActionsClient class', () => {
           data: {
             combined: {
               resources: {
-                '1-2-3-cs-agent': {
+                '1-2-3': {
                   stdout: '',
                   stderr: '',
                   errors: [
@@ -683,9 +724,9 @@ describe('CrowdstrikeActionsClient class', () => {
         (connectorActionsMock.execute as jest.Mock).mockResolvedValueOnce(actionResponse);
 
         await crowdstrikeActionsClient.runscript(
-          createCrowdstrikeRunscrtiptOptions({
+          createCrowdstrikeRunscriptOptions({
             actionId: '456-pqr-789',
-            endpoint_ids: ['1-2-3-cs-agent'],
+            endpoint_ids: ['1-2-3'],
             parameters: {
               raw: 'echo "Hello World"',
             },

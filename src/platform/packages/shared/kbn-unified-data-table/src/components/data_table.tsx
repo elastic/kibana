@@ -47,8 +47,10 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
-import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
+import {
+  type InTableSearchRestorableState,
+  useDataGridInTableSearch,
+} from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
@@ -96,7 +98,7 @@ import {
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
-import { useRestorableState, withRestorableState } from '../restorable_state';
+import { withRestorableState, useRestorableState, useRestorableRef } from '../restorable_state';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
@@ -394,10 +396,6 @@ interface InternalUnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
-   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
-   */
-  additionalFieldGroups?: AdditionalFieldGroups;
-  /**
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -502,7 +500,6 @@ const InternalUnifiedDataTable = ({
   externalAdditionalControls,
   rowsPerPageOptions,
   externalCustomRenderers,
-  additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
@@ -520,7 +517,7 @@ const InternalUnifiedDataTable = ({
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [isFilterActive, setIsFilterActive] = useState(false);
+  const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
   const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
@@ -542,7 +539,9 @@ const InternalUnifiedDataTable = ({
     docIdsInSelectionOrder,
   } = selectedDocsState;
 
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [currentPageIndex, setCurrentPageIndex] = useRestorableState('pageIndex', 0);
+  const currentPageIndexRef = useRef<number>(currentPageIndex);
+  currentPageIndexRef.current = currentPageIndex;
 
   const changeCurrentPageIndex = useCallback(
     (value: number) => {
@@ -645,14 +644,12 @@ const InternalUnifiedDataTable = ({
      * to the consumer.
      *
      */
-    setCurrentPageIndex((previousPageIndex: number) => {
-      const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
-      if (calculatedPageIndex !== previousPageIndex) {
-        onUpdatePageIndex?.(calculatedPageIndex);
-      }
-      return calculatedPageIndex;
-    });
-  }, [onUpdatePageIndex, pageCount]);
+    const previousPageIndex = currentPageIndexRef.current;
+    const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
+    if (calculatedPageIndex !== previousPageIndex) {
+      changeCurrentPageIndex(calculatedPageIndex);
+    }
+  }, [pageCount, changeCurrentPageIndex]);
 
   const paginationObj = useMemo(() => {
     const onChangeItemsPerPage = (pageSize: number) => {
@@ -760,6 +757,14 @@ const InternalUnifiedDataTable = ({
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
+  const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);
+  const onInTableSearchInitialStateChange = useCallback(
+    (newState: InTableSearchRestorableState) => {
+      inTableSearchLatestStateRef.current = newState;
+    },
+    [inTableSearchLatestStateRef]
+  );
+
   const {
     inTableSearchTermCss,
     inTableSearchControl,
@@ -774,6 +779,8 @@ const InternalUnifiedDataTable = ({
     renderCellValue,
     cellContext,
     pagination: paginationObj,
+    initialState: inTableSearchLatestStateRef.current,
+    onInitialStateChange: onInTableSearchInitialStateChange,
   });
 
   const renderCustomPopover = useMemo(
@@ -1037,6 +1044,7 @@ const InternalUnifiedDataTable = ({
     rows,
     selectedDocsState,
     enableComparisonMode,
+    setIsFilterActive,
     setIsCompareActive,
     fieldFormats,
     unifiedDataTableContextValue.pageIndex,
@@ -1265,7 +1273,6 @@ const InternalUnifiedDataTable = ({
               dataView={dataView}
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
-              additionalFieldGroups={additionalFieldGroups}
               selectedDocIds={docIdsInSelectionOrder}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}

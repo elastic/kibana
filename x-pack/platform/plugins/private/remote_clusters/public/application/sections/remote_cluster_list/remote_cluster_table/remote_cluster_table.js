@@ -306,7 +306,7 @@ export class RemoteClusterTable extends Component {
                   );
 
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="remoteClusterTableRowEditButton"
                     aria-label={label}

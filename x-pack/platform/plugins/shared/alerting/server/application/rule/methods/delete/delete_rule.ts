@@ -19,6 +19,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
   try {
@@ -105,6 +106,21 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
+
+  try {
+    const eventLogClient = await context.getEventLogClient();
+
+    await softDeleteGaps({
+      ruleId: id,
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    });
+  } catch (error) {
+    // Failing to soft delete gaps should not block the rule deletion
+    context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
+  }
+
   const removeResult = await deleteRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     id,

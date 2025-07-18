@@ -36,7 +36,7 @@ import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import type { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
+import type { CommonAlertFields870, SuppressionFields870 } from '../../common/schemas';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -45,13 +45,13 @@ import type { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
  * AlertWithSuppressionFieldsLatest since we're reading alerts rather than writing,
  * so future versions of Kibana may read 8.7.0 version alerts and need to update them
  */
-export type BackendAlertWithSuppressionFields870<T> = Omit<
-  AlertWithSuppressionFields870<T>,
+export type BackendAlertWithSuppressionFields870 = Omit<
+  SuppressionFields870,
   typeof ALERT_SUPPRESSION_START | typeof ALERT_SUPPRESSION_END
 > & {
   [ALERT_SUPPRESSION_START]: string;
   [ALERT_SUPPRESSION_END]: string;
-};
+} & CommonAlertFields870;
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
@@ -211,7 +211,7 @@ export const suppressAlertsInMemory = <
 export const isExistingDateGtEqThanAlert = <
   T extends { [ALERT_SUPPRESSION_END]: Date; [ALERT_SUPPRESSION_START]: Date }
 >(
-  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870>,
   alert: { _id: string; _source: T },
   property: typeof ALERT_SUPPRESSION_END | typeof ALERT_SUPPRESSION_START
 ) => {
@@ -228,7 +228,7 @@ interface SuppressionBoundaries {
  * returns updated suppression time boundaries
  */
 export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>(
-  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870>,
   alert: { _id: string; _source: T },
   executionId: string
 ): Partial<SuppressionBoundaries> => {
@@ -469,11 +469,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   .getReader({ namespace: options.spaceId })
                   .search<
                     typeof suppressionAlertSearchRequest,
-                    BackendAlertWithSuppressionFields870<{}>
+                    BackendAlertWithSuppressionFields870
                   >(suppressionAlertSearchRequest);
 
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
-                  Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>>
+                  Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870>>
                 >((acc, hit) => {
                   acc[hit._source[ALERT_INSTANCE_ID]] = hit;
                   return acc;

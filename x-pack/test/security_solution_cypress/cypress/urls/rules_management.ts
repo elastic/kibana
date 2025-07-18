@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export const INSTALL_PREBUILT_RULES_URL = '/app/security/rules/add_rules';
 export const RULES_MANAGEMENT_URL = '/app/security/rules/management';
 export const RULES_MONITORING_URL = '/app/security/rules/monitoring';
 export const RULES_COVERAGE_OVERVIEW_URL = '/app/security/rules_coverage_overview';

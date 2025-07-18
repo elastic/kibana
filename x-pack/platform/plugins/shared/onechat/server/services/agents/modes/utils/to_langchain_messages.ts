@@ -43,7 +43,7 @@ export const roundToLangchain = (
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(createUserMessage({ content: round.userInput.message }));
+  messages.push(createUserMessage({ content: round.input.message }));
 
   // steps
   if (!ignoreSteps) {
@@ -55,7 +55,7 @@ export const roundToLangchain = (
   }
 
   // assistant response
-  messages.push(createAssistantMessage({ content: round.assistantResponse.message }));
+  messages.push(createAssistantMessage({ content: round.response.message }));
 
   return messages;
 };
@@ -73,16 +73,16 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
     content: '',
     tool_calls: [
       {
-        id: toolCall.toolCallId,
-        name: toolCall.toolId.toolId,
-        args: toolCall.args,
+        id: toolCall.tool_call_id,
+        name: toolCall.tool_id,
+        args: toolCall.params,
         type: 'tool_call',
       },
     ],
   });
 
   const toolResultMessage = new ToolMessage({
-    tool_call_id: toolCall.toolCallId,
+    tool_call_id: toolCall.tool_call_id,
     content: toolCall.result,
   });
 

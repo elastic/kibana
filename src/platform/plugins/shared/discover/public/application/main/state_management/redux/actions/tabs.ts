@@ -23,6 +23,7 @@ import {
   selectTabRuntimeState,
   selectTabRuntimeAppState,
   selectTabRuntimeGlobalState,
+  selectRestorableTabRuntimeHistogramLayoutProps,
 } from '../runtime_state';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import type { DiscoverAppState } from '../../discover_app_state_container';
@@ -51,6 +52,14 @@ export const setTabs: InternalStateThunkActionCreator<
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
         profilesManager,
         ebtManager,
+        initialValues: {
+          unifiedHistogramLayoutProps: tab.duplicatedFromId
+            ? selectRestorableTabRuntimeHistogramLayoutProps(
+                runtimeStateManager,
+                tab.duplicatedFromId
+              )
+            : undefined,
+        },
       });
     }
 
@@ -86,17 +95,24 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       const tab: TabState = {
         ...defaultTabState,
         ...existingTab,
-        ...pick(item, 'id', 'label'),
+        ...pick(item, 'id', 'label', 'duplicatedFromId'),
       };
 
-      if (item.duplicatedFromId) {
-        const existingTabToDuplicate = selectTab(currentState, item.duplicatedFromId);
+      if (item.duplicatedFromId && !existingTab) {
+        const existingTabToDuplicateFrom = selectTab(currentState, item.duplicatedFromId);
+
+        if (!existingTabToDuplicateFrom) {
+          return tab;
+        }
+
         tab.initialAppState =
           selectTabRuntimeAppState(runtimeStateManager, item.duplicatedFromId) ??
-          cloneDeep(existingTabToDuplicate.initialAppState);
-        tab.initialGlobalState =
-          selectTabRuntimeGlobalState(runtimeStateManager, item.duplicatedFromId) ??
-          cloneDeep(existingTabToDuplicate.initialGlobalState);
+          cloneDeep(existingTabToDuplicateFrom.initialAppState);
+        tab.initialGlobalState = cloneDeep({
+          ...existingTabToDuplicateFrom.initialGlobalState,
+          ...existingTabToDuplicateFrom.lastPersistedGlobalState,
+        });
+        tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
       }
 
       return tab;

@@ -48,7 +48,6 @@ const createPngV2Params = (testWidth: number | string) =>
   `title:\'Tag Cloud of Names\',` +
   `version:\'8.2.0\')`;
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const retry = getService('retry');

@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { transformControlGroupIn } from './control_group_in_transforms';
-export { transformPanelsIn } from './panels_in_transforms';
-export { transformSearchSourceIn } from './search_source_in_transforms';
+export { transformDashboardIn } from './transform_dashboard_in';

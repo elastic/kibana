@@ -269,7 +269,14 @@ describe('AssetInventoryDataClient', () => {
       expect(result).toEqual({ status: 'disabled' });
     });
 
-    it('returns READY when documents have been processed in the generic entity store and check if DataView exists', async () => {
+    it('returns EMPTY when transform has been triggered but no generic documents exist', async () => {
+      // Mock that no generic documents exist initially, so we proceed to entity store logic
+      (
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock
+      ).mockResolvedValue({
+        count: 0,
+      });
+
       (mockSecSolutionContext.getEntityStoreDataClient as unknown as jest.Mock).mockReturnValue({
         status: () => ({
           status: 'ready',
@@ -284,6 +291,19 @@ describe('AssetInventoryDataClient', () => {
         }),
       });
 
+      const result = await client.status(mockSecSolutionContext, mockEntityStorePrivileges);
+
+      expect(result).toEqual({ status: 'empty' });
+    });
+
+    it('returns READY when generic documents exist and installs data view', async () => {
+      // Mock that generic documents exist, so we return READY immediately
+      (
+        mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count as jest.Mock
+      ).mockResolvedValue({
+        count: 5,
+      });
+
       // Mock data view service for installAssetInventoryDataView call
       const mockDataViewService = {
         get: jest.fn().mockResolvedValue({ id: 'asset-inventory-default' }), // Data view already exists
@@ -295,7 +315,6 @@ describe('AssetInventoryDataClient', () => {
       const result = await client.status(mockSecSolutionContext, mockEntityStorePrivileges);
 
       expect(result).toEqual({ status: 'ready' });
-
       expect(mockSecSolutionContext.getDataViewsService).toHaveBeenCalled();
     });
 

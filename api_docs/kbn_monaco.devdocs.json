@@ -487,13 +487,7 @@
             "description": [],
             "signature": [
               "CallbackFn<{ query: string; }, ",
-              {
-                "pluginId": "@kbn/esql-validation-autocomplete",
-                "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-                "section": "def-common.ESQLFieldWithMetadata",
-                "text": "ESQLFieldWithMetadata"
-              },
+              "ESQLFieldWithMetadata",
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",

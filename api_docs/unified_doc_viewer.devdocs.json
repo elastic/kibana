@@ -322,9 +322,9 @@
           ") => [",
           {
             "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-common.ElasticRequestState",
+            "section": "def-public.ElasticRequestState",
             "text": "ElasticRequestState"
           },
           ", ",
@@ -460,9 +460,9 @@
           "signature": [
             {
               "pluginId": "@kbn/unified-doc-viewer",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnUnifiedDocViewerPluginApi",
-              "section": "def-common.DocViewsRegistry",
+              "section": "def-public.DocViewsRegistry",
               "text": "DocViewsRegistry"
             }
           ],
@@ -495,9 +495,9 @@
           "signature": [
             {
               "pluginId": "@kbn/unified-doc-viewer",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnUnifiedDocViewerPluginApi",
-              "section": "def-common.DocViewsRegistry",
+              "section": "def-public.DocViewsRegistry",
               "text": "DocViewsRegistry"
             }
           ],

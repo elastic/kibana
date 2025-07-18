@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './app.scss';
 import React, { useEffect, useCallback, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -20,6 +19,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { css } from '@emotion/react';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -28,6 +28,15 @@ import {
   VisualizeByValueEditor,
 } from './components';
 import { VisualizeConstants } from '../../common/constants';
+
+const visAppStyles = {
+  wrapperLoading: css({
+    alignItems: 'center',
+    justifyContent: 'center',
+    display: 'flex',
+    flexGrow: 1,
+  }),
+};
 
 export interface VisualizeAppProps {
   onAppLeave: AppMountParameters['onAppLeave'];
@@ -136,7 +145,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
 
   if (isLoading) {
     return (
-      <div className="visAppLoadingWrapper">
+      <div css={visAppStyles.wrapperLoading}>
         <EuiLoadingSpinner size="xl" />
       </div>
     );

@@ -34,7 +34,7 @@ export class EsqlDocumentBase {
   }
 
   getDocumentation(
-    keywords: string[],
+    rawKeywords: string[],
     {
       generateMissingKeywordDoc = true,
       addSuggestions = true,
@@ -42,8 +42,9 @@ export class EsqlDocumentBase {
       resolveAliases = true,
     }: GetDocsOptions = {}
   ) {
-    keywords = keywords.map((raw) => {
-      let keyword = format(raw);
+    const keywords = rawKeywords.map((raw) => {
+      // LOOKUP JOIN  has space so we want to retain as is
+      let keyword = raw.toLowerCase().includes('join') ? raw : format(raw);
       if (resolveAliases) {
         keyword = tryResolveAlias(keyword);
       }

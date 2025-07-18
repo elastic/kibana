@@ -20,7 +20,7 @@ import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/com
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { itemAttrsToSavedObjectWithTags, savedObjectToItem } from './latest';
+import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -31,7 +31,6 @@ import type {
   DashboardUpdateOptions,
   DashboardUpdateOut,
   DashboardSearchOptions,
-  ReplaceTagReferencesByNameParams,
 } from './latest';
 
 const getRandomColor = (): string => {
@@ -258,15 +257,15 @@ export class DashboardStorage {
     const {
       attributes: soAttributes,
       references: soReferences,
-      error: attributesError,
-    } = await itemAttrsToSavedObjectWithTags({
-      attributes: dataToLatest,
-      replaceTagReferencesByName: ({ references, newTagNames }: ReplaceTagReferencesByNameParams) =>
+      error: transformDashboardError,
+    } = await transformDashboardIn({
+      dashboardState: dataToLatest,
+      replaceTagReferencesByName: ({ references, newTagNames }) =>
         this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
       incomingReferences: options.references,
     });
-    if (attributesError) {
-      throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
+    if (transformDashboardError) {
+      throw Boom.badRequest(`Invalid data. ${transformDashboardError.message}`);
     }
 
     // Save data in DB
@@ -340,15 +339,15 @@ export class DashboardStorage {
     const {
       attributes: soAttributes,
       references: soReferences,
-      error: attributesError,
-    } = await itemAttrsToSavedObjectWithTags({
-      attributes: dataToLatest,
-      replaceTagReferencesByName: ({ references, newTagNames }: ReplaceTagReferencesByNameParams) =>
+      error: transformDashboardError,
+    } = await transformDashboardIn({
+      dashboardState: dataToLatest,
+      replaceTagReferencesByName: ({ references, newTagNames }) =>
         this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
       incomingReferences: options.references,
     });
-    if (attributesError) {
-      throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
+    if (transformDashboardError) {
+      throw Boom.badRequest(`Invalid data. ${transformDashboardError.message}`);
     }
 
     // Save data in DB
