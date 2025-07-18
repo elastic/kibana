@@ -87,7 +87,32 @@ export function prepareStreamsForImport({
 
   const streamObjects = entries.map(({ name, request }) => {
     if (name === ROOT_STREAM_ID) {
-      // merge special parent stream's routing and fields with the new root
+      // merge imported root stream's routing and fields with the new root.
+      // if it already routes to an imported destination, we overwrite the
+      // existing condition
+      const rootRouting = [...root.request.stream.ingest.wired.routing];
+      prepareIncludedDestinations(request.stream.ingest.wired.routing).forEach((definition) => {
+        const pos = rootRouting.findIndex(
+          ({ destination }) => destination === definition.destination
+        );
+        if (pos === -1) {
+          rootRouting.push(definition);
+        } else {
+          rootRouting.splice(pos, 1, definition);
+        }
+      });
+
+      // merge imported root stream's fields with the new root if not already mapped
+      const rootFields = {
+        ...root.request.stream.ingest.wired.fields,
+        ...Object.keys(request.stream.ingest.wired.fields)
+          .filter((key) => !root.request.stream.ingest.wired.fields[key] && !inheritedFields[key])
+          .reduce((acc, key) => {
+            acc[key] = { ...request.stream.ingest.wired.fields[key] };
+            return acc;
+          }, {} as FieldDefinition),
+      };
+
       return {
         type: 'stream' as const,
         name: root.name,
@@ -99,21 +124,8 @@ export function prepareStreamsForImport({
               ...root.request.stream.ingest,
               wired: {
                 ...root.request.stream.ingest.wired,
-                routing: root.request.stream.ingest.wired.routing.concat(
-                  prepareIncludedDestinations(request.stream.ingest.wired.routing)
-                ),
-                fields: {
-                  ...root.request.stream.ingest.wired.fields,
-                  ...Object.keys(request.stream.ingest.wired.fields)
-                    .filter(
-                      (key) =>
-                        !root.request.stream.ingest.wired.fields[key] && !inheritedFields[key]
-                    )
-                    .reduce((acc, key) => {
-                      acc[key] = { ...request.stream.ingest.wired.fields[key] };
-                      return acc;
-                    }, {} as FieldDefinition),
-                },
+                routing: rootRouting,
+                fields: rootFields,
               },
             },
           },
