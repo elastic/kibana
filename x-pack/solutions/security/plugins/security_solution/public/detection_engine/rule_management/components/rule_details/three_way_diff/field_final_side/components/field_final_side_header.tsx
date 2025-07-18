@@ -57,6 +57,7 @@ export function FieldFinalSideHeader(): JSX.Element {
               size="s"
               disabled={!form?.isValid}
               onClick={handleSave}
+              data-test-subj="prebuilt-rule-upgrade-flyout-field-save"
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
             </EuiButton>

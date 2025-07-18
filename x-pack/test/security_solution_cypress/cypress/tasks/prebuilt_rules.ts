@@ -13,7 +13,6 @@ import {
   getUpgradeSingleRuleLoadingSpinnerByRuleId,
   RULES_MANAGEMENT_TABLE,
   RULES_UPDATES_TAB,
-  RULES_UPDATES_TABLE,
   TOASTER,
   SUCCESS_TOASTER_HEADER,
 } from '../screens/alerts_detection_rules';
@@ -233,12 +232,6 @@ export const assertRulesNotPresentInAddPrebuiltRulesTable = (
 ) => {
   for (const rule of rules) {
     cy.get(ADD_ELASTIC_RULES_TABLE).contains(rule['security-rule'].name).should('not.exist');
-  }
-};
-
-export const assertRulesPresentInRuleUpdatesTable = (rules: Array<typeof SAMPLE_PREBUILT_RULE>) => {
-  for (const rule of rules) {
-    cy.get(RULES_UPDATES_TABLE).contains(rule['security-rule'].name);
   }
 };
 

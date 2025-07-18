@@ -15,11 +15,12 @@ import {
   getUpgradeSingleRuleButtonByRuleId,
   INSTALL_ALL_RULES_BUTTON,
   INSTALL_SELECTED_RULES_BUTTON,
+  RULES_UPDATES_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
   UPGRADE_SELECTED_RULES_BUTTON,
 } from '../../../../screens/alerts_detection_rules';
-import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
+import { expectRulesInTable, selectRulesByName } from '../../../../tasks/alerts_detection_rules';
 import {
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
@@ -36,7 +37,6 @@ import {
   assertRuleInstallationFailureToastShown,
   assertRulesPresentInAddPrebuiltRulesTable,
   assertRuleUpgradeFailureToastShown,
-  assertRulesPresentInRuleUpdatesTable,
   interceptInstallationRequestToFailPartially,
   assertRuleInstallationSuccessToastShown,
   assertRuleUpgradeSuccessToastShown,
@@ -178,7 +178,7 @@ describe(
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1]);
 
         assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1]);
-        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1]);
+        expectRulesInTable(RULES_UPDATES_TABLE, ['Outdated rule 1']);
       });
 
       it('upgrading multiple selected prebuilt rules by selecting them individually', () => {
@@ -194,7 +194,7 @@ describe(
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        expectRulesInTable(RULES_UPDATES_TABLE, ['Outdated rule 1', 'Outdated rule 2']);
       });
 
       it('upgrading multiple selected prebuilt rules by selecting all in page', () => {
@@ -206,7 +206,7 @@ describe(
         cy.get(UPGRADE_SELECTED_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        expectRulesInTable(RULES_UPDATES_TABLE, ['Outdated rule 1', 'Outdated rule 2']);
       });
 
       it('upgrading all rules with available upgrades at once', () => {
@@ -218,7 +218,7 @@ describe(
         cy.get(UPGRADE_ALL_RULES_BUTTON).click();
         assertUpgradeRequestIsComplete([OUTDATED_RULE_1, OUTDATED_RULE_2]);
         assertRuleUpgradeFailureToastShown([OUTDATED_RULE_1, OUTDATED_RULE_2]);
-        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        expectRulesInTable(RULES_UPDATES_TABLE, ['Outdated rule 1', 'Outdated rule 2']);
       });
 
       it('upgrading all rules with available upgrades at once with some rules succeeding', () => {
@@ -233,7 +233,7 @@ describe(
         cy.get(UPGRADE_ALL_RULES_BUTTON).click();
         assertRuleUpgradeSuccessToastShown([OUTDATED_RULE_1]);
         assertRuleUpgradeFailureToastShown([OUTDATED_RULE_2]);
-        assertRulesPresentInRuleUpdatesTable([OUTDATED_RULE_1, OUTDATED_RULE_2]);
+        expectRulesInTable(RULES_UPDATES_TABLE, ['Outdated rule 1', 'Outdated rule 2']);
       });
     });
   }

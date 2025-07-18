@@ -51,7 +51,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Rule upgrade button](#rule-upgrade-button)
     - [**Scenario: Rule upgrade button is disabled when num of conflicts \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-of-conflicts--1)
     - [**Scenario: Rule upgrade button is disabled when num fields in edit mode \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-fields-in-edit-mode--1)
-    - [**Scenario: Rule upgrade button is disabled when num of conflicts \>= 1 or num fields in edit mode \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-of-conflicts--1-or-num-fields-in-edit-mode--1)
+    - [**Scenario: Rule upgrade button is disabled when num of conflicts \>= 1 and num fields in edit mode \>= 1**](#scenario-rule-upgrade-button-is-disabled-when-num-of-conflicts--1-and-num-fields-in-edit-mode--1)
   - [Rule upgrade after field preview](#rule-upgrade-after-field-preview)
     - [**Scenario: Non-customized rule upgrade after preview (AAB diff case)**](#scenario-non-customized-rule-upgrade-after-preview-aab-diff-case)
     - [**Scenario: Non-customized rule upgrade after preview and customizing field values (AAB diff case)**](#scenario-non-customized-rule-upgrade-after-preview-and-customizing-field-values-aab-diff-case)
@@ -65,8 +65,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Non-customized rule upgrade to a different rule type after preview**](#scenario-non-customized-rule-upgrade-to-a-different-rule-type-after-preview)
     - [**Scenario: Customized rule upgrade to a different rule type after preview**](#scenario-customized-rule-upgrade-to-a-different-rule-type-after-preview)
   - [Concurrency control](#concurrency-control)
-    - [**Scenario: User gets notified after someone edited a rule being previewed**](#scenario-user-gets-notified-after-someone-edited-a-rule-being-previewed)
-    - [**Scenario: User gets notified after a new rule versions is released**](#scenario-user-gets-notified-after-a-new-rule-versions-is-released)
+    - [**Scenario: User gets notified after someone edited the prebuilt rule being previewed**](#scenario-user-gets-notified-after-someone-edited-the-prebuilt-rule-being-previewed)
+    - [**Scenario: User gets notified after a prebuilt new rule version is released**](#scenario-user-gets-notified-after-a-prebuilt-new-rule-version-is-released)
   - [Licensing](#licensing)
     - [**Scenario: User can NOT modify field values in upgrade preview when license is insufficient**](#scenario-user-can-not-modify-field-values-in-upgrade-preview-when-license-is-insufficient)
     - [**Scenario: User is warned about losing their customizations in upgrade preview when license is insufficient**](#scenario-user-is-warned-about-losing-their-customizations-in-upgrade-preview-when-license-is-insufficient)
@@ -143,6 +143,8 @@ What should be inside the Rule Upgrade flyout:
 ### Rule upgrade workflow: rule previews
 
 #### **Scenario: User can preview prebuilt rules having upgrades**
+
+**Automation**: 1 e2e test.
 
 ```Gherkin
 Given a prebuilt rule with an upgrade
@@ -515,11 +517,11 @@ When user switch one or more fields to edit mode
 Then user should see INACTIVE CTA
 When user hover on the INACTIVE CTA
 Then explanation tooltip appears
-When user every field in readonly mode
+When user switches every field in readonly mode
 Then the INACTIVE CTA becomes ACTIVE
 ```
 
-#### **Scenario: Rule upgrade button is disabled when num of conflicts >= 1 or num fields in edit mode >= 1**
+#### **Scenario: Rule upgrade button is disabled when num of conflicts >= 1 and num fields in edit mode >= 1**
 
 **Automation**: 1 Cypress test.
 
@@ -787,7 +789,11 @@ And has upgraded field values
 
 ### Concurrency control
 
-#### **Scenario: User gets notified after someone edited a rule being previewed**
+> It wasn't possible to test the Concurrency control with Cypress clock mocking. Testing without mocks would require
+> waiting for 5 minutes significantly increasing tests duration. We should revisit this after we obtain better e2e
+> testing tooling.
+
+#### **Scenario: User gets notified after someone edited the prebuilt rule being previewed**
 
 **Automation**: 1 Cypress test.
 
@@ -800,7 +806,7 @@ Then <userA> should see a notification that rule has been edited
 And saved custom field values got discarded
 ```
 
-#### **Scenario: User gets notified after a new rule versions is released**
+#### **Scenario: User gets notified after a prebuilt new rule version is released**
 
 **Automation**: 1 Cypress test.
 
