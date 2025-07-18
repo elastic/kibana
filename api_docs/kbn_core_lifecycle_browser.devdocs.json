@@ -468,20 +468,12 @@
                 "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
               },
               {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
-              },
-              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
               },
               {
                 "plugin": "visualizations",
                 "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
               }
             ]
           },

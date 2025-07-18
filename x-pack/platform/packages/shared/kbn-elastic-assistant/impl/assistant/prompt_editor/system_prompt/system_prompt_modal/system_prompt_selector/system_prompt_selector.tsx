@@ -211,7 +211,11 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
           {!value?.isDefault && (
             <EuiFlexItem grow={false} component={'span'}>
-              <EuiToolTip position="right" content={i18n.DELETE_SYSTEM_PROMPT}>
+              <EuiToolTip
+                position="right"
+                content={i18n.DELETE_SYSTEM_PROMPT}
+                disableScreenReaderOutput
+              >
                 <EuiButtonIcon
                   iconType="cross"
                   aria-label={i18n.DELETE_SYSTEM_PROMPT}

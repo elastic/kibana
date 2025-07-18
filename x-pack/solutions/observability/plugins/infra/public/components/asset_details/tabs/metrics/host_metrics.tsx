@@ -25,7 +25,7 @@ const METRIC_TYPES: Array<Exclude<HostMetricTypes, 'kpi'>> = [
 export const HostMetrics = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { dateRange } = useDatePickerContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const { metrics, logs } = useDataViewsContext();
 
   const state = useIntersectingState(ref, { dateRange });
@@ -35,14 +35,14 @@ export const HostMetrics = () => {
       {METRIC_TYPES.map((metric) => (
         <HostCharts
           key={metric}
-          assetId={asset.id}
+          entityId={entity.id}
           dataView={metric === 'log' ? logs.dataView : metrics.dataView}
           dateRange={state.dateRange}
           metric={metric}
         />
       ))}
       <KubernetesNodeCharts
-        assetId={asset.id}
+        entityId={entity.id}
         dataView={metrics.dataView}
         dateRange={state.dateRange}
       />

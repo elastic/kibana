@@ -6445,6 +6445,18 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.visContainerClassName",
+        "type": "string",
+        "tags": [],
+        "label": "visContainerClassName",
+        "description": [],
+        "path": "src/platform/plugins/shared/visualizations/public/vis.styles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.VisToExpressionAst",
         "type": "Type",
         "tags": [],
@@ -6916,6 +6928,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.visContainerStyle",
+        "type": "Object",
+        "tags": [],
+        "label": "visContainerStyle",
+        "description": [],
+        "signature": [
+          "SerializedStyles"
+        ],
+        "path": "src/platform/plugins/shared/visualizations/public/vis.styles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

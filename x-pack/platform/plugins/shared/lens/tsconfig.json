@@ -124,6 +124,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/deeplinks-analytics",
     "@kbn/core-http-server",
+    "@kbn/presentation-util",
   ],
   "exclude": ["target/**/*"]
 }

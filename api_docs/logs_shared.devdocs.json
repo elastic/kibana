@@ -950,7 +950,13 @@
           ", ",
           "ServiceMap",
           ">>; logViewStateNotifications: ",
-          "NotificationChannel",
+          {
+            "pluginId": "@kbn/xstate-utils",
+            "scope": "public",
+            "docId": "kibKbnXstateUtilsPluginApi",
+            "section": "def-public.NotificationChannel",
+            "text": "NotificationChannel"
+          },
           "<",
           "LogViewContextWithReference",
           " | (",
@@ -1539,7 +1545,13 @@
           ", ",
           "ServiceMap",
           ">>; logViewStateNotifications: ",
-          "NotificationChannel",
+          {
+            "pluginId": "@kbn/xstate-utils",
+            "scope": "public",
+            "docId": "kibKbnXstateUtilsPluginApi",
+            "section": "def-public.NotificationChannel",
+            "text": "NotificationChannel"
+          },
           "<",
           "LogViewContextWithReference",
           " | (",
@@ -2397,7 +2409,13 @@
         "label": "LogViewNotificationChannel",
         "description": [],
         "signature": [
-          "NotificationChannel",
+          {
+            "pluginId": "@kbn/xstate-utils",
+            "scope": "public",
+            "docId": "kibKbnXstateUtilsPluginApi",
+            "section": "def-public.NotificationChannel",
+            "text": "NotificationChannel"
+          },
           "<",
           "LogViewContextWithReference",
           " | (",
