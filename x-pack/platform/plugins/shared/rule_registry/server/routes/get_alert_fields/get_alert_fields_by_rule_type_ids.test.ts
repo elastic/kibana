@@ -7,9 +7,9 @@
 
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
-import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { requestContextMock } from './__mocks__/request_context';
-import { requestMock, serverMock } from './__mocks__/server';
+import { BASE_RAC_ALERTS_API_PATH } from '../../../common/constants';
+import { requestContextMock } from '../__mocks__/request_context';
+import { requestMock, serverMock } from '../__mocks__/server';
 import { getAlertFieldsByRuleTypeIds } from './get_alert_fields_by_rule_type_ids';
 
 describe('getAlertFieldsByRuleTypeIds', () => {
@@ -100,7 +100,41 @@ describe('getAlertFieldsByRuleTypeIds', () => {
         type: 'string',
       },
     ]);
-    expect(response.body.alertFields).toBeDefined();
+  });
+
+  test('should fetch alert fields for single rule type correctly', async () => {
+    const newRequest = requestMock.create({
+      method: 'get',
+      path: `${BASE_RAC_ALERTS_API_PATH}/alert_fields`,
+      query: { ruleTypeIds: '.es-query' },
+    });
+
+    // @ts-expect-error: mocking only necessary methods
+    jest.spyOn(await context.rac, 'getAlertsClient').mockResolvedValue({
+      getAlertFields: jest.fn().mockImplementation((ruleTypeIds: string[]) => {
+        return Promise.resolve({
+          fields: [
+            { name: '@timestamp', type: 'date' },
+            { name: 'message', type: 'string' },
+          ],
+        });
+      }),
+    });
+
+    const response = await server.inject(newRequest, context);
+
+    expect(response.status).toBe(200);
+
+    expect(response.body.fields).toEqual([
+      {
+        name: '@timestamp',
+        type: 'date',
+      },
+      {
+        name: 'message',
+        type: 'string',
+      },
+    ]);
   });
 
   test('handles errors when fetching fields fails', async () => {

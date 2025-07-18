@@ -7,22 +7,34 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import * as t from 'io-ts';
 
-import type { RacRequestHandlerContext } from '../types';
-import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { buildRouteValidation } from './utils/route_validation';
+import type { RacRequestHandlerContext } from '../../types';
+import { BASE_RAC_ALERTS_API_PATH } from '../../../common/constants';
+import { getAlertFieldsRequestSchemaV1, getAlertFieldsResponseSchemaV1 } from '.';
 
 export const getAlertFieldsByRuleTypeIds = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
       path: `${BASE_RAC_ALERTS_API_PATH}/fields`,
       validate: {
-        query: buildRouteValidation(
-          t.partial({
-            ruleTypeIds: t.union([t.array(t.string), t.string]),
-          })
-        ),
+        request: {
+          query: getAlertFieldsRequestSchemaV1,
+        },
+        response: {
+          200: {
+            body: () => getAlertFieldsResponseSchemaV1,
+            description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates given rule type id or ids do not exist.',
+          },
+        },
       },
       security: {
         authz: {
@@ -35,11 +47,16 @@ export const getAlertFieldsByRuleTypeIds = (router: IRouter<RacRequestHandlerCon
     },
     async (context, request, response) => {
       try {
-        const { ruleTypeIds = [] } = request.query;
+        const { rule_type_ids: ruleTypeIds } = request.query;
+        const ruleTypeIdsArray = ruleTypeIds
+          ? Array.isArray(ruleTypeIds)
+            ? ruleTypeIds
+            : [ruleTypeIds]
+          : [];
         const racContext = await context.rac;
         const alerting = await racContext.getAlertsClient();
 
-        const alertFields = await alerting.getAlertFields(ruleTypeIds);
+        const alertFields = await alerting.getAlertFields(ruleTypeIdsArray);
 
         return response.ok({
           body: alertFields,

@@ -16,7 +16,7 @@ import { AlertsClient } from './alerts_client';
 export interface AlertsClientFactoryProps {
   logger: Logger;
   esClient: ElasticsearchClient;
-  getEsClientScoped?: (request: KibanaRequest) => Promise<ElasticsearchClient>;
+  getEsClientScoped: (request: KibanaRequest) => Promise<ElasticsearchClient>;
   getAlertingAuthorization: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -31,7 +31,7 @@ export class AlertsClientFactory {
   private isInitialized = false;
   private logger!: Logger;
   private esClient!: ElasticsearchClient;
-  private getEsClientScoped?: (request: KibanaRequest) => Promise<ElasticsearchClient>;
+  private getEsClientScoped!: (request: KibanaRequest) => Promise<ElasticsearchClient>;
   private getAlertingAuthorization!: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -64,13 +64,14 @@ export class AlertsClientFactory {
   public async create(request: KibanaRequest): Promise<AlertsClient> {
     const { securityPluginSetup, getAlertingAuthorization, logger } = this;
     const authorization = await getAlertingAuthorization(request);
+    const esClientScoped = await this.getEsClientScoped(request);
 
     return new AlertsClient({
       logger,
       authorization,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       esClient: this.esClient,
-      esClientScoped: this.getEsClientScoped ? await this.getEsClientScoped(request) : undefined,
+      esClientScoped,
       ruleDataService: this.ruleDataService!,
       getRuleType: this.getRuleType,
       getRuleList: this.getRuleList,

@@ -68,11 +68,4 @@ describe('mergeUniqueFieldsByName', () => {
     expect(res).toHaveLength(0);
     expect(res).toEqual([]);
   });
-
-  test('returns empty array when no fields match', async () => {
-    const res = mergeUniqueFieldsByName([], []);
-
-    expect(res).toHaveLength(0);
-    expect(res).toEqual([]);
-  });
 });
