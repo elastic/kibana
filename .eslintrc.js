@@ -788,7 +788,7 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/platform/test/ui_capabilities/*/tests/**/*',
-        'x-pack/test/upgrade_assistant_integration/**/*',
+        'x-pack/platform/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
@@ -1812,7 +1812,7 @@ module.exports = {
         'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
         'x-pack/platform/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/solutions/**/test/cases_api_integration/**/*.{ts, tsx}',
-        'x-pack/test/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/test/rule_registry/**/*.{ts, tsx}',
         'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
       rules: {

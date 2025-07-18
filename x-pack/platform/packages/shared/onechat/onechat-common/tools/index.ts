@@ -6,7 +6,7 @@
  */
 
 export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
-export { isReservedToolId, isBuiltInToolId } from './tool_ids';
+export { isReservedToolId, isBuiltInToolId, idRegexp } from './tool_ids';
 export { builtinToolIds, builtinTags, builtInToolIdPrefix } from './constants';
 export {
   type ByIdsToolSelection,
@@ -18,4 +18,10 @@ export {
   allToolsSelectionWildcard,
   allToolsSelection,
 } from './tool_selection';
-export type { EsqlToolConfig, EsqlToolFieldTypes, EsqlToolParam, EsqlToolDefinition } from './esql';
+export {
+  type EsqlToolConfig,
+  EsqlToolFieldType,
+  type EsqlToolFieldTypes,
+  type EsqlToolParam,
+  type EsqlToolDefinition,
+} from './esql';

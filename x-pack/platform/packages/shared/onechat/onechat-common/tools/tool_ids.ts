@@ -7,6 +7,8 @@
 
 import { builtInToolIdPrefix } from './constants';
 
+export const idRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+
 /**
  * Check if the given ID is a built-in ID (starting with `.`)
  */
