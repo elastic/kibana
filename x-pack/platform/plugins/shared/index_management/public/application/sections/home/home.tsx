@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,16 +33,47 @@ interface MatchParams {
   section: Section;
 }
 
+type TabFocusHistoryState =
+  | {
+      tabToFocus?: string;
+    }
+  | undefined;
+
 export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { section },
   },
   history,
+  location,
 }) => {
   const {
     plugins: { console: consolePlugin },
     privs,
   } = useAppContext();
+
+  // When an a11y user is navigating tabs, we do not want to reset their focus to the top of the page
+  //  every time they choose a tab.
+  const tabSelectedWithMouseclick = useRef<boolean>(false);
+  useEffect(() => {
+    const historyState = location.state as TabFocusHistoryState;
+    if (historyState?.tabToFocus) {
+      const tabToFocus = document.querySelector(
+        `[data-test-subj="${historyState.tabToFocus}"]`
+      ) as HTMLElement;
+      // Wait for EuiScreenReaderLive in the header to enqueue its focus() call
+      //  before we move focus back to the tab.
+      const timeoutId = setTimeout(() => {
+        tabToFocus?.focus();
+        history.replace(`/${section}`, { ...historyState, tabToFocus: undefined });
+        // Alternative to magic number timeout could be custom hook with backoff/retry focus calls to make
+        //  sure the focus is applied correctly.
+      }, 100);
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [location.state]);
+
   const tabs = [
     {
       id: Section.Indices,
@@ -93,19 +124,25 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   }
 
   const onSectionChange = (newSection: Section) => {
-    // This announcement happens when tab selected or mouse clicked. Announcement gets queued and happens
-    // after page load.
-    const liveRegion = document.getElementById('live-region');
-    if (liveRegion) {
-      liveRegion.textContent = `Navigated to new page: ${newSection} within Index Management`; // Announce the tab change for screen readers
+    if (!tabSelectedWithMouseclick.current) {
+      // User is using keyboard controls to navigate the page, focus should return to the tab
+      //  that was selected.
+      history.push(`/${newSection}`, {
+        tabToFocus: !tabSelectedWithMouseclick.current && `${newSection}Tab`,
+      });
+    } else {
+      history.push(`/${newSection}`);
     }
-    history.push(`/${newSection}`);
+    tabSelectedWithMouseclick.current = false;
   };
+  // Before onSectionChange is called, determine the methhod of tab selection (mouse vs keyboard)
+  //  to properly manage focus on next page load.
+  const onTabMouseDown = () => (tabSelectedWithMouseclick.current = true);
 
   const indexManagementTabs = (
     <>
       <EuiScreenReaderOnly>
-        <div id="live-region" aria-live="assertive" aria-atomic="true"></div>
+        <div id="live-region" aria-live="polite" aria-atomic="true"></div>
       </EuiScreenReaderOnly>
       <EuiPageHeader
         data-test-subj="indexManagementHeaderContent"
@@ -130,6 +167,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         ]}
         tabs={tabs.map((tab) => ({
           onClick: () => onSectionChange(tab.id),
+          onMouseDown: onTabMouseDown,
           isSelected: tab.id === section,
           key: tab.id,
           'data-test-subj': `${tab.id}Tab`,
