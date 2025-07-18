@@ -14,7 +14,6 @@ export default function ({ getService }: FtrProviderContext) {
   const ingestPipelines = getService('ingestPipelines');
   const es = getService('es');
   const url = `/api/ingest_pipelines/structure_tree`;
-  const rootPipelineName = 'root';
 
   /**
    * This function generates a Geometric series tree of {@link levels} levels and each node
@@ -78,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Pipeline structure tree', function () {
-    const createdPipelines = [];
+    const createdPipelines: string[] = [];
     before(async () => {
       // Create a complex tree of 7 levels and 5 children per node
       const treePipelines = await createComplexTree(7, 3);
