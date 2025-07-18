@@ -49,7 +49,6 @@ describe('savedObjectToItem', () => {
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
           id: '1',
           panelIndex: '1',
-          panelRefName: 'ref1',
           title: 'title1',
           type: 'type1',
           version: '2',
@@ -84,7 +83,6 @@ describe('savedObjectToItem', () => {
             },
             gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
             panelIndex: '1',
-            panelRefName: 'ref1',
             type: 'type1',
             version: '2',
           },
@@ -190,7 +188,7 @@ describe('savedObjectToItem', () => {
     expect(error).toBeNull();
     expect(item).toEqual({
       ...commonSavedObject,
-      references: undefined,
+      references: [],
       attributes: {
         title: 'title',
         description: 'my description',
@@ -262,7 +260,7 @@ describe('savedObjectToItem', () => {
         allowedAttributes: ['title', 'description'],
         allowedReferences: [],
       });
-      expect(item?.references).toBeUndefined();
+      expect(item?.references).toEqual([]);
     }
   });
 });

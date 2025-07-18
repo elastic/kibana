@@ -2320,7 +2320,7 @@
             "section": "def-public.HasEditCapabilities",
             "text": "HasEditCapabilities"
           },
-          " & Pick<",
+          " & Pick<Required<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2328,7 +2328,7 @@
             "section": "def-public.PublishesTitle",
             "text": "PublishesTitle"
           },
-          ", \"defaultTitle$\">"
+          ">, \"defaultTitle$\">"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/esql_control/types.ts",
         "deprecated": false,

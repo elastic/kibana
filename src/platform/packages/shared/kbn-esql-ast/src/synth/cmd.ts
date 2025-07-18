@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParseOptions } from '../parser';
-import { EsqlQuery } from '../query';
+import { ParseOptions, Parser } from '../parser';
 import { makeSynthNode, createSynthMethod } from './helpers';
 import type { SynthGenerator } from './types';
 import type { ESQLCommand } from '../types';
@@ -19,10 +18,7 @@ const generator: SynthGenerator<ESQLCommand> = (
 ): ESQLCommand => {
   src = src.trimStart();
 
-  const isSourceCommand = /^FROM/i.test(src);
-  const querySrc = isSourceCommand ? src : 'FROM a | ' + src;
-  const query = EsqlQuery.fromSrc(querySrc, { withFormatting, ...rest });
-  const command = query.ast.commands[isSourceCommand ? 0 : 1];
+  const { root: command } = Parser.parseCommand(src, { withFormatting, ...rest });
 
   if (command.type !== 'command') {
     throw new Error('Expected a command node');
