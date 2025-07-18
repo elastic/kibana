@@ -1629,7 +1629,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/functional/fixtures/kbn_archiver/dashboard_error_cases.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859020986
 /x-pack/test/functional/es_archives/getting_started/shakespeare @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1860319853
 /x-pack/platform/test/upgrade/screenshots @elastic/kibana-presentation
-/x-pack/test/functional/screenshots @elastic/kibana-presentation
+/x-pack/platform/test/functional/screenshots @elastic/kibana-presentation
 /src/platform/test/functional/fixtures/kbn_archiver/legacy.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/200934#discussion_r1856407606
 /x-pack/test/functional/fixtures/kbn_archiver/maps.json @elastic/kibana-presentation
 /x-pack/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
@@ -1670,7 +1670,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/services/maps_upgrade_services.ts @elastic/kibana-presentation
 /x-pack/test/stack_functional_integration/apps/maps @elastic/kibana-presentation
-/ x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
+/x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-presentation
 /x-pack/platform/test/api_integration/apis/maps/ @elastic/kibana-presentation
