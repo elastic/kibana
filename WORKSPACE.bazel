@@ -33,9 +33,9 @@ node_repositories(
     "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-glibc-217/dist/v{version}/{filename}",
   ],
   yarn_repositories = {
-    "1.22.21": ("yarn-v1.22.21.tar.gz", "yarn-v1.22.21", "a55bb4e85405f5dfd6e7154a444e7e33ad305d7ca858bad8546e932a6688df08"),
+    "1.22.22": ("yarn-v1.22.22.tar.gz", "yarn-v1.22.22", "88268464199d1611fcf73ce9c0a6c4d44c7d5363682720d8506f6508addf36a0"),
   },
-  yarn_version = "1.22.21",
+  yarn_version = "1.22.22",
   yarn_urls = [
     "https://github.com/yarnpkg/yarn/releases/download/v{version}/{filename}",
   ],
