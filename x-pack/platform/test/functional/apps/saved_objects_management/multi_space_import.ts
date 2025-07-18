@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.verifyNoRenderErrors();
   };
 
-  describe('should be able to handle multi-space imports correctly', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/228143
+  describe.skip('should be able to handle multi-space imports correctly', function () {
     before(async function () {
       await spacesService.create({
         id: 'another_space',

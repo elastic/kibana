@@ -36,7 +36,7 @@ export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
   } = useKibana();
   const [status, setStatus] = useState<ChatStatus>('ready');
   const { actions, conversationId, conversation } = useConversation();
-  const { agentId } = conversation ?? {};
+  const { agent_id: agentId } = conversation ?? {};
 
   const sendMessage = useCallback(
     (nextMessage: string) => {
@@ -72,7 +72,6 @@ export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
                 result: '',
                 tool_call_id: event.data.tool_call_id,
                 tool_id: event.data.tool_id,
-                tool_type: event.data.tool_type,
               }),
             });
           } else if (isToolResultEvent(event)) {

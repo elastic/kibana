@@ -209,7 +209,7 @@ export const RelationsParameter = () => {
                       }
                     );
                     return (
-                      <EuiToolTip content={label} delay="long">
+                      <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
                         <EuiButtonIcon
                           data-test-subj="removeRelationshipButton"
                           aria-label={label}

@@ -5,31 +5,29 @@
  * 2.0.
  */
 
-import { ToolDescriptor } from './tools';
+import { ToolType } from './definition';
 import {
   allToolsSelectionWildcard,
   ByIdsToolSelection,
+  ToolSelectionRelevantFields,
   filterToolsBySelection,
   toolMatchSelection,
 } from './tool_selection';
 
 describe('toolMatchSelection', () => {
-  const tool: ToolDescriptor = {
+  const tool: ToolSelectionRelevantFields = {
     id: 'toolA',
-    description: 'Tool A description',
-    meta: {
-      providerId: 'type1',
-      tags: [],
-    },
+    type: 'type1' as ToolType,
+    tags: [],
   };
 
   it('should return true if provider matches and toolId is included', () => {
-    const toolSelection: ByIdsToolSelection = { type: 'type1', tool_ids: ['toolA'] };
+    const toolSelection: ByIdsToolSelection = { type: 'type1' as ToolType, tool_ids: ['toolA'] };
     expect(toolMatchSelection(tool, toolSelection)).toBe(true);
   });
 
   it('should return false if type does not match', () => {
-    const toolSelection: ByIdsToolSelection = { type: 'type2', tool_ids: ['toolA'] };
+    const toolSelection: ByIdsToolSelection = { type: 'type2' as ToolType, tool_ids: ['toolA'] };
     expect(toolMatchSelection(tool, toolSelection)).toBe(false);
   });
 
@@ -55,30 +53,21 @@ describe('toolMatchSelection', () => {
 });
 
 describe('filterToolsBySelection', () => {
-  const tools: ToolDescriptor[] = [
+  const tools: ToolSelectionRelevantFields[] = [
     {
       id: 'toolA',
-      description: 'Tool A description',
-      meta: {
-        providerId: 'type1',
-        tags: [],
-      },
+      type: 'type1' as ToolType,
+      tags: [],
     },
     {
       id: 'toolB',
-      description: 'Tool B description',
-      meta: {
-        providerId: 'type1',
-        tags: [],
-      },
+      type: 'type1' as ToolType,
+      tags: [],
     },
     {
       id: 'toolC',
-      description: 'Tool C description',
-      meta: {
-        providerId: 'type2',
-        tags: [],
-      },
+      type: 'type2' as ToolType,
+      tags: [],
     },
   ];
 
@@ -88,19 +77,13 @@ describe('filterToolsBySelection', () => {
     expect(result).toEqual([
       {
         id: 'toolA',
-        description: 'Tool A description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
       {
         id: 'toolC',
-        description: 'Tool C description',
-        meta: {
-          providerId: 'type2',
-          tags: [],
-        },
+        type: 'type2',
+        tags: [],
       },
     ]);
   });
@@ -113,40 +96,33 @@ describe('filterToolsBySelection', () => {
 
   it('should filter tools by provider', () => {
     const toolSelection: ByIdsToolSelection[] = [
-      { type: 'type1', tool_ids: [allToolsSelectionWildcard] },
+      { type: 'type1' as ToolType, tool_ids: [allToolsSelectionWildcard] },
     ];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([
       {
         id: 'toolA',
-        description: 'Tool A description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
       {
         id: 'toolB',
-        description: 'Tool B description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
     ]);
   });
 
   it('should filter tools by provider and specific tool_ids', () => {
-    const toolSelection: ByIdsToolSelection[] = [{ type: 'type1', tool_ids: ['toolA'] }];
+    const toolSelection: ByIdsToolSelection[] = [
+      { type: 'type1' as ToolType, tool_ids: ['toolA'] },
+    ];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([
       {
         id: 'toolA',
-        description: 'Tool A description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
     ]);
   });
@@ -159,26 +135,20 @@ describe('filterToolsBySelection', () => {
 
   it('should handle multiple selections', () => {
     const toolSelection: ByIdsToolSelection[] = [
-      { type: 'type1', tool_ids: ['toolA'] },
-      { type: 'type2', tool_ids: [allToolsSelectionWildcard] },
+      { type: 'type1' as ToolType, tool_ids: ['toolA'] },
+      { type: 'type2' as ToolType, tool_ids: [allToolsSelectionWildcard] },
     ];
     const result = filterToolsBySelection(tools, toolSelection);
     expect(result).toEqual([
       {
         id: 'toolA',
-        description: 'Tool A description',
-        meta: {
-          providerId: 'type1',
-          tags: [],
-        },
+        type: 'type1',
+        tags: [],
       },
       {
         id: 'toolC',
-        description: 'Tool C description',
-        meta: {
-          providerId: 'type2',
-          tags: [],
-        },
+        type: 'type2',
+        tags: [],
       },
     ]);
   });
