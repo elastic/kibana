@@ -6,10 +6,16 @@
  */
 
 import { fetchPipelineStructureTree } from './fetch_pipeline_structure_tree';
-import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
+import { MAX_TREE_LEVEL, PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
 import type { estypes } from '@elastic/elasticsearch';
 
 describe('fetchPipelineStructureTree', () => {
+  it('returns undefined if root pipeline is missing', () => {
+    const allPipelines: Record<string, estypes.IngestPipeline> = {};
+    const result = fetchPipelineStructureTree(allPipelines, 'nonexistent');
+    expect(result).toBeUndefined();
+  });
+
   it('fetches a simple root pipeline', () => {
     const allPipelines: Record<string, estypes.IngestPipeline> = {
       'my-pipeline': {
@@ -88,13 +94,15 @@ describe('fetchPipelineStructureTree', () => {
 
     const resultFromRoot = fetchPipelineStructureTree(allPipelines, 'root');
 
-    let lastLeaf = resultFromRoot;
-    let currentLevel = 1;
-    while (currentLevel < MAX_TREE_LEVEL + 1) {
-      lastLeaf = lastLeaf.children[0];
-      currentLevel++;
+    // Traverse until reaching max level
+    let node = resultFromRoot;
+    let depth = 1;
+    while (depth <= MAX_TREE_LEVEL && node?.children?.[0]) {
+      node = node.children[0];
+      depth++;
     }
-    expect(lastLeaf).toEqual({
+
+    expect(node).toEqual({
       pipelineName: 'infinite',
       isManaged: false,
       isDeprecated: false,
@@ -114,8 +122,8 @@ describe('fetchPipelineStructureTree', () => {
 
     const result = fetchPipelineStructureTree(allPipelines, 'root');
 
-    expect(result.children).toHaveLength(1);
-    expect(result.children?.[0].pipelineName).toBe('sub');
+    expect(result?.children).toHaveLength(1);
+    expect(result?.children?.[0].pipelineName).toBe('sub');
   });
 
   it('handles missing processors, deprecated, and managed fields gracefully', () => {
@@ -128,6 +136,35 @@ describe('fetchPipelineStructureTree', () => {
     expect(result).toEqual({
       pipelineName: 'root',
       isManaged: false,
+      isDeprecated: false,
+      children: [],
+    });
+  });
+
+  it('reuses already created nodes via the createdNodes param', () => {
+    const allPipelines: Record<string, estypes.IngestPipeline> = {
+      root: {
+        processors: [{ pipeline: { name: 'shared-child' } }, { pipeline: { name: 'child' } }],
+      },
+      'shared-child': {
+        processors: [],
+        _meta: { managed: true },
+      },
+      child: {
+        processors: [{ pipeline: { name: 'shared-child' } }],
+      },
+    };
+
+    const createdNodes: Record<string, PipelineTreeNode> = {};
+    const result = fetchPipelineStructureTree(allPipelines, 'root', 1, createdNodes);
+
+    expect(result?.children).toHaveLength(2);
+
+    // Confirm shared-child is only created once and reused
+    expect(Object.keys(createdNodes)).toEqual(['shared-child', 'child']);
+    expect(createdNodes['shared-child']).toEqual({
+      pipelineName: 'shared-child',
+      isManaged: true,
       isDeprecated: false,
       children: [],
     });
