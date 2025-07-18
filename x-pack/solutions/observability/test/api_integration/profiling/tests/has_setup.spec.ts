@@ -24,6 +24,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const es = getService('es');
   const retry = getService('retry');
 
+  // Failing: See https://github.com/elastic/kibana/issues/167076
   registry.when.skip('Profiling status check', { config: 'cloud' }, () => {
     describe('Profiling is not set up and no data is loaded', () => {
       before(async () => {

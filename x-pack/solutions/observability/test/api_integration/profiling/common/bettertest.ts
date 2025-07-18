@@ -39,11 +39,6 @@ export function getBettertest(st: supertest.Agent): BetterTest {
         .set('x-elastic-internal-origin', 'Kibana');
     }
 
-    // supertest doesn't throw on http errors
-    // if (res?.status !== 200 && res?.status !== 202) {
-    //   throw new BetterTestError(res);
-    // }
-
     return res;
   };
 }
