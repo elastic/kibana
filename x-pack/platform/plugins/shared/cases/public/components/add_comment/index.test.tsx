@@ -318,10 +318,6 @@ describe('draft comment ', () => {
 });
 
 describe('submit comment by key press', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   beforeAll(() => {
     jest.useFakeTimers();
   });

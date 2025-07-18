@@ -179,10 +179,11 @@ export const AddComment = React.memo(
         isLoading || !comment?.trim().length || comment.trim().length > MAX_COMMENT_LENGTH;
 
       const handleKeyDown = useCallback(
-        (event: { key: string; metaKey: boolean; ctrlKey: boolean }) => {
+        (event: KeyboardEvent) => {
           const modifierPressed = event.ctrlKey || event.metaKey;
           const isEnter = event.key === 'Enter' || event.key === 'NumpadEnter';
           if (!isDisabled && isEnter && modifierPressed) {
+            event.preventDefault();
             onSubmit();
           }
         },
