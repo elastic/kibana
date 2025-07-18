@@ -28,6 +28,13 @@ export const SETTINGS_UPDATED_TOAST_TITLE = i18n.translate(
   }
 );
 
+export const GEN_AI_SETTINGS_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.genAiSettingsButton',
+  {
+    defaultMessage: 'GenAI Settings',
+  }
+);
+
 export const CONNECTORS_MENU_ITEM = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.settingsConnectorsMenuItemTitle',
   {

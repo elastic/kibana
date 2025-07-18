@@ -6,7 +6,14 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButtonEmpty,
+  EuiPageTemplate,
+  EuiTitle,
+  useEuiShadow,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import * as i18n from './translations';
@@ -63,6 +70,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
+    const { navigateToApp } = useAssistantContext();
 
     const tabsConfig = useMemo(
       () => [
@@ -129,6 +137,16 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               </EuiTitle>
             </>
           }
+          rightSideItems={[
+            <EuiButtonEmpty
+              iconType="gear"
+              size="m"
+              onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+              data-test-subj="genAiSettingsButton"
+            >
+              {i18n.GEN_AI_SETTINGS_BUTTON}
+            </EuiButtonEmpty>,
+          ]}
           tabs={tabs}
           paddingSize="none"
         />

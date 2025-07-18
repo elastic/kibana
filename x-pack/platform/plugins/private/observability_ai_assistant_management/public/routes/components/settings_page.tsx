@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAvatar,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -124,55 +125,74 @@ export function SettingsPage() {
 
   return (
     <div data-test-subj="aiAssistantSettingsPage">
-      <EuiFlexGroup gutterSize="none" alignItems="center">
+      <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiAvatar
-                iconType="logoObservability"
-                iconSize="m"
-                color="plain"
-                name={i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.settingsPage.observabilityAvatarLabel',
-                  {
-                    defaultMessage: 'Observability AI',
-                  }
-                )}
-                css={css`
-                  ${headerIconShadow};
-                `}
-              />
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiAvatar
+                    iconType="logoObservability"
+                    iconSize="m"
+                    color="plain"
+                    name={i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.settingsPage.observabilityAvatarLabel',
+                      {
+                        defaultMessage: 'Observability AI',
+                      }
+                    )}
+                    css={css`
+                      ${headerIconShadow};
+                    `}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiAvatar
+                    iconType="logoEnterpriseSearch"
+                    iconSize="m"
+                    color="plain"
+                    name={i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.settingsPage.searchAvatarLabel',
+                      {
+                        defaultMessage: 'Enterprise Search AI',
+                      }
+                    )}
+                    css={css`
+                      ${headerIconShadow};
+                      margin-right: ${euiTheme.base * 0.75}px;
+                    `}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiAvatar
-                iconType="logoEnterpriseSearch"
-                iconSize="m"
-                color="plain"
-                name={i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.settingsPage.searchAvatarLabel',
-                  {
-                    defaultMessage: 'Enterprise Search AI',
-                  }
-                )}
-                css={css`
-                  ${headerIconShadow};
-                  margin-right: ${euiTheme.base * 0.75}px;
-                `}
-              />
+              <EuiTitle size="m">
+                <h2>
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
+                    {
+                      defaultMessage: 'AI Assistant for Observability and Search',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h2>
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
-                {
-                  defaultMessage: 'AI Assistant for Observability and Search',
-                }
-              )}
-            </h2>
-          </EuiTitle>
+          <EuiButtonEmpty
+            iconType="gear"
+            size="m"
+            onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+            data-test-subj="genAiSettingsButton"
+          >
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton',
+              {
+                defaultMessage: 'GenAI Settings',
+              }
+            )}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 
