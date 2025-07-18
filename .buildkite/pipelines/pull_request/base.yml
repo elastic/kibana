@@ -51,7 +51,7 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: c3d-highcpu-16
+      machineType: c3d-standard-16
       preemptible: true
       diskSizeGb: 85
     key: linting
