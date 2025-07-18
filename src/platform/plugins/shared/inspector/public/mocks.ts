@@ -17,7 +17,6 @@ import { plugin as pluginInitializer } from '.';
 import { InspectorPanel } from './async_services';
 InspectorPanel;
 
-
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;
 
