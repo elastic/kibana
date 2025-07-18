@@ -90,7 +90,11 @@ export class WorkflowsExecutionEnginePlugin
         });
 
         for (const currentStep of workflow.steps) {
-          const step = StepFactory.create(currentStep, contextManager, connectorExecutor);
+          const step = new StepFactory().create(
+            currentStep as any,
+            contextManager,
+            connectorExecutor
+          );
           const workflowExecutionId = `${workflowRunId}-${currentStep.id}`;
           const stepStartedAt = new Date();
 

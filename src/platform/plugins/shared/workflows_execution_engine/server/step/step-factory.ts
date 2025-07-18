@@ -30,7 +30,7 @@ import { ConnectorStepImpl } from './connector-step';
 // import { MergeStepImpl } from './merge-step'; // To be created
 
 export class StepFactory {
-  public static create<TStep extends BaseStep>(
+  public create<TStep extends BaseStep>(
     step: TStep, // Use z.infer<typeof StepSchema> when fully defined
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor // this is temporary, we will remove it when we have a proper connector executor
