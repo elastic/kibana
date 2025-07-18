@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import axios from 'axios';
+import { last } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import { tmpdir } from 'os';
 import { writeFile } from 'fs/promises';
@@ -12,10 +14,30 @@ import { v4 as uuid } from 'uuid';
 import execa from 'execa';
 import path from 'path';
 import expect from '@kbn/expect';
-
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { getLatestVersion } from '../../../fleet_cypress/artifact_manager';
 import { skipIfNoDockerRegistry } from '../../helpers';
+
+const DEFAULT_VERSION = '8.15.0-SNAPSHOT';
+const name = 'Artifact Manager - getLatestVersion';
+
+export async function getLatestVersion(): Promise<string> {
+  return retryForSuccess(
+    new ToolingLog({ level: 'debug', writeTo: process.stdout }, { context: name }),
+    {
+      timeout: 60_000,
+      methodName: name,
+      retryCount: 20,
+      block: () => axios('https://artifacts-api.elastic.co/v1/versions'),
+    }
+  )
+    .then(
+      (response) =>
+        last((response.data.versions as string[]).filter((v) => v.includes('-SNAPSHOT'))) ||
+        DEFAULT_VERSION
+    )
+    .catch(() => DEFAULT_VERSION);
+}
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
