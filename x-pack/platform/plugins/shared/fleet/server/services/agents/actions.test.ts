@@ -221,16 +221,16 @@ describe('Agent actions', () => {
 
     it('should sign UNENROLL, UPGRADE and MIGRATE actions', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
-      const newActions: NewAgentAction[] = (['UNENROLL', 'UPGRADE', 'MIGRATE'] as AgentActionType[]).map(
-        (actionType, i) => {
-          const actionId = `action${i + 1}`;
-          return {
-            id: actionId,
-            type: actionType,
-            agents: [actionId],
-          };
-        }
-      );
+      const newActions: NewAgentAction[] = (
+        ['UNENROLL', 'UPGRADE', 'MIGRATE'] as AgentActionType[]
+      ).map((actionType, i) => {
+        const actionId = `action${i + 1}`;
+        return {
+          id: actionId,
+          type: actionType,
+          agents: [actionId],
+        };
+      });
 
       await bulkCreateAgentActions(esClient, newActions);
       expect(esClient.bulk).toHaveBeenCalledWith(
