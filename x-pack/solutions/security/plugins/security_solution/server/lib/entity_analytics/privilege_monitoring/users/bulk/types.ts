@@ -9,6 +9,11 @@ import type { Either } from 'fp-ts/Either';
 
 export interface BulkPrivMonUser {
   username: string;
+  label?: {
+    field: string;
+    value: string;
+    source: string;
+  };
   index: number;
 }
 

@@ -222,6 +222,10 @@ export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInven
 
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
+export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
+  'securitySolution:enablePrivilegedUserMonitoring' as const;
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -522,4 +526,7 @@ export const AI_FOR_SOC_INTEGRATIONS = [
 /*
  * The tag to mark promotion rules that are related to the AI for SOC integrations
  */
-export const PROMOTION_RULE_TAG = 'Promotion';
+export const PROMOTION_RULE_TAGS = [
+  'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live
+  'Promotion: External Alerts',
+];
