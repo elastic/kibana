@@ -260,7 +260,7 @@ export const ModalInspectQuery = ({
                 >
                   {isString(inspectRequest.body)
                     ? inspectRequest.body
-                    : manageStringify(inspectRequest.body)}
+                    : manageStringify(inspectRequest.body ?? inspectRequest)}
                 </EuiCodeBlock>
               </Fragment>
             ))
