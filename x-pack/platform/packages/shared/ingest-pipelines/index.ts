@@ -6,3 +6,4 @@
  */
 
 export { PipelineStructureTree } from './src';
+export { PipelineTreeNode } from './src/components/pipeline_structure_tree/types';

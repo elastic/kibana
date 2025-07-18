@@ -42,6 +42,7 @@ export interface Props {
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: Pipeline[]) => void;
+  openFlyout: () => void;
 }
 
 export const deprecatedPipelineBadge = {
@@ -112,6 +113,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onEditPipelineClick,
   onClonePipelineClick,
   onDeletePipelineClick,
+  openFlyout,
 }) => {
   const [queryText, setQueryText] = useState<string>('');
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>(defaultFilterOptions);
@@ -317,14 +319,19 @@ export const PipelineTable: FunctionComponent<Props> = ({
         render: (name: string) => {
           const currentSearch = history.location.search;
           const prependSearch = isEmpty(currentSearch) ? '?' : `${currentSearch}&`;
+          const { href, onClick: navigate } = reactRouterNavigate(history, {
+            pathname: '',
+            search: `${prependSearch}pipeline=${encodeURIComponent(name)}`,
+          });
 
           return (
             <EuiLink
               data-test-subj="pipelineDetailsLink"
-              {...reactRouterNavigate(history, {
-                pathname: '',
-                search: `${prependSearch}pipeline=${encodeURIComponent(name)}`,
-              })}
+              href={href}
+              onClick={() => {
+                openFlyout();
+                navigate();
+              }}
             >
               {name}
             </EuiLink>

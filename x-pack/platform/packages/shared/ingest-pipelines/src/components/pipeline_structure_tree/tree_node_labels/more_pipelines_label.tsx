@@ -11,11 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 interface MorePipelinesLabelProps {
   count: number;
+  onClick: () => void;
 }
 
-export const MorePipelinesLabel = ({ count }: MorePipelinesLabelProps) => {
+export const MorePipelinesLabel = ({ count, onClick }: MorePipelinesLabelProps) => {
   return (
-    <EuiLink color="primary" onClick={() => {}} data-test-subj="morePipelinesNodeLabel">
+    <EuiLink color="primary" onClick={onClick} data-test-subj="morePipelinesNodeLabel">
       <FormattedMessage
         id="ingestPipelines.pipelineStructureTree.morePipelinesTreeNodeLabel"
         defaultMessage="+{count} more {count, plural,one {pipeline} other {pipelines}}"

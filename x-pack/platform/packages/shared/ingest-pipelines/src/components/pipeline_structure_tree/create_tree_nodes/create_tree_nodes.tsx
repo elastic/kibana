@@ -19,6 +19,7 @@ export const createTreeNodesFromPipelines = (
   treeNode: PipelineTreeNode,
   selectedPipeline: string,
   setSelectedPipeline: (pipelineName: string) => void,
+  clickMorePipelines: (name: string) => void,
   level: number = 1
 ): Node => {
   const currentNode = {
@@ -45,7 +46,12 @@ export const createTreeNodesFromPipelines = (
     if (treeNode.children) {
       const morePipelinesNode = {
         id: `${treeNode.pipelineName}-moreChildrenPipelines`,
-        label: <MorePipelinesLabel count={treeNode.children.length} />,
+        label: (
+          <MorePipelinesLabel
+            count={treeNode.children.length}
+            onClick={() => clickMorePipelines(treeNode.pipelineName)}
+          />
+        ),
         'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
         className: 'cssTreeNode-morePipelines',
       };
@@ -55,7 +61,7 @@ export const createTreeNodesFromPipelines = (
   }
   treeNode.children.forEach((node) => {
     currentNode.children!.push(
-      createTreeNodesFromPipelines(node, selectedPipeline, setSelectedPipeline, level + 1)
+      createTreeNodesFromPipelines(node, selectedPipeline, setSelectedPipeline, clickMorePipelines,level + 1)
     );
   });
   return currentNode;

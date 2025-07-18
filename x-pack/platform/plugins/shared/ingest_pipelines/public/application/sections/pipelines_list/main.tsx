@@ -8,8 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Location } from 'history';
-import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -41,17 +39,11 @@ import { PipelineDeleteModal } from './delete_modal';
 import { getErrorText } from '../utils';
 import { PipelineFlyout } from './pipeline_flyout';
 
-const getPipelineNameFromLocation = (location: Location) => {
-  const { pipeline } = parse(location.search.substring(1));
-  return pipeline;
-};
-
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   history,
   location,
 }) => {
   const { services } = useKibana();
-  const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
   const [showPopover, setShowPopover] = useState<boolean>(false);
@@ -66,12 +58,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     services.metric.trackUiMetric(UIM_PIPELINES_LIST_LOAD);
     services.breadcrumbs.setBreadcrumbs('home');
   }, [services.metric, services.breadcrumbs]);
-
-  useEffect(() => {
-    if (pipelineNameFromLocation && data?.length) {
-      setShowFlyout(true);
-    }
-  }, [pipelineNameFromLocation, data]);
 
   const goToEditPipeline = (pipelineName: string) => {
     const encodedParam = encodeURIComponent(pipelineName);
@@ -252,11 +238,12 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         onDeletePipelineClick={setPipelinesToDelete}
         onClonePipelineClick={goToClonePipeline}
         pipelines={data as Pipeline[]}
+        openFlyout={() => setShowFlyout(true)}
       />
 
       {showFlyout && (
         <PipelineFlyout
-          pipeline={pipelineNameFromLocation}
+          location={location}
           onClose={() => {
             goHome();
           }}

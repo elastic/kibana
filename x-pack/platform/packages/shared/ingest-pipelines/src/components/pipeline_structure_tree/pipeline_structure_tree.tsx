@@ -19,6 +19,10 @@ export interface PipelineStructureTreeProps {
    * when the user clicks on the last "+X more pipelines" tree node.
    */
   isExtension: boolean;
+  selectedPipeline: string;
+  setSelectedPipeline: (name: string) => void;
+  clickMorePipelines: (name: string) => void;
+  goBack: () => void;
 }
 
 /**
@@ -30,23 +34,26 @@ export interface PipelineStructureTreeProps {
 export const PipelineStructureTree = ({
   pipelineTree,
   isExtension,
+                                        selectedPipeline,
+                                        setSelectedPipeline,
+  clickMorePipelines,
+  goBack,
 }: PipelineStructureTreeProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = getStyles(euiTheme, isExtension);
 
-  const [selectedPipeline, setSelectedPipeline] = useState(pipelineTree.pipelineName);
-
   const treeNode = createTreeNodesFromPipelines(
     pipelineTree,
     selectedPipeline,
-    setSelectedPipeline
+    setSelectedPipeline,
+    clickMorePipelines,
   );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
       {isExtension && (
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" onClick={() => {}}>
+          <EuiButtonEmpty iconType="arrowLeft" onClick={goBack}>
             <FormattedMessage
               id="ingestPipelines.pipelineStructureTree.backToMainTreeNodeLabel"
               defaultMessage="Back to previous pipelines"
