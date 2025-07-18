@@ -9,7 +9,6 @@ import { cpuV2 } from './cpu_v2';
 import { cpu } from './cpu';
 import { diskLatency } from './disk_latency';
 import { diskSpaceUsage } from './disk_space_usage';
-import { count } from '../../../shared/metrics/snapshot/count';
 import { load } from './load';
 import { logRate } from './log_rate';
 import { memory } from './memory';
@@ -26,7 +25,6 @@ export const snapshot = {
   cpuV2,
   diskLatency,
   diskSpaceUsage,
-  count,
   load,
   logRate,
   memory,

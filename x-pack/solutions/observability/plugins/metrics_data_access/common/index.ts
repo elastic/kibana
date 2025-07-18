@@ -11,7 +11,6 @@ export {
   getFieldByType,
   findInventoryFields,
   metrics,
-  type InventoryModels,
   isBasicMetricAgg,
   isDerivativeAgg,
   isSumBucketAgg,
@@ -39,8 +38,8 @@ export type {
 } from './inventory_models/types';
 
 export type {
-  AggregationMetricsCatalog,
-  LensMetricsCatalog,
+  MetricsAggregationsCatalog,
+  MetricsFormulasCatalog,
 } from './inventory_models/shared/metrics/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';

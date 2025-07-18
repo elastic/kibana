@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { JsonObject } from '@kbn/utility-types';
 import type {
-  AggregationMetricsCatalog,
+  MetricsAggregationsCatalog,
   InventoryItemType,
   MetricsUIAggregation,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -43,7 +43,7 @@ export const metricToAggregation = async (
     };
   }
 
-  const aggregations: AggregationMetricsCatalog = await inventoryModel.metrics.getAggregations();
+  const aggregations: MetricsAggregationsCatalog = await inventoryModel.metrics.getAggregations();
   return aggregations.get(metric.type);
 };
 

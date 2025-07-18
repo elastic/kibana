@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type {
-  AggregationMetricsCatalog,
+  MetricsAggregationsCatalog,
   InventoryItemType,
   SnapshotMetricType,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -26,7 +26,7 @@ export const calculateFromBasedOnMetric = async (
 ) => {
   const inventoryModel = findInventoryModel(nodeType);
 
-  const aggregations: AggregationMetricsCatalog = await inventoryModel.metrics.getAggregations();
+  const aggregations: MetricsAggregationsCatalog = await inventoryModel.metrics.getAggregations();
 
   const metricAgg = aggregations.get(metric);
 

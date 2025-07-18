@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { LensMetricChartMap } from '../../../../types';
+import type { LensMetricChartConfig } from '../../../../shared/metrics/types';
 import { node } from './node';
 
 export const charts = {
   node,
-} satisfies LensMetricChartMap;
+} satisfies LensMetricChartConfig;

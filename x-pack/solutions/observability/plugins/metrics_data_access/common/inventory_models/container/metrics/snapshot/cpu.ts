@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricsUIAggregation } from '../../../shared/metrics/types';
+import type { MetricsUIAggregation } from '../../../types';
 
 export const cpu: MetricsUIAggregation = {
   cpu: {

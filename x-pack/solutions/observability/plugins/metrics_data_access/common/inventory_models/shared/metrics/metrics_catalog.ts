@@ -12,6 +12,7 @@ import type {
   MetricConfigEntry,
   MetricConfigMap,
   ResolvedMetricMap,
+  SchemaTypes,
   SchemaWrappedEntry,
 } from './types';
 
@@ -22,7 +23,7 @@ export class MetricsCatalog<
 {
   private readonly catalog: TResolved;
 
-  constructor(configCatalog: TConfig, private readonly schema: 'ecs' | 'semconv' = 'ecs') {
+  constructor(configCatalog: TConfig, private readonly schema: SchemaTypes = 'ecs') {
     this.catalog = this.resolveSchemaMetrics(configCatalog);
   }
 

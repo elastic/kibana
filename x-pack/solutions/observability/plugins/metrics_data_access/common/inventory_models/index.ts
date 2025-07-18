@@ -15,7 +15,8 @@ import { awsS3 } from './aws_s3';
 import { awsRDS } from './aws_rds';
 import { awsSQS } from './aws_sqs';
 import { container } from './container';
-import type { InventoryItemType } from './types';
+import type { InventoryItemType, InventoryModel } from './types';
+import type { InventoryMetricsConfig } from './shared/metrics/types';
 export { metrics } from './metrics';
 
 const catalog = {
@@ -26,12 +27,11 @@ const catalog = {
   awsS3,
   awsRDS,
   awsSQS,
-} as const;
+} satisfies Record<string, InventoryModel<InventoryItemType, InventoryMetricsConfig>>;
 
 export const inventoryModels = Object.values(catalog);
-export type InventoryModels<T extends InventoryItemType> = (typeof catalog)[T];
 
-export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
+export const findInventoryModel = <TType extends InventoryItemType>(type: TType) => {
   const model = catalog[type];
   if (!model) {
     throw new Error(
@@ -41,7 +41,7 @@ export const findInventoryModel = <T extends InventoryItemType>(type: T): Invent
     );
   }
 
-  return model as InventoryModels<T>;
+  return model;
 };
 
 const LEGACY_TYPES = ['host', 'pod', 'container'];

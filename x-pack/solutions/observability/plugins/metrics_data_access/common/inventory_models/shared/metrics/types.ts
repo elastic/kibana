@@ -13,22 +13,15 @@ import type {
   TSVBMetricModelCreator,
 } from '../../types';
 
+export type SchemaTypes = 'ecs' | 'semconv';
+
 export type LensSchemaVariant = Omit<LensBaseLayer, 'value'> & {
-  value: {
-    ecs: LensBaseLayer['value'];
-    semconv: LensBaseLayer['value'];
-  };
+  value: Record<SchemaTypes, LensBaseLayer['value']>;
 };
-
-export interface AggregationSchemaVariant {
-  ecs: MetricsUIAggregation;
-  semconv: MetricsUIAggregation;
-}
-
-export type RawMetricEntry = LensFormulaConfig | AggregationConfig;
-
 export type LensFormulaConfig = LensBaseLayer | LensSchemaVariant;
-export type AggregationConfig = Record<string, MetricsUIAggregation | AggregationSchemaVariant>;
+export type AggregationSchemaVariant = Record<SchemaTypes, MetricsUIAggregation>;
+export type AggregationConfig = MetricsUIAggregation | AggregationSchemaVariant;
+export type RawMetricEntry = LensFormulaConfig | AggregationConfig;
 
 export type SchemaWrappedEntry<T> = T extends AggregationConfig
   ? AggregationSchemaVariant
@@ -64,12 +57,12 @@ export interface BaseMetricsCatalog<
   getAll(): TResolved;
 }
 
-export type AggregationMetricsCatalog = BaseMetricsCatalog<
-  AggregationConfig,
-  ResolvedMetricMap<AggregationConfig>
+export type MetricsAggregationsCatalog = BaseMetricsCatalog<
+  Record<string, AggregationConfig>,
+  ResolvedMetricMap<Record<string, AggregationConfig>>
 >;
 
-export type LensMetricsCatalog = BaseMetricsCatalog<
+export type MetricsFormulasCatalog = BaseMetricsCatalog<
   Record<string, LensFormulaConfig>,
   ResolvedMetricMap<Record<string, LensFormulaConfig>>
 >;
@@ -88,7 +81,7 @@ export interface BaseInventoryMetricsConfig<TCatalog extends MetricConfigMap> {
   defaultSnapshot: SnapshotMetricType;
   defaultTimeRangeInSeconds: number;
   getAggregations: (args?: {
-    schema?: 'ecs' | 'semconv';
+    schema?: SchemaTypes;
   }) => Promise<BaseMetricsCatalog<TCatalog, ResolvedMetricMap<TCatalog>>>;
 }
 
@@ -98,7 +91,7 @@ export interface InventoryMetricsConfigWithLens<
   TCharts extends LensMetricChartConfig
 > extends BaseInventoryMetricsConfig<TAggeggations> {
   getFormulas: (args?: {
-    schema?: 'ecs' | 'semconv';
+    schema?: SchemaTypes;
   }) => Promise<BaseMetricsCatalog<TFormulas, ResolvedMetricMap<TFormulas>>>;
   getCharts: () => Promise<TCharts>;
 }
