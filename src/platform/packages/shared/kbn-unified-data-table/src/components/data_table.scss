@@ -11,14 +11,6 @@
   text-align: left;
 }
 
-.unifiedDataTable__cellPopover {
-  // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
-  .lines-content.monaco-editor-background {
-    overflow: unset !important;
-    contain: unset !important;
-  }
-}
-
 .unifiedDataTable__cellPopoverValue {
   font-family: $euiCodeFontFamily;
   font-size: $euiFontSizeS;
