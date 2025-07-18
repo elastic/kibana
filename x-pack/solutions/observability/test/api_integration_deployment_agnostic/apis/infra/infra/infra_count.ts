@@ -6,15 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  GetInfraAssetCountRequestBodyPayloadClient,
-  GetInfraAssetCountResponsePayload,
-  GetInfraAssetCountRequestParamsPayload,
+import {
+  GetInfraEntityCountRequestBodyPayloadClient,
+  GetInfraEntityCountRequestParamsPayload,
+  GetInfraEntityCountResponsePayload,
 } from '@kbn/infra-plugin/common/http_api';
-import type { SupertestWithRoleScopeType } from '../../services';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-import { DATES } from './utils/constants';
+import { DATES } from '../utils/constants';
 
 const timeRange = {
   from: new Date(DATES['8.0.0'].logs_and_metrics.min).toISOString(),
@@ -25,16 +25,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
 
-  describe('API /api/infra/{assetType}/count', () => {
+  describe('API /api/infra/{entityType}/count', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 
     const fetchHostsCount = async ({
       params,
       body,
     }: {
-      params: GetInfraAssetCountRequestParamsPayload;
-      body: GetInfraAssetCountRequestBodyPayloadClient;
-    }): Promise<GetInfraAssetCountResponsePayload | undefined> => {
+      params: GetInfraEntityCountRequestParamsPayload;
+      body: GetInfraEntityCountRequestBodyPayloadClient;
+    }): Promise<GetInfraEntityCountResponsePayload | undefined> => {
       const { entityType } = params;
       const response = await supertestWithAdminScope
         .post(`/api/infra/${entityType}/count`)
