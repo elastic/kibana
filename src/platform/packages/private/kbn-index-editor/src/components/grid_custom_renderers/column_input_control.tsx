@@ -26,6 +26,7 @@ export const getColumnInputRenderer = (
     ...column,
     display: <AddColumnHeader initialColumnName={initialColumnName} />,
     actions: false,
+    isExpandable: false,
   });
 };
 
