@@ -11,7 +11,6 @@ import * as fastGlob from 'fast-glob';
 import yargs from 'yargs';
 import chalk from 'chalk';
 import { castArray, omit } from 'lodash';
-// @ts-expect-error
 import Mocha from 'mocha';
 import Path from 'path';
 import * as table from 'table';
