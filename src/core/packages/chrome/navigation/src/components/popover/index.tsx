@@ -89,7 +89,7 @@ export const SideNavPopover = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' || e.key === ' ') {
         trigger.props.onKeyDown?.(e);
         if (hasContent && !e.defaultPrevented) {
           e.preventDefault();
