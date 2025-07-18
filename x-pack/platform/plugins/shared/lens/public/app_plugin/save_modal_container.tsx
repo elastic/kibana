@@ -294,7 +294,6 @@ export const runSaveLensVisualization = async (
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
   const originalSavedObjectId = originalInput?.savedObjectId;
   if (options.saveToLibrary) {
-    // TODO: check if it's worth to replace it with the attribute service one
     await lensDocumentService.checkForDuplicateTitle(
       {
         id: originalSavedObjectId,
