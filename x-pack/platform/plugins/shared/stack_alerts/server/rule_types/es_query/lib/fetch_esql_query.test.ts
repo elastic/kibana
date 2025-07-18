@@ -157,7 +157,7 @@ describe('fetchEsqlQuery', () => {
       expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
     });
 
-    it('should not add a warning or throw when is_partial is false', async () => {
+    it('should not add a warning when is_partial is false', async () => {
       const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         columns: [],
