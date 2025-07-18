@@ -12,7 +12,5 @@ export JOB=kibana-apm-cypress
 echo "--- APM Cypress Tests"
 
 cd "$XPACK_DIR"
-
-checks-reporter-with-killswitch "APM Cypress Tests" \
-  node --openssl-legacy-provider plugins/apm/scripts/test/e2e.js \
+node --openssl-legacy-provider plugins/apm/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION"
