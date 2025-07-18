@@ -13,11 +13,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
-  DashboardStart,
-  DASHBOARD_GRID_COLUMN_COUNT,
-  PanelPlacementStrategy,
-} from '@kbn/dashboard-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -26,8 +22,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
-import { LinksSerializedState } from './types';
-import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
+import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION, LinksEmbeddableState } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
@@ -66,13 +61,13 @@ export class LinksPlugin
 
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
-          const { createLinksSavedObjectRef } = await import('./lib/saved_object_ref_utils');
-          container.addNewPanel<LinksSerializedState>(
+          container.addNewPanel<LinksEmbeddableState>(
             {
               panelType: CONTENT_ID,
               serializedState: {
-                rawState: {},
-                references: [createLinksSavedObjectRef(savedObject.id)],
+                rawState: {
+                  savedObjectId: savedObject.id,
+                },
               },
             },
             true
@@ -115,16 +110,19 @@ export class LinksPlugin
                     openLazyFlyout({
                       core: coreServices,
                       loadContent: async ({ closeFlyout }) => {
-                        const [{ getEditorFlyout }, { deserializeLinksSavedObject }] =
+                        const [{ loadFromLibrary }, { getEditorFlyout }, { resolveLinks }] =
                           await Promise.all([
+                            import('./content_management/load_from_library'),
                             import('./editor/get_editor_flyout'),
-                            import('./lib/deserialize_from_library'),
+                            import('./lib/resolve_links'),
                           ]);
-                        const linksSavedObject = await getLinksClient().get(savedObjectId);
-                        const initialState = await deserializeLinksSavedObject(
-                          linksSavedObject.item
-                        );
-                        return await getEditorFlyout({ initialState, closeFlyout });
+                        const linksState = await loadFromLibrary(savedObjectId);
+                        const resolvedLinks = await resolveLinks(linksState.links ?? []);
+                        return await getEditorFlyout({
+                          initialLayout: linksState.layout,
+                          initialLinks: resolvedLinks,
+                          closeFlyout,
+                        });
                       },
                       flyoutProps: {
                         'data-test-subj': 'links--panelEditor--flyout',
@@ -160,14 +158,9 @@ export class LinksPlugin
 
     plugins.dashboard.registerDashboardPanelPlacementSetting(
       CONTENT_ID,
-      async (serializedState?: SerializedPanelState<LinksSerializedState>) => {
-        if (!serializedState) return {};
-        const { deserializeState } = await import('./embeddable/links_embeddable');
-        const runtimeState = await deserializeState(serializedState);
-        const isHorizontal = runtimeState.layout === 'horizontal';
-        const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-        const height = isHorizontal ? 4 : (runtimeState.links?.length ?? 1 * 3) + 4;
-        return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
+      async (serializedState?: SerializedPanelState<LinksEmbeddableState>) => {
+        const { getPanelPlacement } = await import('./embeddable/embeddable_module');
+        return await getPanelPlacement(serializedState);
       }
     );
 

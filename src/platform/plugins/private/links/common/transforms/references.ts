@@ -13,13 +13,7 @@ import { DASHBOARD_LINK_TYPE } from '../content_management';
 import type { ExternalLink, LinksState } from '../../server';
 import { StoredDashboardLink, StoredLinksState } from './types';
 
-export function extractReferences({
-  links,
-  references = [],
-}: {
-  links: LinksState['links'];
-  references?: Reference[];
-}) {
+export function extractReferences(links: LinksState['links']) {
   const extractedReferences: Reference[] = [];
 
   const newLinks = links.map((link) => {
@@ -54,7 +48,7 @@ export function injectReferences(
     const reference = references.find(({ name }) => name === destinationRefName);
     return {
       ...rest,
-      destination: reference?.id ?? ''
+      destination: reference?.id ?? '',
     };
   });
 }

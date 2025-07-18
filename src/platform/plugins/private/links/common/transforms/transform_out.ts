@@ -8,18 +8,18 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { StoredLinksEmbeddableState } from "./types";
-import { type LinksByValueState910, isLegacyState, transformLegacyState } from "./bwc";
+import { StoredLinksEmbeddableState } from './types';
+import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
 import { LINKS_SAVED_OBJECT_TYPE } from '../constants';
 import { injectReferences } from './references';
 
 export function transformOut(
-  storedState: StoredLinksEmbeddableState | LinksByValueState910,
+  storedState: StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
 ) {
-  console.log('links transformOut');
-  console.log(JSON.stringify(storedState, null, ' '));
-  const state = isLegacyState(storedState) ? transformLegacyState(storedState) : storedState as StoredLinksEmbeddableState;
+  const state = isLegacyState(storedState)
+    ? transformLegacyState(storedState)
+    : (storedState as StoredLinksEmbeddableState);
 
   // inject saved object reference when by-reference
   const savedObjectRef = (references ?? []).find(
@@ -36,5 +36,5 @@ export function transformOut(
   return {
     ...state,
     links: injectReferences(state.links, references),
-  }
+  };
 }

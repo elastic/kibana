@@ -19,7 +19,7 @@ import { CONTENT_ID } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
 import { linksClient } from './links_content_management_client';
 import { LinksRuntimeState } from '../types';
-import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import { serializeResolvedLinks } from '../lib/resolve_links';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,
@@ -55,10 +55,9 @@ export const runSaveToLibrary = async (
         return {};
       }
 
-      const { attributes, references } = serializeLinksAttributes(newState);
-
       const newAttributes = {
-        ...attributes,
+        ...newState,
+        links: serializeResolvedLinks(newState.links ?? []),
         ...stateFromSaveModal,
       };
 
@@ -67,7 +66,6 @@ export const runSaveToLibrary = async (
           item: { id },
         } = await linksClient.create({
           data: { ...newAttributes, title: newTitle },
-          options: { references },
         });
         resolve({
           ...newState,

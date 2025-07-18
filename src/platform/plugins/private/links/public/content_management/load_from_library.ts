@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoredLinksState } from '../types';
+import { linksClient } from './links_content_management_client';
 
-export interface StoredLinksByValueState910 {
-  attributes: StoredLinksState;
+export async function loadFromLibrary(libraryId: string) {
+  const { item } = await linksClient.get(libraryId);
+  if (item.error) {
+    throw item.error;
+  }
+  return item.attributes;
 }

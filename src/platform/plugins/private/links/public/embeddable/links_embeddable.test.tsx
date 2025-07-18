@@ -12,35 +12,28 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
-import { deserializeState, getLinksEmbeddableFactory } from './links_embeddable';
-import { Link } from '../../common/content_management';
-import { CONTENT_ID } from '../../common';
+import { getLinksEmbeddableFactory } from './links_embeddable';
+import { CONTENT_ID, LinksEmbeddableState } from '../../common';
+import type { Link } from '../../server';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import {
-  LinksApi,
-  LinksByReferenceSerializedState,
-  LinksByValueSerializedState,
-  LinksParentApi,
-  LinksSerializedState,
-  ResolvedLink,
-} from '../types';
+import { LinksApi, LinksParentApi, ResolvedLink } from '../types';
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';
 
-const getLinks: () => Link[] = () => [
+const getLinks = (): Link[] => [
   {
     id: '001',
     order: 0,
     type: 'dashboardLink',
     label: '',
-    destinationRefName: 'link_001_dashboard',
+    destination: 'link_001_dashboard',
   },
   {
     id: '002',
     order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
-    destinationRefName: 'link_002_dashboard',
+    destination: 'link_002_dashboard',
   },
   {
     id: '003',
@@ -149,7 +142,7 @@ const renderEmbeddable = (
 ) => {
   return render(
     <EuiThemeProvider>
-      <EmbeddableRenderer<LinksSerializedState, LinksApi>
+      <EmbeddableRenderer<LinksEmbeddableState, LinksApi>
         type={CONTENT_ID}
         onApiAvailable={jest.fn()}
         getParentApi={jest.fn().mockReturnValue(parent)}
@@ -171,39 +164,11 @@ describe('getLinksEmbeddableFactory', () => {
   });
 
   describe('by reference embeddable', () => {
-    const byRefState = {
-      rawState: {
-        title: 'my links',
-        description: 'just a few links',
-        hidePanelTitles: false,
-      } as LinksByReferenceSerializedState,
-      references: [
-        {
-          id: '123',
-          name: 'savedObjectRef',
-          type: 'links',
-        },
-      ],
-    };
-
-    const expectedRuntimeState = {
-      defaultTitle: 'links 001',
-      defaultDescription: 'some links',
-      layout: 'vertical',
-      links: getResolvedLinks(),
-      description: 'just a few links',
+    const parent = getMockLinksParentApi({
       title: 'my links',
-      savedObjectId: '123',
+      description: 'just a few links',
       hidePanelTitles: false,
-    };
-
-    const parent = getMockLinksParentApi(byRefState.rawState, byRefState.references);
-
-    test('deserializeState', async () => {
-      const deserializedState = await deserializeState(byRefState);
-      expect(deserializedState).toEqual({
-        ...expectedRuntimeState,
-      });
+      savedObjectId: '123',
     });
 
     test('component renders', async () => {
@@ -262,35 +227,12 @@ describe('getLinksEmbeddableFactory', () => {
   });
 
   describe('by value embeddable', () => {
-    const byValueState = {
-      rawState: {
-        attributes: {
-          links: getLinks(),
-          layout: 'horizontal',
-        },
-        description: 'just a few links',
-        title: 'my links',
-        hidePanelTitles: true,
-      } as LinksByValueSerializedState,
-      references,
-    };
-
-    const expectedRuntimeState = {
-      defaultTitle: undefined,
-      defaultDescription: undefined,
-      layout: 'horizontal',
-      links: getResolvedLinks(),
+    const parent = getMockLinksParentApi({
       description: 'just a few links',
       title: 'my links',
-      savedObjectId: undefined,
       hidePanelTitles: true,
-    };
-
-    const parent = getMockLinksParentApi(byValueState.rawState, byValueState.references);
-
-    test('deserializeState', async () => {
-      const deserializedState = await deserializeState(byValueState);
-      expect(deserializedState).toEqual({ ...expectedRuntimeState, layout: 'horizontal' });
+      links: getLinks(),
+      layout: 'horizontal',
     });
 
     test('component renders', async () => {

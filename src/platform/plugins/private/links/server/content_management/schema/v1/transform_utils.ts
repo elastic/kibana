@@ -8,8 +8,8 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { LinksAttributes, LinksItem } from '../../../../common/content_management';
-import { LinksCreateOptions, LinksSavedObjectAttributes } from './types';
+import { LinksItem } from '../../../../common/content_management';
+import { LinksCreateOptions, LinksSavedObjectAttributes, LinksState } from './types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -40,7 +40,7 @@ export function savedObjectToItem(
 }
 
 export function itemToSavedObject(item: {
-  attributes: LinksAttributes;
+  attributes: LinksState;
   references?: LinksCreateOptions['references'];
 }) {
   return item as SavedObject<LinksSavedObjectAttributes>;

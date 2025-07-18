@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { LinksByValueState910 } from './types';
+export type { StoredLinksByValueState910 } from './types';
 export { isLegacyState } from './is_legacy_state';
 export { transformLegacyState } from './transform_legacy_state';

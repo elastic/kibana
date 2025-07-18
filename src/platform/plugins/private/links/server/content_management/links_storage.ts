@@ -13,7 +13,7 @@ import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-ap
 import Boom from '@hapi/boom';
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { CONTENT_ID as LINKS_SAVED_OBJECT_TYPE } from '../../common';
-import type { LinksAttributes, LinksItem, LinksSearchOut } from '../../common/content_management';
+import type { LinksItem, LinksSearchOut } from '../../common/content_management';
 import { cmServicesDefinition } from './schema/cm_services';
 import {
   LinksCreateOptions,
@@ -25,6 +25,7 @@ import {
   LinksUpdateOptions,
   LinksUpdateOut,
   LinksSearchOptions,
+  LinksState,
 } from './schema/latest';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
@@ -110,7 +111,7 @@ export class LinksStorage {
 
   async create(
     ctx: StorageContext,
-    data: LinksAttributes,
+    data: LinksState,
     options: LinksCreateOptions
   ): Promise<LinksCreateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
@@ -118,8 +119,8 @@ export class LinksStorage {
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
-      LinksAttributes,
-      LinksAttributes
+      LinksState,
+      LinksState
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
@@ -175,7 +176,7 @@ export class LinksStorage {
   async update(
     ctx: StorageContext,
     id: string,
-    data: LinksAttributes,
+    data: LinksState,
     options: LinksUpdateOptions
   ): Promise<LinksUpdateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
@@ -183,8 +184,8 @@ export class LinksStorage {
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
-      LinksAttributes,
-      LinksAttributes
+      LinksState,
+      LinksState
     >(data);
     if (dataError) {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);

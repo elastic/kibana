@@ -9,7 +9,13 @@
 
 import { PluginInitializerContext } from '@kbn/core-plugins-server';
 
-export type { DashboardLink, ExternalLink, LinksState } from './content_management';
+export type {
+  DashboardLink,
+  ExternalLink,
+  Link,
+  LinkOptions,
+  LinksState,
+} from './content_management';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { LinksServerPlugin } = await import('./plugin');
