@@ -33,7 +33,7 @@ const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>((params)
     : mockUseSubActionWebhooks(params)
 );
 
-const mockToasts = { danger: jest.fn(), warning: jest.fn() };
+const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
 jest.mock(triggersActionsPath, () => {
   const original = jest.requireActual(triggersActionsPath);
   return {
@@ -41,7 +41,9 @@ jest.mock(triggersActionsPath, () => {
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
     useKibana: () => ({
       ...original.useKibana(),
-      notifications: { toasts: mockToasts },
+      services: {
+        notifications: { toasts: mockToasts },
+      },
     }),
   };
 });
@@ -346,7 +348,7 @@ describe('TinesParamsFields renders', () => {
         />
       );
 
-      expect(mockToasts.warning).toHaveBeenCalledWith({
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
         title: 'Cannot find the saved story. Please select a valid story from the selector',
       });
     });
@@ -362,7 +364,7 @@ describe('TinesParamsFields renders', () => {
         />
       );
 
-      expect(mockToasts.warning).toHaveBeenCalledWith({
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
         title: 'Cannot find the saved webhook. Please select a valid webhook from the selector',
       });
     });
@@ -532,9 +534,9 @@ describe('TinesParamsFields renders', () => {
           />
         );
 
-        expect(mockToasts.danger).toHaveBeenCalledWith({
+        expect(mockToasts.addDanger).toHaveBeenCalledWith({
           title: 'Error retrieving stories from Tines',
-          body: errorMessage,
+          text: errorMessage,
         });
       });
 
@@ -556,9 +558,9 @@ describe('TinesParamsFields renders', () => {
           />
         );
 
-        expect(mockToasts.danger).toHaveBeenCalledWith({
+        expect(mockToasts.addDanger).toHaveBeenCalledWith({
           title: 'Error retrieving webhook actions from Tines',
-          body: errorMessage,
+          text: errorMessage,
         });
       });
     });

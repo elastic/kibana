@@ -27,13 +27,13 @@ import {
   updateTraceTreeNode,
   reparentOrphanItems,
   generateLegendsAndAssignColorsToWaterfall,
-  WaterfallLegendType,
 } from './waterfall_helpers';
 import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type {
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
+import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
 
 describe('waterfall_helpers', () => {
   const hits = [

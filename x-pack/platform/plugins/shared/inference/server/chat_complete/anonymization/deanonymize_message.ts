@@ -18,6 +18,10 @@ import {
 import { OperatorFunction, mergeMap, filter, of, identity } from 'rxjs';
 import { deanonymize } from './deanonymize';
 
+export function deanonymizeMessage<T extends ChatCompletionEvent>(
+  anonymization: AnonymizationOutput
+): OperatorFunction<T, T>;
+
 export function deanonymizeMessage(
   anonymization: AnonymizationOutput
 ): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
@@ -28,7 +32,10 @@ export function deanonymizeMessage(
   return (source$) => {
     return source$.pipe(
       // Filter out original chunk events (we recreate a single deanonymized chunk later)
-      filter((event) => event.type !== ChatCompletionEventType.ChatCompletionChunk),
+      filter(
+        (event): event is Exclude<ChatCompletionEvent, ChatCompletionChunkEvent> =>
+          event.type !== ChatCompletionEventType.ChatCompletionChunk
+      ),
       // Process message events and create a new chunk plus the message
       mergeMap((event) => {
         if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
@@ -40,7 +47,7 @@ export function deanonymizeMessage(
           } satisfies Message;
 
           const {
-            message: { content, toolCalls },
+            message: { content: deanonymizedContent, toolCalls: deanonymizedToolCalls },
             deanonymizations,
           } = deanonymize(message, anonymization.anonymizations);
 
@@ -55,15 +62,19 @@ export function deanonymizeMessage(
 
           // Create deanonymized output metadata
           const deanonymizedOutput = {
-            message,
+            message: {
+              content: deanonymizedContent,
+              toolCalls: deanonymizedToolCalls,
+              role: MessageRole.Assistant,
+            } as Message,
             deanonymizations,
           };
 
           // Create a new chunk with the complete deanonymized content
           const completeChunk: ChatCompletionChunkEvent = {
             type: ChatCompletionEventType.ChatCompletionChunk,
-            content,
-            tool_calls: toolCalls.map((tc, idx) => ({
+            content: deanonymizedContent,
+            tool_calls: deanonymizedToolCalls.map((tc, idx) => ({
               index: idx,
               toolCallId: tc.toolCallId,
               function: {
@@ -78,8 +89,8 @@ export function deanonymizeMessage(
           // Create deanonymized message event
           const deanonymizedMsg = {
             ...event,
-            content,
-            toolCalls,
+            content: deanonymizedContent,
+            toolCalls: deanonymizedToolCalls,
             deanonymized_input: deanonymizedInput,
             deanonymized_output: deanonymizedOutput,
           };

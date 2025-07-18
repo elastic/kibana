@@ -91,5 +91,6 @@
     "@kbn/typed-react-router-config",
     "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/dev-utils",
+    "@kbn/test-suites-xpack",
   ]
 }
