@@ -9,11 +9,12 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from '../empty_prompt/translations';
+import type { SettingsOverrideOptions } from '../../history/types';
 
 interface Props {
   isDisabled?: boolean;
   isLoading: boolean;
-  onGenerate: () => void;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
 }
 
 const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, onGenerate }) => {
@@ -24,7 +25,12 @@ const GenerateComponent: React.FC<Props> = ({ isLoading, isDisabled = false, onG
       content={disabled ? i18n.SELECT_A_CONNECTOR : null}
       data-test-subj="generateTooltip"
     >
-      <EuiButton color="primary" data-test-subj="generate" disabled={disabled} onClick={onGenerate}>
+      <EuiButton
+        color="primary"
+        data-test-subj="generate"
+        disabled={disabled}
+        onClick={() => onGenerate()}
+      >
         {i18n.GENERATE}
       </EuiButton>
     </EuiToolTip>

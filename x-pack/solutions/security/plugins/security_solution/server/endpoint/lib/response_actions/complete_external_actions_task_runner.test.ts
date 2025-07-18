@@ -40,6 +40,8 @@ describe('CompleteExternalTaskRunner class', () => {
       '60s',
       `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`
     );
+    fetchSpaceIdsWithMaybePendingActionsMock.mockResolvedValue(['default']);
+
     const actionGenerator = new EndpointActionGenerator('seed');
 
     (endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock).mockImplementation(

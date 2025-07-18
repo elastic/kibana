@@ -17,6 +17,7 @@ export const isImpliedDefaultElserInferenceId = (inferenceId: string | null | un
     inferenceId === null ||
     inferenceId === undefined ||
     inferenceId === defaultInferenceEndpoints.ELSER ||
-    inferenceId === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
+    inferenceId === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID ||
+    (typeof inferenceId === 'string' && inferenceId.toLowerCase().includes('elser'))
   );
 };

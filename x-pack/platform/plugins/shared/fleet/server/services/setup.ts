@@ -165,14 +165,12 @@ async function createSetupSideEffects(
   );
 
   logger.debug('Setting up Fleet outputs');
-  await Promise.all([
-    ensurePreconfiguredOutputs(
-      soClient,
-      esClient,
-      getPreconfiguredOutputFromConfig(appContextService.getConfig())
-    ),
-    settingsService.settingsSetup(soClient),
-  ]);
+  await settingsService.settingsSetup(soClient);
+  await ensurePreconfiguredOutputs(
+    soClient,
+    esClient,
+    getPreconfiguredOutputFromConfig(appContextService.getConfig())
+  );
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
