@@ -702,7 +702,7 @@ describe('AuthConfig renders', () => {
       expect(screen.queryByTestId('additionalFields')).not.toBeInTheDocument();
     });
 
-    it.skip('renders OAuth2 fields as readOnly when readOnly prop is true', async () => {
+    it('renders OAuth2 fields as readOnly when readOnly prop is true', async () => {
       jest.mock('@kbn/code-editor', () => {
         const original = jest.requireActual('@kbn/code-editor');
         return {

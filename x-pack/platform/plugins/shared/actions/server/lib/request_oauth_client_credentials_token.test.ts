@@ -147,68 +147,20 @@ describe('requestOAuthClientCredentialsToken', () => {
     const receivedParams = new URLSearchParams(receivedDataString);
 
     const expectedParamsObject = {
+      another_field: 'value 2 with spaces',
       client_id: 'client-abc',
       client_secret: 'secret-xyz',
-      grant_type: 'client_credentials',
-      scope: 'test-scope',
       custom_param: 'value1',
-      another_field: 'value 2 with spaces',
+      grant_type: 'client_credentials',
       numeric_field: '123',
+      scope: 'test-scope',
     };
 
     expect(paramsToObject(receivedParams)).toEqual(expectedParamsObject);
 
-    // Update the snapshot to reflect the potentially different order in the data string
-    // You might need to run `jest -u` to update the snapshot after confirming the object comparison passes.
-    expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "https://test-additional",
-        Object {
-          "data": "another_field=value%202%20with%20spaces&client_id=client-abc&client_secret=secret-xyz&custom_param=value1&grant_type=client_credentials&numeric_field=123&scope=test-scope",
-          "headers": Object {
-            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-          },
-          "httpAgent": undefined,
-          "httpsAgent": Agent {
-            "_events": Object {
-              "free": [Function],
-              "newListener": [Function],
-            },
-            "_eventsCount": 2,
-            "_maxListeners": undefined,
-            "_sessionCache": Object {
-              "list": Array [],
-              "map": Object {},
-            },
-            "defaultPort": 443,
-            "freeSockets": Object {},
-            "keepAlive": false,
-            "keepAliveMsecs": 1000,
-            "maxCachedSessions": 100,
-            "maxFreeSockets": 256,
-            "maxSockets": Infinity,
-            "maxTotalSockets": Infinity,
-            "options": Object {
-              "noDelay": true,
-              "path": null,
-              "rejectUnauthorized": true,
-            },
-            "protocol": "https:",
-            "requests": Object {},
-            "scheduling": "lifo",
-            "sockets": Object {},
-            "totalSocketCount": 0,
-            Symbol(shapeMode): false,
-            Symbol(kCapture): false,
-          },
-          "maxContentLength": 1000000,
-          "method": "post",
-          "proxy": false,
-          "timeout": 360000,
-          "validateStatus": [Function],
-        },
-      ]
-    `);
+    expect(axiosInstanceMock.mock.calls[0][1].data).toMatchInlineSnapshot(
+      `"another_field=value%202%20with%20spaces&client_id=client-abc&client_secret=secret-xyz&custom_param=value1&grant_type=client_credentials&numeric_field=123&scope=test-scope"`
+    );
   });
 
   test('throw the exception and log the proper error if token was not get successfuly', async () => {

@@ -16,6 +16,7 @@ export interface ClientCredentialsOAuthRequestParams {
   scope?: string;
   clientId?: string;
   clientSecret?: string;
+  // Additional fields
   [key: string]: unknown;
 }
 

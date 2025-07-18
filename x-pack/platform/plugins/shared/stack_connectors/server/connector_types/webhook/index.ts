@@ -42,7 +42,7 @@ import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { buildConnectorAuth } from '../../../common/auth/utils';
 import { AuthType } from '../../../common/auth/constants';
-import { WebhookSecretConfigurationSchema } from '../../../common/auth/schema';
+import { SecretConfigurationSchema } from '../../../common/auth/schema';
 
 export const ConnectorTypeId = '.webhook';
 
@@ -65,7 +65,7 @@ export function getConnectorType(): WebhookConnectorType {
         customValidator: validateConnectorTypeConfig,
       },
       secrets: {
-        schema: WebhookSecretConfigurationSchema,
+        schema: SecretConfigurationSchema,
       },
       params: {
         schema: ParamsSchema,

@@ -52,7 +52,7 @@ describe('WebhookActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
   });
 
-  it('renders alweys OAuth2 option and fields', () => {
+  it('renders OAuth2 option and fields', () => {
     const actionConnector = {
       actionTypeId: '.webhook',
       name: 'webhook',

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { SecretConfigurationSchemaValidation, WebhookSecretConfigurationSchema } from './schema';
+import { SecretConfigurationSchema, SecretConfigurationSchemaValidation } from './schema';
+
+const errorMessage =
+  'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or OAuth2 client secret';
 
 describe('SecretConfigurationSchemaValidation', () => {
   const { validate } = SecretConfigurationSchemaValidation;
-  const errorMessage =
-    'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)';
 
   describe('valid configurations', () => {
     it('should accept empty credentials', () => {
@@ -188,39 +189,35 @@ describe('SecretConfigurationSchemaValidation', () => {
 describe('WebhookSecretConfigurationSchemaValidation', () => {
   it('returns error if only clientSecret is provided with other fields', () => {
     expect(() =>
-      WebhookSecretConfigurationSchema.validate({ clientSecret: 'secret', user: 'bob' })
+      SecretConfigurationSchema.validate({ clientSecret: 'secret', user: 'bob' })
     ).toThrow(/must specify one of the following schemas/);
   });
 
   it('accepts only clientSecret for OAuth2', () => {
-    expect(() =>
-      WebhookSecretConfigurationSchema.validate({ clientSecret: 'secret' })
-    ).not.toThrow();
+    expect(() => SecretConfigurationSchema.validate({ clientSecret: 'secret' })).not.toThrow();
   });
 
   it('accepts only user and password for basic auth', () => {
     expect(() =>
-      WebhookSecretConfigurationSchema.validate({ user: 'bob', password: 'secret' })
+      SecretConfigurationSchema.validate({ user: 'bob', password: 'secret' })
     ).not.toThrow();
   });
 
   it('accepts crt and key for SSL', () => {
-    expect(() =>
-      WebhookSecretConfigurationSchema.validate({ crt: 'crt', key: 'key' })
-    ).not.toThrow();
+    expect(() => SecretConfigurationSchema.validate({ crt: 'crt', key: 'key' })).not.toThrow();
   });
 
   it('accepts only pfx', () => {
-    expect(() => WebhookSecretConfigurationSchema.validate({ pfx: 'pfx' })).not.toThrow();
+    expect(() => SecretConfigurationSchema.validate({ pfx: 'pfx' })).not.toThrow();
   });
 
   it('returns error if nothing is provided', () => {
-    expect(() => WebhookSecretConfigurationSchema.validate({})).not.toThrow(); // No auth is allowed
+    expect(() => SecretConfigurationSchema.validate({})).not.toThrow(); // No auth is allowed
   });
 
   it('should reject mixed PFX certificate and OAuth2', () => {
     expect(() =>
-      WebhookSecretConfigurationSchema.validate({
+      SecretConfigurationSchema.validate({
         user: null,
         password: null,
         crt: null,
@@ -228,14 +225,12 @@ describe('WebhookSecretConfigurationSchemaValidation', () => {
         pfx: 'pfx-content',
         clientSecret: 'oauth2-client-secret',
       })
-    ).toThrow(
-      'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or OAuth2 client secret'
-    );
+    ).toThrow(errorMessage);
   });
 
   it('should reject mixed SSL certificate and OAuth2', () => {
     expect(() =>
-      WebhookSecretConfigurationSchema.validate({
+      SecretConfigurationSchema.validate({
         user: null,
         password: null,
         crt: 'certificate-content',
@@ -243,14 +238,12 @@ describe('WebhookSecretConfigurationSchemaValidation', () => {
         pfx: null,
         clientSecret: 'oauth2-client-secret',
       })
-    ).toThrow(
-      'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or OAuth2 client secret'
-    );
+    ).toThrow(errorMessage);
   });
 
   it('should reject mixed basic auth and OAuth2', () => {
     expect(() =>
-      WebhookSecretConfigurationSchema.validate({
+      SecretConfigurationSchema.validate({
         user: 'username',
         password: 'password',
         crt: null,
@@ -258,8 +251,6 @@ describe('WebhookSecretConfigurationSchemaValidation', () => {
         pfx: null,
         clientSecret: 'oauth2-client-secret',
       })
-    ).toThrow(
-      'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or OAuth2 client secret'
-    );
+    ).toThrow(errorMessage);
   });
 });

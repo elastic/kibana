@@ -60,18 +60,10 @@ export const WebhookAuthConfiguration = {
   accessTokenUrl: schema.maybe(schema.string()),
   clientId: schema.maybe(schema.string()),
   scope: schema.maybe(schema.string()),
-  additionalFields: schema.maybe(schema.string()), // Assuming it's stored as a JSON string
+  additionalFields: schema.maybe(schema.string()),
 };
 
 export const SecretConfiguration = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  crt: schema.nullable(schema.string()),
-  key: schema.nullable(schema.string()),
-  pfx: schema.nullable(schema.string()),
-};
-
-export const WebhookSecretConfiguration = {
   user: schema.nullable(schema.string()),
   password: schema.nullable(schema.string()),
   crt: schema.nullable(schema.string()),
@@ -83,19 +75,6 @@ export const WebhookSecretConfiguration = {
 export const SecretConfigurationSchemaValidation = {
   validate: (secrets: any) => {
     // user and password must be set together (or not at all)
-    if (!secrets.password && !secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
-    if (secrets.password && secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
-    if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx) return;
-    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx) return;
-    return i18n.translate('xpack.stackConnectors.webhook.invalidSecrets', {
-      defaultMessage:
-        'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)',
-    });
-  },
-};
-export const WebhookSecretConfigurationSchemaValidation = {
-  validate: (secrets: any) => {
-    // Case 1: No authentication credentials provided
     if (
       !secrets.password &&
       !secrets.user &&
@@ -105,8 +84,6 @@ export const WebhookSecretConfigurationSchemaValidation = {
       !secrets.clientSecret
     )
       return;
-
-    // Case 2: Basic authentication (username + password)
     if (
       secrets.password &&
       secrets.user &&
@@ -116,16 +93,10 @@ export const WebhookSecretConfigurationSchemaValidation = {
       !secrets.clientSecret
     )
       return;
-
-    // Case 3: SSL certificate authentication (crt + key)
     if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx && !secrets.clientSecret)
       return;
-
-    // Case 4: PFX certificate authentication
-    if (!secrets.crt && !secrets.key && !secrets.user && !secrets.clientSecret && secrets.pfx)
+    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx && !secrets.clientSecret)
       return;
-
-    // Case 5: OAuth2 authentication (clientSecret)
     if (!secrets.crt && !secrets.key && !secrets.user && !secrets.pfx && secrets.clientSecret)
       return;
     return i18n.translate('xpack.stackConnectors.webhook.invalidSecrets', {
@@ -138,9 +109,4 @@ export const WebhookSecretConfigurationSchemaValidation = {
 export const SecretConfigurationSchema = schema.object(
   SecretConfiguration,
   SecretConfigurationSchemaValidation
-);
-
-export const WebhookSecretConfigurationSchema = schema.object(
-  WebhookSecretConfiguration,
-  WebhookSecretConfigurationSchemaValidation
 );
