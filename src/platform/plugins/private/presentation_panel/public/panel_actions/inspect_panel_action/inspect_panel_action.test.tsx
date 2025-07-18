@@ -79,7 +79,7 @@ describe('Inspect panel action', () => {
         flyoutType: 'push',
         options: { fileName: 'some-title' },
         title: 'some-title',
-        uuid: 'some-uuid',
+        focusedPanelId: 'some-uuid',
       },
       context.embeddable.parentApi
     );

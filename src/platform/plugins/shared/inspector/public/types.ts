@@ -57,12 +57,14 @@ export interface InspectorViewDescription {
  * @property {string} title - An optional title, that will be shown in the header
  *    of the inspector. Can be used to give more context about what is being inspected.
  * @property {unknown} options - A set of specific payload to be passed to inspector views
+ * @property {'push' | 'overlay' } flyoutType - The type of flyout that will be used to open the inspector.
+ * @property {string} focusedPanelId - The id of the panel that should be focused when opening the inspector
  */
 export interface InspectorOptions {
   title?: string;
   options?: unknown;
   flyoutType?: EuiFlyoutProps['type'];
-  uuid?: string;
+  focusedPanelId?: string;
 }
 
 export type InspectorSession = OverlayRef;

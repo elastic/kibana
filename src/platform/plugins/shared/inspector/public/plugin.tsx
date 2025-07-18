@@ -115,7 +115,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
           size: 'm',
           paddingSize: 'l',
         },
-        uuid: options.uuid,
+        uuid: options.focusedPanelId,
       });
       return flyoutRef;
     };
