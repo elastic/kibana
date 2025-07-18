@@ -180,9 +180,9 @@ export const AddComment = React.memo(
 
       const handleKeyDown = useCallback(
         (event: { key: string; metaKey: boolean; ctrlKey: boolean }) => {
-          const isWindows = navigator.userAgent.includes('Windows');
-          const modifierPressed = isWindows ? event.ctrlKey : event.metaKey;
-          if (!isDisabled && event.key === 'Enter' && modifierPressed) {
+          const modifierPressed = event.ctrlKey || event.metaKey;
+          const isEnter = event.key === 'Enter' || event.key === 'NumpadEnter';
+          if (!isDisabled && isEnter && modifierPressed) {
             onSubmit();
           }
         },
@@ -191,10 +191,14 @@ export const AddComment = React.memo(
       );
 
       useEffect(() => {
-        window.addEventListener('keydown', handleKeyDown);
+        const textarea = editorRef.current?.textarea;
+        if (!textarea) {
+          return;
+        }
+        textarea.addEventListener('keydown', handleKeyDown);
 
         return () => {
-          window.removeEventListener('keydown', handleKeyDown);
+          textarea.removeEventListener('keydown', handleKeyDown);
         };
       }, [handleKeyDown]);
 
