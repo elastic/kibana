@@ -2277,6 +2277,10 @@
                 "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-security",
+                "path": "x-pack/solutions/security/test/fleet_api_integration/apis/package_policy/update.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
               },
@@ -12209,7 +12213,15 @@
             "label": "getAgentPolicyConfigYAML",
             "description": [],
             "signature": [
-              "(pkgName: string, pkgVersion?: string | undefined, prerelease?: boolean | undefined, ignoreUnverified?: boolean | undefined) => Promise<string>"
+              "(pkgName: string, pkgVersion?: string | undefined, isInputIncluded?: ((input: ",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.TemplateAgentPolicyInput",
+                "text": "TemplateAgentPolicyInput"
+              },
+              ") => boolean) | undefined, prerelease?: boolean | undefined, ignoreUnverified?: boolean | undefined) => Promise<string>"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
             "deprecated": false,
@@ -12248,6 +12260,29 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-server.PackageClient.getAgentPolicyConfigYAML.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "isInputIncluded",
+                "description": [],
+                "signature": [
+                  "((input: ",
+                  {
+                    "pluginId": "fleet",
+                    "scope": "common",
+                    "docId": "kibFleetPluginApi",
+                    "section": "def-common.TemplateAgentPolicyInput",
+                    "text": "TemplateAgentPolicyInput"
+                  },
+                  ") => boolean) | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getAgentPolicyConfigYAML.$4",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "prerelease",
@@ -12262,7 +12297,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackageClient.getAgentPolicyConfigYAML.$4",
+                "id": "def-server.PackageClient.getAgentPolicyConfigYAML.$5",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ignoreUnverified",
@@ -25735,6 +25770,10 @@
                 "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-security",
+                "path": "x-pack/solutions/security/test/fleet_api_integration/apis/package_policy/update.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/metadata/endpoint_metadata_service.test.ts"
               },
@@ -27872,6 +27911,20 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryInput.RegistryInputKeys.deployment_modes",
+            "type": "Array",
+            "tags": [],
+            "label": "[RegistryInputKeys.deployment_modes]",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -29779,6 +29832,21 @@
         "label": "PACKAGE_POLICY_API_ROOT",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.PACKAGE_POLICY_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "PACKAGE_POLICY_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-package-policies\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/package_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

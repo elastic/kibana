@@ -47,6 +47,7 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }:
       isInvalid={hasError}
     >
       <EuiFieldNumber
+        isInvalid={hasError}
         fullWidth
         step={0.01}
         min={0.01}

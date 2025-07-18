@@ -216,23 +216,25 @@ export class AssetInventoryDataClient {
       return { status: ASSET_INVENTORY_STATUS.INACTIVE_FEATURE };
     }
 
-    // Check if the user has the required privileges to access the entity store.
-    if (!entityStorePrivileges.has_all_required) {
-      try {
-        const hasGenericDocuments = await this.hasGenericDocuments(secSolutionContext);
-        // check if users doesn't have entity store privileges but generic documents are present
-        if (hasGenericDocuments) {
-          try {
-            await this.installAssetInventoryDataView(secSolutionContext);
-          } catch (error) {
-            logger.error(`Error installing asset inventory data view: ${error.message}`);
-          }
-          return { status: ASSET_INVENTORY_STATUS.READY };
+    // Determine the ready status based on the presence of generic documents
+    try {
+      const hasGenericDocuments = await this.hasGenericDocuments(secSolutionContext);
+      // check if users don't have entity store privileges but generic documents are present
+      if (hasGenericDocuments) {
+        try {
+          await this.installAssetInventoryDataView(secSolutionContext);
+        } catch (error) {
+          logger.error(`Error installing asset inventory data view: ${error.message}`);
         }
-      } catch (error) {
-        logger.error(`Error checking for generic documents: ${error.message}`);
+        return { status: ASSET_INVENTORY_STATUS.READY };
       }
+    } catch (error) {
+      logger.error(`Error checking for generic documents: ${error.message}`);
+    }
 
+    // In case there are no generic documents, Entity Store will need to be enabled.
+    // Check if the user has the required privileges to enable the entity store.
+    if (!entityStorePrivileges.has_all_required) {
       return {
         status: ASSET_INVENTORY_STATUS.INSUFFICIENT_PRIVILEGES,
         privileges: entityStorePrivileges,
@@ -261,12 +263,8 @@ export class AssetInventoryDataClient {
       return { status: ASSET_INVENTORY_STATUS.DISABLED };
     }
 
-    // Determine final status based on transform metadata
-    if (this.hasDocumentsProcessed(genericEntityEngine)) {
-      await this.installAssetInventoryDataView(secSolutionContext);
-
-      return { status: ASSET_INVENTORY_STATUS.READY };
-    }
+    // If there are no generic documents and the transform has already been triggered,
+    // we consider the asset inventory to be in the empty status.
     if (this.hasTransformTriggered(genericEntityEngine)) {
       return { status: ASSET_INVENTORY_STATUS.EMPTY };
     }
@@ -308,15 +306,6 @@ export class AssetInventoryDataClient {
       typeof (metadata as TransformMetadata).documents_processed === 'number' &&
       typeof (metadata as TransformMetadata).trigger_count === 'number'
     );
-  }
-
-  private hasDocumentsProcessed(engine: GenericEntityEngineStatus): boolean {
-    return !!engine.components?.some((component) => {
-      if (component.resource === 'transform' && this.isTransformMetadata(component.metadata)) {
-        return component.metadata.documents_processed > 0;
-      }
-      return false;
-    });
   }
 
   private hasTransformTriggered(engine: GenericEntityEngineStatus): boolean {
