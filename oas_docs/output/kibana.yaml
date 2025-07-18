@@ -56223,6 +56223,83 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
+  /api/synthetics/monitor/test/{monitorId}:
+    post:
+      description: |
+        Trigger an immediate test execution for the specified monitor. The response includes the generated `testRunId`. If the test encounters issues in one or more service locations, an `errors` array is also returned with details about the failures.
+      operationId: post-synthetics-monitor-test
+      parameters:
+        - description: The ID (config_id) of the monitor to test.
+          in: path
+          name: monitorId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                testNowMonitorResponseExample1:
+                  value: |-
+                    {
+                      "testRunId": "2bd506e5-4f9a-4aa6-a019-7988500afba0",
+                      "errors": [
+                        {
+                          "locationId": "us_central_staging",
+                          "error": {
+                            "status": 401,
+                            "reason": "no auth credentials provided",
+                            "failed_monitors": null
+                          }
+                        }
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    description: Array of errors encountered while triggering the test, one per service location.
+                    items:
+                      type: object
+                      properties:
+                        error:
+                          type: object
+                          properties:
+                            failed_monitors:
+                              description: Optional list of monitors that failed at the location.
+                              items:
+                                type: object
+                              nullable: true
+                              type: array
+                            reason:
+                              description: Human-readable explanation of the failure.
+                              type: string
+                            status:
+                              description: HTTP status code returned by the agent.
+                              type: integer
+                          required:
+                            - status
+                            - reason
+                            - failed_monitors
+                        locationId:
+                          description: Identifier of the service location where the error occurred.
+                          type: string
+                      required:
+                        - locationId
+                        - error
+                    type: array
+                  testRunId:
+                    description: Unique identifier for the triggered test run.
+                    type: string
+                required:
+                  - testRunId
+          description: Test run triggered successfully.
+        '404':
+          description: Monitor not found.
+      summary: Trigger an on-demand test run for a monitor
+      tags:
+        - synthetics
   /api/synthetics/monitors:
     get:
       description: |
