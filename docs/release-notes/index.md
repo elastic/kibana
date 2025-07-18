@@ -28,23 +28,20 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 ### Features and enhancements [kibana-9.1.0-features-enhancements]
 
 **Alerting**:
-* Adds the ability to schedule reports on a recurring basis and view previously scheduled reports [#224849]({{kib-pull}}224849).
+* Adds the ability to schedule reports on a recurring basis and view previously scheduled reports [#224849]({{kib-pull}}224849), [#221028]({{kib-pull}}221028).
 * Adds four dedicated case analytics indices that allow users to build dashboards and metrics using case data. These indices are automtically created when {{kib}} starts up and are updated periodically with cases, comments, attachments, and activity data [#223405]({{kib-pull}}223405).
 * Adds the `xpack.actions.email.services.enabled` {{kib}} setting, which allows you to to enable or disable email services for email connectors [#223363]({{kib-pull}}223363).
 * Adds the  `xpack.actions.webhook.ssl.pfx.enabled` {{kib}} setting, which allows you to disable Webhook connector PFX file support for SSL client authentication [#222507]({{kib-pull}}222507).
 * Adds the `xpack.actions.email.services.ses.host` {{kib}} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {{kib}} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors.[#221389]({{kib-pull}}221389). 
-* Scheduled Reports [#221028]({{kib-pull}}221028).
 * Support rrule for task scheduling [#217728]({{kib-pull}}217728).
-* Publish new public APIs for the Maintenance Window [#216756]({{kib-pull}}216756).
-* Alert Delete [#216613]({{kib-pull}}216613).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added alert cleanup functionality to delete active or inactive (recovered, closed, or untracked) alerts with no status update for a period of time of at least one day
-* Added an embeddable panel for Dashboards to display alerts [#216076]({{kib-pull}}216076).
-* Report UI should only show reports generated in the current space [#221375]({{kib-pull}}221375).
-* Moves rule settings to a flyout instead of a modal [#216162]({{kib-pull}}216162).
-* Allow users to delete a snooze schedule from a rule using schedule id [#213247]({{kib-pull}}213247).
-* Allow users to create a snooze schedule for rule via API [#210584]({{kib-pull}}210584).
-* Implement functionality to add observables, procedures and custom fields to alerts for TheHive [#207255]({{kib-pull}}207255).
+* Publishes new public APIs for the Maintenance Window [#216756]({{kib-pull}}216756).
+* Adds an alert cleanup functionality that allows you to delete active or inactive (acknowledged, recovered, closed, or untracked) alerts with no status update for a period of time [#216613]({{kib-pull}}216613).
+* Adds an embeddable panel for dashboards that allows you to display show a simplified version of the Alerts table from {{observability}} or {{elastic-sec}} [#216076]({{kib-pull}}216076).
+* Ensures the **Reporting** page only shows reports generated in the current space [#221375]({{kib-pull}}221375).
+* Moves the rule settings to a flyout [#216162]({{kib-pull}}216162).
+* Allows users to delete a snooze schedule from a rule using schedule ID [#213247]({{kib-pull}}213247).
+* Allows users to create a snooze schedule for rule using the schedule API [#210584]({{kib-pull}}210584).
+* Implements functionality to add observables, procedures, and custom fields to alerts for {{hive}} [#207255]({{kib-pull}}207255).
 
 **Dashboards and Visualizations**:
 * Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This allows you to generate an alert when the data on the chart crosses a certain threshold [#217719]({{kib-pull}}217719).
@@ -135,12 +132,12 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 **Machine Learning**:
 * Moves job and trained model management features into Stack Management [#204290]({{kib-pull}}204290).
 * Updates NL-2-ESQL docs [#224868]({{kib-pull}}224868).
-* Trained Models: Hides Adaptive Allocations Toggle in Serverless [#224097]({{kib-pull}}224097).
+* Hides Adaptive Allocations Toggle in Serverless [#224097]({{kib-pull}}224097).
 * Adds rare scripts job to preconfigured Security:Windows anomaly detection jobs [#223041]({{kib-pull}}223041).
 * Adds new subAction for converse and converseStream for Bedrock [#223033]({{kib-pull}}223033).
-* ES|QL pattern formatting [#222871]({{kib-pull}}222871).
-* Adds ability to disable AIOps features in Kibana [#221286]({{kib-pull}}221286).
-* New severity colors alignment and new UX for filtering anomalies [#221081]({{kib-pull}}221081).
+* Adds an recommended query for the `CATEGORIZE` function in {{esql}} [#222871]({{kib-pull}}222871).
+* Adds ability to disable the AIOps features in {{kib}} [#221286]({{kib-pull}}221286).
+* Adds new severity colors and UX for filtering anomalies [#221081]({{kib-pull}}221081).
 * Prevents the download of models already present in other spaces and shows a warning [#220238]({{kib-pull}}220238).
 * Enhances `No Results` state for Change Point Detection [#219072]({{kib-pull}}219072).
 * Fixes some OpenAI models not accepting temperature for Inference service [#218887]({{kib-pull}}218887).
@@ -282,14 +279,13 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixed spaces search functionality for spaces created with avatar type as image [#220398]({{kib-pull}}220398).
 
 **Machine Learning**:
-* Hides node allocation warning on serverless [#224406]({{kib-pull}}224406).
 * Fixes unknown fields not supported in Data Visualizer and Field Statistics [#223903]({{kib-pull}}223903).
 * Fixes overflow of cards in Machine Learning Overview page [#223431]({{kib-pull}}223431).
-* Change Point Detection: Fixes 'Use full data' button issue which could cause page to crash [#217291]({{kib-pull}}217291).
+* Fixes 'Use full data' button issue which could cause page to crash [#217291]({{kib-pull}}217291).
 * Fixes permission to view ML nodes [#215503]({{kib-pull}}215503).
 * Fixes chart in single metric anomaly detection wizard [#214837]({{kib-pull}}214837).
-* Trained Models: Prevents multiple clicks in Delete Model dialog [#211580]({{kib-pull}}211580).
-* Trained Models: Fixes further deployment of models after a failed deployment [#211459]({{kib-pull}}211459).
+* Prevents multiple clicks in the Delete Model dialog [#211580]({{kib-pull}}211580).
+* Fixes further deployment of models after a failed deployment [#211459]({{kib-pull}}211459).
 * AIOps Hides saved query controls [#210556]({{kib-pull}}210556).
 
 **Management**:
