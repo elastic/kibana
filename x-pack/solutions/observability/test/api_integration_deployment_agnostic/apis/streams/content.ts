@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
 import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import { Streams, FieldDefinition, RoutingDefinition } from '@kbn/streams-schema';
+import { Streams, FieldDefinition, RoutingDefinition, isDescendantOf } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -336,6 +336,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             if: { never: {} },
           },
         ]);
+      });
+
+      it('can successfully import the same content pack', async () => {
+        const targetStreamName = 'logs.reimport_target';
+        await putStream(apiClient, targetStreamName, upsertRequest({}, []));
+
+        const archiveBuffer = await exportContent(apiClient, 'logs', {
+          name: 'logs_content_pack',
+          description: 'Content pack with branch_a',
+          version: '1.0.0',
+          include: { objects: { streams: ['branch_a.child2'] } },
+        });
+
+        const firstImportResponse = await importContent(apiClient, targetStreamName, {
+          include: { all: {} },
+          content: Readable.from(archiveBuffer),
+          filename: 'reimport_content_pack-1.0.0.zip',
+        });
+
+        expect(firstImportResponse.result.created).to.eql([
+          `${targetStreamName}.branch_a`,
+          `${targetStreamName}.branch_a.child2`,
+        ]);
+
+        const secondImportResponse = await importContent(apiClient, targetStreamName, {
+          include: { all: {} },
+          content: Readable.from(archiveBuffer),
+          filename: 'reimport_content_pack-1.0.1.zip',
+        });
+
+        expect(secondImportResponse.result.created).to.eql([]);
+        expect(
+          secondImportResponse.result.updated
+            .filter((name) => isDescendantOf(targetStreamName, name))
+            .sort()
+        ).to.eql([`${targetStreamName}.branch_a`, `${targetStreamName}.branch_a.child2`]);
       });
     });
   });
