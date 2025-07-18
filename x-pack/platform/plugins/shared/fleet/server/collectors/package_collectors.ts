@@ -18,6 +18,7 @@ export interface PackageUsage {
   name: string;
   version: string;
   enabled: boolean;
+  agent_based?: boolean;
 }
 
 export interface AgentlessUsage {

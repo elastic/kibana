@@ -75,7 +75,6 @@ export interface CreateEventSignalOptions {
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
-  threatMatchedFields: ThreatMatchedFields;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
   sortOrder?: SortOrderOrUndefined;
@@ -85,7 +84,6 @@ export interface CreateEventSignalOptions {
 type EntryKey = 'field' | 'value';
 
 export interface BuildThreatMappingFilterOptions {
-  chunkSize?: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
@@ -111,16 +109,10 @@ export interface CreateAndOrClausesOptions {
 }
 
 export interface BuildEntriesMappingFilterOptions {
-  chunkSize: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
-}
-
-export interface SplitShouldClausesOptions {
-  chunkSize: number;
-  should: BooleanFilter[];
 }
 
 export interface BooleanFilter {
@@ -197,8 +189,9 @@ export interface BuildThreatEnrichmentOptions {
   threatFilters: unknown[];
   threatIndicatorPath: ThreatIndicatorPath;
   pitId: string;
-  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatIndexFields: DataViewFieldBase[];
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
 }
 
 export interface EventsOptions {
@@ -264,7 +257,7 @@ export interface AllowedFieldsForTermsQuery {
   threat: Record<string, boolean>;
 }
 
-export interface SignalValuesMap {
+export interface FieldAndValueToDocIdsMap {
   [field: string]: {
     [fieldValue: string]: string[];
   };
@@ -278,7 +271,7 @@ export interface GetAllowedFieldsForTermQuery {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
-export interface GetSignalValuesMap {
+export interface GetFieldAndValueToDocIdsMap {
   eventList: EventItem[];
   threatMatchedFields: ThreatMatchedFields;
 }
