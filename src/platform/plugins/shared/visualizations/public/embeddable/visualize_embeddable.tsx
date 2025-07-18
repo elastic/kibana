@@ -158,7 +158,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       linkedToLibraryArg: boolean
     ) => {
       return serializeState({
-        serializedVis: serializedVis$.value,
+        serializedVis: vis$.getValue().serialize(),
         titles: titleManager.getLatestState(),
         id: savedObjectId,
         linkedToLibrary: linkedToLibraryArg,
