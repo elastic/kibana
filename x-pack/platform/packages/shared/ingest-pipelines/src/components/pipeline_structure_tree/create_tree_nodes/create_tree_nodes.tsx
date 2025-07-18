@@ -11,11 +11,15 @@ import type { PipelineTreeNode } from '../types';
 import { MAX_TREE_LEVEL } from '../constants';
 import { PipelineTreeNodeLabel, MorePipelinesLabel } from '../tree_node_labels';
 
-const traverseTree = (
+/**
+ * This function takes a {@link PipelineTreeNode} tree of pipeline names, traverses it
+ * recursively, and returns a Node tree that can be passed to an {@link EuiTreeView}.
+ */
+export const createTreeNodesFromPipelines = (
   treeNode: PipelineTreeNode,
   selectedPipeline: string,
   setSelectedPipeline: (pipelineName: string) => void,
-  level: number
+  level: number = 1
 ): Node => {
   const currentNode = {
     id: treeNode.pipelineName,
@@ -51,20 +55,8 @@ const traverseTree = (
   }
   treeNode.children.forEach((node) => {
     currentNode.children!.push(
-      traverseTree(node, selectedPipeline, setSelectedPipeline, level + 1)
+      createTreeNodesFromPipelines(node, selectedPipeline, setSelectedPipeline, level + 1)
     );
   });
   return currentNode;
-};
-
-/**
- * This function takes a {@link PipelineTreeNode} tree of pipeline names, traverses it
- * recursively, and returns a Node tree that can be passed to an {@link EuiTreeView}.
- */
-export const createTreeNodesFromPipelines = (
-  pipelines: PipelineTreeNode,
-  selectedPipeline: string,
-  setSelectedPipeline: (pipelineName: string) => void
-): Node => {
-  return traverseTree(pipelines, selectedPipeline, setSelectedPipeline, 1);
 };
