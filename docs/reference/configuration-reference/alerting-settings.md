@@ -70,7 +70,7 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
               -----END CERTIFICATE-----
         smtp:
           requireTLS: true
-      - url: https://webhook.example.com
+      - url: <EXAMPLE_WEBHOOK_URL>
         ssl:
           verificationMode: 'none'
     ```
@@ -223,7 +223,7 @@ $$$action-config-email-domain-allowlist$$$
     To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the proxy in tunneling mode, and display some of the interaction between the client and the proxy.
 
     ```sh
-    curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
+    curl --verbose --proxytunnel --proxy http://localhost:8080 <EXAMPLE_URL>
     ```
 
 `xpack.actions.proxyBypassHosts` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")

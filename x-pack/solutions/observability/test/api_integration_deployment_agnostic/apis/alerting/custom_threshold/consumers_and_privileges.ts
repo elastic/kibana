@@ -28,8 +28,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const isServerless = config.get('serverless');
 
   describe('Custom Threshold Rule - consumers and priviledges', function () {
-    // skip until custom roles are supported in serverless
-    this.tags(['skipMKI']);
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX_PATTERN = '.alerts-observability.threshold.alerts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
