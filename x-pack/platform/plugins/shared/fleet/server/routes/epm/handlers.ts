@@ -627,6 +627,7 @@ export const getInputsHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       'json',
+      undefined,
       prerelease,
       ignoreUnverified
     );
@@ -636,6 +637,7 @@ export const getInputsHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       'yml',
+      undefined,
       prerelease,
       ignoreUnverified
     );
