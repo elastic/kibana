@@ -7,7 +7,7 @@
 
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { AssetTypeRT } from './shared/asset_type';
+import { EntityTypeRT } from './shared/entity_type';
 
 export const GetInfraAssetCountRequestBodyPayloadRT = rt.intersection([
   rt.partial({
@@ -19,10 +19,10 @@ export const GetInfraAssetCountRequestBodyPayloadRT = rt.intersection([
   }),
 ]);
 
-export const GetInfraAssetCountRequestParamsPayloadRT = AssetTypeRT;
+export const GetInfraAssetCountRequestParamsPayloadRT = EntityTypeRT;
 
 export const GetInfraAssetCountResponsePayloadRT = rt.intersection([
-  AssetTypeRT,
+  EntityTypeRT,
   rt.type({
     count: rt.number,
   }),

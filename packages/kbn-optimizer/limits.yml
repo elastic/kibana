@@ -16,7 +16,7 @@ pageLoadAssetSize:
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
-  cloudSecurityPosture: 21590
+  cloudSecurityPosture: 21520
   console: 31337
   contentConnectors: 33036
   contentManagement: 8350
@@ -25,7 +25,7 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
-  dashboardEnhanced: 18616
+  dashboardEnhanced: 12500
   data: 453742
   dataQuality: 10387
   datasetQuality: 27203
@@ -39,14 +39,14 @@ pageLoadAssetSize:
   discover: 25000
   discoverEnhanced: 10290
   discoverShared: 2322
-  elasticAssistant: 279115
+  elasticAssistant: 294308
   elasticAssistantSharedState: 4881
   embeddable: 18810
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
   esql: 10370
-  esqlDataGrid: 10279
+  esqlDataGrid: 10209
   esUiShared: 100338
   eventAnnotation: 22361
   eventAnnotationListing: 13164
@@ -73,7 +73,7 @@ pageLoadAssetSize:
   grokdebugger: 5484
   guidedOnboarding: 26999
   home: 13710
-  imageEmbeddable: 7024
+  imageEmbeddable: 6000
   indexLifecycleManagement: 29870
   indexManagement: 35861
   inference: 10368
@@ -87,7 +87,7 @@ pageLoadAssetSize:
   kibanaReact: 25470
   kibanaUsageCollection: 1736
   kibanaUtils: 62813
-  lens: 66805
+  lens: 66734
   licenseManagement: 13558
   licensing: 10078
   links: 9000
@@ -124,6 +124,7 @@ pageLoadAssetSize:
   reporting: 58600
   rollup: 12709
   runtimeFields: 11828
+  sampleDataIngest: 17496
   savedObjects: 11735
   savedObjectsFinder: 4319
   savedObjectsManagement: 22426
@@ -142,7 +143,7 @@ pageLoadAssetSize:
   searchprofiler: 18361
   searchQueryRules: 6689
   searchSynonyms: 6371
-  security: 68525
+  security: 79987
   securitySolution: 106289
   securitySolutionEss: 34480
   securitySolutionServerless: 49663
@@ -152,7 +153,7 @@ pageLoadAssetSize:
   serverlessSearch: 28909
   sessionView: 47938
   share: 58677
-  slo: 36715
+  slo: 36645
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
@@ -165,7 +166,7 @@ pageLoadAssetSize:
   telemetryManagementSection: 5522
   timelines: 200384
   transform: 22722
-  triggersActionsUi: 126450
+  triggersActionsUi: 110000
   uiActions: 24712
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513

@@ -30,7 +30,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
-      path: '/api/metrics/infra/{assetType}',
+      path: '/api/metrics/infra/{entityType}',
       validate: {
         body: createRouteValidationFunction(GetInfraMetricsRequestBodyPayloadRT),
         params: createRouteValidationFunction(GetInfraMetricsRequestParamsRT),
@@ -84,7 +84,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
-      path: '/api/infra/{assetType}/count',
+      path: '/api/infra/{entityType}/count',
       validate: {
         body: createRouteValidationFunction(GetInfraAssetCountRequestBodyPayloadRT),
         params: createRouteValidationFunction(GetInfraAssetCountRequestParamsPayloadRT),
@@ -92,7 +92,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
     },
     async (context, request, response) => {
       const { body, params } = request;
-      const { assetType } = params;
+      const { entityType } = params;
       const { query, from, to } = body;
 
       try {
@@ -114,7 +114,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
 
         return response.ok({
           body: GetInfraAssetCountResponsePayloadRT.encode({
-            assetType,
+            entityType,
             count,
           }),
         });

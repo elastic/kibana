@@ -176,7 +176,11 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
           </EuiFlexItem>
           {!value?.isDefault && (
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="right" content={i18n.DELETE_QUICK_PROMPT_}>
+              <EuiToolTip
+                position="right"
+                content={i18n.DELETE_QUICK_PROMPT_}
+                disableScreenReaderOutput
+              >
                 <EuiButtonIcon
                   iconType="cross"
                   aria-label={i18n.DELETE_QUICK_PROMPT_}

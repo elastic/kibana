@@ -35,9 +35,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       params: GetInfraAssetCountRequestParamsPayload;
       body: GetInfraAssetCountRequestBodyPayloadClient;
     }): Promise<GetInfraAssetCountResponsePayload | undefined> => {
-      const { assetType } = params;
+      const { entityType } = params;
       const response = await supertestWithAdminScope
-        .post(`/api/infra/${assetType}/count`)
+        .post(`/api/infra/${entityType}/count`)
         .send(body)
         .expect(200);
       return response.body;
@@ -61,7 +61,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('received data', async () => {
           const infraHosts = await fetchHostsCount({
-            params: { assetType: 'host' },
+            params: { entityType: 'host' },
             body: {
               query: {
                 bool: {
@@ -77,7 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           if (infraHosts) {
-            const { count, assetType } = infraHosts;
+            const { count, entityType: assetType } = infraHosts;
             expect(count).to.equal(3);
             expect(assetType).to.be('host');
           } else {
