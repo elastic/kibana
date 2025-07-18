@@ -14,7 +14,7 @@ import {
   contentPackIncludedObjectsSchema,
   isIncludeAll,
 } from '@kbn/content-packs-schema';
-import { Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
+import { FieldDefinition, Streams, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
@@ -27,6 +27,7 @@ import {
   withRootPrefix,
 } from '../../lib/content/stream';
 import { AssetClient } from '../../lib/streams/assets/asset_client';
+import { baseFields } from '../../lib/streams/component_templates/logs_layer';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
 
@@ -79,12 +80,18 @@ const exportContentRoute = createServerRoute({
           return descendant;
         });
 
+    const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
     const streamObjects = prepareStreamsForExport({
       root: await asContentPackEntry({ stream: root, assetClient }),
       descendants: await Promise.all(
         exportedDescendants.map((stream) => asContentPackEntry({ stream, assetClient }))
       ),
-      inheritedFields: getInheritedFieldsFromAncestors(ancestors),
+      inheritedFields: Object.keys(inheritedFields)
+        .filter((field) => !baseFields[field])
+        .reduce((fields, field) => {
+          fields[field] = inheritedFields[field];
+          return fields;
+        }, {} as FieldDefinition),
     });
 
     const archive = await generateArchive(params.body, streamObjects);
@@ -148,9 +155,6 @@ const importContentRoute = createServerRoute({
       .getStream(params.path.name)
       .then(Streams.WiredStream.Definition.parse);
 
-    const ancestors = await streamsClient.getAncestors(params.path.name);
-    const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
-
     const contentPack = await parseArchive(params.body.content);
     const parentEntry = contentPack.entries.find(
       (entry): entry is ContentPackStream =>
@@ -178,7 +182,6 @@ const importContentRoute = createServerRoute({
     const streams = prepareStreamsForImport({
       root: await asContentPackEntry({ stream: root, assetClient }),
       entries: importedStreamEntries,
-      inheritedFields,
     });
 
     return await streamsClient.bulkUpsert(streams);

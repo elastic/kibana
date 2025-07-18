@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { mapValues, omit, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import {
-  FieldDefinition,
-  InheritedFieldDefinition,
-  RoutingDefinition,
-  getAncestorsAndSelf,
-} from '@kbn/streams-schema';
+import { FieldDefinition, RoutingDefinition, getAncestorsAndSelf } from '@kbn/streams-schema';
 
 export function prepareStreamsForExport({
   root,
@@ -21,7 +16,7 @@ export function prepareStreamsForExport({
 }: {
   root: ContentPackStream;
   descendants: ContentPackStream[];
-  inheritedFields: InheritedFieldDefinition;
+  inheritedFields: FieldDefinition;
 }): ContentPackStream[] {
   const prepareIncludedDestinations = prepareRouting(descendants, (destination) =>
     withoutRootPrefix(root.name, destination)
@@ -43,7 +38,7 @@ export function prepareStreamsForExport({
               routing: prepareIncludedDestinations(root.request.stream.ingest.wired.routing),
               fields: {
                 ...root.request.stream.ingest.wired.fields,
-                ...mapValues(inheritedFields, (field) => omit(field, ['from'])),
+                ...inheritedFields,
               },
             },
           },
@@ -75,11 +70,9 @@ export function prepareStreamsForExport({
 export function prepareStreamsForImport({
   root,
   entries,
-  inheritedFields,
 }: {
   root: ContentPackStream;
   entries: ContentPackStream[];
-  inheritedFields: InheritedFieldDefinition;
 }): ContentPackStream[] {
   const prepareIncludedDestinations = prepareRouting(entries, (destination) =>
     withRootPrefix(root.name, destination)
@@ -102,15 +95,10 @@ export function prepareStreamsForImport({
         }
       });
 
-      // merge imported root stream's fields with the new root if not already mapped
+      // merge imported root stream's fields with the new root
       const rootFields = {
         ...root.request.stream.ingest.wired.fields,
-        ...Object.keys(request.stream.ingest.wired.fields)
-          .filter((key) => !root.request.stream.ingest.wired.fields[key] && !inheritedFields[key])
-          .reduce((acc, key) => {
-            acc[key] = { ...request.stream.ingest.wired.fields[key] };
-            return acc;
-          }, {} as FieldDefinition),
+        ...request.stream.ingest.wired.fields,
       };
 
       return {
