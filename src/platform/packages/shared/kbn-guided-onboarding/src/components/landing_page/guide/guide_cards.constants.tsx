@@ -37,32 +37,6 @@ export const getGuideCards = (
 ): GuideCardConstants[] =>
   [
     {
-      solution: 'search',
-      icon: 'pivot',
-      title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.elasticsearchApi.title', {
-        defaultMessage: 'Connect to the Elasticsearch API',
-      }),
-      telemetryId: 'onboarding--search--elasticsearchEndpointApi',
-      order: 1,
-      openEndpointModal: true,
-    },
-    {
-      solution: 'search',
-      icon: 'database',
-      title: (
-        <FormattedMessage
-          id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-          defaultMessage="Search across databases {lineBreak} and business systems"
-          values={{
-            lineBreak: <br />,
-          }}
-        />
-      ),
-      guideId: 'databaseSearch',
-      telemetryId: 'onboarding--search--database',
-      order: 1,
-    },
-    {
       solution: 'observability',
       icon: 'logstashInput',
       title: i18n.translate(
