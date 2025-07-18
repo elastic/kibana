@@ -32,7 +32,7 @@ const create = async ({ data, options }: Omit<LinksCrudTypes['CreateIn'], 'conte
   return res;
 };
 
-const update = async ({ id, data, options }: Omit<LinksCrudTypes['UpdateIn'], 'contentTypeId'>) => {
+const update = async ({ id, data }: Omit<LinksCrudTypes['UpdateIn'], 'contentTypeId'>) => {
   const res = await contentManagement.client.update<
     LinksCrudTypes['UpdateIn'],
     LinksCrudTypes['UpdateOut']
@@ -40,7 +40,6 @@ const update = async ({ id, data, options }: Omit<LinksCrudTypes['UpdateIn'], 'c
     contentTypeId: CONTENT_ID,
     id,
     data,
-    options,
   });
   return res;
 };
