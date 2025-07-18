@@ -212,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           expect(response.status).to.eql(400);
           expect(response.body.message).to.match(
-            /Sort field ".*\.title" is of type "text" which is not sortable\. Sorting on text fields requires a "keyword" subfield\./
+            /Sort field "sortTestingType.title" is of type "text" which is not sortable. If the field has a sortable subfield e.g "keyword" subfield, use "field.keyword" for sorting./
           );
         });
 
@@ -226,7 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           expect(response.status).to.eql(400);
           expect(response.body.message).to.match(
-            /Sort field ".*\.textWithKeyword" is of type "text" which is not sortable\. Sorting on text fields requires a "keyword" subfield\./
+            /Sort field "sortTestingType.textWithKeyword" is of type "text" which is not sortable. If the field has a sortable subfield e.g "keyword" subfield, use "field.keyword" for sorting./
           );
         });
 

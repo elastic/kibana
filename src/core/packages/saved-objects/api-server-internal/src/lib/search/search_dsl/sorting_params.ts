@@ -83,14 +83,9 @@ export function getSortingParams(
         for (const t of types) {
           const fieldMapping = getProperty(mappings, `${t}.${sortField}`);
           if (!isValidSortingField(fieldMapping) && fieldMapping) {
+            const fieldType = fieldMapping.type;
             throw Boom.badRequest(
-              `Sort field "${t}.${sortField}" is of type "${
-                fieldMapping.type
-              }" which is not sortable.${
-                fieldMapping.type === 'text'
-                  ? ' Sorting on text fields requires a "keyword" subfield.'
-                  : ''
-              }`
+              `Sort field "${t}.${sortField}" is of type "${fieldType}" which is not sortable. If the field has a sortable subfield e.g "keyword" subfield, use "field.keyword" for sorting.`
             );
           }
         }

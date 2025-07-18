@@ -401,8 +401,8 @@ describe('getSortingParams', () => {
       it('throws error for text fields', () => {
         expect(() =>
           getSortingParams(MAPPINGS, ['primary_type', 'secondary_type'], 'title')
-        ).toThrowError(
-          'Sort field "primary_type.title" is of type "text" which is not sortable. Sorting on text fields requires a "keyword" subfield.'
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Sort field \\"primary_type.title\\" is of type \\"text\\" which is not sortable. If the field has a sortable subfield e.g \\"keyword\\" subfield, use \\"field.keyword\\" for sorting."`
         );
       });
 
@@ -564,16 +564,16 @@ describe('getSortingParams', () => {
       it('throws error for text fields', () => {
         expect(() =>
           getSortingParams(MAPPINGS, ['textonly', 'primary_type'], 'description')
-        ).toThrow(
-          'Sort field "textonly.description" is of type "text" which is not sortable. Sorting on text fields requires a "keyword" subfield.'
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Sort field \\"textonly.description\\" is of type \\"text\\" which is not sortable. If the field has a sortable subfield e.g \\"keyword\\" subfield, use \\"field.keyword\\" for sorting."`
         );
       });
 
       it('throws error for incompatible types across saved object types', () => {
         expect(() =>
           getSortingParams(MAPPINGS, ['numeric', 'numeric_incompatible'], 'count')
-        ).toThrow(
-          'Sort field "count" has incompatible types across saved object types: [double, keyword]. All field types must be compatible for sorting (numeric types are considered equivalent).'
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Sort field \\"count\\" has incompatible types across saved object types: [double, keyword]. All field types must be compatible for sorting (numeric types are considered equivalent)."`
         );
       });
 
