@@ -8,9 +8,9 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { StoredLinksEmbeddableState } from './types';
+import { StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
-import { LINKS_SAVED_OBJECT_TYPE } from '../constants';
+import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import { injectReferences } from './references';
 
 export function transformOut(

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoredLinksState } from '../types';
+import type { StoredLinksState } from '../../../../server';
 
 export interface StoredLinksByValueState910 {
   attributes: StoredLinksState;

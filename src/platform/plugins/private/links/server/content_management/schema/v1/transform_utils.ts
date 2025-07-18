@@ -11,7 +11,10 @@ import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-
 import { Reference } from '@kbn/content-management-utils/src/types';
 import { LinksItem } from '../../../../common/content_management';
 import { LinksState, StoredLinksState } from './types';
-import { extractReferences, injectReferences } from '../../../../common/transforms/references';
+import {
+  extractReferences,
+  injectReferences,
+} from '../../../../common/embeddable/transforms/references';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;

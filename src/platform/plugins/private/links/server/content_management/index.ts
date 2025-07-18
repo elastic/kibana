@@ -13,6 +13,7 @@ export type {
   Link,
   LinkOptions,
   LinksState,
+  StoredDashboardLink,
   StoredLinksState,
 } from './schema/v1';
 export { LinksStorage } from './links_storage';

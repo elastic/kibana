@@ -8,7 +8,7 @@
  */
 
 import type { SerializedTitles } from '@kbn/presentation-publishing';
-import type { DashboardLink, ExternalLink, LinksState } from '../../server';
+import type { LinksState, StoredLinksState } from '../../server';
 
 export interface LinksByReferenceState {
   savedObjectId: string;
@@ -19,11 +19,3 @@ export type LinksByValueState = Pick<LinksState, 'layout' | 'links'>;
 export type LinksEmbeddableState = SerializedTitles & (LinksByValueState | LinksByReferenceState);
 
 export type StoredLinksEmbeddableState = SerializedTitles & StoredLinksState;
-
-export type StoredLinksState = Omit<LinksState, 'links'> & {
-  links?: Array<StoredDashboardLink | ExternalLink>;
-};
-
-export type StoredDashboardLink = Omit<DashboardLink, 'destination'> & {
-  destinationRefName: string;
-};

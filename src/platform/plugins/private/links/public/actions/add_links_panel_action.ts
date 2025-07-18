@@ -19,7 +19,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi } from '../types';
-import { APP_ICON, APP_NAME, CONTENT_ID, LinksEmbeddableState } from '../../common';
+import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE, LinksEmbeddableState } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
 import { coreServices } from '../services/kibana_services';
 import { getEditorFlyout } from '../editor/get_editor_flyout';
@@ -69,7 +69,7 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
             }
 
             await embeddable.addNewPanel<LinksEmbeddableState>({
-              panelType: CONTENT_ID,
+              panelType: LINKS_EMBEDDABLE_TYPE,
               serializedState: serializeState(),
             });
           },

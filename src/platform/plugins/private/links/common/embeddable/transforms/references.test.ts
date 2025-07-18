@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../content_management';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../content_management';
 import { extractReferences, injectReferences } from './references';
 
 describe('extractReferences', () => {

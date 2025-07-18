@@ -15,6 +15,7 @@ export type {
   Link,
   LinkOptions,
   LinksState,
+  StoredDashboardLink,
   StoredLinksState,
 } from './content_management';
 

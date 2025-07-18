@@ -11,7 +11,7 @@ export type {
   LinksByValueState,
   LinksByReferenceState,
   LinksEmbeddableState,
-} from './transforms/types';
+} from './embeddable/types';
 export {
   APP_ICON,
   APP_NAME,

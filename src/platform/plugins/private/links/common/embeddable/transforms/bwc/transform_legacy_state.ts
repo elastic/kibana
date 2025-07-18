@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StoredLinksState } from '../types';
-import { StoredLinksByValueState910 } from './types';
+import type { StoredLinksState } from '../../../../server';
+import type { StoredLinksByValueState910 } from './types';
 
 export function transformLegacyState(state: StoredLinksByValueState910): StoredLinksState {
   // 9.1.0 by-value state stored state under attributes
