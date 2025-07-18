@@ -5290,6 +5290,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-settings-browser@link:src/core/packages/user-settings/browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-settings-server-internal@link:src/core/packages/user-settings/server-internal":
   version "0.0.0"
   uid ""
@@ -8219,6 +8223,10 @@
   uid ""
 
 "@kbn/user-profiles-consumer-plugin@link:x-pack/test/security_api_integration/plugins/user_profiles_consumer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/user-settings-example-plugin@link:examples/user_settings":
   version "0.0.0"
   uid ""
 

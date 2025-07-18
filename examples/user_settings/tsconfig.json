@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-user-settings-browser",
+    "@kbn/developer-examples-plugin",
+    "@kbn/i18n-react",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/spaces-plugin"
+  ]
+}
