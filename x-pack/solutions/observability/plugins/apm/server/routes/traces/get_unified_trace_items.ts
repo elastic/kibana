@@ -25,6 +25,7 @@ import {
   TRANSACTION_ID,
   TRANSACTION_NAME,
   TIMESTAMP_US,
+  EVENT_OUTCOME,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
@@ -47,6 +48,8 @@ const optionalFields = asMutableArray([
   PARENT_ID,
   STATUS_CODE,
   TIMESTAMP_US,
+  EVENT_OUTCOME,
+  STATUS_CODE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 ] as const);
@@ -140,7 +143,6 @@ export async function getUnifiedTraceItems({
   );
 
   const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
-
   return response.hits.hits
     .map((hit) => {
       const event = unflattenKnownApmEventFields(hit.fields, fields);
@@ -157,11 +159,13 @@ export async function getUnifiedTraceItems({
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
         duration: resolveDuration(apmDuration, event.duration),
-        hasError:
-          docErrorCount > 0 ||
-          (event.status?.code && Array.isArray(event.status.code)
-            ? event.status.code[0] === 'Error'
-            : false),
+        ...((event.event?.outcome || event.status?.code) && {
+          status: {
+            fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
+            value: event.event?.outcome || event.status?.code,
+          },
+        }),
+        errorCount: docErrorCount,
         parentId: event.parent?.id,
         serviceName: event.service.name,
         spanType: event.span?.subtype || event.span?.type,
