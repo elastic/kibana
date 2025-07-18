@@ -249,6 +249,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        [ALERT_GROUPING]: recoveredAlertState?.grouping,
       },
     });
   }
