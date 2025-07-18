@@ -92,6 +92,7 @@ export const dateHistogramOperation: OperationDefinition<
   }),
   input: 'field',
   priority: 5, // Highest priority level used
+  scale: () => 'interval',
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) => [
     ...getInvalidFieldMessage(layer, columnId, indexPattern),
@@ -118,7 +119,6 @@ export const dateHistogramOperation: OperationDefinition<
       operationType: 'date_histogram',
       sourceField: field.name,
       isBucketed: true,
-      scale: 'interval',
       params: {
         interval: columnParams?.interval ?? autoInterval,
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,

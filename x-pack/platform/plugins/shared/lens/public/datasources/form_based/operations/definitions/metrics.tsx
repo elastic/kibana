@@ -150,7 +150,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         operationType: type,
         sourceField: field.name,
         isBucketed: false,
-        scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,

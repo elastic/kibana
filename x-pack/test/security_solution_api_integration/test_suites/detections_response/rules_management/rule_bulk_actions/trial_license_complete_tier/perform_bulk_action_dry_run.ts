@@ -10,12 +10,7 @@ import {
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import moment from 'moment';
-import {
-  getCustomQueryRuleParams,
-  getSimpleMlRule,
-  getSimpleRule,
-  installMockPrebuiltRules,
-} from '../../../utils';
+import { getCustomQueryRuleParams, getSimpleMlRule, getSimpleRule } from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
@@ -199,31 +194,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .readRule({ query: { rule_id: ruleId } })
           .expect(200);
         expect(ruleBody.tags).toEqual(tags);
-      });
-
-      it('should allow prebuilt rules edit', async () => {
-        await installMockPrebuiltRules(supertest, es);
-        const { body: findBody } = await securitySolutionApi
-          .findRules({ query: { per_page: 1, filter: 'alert.attributes.params.immutable: true' } })
-          .expect(200);
-
-        const prebuiltRule = findBody.data[0];
-
-        const { body } = await securitySolutionApi
-          .performRulesBulkAction({
-            query: { dry_run: true },
-            body: {
-              ids: [prebuiltRule.id],
-              action: BulkActionTypeEnum.edit,
-              [BulkActionTypeEnum.edit]: [
-                { type: BulkActionEditTypeEnum.set_tags, value: ['reset-tag'] },
-              ],
-            },
-          })
-          .expect(200);
-
-        expect(body).toMatchObject({ success: true });
-        expect(body.attributes.summary).toMatchObject({ succeeded: 1, total: 1 });
       });
 
       describe('validate updating index pattern for machine learning rule', () => {

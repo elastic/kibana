@@ -134,7 +134,7 @@
     "@kbn/entityManager-plugin",
     "@kbn/core-http-server-utils",
     "@kbn/key-value-metadata-table",
-    "@kbn/event-stacktrace"
+    "@kbn/event-stacktrace",
   ],
   "exclude": ["target/**/*"]
 }

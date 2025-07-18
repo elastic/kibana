@@ -2,7 +2,11 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "jest","@kbn/ambient-ftr-types"]
+    "types": [
+      "node",
+      "jest",
+      "@kbn/ambient-ftr-types"
+    ]
   },
   "include": [
     "**/*",
@@ -13,11 +17,19 @@
     "target/**/*"
   ],
   "kbn_references": [
-    { "path": "../security_solution_endpoint/tsconfig.json" },
+    {
+      "path": "../security_solution_endpoint/tsconfig.json"
+    },
     "@kbn/test-suites-serverless",
-    { "path": "../../test_serverless/api_integration/**/*" },
-    { "path": "../../test_serverless/shared/**/*" },
-    { "path": "../../api_integration/services/**/*" },
+    {
+      "path": "../../test_serverless/api_integration/**/*"
+    },
+    {
+      "path": "../../test_serverless/shared/**/*"
+    },
+    {
+      "path": "../../api_integration/services/**/*"
+    },
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/expect",
@@ -57,6 +69,7 @@
     "@kbn/security-plugin-types-common",
     "@kbn/scout-info",
     "@kbn/babel-register",
+    "@kbn/response-ops-rule-params",
     "@kbn/config-schema"
   ]
 }

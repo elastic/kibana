@@ -111,10 +111,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('updates step status with message', async () => {
+        const message = 'Download failed';
         const step = {
           name: 'ea-download',
           status: 'danger',
-          message: 'Download failed',
+          message: Buffer.from(message, 'utf8').toString('base64'),
         };
         const request = await callApi({
           id: onboardingId,
@@ -130,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const stepProgress = savedState.attributes.progress?.[step.name];
         expect(stepProgress).to.have.property('status', step.status);
-        expect(stepProgress).to.have.property('message', step.message);
+        expect(stepProgress).to.have.property('message', message);
       });
 
       afterEach(async () => {
