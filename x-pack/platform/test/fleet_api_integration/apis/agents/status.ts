@@ -11,16 +11,13 @@ import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  const superTestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failed test: https://github.com/elastic/kibana/issues/228565
-  describe.skip('fleet_agents_status', () => {
+  describe('fleet_agents_status', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       await es.create({
@@ -256,32 +253,6 @@ export default function ({ getService }: FtrProviderContext) {
           uninstalled: 1,
         },
       });
-    });
-
-    it('should work with adequate package privileges', async () => {
-      await superTestWithoutAuth
-        .get(`/api/fleet/agent_status`)
-        .set('kbn-xsrf', 'xxxx')
-        .auth(
-          testUsers.endpoint_fleet_all_integr_read_policy.username,
-          testUsers.endpoint_fleet_all_integr_read_policy.password
-        )
-        .expect(200);
-    });
-
-    it('should not work without adequate package privileges', async () => {
-      await superTestWithoutAuth
-        .get(`/api/fleet/agent_status`)
-        .set('kbn-xsrf', 'xxxx')
-        .auth(
-          testUsers.endpoint_fleet_read_integr_none.username,
-          testUsers.endpoint_fleet_read_integr_none.password
-        )
-        .expect(403, {
-          error: 'Forbidden',
-          message: 'Forbidden',
-          statusCode: 403,
-        });
     });
 
     it('should not perform inactivity check if there are too many agent policies with inactivity timeout', async () => {

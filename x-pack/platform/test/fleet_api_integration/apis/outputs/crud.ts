@@ -207,7 +207,6 @@ export default function (providerContext: FtrProviderContext) {
     let fleetServerPolicyId: string;
     let fleetServerPolicyWithCustomOutputId: string;
 
-    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async function () {
       await enableSecrets(providerContext);
       await enableOutputSecrets();
@@ -1378,7 +1377,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      // eslint-disable-next-line mocha/no-identical-title
       it('should discard the shipper values when shipper is disabled', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
@@ -1889,7 +1887,6 @@ export default function (providerContext: FtrProviderContext) {
             .expect(400);
         });
 
-        // eslint-disable-next-line mocha/no-identical-title
         it('should return a 400 when deleting a default output ', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)

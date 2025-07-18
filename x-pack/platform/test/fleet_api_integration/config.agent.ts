@@ -8,15 +8,13 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseFleetApiConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack-platform/fleet_api_integration/config.base')
-  );
+  const baseFleetApiConfig = await readConfigFile(require.resolve('./config.base.ts'));
 
   return {
     ...baseFleetApiConfig.getAll(),
     testFiles: [require.resolve('./apis/agents')],
     junit: {
-      reportName: 'X-Pack Security Solution Fleet Agent API Integration Tests',
+      reportName: 'X-Pack Fleet Agent API Integration Tests',
     },
   };
 }
