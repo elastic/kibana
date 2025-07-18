@@ -108,7 +108,7 @@ describe('Agent actions', () => {
       });
     });
 
-    it.each(['UNENROLL', 'UPGRADE'] as AgentActionType[])(
+    it.each(['UNENROLL', 'UPGRADE', 'MIRGATE'] as AgentActionType[])(
       'should sign %s action',
       async (actionType: AgentActionType) => {
         const esClient = elasticsearchServiceMock.createInternalClient();
@@ -219,9 +219,9 @@ describe('Agent actions', () => {
       }
     });
 
-    it('should sign UNENROLL and UPGRADE actions', async () => {
+    it('should sign UNENROLL, UPGRADE and MIGRATE actions', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
-      const newActions: NewAgentAction[] = (['UNENROLL', 'UPGRADE'] as AgentActionType[]).map(
+      const newActions: NewAgentAction[] = (['UNENROLL', 'UPGRADE', 'MIGRATE'] as AgentActionType[]).map(
         (actionType, i) => {
           const actionId = `action${i + 1}`;
           return {
@@ -249,7 +249,7 @@ describe('Agent actions', () => {
       );
     });
 
-    it('should not sign actions other than UNENROLL and UPGRADE', async () => {
+    it('should not sign actions other than UNENROLL, UPGRADE and MIGRATE', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
       const newActions: NewAgentAction[] = (
         [
