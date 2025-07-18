@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
-import { ReindexStatusResponse } from '@kbn/upgrade-assistant-pkg-common';
+import {
+  ReindexStatusResponse,
+  ReindexOperationCancelResponse,
+  ReindexOperation,
+} from '@kbn/upgrade-assistant-pkg-common';
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
 import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../lib';
 import { reindexActionsFactory } from '../lib/reindex_actions';
@@ -54,7 +58,7 @@ export function registerReindexIndicesRoutes(
       } = await core;
       const { indexName } = request.params;
       try {
-        const result = await reindexHandler({
+        const result: ReindexOperation = await reindexHandler({
           savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
           indexName,
@@ -199,7 +203,7 @@ export function registerReindexIndicesRoutes(
       try {
         await reindexService.cancelReindexing(indexName);
 
-        return response.ok({ body: { acknowledged: true } });
+        return response.ok<ReindexOperationCancelResponse>({ body: { acknowledged: true } });
       } catch (error) {
         if (error instanceof errors.ResponseError) {
           return handleEsError({ error, response });

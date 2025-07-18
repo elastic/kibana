@@ -112,6 +112,10 @@ export interface ReindexOperation {
   reindexOptions?: ReindexOptions;
 }
 
+export interface ReindexOperationCancelResponse {
+  acknowledged: true;
+}
+
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
   created = 0,

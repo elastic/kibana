@@ -57,7 +57,6 @@ export class ReindexWorker {
   private readonly stop$ = new Subject<void>();
   private updateOperationLoopRunning: boolean = false;
   private inProgressOps: ReindexSavedObject[] = [];
-  // todo current idea is to expose a function off the reindex service
   private readonly reindexService: ReindexService;
   private readonly log: Logger;
   private readonly security: SecurityPluginStart;
