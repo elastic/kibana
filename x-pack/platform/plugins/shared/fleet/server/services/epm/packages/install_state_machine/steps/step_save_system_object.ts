@@ -13,7 +13,7 @@ import {
 } from '../../../../../constants';
 import type { Installation } from '../../../../../types';
 
-import { packagePolicyService } from '../../../..';
+import { packagePolicyService } from '../../../../package_policy';
 
 import { auditLoggingService } from '../../../../audit_logging';
 
