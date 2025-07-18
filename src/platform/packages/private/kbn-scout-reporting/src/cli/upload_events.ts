@@ -23,7 +23,7 @@ import {
 import { ScoutReportDataStream } from '../reporting/report/events';
 import { getValidatedESClient } from '../helpers/elasticsearch';
 
-const readFilesRecursively = async (directory: string, callback: Function) => {
+const readFilesRecursively = (directory: string, callback: Function) => {
   const files = fs.readdirSync(directory);
   files.forEach((file) => {
     const filePath = path.join(directory, file);
@@ -72,24 +72,28 @@ export const uploadAllEventsFromPath = async (
 
   // Event log upload
   const reportDataStream = new ScoutReportDataStream(es, options.log);
-  let numberOfNdjsonFilesFound = 0;
 
   if (fs.statSync(eventLogPath).isDirectory()) {
-    await readFilesRecursively(eventLogPath, async (filePath: string) => {
+    const ndjsonFilesPaths: string[] = [];
+
+    readFilesRecursively(eventLogPath, async (filePath: string) => {
       if (filePath.endsWith('.ndjson')) {
-        await reportDataStream.addEventsFromFile(filePath);
-        numberOfNdjsonFilesFound += 1;
+        ndjsonFilesPaths.push(filePath);
       }
     });
 
-    if (numberOfNdjsonFilesFound === 0) {
+    if (ndjsonFilesPaths.length === 0) {
       options.log.warning(`No .ndjson event log files found in directory '${eventLogPath}'.`);
     } else {
       options.log.info(
-        `Recursively found ${numberOfNdjsonFilesFound} .ndjson event log file${
-          numberOfNdjsonFilesFound === 1 ? '' : 's'
+        `Recursively found ${ndjsonFilesPaths.length} .ndjson event log file${
+          ndjsonFilesPaths.length === 1 ? '' : 's'
         } in directory '${eventLogPath}'.`
       );
+    }
+
+    for (const filePath of ndjsonFilesPaths) {
+      await reportDataStream.addEventsFromFile(filePath);
     }
   } else if (eventLogPath.endsWith('.ndjson')) {
     await reportDataStream.addEventsFromFile(eventLogPath);
