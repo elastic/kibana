@@ -248,6 +248,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.SearchPlaygroundMutationKeys",
+        "type": "Enum",
+        "tags": [],
+        "label": "SearchPlaygroundMutationKeys",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/common/query_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
