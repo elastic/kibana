@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('assertions on inserted documents', () => {
-      Array(4)
+      Array(400)
         .fill(0)
         .forEach(() => {
           it('should have one document from the timestamp_override_3 archive', async () => {
