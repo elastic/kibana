@@ -23,12 +23,12 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       await es.create({
-        id: 'ingest-agent-policies:policy-inactivity-timeout',
+        id: 'fleet-agent-policies:policy-inactivity-timeout',
         index: INGEST_SAVED_OBJECT_INDEX,
         refresh: 'wait_for',
         document: {
-          type: 'ingest-agent-policies',
-          'ingest-agent-policies': {
+          type: 'fleet-agent-policies',
+          'fleet-agent-policies': {
             name: 'Test policy',
             namespace: 'default',
             description: 'Policy with inactivity timeout',
@@ -292,12 +292,12 @@ export default function ({ getService }: FtrProviderContext) {
       await Promise.all(
         policiesToAdd.map((policyId) =>
           es.create({
-            id: 'ingest-agent-policies:' + policyId,
+            id: 'fleet-agent-policies:' + policyId,
             index: INGEST_SAVED_OBJECT_INDEX,
             refresh: 'wait_for',
             document: {
-              type: 'ingest-agent-policies',
-              'ingest-agent-policies': {
+              type: 'fleet-agent-policies',
+              'fleet-agent-policies': {
                 name: policyId,
                 namespace: 'default',
                 description: 'Policy with inactivity timeout',
