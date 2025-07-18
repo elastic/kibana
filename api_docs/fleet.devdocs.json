@@ -27911,6 +27911,20 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryInput.RegistryInputKeys.deployment_modes",
+            "type": "Array",
+            "tags": [],
+            "label": "[RegistryInputKeys.deployment_modes]",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -29818,6 +29832,21 @@
         "label": "PACKAGE_POLICY_API_ROOT",
         "description": [],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.PACKAGE_POLICY_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "PACKAGE_POLICY_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-package-policies\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/package_policy.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
