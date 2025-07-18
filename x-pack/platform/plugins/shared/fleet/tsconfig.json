@@ -122,6 +122,5 @@
     "@kbn/logs-data-access-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/alerting-plugin"
   ]
 }
