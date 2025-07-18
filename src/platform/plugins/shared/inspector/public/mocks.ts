@@ -12,8 +12,9 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { Setup as PluginSetup, Start as PluginStart } from '.';
 import { InspectorViewRegistry } from './view_registry';
 import { plugin as pluginInitializer } from '.';
+// we need to import this here otherwise the tests timeouts
 import { InspectorPanel } from './async_services';
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions we need to import this here otherwise the tests timeouts
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 InspectorPanel;
 
 export type Setup = jest.Mocked<PluginSetup>;
