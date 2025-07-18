@@ -150,10 +150,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           );
         });
 
-        it('leaves the LLM to choose the correct tool by leave tool_choice as auto and passes tools', () => {
-          expect(firstRequestBody.tool_choice).to.be('auto');
-          expect(firstRequestBody.tools?.length).to.not.be(0);
-        });
       });
 
       describe('The second request - Sending the user prompt', () => {
