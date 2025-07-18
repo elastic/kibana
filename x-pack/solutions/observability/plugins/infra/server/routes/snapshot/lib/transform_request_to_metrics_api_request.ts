@@ -40,12 +40,14 @@ export const transformRequestToMetricsAPIRequest = async ({
     sourceConfiguration: source.configuration,
   });
 
+  const transformed = await transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest);
+
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
       ...timeRangeWithIntervalApplied,
     },
-    metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
+    metrics: transformed,
     limit: snapshotRequest.overrideCompositeSize
       ? snapshotRequest.overrideCompositeSize
       : compositeSize,

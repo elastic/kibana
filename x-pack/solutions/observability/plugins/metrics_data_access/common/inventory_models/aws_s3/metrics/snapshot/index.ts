@@ -10,7 +10,7 @@ import { s3TotalRequests } from './s3_total_requests';
 import { s3NumberOfObjects } from './s3_number_of_objects';
 import { s3DownloadBytes } from './s3_download_bytes';
 import { s3UploadBytes } from './s3_upload_bytes';
-import type { MetricAggregationMap } from '../../../types';
+import type { MetricConfigMap } from '../../../shared/metrics/types';
 
 export const snapshot = {
   s3BucketSize,
@@ -18,4 +18,6 @@ export const snapshot = {
   s3TotalRequests,
   s3UploadBytes,
   s3DownloadBytes,
-} satisfies MetricAggregationMap;
+} satisfies MetricConfigMap;
+
+export type S3Aggregations = typeof snapshot;

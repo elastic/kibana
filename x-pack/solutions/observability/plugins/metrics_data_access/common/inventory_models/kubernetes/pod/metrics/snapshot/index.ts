@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricsUIAggregation } from '../../../../types';
+import type { MetricConfigMap } from '../../../../shared/metrics/types';
 import { cpu } from './cpu';
 import { memory } from './memory';
 import { rx } from './rx';
@@ -16,4 +16,6 @@ export const snapshot = {
   cpu,
   rx,
   tx,
-} as const satisfies Record<string, MetricsUIAggregation>;
+} satisfies MetricConfigMap;
+
+export type PodAggregations = typeof snapshot;

@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { InventoryItemType, InventoryModel } from '../types';
 import type {
-  InventoryItemType,
-  InventoryMetrics,
-  InventoryModel,
-  LensMetricChartMap,
-  LensMetricFormulaMap,
-  MetricAggregationMap,
-} from '../types';
+  AggregationConfig,
+  InventoryMetricsConfig,
+  LensFormulaConfig,
+  LensMetricChartConfig,
+  MetricConfigMap,
+} from './metrics/types';
 
 export function createInventoryModel<
   TType extends InventoryItemType,
-  TMetrics extends InventoryMetrics
+  TMetrics extends InventoryMetricsConfig<any, any, any>
 >(id: TType, config: Omit<InventoryModel<TType, TMetrics>, 'id'>): InventoryModel<TType, TMetrics> {
   return { id, ...config };
 }
 export function createInventoryModelMetrics<
-  TAggregations extends MetricAggregationMap = MetricAggregationMap,
-  TFormulas extends LensMetricFormulaMap | undefined = undefined,
-  TCharts extends LensMetricChartMap | undefined = undefined
+  TAggeggations extends MetricConfigMap<AggregationConfig> = MetricConfigMap<AggregationConfig>,
+  TFormulas extends MetricConfigMap<LensFormulaConfig> | undefined = undefined,
+  TCharts extends LensMetricChartConfig | undefined = undefined
 >(
-  input: InventoryMetrics<TAggregations, TFormulas, TCharts>
-): InventoryMetrics<TAggregations, TFormulas, TCharts> {
-  return input;
+  config: InventoryMetricsConfig<TAggeggations, TFormulas, TCharts>
+): InventoryMetricsConfig<TAggeggations, TFormulas, TCharts> {
+  return config;
 }

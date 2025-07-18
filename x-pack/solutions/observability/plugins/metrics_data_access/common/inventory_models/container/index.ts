@@ -9,8 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { createInventoryModel } from '../shared/create_inventory_model';
 
-export { containerSnapshotMetricTypes } from './metrics';
-
 export const container = createInventoryModel('container', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.container.displayName', {
     defaultMessage: 'Docker Containers',

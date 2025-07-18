@@ -11,8 +11,10 @@ import { awsS3NumberOfObjects } from './tsvb/aws_s3_number_of_objects';
 import { awsS3DownloadBytes } from './tsvb/aws_s3_download_bytes';
 import { awsS3UploadBytes } from './tsvb/aws_s3_upload_bytes';
 import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
+import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
+import type { S3Aggregations } from './snapshot';
 
-export const metrics = createInventoryModelMetrics({
+export const metrics = createInventoryModelMetrics<S3Aggregations>({
   tsvb: {
     awsS3BucketSize,
     awsS3TotalRequests,
@@ -20,9 +22,11 @@ export const metrics = createInventoryModelMetrics({
     awsS3DownloadBytes,
     awsS3UploadBytes,
   },
-  getAggregation: async (aggregation) =>
-    await import('./snapshot').then(({ snapshot }) => snapshot[aggregation]),
-  getAggregations: async () => await import('./snapshot').then(({ snapshot }) => snapshot),
+  getAggregations: async (args) => {
+    const { snapshot } = await import('./snapshot');
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    return catalog;
+  },
   defaultSnapshot: 's3BucketSize',
   defaultTimeRangeInSeconds: 86400 * 7, // 7 days
 });

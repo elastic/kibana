@@ -5,13 +5,26 @@
  * 2.0.
  */
 import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
-import { getAggregation } from '../../shared/metrics/resolve_schema_metrics';
+import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
+import type { HostAggregations } from './snapshot';
+import type { HostFormulas } from './formulas';
+import type { HostCharts } from './charts';
 
-export const metrics = createInventoryModelMetrics({
-  getAggregation: async (aggregation) =>
-    await import('./snapshot').then(({ snapshot }) => getAggregation(snapshot, aggregation)),
-  getFormulas: async () => await import('./formulas').then(({ formulas }) => formulas),
-  getCharts: async () => await import('./charts').then(({ charts }) => charts),
+export const metrics = createInventoryModelMetrics<HostAggregations, HostFormulas, HostCharts>({
+  getAggregations: async (args) => {
+    const { snapshot } = await import('./snapshot');
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    return catalog;
+  },
+  getFormulas: async (args) => {
+    const { formulas } = await import('./formulas');
+    const catalog = new MetricsCatalog(formulas, args?.schema);
+    return catalog;
+  },
+  getCharts: async () => {
+    const { charts } = await import('./charts');
+    return charts;
+  },
   defaultSnapshot: 'cpuV2',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 });

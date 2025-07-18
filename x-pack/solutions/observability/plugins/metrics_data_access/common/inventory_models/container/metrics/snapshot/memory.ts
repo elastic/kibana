@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricsUIAggregation } from '../../../types';
+import type { MetricsUIAggregation } from '../../../shared/metrics/types';
 
 export const memory: MetricsUIAggregation = {
   memory: { avg: { field: 'docker.memory.usage.pct' } },

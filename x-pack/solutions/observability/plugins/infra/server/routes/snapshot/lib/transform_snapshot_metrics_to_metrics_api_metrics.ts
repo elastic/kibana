@@ -6,17 +6,21 @@
  */
 
 import { identity } from 'lodash';
+import type { AggregationMetricsCatalog } from '@kbn/metrics-data-access-plugin/common';
 import { networkTraffic, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { MetricsAPIMetric } from '@kbn/metrics-data-access-plugin/common/http_api/metrics_api';
 import { type SnapshotRequest, SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 
-export const transformSnapshotMetricsToMetricsAPIMetrics = (
+export const transformSnapshotMetricsToMetricsAPIMetrics = async (
   snapshotRequest: SnapshotRequest
-): MetricsAPIMetric[] => {
+): Promise<MetricsAPIMetric[]> => {
+  const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
+  const aggregations: AggregationMetricsCatalog = await inventoryModel.metrics.getAggregations();
+
   return snapshotRequest.metrics
     .map((metric, index) => {
-      const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
-      const aggregations = inventoryModel.metrics.snapshot?.[metric.type];
+      const aggregation = aggregations.get(metric.type);
+
       if (SnapshotCustomMetricInputRT.is(metric)) {
         const isUniqueId = snapshotRequest.metrics.findIndex((m) =>
           SnapshotCustomMetricInputRT.is(m) ? m.id === metric.id : false
@@ -36,7 +40,7 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = (
           },
         };
       }
-      return { id: metric.type, aggregations };
+      return { id: metric.type, aggregations: aggregation };
     })
     .filter(identity) as MetricsAPIMetric[];
 };

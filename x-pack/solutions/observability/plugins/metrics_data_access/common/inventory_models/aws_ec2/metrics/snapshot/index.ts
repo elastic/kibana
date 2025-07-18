@@ -10,7 +10,7 @@ import { rx } from './rx';
 import { tx } from './tx';
 import { diskIOReadBytes } from './disk_io_read_bytes';
 import { diskIOWriteBytes } from './disk_io_write_bytes';
-import type { MetricAggregationMap } from '../../../types';
+import type { MetricConfigMap } from '../../../shared/metrics/types';
 
 export const snapshot = {
   cpu,
@@ -18,4 +18,6 @@ export const snapshot = {
   tx,
   diskIOReadBytes,
   diskIOWriteBytes,
-} satisfies MetricAggregationMap;
+} satisfies MetricConfigMap;
+
+export type SQSAggregations = typeof snapshot;

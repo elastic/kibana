@@ -10,7 +10,7 @@ import { sqsMessagesDelayed } from './sqs_messages_delayed';
 import { sqsMessagesEmpty } from './sqs_messages_empty';
 import { sqsMessagesSent } from './sqs_messages_sent';
 import { sqsOldestMessage } from './sqs_oldest_message';
-import type { MetricAggregationMap } from '../../../types';
+import type { MetricConfigMap } from '../../../shared/metrics/types';
 
 export const snapshot = {
   sqsMessagesVisible,
@@ -18,4 +18,6 @@ export const snapshot = {
   sqsMessagesEmpty,
   sqsMessagesSent,
   sqsOldestMessage,
-} satisfies MetricAggregationMap;
+} satisfies MetricConfigMap;
+
+export type SQSAggregations = typeof snapshot;

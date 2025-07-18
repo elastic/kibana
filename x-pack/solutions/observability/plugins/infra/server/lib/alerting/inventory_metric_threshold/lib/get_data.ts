@@ -143,7 +143,7 @@ export const getData = async (
       ? await doFieldsExist(esClient, [termsAggField[KUBERNETES_POD_UID]], index)
       : null;
 
-  const request = createRequest(
+  const request = await createRequest(
     index,
     nodeType,
     metric,

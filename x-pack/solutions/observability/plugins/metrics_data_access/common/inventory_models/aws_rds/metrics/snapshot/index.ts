@@ -10,7 +10,7 @@ import { rdsLatency } from './rds_latency';
 import { rdsConnections } from './rds_connections';
 import { rdsQueriesExecuted } from './rds_queries_executed';
 import { rdsActiveTransactions } from './rds_active_transactions';
-import type { MetricAggregationMap } from '../../../types';
+import type { MetricConfigMap } from '../../../shared/metrics/types';
 
 export const snapshot = {
   cpu,
@@ -18,4 +18,6 @@ export const snapshot = {
   rdsConnections,
   rdsQueriesExecuted,
   rdsActiveTransactions,
-} satisfies MetricAggregationMap;
+} satisfies MetricConfigMap;
+
+export type RDSAggregations = typeof snapshot;

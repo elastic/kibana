@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { JsonObject } from '@kbn/utility-types';
 import type {
+  AggregationMetricsCatalog,
   InventoryItemType,
   MetricsUIAggregation,
 } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
-import type { MetricAggregationMap } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
 import type { SnapshotMetricInput, SnapshotRequest } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
@@ -24,12 +24,6 @@ export interface InfraSnapshotRequestOptions
   filterQuery: JsonObject | undefined;
 }
 
-function isAggregationKey<T extends MetricAggregationMap>(
-  key: PropertyKey,
-  obj: T
-): key is keyof T {
-  return key in obj;
-}
 export const metricToAggregation = async (
   nodeType: InventoryItemType,
   metric: SnapshotMetricInput,
@@ -49,7 +43,8 @@ export const metricToAggregation = async (
     };
   }
 
-  return inventoryModel.metrics.getAggregation(metric.type);
+  const aggregations: AggregationMetricsCatalog = await inventoryModel.metrics.getAggregations();
+  return aggregations.get(metric.type);
 };
 
 export const getMetricsAggregations = (

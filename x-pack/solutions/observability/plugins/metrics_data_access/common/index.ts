@@ -18,14 +18,6 @@ export {
   isTermsWithAggregation,
 } from './inventory_models';
 
-export { podSnapshotMetricTypes } from './inventory_models/kubernetes/pod';
-export { containerSnapshotMetricTypes } from './inventory_models/container';
-export { awsS3SnapshotMetricTypes } from './inventory_models/aws_s3';
-export { hostSnapshotMetricTypes } from './inventory_models/host';
-export { awsEC2SnapshotMetricTypes } from './inventory_models/aws_ec2';
-export { awsRDSSnapshotMetricTypes } from './inventory_models/aws_rds';
-export { awsSQSSnapshotMetricTypes } from './inventory_models/aws_sqs';
-
 export {
   InventoryMetricRT,
   InventoryFormatterTypeRT,
@@ -45,6 +37,11 @@ export type {
   TSVBMetricModelCreator,
   TSVBMetricModel,
 } from './inventory_models/types';
+
+export type {
+  AggregationMetricsCatalog,
+  LensMetricsCatalog,
+} from './inventory_models/shared/metrics/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
 export { METRICS_EXPLORER_API_MAX_METRICS } from './constants';

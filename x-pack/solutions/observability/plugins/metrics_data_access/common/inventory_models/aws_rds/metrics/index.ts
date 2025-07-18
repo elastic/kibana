@@ -11,8 +11,10 @@ import { awsRDSCpuTotal } from './tsvb/aws_rds_cpu_total';
 import { awsRDSQueriesExecuted } from './tsvb/aws_rds_queries_executed';
 import { awsRDSActiveTransactions } from './tsvb/aws_rds_active_transactions';
 import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
+import type { RDSAggregations } from './snapshot';
+import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
 
-export const metrics = createInventoryModelMetrics({
+export const metrics = createInventoryModelMetrics<RDSAggregations>({
   tsvb: {
     awsRDSLatency,
     awsRDSConnections,
@@ -20,9 +22,11 @@ export const metrics = createInventoryModelMetrics({
     awsRDSQueriesExecuted,
     awsRDSActiveTransactions,
   },
-  getAggregation: async (aggregation) =>
-    await import('./snapshot').then(({ snapshot }) => snapshot[aggregation]),
-  getAggregations: async () => await import('./snapshot').then(({ snapshot }) => snapshot),
+  getAggregations: async (args) => {
+    const { snapshot } = await import('./snapshot');
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    return catalog;
+  },
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 });

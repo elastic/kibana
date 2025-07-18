@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
@@ -92,23 +93,21 @@ export const getDocumentsFilter = async ({
   return filters;
 };
 
-export const getInventoryModelAggregations = (
-  entityType: 'host',
+export const getInventoryModelAggregations = async (
+  assetType: 'host',
   metrics: InfraEntityMetricType[]
 ) => {
-  const inventoryModel = findInventoryModel(entityType);
-  return metrics.reduce<
-    Partial<
-      Record<
-        InfraEntityMetricType,
-        (typeof inventoryModel.metrics.snapshot)[keyof typeof inventoryModel.metrics.snapshot]
-      >
-    >
-  >(
-    (acc, metric) =>
-      inventoryModel.metrics.snapshot?.[metric]
-        ? Object.assign(acc, inventoryModel.metrics.snapshot[metric])
-        : acc,
+  const inventoryModel = findInventoryModel(assetType);
+  const aggregations = await inventoryModel.metrics.getAggregations();
+
+  return metrics.reduce<Partial<Record<InfraEntityMetricType, MetricsUIAggregation>>>(
+    (acc, metric) => {
+      const metricAgg = aggregations.get(metric);
+      if (metricAgg) {
+        Object.assign(acc, metricAgg);
+      }
+      return acc;
+    },
     {}
   );
 };

@@ -11,8 +11,10 @@ import { awsSQSMessagesSent } from './tsvb/aws_sqs_messages_sent';
 import { awsSQSMessagesEmpty } from './tsvb/aws_sqs_messages_empty';
 import { awsSQSOldestMessage } from './tsvb/aws_sqs_oldest_message';
 import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
+import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
+import type { SQSAggregations } from './snapshot';
 
-export const metrics = createInventoryModelMetrics({
+export const metrics = createInventoryModelMetrics<SQSAggregations>({
   tsvb: {
     awsSQSMessagesVisible,
     awsSQSMessagesDelayed,
@@ -20,9 +22,11 @@ export const metrics = createInventoryModelMetrics({
     awsSQSMessagesEmpty,
     awsSQSOldestMessage,
   },
-  getAggregation: async (aggregation) =>
-    await import('./snapshot').then(({ snapshot }) => snapshot[aggregation]),
-  getAggregations: async () => await import('./snapshot').then(({ snapshot }) => snapshot),
+  getAggregations: async (args) => {
+    const { snapshot } = await import('./snapshot');
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    return catalog;
+  },
   defaultSnapshot: 'sqsMessagesVisible',
   defaultTimeRangeInSeconds: 14400,
 });

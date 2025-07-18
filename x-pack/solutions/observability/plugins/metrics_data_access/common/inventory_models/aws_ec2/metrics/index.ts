@@ -9,16 +9,20 @@ import { awsEC2CpuUtilization } from './tsvb/aws_ec2_cpu_utilization';
 import { awsEC2NetworkTraffic } from './tsvb/aws_ec2_network_traffic';
 import { awsEC2DiskIOBytes } from './tsvb/aws_ec2_diskio_bytes';
 import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
+import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
+import type { SQSAggregations } from './snapshot';
 
-export const metrics = createInventoryModelMetrics({
+export const metrics = createInventoryModelMetrics<SQSAggregations>({
   tsvb: {
     awsEC2CpuUtilization,
     awsEC2NetworkTraffic,
     awsEC2DiskIOBytes,
   },
-  getAggregation: async (aggregation) =>
-    await import('./snapshot').then(({ snapshot }) => snapshot[aggregation]),
-  getAggregations: async () => await import('./snapshot').then(({ snapshot }) => snapshot),
+  getAggregations: async (args) => {
+    const { snapshot } = await import('./snapshot');
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    return catalog;
+  },
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 });

@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ChartType,
-  LensBaseLayer,
-  LensConfig,
-} from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
-
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { InventoryMetricsConfig } from './shared/metrics/types';
+export type { BaseMetricsCatalog } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
@@ -269,50 +266,11 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
-export type LensMetricFormulaMap = Record<string, LensBaseLayer>;
-export type LensMetricChartMap = Record<
-  string,
-  { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }
->;
-export type MetricAggregationMap<TAggKey extends string = string> = Record<
-  TAggKey,
-  MetricsUIAggregation
->;
-
-interface InventoryMetricsBase<TAggregations extends MetricAggregationMap> {
-  tsvb?: Record<string, TSVBMetricModelCreator>;
-
-  getAggregation<TAggKey extends string>(
-    aggregation: TAggKey,
-    args?: {
-      schema?: 'ecs' | 'semconv';
-    }
-  ): Promise<TAggregations[TAggKey]>;
-  // getAggregations(args?: { schema?: 'ecs' | 'semconv' }): Promise<TAggregations>;
-  defaultSnapshot: SnapshotMetricType;
-  defaultTimeRangeInSeconds: number;
-}
-type InventoryMetricsWithLens<
-  TAggregations extends MetricAggregationMap,
-  TFormulas extends LensMetricFormulaMap,
-  TCharts extends LensMetricChartMap
-> = InventoryMetricsBase<TAggregations> & {
-  getFormulas: () => Promise<TFormulas>;
-  getCharts: () => Promise<TCharts>;
-};
-export type InventoryMetrics<
-  TAggregations extends MetricAggregationMap = MetricAggregationMap,
-  TFormulas extends LensMetricFormulaMap | undefined = undefined,
-  TCharts extends LensMetricChartMap | undefined = undefined
-> = [TFormulas, TCharts] extends [LensMetricFormulaMap, LensMetricChartMap]
-  ? InventoryMetricsWithLens<TAggregations, NonNullable<TFormulas>, NonNullable<TCharts>>
-  : InventoryMetricsBase<TAggregations>;
-
 type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
 
 export interface InventoryModel<
   TEntityType extends InventoryItemType,
-  TMetrics = InventoryMetrics
+  TMetrics = InventoryMetricsConfig
 > {
   id: TEntityType;
   displayName: string;
@@ -339,10 +297,3 @@ export interface InventoryModel<
 }
 
 export type LensConfigWithId = LensConfig & { id: string };
-
-export type MetricDefinition = LensMetricFormulaMap | MetricAggregationMap;
-
-export interface MetricsBySchema<TMetricDefinition extends MetricDefinition> {
-  ecs: TMetricDefinition;
-  semconv: TMetricDefinition;
-}

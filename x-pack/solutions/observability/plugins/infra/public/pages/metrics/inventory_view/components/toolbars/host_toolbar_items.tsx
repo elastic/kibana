@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { hostSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 
@@ -18,11 +17,5 @@ export const hostGroupByFields = [
 ];
 
 export const HostToolbarItems = (props: ToolbarProps) => {
-  return (
-    <MetricsAndGroupByToolbarItems
-      {...props}
-      metricTypes={hostSnapshotMetricTypes}
-      groupByFields={hostGroupByFields}
-    />
-  );
+  return <MetricsAndGroupByToolbarItems {...props} groupByFields={hostGroupByFields} />;
 };

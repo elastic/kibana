@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { createInventoryModel } from '../shared/create_inventory_model';
-
 export const awsRDS = createInventoryModel('awsRDS', {
   displayName: i18n.translate('xpack.metricsData.inventoryModels.awsRDS.displayName', {
     defaultMessage: 'RDS Databases',
