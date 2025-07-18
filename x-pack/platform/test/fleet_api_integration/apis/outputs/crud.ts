@@ -52,6 +52,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: true,
+          use_space_awareness_migration_status: 'success',
         },
         overwrite: true,
       });
@@ -67,6 +68,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'fleet-default-settings',
         attributes: {
           output_secret_storage_requirements_met: false,
+          use_space_awareness_migration_status: 'success',
         },
         overwrite: true,
       });

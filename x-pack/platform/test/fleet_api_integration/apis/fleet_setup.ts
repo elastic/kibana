@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidV4 } from 'uuid';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
@@ -72,6 +72,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('upgrade managed package policies', () => {
       const apiClient = new SpaceTestApiClient(supertest);
       before(async () => {
+        await apiClient.setup();
         const pkgRes = await apiClient.getPackage({
           pkgName: 'synthetics',
         });
@@ -96,12 +97,13 @@ export default function (providerContext: FtrProviderContext) {
           operations: [...new Array(10).keys()].flatMap((_, index) => [
             {
               create: {
-                _id: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}:${uuidV4()}`,
+                _id: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}:${uuidV4()}`,
               },
             },
             {
-              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-              [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
+              type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              namespaces: ['default'],
+              [PACKAGE_POLICY_SAVED_OBJECT_TYPE]: {
                 name: `test-${index}`,
                 policy_ids: [agentPolicyRes.item.id],
                 inputs: [],
@@ -114,7 +116,7 @@ export default function (providerContext: FtrProviderContext) {
           ]),
         });
 
-        await apiClient.getPackage({
+        return await apiClient.getPackage({
           pkgName: 'synthetics',
         });
       });
@@ -130,12 +132,12 @@ export default function (providerContext: FtrProviderContext) {
                 bool: {
                   must: {
                     term: {
-                      [`${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version`]: '1.2.1',
+                      [`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.version`]: '1.2.1',
                     },
                   },
                   filter: {
                     term: {
-                      [`${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name`]: 'synthetics',
+                      [`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name`]: 'synthetics',
                     },
                   },
                 },
