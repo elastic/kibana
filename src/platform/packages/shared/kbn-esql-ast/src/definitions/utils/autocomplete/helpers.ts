@@ -24,7 +24,7 @@ import {
   isLiteralDateItem,
   compareTypesWithLiterals,
 } from '../literals';
-import { EDITOR_MARKER } from '../../../parser/constants';
+import { EDITOR_MARKER } from '../../constants';
 import {
   type SupportedDataType,
   isParameterType,
