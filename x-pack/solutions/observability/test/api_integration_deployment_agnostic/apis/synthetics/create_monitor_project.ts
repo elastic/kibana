@@ -965,8 +965,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const foundAfter = soResAfter.saved_objects.find((obj: any) => obj.id === found!.id);
         expect(foundAfter).to.be(undefined);
       });
-
-      it('recreates monitors on update for multi space', async () => {});
     });
   });
 }

@@ -842,8 +842,6 @@ export default function ({ getService }: FtrProviderContext) {
           type: syntheticsMonitorSavedObjectType,
         });
 
-        // Get all available spaces
-
         // Find the monitor
         const found = soRes.saved_objects.find(
           (obj: any) => obj.attributes.journey_id === monitorId

@@ -114,7 +114,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 });
 
 const validProjectMultiSpace = async (routeContext: RouteContext, monitors: ProjectMonitor[]) => {
-  const { response } = routeContext;
+  const { response, server } = routeContext;
   const spaceId = await validateSpaceId(routeContext);
 
   const spacesList = new Set(
@@ -126,23 +126,21 @@ const validProjectMultiSpace = async (routeContext: RouteContext, monitors: Proj
   if ((spacesList.size === 1 && spacesList.has(DEFAULT_SPACE_ID)) || spacesList.size === 0) {
     return spaceId;
   }
-
-  try {
-    await pMap(
-      spacesList,
-      async (space) => {
-        const { server } = routeContext;
-        const spacesClient = server.spaces?.spacesService.createSpacesClient(routeContext.request);
-        if (spacesClient) {
+  const spacesClient = server.spaces?.spacesService.createSpacesClient(routeContext.request);
+  if (spacesClient) {
+    try {
+      await pMap(
+        spacesList,
+        async (space) => {
           await spacesClient.get(space);
-        }
-      },
-      { concurrency: 5, stopOnError: true }
-    );
-  } catch (error) {
-    throw response.notFound({
-      body: { message: `Kibana space does not exist, ${error}` },
-    });
+        },
+        { concurrency: 5, stopOnError: true }
+      );
+    } catch (error) {
+      throw response.notFound({
+        body: { message: `Kibana space does not exist, ${error}` },
+      });
+    }
   }
 
   for (const monitor of monitors) {
