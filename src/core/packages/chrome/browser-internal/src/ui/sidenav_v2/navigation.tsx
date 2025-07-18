@@ -12,6 +12,7 @@ import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@kbn/shared-ux-router';
+import { Global, css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import {
   LOGO,
@@ -37,14 +38,24 @@ export const Navigation = ({ isSideNavCollapsed$, history, setWidth }: Props) =>
   const isCollapsed = useObservable(isSideNavCollapsed$, isSideNavCollapsed$.getValue());
 
   return (
-    <Router history={history}>
-      <NavigationComponent
-        isCollapsed={isCollapsed}
-        items={demoItems}
-        logoLabel={LOGO.label}
-        logoType={LOGO.logoType}
-        setWidth={setWidth}
+    <>
+      <Global
+        styles={css`
+          :root {
+            // have to provide this fallback to avoid bugs when EuiCollapsibleNavBeta is missing
+            --euiCollapsibleNavOffset: 0px;
+          }
+        `}
       />
-    </Router>
+      <Router history={history}>
+        <NavigationComponent
+          isCollapsed={isCollapsed}
+          items={demoItems}
+          logoLabel={LOGO.label}
+          logoType={LOGO.logoType}
+          setWidth={setWidth}
+        />
+      </Router>
+    </>
   );
 };
