@@ -60,7 +60,14 @@ export interface InternalChromeStart extends ChromeStart {
    * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getProjectHeaderComponentForGridLayout(): JSX.Element;
+  getProjectHeaderComponentForGridLayout(opts: { includeSideNavigation: boolean }): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the new project side navigation UI
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectSideNavigationV2Component(opts: { setWidth: (width: number) => void }): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header banner UI

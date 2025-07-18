@@ -30,6 +30,8 @@ import {
   LayoutFeatureFlag,
   LAYOUT_FEATURE_FLAG_KEY,
   LAYOUT_DEBUG_FEATURE_FLAG_KEY,
+  LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
+  LayoutProjectSideNavVersion,
 } from '@kbn/core-chrome-layout';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
@@ -93,6 +95,10 @@ export class RenderingService implements IRenderingService {
       'legacy-fixed'
     );
     const debugLayout = featureFlags.getBooleanValue(LAYOUT_DEBUG_FEATURE_FLAG_KEY, false);
+    const projectSideNavVersion = featureFlags.getStringValue<LayoutProjectSideNavVersion>(
+      LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
+      'v1'
+    );
 
     const startServices = this.contextDeps.getValue()!;
 
@@ -107,7 +113,7 @@ export class RenderingService implements IRenderingService {
 
     const layout: LayoutService =
       layoutType === 'grid'
-        ? new GridLayout(renderCoreDeps, { debug: debugLayout })
+        ? new GridLayout(renderCoreDeps, { debug: debugLayout, projectSideNavVersion })
         : new LegacyFixedLayout(renderCoreDeps);
 
     const Layout = layout.getComponent();

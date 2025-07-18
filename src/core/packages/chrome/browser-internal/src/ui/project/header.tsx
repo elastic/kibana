@@ -47,6 +47,7 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/scr
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
+import { CollapseButton } from './collapse_button';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -257,7 +258,7 @@ export const ProjectHeader = ({
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position={isFixed ? 'fixed' : 'static'} className="header__firstBar">
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
-              {children && (
+              {children ? (
                 <Router history={application.history}>
                   <ProjectNavigation
                     isSideNavCollapsed$={observables.isSideNavCollapsed$}
@@ -266,6 +267,13 @@ export const ProjectHeader = ({
                     {children}
                   </ProjectNavigation>
                 </Router>
+              ) : (
+                <EuiHeaderSectionItem>
+                  <CollapseButton
+                    isSideNavCollapsed$={observables.isSideNavCollapsed$}
+                    toggleSideNav={toggleSideNav}
+                  />
+                </EuiHeaderSectionItem>
               )}
 
               <EuiHeaderSectionItem>
