@@ -10,13 +10,13 @@
 import { useCallback, useState } from 'react';
 
 /**
- * Hook for managing click-based opening (persistent mode)
+ * Hook for persisting popover on trigger click.
  */
-export const useClickToggle = () => {
-  const [isOpenedByClick, setIsOpenedByClick] = useState(false);
+export const usePersistentPopover = () => {
+  const [isPersistent, setIsPersistent] = useState(false);
 
-  const setClickOpened = useCallback(() => setIsOpenedByClick(true), []);
-  const clearClickOpened = useCallback(() => setIsOpenedByClick(false), []);
+  const setPersistent = useCallback(() => setIsPersistent(true), []);
+  const clearPersistent = useCallback(() => setIsPersistent(false), []);
 
-  return { isOpenedByClick, setClickOpened, clearClickOpened };
+  return { isPersistent, setPersistent, clearPersistent };
 };
