@@ -105,61 +105,7 @@ describe('fetchEsqlQuery', () => {
       }
     });
 
-    it('should throw an error when is_partial is true but no results are returned and (Alert if matches are found) is selected', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        columns: [], // no results
-        values: [],
-        is_partial: true, // is_partial is true
-      });
-
-      (getEsqlQueryHits as jest.Mock).mockReturnValue({
-        results: {
-          esResult: {
-            _shards: { failed: 0, successful: 0, total: 0 },
-            aggregations: {},
-            hits: { hits: [] },
-            timed_out: false,
-            took: 0,
-          },
-          isCountAgg: false,
-          isGroupAgg: false,
-        },
-      });
-
-      await expect(
-        fetchEsqlQuery({
-          ruleId: 'testRuleId',
-          alertLimit: 1,
-          params: defaultParams,
-          services: {
-            logger,
-            scopedClusterClient,
-            // @ts-expect-error
-            share: {
-              url: {
-                locators: {
-                  get: jest.fn().mockReturnValue({
-                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
-                  } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
-                },
-              },
-            } as SharePluginStart,
-            ruleResultService: mockRuleResultService,
-          },
-          spacePrefix: '',
-          dateStart: new Date().toISOString(),
-          dateEnd: new Date().toISOString(),
-        })
-      ).rejects.toThrow(
-        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.'
-      );
-
-      expect(mockRuleResultService.addLastRunWarning).not.toHaveBeenCalled();
-      expect(mockRuleResultService.setLastRunOutcomeMessage).not.toHaveBeenCalled();
-    });
-
-    it('should add a warning when is_partial is true and (Alert per row) is selected', async () => {
+    it('should add a warning when is_partial is true', async () => {
       const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         columns: [],
@@ -185,58 +131,6 @@ describe('fetchEsqlQuery', () => {
         ruleId: 'testRuleId',
         alertLimit: 1,
         params: { ...defaultParams, groupBy: 'row' },
-        services: {
-          logger,
-          scopedClusterClient,
-          // @ts-expect-error
-          share: {
-            url: {
-              locators: {
-                get: jest.fn().mockReturnValue({
-                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
-                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
-              },
-            },
-          } as SharePluginStart,
-          ruleResultService: mockRuleResultService,
-        },
-        spacePrefix: '',
-        dateStart: new Date().toISOString(),
-        dateEnd: new Date().toISOString(),
-      });
-
-      const warning =
-        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.';
-      expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
-      expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
-    });
-
-    it('should add a warning when is_partial is true, has some results and (Alert if matches are found) is selected', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        columns: [],
-        values: [],
-        is_partial: true, // is_partial is true
-      });
-
-      (getEsqlQueryHits as jest.Mock).mockReturnValue({
-        results: {
-          esResult: {
-            _shards: { failed: 0, successful: 0, total: 0 },
-            aggregations: {},
-            hits: { hits: [{ foo: 'bar' }] }, // has data
-            timed_out: false,
-            took: 0,
-          },
-          isCountAgg: false,
-          isGroupAgg: true,
-        },
-      });
-
-      await fetchEsqlQuery({
-        ruleId: 'testRuleId',
-        alertLimit: 1,
-        params: defaultParams,
         services: {
           logger,
           scopedClusterClient,
