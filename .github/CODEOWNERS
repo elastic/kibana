@@ -2285,7 +2285,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 x-pack/test/security_solution_api_integration/test_suites/detections_response/utils @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/detections_response/telemetry @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
-x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-investigations
+x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-entity-analytics
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
@@ -2370,16 +2370,16 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 ## Security Solution Threat Hunting areas - Threat Hunting Explore
 /x-pack/solutions/security/plugins/security_solution/common/api/tags @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-entity-analytics
 
-/x-pack/test/security_solution_cypress/cypress/e2e/explore @elastic/security-threat-hunting-investigations
-/x-pack/test/security_solution_cypress/cypress/screens/hosts @elastic/security-threat-hunting-investigations
-/x-pack/test/security_solution_cypress/cypress/screens/network @elastic/security-threat-hunting-investigations
-/x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-threat-hunting-investigations
-/x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-threat-hunting-investigations
+/x-pack/test/security_solution_cypress/cypress/e2e/explore @elastic/security-entity-analytics
+/x-pack/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
+/x-pack/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
+/x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-entity-analytics
+/x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-entity-analytics
 
 /x-pack/solutions/security/plugins/security_solution/public/app/actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/assets @elastic/security-threat-hunting-investigations
@@ -2410,17 +2410,17 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_form_with_warn @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/cases @elastic/kibana-cases
-/x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/public/overview @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/dashboards @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/empty_page @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/empty_prompt @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution_serverless/public/components/dashboards_landing_callout @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-entity-analytics
 
 /x-pack/test/functional/es_archives/auditbeat/overview @elastic/security-threat-hunting-investigations
 /x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-investigations
