@@ -14,16 +14,14 @@ export type ToolHandler<TPayload = Record<string, unknown>, TMetadata = Record<s
 
 export interface SuggestionDefinitionServer<TPayload = {}, TMetadata = {}> {
   suggestionId: string; // Unique identifier for the case suggestion
-  displayName: string; // Human-readable name for the suggestion
-  description: string; // Description of the suggestion's purpose
   availableTools: Record<string, ToolDefinition>; // Tools available for this suggestion, keyed by tool name
-  toolHandlers: Record<string, ToolHandler<TPayload, TMetadata>>; // Handlers for tools, keyed to match the tool name
+  handlers: Record<string, ToolHandler<TPayload, TMetadata>>; // Handlers for tools, keyed to match the tool name
 }
 
 export class Registry {
   private registry: Map<string, SuggestionDefinitionServer> = new Map();
   private tools: Map<string, ToolDefinition> = new Map();
-  private toolHandlers: Map<string, ToolHandler> = new Map();
+  private handlers: Map<string, ToolHandler> = new Map();
 
   public register(suggestion: SuggestionDefinitionServer): void {
     if (this.registry.has(suggestion.suggestionId)) {
@@ -38,13 +36,13 @@ export class Registry {
       }
       this.tools.set(toolName, toolDefinition);
     });
-    Object.entries(suggestion.toolHandlers).forEach(([handlerName, handler]) => {
-      if (this.toolHandlers.has(handlerName)) {
+    Object.entries(suggestion.handlers).forEach(([handlerName, handler]) => {
+      if (this.handlers.has(handlerName)) {
         throw new Error(
           `Tool handler '${handlerName}' is already registered for suggestion type '${suggestion.suggestionId}'.`
         );
       }
-      this.toolHandlers.set(handlerName, handler);
+      this.handlers.set(handlerName, handler);
     });
   }
 
@@ -57,15 +55,15 @@ export class Registry {
   }
 
   getToolHandler(handlerName: string): ToolHandler | undefined {
-    return this.toolHandlers.get(handlerName);
+    return this.handlers.get(handlerName);
   }
 
   getAllTools(): Record<string, ToolDefinition> {
     return Object.fromEntries(this.tools.entries());
   }
 
-  getAllToolHandlers(): SuggestionDefinitionServer['toolHandlers'] {
-    return Object.fromEntries(this.toolHandlers.entries());
+  getAllToolHandlers(): SuggestionDefinitionServer['handlers'] {
+    return Object.fromEntries(this.handlers.entries());
   }
 
   getAll(): SuggestionDefinitionServer[] {
