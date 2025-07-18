@@ -15,6 +15,10 @@ import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/commo
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { binaryToString, deleteAllExceptions } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  createExceptionListItem,
+  deleteExceptionListItem,
+} from '../../../../detections_response/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -48,19 +52,6 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
     });
 
-    it('returns an empty response if filter does not match any items', async () => {
-      const { body } = await supertest
-        .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
-        .set('kbn-xsrf', 'true')
-        .send({ filter: { bool: { must: [{ term: { list_id: 'non-existent-list-id' } }] } } })
-        .expect(200)
-        .parse(binaryToString);
-
-      const parsedItems = parseRows(body);
-
-      expect(parsedItems).toEqual([]);
-    });
-
     it('returns a 400 error if the query is malformed', async () => {
       const { body } = await supertest
         .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
@@ -73,6 +64,41 @@ export default ({ getService }: FtrProviderContext) => {
           error: 'Bad Request',
           message: expect.stringContaining('include_expired_exceptions'),
         })
+      );
+    });
+
+    it('returns a 404 response if filter does not match any items', async () => {
+      const { body } = await supertest
+        .post(
+          `${EXCEPTION_LIST_URL}/_bulk_export?filter=exception-list.attributes.list_id:non-existent-list-id`
+        )
+        .set('kbn-xsrf', 'true')
+        .expect(404);
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          message:
+            'No lists found for filter: "exception-list.attributes.list_id:non-existent-list-id"',
+          status_code: 404,
+        })
+      );
+    });
+
+    it('returns a partial response if the filter matches some items', async () => {
+      const { body } = await supertest
+        .post(`${EXCEPTION_LIST_URL}/_bulk_export?filter=exception-list.attributes.list_id:list-0`)
+        .set('kbn-xsrf', 'true')
+        .expect(200)
+        .parse(binaryToString);
+
+      const exportedRows: Array<{ type: string; list_id: string }> = parseRows(body);
+      const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+      const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
+
+      expect(exportedLists).toHaveLength(1); // 1 list matching the filter
+      expect(exportedItems).toHaveLength(2); // 2 items matching the list
+      expect(exportedRows.map((row) => row.list_id)).toEqual(
+        expect.arrayContaining(['list-0', 'list-0', 'list-0'])
       );
     });
 
@@ -91,7 +117,52 @@ export default ({ getService }: FtrProviderContext) => {
       expect(exportedItems).toHaveLength(6); // 3 lists * 2 items
     });
 
-    it('does not include expired exceptions by default');
+    describe('with an expired exception', () => {
+      before(async () => {
+        await createExceptionListItem(supertest, log, {
+          ...getCreateExceptionListItemMinimalSchemaMock({
+            item_id: 'expired-item',
+            list_id: 'list-0',
+            expire_time: new Date(Date.now() - 10_000).toISOString(),
+          }),
+        });
+      });
+
+      after(async () => {
+        await deleteExceptionListItem(supertest, log, 'expired-item');
+      });
+
+      it('can exclude expired exceptions', async () => {
+        const { body } = await supertest
+          .post(`${EXCEPTION_LIST_URL}/_bulk_export?include_expired_exceptions=false`)
+          .set('kbn-xsrf', 'true')
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRows: Array<{ type: string }> = parseRows(body);
+        const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+        const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
+
+        expect(exportedLists).toHaveLength(3); // 3 lists
+        expect(exportedItems).toHaveLength(6); // 3 lists * 2 items
+      });
+
+      it('includes expired exceptions by default', async () => {
+        const { body } = await supertest
+          .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
+          .set('kbn-xsrf', 'true')
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRows: Array<{ type: string }> = parseRows(body);
+        const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+        const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
+
+        expect(exportedLists).toHaveLength(3); // 3 lists
+        expect(exportedItems).toHaveLength(7); // 3 lists * 2 items + 1 expired item
+      });
+    });
+
     it('does not include rule exception lists');
 
     describe('when exception list count exceeds the default export size limit', () => {

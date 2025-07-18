@@ -41,6 +41,7 @@ import type {
   DeleteExceptionListOptions,
   DuplicateExceptionListOptions,
   ExportExceptionListAndItemsOptions,
+  ExportExceptionListsAndItemsOptions,
   FindEndpointListItemOptions,
   FindExceptionListItemOptions,
   FindExceptionListItemPointInTimeFinderOptions,
@@ -1079,17 +1080,18 @@ export class ExceptionListClient {
    * @returns the ndjson of the list and items to export or null if none exists
    */
   public exportExceptionListsAndItems = async (
-    options: ExportExceptionListAndItemsOptions
-  ): Promise<ExportExceptionListAndItemsReturn | null> => {
+    options: ExportExceptionListsAndItemsOptions
+  ): Promise<ExportExceptionListsAndItemsReturn | null> => {
     const { savedObjectsClient } = this;
 
-    if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
-        'exceptionsListPreExport',
-        options,
-        this.getServerExtensionCallbackContext()
-      );
-    }
+    // TODO fix this
+    // if (this.enableServerExtensionPoints) {
+    //   await this.serverExtensionsClient.pipeRun(
+    //     'exceptionsListsPreExport',
+    //     options,
+    //     this.getServerExtensionCallbackContext()
+    //   );
+    // }
 
     return exportExceptionListsAndItems({
       ...options,
