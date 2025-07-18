@@ -887,6 +887,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         summary: `Rollback a package to previous version`,
         options: {
           tags: ['oas-tag:Elastic Package Manager (EPM)'],
+          availability: {
+            since: '9.1.0',
+            stability: 'experimental',
+          },
         },
       })
       .addVersion(
