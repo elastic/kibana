@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
+  columnExists as _columnExists,
   getFragmentData,
   suggestForExpression,
 } from '../../../definitions/utils/autocomplete/helpers';
@@ -24,6 +25,7 @@ import {
   getNullsPrefixRange,
   getSortPos,
   getSuggestionsAfterCompleteExpression,
+  rightAfterColumn,
   sortModifierSuggestions,
 } from './utils';
 
@@ -63,13 +65,9 @@ export async function autocomplete(
         return [];
       }
 
-      const suggestions = await suggestForExpression({
-        innerText,
-        getColumnsByType: callbacks?.getByType,
-        expressionRoot,
-        location: Location.SORT,
-        context,
-      });
+      const suggestions: ISuggestionItem[] = [];
+
+      const columnExists = (name: string) => _columnExists(name, context);
 
       if (
         isExpressionComplete(
@@ -77,7 +75,20 @@ export async function autocomplete(
           innerText
         )
       ) {
-        suggestions.push(...getSuggestionsAfterCompleteExpression(innerText, expressionRoot));
+        suggestions.push(
+          ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
+        );
+      }
+
+      if (!rightAfterColumn(innerText, expressionRoot, columnExists)) {
+        const expressionSuggestions = await suggestForExpression({
+          innerText,
+          getColumnsByType: callbacks?.getByType,
+          expressionRoot,
+          location: Location.SORT,
+          context,
+        });
+        suggestions.push(...expressionSuggestions);
       }
 
       const nullsPrefixRange = getNullsPrefixRange(innerText);

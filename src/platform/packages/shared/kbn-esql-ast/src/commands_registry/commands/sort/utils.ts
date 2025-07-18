@@ -95,9 +95,24 @@ export const sortModifierSuggestions = {
   } as ISuggestionItem,
 };
 
+export const rightAfterColumn = (
+  innerText: string,
+  expressionRoot: ESQLSingleAstItem | undefined,
+  columnExists: (name: string) => boolean
+): boolean => {
+  return (
+    isColumn(expressionRoot) &&
+    columnExists(expressionRoot.parts.join('.')) &&
+    // this prevents the branch from being entered for something like "SORT column NULLS LA/"
+    // where the "NULLS LA" won't be in the AST so expressionRoot will just be the column
+    /(?:sort|,)\s+\S+$/i.test(innerText)
+  );
+};
+
 export const getSuggestionsAfterCompleteExpression = (
   innerText: string,
-  expressionRoot: ESQLSingleAstItem | undefined
+  expressionRoot: ESQLSingleAstItem | undefined,
+  columnExists: (name: string) => boolean
 ): ISuggestionItem[] => {
   let sortCommandKeywordSuggestions = [
     { ...sortModifierSuggestions.ASC },
@@ -123,12 +138,7 @@ export const getSuggestionsAfterCompleteExpression = (
     };
   }
   // special case: cursor right after a column name
-  else if (
-    isColumn(expressionRoot) &&
-    // this prevents the branch from being entered for something like "SORT column NULLS LA/"
-    // where the "NULLS LA" won't be in the AST so expressionRoot will just be the column
-    /(?:sort|,)\s+\S+$/i.test(innerText)
-  ) {
+  else if (isColumn(expressionRoot) && rightAfterColumn(innerText, expressionRoot, columnExists)) {
     const { fragment, rangeToReplace } = getFragmentData(innerText);
 
     sortCommandKeywordSuggestions = sortCommandKeywordSuggestions.map((s) => ({
@@ -143,7 +153,7 @@ export const getSuggestionsAfterCompleteExpression = (
     pipeSuggestion.rangeToReplace = rangeToReplace;
 
     commaSuggestion.filterText = fragment;
-    commaSuggestion.text = fragment + ' ' + commaSuggestion.text;
+    commaSuggestion.text = fragment + commaSuggestion.text;
     commaSuggestion.rangeToReplace = rangeToReplace;
   }
 
