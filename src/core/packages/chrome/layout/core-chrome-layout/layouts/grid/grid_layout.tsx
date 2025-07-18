@@ -86,8 +86,6 @@ export class GridLayout implements LayoutService {
     const projectAppMenu = chrome.getProjectAppMenuComponent();
     const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
 
-    // TODO: temporary solution to get the navigation width
-
     const projectSideNavigationV2 = chrome.getProjectSideNavV2Component();
 
     return React.memo(() => {
