@@ -69,6 +69,14 @@ describe('SORT Autocomplete', () => {
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ...getFunctionSignaturesByReturnType(
+          Location.SORT,
+          'any',
+          {
+            operators: true,
+          },
+          ['keyword']
+        ),
       ]);
     });
     it('suggests subsequent column after comma', async () => {
@@ -158,25 +166,25 @@ describe('SORT Autocomplete', () => {
 
     test('when user starts to type NULLS modifiers', async () => {
       // @TODO check for replacement range
-      await sortExpectSuggestions('from a | sort stringField N/', [
+      await sortExpectSuggestions('from a | sort stringField N', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
       ]);
-      await sortExpectSuggestions('from a | sort stringField null/', [
+      await sortExpectSuggestions('from a | sort stringField null', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
       ]);
-      await sortExpectSuggestions('from a | sort stringField nulls/', [
+      await sortExpectSuggestions('from a | sort stringField nulls', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
       ]);
-      await sortExpectSuggestions('from a | sort stringField nulls /', [
+      await sortExpectSuggestions('from a | sort stringField nulls ', [
         'ASC',
         'DESC',
         'NULLS FIRST',
@@ -215,7 +223,7 @@ describe('SORT Autocomplete', () => {
     });
 
     test('after nulls are entered, suggests comma or pipe', async () => {
-      await sortExpectSuggestions('from a | sort stringField NULLS LAST /', [', ', '| ']);
+      await sortExpectSuggestions('from a | sort stringField NULLS LAST ', [', ', '| ']);
     });
   });
 });
