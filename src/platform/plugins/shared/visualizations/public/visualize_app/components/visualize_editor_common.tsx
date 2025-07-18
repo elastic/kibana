@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './visualize_editor.scss';
 import { EventEmitter } from 'events';
 import React, { RefObject, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, type UseEuiTheme, euiBreakpoint } from '@elastic/eui';
+import { euiBreakpoint, EuiScreenReaderOnly, type UseEuiTheme } from '@elastic/eui';
 import { AppMountParameters } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
@@ -35,27 +34,43 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+import { visualizeStyle } from '../../vis.styles';
 
-interface VisualizeEditorCommonProps {
-  visInstance?: VisualizeEditorVisInstance;
-  appState: VisualizeAppStateContainer | null;
-  currentAppState?: VisualizeAppState;
-  isChromeVisible?: boolean;
-  hasUnsavedChanges: boolean;
-  setHasUnsavedChanges: (value: boolean) => void;
-  hasUnappliedChanges: boolean;
-  isEmbeddableRendered: boolean;
-  onAppLeave: AppMountParameters['onAppLeave'];
-  visEditorRef: RefObject<HTMLDivElement>;
-  originatingApp?: string;
-  setOriginatingApp?: (originatingApp: string | undefined) => void;
-  originatingPath?: string;
-  visualizationIdFromUrl?: string;
-  embeddableId?: string;
-  eventEmitter?: EventEmitter;
-}
+const flexParentStyle = css({
+  flex: '1 1 auto',
+  display: 'flex',
+  flexDirection: 'column',
+
+  '> *': {
+    flexShrink: 0,
+  },
+});
 
 const visEditorCommonStyles = {
+  base: (euiThemeContext: UseEuiTheme) =>
+    css`
+      height: '100%';
+      ${flexParentStyle};
+      ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+        .visualization {
+          // While we are on a small screen the visualization is below the
+          // editor. In this cases it needs a minimum height, since it would otherwise
+          // maybe end up with 0 height since it just gets the flexbox rest of the screen.
+          min-height: calc(${euiThemeContext.euiTheme.size.l} * 10);
+        }
+      }
+      > .visualize {
+        height: 100%;
+        flex: 1 1 auto;
+        display: flex;
+        z-index: 0; // Without setting this to 0 you will run into a bug where the filter bar modal is hidden under a tilemap in an iframe: https://github.com/elastic/kibana/issues/16457
+      }
+    `,
+  content: css`
+    width: 100%;
+    z-index: 0;
+    ${flexParentStyle};
+  `,
   visType: (euiThemeContext: UseEuiTheme) =>
     css({
       '&.visEditor--timelion': {
@@ -81,6 +96,25 @@ const visEditorCommonStyles = {
       },
     }),
 };
+
+interface VisualizeEditorCommonProps {
+  visInstance?: VisualizeEditorVisInstance;
+  appState: VisualizeAppStateContainer | null;
+  currentAppState?: VisualizeAppState;
+  isChromeVisible?: boolean;
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: (value: boolean) => void;
+  hasUnappliedChanges: boolean;
+  isEmbeddableRendered: boolean;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  visEditorRef: RefObject<HTMLDivElement>;
+  originatingApp?: string;
+  setOriginatingApp?: (originatingApp: string | undefined) => void;
+  originatingPath?: string;
+  visualizationIdFromUrl?: string;
+  embeddableId?: string;
+  eventEmitter?: EventEmitter;
+}
 
 export const VisualizeEditorCommon = ({
   visInstance,
@@ -167,7 +201,7 @@ export const VisualizeEditorCommon = ({
   return (
     <div
       className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}
-      css={styles.visType}
+      css={[styles.base, styles.visType]}
     >
       {visInstance && appState && currentAppState && (
         <VisualizeTopNav
@@ -231,7 +265,11 @@ export const VisualizeEditorCommon = ({
           </h1>
         </EuiScreenReaderOnly>
       )}
-      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
+      <div
+        className={isChromeVisible ? 'visEditor__content' : 'visualize'}
+        ref={visEditorRef}
+        css={isChromeVisible ? styles.content : visualizeStyle}
+      />
     </div>
   );
 };

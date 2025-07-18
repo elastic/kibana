@@ -23,7 +23,7 @@ import { FETCH_STATUS, isPending, isSuccess, useFetcher } from '../../../hooks/u
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import type { TableSearchBar, VisibleItemsStartEnd } from '../managed_table';
+import type { TableSearchBar } from '../managed_table';
 import { ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
@@ -75,7 +75,7 @@ export function TransactionsTable({
 }: Props) {
   const { link } = useApmRouter();
   const { core, observabilityAIAssistant } = useApmPluginContext();
-  const [renderedItemIndices, setRenderedItemIndices] = useState<VisibleItemsStartEnd>([0, 0]);
+  const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
   const {
     query,
@@ -112,7 +112,7 @@ export function TransactionsTable({
       serviceName,
       start,
       transactionType,
-      renderedItemIndices,
+      renderedItems,
     });
 
   useEffect(() => {
@@ -260,7 +260,7 @@ export function TransactionsTable({
             tableSearchBar={tableSearchBar}
             showPerPageOptions={showPerPageOptions}
             saveTableOptionsToUrl={saveTableOptionsToUrl}
-            onChangeItemIndices={setRenderedItemIndices}
+            onChangeRenderedItems={setRenderedItems}
           />
         </OverviewTableContainer>
       </EuiFlexItem>
@@ -279,7 +279,7 @@ function useTableData({
   serviceName,
   start,
   transactionType,
-  renderedItemIndices,
+  renderedItems,
 }: {
   comparisonEnabled: boolean | undefined;
   end: string;
@@ -291,7 +291,7 @@ function useTableData({
   serviceName: string;
   start: string;
   transactionType: string | undefined;
-  renderedItemIndices: VisibleItemsStartEnd;
+  renderedItems: ApiResponse['transactionGroups'];
 }) {
   const preferredDataSource = usePreferredDataSourceAndBucketSize({
     start,
@@ -346,15 +346,7 @@ function useTableData({
     ]
   );
 
-  const itemsToFetch = useMemo(
-    () =>
-      mainStatistics.transactionGroups
-        .slice(...renderedItemIndices)
-        .map(({ name }) => name)
-        .filter((name) => Boolean(name))
-        .sort(),
-    [renderedItemIndices, mainStatistics.transactionGroups]
-  );
+  const itemsToFetch = useMemo(() => renderedItems.map(({ name }) => name), [renderedItems]);
 
   const { data: detailedStatistics, status: detailedStatisticsStatus } = useFetcher(
     (callApmApi) => {

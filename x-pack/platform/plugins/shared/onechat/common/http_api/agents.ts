@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import type { AgentDescriptor } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/onechat-common';
 
-export interface ListAgentsResponse {
-  agents: AgentDescriptor[];
+export type GetAgentResponse = AgentDefinition;
+
+export interface ListAgentResponse {
+  results: AgentDefinition[];
+}
+
+export type UpdateAgentResponse = AgentDefinition;
+
+export type CreateAgentResponse = AgentDefinition;
+
+export interface DeleteAgentResponse {
+  success: boolean;
 }

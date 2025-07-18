@@ -20,7 +20,6 @@ interface DocsSectionContent {
 
 (function () {
   const pathToElasticsearch = process.argv[2];
-
   if (!pathToElasticsearch) {
     throw new Error('Path to Elasticsearch must be provided as the first argument.');
   }
@@ -29,6 +28,10 @@ interface DocsSectionContent {
   const functionTypes = [
     { fnType: 'scalar', outputFile: '../src/sections/generated/scalar_functions.tsx' },
     { fnType: 'agg', outputFile: '../src/sections/generated/aggregation_functions.tsx' },
+    {
+      fnType: 'time_series_agg',
+      outputFile: '../src/sections/generated/timeseries_aggregation_functions.tsx',
+    },
     { fnType: 'grouping', outputFile: '../src/sections/generated/grouping_functions.tsx' },
     { fnType: 'operator', outputFile: '../src/sections/generated/operators.tsx' },
   ];

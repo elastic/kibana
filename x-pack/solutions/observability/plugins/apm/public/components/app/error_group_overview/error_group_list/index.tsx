@@ -11,6 +11,7 @@ import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { Timestamp } from '@kbn/apm-ui-shared';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
@@ -27,7 +28,6 @@ import type {
   VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
-import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import type { ErrorGroupItem } from './use_error_group_list_data';
 import { useErrorGroupListData } from './use_error_group_list_data';
@@ -247,7 +247,11 @@ export function ErrorGroupList({
         width: `${unit * 6}px`,
         align: RIGHT_ALIGNMENT,
         render: (_, { lastSeen }) =>
-          lastSeen ? <TimestampTooltip time={lastSeen} timeUnit="minutes" /> : NOT_AVAILABLE_LABEL,
+          lastSeen ? (
+            <Timestamp timestamp={lastSeen} timeUnit="minutes" renderMode="tooltip" />
+          ) : (
+            NOT_AVAILABLE_LABEL
+          ),
       },
       {
         field: 'occurrences',

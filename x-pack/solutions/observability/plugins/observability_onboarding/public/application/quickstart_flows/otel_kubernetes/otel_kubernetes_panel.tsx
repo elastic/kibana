@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { css } from '@emotion/react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { type ObservabilityOnboardingAppServices } from '../../..';
 import { EmptyPrompt } from '../shared/empty_prompt';
@@ -38,7 +39,7 @@ import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
-const OTEL_KUBE_STACK_VERSION = '0.3.9';
+const OTEL_KUBE_STACK_VERSION = '0.6.3';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
@@ -57,6 +58,7 @@ export const OtelKubernetesPanel: React.FC = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
+  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
   const theme = useEuiTheme();
   const { onPageReady } = usePerformanceContext();
   const metricsOnboardingEnabled = usePricingFeature(
@@ -383,12 +385,17 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
             children: data ? (
               <>
                 <p>
-                  {i18n.translate(
-                    'xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel',
-                    {
-                      defaultMessage:
-                        'Analyze your Kubernetes cluster’s health and monitor your container workloads.',
-                    }
+                  {metricsOnboardingEnabled && (
+                    <FormattedMessage
+                      id="xpack.observability_onboarding.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel"
+                      defaultMessage="Analyze your Kubernetes cluster’s health and monitor your container workloads."
+                    />
+                  )}
+                  {!metricsOnboardingEnabled && (
+                    <FormattedMessage
+                      id="xpack.observability_onboarding.logsEssentials.otelKubernetesPanel.onceYourKubernetesInfrastructureLabel"
+                      defaultMessage="After running the previous command, come back and view your data."
+                    />
                   )}
                 </p>
                 <EuiSpacer />
@@ -399,43 +406,64 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
                   integration="kubernetes_otel"
                   newTab={false}
                   isLoading={false}
-                  actionLinks={[
-                    {
-                      id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                      title: i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.monitoringCluster',
-                        {
-                          defaultMessage: 'Check your Kubernetes cluster health:',
-                        }
-                      ),
-                      label: i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.exploreDashboard',
-                        {
-                          defaultMessage: 'Explore Kubernetes Cluster Dashboard',
-                        }
-                      ),
-                      href:
-                        dashboardLocator?.getRedirectUrl({
-                          dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                        }) ?? '',
-                    },
-                    {
-                      id: 'services',
-                      title: i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.servicesTitle',
-                        {
-                          defaultMessage: 'Check your application services:',
-                        }
-                      ),
-                      label: i18n.translate(
-                        'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
-                        {
-                          defaultMessage: 'Explore Service Inventory',
-                        }
-                      ),
-                      href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
-                    },
-                  ]}
+                  actionLinks={
+                    metricsOnboardingEnabled
+                      ? [
+                          {
+                            id: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                            title: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.monitoringCluster',
+                              {
+                                defaultMessage: 'Check your Kubernetes cluster health:',
+                              }
+                            ),
+                            label: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.exploreDashboard',
+                              {
+                                defaultMessage: 'Explore Kubernetes Cluster Dashboard',
+                              }
+                            ),
+                            href:
+                              dashboardLocator?.getRedirectUrl({
+                                dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                              }) ?? '',
+                          },
+                          {
+                            id: 'services',
+                            title: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.servicesTitle',
+                              {
+                                defaultMessage: 'Check your application services:',
+                              }
+                            ),
+                            label: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.servicesLabel',
+                              {
+                                defaultMessage: 'Explore Service Inventory',
+                              }
+                            ),
+                            href: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
+                          },
+                        ]
+                      : [
+                          {
+                            id: 'logs',
+                            title: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.logsTitle',
+                              {
+                                defaultMessage: 'View and analyze your logs:',
+                              }
+                            ),
+                            label: i18n.translate(
+                              'xpack.observability_onboarding.otelKubernetesPanel.logsLabel',
+                              {
+                                defaultMessage: 'Explore logs',
+                              }
+                            ),
+                            href: logsLocator?.getRedirectUrl({}) ?? '',
+                          },
+                        ]
+                  }
                 />
               </>
             ) : (

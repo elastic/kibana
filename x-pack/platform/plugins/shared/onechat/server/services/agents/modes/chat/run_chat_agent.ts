@@ -78,7 +78,7 @@ export const runChatAgent: RunChatAgentFn = async (
         agentId,
         runId,
       },
-      recursionLimit: 10,
+      recursionLimit: 25,
       callbacks: [],
     }
   );

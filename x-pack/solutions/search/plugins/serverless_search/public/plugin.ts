@@ -26,7 +26,6 @@ import {
   ServerlessSearchPluginStart,
   ServerlessSearchPluginStartDependencies,
 } from './types';
-import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { navigationTree } from './navigation_tree';
 import { SEARCH_HOMEPAGE_PATH } from './application/constants';
@@ -200,9 +199,6 @@ export class ServerlessSearchPlugin
     });
 
     indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
-    indexManagement?.extensionsService.addIndexDetailsTab(
-      createIndexDocumentsContent(core, services)
-    );
     indexManagement?.extensionsService.setIndexOverviewContent(
       createIndexOverviewContent(core, services)
     );

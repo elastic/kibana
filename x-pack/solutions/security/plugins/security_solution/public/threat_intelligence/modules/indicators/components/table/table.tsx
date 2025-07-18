@@ -232,7 +232,7 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
 
   return (
     <IndicatorsTableContext.Provider value={indicatorTableContextValue}>
-      <div style={{ position: 'relative' }}>
+      <div css={{ position: 'relative' }}>
         {flyoutFragment}
         {gridFragment}
       </div>

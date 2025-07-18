@@ -18,4 +18,4 @@ const SVG_WIDTH = 376;
  */
 export const EmptyStatesIllustrationContainer: React.FC<{ children: React.ReactNode }> = ({
   children,
-}) => <div style={{ height: SVG_HEIGHT, width: SVG_WIDTH }}>{children}</div>;
+}) => <div css={{ height: SVG_HEIGHT, width: SVG_WIDTH }}>{children}</div>;

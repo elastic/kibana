@@ -86,7 +86,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const roleScopedSupertest = getService('roleScopedSupertest');
+  const spacesSupertest = getService('spacesSupertest');
   const config = getService('config');
   const isServerless = config.get('serverless');
 
@@ -128,7 +128,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
 
         // _update_objects_spaces route is internal in serverless and public in stateful
         const supertestWithScope = isServerless
-          ? await roleScopedSupertest.getSupertestWithRoleScope(
+          ? await spacesSupertest.getSupertestWithRoleScope(
               { role: 'admin' },
               {
                 withCommonHeaders: true,

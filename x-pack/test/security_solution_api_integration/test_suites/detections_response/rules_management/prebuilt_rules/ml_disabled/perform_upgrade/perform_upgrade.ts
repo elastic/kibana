@@ -36,7 +36,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
     const ruleId = 'ml-rule';
 
-    describe('ALL_RULES mode', () => {
+    describe('ALL_RULES mode', function () {
+      this.tags('skipFIPS');
+
       it('silently skips ML rules in ALL_RULES mode', async () => {
         await setUpRuleUpgrade({
           assets: {
@@ -68,117 +70,123 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('SPECIFIC_RULES mode', () => {
-      it(`doesn't upgrade if target is an ML rule`, async () => {
-        await createMlRuleThroughAlertingEndpoint(supertest, {
-          ruleId,
-          version: 1,
-        });
+    describe('SPECIFIC_RULES mode', function () {
+      describe(`doesn't upgrade`, function () {
+        this.tags('skipFIPS');
 
-        const targetMlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', {
-          rule_id: ruleId,
-          version: 2,
-        });
-        await createPrebuiltRuleAssetSavedObjects(es, [targetMlRuleAsset]);
+        it(`if target is an ML rule`, async () => {
+          await createMlRuleThroughAlertingEndpoint(supertest, {
+            ruleId,
+            version: 1,
+          });
 
-        const upgradePerformResult = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: ruleId,
-              revision: 0,
-              version: 2,
+          const targetMlRuleAsset = createRuleAssetSavedObjectOfType('machine_learning', {
+            rule_id: ruleId,
+            version: 2,
+          });
+          await createPrebuiltRuleAssetSavedObjects(es, [targetMlRuleAsset]);
+
+          const upgradePerformResult = await performUpgradePrebuiltRules(es, supertest, {
+            mode: ModeEnum.SPECIFIC_RULES,
+            rules: [
+              {
+                rule_id: ruleId,
+                revision: 0,
+                version: 2,
+              },
+            ],
+          });
+
+          expect(upgradePerformResult).toMatchObject({
+            summary: {
+              total: 1,
+              failed: 1,
             },
-          ],
-        });
-
-        expect(upgradePerformResult).toMatchObject({
-          summary: {
-            total: 1,
-            failed: 1,
-          },
-          errors: [
-            {
-              message:
-                'Your license does not support machine learning. Please upgrade your license.',
-              rules: [{ rule_id: ruleId }],
-            },
-          ],
+            errors: [
+              {
+                message:
+                  'Your license does not support machine learning. Please upgrade your license.',
+                rules: [{ rule_id: ruleId }],
+              },
+            ],
+          });
         });
       });
 
-      it('upgrades successfully if current rule is an ML rule, but target is a non-ML rule', async () => {
-        await createMlRuleThroughAlertingEndpoint(supertest, {
-          ruleId,
-          version: 1,
-        });
+      describe('upgrades successfully', function () {
+        it('if current rule is an ML rule, but target is a non-ML rule', async () => {
+          await createMlRuleThroughAlertingEndpoint(supertest, {
+            ruleId,
+            version: 1,
+          });
 
-        const targetMlRuleAsset = createRuleAssetSavedObjectOfType('query', {
-          rule_id: ruleId,
-          version: 2,
-        });
-        await createPrebuiltRuleAssetSavedObjects(es, [targetMlRuleAsset]);
+          const targetMlRuleAsset = createRuleAssetSavedObjectOfType('query', {
+            rule_id: ruleId,
+            version: 2,
+          });
+          await createPrebuiltRuleAssetSavedObjects(es, [targetMlRuleAsset]);
 
-        const upgradePerformResult = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: ruleId,
-              revision: 0,
-              version: 2,
-              pick_version: 'TARGET',
+          const upgradePerformResult = await performUpgradePrebuiltRules(es, supertest, {
+            mode: ModeEnum.SPECIFIC_RULES,
+            rules: [
+              {
+                rule_id: ruleId,
+                revision: 0,
+                version: 2,
+                pick_version: 'TARGET',
+              },
+            ],
+          });
+
+          expect(upgradePerformResult).toMatchObject({
+            summary: {
+              total: 1,
+              succeeded: 1,
             },
-          ],
-        });
-
-        expect(upgradePerformResult).toMatchObject({
-          summary: {
-            total: 1,
-            succeeded: 1,
-          },
-          results: {
-            updated: [{ rule_id: ruleId }],
-          },
-        });
-      });
-
-      it('upgrades successfully if both current and target are non-ML rules', async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              version: 1,
-              rule_id: ruleId,
+            results: {
+              updated: [{ rule_id: ruleId }],
             },
-            upgrade: {
-              type: 'query',
-              version: 2,
-              rule_id: ruleId,
-            },
-            patch: {},
-          },
-          deps,
+          });
         });
 
-        const upgradePerformResult = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: ruleId,
-              revision: 0,
-              version: 2,
+        it('if both current and target are non-ML rules', async () => {
+          await setUpRuleUpgrade({
+            assets: {
+              installed: {
+                type: 'query',
+                version: 1,
+                rule_id: ruleId,
+              },
+              upgrade: {
+                type: 'query',
+                version: 2,
+                rule_id: ruleId,
+              },
+              patch: {},
             },
-          ],
-        });
+            deps,
+          });
 
-        expect(upgradePerformResult).toMatchObject({
-          summary: {
-            total: 1,
-            succeeded: 1,
-          },
-          results: {
-            updated: [{ rule_id: ruleId }],
-          },
+          const upgradePerformResult = await performUpgradePrebuiltRules(es, supertest, {
+            mode: ModeEnum.SPECIFIC_RULES,
+            rules: [
+              {
+                rule_id: ruleId,
+                revision: 0,
+                version: 2,
+              },
+            ],
+          });
+
+          expect(upgradePerformResult).toMatchObject({
+            summary: {
+              total: 1,
+              succeeded: 1,
+            },
+            results: {
+              updated: [{ rule_id: ruleId }],
+            },
+          });
         });
       });
     });

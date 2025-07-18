@@ -4140,6 +4140,12 @@
             "description": "The Serverless Project type"
           }
         },
+        "productTier": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Product Tier"
+          }
+        },
         "orchestratorTarget": {
           "type": "keyword",
           "_meta": {
@@ -4317,6 +4323,9 @@
                 "type": "keyword"
               },
               "enabled": {
+                "type": "boolean"
+              },
+              "agent_based": {
                 "type": "boolean"
               }
             }

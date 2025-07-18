@@ -42,3 +42,5 @@ export function getAncestorsAndSelf(id: string) {
 export function getSegments(id: string) {
   return id.split('.');
 }
+
+export const MAX_NESTING_LEVEL = 5;

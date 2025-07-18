@@ -10,7 +10,6 @@ import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getEventLog, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function createCappedActionsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

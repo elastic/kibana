@@ -18,6 +18,7 @@ import {
 import { VariableSizeList as List } from 'react-window';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WindowScroller } from 'react-virtualized';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import type { IntegrationCardItem } from '../../screens/home';
 
@@ -120,7 +121,9 @@ export const GridColumn = ({
           }
         }}
         scrollElement={
-          scrollElementId ? document.getElementById(scrollElementId) ?? undefined : undefined
+          (scrollElementId && document.getElementById(scrollElementId)) ||
+          document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ||
+          undefined
         }
       >
         {() => (
