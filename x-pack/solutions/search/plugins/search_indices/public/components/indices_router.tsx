@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../hooks/use_kibana';
 import {
@@ -18,24 +18,22 @@ import { CreateIndexPage } from './create_index/create_index_page';
 import { IndexDetailsRootRedirect } from './index_details_root_redirect';
 
 export const SearchIndicesRouter: React.FC = () => {
-  const { application, history } = useKibana().services;
+  const { application } = useKibana().services;
   return (
-    <Router history={history}>
-      <Routes>
-        <Route exact path={[SEARCH_INDICES_DETAILS_TABS_PATH, SEARCH_INDICES_DETAILS_PATH]}>
-          <Routes>
-            <Route path={SEARCH_INDICES_DETAILS_TABS_PATH} component={SearchIndexDetailsPage} />
-            <IndexDetailsRootRedirect />
-          </Routes>
-        </Route>
-        <Route exact path={CREATE_INDEX_PATH} component={CreateIndexPage} />
-        <Route
-          render={() => {
-            application.navigateToApp('elasticsearchStart');
-            return null;
-          }}
-        />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route exact path={[SEARCH_INDICES_DETAILS_TABS_PATH, SEARCH_INDICES_DETAILS_PATH]}>
+        <Routes>
+          <Route path={SEARCH_INDICES_DETAILS_TABS_PATH} component={SearchIndexDetailsPage} />
+          <IndexDetailsRootRedirect />
+        </Routes>
+      </Route>
+      <Route exact path={CREATE_INDEX_PATH} component={CreateIndexPage} />
+      <Route
+        render={() => {
+          application.navigateToApp('elasticsearchStart');
+          return null;
+        }}
+      />
+    </Routes>
   );
 };
