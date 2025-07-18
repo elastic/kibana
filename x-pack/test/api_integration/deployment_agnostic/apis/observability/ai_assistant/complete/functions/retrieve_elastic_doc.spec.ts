@@ -149,7 +149,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             'retrieve_elastic_doc'
           );
         });
-
       });
 
       describe('The second request - Sending the user prompt', () => {
