@@ -895,6 +895,39 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.ObservabilityAIAssistantFlyoutStateProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ObservabilityAIAssistantFlyoutStateProvider",
+        "description": [],
+        "signature": [
+          "({\n  children,\n  isFlyoutOpen,\n}: FlyoutStateProviderProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/context/observability_ai_assistant_flyout_state_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.ObservabilityAIAssistantFlyoutStateProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  isFlyoutOpen,\n}",
+            "description": [],
+            "signature": [
+              "FlyoutStateProviderProps"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/context/observability_ai_assistant_flyout_state_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.useAbortableAsync",
         "type": "Function",
         "tags": [],
@@ -1099,6 +1132,23 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.useObservabilityAIAssistantFlyoutStateContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useObservabilityAIAssistantFlyoutStateContext",
+        "description": [],
+        "signature": [
+          "() => FlyoutStateContextValue"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/context/observability_ai_assistant_flyout_state_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -6741,6 +6791,21 @@
           "\".inference\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/get_elastic_managed_llm_connector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.LEGACY_CUSTOM_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LEGACY_CUSTOM_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\"obs_ai_assistant_kb_inference\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13992,6 +14057,21 @@
         "description": [],
         "signature": [
           "\".elser-2-elasticsearch\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.LEGACY_CUSTOM_INFERENCE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LEGACY_CUSTOM_INFERENCE_ID",
+        "description": [],
+        "signature": [
+          "\"obs_ai_assistant_kb_inference\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/preconfigured_inference_ids.ts",
         "deprecated": false,

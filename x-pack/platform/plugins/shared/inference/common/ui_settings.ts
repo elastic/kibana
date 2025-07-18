@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
-import { aiAssistantAnonymizationSettings } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 
 const baseRuleSchema = schema.object({
   enabled: schema.boolean(),
@@ -42,7 +42,7 @@ const nerRuleSchema = schema.allOf([
 ]);
 
 export const uiSettings: Record<string, UiSettingsParams> = {
-  [aiAssistantAnonymizationSettings]: {
+  [aiAnonymizationSettings]: {
     category: ['observability'],
     name: i18n.translate('xpack.inference.anonymizationSettingsLabel', {
       defaultMessage: 'Anonymization Settings',
@@ -87,5 +87,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     type: 'json',
     requiresPageReload: true,
+    solution: 'oblt',
+    technicalPreview: true,
   },
 };

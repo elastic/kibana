@@ -9,7 +9,8 @@ import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const archiveEmptyIndex = 'x-pack/test/functional_search/fixtures/search-empty-index';
+const archiveEmptyIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchLandingPage = getPageObject('svlSearchLandingPage');
@@ -89,6 +90,11 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           deepLinkId: 'searchSynonyms',
           breadcrumbs: ['Relevance', 'Synonyms'],
           pageTestSubject: 'searchSynonymsOverviewPage',
+        },
+        {
+          deepLinkId: 'searchQueryRules',
+          breadcrumbs: ['Relevance', 'Query Rules'],
+          pageTestSubject: 'queryRulesBasePage',
         },
         {
           deepLinkId: 'searchInferenceEndpoints',
@@ -222,6 +228,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
@@ -243,6 +250,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'serverlessConnectors',
         'relevance',
         'searchSynonyms',
+        'searchQueryRules',
         'searchInferenceEndpoints',
         'search_project_nav_footer',
         'dev_tools',

@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
+import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import { FilterStateStore } from '@kbn/es-query';
@@ -166,7 +167,6 @@ export const panelSchema = schema.object({
     }
   ),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
-  panelRefName: schema.maybe(schema.string()),
   gridData: panelGridDataSchema,
   panelIndex: schema.maybe(
     schema.string({
@@ -259,45 +259,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   timeTo: schema.maybe(
     schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
   ),
-  refreshInterval: schema.maybe(
-    schema.object(
-      {
-        pause: schema.boolean({
-          meta: {
-            description:
-              'Whether the refresh interval is set to be paused while viewing the dashboard.',
-          },
-        }),
-        value: schema.number({
-          meta: {
-            description: 'A numeric value indicating refresh frequency in milliseconds.',
-          },
-        }),
-        display: schema.maybe(
-          schema.string({
-            meta: {
-              description:
-                'A human-readable string indicating the refresh frequency. No longer used.',
-              deprecated: true,
-            },
-          })
-        ),
-        section: schema.maybe(
-          schema.number({
-            meta: {
-              description: 'No longer used.', // TODO what is this legacy property?
-              deprecated: true,
-            },
-          })
-        ),
-      },
-      {
-        meta: {
-          description: 'A container for various refresh interval settings',
-        },
-      }
-    )
-  ),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
 
   // Dashboard Content
   controlGroupInput: schema.maybe(controlsGroupSchema),
