@@ -27,8 +27,7 @@ import {
   defaultGroupStatsRenderer,
   defaultGroupTitleRenderers,
 } from './grouping_settings';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
 
