@@ -1,6 +1,6 @@
 disabled:
   # Cypress configs, for now these are still run manually
-  - x-pack/test/apm_cypress/cli_config.ts
+  - x-pack/solutions/observability/test/apm_cypress/cli_config.ts
   - x-pack/solutions/observability/plugins/observability_onboarding/e2e/ftr_config_open.ts
   - x-pack/solutions/observability/plugins/observability_onboarding/e2e/ftr_config_runner.ts
   - x-pack/solutions/observability/plugins/observability_onboarding/e2e/ftr_config.ts
