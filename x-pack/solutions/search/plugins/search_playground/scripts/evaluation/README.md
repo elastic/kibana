@@ -2,7 +2,7 @@
 
 ## Overview
 
-This tool is developed for our team working on the Elastic Observability platform, specifically focusing on evaluating the Observability AI Assistant. It simplifies scripting and evaluating various scenarios with Large Language Model (LLM) integrations.
+This tool is developed for the Search Playground, specifically focusing on evaluating the Search Playground APIs. It simplifies scripting and evaluating various scenarios with Large Language Model (LLM) integrations.
 
 ## Setup requirements
 
