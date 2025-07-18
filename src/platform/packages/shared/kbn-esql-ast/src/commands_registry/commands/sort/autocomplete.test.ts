@@ -49,7 +49,7 @@ describe('SORT Autocomplete', () => {
     jest.clearAllMocks();
   });
 
-  // TODO
+  // @TODO — test for replacement ranges when we support that.
   // test for replacement range in NULLS FIRST/LAST in all possible positions
   //  including after whitespace... test that replacement range gets added to all suggestions
   //  and IS NULL/IS NOT NULL scenarios

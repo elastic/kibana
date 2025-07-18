@@ -40,14 +40,7 @@ export const getSortPos = (query: string, command: ESQLCommand): SortPosition | 
     return 'order_complete';
   }
 
-  // problem... nulls can come without an order modifier...
-  // SORT column NULLS /
-  // SORT column ASC NULLS /
-  // SORT column + column2 NULLS LAS
-  // SORT column + column2 ASC NULLS LAS
-  // SORT column IS NOT NULL
-  // SORT column IS NULL
-  if (/(?:asc|desc)\s+(?:N?U?L?L?S? ?(FI?R?S?|LA?S?)?)$/i.test(query)) {
+  if (/(?:asc|desc)\s+(?:N?U?L?L?S? ?(F?I?R?S?|LA?S?)?)$/i.test(query)) {
     return 'after_order';
   }
 
