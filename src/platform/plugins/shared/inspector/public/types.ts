@@ -62,6 +62,7 @@ export interface InspectorOptions {
   title?: string;
   options?: unknown;
   flyoutType?: EuiFlyoutProps['type'];
+  uuid?: string;
 }
 
 export type InspectorSession = OverlayRef;

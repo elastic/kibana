@@ -21,10 +21,6 @@ const createSetupContract = (): Setup => {
 
   const setupContract: Setup = {
     registerView: jest.fn(views.register.bind(views)),
-
-    __LEGACY: {
-      views,
-    },
   };
   return setupContract;
 };
