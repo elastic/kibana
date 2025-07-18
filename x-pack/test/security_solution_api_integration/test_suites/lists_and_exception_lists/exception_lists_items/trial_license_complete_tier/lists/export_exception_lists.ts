@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import type SuperTest from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import {
-  removeExceptionListServerGeneratedProperties,
-  removeExceptionListItemServerGeneratedProperties,
-  binaryToString,
-  deleteAllExceptions,
-} from '../../../utils';
+import { deleteAllExceptions } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -30,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
     let ids: string[];
     let listIds: string[];
 
-    beforeEach(async () => {
+    before(async () => {
       await deleteAllExceptions(supertest, log);
 
       // create three lists, each with two items
@@ -57,15 +51,28 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
         .set('kbn-xsrf', 'true')
-        .send({})
         .expect(200);
 
-      expect(body).to.eql([]);
+      expect(body).toEqual([]);
+    });
+
+    it('returns a 400 error if the query is malformed', async () => {
+      const { body } = await supertest
+        .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
+        .set('kbn-xsrf', 'true')
+        .query({ include_expired_exceptions: 'not-a-boolean' })
+        .expect(400);
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          error: 'Bad Request',
+          message: expect.stringContaining('include_expired_exceptions'),
+        })
+      );
     });
 
     it('returns the full list of items if no filter is provided');
     it('returns a partial list of items if a filter is provided');
-    it('returns a 400 error if the query is malformed');
     it('returns a 422 if the total size of the requested lists exceeds the limit');
   });
 };
@@ -83,7 +90,7 @@ const bulkCreateExceptionLists = async (
     const { body: list } = await supertest
       .post(EXCEPTION_LIST_URL)
       .set('kbn-xsrf', 'true')
-      .send(getCreateExceptionListMinimalSchemaMock())
+      .send(getCreateExceptionListMinimalSchemaMock({ list_id: `list-${i}` }))
       .expect(200);
 
     ids.push(list.id);
@@ -93,7 +100,12 @@ const bulkCreateExceptionLists = async (
       const { body: item } = await supertest
         .post(EXCEPTION_LIST_ITEM_URL)
         .set('kbn-xsrf', 'true')
-        .send(getCreateExceptionListItemMinimalSchemaMock())
+        .send(
+          getCreateExceptionListItemMinimalSchemaMock({
+            list_id: list.list_id,
+            item_id: `list-${list.list_id}-item-${j}`,
+          })
+        )
         .expect(200);
 
       itemIdsByListId[list.list_id] ||= [];
