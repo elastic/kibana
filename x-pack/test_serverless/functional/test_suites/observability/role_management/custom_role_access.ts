@@ -19,8 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
 
   describe('With custom role', function () {
-    // skipping on MKI while we are working on a solution
-    this.tags(['skipMKI']);
     before(async () => {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
