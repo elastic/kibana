@@ -19,46 +19,22 @@ import {
   SUMMARIZE_FUNCTION_NAME,
 } from '..';
 
-export function getObservabilitySystemPrompt({
+export function getSystemPrompt({
   availableFunctionNames,
   isServerless = false,
   isKnowledgeBaseReady = false,
   isObservabilityDeployment = false,
-  isProductDocsAvailable = false,
+  isGenericDeployment = false,
+  isProductDocAvailable = false,
 }: {
   availableFunctionNames: string[];
   isServerless?: boolean;
   isKnowledgeBaseReady: boolean;
   isObservabilityDeployment: boolean;
-  isProductDocsAvailable?: boolean;
+  isGenericDeployment: boolean;
+  isProductDocAvailable?: boolean;
 }) {
   const isFunctionAvailable = (fn: string) => availableFunctionNames.includes(fn);
-
-  const promptSections: string[] = [];
-
-  // Section One: Core Introduction
-  promptSections.push(
-    dedent(`
-    # System Prompt: Elastic Observability Assistant
-
-    ## Role and Goal
-
-    ${
-      isObservabilityDeployment
-        ? 'You are a specialized, helpful assistant for Elastic Observability users. Your primary goal is to help users quickly understand what is happening in their observed systems. You assist with visualizing and analyzing data, investigating system behavior, performing root cause analysis, and identifying optimization opportunities within the Elastic Observability platform.'
-        : 'You are a helpful assistant for Elasticsearch. Your primary goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.'
-    }
-    ${
-      availableFunctionNames.length
-        ? `You have access to a set of tools to interact with the Elastic environment${
-            isKnowledgeBaseReady ? ' and the knowledge base' : ''
-          }${isProductDocsAvailable ? ' and the product documentation' : ''}.`
-        : ''
-    }
-  `)
-  );
-
-  // Section Two: Core Principles
   const toolsWithTimeRange = [
     isFunctionAvailable(ALERTS_FUNCTION_NAME) ? `\`${ALERTS_FUNCTION_NAME}\`` : null,
     isFunctionAvailable(GET_APM_DATASET_INFO_FUNCTION_NAME)
@@ -75,65 +51,92 @@ export function getObservabilitySystemPrompt({
       : null,
   ].filter(Boolean);
 
-  const corePrinciples: string[] = [];
+  const promptSections: string[] = [];
 
-  // Core Principles: Be Proactive but Clear
-  let firstCorePrinciple = `${
-    corePrinciples.length + 1
-  }. **Be Proactive but Clear:** Try to fulfill the user's request directly.`;
-  if (toolsWithTimeRange.length) {
-    firstCorePrinciple +=
-      ` If essential information like a time range is missing for tools like ${toolsWithTimeRange.join(
-        ' or '
-      )}` +
-      `${
-        isFunctionAvailable(CONTEXT_FUNCTION_NAME)
-          ? ' first attempt to retrieve it using the `context` tool response. If the context does not provide it,'
-          : ''
-      } assume a default time range of **start='now-15m'** and **end='now'**. When you use a default time range, *always inform the user* which range was used in your response (e.g., "Based on the last 15 minutes...").`;
-  }
-  corePrinciples.push(firstCorePrinciple);
+  if (isObservabilityDeployment || isGenericDeployment) {
+    // Section One: Core Introduction
+    promptSections.push(
+      dedent(`
+    # System Prompt: Elastic Observability Assistant
 
-  // Core Principles: Ask When Necessary
-  corePrinciples.push(
-    `${
+    ## Role and Goal
+
+    ${
+      isObservabilityDeployment
+        ? 'You are a specialized, helpful assistant for Elastic Observability users. Your primary goal is to help users quickly understand what is happening in their observed systems. You assist with visualizing and analyzing data, investigating system behavior, performing root cause analysis, and identifying optimization opportunities within the Elastic Observability platform.'
+        : 'You are a specialized, helpful assistant for Elasticsearch users. Your primary goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.'
+    }
+    ${
+      availableFunctionNames.length
+        ? `You have access to a set of tools to interact with the Elastic environment${
+            isKnowledgeBaseReady ? ' and the knowledge base' : ''
+          }${isProductDocAvailable ? ' and the product documentation' : ''}.`
+        : ''
+    }
+  `)
+    );
+
+    // Section Two: Core Principles
+    const corePrinciples: string[] = [];
+
+    // Core Principles: Be Proactive but Clear
+    let firstCorePrinciple = `${
       corePrinciples.length + 1
-    }. **Ask Only When Necessary:** If key information is missing or ambiguous, or if using a default seems inappropriate for the specific request, ask the user for clarification. **Exception:**  as mentioned, time range can be missing and you can assume the default time range.`
-  );
+    }. **Be Proactive but Clear:** Try to fulfill the user's request directly.`;
+    if (toolsWithTimeRange.length) {
+      firstCorePrinciple +=
+        ` If essential information like a time range is missing for tools like ${toolsWithTimeRange.join(
+          ' or '
+        )}` +
+        `${
+          isFunctionAvailable(CONTEXT_FUNCTION_NAME)
+            ? ' first attempt to retrieve it using the `context` tool response. If the context does not provide it,'
+            : ''
+        } assume a default time range of **start='now-15m'** and **end='now'**. When you use a default time range, *always inform the user* which range was used in your response (e.g., "Based on the last 15 minutes...").`;
+    }
+    corePrinciples.push(firstCorePrinciple);
 
-  // Core Principles: Confirm Tool Use
-  corePrinciples.push(
-    `${
-      corePrinciples.length + 1
-    }. **Confirm Tool Use (If Uncertain):** If you are unsure which specific tool to use or what non-standard arguments are needed${
-      isFunctionAvailable(CONTEXT_FUNCTION_NAME) ? ' even after checking context' : ''
-    }, ask the user for clarification.`
-  );
-
-  // Core Principles: Format Responses
-  corePrinciples.push(
-    `${
-      corePrinciples.length + 1
-    }. **Format Responses:** Use Github-flavored Markdown for your responses.`
-  );
-
-  // Core Principles: Single Tool Call Only
-  if (availableFunctionNames.length) {
+    // Core Principles: Ask When Necessary
     corePrinciples.push(
       `${
         corePrinciples.length + 1
-      }. **Single Tool Call:** Only call one tool per turn. Wait for the tool's result before deciding on the next step or tool call.`
+      }. **Ask Only When Necessary:** If key information is missing or ambiguous, or if using a default seems inappropriate for the specific request, ask the user for clarification. **Exception:**  as mentioned, time range can be missing and you can assume the default time range.`
     );
+
+    // Core Principles: Confirm Tool Use
+    corePrinciples.push(
+      `${
+        corePrinciples.length + 1
+      }. **Confirm Tool Use (If Uncertain):** If you are unsure which specific tool to use or what non-standard arguments are needed${
+        isFunctionAvailable(CONTEXT_FUNCTION_NAME) ? ' even after checking context' : ''
+      }, ask the user for clarification.`
+    );
+
+    // Core Principles: Format Responses
+    corePrinciples.push(
+      `${
+        corePrinciples.length + 1
+      }. **Format Responses:** Use Github-flavored Markdown for your responses.`
+    );
+
+    // Core Principles: Single Tool Call Only
+    if (availableFunctionNames.length) {
+      corePrinciples.push(
+        `${
+          corePrinciples.length + 1
+        }. **Single Tool Call:** Only call one tool per turn. Wait for the tool's result before deciding on the next step or tool call.`
+      );
+    }
+
+    // Core Principles: Summarize Results Clearly
+    corePrinciples.push(
+      `${
+        corePrinciples.length + 1
+      }. **Summarize Results Clearly:** After returning raw output from any tool, always add a concise, user-friendly summary that highlights key findings, anomalies, trends, and actionable insights. When helpful, format the information using tables, bullet lists, or code blocks to maximize readability.`
+    );
+
+    promptSections.push('\n## Core Principles\n\n' + corePrinciples.join('\n\n'));
   }
-
-  // Core Principles: Summarize Results Clearly
-  corePrinciples.push(
-    `${
-      corePrinciples.length + 1
-    }. **Summarize Results Clearly:** After returning raw output from any tool, always add a concise, user-friendly summary that highlights key findings, anomalies, trends, and actionable insights. When helpful, format the information using tables, bullet lists, or code blocks to maximize readability.`
-  );
-
-  promptSections.push('\n## Core Principles\n\n' + corePrinciples.join('\n\n'));
 
   // Section Three: Query Languages
   if (isFunctionAvailable(QUERY_FUNCTION_NAME)) {
@@ -231,7 +234,7 @@ export function getObservabilitySystemPrompt({
 
     usage.push(
       `**Elastic Stack Questions:** For general questions about Elastic Stack products or features, ${
-        isFunctionAvailable(RETRIEVE_ELASTIC_DOC_FUNCTION_NAME) && isProductDocsAvailable
+        isFunctionAvailable(RETRIEVE_ELASTIC_DOC_FUNCTION_NAME) && isProductDocAvailable
           ? `ideally use the dedicated \`${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME}\` tool. Consider that the documentation returned by this tool is always more up to date and accurate than any own internal knowledge you might have.`
           : 'answer based on your knowledge but state that the official Elastic documentation is the definitive source.'
       }`

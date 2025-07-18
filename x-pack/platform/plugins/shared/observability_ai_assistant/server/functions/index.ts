@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { KnowledgeBaseState } from '../../common';
+import { getSystemPrompt } from '../prompts/system_prompt';
+import { getInferenceIdFromWriteIndex } from '../service/knowledge_base_service/get_inference_id_from_write_index';
+import { registerKibanaFunction } from './kibana';
 import { registerContextFunction } from './context/context';
 import { registerSummarizationFunction } from './summarize';
 import type { RegistrationCallback } from '../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
-import { registerKibanaFunction } from './kibana';
 import { registerExecuteConnectorFunction } from './execute_connector';
-import { getObservabilitySystemPrompt } from '../prompts/system_prompt';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<RegistrationCallback>[0],
@@ -46,19 +48,24 @@ export const registerFunctions: RegistrationCallback = async ({
 
   // determine if product documentation is installed
   const llmTasks = pluginsStart?.llmTasks;
-  const isProductDocsAvailable = llmTasks ? await llmTasks.retrieveDocumentationAvailable() : false;
+  const esClient = (await resources.context.core).elasticsearch.client;
+  const inferenceId =
+    (await getInferenceIdFromWriteIndex(esClient, resources.logger)) ??
+    defaultInferenceEndpoints.ELSER;
+  const isProductDocAvailable = llmTasks
+    ? await llmTasks.retrieveDocumentationAvailable({ inferenceId })
+    : false;
 
-  if (isObservabilityDeployment || isGenericDeployment) {
-    functions.registerInstruction(({ availableFunctionNames }) =>
-      getObservabilitySystemPrompt({
-        availableFunctionNames,
-        isServerless,
-        isKnowledgeBaseReady,
-        isObservabilityDeployment,
-        isProductDocsAvailable,
-      })
-    );
-  }
+  functions.registerInstruction(({ availableFunctionNames }) =>
+    getSystemPrompt({
+      availableFunctionNames,
+      isServerless,
+      isKnowledgeBaseReady,
+      isObservabilityDeployment,
+      isGenericDeployment,
+      isProductDocAvailable,
+    })
+  );
 
   if (isKnowledgeBaseReady) {
     registerSummarizationFunction(registrationParameters);
