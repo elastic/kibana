@@ -40,7 +40,7 @@ import * as i18n from './translations';
 
 interface Props {
   readOnly: boolean;
-  showOAuth2Option?: boolean;
+  isOAuth2Enabled?: boolean;
   isPfxEnabled?: boolean;
 }
 
@@ -50,7 +50,7 @@ const VERIFICATION_MODE_DEFAULT = 'full';
 
 export const AuthConfig: FunctionComponent<Props> = ({
   readOnly,
-  showOAuth2Option = false,
+  isOAuth2Enabled = false,
   isPfxEnabled = true,
 }) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
@@ -108,7 +108,7 @@ export const AuthConfig: FunctionComponent<Props> = ({
       ),
       'data-test-subj': 'authSSL',
     },
-    showOAuth2Option && {
+    isOAuth2Enabled && {
       value: AuthType.OAuth2,
       label: i18n.AUTHENTICATION_OAUTH2,
       children: authType === AuthType.OAuth2 && <OAuth2Fields readOnly={readOnly} />,

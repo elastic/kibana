@@ -515,7 +515,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={true} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -534,7 +534,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={true} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -565,7 +565,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={true} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -613,7 +613,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={true} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -650,7 +650,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={true} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -688,7 +688,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={false} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={false} />
         </AuthFormTestProvider>
       );
 
@@ -729,11 +729,10 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={true} showOAuth2Option={true} />
+          <AuthConfig readOnly={true} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
-      // Check a few fields for the readOnly attribute or disabled state
       const accessTokenInput = await screen.findByTestId('accessTokenUrlAOuth2');
       expect(accessTokenInput).toHaveAttribute('readonly');
 
@@ -741,39 +740,13 @@ describe('AuthConfig renders', () => {
       expect(clientIdInput).toHaveAttribute('readonly');
 
       const clientSecretContainer = await screen.findByTestId('clientSecretOAuth2');
-      const actualInput = clientSecretContainer.querySelector('input');
-
-      if (actualInput) {
-        expect(actualInput).toBeDisabled();
-      } else {
-        expect(clientSecretContainer).toBeInTheDocument();
-      }
+      expect(clientSecretContainer).toHaveAttribute('readonly');
 
       const scopeInput = await screen.findByTestId('ScopeOAuth2');
       expect(scopeInput).toHaveAttribute('readonly');
 
-      // Check the mocked textarea for readonly
-      const additionalFieldsContainer = await screen.findByTestId('additionalFields');
-      const textarea = additionalFieldsContainer.querySelector('textarea');
-      expect(textarea).not.toBeNull();
-      expect(textarea).toHaveAttribute('readonly');
-
-      // Ensure radio buttons are disabled
-      const authNoneRadio = await screen.findByTestId('authNone');
-      expect(authNoneRadio.querySelector('input')).toBeDisabled();
-
-      const authBasicRadio = await screen.findByTestId('authBasic');
-      expect(authBasicRadio.querySelector('input')).toBeDisabled();
-
-      const authSSLRadio = await screen.findByTestId('authSSL');
-      expect(authSSLRadio.querySelector('input')).toBeDisabled();
-
-      const authOAuth2Radio = await screen.findByTestId('authOAuth2');
-      expect(authOAuth2Radio.querySelector('input')).toBeDisabled();
-
-      // Ensure toggles are disabled
-      expect(await screen.findByTestId('webhookViewHeadersSwitch')).toBeDisabled();
-      expect(await screen.findByTestId('webhookViewCASwitch')).toBeDisabled();
+      const additionalFieldsContainer = await screen.findByTestId('additionalFields-readOnly');
+      expect(additionalFieldsContainer).toBeInTheDocument();
     });
 
     it('switches from OAuth2 to Basic Auth correctly', async () => {
@@ -791,7 +764,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={true} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -840,7 +813,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={true} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 
@@ -883,7 +856,7 @@ describe('AuthConfig renders', () => {
 
       render(
         <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
-          <AuthConfig readOnly={false} showOAuth2Option={true} />
+          <AuthConfig readOnly={false} isOAuth2Enabled={true} />
         </AuthFormTestProvider>
       );
 

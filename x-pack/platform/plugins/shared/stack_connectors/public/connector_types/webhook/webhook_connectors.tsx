@@ -74,7 +74,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <AuthConfig readOnly={readOnly} isPfxEnabled={isPfxEnabled} showOAuth2Option={true} />
+      <AuthConfig readOnly={readOnly} isPfxEnabled={isPfxEnabled} isOAuth2Enabled={true} />
     </>
   );
 };
