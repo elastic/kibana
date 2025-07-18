@@ -242,6 +242,7 @@ export const OnechatEsqlTools: React.FC = () => {
               toolId: deleteToolId,
             },
           })}
+          aria-labelledby={deleteEsqlToolTitleId}
           titleProps={{ id: deleteEsqlToolTitleId }}
           onCancel={cancelDelete}
           onConfirm={confirmDelete}
