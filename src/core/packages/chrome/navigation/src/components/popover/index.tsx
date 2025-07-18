@@ -20,11 +20,11 @@ import React, {
 } from 'react';
 
 import { focusFirstElement } from '../../utils/focus_first_element';
-import { useClickToggle } from '../../hooks/use_mouse_management';
 import { blurPopover } from './blur_popover';
 import { usePopoverOpen } from './use_popover_open';
 import { useKeyboardManagement } from './use_keyboard_management';
 import { usePopoverHover } from './use_popover_hover';
+import { usePersistentPopover } from './use_persistent_popover';
 
 const TOP_BAR_HEIGHT = 48;
 const TOP_BAR_POPOVER_GAP = 8;
@@ -61,31 +61,31 @@ export const SideNavPopover = ({
   const triggerRef = useRef<HTMLElement>(null);
 
   const { isOpen, open, close } = usePopoverOpen();
-  const { isOpenedByClick, setClickOpened, clearClickOpened } = useClickToggle();
+  const { isPersistent, setPersistent, clearPersistent } = usePersistentPopover();
 
   const handleClose = useCallback(() => {
     close();
-    clearClickOpened();
-  }, [close, clearClickOpened]);
+    clearPersistent();
+  }, [close, clearPersistent]);
 
   const { handleMouseEnter, handleMouseLeave, clearTimeout } = usePopoverHover(
     persistent,
-    isOpenedByClick,
+    isPersistent,
     isSidePanelOpen,
     { open, close: handleClose }
   );
 
   const handleTriggerClick = useCallback(() => {
     if (persistent) {
-      if (isOpen && isOpenedByClick) {
+      if (isOpen && isPersistent) {
         handleClose();
       } else {
         clearTimeout();
         open();
-        setClickOpened();
+        setPersistent();
       }
     }
-  }, [persistent, isOpen, isOpenedByClick, handleClose, clearTimeout, open, setClickOpened]);
+  }, [persistent, isOpen, isPersistent, handleClose, clearTimeout, open, setPersistent]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
