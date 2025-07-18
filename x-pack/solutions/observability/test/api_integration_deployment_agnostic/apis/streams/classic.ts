@@ -25,202 +25,375 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  describe('Classic streams', () => {
+  describe.only('Classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
     });
 
-    it('non-wired data streams', async () => {
-      const doc = {
-        message: '2023-01-01T00:00:10.000Z error test',
-      };
-      const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
-      expect(response.result).to.eql('created');
+    describe('Classic streams processing', () => {
+      it('non-wired data streams', async () => {
+        const doc = {
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
 
-      const {
-        body: { streams },
-        status,
-      } = await apiClient.fetch('GET /api/streams 2023-10-31');
+        const {
+          body: { streams },
+          status,
+        } = await apiClient.fetch('GET /api/streams 2023-10-31');
 
-      expect(status).to.eql(200);
+        expect(status).to.eql(200);
 
-      const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
+        const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
 
-      expect(classicStream).to.eql({
-        name: TEST_STREAM_NAME,
-        description: '',
-        ingest: {
-          lifecycle: { inherit: {} },
-          processing: [],
-          unwired: {},
-        },
+        expect(classicStream).to.eql({
+          name: TEST_STREAM_NAME,
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: [],
+            unwired: {},
+          },
+        });
+      });
+
+      it('Allows setting processing on classic streams', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: TEST_STREAM_NAME,
+            },
+            body: {
+              dashboards: [],
+              queries: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: [
+                    {
+                      grok: {
+                        if: { always: {} },
+                        field: 'message',
+                        patterns: [
+                          '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                        ],
+                      },
+                    },
+                  ],
+                  unwired: {},
+                },
+              },
+            },
+          },
+        });
+
+        expect(putResponse.status).to.eql(200);
+
+        expect(putResponse.body).to.have.property('acknowledged', true);
+
+        const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: { path: { name: TEST_STREAM_NAME } },
+        });
+
+        expect(getResponse.status).to.eql(200);
+
+        const body = getResponse.body;
+        Streams.UnwiredStream.GetResponse.asserts(body);
+
+        const {
+          dashboards,
+          queries,
+          stream,
+          effective_lifecycle: effectiveLifecycle,
+          elasticsearch_assets: elasticsearchAssets,
+        } = body;
+
+        expect(dashboards).to.eql([]);
+        expect(queries).to.eql([]);
+
+        expect(stream).to.eql({
+          name: TEST_STREAM_NAME,
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: [
+              {
+                grok: {
+                  field: 'message',
+                  patterns: [
+                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                  ],
+                  if: { always: {} },
+                },
+              },
+            ],
+            unwired: {},
+          },
+        });
+
+        expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
+
+        expect(elasticsearchAssets).to.eql({
+          ingestPipeline: 'logs@default-pipeline',
+          componentTemplates: ['logs@mappings', 'logs@settings', 'logs@custom', 'ecs@mappings'],
+          indexTemplate: 'logs',
+          dataStream: 'logs-test-default',
+        });
+      });
+
+      it('Executes processing on classic streams', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: '2023-01-01T00:00:10.000Z error test',
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          message2: 'test',
+          log: {
+            level: 'error',
+          },
+        });
+      });
+
+      it('Allows removing processing on classic streams', async () => {
+        const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              queries: [],
+              dashboards: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: [],
+                  unwired: {},
+                },
+              },
+            },
+          },
+        });
+
+        expect(response.status).to.eql(200);
+
+        expect(response.body).to.have.property('acknowledged', true);
+      });
+
+      it('Executes processing on classic streams after removing processing', async () => {
+        const doc = {
+          // default logs pipeline fills in timestamp with current date if not set
+          message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          // accept any date
+          '@timestamp': (result._source as { [key: string]: unknown })['@timestamp'],
+          message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
+        });
       });
     });
 
-    it('Allows setting processing on classic streams', async () => {
-      const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-        params: {
-          path: {
-            name: TEST_STREAM_NAME,
-          },
-          body: {
-            dashboards: [],
-            queries: [],
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: [
-                  {
-                    grok: {
-                      if: { always: {} },
-                      field: 'message',
-                      patterns: [
-                        '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                      ],
+    describe('Classic streams with field overrides', () => {
+      it('Allows setting field overrides on classic streams', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              queries: [],
+              dashboards: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: [],
+                  unwired: {
+                    field_overrides: {
+                      'foo.bar': {
+                        type: 'keyword',
+                      },
                     },
                   },
-                ],
-                unwired: {},
+                },
               },
             },
           },
-        },
+        });
+
+        expect(putResponse.status).to.eql(200);
+
+        // Verify the field override is set via field caps
+        const fieldCapsResponse = await esClient.fieldCaps({
+          index: TEST_STREAM_NAME,
+          fields: 'foo.bar',
+        });
+        expect(fieldCapsResponse.fields).to.have.property('foo.bar');
+        expect(fieldCapsResponse.fields['foo.bar']).to.have.property('keyword');
       });
 
-      expect(putResponse.status).to.eql(200);
-
-      expect(putResponse.body).to.have.property('acknowledged', true);
-
-      const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
-        params: { path: { name: TEST_STREAM_NAME } },
-      });
-
-      expect(getResponse.status).to.eql(200);
-
-      const body = getResponse.body;
-      Streams.UnwiredStream.GetResponse.asserts(body);
-
-      const {
-        dashboards,
-        queries,
-        stream,
-        effective_lifecycle: effectiveLifecycle,
-        elasticsearch_assets: elasticsearchAssets,
-      } = body;
-
-      expect(dashboards).to.eql([]);
-      expect(queries).to.eql([]);
-
-      expect(stream).to.eql({
-        name: TEST_STREAM_NAME,
-        description: '',
-        ingest: {
-          lifecycle: { inherit: {} },
-          processing: [
-            {
-              grok: {
-                field: 'message',
-                patterns: [
-                  '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                ],
-                if: { always: {} },
-              },
-            },
-          ],
-          unwired: {},
-        },
-      });
-
-      expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
-
-      expect(elasticsearchAssets).to.eql({
-        ingestPipeline: 'logs@default-pipeline',
-        componentTemplates: ['logs@mappings', 'logs@settings', 'logs@custom', 'ecs@mappings'],
-        indexTemplate: 'logs',
-        dataStream: 'logs-test-default',
-      });
-    });
-
-    it('Executes processing on classic streams', async () => {
-      const doc = {
-        '@timestamp': '2024-01-01T00:00:10.000Z',
-        message: '2023-01-01T00:00:10.000Z error test',
-      };
-      const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
-      expect(response.result).to.eql('created');
-
-      const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
-      expect(result._source).to.eql({
-        '@timestamp': '2024-01-01T00:00:10.000Z',
-        message: '2023-01-01T00:00:10.000Z error test',
-        inner_timestamp: '2023-01-01T00:00:10.000Z',
-        message2: 'test',
-        log: {
-          level: 'error',
-        },
-      });
-    });
-
-    it('Allows removing processing on classic streams', async () => {
-      const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-        params: {
-          path: { name: TEST_STREAM_NAME },
-          body: {
-            queries: [],
-            dashboards: [],
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: [],
-                unwired: {},
+      it('Does not roll over on compatible changes', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              queries: [],
+              dashboards: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: [],
+                  unwired: {
+                    field_overrides: {
+                      'foo.bar': {
+                        type: 'keyword',
+                      },
+                      'foo.baz': {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                },
               },
             },
           },
-        },
+        });
+
+        expect(putResponse.status).to.eql(200);
+
+        // Verify the field override is set via field caps
+        const fieldCapsResponse = await esClient.fieldCaps({
+          index: TEST_STREAM_NAME,
+          fields: 'foo.baz',
+        });
+        expect(fieldCapsResponse.fields).to.have.property('foo.baz');
+        expect(fieldCapsResponse.fields['foo.baz']).to.have.property('keyword');
+
+        // Verify the stream did not roll over
+        const getResponse = await esClient.indices.getDataStream({
+          name: TEST_STREAM_NAME,
+        });
+        expect(getResponse.data_streams[0].indices).to.have.length(1);
       });
 
-      expect(response.status).to.eql(200);
-
-      expect(response.body).to.have.property('acknowledged', true);
-    });
-
-    it('Executes processing on classic streams after removing processing', async () => {
-      const doc = {
-        // default logs pipeline fills in timestamp with current date if not set
-        message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
-      };
-      const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
-      expect(response.result).to.eql('created');
-
-      const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
-      expect(result._source).to.eql({
-        // accept any date
-        '@timestamp': (result._source as { [key: string]: unknown })['@timestamp'],
-        message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
-      });
-    });
-
-    it('Allows deleting classic streams', async () => {
-      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
-        params: {
-          path: {
-            name: TEST_STREAM_NAME,
+      it('Does roll over on incompatible changes', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              queries: [],
+              dashboards: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: [],
+                  unwired: {
+                    field_overrides: {
+                      'foo.bar': {
+                        type: 'double',
+                      },
+                      'foo.baz': {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
-        },
+        });
+
+        expect(putResponse.status).to.eql(200);
+
+        // Verify the field override is set via field caps
+        const fieldCapsResponse = await esClient.fieldCaps({
+          index: TEST_STREAM_NAME,
+          fields: 'foo.bar',
+        });
+        expect(fieldCapsResponse.fields).to.have.property('foo.bar');
+        expect(fieldCapsResponse.fields['foo.bar']).to.have.property('double');
+
+        // Verify the stream did not roll over
+        const getResponse = await esClient.indices.getDataStream({
+          name: TEST_STREAM_NAME,
+        });
+        expect(getResponse.data_streams[0].indices).to.have.length(2);
       });
 
-      expect(deleteStreamResponse.status).to.eql(200);
+      it('Does roll over on removing field overrides', async () => {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: TEST_STREAM_NAME },
+            body: {
+              queries: [],
+              dashboards: [],
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: [],
+                  unwired: {
+                    field_overrides: {},
+                  },
+                },
+              },
+            },
+          },
+        });
+        expect(putResponse.status).to.eql(200);
+        // Verify the stream rolled over
+        const getResponse = await esClient.indices.getDataStream({
+          name: TEST_STREAM_NAME,
+        });
+        expect(getResponse.data_streams[0].indices).to.have.length(3);
 
-      const getStreamsResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
+        // get the current write index
+        const writeIndex = getResponse.data_streams[0].indices[2];
+        // Verify the field override is removed via field caps
+        const fieldCapsResponse = await esClient.fieldCaps({
+          index: writeIndex.index_name,
+          fields: ['foo.bar', 'foo.baz'],
+        });
+        expect(fieldCapsResponse.fields).to.not.have.property('foo.bar');
+        expect(fieldCapsResponse.fields).to.not.have.property('foo.baz');
+      });
+    });
 
-      expect(getStreamsResponse.status).to.eql(200);
+    describe('Deleting classic streams', () => {
+      it('Allows deleting classic streams', async () => {
+        const deleteStreamResponse = await apiClient.fetch(
+          'DELETE /api/streams/{name} 2023-10-31',
+          {
+            params: {
+              path: {
+                name: TEST_STREAM_NAME,
+              },
+            },
+          }
+        );
 
-      const classicStream = getStreamsResponse.body.streams.find(
-        (stream) => stream.name === TEST_STREAM_NAME
-      );
-      expect(classicStream).to.eql(undefined);
+        expect(deleteStreamResponse.status).to.eql(200);
+
+        const getStreamsResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
+
+        expect(getStreamsResponse.status).to.eql(200);
+
+        const classicStream = getStreamsResponse.body.streams.find(
+          (stream) => stream.name === TEST_STREAM_NAME
+        );
+        expect(classicStream).to.eql(undefined);
+      });
     });
 
     describe('Classic streams sharing template/pipeline', () => {
