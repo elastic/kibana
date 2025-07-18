@@ -14,7 +14,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const fleetPackages = ['apache', 'nginx'];
   const installedPackages: Array<{ pkgName: string }> = [];
 
-
   describe('modules', function () {
     before(async () => {
       // use await kibanaServer.savedObjects.cleanStandardList(); to make sure the fleet setup is removed correctly after the tests
