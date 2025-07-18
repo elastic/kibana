@@ -100,7 +100,7 @@ export const GridColumn = ({
       >
         {({ registerChild }) => (
           <div ref={registerChild} style={style}>
-            <EuiFlexGroup gutterSize="m">
+            <EuiFlexGroup gutterSize="m" responsive={true}>
               {items.map((item) => (
                 <EuiFlexItem
                   key={item.id}
@@ -130,8 +130,13 @@ export const GridColumn = ({
       scrollElement={
         (scrollElementId && document.getElementById(scrollElementId)) ||
         document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ||
-        undefined
+        window
       }
+      onResize={() => {
+        if (rowMeasurementCache.current) {
+          rowMeasurementCache.current.clearAll();
+        }
+      }}
     >
       {({ height, isScrolling, onChildScroll, scrollTop }) => (
         // `key` is a hack to re-render the list when the number of items changes, see:
