@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { EuiButtonIcon, IconType, useEuiTheme } from '@elastic/eui';
 
 import { SideNav } from '../side_nav';
-import { useNestedMenu } from '../../hooks/use_nested_menu';
+import { useNestedMenu } from './use_nested_menu';
 
 export interface PrimaryMenuItemProps {
   children: ReactNode;
