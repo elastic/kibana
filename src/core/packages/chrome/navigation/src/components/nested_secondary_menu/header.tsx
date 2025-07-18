@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React, { FC } from 'react';
 import { css } from '@emotion/react';
 
-import { useNestedMenu } from '../../hooks/use_nested_menu';
+import { useNestedMenu } from './use_nested_menu';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 
 export interface HeaderProps {

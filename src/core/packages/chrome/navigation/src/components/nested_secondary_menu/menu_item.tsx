@@ -12,7 +12,7 @@ import React, { FC, ReactNode, useCallback } from 'react';
 import { css } from '@emotion/react';
 
 import { SecondaryMenu } from '../secondary_menu';
-import { useNestedMenu } from '../../hooks/use_nested_menu';
+import { useNestedMenu } from './use_nested_menu';
 
 export interface ItemProps {
   children: ReactNode;

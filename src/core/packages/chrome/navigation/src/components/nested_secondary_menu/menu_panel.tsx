@@ -10,7 +10,7 @@
 import React, { FC, ReactNode } from 'react';
 
 import { SecondaryMenu } from '../secondary_menu';
-import { useNestedMenu } from '../../hooks/use_nested_menu';
+import { useNestedMenu } from './use_nested_menu';
 
 export interface PanelProps {
   children: ReactNode;

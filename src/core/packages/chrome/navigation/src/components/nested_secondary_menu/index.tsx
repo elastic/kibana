@@ -10,7 +10,7 @@
 import React, { useState, useCallback, ReactNode, FC } from 'react';
 
 import { SecondaryMenu } from '../secondary_menu';
-import { NestedMenuContext } from '../../hooks/use_nested_menu';
+import { NestedMenuContext } from './use_nested_menu';
 import { Panel } from './menu_panel';
 import { Header } from './header';
 import { Item } from './menu_item';
