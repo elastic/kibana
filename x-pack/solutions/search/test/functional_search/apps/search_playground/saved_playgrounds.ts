@@ -211,6 +211,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           testPlaygroundName
         );
       });
+    });
+    describe('Delete Saved Playground', function () {
       it('should allow deleting playground from the playground page', async () => {
         await pageObjects.common.navigateToUrl('searchPlayground');
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();
