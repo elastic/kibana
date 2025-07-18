@@ -308,10 +308,6 @@ describe('draft comment ', () => {
         target: { value: sampleData.comment },
       });
 
-      act(() => {
-        jest.advanceTimersByTime(1000);
-      });
-
       await waitFor(() => {
         expect(screen.getByLabelText('caseComment')).toHaveValue(sessionStorage.getItem(draftKey));
       });
@@ -352,10 +348,6 @@ describe('draft comment ', () => {
 
       fireEvent.change(screen.getByLabelText('caseComment'), {
         target: { value: sampleData.comment },
-      });
-
-      act(() => {
-        jest.advanceTimersByTime(1000);
       });
 
       await waitFor(() => {

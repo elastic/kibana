@@ -186,8 +186,7 @@ export const AddComment = React.memo(
             onSubmit();
           }
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [onSubmit, comment]
+        [onSubmit, isDisabled]
       );
 
       useEffect(() => {
