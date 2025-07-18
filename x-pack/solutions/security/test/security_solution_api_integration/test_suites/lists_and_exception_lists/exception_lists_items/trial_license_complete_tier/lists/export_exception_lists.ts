@@ -102,6 +102,26 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
+    it('returns a partial response if the filter excludes some items', async () => {
+      const { body } = await supertest
+        .post(
+          `${EXCEPTION_LIST_URL}/_bulk_export?filter=NOT exception-list.attributes.list_id:list-1`
+        )
+        .set('kbn-xsrf', 'true')
+        .expect(200)
+        .parse(binaryToString);
+
+      const exportedRows: Array<{ type: string; list_id: string }> = parseRows(body);
+      const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+      const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
+
+      expect(exportedLists).toHaveLength(2); // 2 lists matching the filter
+      expect(exportedItems).toHaveLength(4); // 2 lists * 2 items
+      expect(exportedRows.map((row) => row.list_id)).toEqual(
+        expect.arrayContaining(['list-0', 'list-0', 'list-2', 'list-2'])
+      );
+    });
+
     it('returns the full list of items if no filter is provided', async () => {
       const { body } = await supertest
         .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
