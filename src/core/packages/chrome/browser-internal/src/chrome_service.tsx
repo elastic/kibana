@@ -48,6 +48,12 @@ import type {
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
+import { Navigation } from '@kbn/core-chrome-navigation';
+import {
+  LOGO,
+  PRIMARY_MENU_ITEMS,
+  PRIMARY_MENU_FOOTER_ITEMS,
+} from '@kbn/core-chrome-navigation/src/constants/observability';
 
 import { Logger } from '@kbn/logging';
 import { isPrinting$ } from './utils/printing_observable';
@@ -597,7 +603,11 @@ export class ChromeService {
       return getClassicHeader({ isFixed: false, includeBanner: false, as: 'div' });
     };
 
-    const getProjectHeaderComponentForGridLayout = () => {
+    const getProjectHeaderComponentForGridLayout = ({
+      includeSideNavigation,
+    }: {
+      includeSideNavigation: boolean;
+    }) => {
       return getProjectHeader({
         // in grid layout the header is not fixed, but is inside grid's layout header cell
         isFixed: false,
@@ -606,10 +616,40 @@ export class ChromeService {
         // in grid layout the layout is responsible for rendering the banner
         includeBanner: false,
         // TODO: flip to false when we have a new solution navigation that is part of the grid layout
-        includeSideNavigation: true,
+        includeSideNavigation,
         // in grid layout the application subheader is rendered by the layout service as part of the application slot
         includeAppMenu: false,
       });
+    };
+
+    const getProjectSideNavigationV2Component = ({
+      setWidth,
+    }: {
+      setWidth: (width: number) => void;
+    }) => {
+      const demoItems = {
+        primaryItems: PRIMARY_MENU_ITEMS,
+        footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      };
+
+      const Component = () => {
+        const isCollapsed = useObservable(
+          this.isSideNavCollapsed$,
+          this.isSideNavCollapsed$.getValue()
+        );
+
+        return (
+          <Navigation
+            isCollapsed={isCollapsed}
+            items={demoItems}
+            logoLabel={LOGO.label}
+            logoType={LOGO.logoType}
+            setWidth={setWidth}
+          />
+        );
+      };
+
+      return <Component />;
     };
 
     return {
@@ -618,6 +658,7 @@ export class ChromeService {
       getLegacyHeaderComponentForFixedLayout,
       getClassicHeaderComponentForGridLayout,
       getProjectHeaderComponentForGridLayout,
+      getProjectSideNavigationV2Component,
       getHeaderBanner: () => {
         return (
           <HeaderTopBanner

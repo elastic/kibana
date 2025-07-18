@@ -274,7 +274,7 @@
     "@kbn/core-app-status-plugin": "link:src/platform/test/plugin_functional/plugins/core_app_status",
     "@kbn/core-application-browser": "link:src/core/packages/application/browser",
     "@kbn/core-application-browser-internal": "link:src/core/packages/application/browser-internal",
-  "@kbn/core-application-common": "link:src/core/packages/application/common",
+    "@kbn/core-application-common": "link:src/core/packages/application/common",
     "@kbn/core-apps-browser-internal": "link:src/core/packages/apps/browser-internal",
     "@kbn/core-apps-server-internal": "link:src/core/packages/apps/server-internal",
     "@kbn/core-base-browser-internal": "link:src/core/packages/base/browser-internal",

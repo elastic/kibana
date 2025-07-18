@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
-import { map } from 'rxjs';
+import React, { ReactNode, useMemo } from 'react';
+import { map, BehaviorSubject } from 'rxjs';
 import {
   ChromeLayout,
   ChromeLayoutConfigProvider,
@@ -71,9 +71,12 @@ export class GridLayout implements LayoutService {
     const chromeVisible$ = chrome.getIsVisible$();
     const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
+    const v2ProjectSideNavEnabled = this.params.projectSideNavVersion === 'v2';
 
     const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
-    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout();
+    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout({
+      includeSideNavigation: !v2ProjectSideNavEnabled,
+    });
     const headerBanner = chrome.getHeaderBanner();
 
     // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
@@ -83,6 +86,14 @@ export class GridLayout implements LayoutService {
     const projectAppMenu = chrome.getProjectAppMenuComponent();
     const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
 
+    // TODO: temporary solution to get the navigation width
+    const navigationWidth$ = new BehaviorSubject<number>(layoutConfigs.project.navigationWidth!);
+    const projectSideNavigationV2 = chrome.getProjectSideNavigationV2Component({
+      setWidth: (width) => {
+        navigationWidth$.next(width);
+      },
+    });
+
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
       const chromeVisible = useObservable(chromeVisible$, false);
@@ -90,7 +101,15 @@ export class GridLayout implements LayoutService {
       const chromeStyle = useObservable(chromeStyle$, 'classic');
       const hasAppMenu = useObservable(hasAppMenu$, false);
 
-      const layoutConfig = layoutConfigs[chromeStyle];
+      const _layoutConfig = layoutConfigs[chromeStyle];
+      const navigationWidth = useObservable(navigationWidth$, _layoutConfig.navigationWidth!);
+
+      const layoutConfig = useMemo(() => {
+        return {
+          ..._layoutConfig,
+          navigationWidth,
+        };
+      }, [_layoutConfig, navigationWidth]);
 
       // Assign main layout parts first
       let header: ReactNode;
@@ -111,6 +130,10 @@ export class GridLayout implements LayoutService {
           if (hasAppMenu) {
             // If project app menu is present, we use it as the application top bar
             applicationTopBar = projectAppMenu;
+          }
+
+          if (v2ProjectSideNavEnabled) {
+            navigation = projectSideNavigationV2;
           }
         }
       }
