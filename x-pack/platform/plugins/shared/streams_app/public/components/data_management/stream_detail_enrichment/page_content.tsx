@@ -13,6 +13,7 @@ import {
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
@@ -207,20 +208,32 @@ const ProcessorsEditor = React.memo(() => {
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.headingTitle',
                   {
-                    defaultMessage: 'Processors for field extraction',
+                    defaultMessage: 'Add and configure processors',
                   }
                 )}
               </h2>
             </EuiTitle>
-            <EuiText component="p" size="xs">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
-                {
-                  defaultMessage:
-                    'Drag and drop existing processors to update their execution order.',
-                }
-              )}
-            </EuiText>
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiText component="p" size="xs">
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle',
+                  {
+                    defaultMessage: 'Reorder processors to change their execution order',
+                  }
+                )}
+              </EuiText>
+              <EuiIconTip
+                size="m"
+                content={i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitleTooltip',
+                  {
+                    defaultMessage:
+                      'Changing the order can affect how your data is parsed and which processor gets applied.',
+                  }
+                )}
+                position="right"
+              />
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiButton
             size="s"
