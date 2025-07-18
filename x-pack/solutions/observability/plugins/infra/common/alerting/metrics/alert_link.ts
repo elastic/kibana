@@ -11,7 +11,7 @@ import { encode } from '@kbn/rison';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { type InventoryItemType, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { SupportedAssetTypes } from '@kbn/observability-shared-plugin/common';
+import { SupportedEntityTypes } from '@kbn/observability-shared-plugin/common';
 import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
 import {
   type AssetDetailsLocatorParams,
@@ -73,17 +73,17 @@ export const getInventoryViewInAppUrl = ({
     return '';
   }
 
-  const assetIdField = findInventoryModel(nodeType).fields.id;
-  const assetId = inventoryFields[assetIdField];
-  const assetDetailsSupported = Object.values(SupportedAssetTypes).includes(
-    nodeType as SupportedAssetTypes
+  const entityIdField = findInventoryModel(nodeType).fields.id;
+  const entityId = inventoryFields[entityIdField];
+  const assetDetailsSupported = Object.values(SupportedEntityTypes).includes(
+    nodeType as SupportedEntityTypes
   );
   const criteriaMetric = inventoryFields[ALERT_RULE_PARAMTERS_INVENTORY_METRIC_ID][0];
 
-  if (assetId && assetDetailsSupported) {
+  if (entityId && assetDetailsSupported) {
     return getLinkToAssetDetails({
-      assetId,
-      assetType: nodeType,
+      entityId,
+      entityType: nodeType,
       timestamp: inventoryFields[TIMESTAMP],
       alertMetric: criteriaMetric,
       assetDetailsLocator,
@@ -143,31 +143,33 @@ export const getMetricsViewInAppUrl = ({
     return metricsExplorerLocator.getRedirectUrl({});
   }
 
-  // creates an object of asset details supported assetType by their assetId field name
-  const assetTypeByAssetId = Object.values(SupportedAssetTypes).reduce((acc, curr) => {
+  // creates an object of asset details supported entityType by their entityId field name
+  const entityTypeByEntityIdField = Object.values(SupportedEntityTypes).reduce((acc, curr) => {
     acc[findInventoryModel(curr).fields.id] = curr;
     return acc;
   }, {} as Record<string, InventoryItemType>);
 
   // detemines if the groupBy has a field that the asset details supports
-  const supportedAssetId = groupBy.find((field) => !!assetTypeByAssetId[field]);
+  const supportedEntityId = groupBy.find((field) => !!entityTypeByEntityIdField[field]);
   // assigns a nodeType if the groupBy field is supported by asset details
-  const supportedAssetType = supportedAssetId ? assetTypeByAssetId[supportedAssetId] : undefined;
+  const supportedEntityType = supportedEntityId
+    ? entityTypeByEntityIdField[supportedEntityId]
+    : undefined;
 
-  if (supportedAssetType) {
-    const assetId = fields[findInventoryModel(supportedAssetType).fields.id];
+  if (supportedEntityType) {
+    const entityId = fields[findInventoryModel(supportedEntityType).fields.id];
 
     // A supported asset type can still return no id. In such a case, we can't
     // generate a valid link, so we redirect to Metrics Explorer.
-    if (!assetId) {
+    if (!entityId) {
       return metricsExplorerLocator.getRedirectUrl({});
     }
 
     const timestamp = fields[TIMESTAMP];
 
     return getLinkToAssetDetails({
-      assetId,
-      assetType: supportedAssetType,
+      entityId,
+      entityType: supportedEntityType,
       timestamp,
       assetDetailsLocator,
     });
@@ -177,21 +179,21 @@ export const getMetricsViewInAppUrl = ({
 };
 
 function getLinkToAssetDetails({
-  assetId,
-  assetType,
+  entityId,
+  entityType,
   timestamp,
   alertMetric,
   assetDetailsLocator,
 }: {
-  assetId: string;
-  assetType: InventoryItemType;
+  entityId: string;
+  entityType: InventoryItemType;
   timestamp: string;
   alertMetric?: string;
   assetDetailsLocator: LocatorPublic<AssetDetailsLocatorParams>;
 }): string {
   return assetDetailsLocator.getRedirectUrl({
-    assetId,
-    assetType,
+    entityId,
+    entityType,
     assetDetails: {
       dateRange: {
         from: timestamp,

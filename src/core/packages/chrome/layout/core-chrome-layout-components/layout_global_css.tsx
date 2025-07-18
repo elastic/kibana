@@ -26,7 +26,7 @@ import { useLayoutState } from './layout_state_context';
  *   --kbn-layout--footer-[height|top|bottom|left|width]
  *
  * Navigation:
- *   --kbn-layout--navigation-[top|bottom|height|width|panel-width]
+ *   --kbn-layout--navigation-[top|bottom|height|width]
  *
  * Sidebar:
  *   --kbn-layout--sidebar-[top|bottom|height|width|panel-width]
@@ -74,21 +74,22 @@ export const LayoutGlobalCSS = () => {
     --kbn-layout--header-right: ${sidebarWidth + sidebarPanelWidth}px;
     --kbn-layout--header-height: ${headerHeight}px;
     --kbn-layout--header-width: calc(
-      100vw - var(--kbn-layout--header-right) - var(--kbn-layout--header-left)
+      100vw - var(--kbn-layout--header-left) - var(--kbn-layout--header-right)
     );
   `;
 
   const footer = css`
     --kbn-layout--footer-height: ${footerHeight}px;
     --kbn-layout--footer-top: calc(100vh - var(--kbn-layout--footer-height));
-    --kbn-layout--footer-bottom: 0px;
-    --kbn-layout--footer-left: 0px;
+    --kbn-layout--footer-bottom: 0;
+    --kbn-layout--footer-left: 0;
     --kbn-layout--footer-width: 100vw;
   `;
 
   const navigation = css`
-    --kbn-layout--navigation-top: var(--kbn-layout--header-top);
+    --kbn-layout--navigation-top: var(--kbn-layout--banner-height);
     --kbn-layout--navigation-bottom: var(--kbn-layout--footer-height);
+    --kbn-layout--navigation-left: 0;
     --kbn-layout--navigation-height: calc(
       100vh - var(--kbn-layout--navigation-top) - var(--kbn-layout--navigation-bottom)
     );
@@ -96,8 +97,10 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const sidebar = css`
-    --kbn-layout--sidebar-top: var(--kbn-layout--header-top);
+    --kbn-layout--sidebar-top: var(--kbn-layout--banner-height);
     --kbn-layout--sidebar-bottom: var(--kbn-layout--footer-height);
+    --kbn-layout--sidebar-right: 0;
+    --kbn-layout--sidebar-left: calc(100vw - ${sidebarWidth + sidebarPanelWidth}px);
     --kbn-layout--sidebar-height: calc(
       100vh - var(--kbn-layout--sidebar-top) - var(--kbn-layout--sidebar-bottom)
     );
@@ -106,16 +109,19 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const application = css`
-    --kbn-layout--application-top: ${headerHeight + bannerHeight}px;
-    --kbn-layout--application-bottom: ${footerHeight}px;
-    --kbn-layout--application-left: ${navigationWidth}px;
-    --kbn-layout--application-right: ${sidebarWidth + sidebarPanelWidth}px;
+    --kbn-layout--application-top: calc(
+      var(--kbn-layout--banner-height) + var(--kbn-layout--header-height)
+    );
+    --kbn-layout--application-bottom: var(--kbn-layout--footer-height);
+    --kbn-layout--application-left: calc(var(--kbn-layout--navigation-width));
+    --kbn-layout--application-right: calc(
+      var(--kbn-layout--sidebar-width) + var(--kbn-layout--sidebar-panel-width)
+    );
     --kbn-layout--application-height: calc(
       100vh - var(--kbn-layout--application-top) - var(--kbn-layout--application-bottom)
     );
     --kbn-layout--application-width: calc(
-      100vw - var(--kbn-layout--navigation-width) - var(--kbn-layout--navigation-panel-width) -
-        var(--kbn-layout--sidebar-width) - var(--kbn-layout--sidebar-panel-width)
+      100vw - var(--kbn-layout--application-left) - var(--kbn-layout--application-right)
     );
   `;
 
