@@ -31,6 +31,10 @@ import { ApiKeysPageProvider } from './api_keys_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { LicenseManagementPageProvider } from './license_management_page';
+import { IndexManagementPageProvider } from './index_management_page';
+import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
+import { StatusPageObject } from './status_page';
+import { GeoFileUploadPageObject } from './geo_file_upload';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -61,4 +65,8 @@ export const pageObjects = {
   crossClusterReplication: CrossClusterReplicationPageProvider,
   grokDebugger: GrokDebuggerPageObject,
   licenseManagement: LicenseManagementPageProvider,
+  indexManagement: IndexManagementPageProvider,
+  shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
+  statusPage: StatusPageObject,
+  geoFileUpload: GeoFileUploadPageObject,
 };
