@@ -87,6 +87,7 @@ export const TypeParameter = ({
             }
           >
             <EuiComboBox
+              isInvalid={isInvalid}
               placeholder={i18n.translate(
                 'xpack.idxMgmt.mappingsEditor.typeField.placeholderLabel',
                 {
