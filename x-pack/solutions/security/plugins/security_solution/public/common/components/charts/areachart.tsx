@@ -94,6 +94,10 @@ export const AreaChartBaseComponent = ({
     ...themes,
     ...get('configs.settings', chartConfigs),
   };
+  console.log('settings', {
+    chartConfigs,
+    config: get('configs.settings', chartConfigs),
+  });
   return chartConfigs.width && chartConfigs.height ? (
     <div
       style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}

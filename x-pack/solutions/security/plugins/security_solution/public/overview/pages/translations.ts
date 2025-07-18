@@ -91,13 +91,9 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
   }
 );
 
-
-export const AI_VALUE_DASHBOARD = i18n.translate(
-  'xpack.securitySolution.aiValue.pageTitle',
-  {
-    defaultMessage: 'AI Value Dashboard',
-  }
-);
+export const AI_VALUE_DASHBOARD = i18n.translate('xpack.securitySolution.aiValue.pageTitle', {
+  defaultMessage: 'Value report',
+});
 
 export const TECHNICAL_PREVIEW = i18n.translate(
   'xpack.securitySolution.entityAnalytics.technicalPreviewLabel',

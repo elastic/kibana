@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { pick } from 'lodash/fp';
@@ -29,7 +29,6 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
-import { EmptyPrompt } from '../../common/components/empty_prompt';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
 import { useKibana } from '../../common/lib/kibana';
@@ -62,11 +61,8 @@ const AIValueComponent = () => {
   console.log('from ==>', from);
   console.log('to ==>', to);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView, status } = useDataView();
+  const { status } = useDataView();
 
-  const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
-    : oldIndicesExist;
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const { http } = useKibana().services;
@@ -106,39 +102,36 @@ const AIValueComponent = () => {
 
   return (
     <>
-      {indicesExist ? (
-        <>
-          <SuperDatePicker
-            id={InputsModelId.valueReport}
-            showUpdateButton="iconOnly"
-            width="auto"
-            compressed
+      <>
+        <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
+          <HeaderPage
+            title={i18n.AI_VALUE_DASHBOARD}
+            rightSideItems={[
+              <SuperDatePicker
+                id={InputsModelId.valueReport}
+                showUpdateButton="iconOnly"
+                width="auto"
+                compressed
+              />,
+            ]}
           />
-          <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
-            <HeaderPage title={i18n.AI_VALUE_DASHBOARD} />
-            {isSourcererLoading ? (
-              <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
-            ) : (
-              <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
-                <EuiFlexItem>
-                  <EuiText>
-                    <h2>{'Your AI Security ROI'}</h2>
-                  </EuiText>
-                  {data && (
-                    <AIValueMetrics
-                      totalAlerts={alertCount}
-                      attackDiscoveryCount={data.total}
-                      alertsInAttacks={data.unique_alert_ids_count}
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </SecuritySolutionPageWrapper>
-        </>
-      ) : (
-        <EmptyPrompt />
-      )}
+          {isSourcererLoading ? (
+            <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
+          ) : (
+            <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
+              <EuiFlexItem>
+                {data && (
+                  <AIValueMetrics
+                    totalAlerts={alertCount}
+                    attackDiscoveryCount={data.total}
+                    alertsInAttacks={data.unique_alert_ids_count}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </SecuritySolutionPageWrapper>
+      </>
 
       <SpyRoute pageName={SecurityPageName.aiValue} />
     </>
