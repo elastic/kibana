@@ -10,6 +10,7 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
+  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const javaVariables = {
@@ -34,7 +35,7 @@ export const javaLineNumbers = {
 
 export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
 -${javaVariables.apmServiceName}={{{apmServiceName}}} \\
--${javaVariables.secretToken}=<APM_SECRET_TOKEN> \\
+-${javaVariables.secretToken}=${SECRET_TOKEN_COMMAND_PLACEHOLDER}\\
 -${javaVariables.apmServerUrl}={{{apmServerUrl}}} \\
 -${javaVariables.apmEnvironment}={{{apmEnvironment}}} \\
 -Delastic.apm.application_packages=org.example \\

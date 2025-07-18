@@ -46,5 +46,5 @@ export const serviceEnvironmentHint = i18n.translate(
   }
 );
 
-export const API_KEY_COMMAND_PLACEHOLDER = '<APM_API_KEY>';
-export const SECRET_TOKEN_COMMAND_PLACEHOLDER = '<APM_SECRET_TOKEN>';
+export const API_KEY_COMMAND_PLACEHOLDER = '<API_KEY>';
+export const SECRET_TOKEN_COMMAND_PLACEHOLDER = '<SECRET_TOKEN>';
