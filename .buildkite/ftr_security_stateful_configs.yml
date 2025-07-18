@@ -133,3 +133,4 @@ enabled:
   - x-pack/solutions/security/test/fleet_api_integration/config.agent.ts
   - x-pack/solutions/security/test/fleet_api_integration/config.epm.ts
   - x-pack/solutions/security/test/fleet_api_integration/config.package_policy.ts
+  - x-pack/solutions/security/test/functional_solution_sidenav/config.ts
