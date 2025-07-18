@@ -47,7 +47,7 @@ import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/scr
 import { AppMenuBar } from './app_menu';
 import { ProjectNavigation } from './navigation';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
-import { CollapseButton } from './collapse_button';
+import { CollapseButton } from '../sidenav_v2/collapse_button';
 
 const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   logo: {
@@ -137,6 +137,7 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   toggleSideNav: (isCollapsed: boolean) => void;
   isFixed?: boolean;
   as?: 'div' | 'header';
+  includeSideNavCollapseButton?: boolean;
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -236,6 +237,7 @@ export const ProjectHeader = ({
   breadcrumbsAppendExtensions$,
   isFixed = true,
   as = 'header',
+  includeSideNavCollapseButton = false,
   ...observables
 }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -258,7 +260,7 @@ export const ProjectHeader = ({
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position={isFixed ? 'fixed' : 'static'} className="header__firstBar">
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
-              {children ? (
+              {children && (
                 <Router history={application.history}>
                   <ProjectNavigation
                     isSideNavCollapsed$={observables.isSideNavCollapsed$}
@@ -267,11 +269,13 @@ export const ProjectHeader = ({
                     {children}
                   </ProjectNavigation>
                 </Router>
-              ) : (
+              )}
+
+              {includeSideNavCollapseButton && (
                 <EuiHeaderSectionItem>
                   <CollapseButton
-                    isSideNavCollapsed$={observables.isSideNavCollapsed$}
                     toggleSideNav={toggleSideNav}
+                    isSideNavCollapsed$={observables.isSideNavCollapsed$}
                   />
                 </EuiHeaderSectionItem>
               )}

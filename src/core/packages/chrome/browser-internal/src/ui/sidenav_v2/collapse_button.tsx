@@ -20,12 +20,16 @@ interface Props {
 export const CollapseButton: FC<Props> = ({ isSideNavCollapsed$, toggleSideNav }) => {
   const isCollapsed = useObservable(isSideNavCollapsed$, false);
 
-  // TODO: a11y
+  // TODO: translate
+
   return (
     <EuiButtonIcon
       iconType={isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut'}
       color={'text'}
       onClick={() => toggleSideNav(!isCollapsed)}
+      aria-label={isCollapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+      title={isCollapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+      aria-expanded={!isCollapsed}
     />
   );
 };

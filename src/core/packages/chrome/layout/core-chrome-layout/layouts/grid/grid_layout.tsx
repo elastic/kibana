@@ -88,7 +88,7 @@ export class GridLayout implements LayoutService {
 
     // TODO: temporary solution to get the navigation width
     const navigationWidth$ = new BehaviorSubject<number>(layoutConfigs.project.navigationWidth!);
-    const projectSideNavigationV2 = chrome.getProjectSideNavigationV2Component({
+    const projectSideNavigationV2 = chrome.getProjectSideNavV2Component({
       setWidth: (width) => {
         navigationWidth$.next(width);
       },
