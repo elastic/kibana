@@ -9,6 +9,6 @@
 
 // These are the html tags that will replace the highlight tags.
 export const htmlTags = {
-  pre: '<mark class="ffString__highlight">',
+  pre: '<mark class="ffSearch__highlight">',
   post: '</mark>',
 };

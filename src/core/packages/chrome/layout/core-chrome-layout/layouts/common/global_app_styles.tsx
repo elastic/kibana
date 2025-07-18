@@ -19,11 +19,12 @@ const hackGlobalFieldFormattersPluginStyles = (euiTheme: UseEuiTheme['euiTheme']
     color: ${euiTheme.colors.mediumShade};
   }
 
-  // Styles applied to the span.ffString__emptyValue from FieldFormat class that is used to visually distinguish empty string values when rendering string values as HTML in Kibana field formatters
-  .ffString__highlight {
+  // Styles applied to the span.ffSearch__highlight from FieldFormat class that is used to visually distinguish highlighted string values when rendering string values as HTML in Kibana field formatters
+  .ffSearch__highlight {
     text-decoration: dotted underline;
   }
 
+  // Styles applied to the span.ffString__emptyValue from FieldFormat class that is used to visually distinguish empty string values when rendering string values as HTML in Kibana field formatters
   .ffString__emptyValue {
     color: ${euiTheme.colors.darkShade};
   }

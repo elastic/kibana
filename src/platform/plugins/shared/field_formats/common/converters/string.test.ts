@@ -124,6 +124,6 @@ describe('String Format', () => {
           },
         })
       )
-    ).toBe('<mark class="ffString__highlight">&lt;img /&gt;</mark>');
+    ).toBe('<mark class="ffSearch__highlight">&lt;img /&gt;</mark>');
   });
 });
