@@ -31,7 +31,7 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
       });
 
       await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana',
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana',
         {
           space: spaceId,
         }
@@ -60,7 +60,7 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
       await security.forceLogout();
 
       await kibanaServer.importExport.unload(
-        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana',
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana',
         {
           space: spaceId,
         }
