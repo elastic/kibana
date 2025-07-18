@@ -76,18 +76,21 @@ export const BaseStepSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timeout: z.number().optional(),
 });
+export type BaseStep = z.infer<typeof BaseStepSchema>;
 
 export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
   'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
   with: z.record(z.string(), z.any()).optional(),
 });
+export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.string(),
   steps: z.array(BaseStepSchema).min(1),
 });
+export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
 export const getForEachStepSchema = (stepSchema: z.ZodType) => {
   return BaseStepSchema.extend({
@@ -103,6 +106,7 @@ export const IfStepSchema = BaseStepSchema.extend({
   steps: z.array(BaseStepSchema),
   else: z.array(BaseStepSchema).optional(),
 });
+export type IfStep = z.infer<typeof IfStepSchema>;
 
 export const getIfStepSchema = (stepSchema: z.ZodType) => {
   return BaseStepSchema.extend({
@@ -122,6 +126,7 @@ export const ParallelStepSchema = BaseStepSchema.extend({
     })
   ),
 });
+export type ParallelStep = z.infer<typeof ParallelStepSchema>;
 
 export const getParallelStepSchema = (stepSchema: z.ZodType) => {
   return BaseStepSchema.extend({
@@ -135,6 +140,7 @@ export const MergeStepSchema = BaseStepSchema.extend({
   sources: z.array(z.string()), // references to branches or steps to merge
   steps: z.array(BaseStepSchema), // steps to run after merge
 });
+export type MergeStep = z.infer<typeof MergeStepSchema>;
 
 export const getMergeStepSchema = (stepSchema: z.ZodType) => {
   return BaseStepSchema.extend({
