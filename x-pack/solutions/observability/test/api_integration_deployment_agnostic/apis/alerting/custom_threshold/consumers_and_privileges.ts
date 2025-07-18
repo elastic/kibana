@@ -106,7 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Custom threshold - Rule visibility - consumer observability', () => {
+    describe('Custom threshold - Rule visibility - consumer observability', function () {
       // Custom roles not yet supported in MKI
       this.tags(['failsOnMKI']);
       
