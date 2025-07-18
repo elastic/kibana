@@ -109,11 +109,8 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
+          'xpack.security.authc.native_roles.enabled=true',
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
-          // custom native roles are enabled only for search and security projects
-          ...(options.serverlessProject !== 'oblt'
-            ? ['xpack.security.authc.native_roles.enabled=true']
-            : []),
           ...esServerArgsFromController[options.serverlessProject],
           ...(options.tier && options.tier === 'oblt_logs_essentials'
             ? [

@@ -1129,7 +1129,7 @@
     "@opentelemetry/exporter-trace-otlp-http": "^0.203.0",
     "@opentelemetry/exporter-trace-otlp-proto": "^0.203.0",
     "@opentelemetry/instrumentation": "^0.203.0",
-    "@opentelemetry/instrumentation-undici": "^0.13.2",
+    "@opentelemetry/instrumentation-undici": "^0.14.0",
     "@opentelemetry/otlp-exporter-base": "^0.203.0",
     "@opentelemetry/semantic-conventions": "^1.34.0",
     "@paralleldrive/cuid2": "^2.2.2",
