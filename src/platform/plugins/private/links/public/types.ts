@@ -24,7 +24,7 @@ import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
 import {
-  CONTENT_ID,
+  LINKS_EMBEDDABLE_TYPE,
   LinksByReferenceState,
   LinksByValueState,
   LinksEmbeddableState,
@@ -41,7 +41,7 @@ export type LinksParentApi = PresentationContainer &
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
   };
 
-export type LinksApi = HasType<typeof CONTENT_ID> &
+export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   DefaultEmbeddableApi<LinksEmbeddableState> &
   HasEditCapabilities &
   HasLibraryTransforms<LinksByReferenceState, LinksByValueState>;

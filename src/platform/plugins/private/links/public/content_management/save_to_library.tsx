@@ -15,7 +15,7 @@ import {
   SavedObjectSaveModal,
   SaveResult,
 } from '@kbn/saved-objects-plugin/public';
-import { CONTENT_ID } from '../../common';
+import { LINKS_EMBEDDABLE_TYPE, LINKS_SAVED_OBJECT_TYPE } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
 import { linksClient } from './links_content_management_client';
 import { serializeResolvedLinks } from '../lib/resolve_links';
@@ -24,7 +24,7 @@ import type { EditorState } from '../editor/get_editor_flyout';
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,
   values: {
-    contentId: CONTENT_ID,
+    contentId: LINKS_EMBEDDABLE_TYPE,
   },
 });
 
@@ -83,7 +83,7 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
         description={newState.description}
         showDescription
         showCopyOnSave={false}
-        objectType={CONTENT_ID}
+        objectType={LINKS_SAVED_OBJECT_TYPE}
       />
     );
     showSaveModal(saveModal);

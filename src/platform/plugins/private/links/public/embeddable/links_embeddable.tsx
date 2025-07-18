@@ -24,7 +24,6 @@ import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/prese
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksState } from '../../server';
 import {
-  CONTENT_ID,
   DASHBOARD_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
@@ -33,7 +32,7 @@ import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_l
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
 import { LinksApi, LinksParentApi, ResolvedLink } from '../types';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
-import { DISPLAY_NAME } from '../../common';
+import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 
 import { checkForDuplicateTitle, linksClient } from '../content_management';
 import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
@@ -45,7 +44,7 @@ export const LinksContext = createContext<LinksApi | null>(null);
 
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
-    type: CONTENT_ID,
+    type: LINKS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 

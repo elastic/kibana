@@ -12,7 +12,7 @@ import { StorageContext } from '@kbn/content-management-plugin/server';
 import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
-import { CONTENT_ID as LINKS_SAVED_OBJECT_TYPE } from '../../common';
+import { LINKS_SAVED_OBJECT_TYPE } from '../../common';
 import type { LinksItem, LinksSearchOut } from '../../common/content_management';
 import { cmServicesDefinition } from './schema/cm_services';
 import {

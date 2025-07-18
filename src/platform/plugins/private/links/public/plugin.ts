@@ -22,7 +22,15 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
-import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION, LinksEmbeddableState } from '../common';
+import {
+  APP_ICON,
+  APP_NAME,
+  CONTENT_ID,
+  LATEST_VERSION,
+  LINKS_EMBEDDABLE_TYPE,
+  LINKS_SAVED_OBJECT_TYPE,
+  LinksEmbeddableState,
+} from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
@@ -62,7 +70,7 @@ export class LinksPlugin
         onAdd: async (container, savedObject) => {
           container.addNewPanel<LinksEmbeddableState>(
             {
-              panelType: CONTENT_ID,
+              panelType: LINKS_EMBEDDABLE_TYPE,
               serializedState: {
                 rawState: {
                   savedObjectId: savedObject.id,
@@ -72,19 +80,19 @@ export class LinksPlugin
             true
           );
         },
-        savedObjectType: CONTENT_ID,
+        savedObjectType: LINKS_SAVED_OBJECT_TYPE,
         savedObjectName: APP_NAME,
         getIconForSavedObject: () => APP_ICON,
       });
 
-      plugins.embeddable.registerReactEmbeddableFactory(CONTENT_ID, async () => {
+      plugins.embeddable.registerReactEmbeddableFactory(LINKS_EMBEDDABLE_TYPE, async () => {
         const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
         return getLinksEmbeddableFactory();
       });
 
       plugins.visualizations.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
-        name: CONTENT_ID,
+        name: LINKS_SAVED_OBJECT_TYPE,
         title: APP_NAME,
         icon: APP_ICON,
         description: i18n.translate('links.description', {
@@ -93,7 +101,7 @@ export class LinksPlugin
         stage: 'production',
         appExtensions: {
           visualizations: {
-            docTypes: [CONTENT_ID],
+            docTypes: [LINKS_SAVED_OBJECT_TYPE],
             searchFields: ['title^3'],
             client: getLinksClient,
             toListItem(linkItem: LinksCrudTypes['Item']) {
@@ -138,7 +146,7 @@ export class LinksPlugin
     );
 
     plugins.dashboard.registerDashboardPanelPlacementSetting(
-      CONTENT_ID,
+      LINKS_EMBEDDABLE_TYPE,
       async (serializedState?: SerializedPanelState<LinksEmbeddableState>) => {
         const { getPanelPlacement } = await import('./embeddable/embeddable_module');
         return await getPanelPlacement(serializedState);
