@@ -11,8 +11,8 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
-  const ssl = true;
-  const license = 'trial';
+  const ssl = false;
+  const license = 'basic';
 
   const servers = {
     ...baseIntegrationTestsConfig.get('servers'),
