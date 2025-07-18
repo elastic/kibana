@@ -62,8 +62,8 @@ export const getNonEmptyValidator = (
               field.isValid = true;
             }
           }
+          newSchema.push(field);
         }
-        newSchema.push(field);
       });
 
       validationEventHandler(newSchema);
