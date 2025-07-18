@@ -7,6 +7,7 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
+import { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
 import {
   ReindexStatusResponse,
   ReindexStatus,
@@ -14,7 +15,6 @@ import {
   IndexWarning,
 } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { ApiService } from '../../../../lib/api';
 
 const POLL_INTERVAL = 3000;
 
@@ -116,13 +116,13 @@ export const useReindex = ({
   isFrozen,
   isInDataStream,
   isClosedIndex,
-  api,
+  reindexService,
 }: {
   indexName: string;
   isFrozen: boolean;
   isInDataStream: boolean;
   isClosedIndex: boolean;
-  api: ApiService;
+  reindexService: ReindexServicePublicStart['reindexService'];
 }) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
     loadingState: LoadingState.Loading,
@@ -200,7 +200,8 @@ export const useReindex = ({
   const updateStatus = useCallback(async () => {
     clearPollInterval();
 
-    const { data, error } = await api.getReindexStatus(indexName);
+    // todo
+    const { data, error } = await reindexService.getReindexStatus(indexName);
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {
@@ -228,7 +229,7 @@ export const useReindex = ({
     } else if (data.reindexOp && data.reindexOp.status === ReindexStatus.completed) {
       simulateExtraSteps();
     }
-  }, [clearPollInterval, api, indexName, simulateExtraSteps]);
+  }, [clearPollInterval, reindexService, indexName, simulateExtraSteps]);
 
   const startReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {
@@ -244,7 +245,7 @@ export const useReindex = ({
       };
     });
 
-    const { data: reindexOp, error } = await api.startReindexTask(indexName);
+    const { data: reindexOp, error } = await reindexService.startReindex(indexName);
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {
@@ -259,10 +260,10 @@ export const useReindex = ({
     }
 
     setReindexState((prevValue: ReindexState) => {
-      return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
+      return getReindexState(prevValue, { reindexOp: reindexOp!, meta: prevValue.meta });
     });
     updateStatus();
-  }, [api, indexName, updateStatus]);
+  }, [reindexService, indexName, updateStatus]);
 
   const cancelReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {
@@ -272,7 +273,8 @@ export const useReindex = ({
       };
     });
 
-    const { error } = await api.cancelReindexTask(indexName);
+    // todo
+    const { error } = await reindexService.cancelReindex(indexName);
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {
@@ -283,7 +285,7 @@ export const useReindex = ({
       });
       return;
     }
-  }, [api, indexName]);
+  }, [reindexService, indexName]);
 
   useEffect(() => {
     updateStatus();

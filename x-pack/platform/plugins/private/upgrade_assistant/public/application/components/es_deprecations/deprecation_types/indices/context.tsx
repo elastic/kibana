@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
 
 import { ApiService } from '../../../../lib/api';
 import { useReindex, ReindexState } from './use_reindex';
@@ -33,12 +34,14 @@ export const useIndexContext = () => {
 
 interface Props {
   api: ApiService;
+  reindexService: ReindexServicePublicStart['reindexService'];
   children: React.ReactNode;
   deprecation: EnrichedDeprecationInfo;
 }
 
 export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   api,
+  reindexService,
   deprecation,
   children,
 }) => {
@@ -46,7 +49,7 @@ export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   const indexAction = deprecation.correctiveAction as IndexAction;
   const { reindexState, startReindex, cancelReindex } = useReindex({
     indexName,
-    api,
+    reindexService,
     isInDataStream: Boolean(indexAction?.metadata.isInDataStream),
     isFrozen: Boolean(indexAction?.metadata.isFrozenIndex),
     isClosedIndex: Boolean(indexAction?.metadata.isClosedIndex),

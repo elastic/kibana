@@ -7,7 +7,6 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 
-import type { ReindexService } from '@kbn/reindex-service-plugin/public';
 import type { UpdateIndexOperation } from '../../../common/update_index';
 import type {
   ESUpgradeStatus,
@@ -36,7 +35,6 @@ type ClusterUpgradeStateListener = (clusterUpgradeState: ClusterUpgradeState) =>
 
 export class ApiService {
   private client: HttpSetup | undefined;
-  private reindexService: ReindexService | undefined;
   private clusterUpgradeStateListeners: ClusterUpgradeStateListener[] = [];
 
   private handleClusterUpgradeError(error: ResponseError | null) {
@@ -83,9 +81,8 @@ export class ApiService {
     return response;
   }
 
-  public setup(httpClient: HttpSetup, reindexService: ReindexService): void {
+  public setup(httpClient: HttpSetup): void {
     this.client = httpClient;
-    this.reindexService = reindexService;
   }
 
   public onClusterUpgradeStateChange(listener: ClusterUpgradeStateListener) {
@@ -258,16 +255,6 @@ export class ApiService {
   /**
    * FINISH: Data Stream Migrations
    */
-
-  public async getReindexStatus(indexName: string) {
-    return this.reindexService!.getReindexStatus(indexName);
-  }
-  public async startReindexTask(indexName: string) {
-    return this.reindexService!.startReindex(indexName);
-  }
-  public async cancelReindexTask(indexName: string) {
-    return this.reindexService!.cancelReindex(indexName);
-  }
 
   public async updateIndex(indexName: string, operations: UpdateIndexOperation[]) {
     return await this.sendRequest({
