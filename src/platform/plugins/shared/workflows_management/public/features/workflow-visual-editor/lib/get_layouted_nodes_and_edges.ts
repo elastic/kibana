@@ -219,8 +219,8 @@ export function transformYamlToNodesAndEdges(
 
 export function getLayoutedNodesAndEdges(workflowDefinition: WorkflowYaml) {
   const { nodes, edges } = transformYamlToNodesAndEdges(
-    workflowDefinition.workflow.triggers,
-    workflowDefinition.workflow.steps
+    workflowDefinition.workflow?.triggers ?? [],
+    workflowDefinition.workflow?.steps ?? []
   );
 
   const dagreGraph = new graphlib.Graph();

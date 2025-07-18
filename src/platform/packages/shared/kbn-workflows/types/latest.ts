@@ -10,8 +10,6 @@
 export type {
   // elasticsearch documents types
   EsWorkflow,
-  EsWorkflowTrigger,
-  EsWorkflowStep,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   WorkflowExecutionLogModel,
@@ -27,6 +25,7 @@ export type {
 
   // commands
   CreateWorkflowCommand,
+  UpdatedWorkflowResponseDto,
 
   // execution engine
   Provider,

@@ -5,7 +5,7 @@ export const extractConnectorIds = async (
   workflow: WorkflowExecutionEngineModel,
   actionsClient: IUnsecuredActionsClient
 ): Promise<Record<string, Record<string, any>>> => {
-  const connectorNames = workflow.steps
+  const connectorNames = workflow.definition.workflow.steps
     .filter((step) => step.type.endsWith('-connector'))
     .map((step) => step['connector-id']!);
   const distinctConnectorNames = Array.from(new Set(connectorNames));
