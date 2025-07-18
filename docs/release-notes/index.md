@@ -58,6 +58,10 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Adds ability to mark a dashboard as favorite from within the dashboard in addition to the **Dashboards** page [#201596]({{kib-pull}}201596).
 * Adds the ability to resize and move dashboard panels using a keyboard [#208286]({{kib-pull}}208286).
 * Adds highlight effect when adding a panel to a dashboard [#223614]({{kib-pull}}223614).
+* Adds the ability to create {{esql}} controls from the dashboard **Controls** menu [#219495]({{kib-pull}}219495).
+* Adds the ability to create {{esql}} controls by typing a question mark `?` when editing an {{esql}} visualization's query [#216839]({{kib-pull}}216839).
+* Allows the creation of dynamic aggregations controls for {{esql}} visualizations [#210170]({{kib-pull}}210170).
+* Improves handling of `?_tstart` and `?_tend` named parameters when the {{esql}} visualization's query includes controls [#225054]({{kib-pull}}225054).
 * Adds CRUD API routes for **Lens** [#223296]({{kib-pull}}223296).
 * The **Color Mapping** feature is now GA. Previous **Lens** palette definitions are deprecated and will continue to function normally with no visual change to existing visualizations. Toggling off legacy mode will replace the palette with an equivalent color mapping configuration [#220296]({{kib-pull}}220296).
 * Adds "Compare to" badge for Metric charts in **Lens** [#214811]({{kib-pull}}214811).
@@ -95,35 +99,32 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Registers a custom integrations search provider [#213013]({{kib-pull}}213013).
 
 **Discover**:
-* Display Attributes doc viewer tab for Observability [#222391]({{kib-pull}}222391).
-* Show partial results after timeout [#219027]({{kib-pull}}219027).
-% !!TODO!! The above PR had a lengthy release note description:
-% When an ES|QL query times out (as a result of the `search:timeout` advanced setting), partial results that are available are now shown.
-* Creates control by typing a questionmark [#216839]({{kib-pull}}216839).
-* Implementing click action for Stacktrace and Degraded Fields on Discover [#214413]({{kib-pull}}214413).
-* Added context aware logic for logs view in discover to show Load More… [#211176]({{kib-pull}}211176).
-* Expand to fit the query on editor mount [#225509]({{kib-pull}}225509).
-* Flip LOOKUP JOIN to GA in docs [#225117]({{kib-pull}}225117).
-* Listen to ?_tstart and ?_tend named params [#225054]({{kib-pull}}225054).
-* Enable `COMPLETION` in tech preview [#224811]({{kib-pull}}224811).
-* Moves fork in tech preview [#224680]({{kib-pull}}224680).
-* Suggest all operators in the editor [#223503]({{kib-pull}}223503).
-* Better handling of long fields in the editor [#223222]({{kib-pull}}223222).
-* Adds shortcuts in the editor [#221331]({{kib-pull}}221331).
-* Suggests full text search in our recommendations [#221239]({{kib-pull}}221239).
-* Adds full text search to `STATS ... WHERE` [#220691]({{kib-pull}}220691).
-* Hide "Selected only" toggle in pages that don't filter by value [#220624]({{kib-pull}}220624).
-* Adds an ES|QL control option on the dashboard controls dropdown [#219495]({{kib-pull}}219495).
-* Adds 'Copy value' button to field value cells [#218817]({{kib-pull}}218817).
-* Enable suggestions for `CHANGE_POINT` command [#218100]({{kib-pull}}218100).
-* Autocomplete for `STATS...WHERE` [#216379]({{kib-pull}}216379).
-* Validation and autocomplete support for the `CHANGE_POINT` command [#216043]({{kib-pull}}216043).
-* Highlights the code examples in our inline docs [#214915]({{kib-pull}}214915).
-* Suggest triple quotes when the user selects the `KQL` / `QSTR` [#211457]({{kib-pull}}211457).
-* Display a warning and a tooltip for the `_score` column in the grid [#211013]({{kib-pull}}211013).
-* Allow command/ctrl click for "New" action in top nav [#210982]({{kib-pull}}210982).
-* Apply compact Display options Popover layout [#210180]({{kib-pull}}210180).
-* Allows the creation of dynamic aggregations controls for ES|QL charts [#210170]({{kib-pull}}210170).
+* Adds an **Attributes** tab in **Discover** when exploring OTel documents [#222391]({{kib-pull}}222391).
+* When an ES|QL query times out (as a result of the `search:timeout` advanced setting), partial results that are available are now shown [#219027]({{kib-pull}}219027).
+* Adds click actions for Stacktrace and Degraded Fields in Discover [#214413]({{kib-pull}}214413).
+* Shows a **Load more** option instead of pagination when exploring Logs in **Discover** [#211176]({{kib-pull}}211176).
+* Expands the {{esql}} editor to fit the query size automatically when loading **Discover** [#225509]({{kib-pull}}225509).
+* Hides the "Selected only" toggle in **Discover**'s pages that don't support filtering by value [#220624]({{kib-pull}}220624).
+* Adds a **Copy value** button to field value cells in the Document viewer [#218817]({{kib-pull}}218817).
+* Adds a warning and a tooltip for explaining the `_score` column in **Discover** [#211013]({{kib-pull}}211013).
+* Adds support for `command`/`ctrl` + click to open links in a new tab, for example allowing to conduct simultaneous searches in parallel more efficiently [#210982]({{kib-pull}}210982).
+* Improves the **Display options** menu layout [#210180]({{kib-pull}}210180).
+
+**{{esql}} editor**:
+* The {{esql}} `LOOKUP_JOIN` command is now GA [#225117]({{kib-pull}}225117).
+* The {{esql}} `COMPLETION` command is now available in technical preview [#224811]({{kib-pull}}224811).
+* The {{esql}} `FORK` command is now available in technical preview [#224680]({{kib-pull}}224680).
+* Adds suggestions for all operators when writing queries [#223503]({{kib-pull}}223503).
+* Improves handling of long fields [#223222]({{kib-pull}}223222).
+* Adds support for `date_nanos` fields in `BUCKET` functions [#213319]({{kib-pull}}213319).
+* Shows list of keyboard shortcuts at the bottom of the editor [#221331]({{kib-pull}}221331).
+* Adds suggestions for full text search when writing queries [#221239]({{kib-pull}}221239).
+* Adds full text search suggestions to `STATS ... WHERE` queries [#220691]({{kib-pull}}220691).
+* Adds autocomplete suggestions for `STATS...WHERE` [#216379]({{kib-pull}}216379).
+* Enables suggestions for the `CHANGE_POINT` command [#218100]({{kib-pull}}218100).
+* Adds validation and autocomplete support for the `CHANGE_POINT` command [#216043]({{kib-pull}}216043).
+* Adds highlighting to code examples in the in-product documentation [#214915]({{kib-pull}}214915).
+* Suggests triple quotes when using `KQL` and `QSTR` functions [#211457]({{kib-pull}}211457).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.1.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -180,7 +181,7 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Navigation for Overview Page in Entity Analytics [#221748]({{kib-pull}}221748).
 * Indicate if failure store isn't enabled for data stream [#221644]({{kib-pull}}221644).
 * Adds executable name tab to TopN view [#224291]({{kib-pull}}224291).
-* ES|QL support for partial results [#223198]({{kib-pull}}223198).
+
 * Extend default log pattern on server-side to include error information [#219940]({{kib-pull}}219940).
 % !!TODO!! The above PR had a lengthy release note description:
 % Kibana logging's pattern layout, used by default for the console appender, will now use a new default pattern layout `[%date][%level][%logger] %message %error`. This will include the error name and stack trace if these were included in the log entry. To opt out of this behavior users can omit the `%error` placeholder from their log pattern config in kibana.yml e.g.:
@@ -207,7 +208,10 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixes panel title synchronization with corresponding saved object when using `defaultTitle` [#225237]({{kib-pull}}225237).
 * Fixes visual issues causing labels to be truncated [#225430]({{kib-pull}}225430).
 * Refreshes "Values from a query" options for {{esql}} controls on dashboard reload [#225101]({{kib-pull}}225101).
-* Fixes a performance issue with ES|QL visualizations in case of errors in the query [#225067]({{kib-pull}}225067).
+* Fixes an issue with calculating the query for retrieving {{esql}} control values [#214905]({{kib-pull}}214905).
+* Fixes an issue with the {{esql}} **Create control** suggestions not triggering if the query already contained a control [#214833]({{kib-pull}}214833).
+* Fixes the visibility of the date picker when writing {{esql}} visualization queries [#214728]({{kib-pull}}214728).
+* Fixes a performance issue with {{esql}} visualizations in case of errors in the query [#225067]({{kib-pull}}225067).
 * Fixes dashboard control value changes causing multiple fetches [#224761]({{kib-pull}}224761).
 * Fixes an issue in **Lens** where reordering the groups within a layer would incorrectly assign the color mapping to a group other than the first [#215426]({{kib-pull}}215426).
 * Fixes invalid dashboard displayed as 404 instead of showing validation error [#211661]({{kib-pull}}211661).
@@ -225,53 +229,40 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Makes output and {{fleet}} Server settings non-editable for agentless policies [#218905]({{kib-pull}}218905).
 * Supports integrations with secrets that contain multiple values [#216918]({{kib-pull}}216918).
 * Adds remote cluster instructions for syncing integrations [#211997]({{kib-pull}}211997).
-* Updates install snippets to include all platformss [#210249]({{kib-pull}}210249).
+* Updates install snippets to include all platforms [#210249]({{kib-pull}}210249).
 
 **Discover**:
+* Fixes invalid input highlight in **Data View** flyout [#226822]({{kib-pull}}226822).
+* Fixes an issue causing an internal server error when renaming a search session [#226757]({{kib-pull}}226757).
+* Fixes an issue causing **Discover** to freeze when dragging & dropping columns with animations disabled [#226592]({{kib-pull}}226592).
+* Fixes row highlighting when reordering columns [#226584]({{kib-pull}}226584).
+* Fixes an issue causing an error when updating then deleting a saved query [#226569]({{kib-pull}}226569).
+* Fixes a cell value alignment issue [#226562]({{kib-pull}}226562).
+* Adds missing information icon to the document viewer table [#222299]({{kib-pull}}222299).
+* Fixes an issue incorrectly showing the *unmapped* icon when a field changed from unmapped to mapped [#221308]({{kib-pull}}221308).
+* Fixes the parsing of index patterns in the **Inspect** feature of Kibana. Previously, certain index pattern strings were not being parsed and displayed correctly in the **Inspect** feature [#221084]({{kib-pull}}221084).
+* Fixes an issue that causes transitions from **Logs Stream** and **Logs Explorer** to **Discover** to lose some context such as the selected time range or KQL query [#215867]({{kib-pull}}215867).
+* Excludes only {{es}} metadata fields from the Summary column instead of all fields starting with `_` [#213255]({{kib-pull}}213255).
+* Fixed multiple accessibility issues, including adding missing aria labels and column headers, improving keyboard navigation and interactions, and improving focus changes when interacting with **Discover** features [View list of fixes](https://github.com/elastic/kibana/issues?q=state:closed%20label:Project:Accessibility%20label:v9.1.0%20label:Team:DataDiscovery).
+
+**{{esql}} editor**:
+* Fixes an issue where an {{esql}} query was overwritten when edited while the previous request was still running [#224671]({{kib-pull}}224671).
 * Fixes wrong validation on expressions between aggregations [#227989]({{kib-pull}}227989).
 * Hides lookup index hidden indices from autocomplete [#227819]({{kib-pull}}227819).
-* Fixes invalid input highlight in Data View flyout [#226822]({{kib-pull}}226822).
-* Fixes search session rename error in dev [#226757]({{kib-pull}}226757).
-* Fixes drag & drop when animations are disabled [#226592]({{kib-pull}}226592).
-* Fixes row highlight when reordering columns [#226584]({{kib-pull}}226584).
-* Return namespaces from update [#226569]({{kib-pull}}226569).
-* Left align content inside the rendered cell value [#226562]({{kib-pull}}226562).
-* Fixes edited query overwriting when a request is finished [#224671]({{kib-pull}}224671).
-* Update aria tags in patterns selected field [#224224]({{kib-pull}}224224).
-* Fixes z-index for esql query editor [#222841]({{kib-pull}}222841).
-* Fixes in the bucket function signatures [#222553]({{kib-pull}}222553).
-* Fixes COALESCE validation [#222425]({{kib-pull}}222425).
-* Fixing the suggestions in WHERE after a variable such as ?value [#222312]({{kib-pull}}222312).
-* Adds info icon to doc viewer table [#222299]({{kib-pull}}222299).
-* Adds skip to next section in field list grouped [#221792]({{kib-pull}}221792).
-* Update aria-label in doc viewer table [#221736]({{kib-pull}}221736).
-* Change icon of field list when mapping changes from unmapped to mapped [#221308]({{kib-pull}}221308).
-* Remove not needed tabindex from svg inside button [#221265]({{kib-pull}}221265).
-* Fixes classic and ES|QL switch button a11y issues [#221246]({{kib-pull}}221246).
-* Fixes suggestions after triple quote pair [#221200]({{kib-pull}}221200).
-* Update aria-label for field type filter [#221090]({{kib-pull}}221090).
-* Fixes indexpattern parsing leading to incomplete index pattern values being displayed [#221084]({{kib-pull}}221084).
-* Improve discover session input focus behavior [#220876]({{kib-pull}}220876).
-* Adds Actions header to unified data table [#220824]({{kib-pull}}220824).
-* Fixes rename wrong validation for asterisc in name [#219832]({{kib-pull}}219832).
-* Make icon only presentational [#219696]({{kib-pull}}219696).
-* Make pin button focusable with keyboard [#219230]({{kib-pull}}219230).
-* Fixes the wrong source validation in case of unknown patterns [#218352]({{kib-pull}}218352).
-* Fixes editor menus on safari [#218167]({{kib-pull}}218167).
-* Fixes the broken tooltip suggestions descriptions [#218067]({{kib-pull}}218067).
-* Adds items count to fields accordion title aria-label [#216993]({{kib-pull}}216993).
-* Discover esc closes flyout when focus is on filter [#216630]({{kib-pull}}216630).
-* Pass app state and global state to locator when redirecting from /stream path [#215867]({{kib-pull}}215867).
-* Enables the timepicker if the time params are used with cast [#215820]({{kib-pull}}215820).
-* Calculate the query for retrieving the values correctly [#214905]({{kib-pull}}214905).
-* Make sure that the variables in the editor are always up to date [#214833]({{kib-pull}}214833).
-* Fixes the visibility of the datepicker [#214728]({{kib-pull}}214728).
-* Fixes warnings with escaped quotes [#213685]({{kib-pull}}213685).
-* Fixes the wrong validation when a named param is used as function [#213355]({{kib-pull}}213355).
-* Supports date_nanos in bucket [#213319]({{kib-pull}}213319).
-* Exclude Elasticsearch metadata fields from Display in Content Column [#213255]({{kib-pull}}213255).
-* Fixes the suggestion problem in where for multiline queries [#213240]({{kib-pull}}213240).
-* Suggest triple quotes when the user selects the `KQL` / `QSTR` [#211457]({{kib-pull}}211457).
+* Fixes several issues with `BUCKET` function signatures [#222553]({{kib-pull}}222553).
+* Fixes validation issues with the `COALESCE` function [#222425]({{kib-pull}}222425).
+* Fixes incorrect suggestions after a variable such as `?value` when using the `WHERE` command [#222312]({{kib-pull}}222312).
+* Fixes an issue with suggestions after using triple quotes [#221200]({{kib-pull}}221200).
+* Fixes a validation issue when using asterisks `*` in queries [#219832]({{kib-pull}}219832).
+* Fixes an issue with incorrect source validation in case of unknown patterns [#218352]({{kib-pull}}218352).
+* Fixes a display issue with the editor's menus on Safari [#218167]({{kib-pull}}218167).
+* Fixes a display issue with descriptions in suggestion tooltips [#218067]({{kib-pull}}218067).
+* Correctly enables the time picker when time parameters are used with cast [#215820]({{kib-pull}}215820).
+* Fixes an issue preventing warnings to display correctly when they include escaped quotes [#213685]({{kib-pull}}213685).
+* Fixes a validation issue when a named parameter is used as a function [#213355]({{kib-pull}}213355).
+* Fixes an issue with suggestions for the `WHERE` command in case of a multiline query [#213240]({{kib-pull}}213240).
+
+
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.1.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
