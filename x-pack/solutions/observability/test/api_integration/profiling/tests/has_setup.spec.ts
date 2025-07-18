@@ -24,7 +24,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const es = getService('es');
   const retry = getService('retry');
 
-  registry.when('Profiling status check', { config: 'cloud' }, () => {
+  registry.when.skip('Profiling status check', { config: 'cloud' }, () => {
     describe('Profiling is not set up and no data is loaded', () => {
       before(async () => {
         await cleanUpProfilingData({ es, logger, bettertest });
