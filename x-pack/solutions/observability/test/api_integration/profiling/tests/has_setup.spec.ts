@@ -22,10 +22,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const bettertest = getBettertest(supertest);
   const logger = getService('log');
   const es = getService('es');
-  const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167076
-  registry.when.skip('Profiling status check', { config: 'cloud' }, () => {
+  registry.when('Profiling status check', { config: 'cloud' }, () => {
     describe('Profiling is not set up and no data is loaded', () => {
       before(async () => {
         await cleanUpProfilingData({ es, logger, bettertest });
@@ -79,9 +77,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     describe('APM integration is not installed', () => {
       before(async () => {
-        await retry.tryForTime(240000, async () => {
-          await setupProfiling(bettertest, logger);
-        });
+        await setupProfiling(bettertest, logger);
       });
 
       describe('Admin user', () => {
@@ -133,10 +129,8 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
     describe('Profiling is set up', () => {
       before(async () => {
-        await retry.tryForTime(240000, async () => {
-          await cleanUpProfilingData({ es, logger, bettertest });
-          await setupProfiling(bettertest, logger);
-        });
+        await cleanUpProfilingData({ es, logger, bettertest });
+        await setupProfiling(bettertest, logger);
       });
 
       after(async () => {
@@ -193,9 +187,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
 
       describe('with data', () => {
         before(async () => {
-          await retry.tryForTime(240000, async () => {
-            await loadProfilingData(es, logger);
-          });
+          await loadProfilingData(es, logger);
         });
         describe('Admin user', () => {
           let statusCheck: ProfilingStatus;
@@ -248,9 +240,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Collector integration is not installed', () => {
       let collectorId: string | undefined;
       before(async () => {
-        await retry.tryForTime(240000, async () => {
-          await setupProfiling(bettertest, logger);
-        });
+        await setupProfiling(bettertest, logger);
         const response = await getProfilingPackagePolicyIds(bettertest);
         collectorId = response.collectorId;
         if (collectorId) {
@@ -312,9 +302,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     describe('Symbolizer integration is not installed', () => {
       let symbolizerId: string | undefined;
       before(async () => {
-        await retry.tryForTime(240000, async () => {
-          await setupProfiling(bettertest, logger);
-        });
+        await setupProfiling(bettertest, logger);
         const response = await getProfilingPackagePolicyIds(bettertest);
         symbolizerId = response.symbolizerId;
         if (symbolizerId) {
