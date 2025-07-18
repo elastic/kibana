@@ -5,28 +5,22 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
-import {
-  AggregationsMultiBucketAggregateBase,
-  AggregationsTermsAggregateBase,
-} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { ChangePointType } from '@kbn/es-types/src';
-import { SignificantEventsGetResponse } from '@kbn/streams-schema';
-import { get, isArray, isEmpty, keyBy } from 'lodash';
+import type { ChangePointType } from '@kbn/es-types/src';
+import { SignificantEventsGetResponse, SignificantEventsResponse } from '@kbn/streams-schema';
+import { isEmpty, keyBy } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
 import { getRuleIdFromQueryLink } from '../../../lib/streams/assets/query/helpers/query';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
 
 export async function readSignificantEventsFromAlertsIndices(
-  params: { name: string; from: Date; to: Date; bucketSize: string },
+  params: { name: string; from: Date; to: Date },
   dependencies: {
     assetClient: AssetClient;
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsGetResponse> {
   const { assetClient, scopedClusterClient } = dependencies;
-  const { name, from, to, bucketSize } = params;
+  const { name, from, to } = params;
 
   const queryLinks = await assetClient.getAssetLinks(name, ['query']);
   if (isEmpty(queryLinks)) {
@@ -36,119 +30,100 @@ export async function readSignificantEventsFromAlertsIndices(
   const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
   const ruleIds = Object.keys(queryLinkByRuleId);
 
-  const response = await scopedClusterClient.asCurrentUser
-    .search<
-      unknown,
-      {
-        by_rule: AggregationsTermsAggregateBase<{
-          key: string;
-          doc_count: number;
-          occurrences: AggregationsMultiBucketAggregateBase<{
-            key_as_string: string;
-            key: number;
-            doc_count: 0;
-          }>;
-          change_points: {
-            type: {
-              [key in ChangePointType]: { p_value: number; change_point: number };
-            };
-          };
-        }>;
-      }
-    >({
-      index: '.alerts-streams.alerts-default',
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: from.toISOString(),
-                  lte: to.toISOString(),
-                },
-              },
-            },
-            {
-              terms: {
-                'kibana.alert.rule.uuid': ruleIds,
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        by_rule: {
-          terms: {
-            field: 'kibana.alert.rule.uuid',
-            size: 10000,
-          },
-          aggs: {
-            occurrences: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: bucketSize,
-                extended_bounds: {
-                  min: from.toISOString(),
-                  max: to.toISOString(),
-                },
-              },
-            },
-            change_points: {
-              // @ts-expect-error
-              change_point: {
-                buckets_path: 'occurrences>_count',
-              },
-            },
-          },
-        },
-      },
+  const esqlQuery = createEsqlRequest({
+    ruleIds,
+    from,
+    to,
+  });
+
+  const { columns = [], values = [] } = await scopedClusterClient.asCurrentUser.esql
+    .query({
+      query: esqlQuery,
     })
-    .catch((err) => {
-      const isResponseError = err instanceof errors.ResponseError;
-      if (isResponseError && err?.body?.error?.type === 'security_exception') {
-        throw new SecurityError(
-          `Cannot read significant events, insufficient privileges: ${err.message}`,
-          { cause: err }
-        );
-      }
-      throw err;
+    .catch(() => {
+      return { columns: [], values: [] };
     });
 
-  if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
+  if (!columns || !values) {
     return queryLinks.map((queryLink) => ({
       id: queryLink.query.id,
       title: queryLink.query.title,
       kql: queryLink.query.kql,
       occurrences: [],
       change_points: {
-        type: {
-          stationary: { p_value: 0, change_point: 0 },
-        },
+        type: {},
       },
     }));
   }
 
-  const significantEvents = response.aggregations.by_rule.buckets.map((bucket) => {
-    const ruleId = bucket.key;
-    const queryLink = queryLinkByRuleId[ruleId];
-    const occurrences = get(bucket, 'occurrences.buckets');
-    const changePoints = get(bucket, 'change_points') ?? {};
+  const dateColIndex = columns.findIndex((col) => col.name === 'interval');
+  const countColIndex = columns.findIndex((col) => col.name === 'count');
+  const ruleIdColIndex = columns.findIndex((col) => col.name === 'rule_id');
+  const pValueColIndex = columns.findIndex((col) => col.name === 'pvalue');
+  const typeColIndex = columns.findIndex((col) => col.name === 'type');
 
-    return {
+  if (
+    dateColIndex === -1 ||
+    countColIndex === -1 ||
+    ruleIdColIndex === -1 ||
+    pValueColIndex === -1 ||
+    typeColIndex === -1
+  ) {
+    return queryLinks.map((queryLink) => ({
       id: queryLink.query.id,
       title: queryLink.query.title,
       kql: queryLink.query.kql,
-      occurrences: isArray(occurrences)
-        ? occurrences.map((occurrence) => ({
-            date: occurrence.key_as_string,
-            count: occurrence.doc_count,
-          }))
-        : [],
-      change_points: changePoints,
-    };
-  });
+      occurrences: [],
+      change_points: {
+        type: {},
+      },
+    }));
+  }
 
-  const foundSignificantEventsIds = significantEvents.map((event) => event.id);
+  const significantEvents = values.reduce((acc, row, index) => {
+    const ruleId = row[ruleIdColIndex] as string;
+    if (!ruleId) {
+      return acc;
+    }
+
+    const queryLink = queryLinkByRuleId[ruleId];
+    if (!queryLink) {
+      return acc;
+    }
+
+    const currSigEvent = acc[queryLink.query.id] || {
+      id: queryLink.query.id,
+      title: queryLink.query.title,
+      kql: queryLink.query.kql,
+      occurrences: [],
+      change_points: {
+        type: {},
+      },
+    };
+
+    const interval = row[dateColIndex] as string;
+    const count = row[countColIndex] as number;
+
+    currSigEvent.occurrences.push({
+      date: interval,
+      count,
+    });
+
+    const changePointType = row[typeColIndex] as ChangePointType;
+    const pValue = row[pValueColIndex] as number;
+
+    if (changePointType && !isNaN(pValue)) {
+      currSigEvent.change_points.type = {
+        [changePointType]: { p_value: pValue, change_point: index },
+      };
+    }
+
+    acc[queryLink.query.id] = currSigEvent;
+    return acc;
+  }, {} as Record<string, SignificantEventsResponse>);
+
+  const foundSignificantEventsIds = Object.keys(significantEvents);
+
   const notFoundSignificantEvents = queryLinks
     .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
     .map((queryLink) => ({
@@ -157,11 +132,25 @@ export async function readSignificantEventsFromAlertsIndices(
       kql: queryLink.query.kql,
       occurrences: [],
       change_points: {
-        type: {
-          stationary: { p_value: 0, change_point: 0 },
-        },
+        type: {},
       },
     }));
 
-  return [...significantEvents, ...notFoundSignificantEvents];
+  return Object.values(significantEvents).concat(notFoundSignificantEvents);
+}
+
+function createEsqlRequest({
+  ruleIds,
+  from,
+  to,
+}: {
+  ruleIds: string[];
+  from: Date;
+  to: Date;
+}): string {
+  return `FROM .alerts-streams.alerts-default
+  | WHERE @timestamp >= "${from.toISOString()}" AND @timestamp <= "${to.toISOString()}"
+  | WHERE ${ruleIds.map((ruleId) => `kibana.alert.rule.uuid == "${ruleId}"`).join(' OR ')} 
+  | STATS count = COUNT(*) BY rule_id = kibana.alert.rule.uuid, interval = BUCKET(@timestamp, 50, "${from.toISOString()}", "${to.toISOString()}")
+  | CHANGE_POINT count ON interval`;
 }
