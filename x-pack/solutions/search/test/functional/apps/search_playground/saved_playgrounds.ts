@@ -6,22 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { createPlayground, deletePlayground } from './utils/create_playground';
 
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects([
-    'common',
-    'svlCommonPage',
-    'searchPlayground',
-    'solutionNavigation',
-  ]);
+  const pageObjects = getPageObjects(['common', 'searchPlayground', 'solutionNavigation']);
   const log = getService('log');
-  const roleScopedSupertest = getService('roleScopedSupertest');
+  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   const createIndices = async () => {
@@ -32,13 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('Search Playground - Saved Playgrounds', function () {
-    let supertest: SupertestWithRoleScopeType;
     let testPlaygroundId: string;
     before(async () => {
-      supertest = await roleScopedSupertest.getSupertestWithRoleScope('developer', {
-        useCookieHeader: true,
-        withInternalHeaders: true,
-      });
       await createIndices();
       // Note: replace with creating playground via UI once thats supported
       testPlaygroundId = await createPlayground(
@@ -50,8 +39,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
         { log, supertest }
       );
-
-      await pageObjects.svlCommonPage.loginWithRole('developer');
     });
     after(async () => {
       if (testPlaygroundId) {
