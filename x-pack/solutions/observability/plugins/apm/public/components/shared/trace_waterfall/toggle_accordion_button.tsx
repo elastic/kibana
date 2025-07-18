@@ -18,7 +18,6 @@ interface Props {
 export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props) {
   return (
     <EuiFlexGroup
-      data-test-subj="irene"
       gutterSize="xs"
       alignItems="center"
       justifyContent="center"
