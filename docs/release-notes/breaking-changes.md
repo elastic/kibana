@@ -39,10 +39,10 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 ## 9.1.0 [kibana-9.1.0-breaking-changes]
 $$$kibana-213916$$$
-::::{dropdown} Now the fields / functions variables are being described with ?? in the query. The values variables use ? as before 
-% **Details**<br> Description
-% **Impact**<br> Impact of the breaking change.
-% **Action**<br> Steps for mitigating impact.
+::::{dropdown} Change to variable syntax in {{esql}} queries
+
+% **Details**<br> Fields and functions variables are now described with `??` in {{esql}} queries. For value variables, you can continue to use `?`. 
+
 View [#213916]({{kib-pull}}213916).
 ::::
 
