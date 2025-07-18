@@ -29,26 +29,26 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 
 **Alerting**:
 * Adds the ability to schedule reports on a recurring basis and view previously scheduled reports [#224849]({{kib-pull}}224849), [#221028]({{kib-pull}}221028).
-* Adds four dedicated case analytics indices that allow users to build dashboards and metrics using case data. These indices are automtically created when {{kib}} starts up and are updated periodically with cases, comments, attachments, and activity data [#223405]({{kib-pull}}223405).
-* Adds the `xpack.actions.email.services.enabled` {{kib}} setting, which allows you to to enable or disable email services for email connectors [#223363]({{kib-pull}}223363).
-* Adds the  `xpack.actions.webhook.ssl.pfx.enabled` {{kib}} setting, which allows you to disable Webhook connector PFX file support for SSL client authentication [#222507]({{kib-pull}}222507).
-* Adds the `xpack.actions.email.services.ses.host` {{kib}} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {{kib}} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors.[#221389]({{kib-pull}}221389). 
-* Support rrule for task scheduling [#217728]({{kib-pull}}217728).
+* Adds four dedicated case analytics indices that allow users to build dashboards and metrics using case data. These indices are automatically created when {{kib}} starts up and are updated periodically with cases, comments, attachments, and activity data [#223405]({{kib-pull}}223405).
+* Adds the `xpack.actions.email.services.enabled` {{kib}} setting, which allows you to enable or disable email services for email connectors [#223363]({{kib-pull}}223363).
+* Adds the `xpack.actions.webhook.ssl.pfx.enabled` {{kib}} setting, which allows you to disable Webhook connector PFX file support for SSL client authentication [#222507]({{kib-pull}}222507).
+* Adds the `xpack.actions.email.services.ses.host` {{kib}} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {{kib}} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors [#221389]({{kib-pull}}221389). 
+* Adds `rrule` notation support for task scheduling [#217728]({{kib-pull}}217728).
 * Publishes new public APIs for the Maintenance Window [#216756]({{kib-pull}}216756).
 * Adds an alert cleanup functionality that allows you to delete active or inactive (acknowledged, recovered, closed, or untracked) alerts with no status update for a period of time [#216613]({{kib-pull}}216613).
-* Adds an embeddable panel for dashboards that allows you to display show a simplified version of the Alerts table from {{observability}} or {{elastic-sec}} [#216076]({{kib-pull}}216076).
+* Adds an embeddable panel for dashboards that allows you to show a simplified version of the Alerts table from {{observability}} or {{elastic-sec}} [#216076]({{kib-pull}}216076).
 * Ensures the **Reporting** page only shows reports generated in the current space [#221375]({{kib-pull}}221375).
 * Moves the rule settings to a flyout [#216162]({{kib-pull}}216162).
 * Allows users to delete a snooze schedule from a rule using schedule ID [#213247]({{kib-pull}}213247).
-* Allows users to create a snooze schedule for rule using the schedule API [#210584]({{kib-pull}}210584).
+* Allows users to create a snooze schedule for rules using the schedule API [#210584]({{kib-pull}}210584).
 * Implements functionality to add observables, procedures, and custom fields to alerts for {{hive}} [#207255]({{kib-pull}}207255).
 
 **Dashboards and Visualizations**:
 * Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This allows you to generate an alert when the data on the chart crosses a certain threshold [#217719]({{kib-pull}}217719).
 * Adds collapsible sections to **Dashboard**. Collapsible sections allow you to group panels into logical groups, and to help your dashboards load faster by only loading their content when expanded [#220877]({{kib-pull}}220877).
-* Adds ability to mark a dashboard as favorite from within the dashboard in addition to the **Dashboards** page [#201596]({{kib-pull}}201596).
+* Adds the ability to mark a dashboard as favorite from within the dashboard in addition to the **Dashboards** page [#201596]({{kib-pull}}201596).
 * Adds the ability to resize and move dashboard panels using a keyboard [#208286]({{kib-pull}}208286).
-* Adds highlight effect when adding a panel to a dashboard [#223614]({{kib-pull}}223614).
+* Adds a highlight effect when adding a panel to a dashboard [#223614]({{kib-pull}}223614).
 * Adds the ability to create {{esql}} controls from the dashboard **Controls** menu [#219495]({{kib-pull}}219495).
 * Adds the ability to create {{esql}} controls by typing a question mark `?` when editing an {{esql}} visualization's query [#216839]({{kib-pull}}216839).
 * Allows the creation of dynamic aggregations controls for {{esql}} visualizations [#210170]({{kib-pull}}210170).
@@ -59,7 +59,7 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Updates time-based charts to use the multi-layer time axis by default, providing a better time window context and improved label positioning. [#210579]({{kib-pull}}210579).
 * Enables read-only editor mode to inspect a panel's configuration in **Lens** [#208554]({{kib-pull}}208554).
 * Adds a **Point visibility** option to Area and Line charts in **Lens** [#222187]({{kib-pull}}222187).
-* Adds a settings to control the data table density in **Lens** [#220252]({{kib-pull}}220252).
+* Adds a setting to control the data table density in **Lens** [#220252]({{kib-pull}}220252).
 * When clicking "Open in Lens" from a visualization, **Lens** now opens in the same tab [#217528]({{kib-pull}}217528).
 * Adds the ability to open links from **Vega** visualizations in a new tab by specifying the `"target": "_blank"` option for the `usermeta.embedOptions.loader` property of the Vega chart configuration [#216200]({{kib-pull}}216200).
 * Adds globe projection improvements to **Maps** [#212437]({{kib-pull}}212437).
@@ -126,7 +126,7 @@ For the Elastic Observability 9.1.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.1.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Adds an option to User Settings that allows to display the Kibana interface in high contrast mode [#216242]({{kib-pull}}216242).
+* Adds an option to User Settings that allows displaying the Kibana interface in high contrast mode [#216242]({{kib-pull}}216242).
 * Adds an unused "URL" saved objects cleanup task to reduce upgrade downtime [#220138]({{kib-pull}}220138).
 * Adds a `defaultSolution` setting to spaces configuration to allow starting Kibana with its default space set to specific solution view [#218360]({{kib-pull}}218360).
 * Kibana logging's pattern layout, used by default for the console appender, will now use a new default pattern layout: `[%date][%level][%logger] %message %error`. This includes the error name and stack trace if these were included in the log entry. To opt out of this behavior, you can omit the `%error` placeholder from your log pattern configuration in `kibana.yml` [#219940]({{kib-pull}}219940). For example: 
@@ -147,8 +147,8 @@ logging:
 * Hides Adaptive Allocations Toggle in Serverless [#224097]({{kib-pull}}224097).
 * Adds rare scripts job to preconfigured Security:Windows anomaly detection jobs [#223041]({{kib-pull}}223041).
 * Adds new subAction for converse and converseStream for Bedrock [#223033]({{kib-pull}}223033).
-* Adds an recommended query for the `CATEGORIZE` function in {{esql}} [#222871]({{kib-pull}}222871).
-* Adds ability to disable the AIOps features in {{kib}} [#221286]({{kib-pull}}221286).
+* Adds a recommended query for the `CATEGORIZE` function in {{esql}} [#222871]({{kib-pull}}222871).
+* Adds the ability to disable the AIOps features in {{kib}} [#221286]({{kib-pull}}221286).
 * Adds new severity colors and UX for filtering anomalies [#221081]({{kib-pull}}221081).
 * Prevents the download of models already present in other spaces and shows a warning [#220238]({{kib-pull}}220238).
 * Enhances `No Results` state for Change Point Detection [#219072]({{kib-pull}}219072).
@@ -163,7 +163,7 @@ logging:
 
 
 **Search solution**:
-* Adds a section that enables adding, updating and deleting query rules written on top of the Query Rules APIs to pin or exclude documents to a query according to criteria you set. [#227226]({{kib-pull}}227226).
+* Adds a section that enables adding, updating, and deleting query rules written on top of the Query Rules APIs to pin or exclude documents to a query according to criteria you set. [#227226]({{kib-pull}}227226).
 * Adds a **Home** page dedicated to the Elasticsearch solution to Classic and Elasticsearch solution views [#225162]({{kib-pull}}225162).
 * Updates the navigation items available for the Elasticsearch solution view and Elasticsearch section of the Classic view [#224755]({{kib-pull}}224755).
 
@@ -179,7 +179,7 @@ logging:
 * Forwards the secondary prefix correctly when the state value is an empty string (`None` option) in **Lens** [#228183]({{kib-pull}}228183).
 * Fixes an issue where a **Lens** Partition chart (i.e. `Pie`) prevented the user from selecting a legacy palette [#228051]({{kib-pull}}228051).
 * Fixes an accessibility issue where dashboard controls should be grouped as a labelled list [#227633]({{kib-pull}}227633).
-* Fixes disabled range slider tooltip, clean up delete control button [#227295]({{kib-pull}}227295).
+* Fixes incorrectly disabled range slider tooltip and moves the **Delete control** button to be more visible [#227295]({{kib-pull}}227295).
 * Fixes secondary metric styles to prevent wrapping in **Lens** [#227234]({{kib-pull}}227234).
 * Keeps the **Save** button enabled in case of save error [#227091]({{kib-pull}}227091).
 * Hides the **Select All** checkbox from single select controls [#226311]({{kib-pull}}226311).
