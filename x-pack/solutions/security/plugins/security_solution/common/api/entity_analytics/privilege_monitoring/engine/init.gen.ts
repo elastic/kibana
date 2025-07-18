@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import type { z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 
 import { MonitoringEngineDescriptor } from '../common.gen';
 
