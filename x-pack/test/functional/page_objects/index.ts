@@ -35,7 +35,6 @@ import { IndexManagementPageProvider } from '@kbn/test-suites-xpack-platform/fun
 import { AssetDetailsProvider } from './asset_details';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
-import { GeoFileUploadPageObject } from './geo_file_upload';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
@@ -64,7 +63,6 @@ export const pageObjects = {
   crossClusterReplication: CrossClusterReplicationPageProvider,
   detections: DetectionsPageObject,
   embeddedConsole: EmbeddedConsoleProvider,
-  geoFileUpload: GeoFileUploadPageObject,
   graph: GraphPageObject,
   grokDebugger: GrokDebuggerPageObject,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
