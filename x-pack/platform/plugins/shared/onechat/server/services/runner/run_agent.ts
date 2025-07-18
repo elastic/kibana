@@ -10,6 +10,7 @@ import type {
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
 } from '@kbn/onechat-server';
+import { withAgentSpan } from '../../tracing';
 import { registryToProvider } from '../tools/utils';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { createAgentEventEmitter, forkContextForAgentRun } from './utils';
@@ -55,16 +56,18 @@ export const runAgent = async ({
   const { agentsService, request } = manager.deps;
   const agentClient = await agentsService.getScopedClient({ request });
   const agent = await agentClient.get(agentId);
-  const agentHandler = createAgentHandler({ agent });
 
-  const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
-  const agentResult = await agentHandler(
-    {
-      runId: manager.context.runId,
-      agentParams,
-    },
-    agentHandlerContext
-  );
+  const agentResult = await withAgentSpan({ agent }, async () => {
+    const agentHandler = createAgentHandler({ agent });
+    const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
+    return await agentHandler(
+      {
+        runId: manager.context.runId,
+        agentParams,
+      },
+      agentHandlerContext
+    );
+  });
 
   return {
     runId: manager.context.runId,
