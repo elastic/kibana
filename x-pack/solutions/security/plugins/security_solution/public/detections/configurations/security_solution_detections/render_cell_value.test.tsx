@@ -112,10 +112,4 @@ describe('RenderCellValue', () => {
 
     expect(getByText('Nov 5, 2018 @ 19:03:25.937')).toBeInTheDocument();
   });
-
-  it('should render the guided onboarding step', () => {
-    const { getByTestId } = render(<RenderCellValueComponent {...defaultProps} />);
-
-    expect(getByTestId('GuidedOnboardingTourStep')).toBeInTheDocument();
-  });
 });

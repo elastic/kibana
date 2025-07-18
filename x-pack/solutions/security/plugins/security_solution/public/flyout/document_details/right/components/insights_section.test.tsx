@@ -167,19 +167,6 @@ describe('<InsightsSection />', () => {
     expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
   });
 
-  it('should render the component expanded if guided onboarding tour is shown', () => {
-    (useExpandSection as jest.Mock).mockReturnValue(false);
-
-    const contextValue = {
-      eventId: 'some_Id',
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      getFieldsData: mockGetFieldsData,
-    } as unknown as DocumentDetailsContext;
-
-    const wrapper = renderInsightsSection(contextValue);
-    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
-  });
-
   it('should render all children when event kind is signal', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
 
