@@ -163,9 +163,14 @@ export const getLinksEmbeddableFactory = () => {
             loadContent: async ({ closeFlyout }) => {
               const { getEditorFlyout } = await import('../editor/get_editor_flyout');
               return getEditorFlyout({
-                initialLayout: layout$.getValue(),
-                initialLinks: resolvedLinks$.getValue(),
-                savedObjectId,
+                initialState: {
+                  description:
+                    titleManager.api.description$.getValue() ?? defaultDescription$.getValue(),
+                  layout: layout$.getValue(),
+                  links: resolvedLinks$.getValue(),
+                  title: titleManager.api.title$.getValue() ?? defaultTitle$.getValue(),
+                  savedObjectId,
+                },
                 parentDashboard: parentApi,
                 onCompleteEdit: async (newState) => {
                   if (!newState) return;

@@ -14,77 +14,71 @@ import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 import { LinksLayoutType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
 import { ResolvedLink } from '../types';
-import LinksEditor, { LinksEditorProps } from '../components/editor/links_editor';
+import LinksEditor from '../components/editor/links_editor';
 import { serializeResolvedLinks } from '../lib/resolve_links';
 
+export interface EditorState {
+  description?: string;
+  layout?: LinksLayoutType;
+  links?: ResolvedLink[];
+  savedObjectId?: string;
+  title?: string;
+}
+
 export async function getEditorFlyout({
-  initialLayout,
-  initialLinks,
-  savedObjectId,
+  initialState,
   parentDashboard,
   onCompleteEdit,
   closeFlyout,
 }: {
-  initialLayout?: LinksEditorProps['initialLayout'];
-  initialLinks?: LinksEditorProps['initialLinks'];
-  savedObjectId?: string;
+  initialState?: EditorState;
   parentDashboard?: unknown;
-  onCompleteEdit?: (newState?: {
-    layout?: LinksLayoutType;
-    links?: ResolvedLink[];
-    savedObjectId?: string;
-    title?: string;
-  }) => void;
+  onCompleteEdit?: (state?: EditorState) => void;
   closeFlyout: () => void;
 }) {
   const flyoutId = `linksEditorFlyout-${uuidv4()}`;
   return (
     <LinksEditor
       flyoutId={flyoutId}
-      initialLinks={initialLinks}
-      initialLayout={initialLayout}
+      initialLinks={initialState?.links}
+      initialLayout={initialState?.layout}
       onClose={() => {
         onCompleteEdit?.(undefined);
         closeFlyout();
       }}
       onSaveToLibrary={async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
-        if (savedObjectId) {
+        const newState: EditorState = {
+          ...initialState,
+          layout: newLayout,
+          links: newLinks,
+        };
+        if (initialState?.savedObjectId) {
           await linksClient.update({
-            id: savedObjectId,
+            id: initialState.savedObjectId,
             data: {
-              layout: newLayout,
+              ...newState,
               links: serializeResolvedLinks(newLinks),
             },
           });
-          onCompleteEdit?.({
-            layout: newLayout,
-            links: newLinks,
-            savedObjectId,
-          });
+          onCompleteEdit?.(newState);
           closeFlyout();
         } else {
           const saveResult = await runSaveToLibrary({
             layout: newLayout,
             links: newLinks,
           });
-          onCompleteEdit?.(
-            saveResult
-              ? {
-                  layout: newLayout,
-                  links: newLinks,
-                  savedObjectId: saveResult.savedObjectId,
-                }
-              : undefined
-          );
+          onCompleteEdit?.(saveResult);
           // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
           if (saveResult) closeFlyout();
         }
       }}
       onAddToDashboard={(newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
-        onCompleteEdit?.({
+        const newState = {
+          ...initialState,
           links: newLinks,
           layout: newLayout,
-        });
+        };
+        onCompleteEdit?.(newState);
         closeFlyout();
       }}
       parentDashboardId={
@@ -92,7 +86,7 @@ export async function getEditorFlyout({
           ? parentDashboard.savedObjectId$.value
           : undefined
       }
-      isByReference={Boolean(savedObjectId)}
+      isByReference={Boolean(initialState?.savedObjectId)}
     />
   );
 }

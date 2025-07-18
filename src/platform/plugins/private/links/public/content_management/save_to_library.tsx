@@ -18,8 +18,8 @@ import {
 import { CONTENT_ID } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
 import { linksClient } from './links_content_management_client';
-import { LinksRuntimeState } from '../types';
 import { serializeResolvedLinks } from '../lib/resolve_links';
+import type { EditorState } from '../editor/get_editor_flyout';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,
@@ -29,9 +29,9 @@ const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
 });
 
 export const runSaveToLibrary = async (
-  newState: LinksRuntimeState
-): Promise<LinksRuntimeState | undefined> => {
-  return new Promise<LinksRuntimeState | undefined>((resolve, reject) => {
+  newState: EditorState
+): Promise<EditorState | undefined> => {
+  return new Promise<EditorState | undefined>((resolve, reject) => {
     const onSave = async ({
       newTitle,
       newDescription,
@@ -69,8 +69,6 @@ export const runSaveToLibrary = async (
         });
         resolve({
           ...newState,
-          defaultTitle: newTitle,
-          defaultDescription: newDescription,
           savedObjectId: id,
         });
         return { id };

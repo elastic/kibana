@@ -15,7 +15,6 @@ import {
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
@@ -30,7 +29,6 @@ import {
   LinksByValueState,
   LinksEmbeddableState,
 } from '../common';
-import { LinksLayoutType } from '../common/content_management';
 import type { Link } from '../server';
 
 export type LinksParentApi = PresentationContainer &
@@ -47,14 +45,6 @@ export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi<LinksEmbeddableState> &
   HasEditCapabilities &
   HasLibraryTransforms<LinksByReferenceState, LinksByValueState>;
-
-export interface LinksRuntimeState extends SerializedTitles {
-  links?: ResolvedLink[];
-  layout?: LinksLayoutType;
-  defaultTitle?: string;
-  defaultDescription?: string;
-  savedObjectId?: string;
-}
 
 export type ResolvedLink = Link & {
   title: string;

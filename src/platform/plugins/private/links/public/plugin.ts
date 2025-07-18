@@ -117,10 +117,11 @@ export class LinksPlugin
                             import('./lib/resolve_links'),
                           ]);
                         const linksState = await loadFromLibrary(savedObjectId);
-                        const resolvedLinks = await resolveLinks(linksState.links ?? []);
                         return await getEditorFlyout({
-                          initialLayout: linksState.layout,
-                          initialLinks: resolvedLinks,
+                          initialState: {
+                            ...linksState,
+                            links: await resolveLinks(linksState.links ?? []),
+                          },
                           closeFlyout,
                         });
                       },
