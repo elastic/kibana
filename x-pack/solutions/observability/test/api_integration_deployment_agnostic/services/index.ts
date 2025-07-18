@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { services as commonDeploymentAgnosticServices } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
 import { AlertingApiProvider } from './alerting_api';
 import { ApmApiProvider } from './apm_api';
@@ -19,7 +20,7 @@ export type {
 } from '@kbn/ftr-common-functional-services';
 
 export const services = {
-  ...commonDeploymentAgnosticServices,
+  ...omit(commonDeploymentAgnosticServices, ['alertingApi']),
   // create a new deployment-agnostic service and load here
   alertingApi: AlertingApiProvider,
   apmApi: ApmApiProvider,
