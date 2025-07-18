@@ -7,11 +7,11 @@
 
 import { HostsFields } from '../../../api/search_strategy/hosts/model/sort';
 
-export * from './all';
+export type * from './all';
 export * from './common';
-export * from './details';
-export * from './overview';
-export * from './uncommon_processes';
+export type * from './details';
+export type * from './overview';
+export type * from './uncommon_processes';
 
 export { HostsQueries } from '../../../api/search_strategy';
 

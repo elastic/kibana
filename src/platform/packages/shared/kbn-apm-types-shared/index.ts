@@ -8,5 +8,5 @@
  */
 
 export * from './src/enums';
-export * from './src/types';
-export * from './src/interfaces';
+export type * from './src/types';
+export type * from './src/interfaces';

@@ -19,4 +19,4 @@ export { createRuntimeServices } from './services/stack_services';
 export { waitForAlertsToPopulate } from './services/alerting_services';
 export * from './api';
 export { createToolingLogger } from './logger';
-export * from './utils';
+export type * from './utils';

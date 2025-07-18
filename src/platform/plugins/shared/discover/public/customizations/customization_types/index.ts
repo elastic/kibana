@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './flyout_customization';
-export * from './search_bar_customization';
-export * from './top_nav_customization';
-export * from './histogram_customization';
-export * from './data_table_customisation';
-export * from './field_list_customisation';
+export type * from './flyout_customization';
+export type * from './search_bar_customization';
+export type * from './top_nav_customization';
+export type * from './histogram_customization';
+export type * from './data_table_customisation';
+export type * from './field_list_customisation';

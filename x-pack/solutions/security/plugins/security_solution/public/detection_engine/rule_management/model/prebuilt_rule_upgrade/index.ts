@@ -6,7 +6,7 @@
  */
 
 export * from './field_upgrade_state_enum';
-export * from './fields_upgrade_state';
-export * from './rule_upgrade_state';
-export * from './rules_upgrade_state';
-export * from './set_rule_field_resolved_value';
+export type * from './fields_upgrade_state';
+export type * from './rule_upgrade_state';
+export type * from './rules_upgrade_state';
+export type * from './set_rule_field_resolved_value';
