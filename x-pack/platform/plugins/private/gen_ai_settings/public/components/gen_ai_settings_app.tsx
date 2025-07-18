@@ -39,17 +39,28 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   coreStart,
 }) => {
   const { application, http, docLinks } = coreStart;
-  const { showSpacesIntegration, isSolutionView } = useEnabledFeatures();
+  const { showSpacesIntegration, isSolutionView, showAiBreadcrumb } = useEnabledFeatures();
 
   useEffect(() => {
-    setBreadcrumbs([
+    const breadcrumbs = [
+      ...(showAiBreadcrumb
+        ? [
+            {
+              text: i18n.translate('genAiSettings.breadcrumbs.ai', {
+                defaultMessage: 'AI',
+              }),
+            },
+          ]
+        : []),
       {
         text: i18n.translate('genAiSettings.breadcrumbs.genAiSettings', {
           defaultMessage: 'GenAI Settings',
         }),
       },
-    ]);
-  }, [setBreadcrumbs]);
+    ];
+
+    setBreadcrumbs(breadcrumbs);
+  }, [setBreadcrumbs, showAiBreadcrumb]);
 
   const getUrlForSpaces = (toPermissionsTab: boolean = false) => {
     const basePath = http.basePath.get();

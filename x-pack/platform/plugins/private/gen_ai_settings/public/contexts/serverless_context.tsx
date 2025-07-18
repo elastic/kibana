@@ -16,11 +16,13 @@ export interface EnabledFeatures {
   showSpacesIntegration: boolean;
   /** True when the current space is in a Solution (project) view */
   isSolutionView: boolean;
+  showAiBreadcrumb: boolean;
 }
 
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
   showSpacesIntegration: true,
   isSolutionView: false,
+  showAiBreadcrumb: true,
 });
 
 interface Props {
@@ -47,6 +49,7 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
     return {
       showSpacesIntegration: !isServerless,
       isSolutionView,
+      showAiBreadcrumb: !isServerless,
     };
   }, [isServerless, activeSpace]);
 
