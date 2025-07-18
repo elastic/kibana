@@ -13,6 +13,11 @@ import { Setup as PluginSetup, Start as PluginStart } from '.';
 import { InspectorViewRegistry } from './view_registry';
 import { plugin as pluginInitializer } from '.';
 
+// We need to import this here otherwise the tests timeouts
+import { InspectorPanel } from './async_services';
+InspectorPanel;
+
+
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;
 
