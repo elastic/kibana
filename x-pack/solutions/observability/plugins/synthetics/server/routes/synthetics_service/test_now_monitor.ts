@@ -32,6 +32,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
     return triggerTestNow(monitorId, routeContext);
   },
   writeAccess: true,
+  options: { availability: { since: '9.2.0' } },
 });
 
 export const triggerTestNow = async (
