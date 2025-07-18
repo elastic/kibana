@@ -95,6 +95,7 @@ export const DurationInput = memo(function DurationInputComponent({
       isDisabled={isDisabled}
     >
       <EuiFieldNumber
+        isInvalid={isInvalid}
         css={durationInputStyle}
         append={
           <EuiSelect
