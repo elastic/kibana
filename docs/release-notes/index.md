@@ -91,15 +91,15 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Adds support for collapsible sections in integration overview pages [#223916]({{kib-pull}}223916).
 
 **Discover**:
-* Adds an **Attributes** tab in **Discover** when exploring OTel documents [#222391]({{kib-pull}}222391).
+* Adds an **Attributes** tab to the document viewer when exploring OTel documents in the Observability solution view [#222391]({{kib-pull}}222391).
 * When an ES|QL query times out (as a result of the `search:timeout` advanced setting), partial results that are available are now shown [#219027]({{kib-pull}}219027).
-* Adds click actions for Stacktrace and Degraded Fields in Discover [#214413]({{kib-pull}}214413).
+* Adds click actions for Stacktrace and Degraded Fields when exploring logs in Discover [#214413]({{kib-pull}}214413).
 * Shows a **Load more** option instead of pagination when exploring Logs in **Discover** [#211176]({{kib-pull}}211176).
 * Expands the {{esql}} editor to fit the query size automatically when loading **Discover** [#225509]({{kib-pull}}225509).
 * Hides the "Selected only" toggle in **Discover**'s pages that don't support filtering by value [#220624]({{kib-pull}}220624).
 * Adds a **Copy value** button to field value cells in the Document viewer [#218817]({{kib-pull}}218817).
 * Adds a warning and a tooltip for explaining the `_score` column in **Discover** [#211013]({{kib-pull}}211013).
-* Adds support for `command`/`ctrl` + click to open links in a new tab, for example allowing to conduct simultaneous searches in parallel more efficiently [#210982]({{kib-pull}}210982).
+* Adds support for `command`/`ctrl` + click to open new Discover sessions in a separate tab, for example allowing to conduct simultaneous searches in parallel more efficiently [#210982]({{kib-pull}}210982).
 * Improves the **Display options** menu layout [#210180]({{kib-pull}}210180).
 * Updates styles for Color formatter to look like badges [#189391]({{kib-pull}}189391).
 
@@ -215,15 +215,14 @@ logging:
 
 **Discover**:
 * Fixes invalid input highlight in **Data View** flyout [#226822]({{kib-pull}}226822).
-* Fixes an issue causing an internal server error when renaming a search session [#226757]({{kib-pull}}226757).
 * Fixes an issue causing **Discover** to freeze when dragging & dropping columns with animations disabled [#226592]({{kib-pull}}226592).
 * Fixes row highlighting when reordering columns [#226584]({{kib-pull}}226584).
 * Fixes an issue causing an error when updating then deleting a saved query [#226569]({{kib-pull}}226569).
-* Fixes a cell value alignment issue [#226562]({{kib-pull}}226562).
+* Fixes a cell value alignment issue for aggregate metric fields [#226562]({{kib-pull}}226562).
 * Adds missing information icon to the document viewer table [#222299]({{kib-pull}}222299).
 * Fixes an issue incorrectly showing the *unmapped* icon when a field changed from unmapped to mapped [#221308]({{kib-pull}}221308).
 * Fixes the parsing of index patterns in the **Inspect** feature of Kibana. Previously, certain index pattern strings were not being parsed and displayed correctly in the **Inspect** feature [#221084]({{kib-pull}}221084).
-* Fixes an issue that causes transitions from **Logs Stream** and **Logs Explorer** to **Discover** to lose some context such as the selected time range or KQL query [#215867]({{kib-pull}}215867).
+* Fixes an issue that causes redirects from the deprecated **Logs Stream** and **Logs Explorer** routes to **Discover** to lose some context such as the selected time range or KQL query [#215867]({{kib-pull}}215867).
 * Excludes only {{es}} metadata fields from the Summary column instead of all fields starting with `_` [#213255]({{kib-pull}}213255).
 * Fixes inability to clear Document ID in data view field editor preview [#220891]({{kib-pull}}220891).
 * Fixed multiple accessibility issues, including adding missing aria labels and column headers, improving keyboard navigation and interactions, and improving focus changes when interacting with **Discover** features [View list of fixes](https://github.com/elastic/kibana/issues?q=state:closed%20label:Project:Accessibility%20label:v9.1.0%20label:Team:DataDiscovery).
