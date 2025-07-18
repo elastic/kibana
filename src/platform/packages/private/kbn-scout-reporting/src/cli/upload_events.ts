@@ -23,7 +23,7 @@ import {
 import { ScoutReportDataStream } from '../reporting/report/events';
 import { getValidatedESClient } from '../helpers/elasticsearch';
 
-const readFilesRecursively = (directory: string, callback: Function) => {
+const readFilesRecursively = async (directory: string, callback: Function) => {
   const files = fs.readdirSync(directory);
   files.forEach((file) => {
     const filePath = path.join(directory, file);
@@ -75,7 +75,7 @@ export const uploadAllEventsFromPath = async (
   let numberOfNdjsonFilesFound = 0;
 
   if (fs.statSync(eventLogPath).isDirectory()) {
-    readFilesRecursively(eventLogPath, async (filePath: string) => {
+    await readFilesRecursively(eventLogPath, async (filePath: string) => {
       if (filePath.endsWith('.ndjson')) {
         await reportDataStream.addEventsFromFile(filePath);
         numberOfNdjsonFilesFound += 1;
