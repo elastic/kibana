@@ -224,4 +224,149 @@ describe('useOnSubmit', () => {
       },
     });
   });
+
+  describe('input deployment mode filtering', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should disable inputs that are not allowed for agentless deployment mode', async () => {
+      // Mock packageInfo with inputs that have deployment_modes
+      const packageInfoWithInputs: PackageInfo = {
+        ...packageInfo,
+        policy_templates: [
+          {
+            name: 'test_template',
+            title: 'Test Template',
+            description: 'Test template',
+            deployment_modes: {
+              default: { enabled: true },
+              agentless: { enabled: true },
+            },
+            inputs: [
+              {
+                type: 'logs',
+                title: 'Logs',
+                description: 'Log collection',
+                deployment_modes: ['default', 'agentless'],
+              },
+              {
+                type: 'metrics',
+                title: 'Metrics',
+                description: 'Metrics collection',
+                deployment_modes: ['default'],
+              },
+              {
+                type: 'http_endpoint',
+                title: 'HTTP Endpoint',
+                description: 'HTTP endpoint',
+                deployment_modes: ['agentless'],
+              },
+            ],
+          },
+        ],
+      };
+
+      // Mock useConfig to return agentless configuration
+      (useConfig as MockFn).mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      // Render the hook with a package policy that has inputs including metrics
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoWithInputs,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+      act(() => {
+        // Simulate switching to agentless setup technology
+        renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
+      });
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logsInput = packagePolicy.inputs.find((input: any) => input.type === 'logs');
+        const metricsInput = packagePolicy.inputs.find((input: any) => input.type === 'metrics');
+        const httpInput = packagePolicy.inputs.find((input: any) => input.type === 'http_endpoint');
+
+        // Expect logs and http_endpoint to be enabled, and metrics to be disabled
+        expect(logsInput?.enabled).toBe(true);
+        expect(httpInput?.enabled).toBe(true);
+        expect(metricsInput?.enabled).toBe(false);
+      });
+    });
+
+    it('should enable all inputs for default deployment mode', async () => {
+      // Mock packageInfo with inputs
+      const packageInfoWithInputs: PackageInfo = {
+        ...packageInfo,
+        policy_templates: [
+          {
+            name: 'test_template',
+            title: 'Test Template',
+            description: 'Test template',
+            deployment_modes: {
+              default: { enabled: true },
+              agentless: { enabled: true },
+            },
+            inputs: [
+              {
+                type: 'logs',
+                title: 'Logs',
+                description: 'Log collection',
+                deployment_modes: ['default', 'agentless'],
+              },
+              {
+                type: 'metrics',
+                title: 'Metrics',
+                description: 'Metrics collection',
+                deployment_modes: ['default'],
+              },
+            ],
+          },
+        ],
+      };
+
+      // Mock useConfig to return regular configuration
+      (useConfig as MockFn).mockReturnValue({
+        agentless: undefined,
+      } as any);
+
+      // Render the hook with regular agent policy
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoWithInputs,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logsInput = packagePolicy.inputs.find((input: any) => input.type === 'logs');
+        const metricsInput = packagePolicy.inputs.find((input: any) => input.type === 'metrics');
+
+        // Both inputs should remain enabled for default mode
+        expect(logsInput?.enabled).toBe(true);
+        expect(metricsInput?.enabled).toBe(true);
+      });
+    });
+  });
 });
