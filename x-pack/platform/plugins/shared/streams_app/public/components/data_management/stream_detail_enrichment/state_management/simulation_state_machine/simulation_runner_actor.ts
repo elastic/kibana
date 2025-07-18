@@ -10,6 +10,7 @@ import { FlattenRecord } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
+import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { getFormattedError } from '../../../../../util/errors';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
@@ -29,25 +30,40 @@ export function createSimulationRunnerActor({
   streamsRepositoryClient,
 }: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
   return fromPromise<Simulation, SimulationRunnerInput>(({ input, signal }) =>
-    streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
+    simulateProcessing({
+      streamsRepositoryClient,
+      input,
       signal,
-      params: {
-        path: { name: input.streamName },
-        body: {
-          documents: input.documents,
-          processing: input.processors.map(processorConverter.toSimulateDefinition),
-          detected_fields:
-            input.detectedFields && !isEmpty(input.detectedFields)
-              ? getMappedSchemaFields(input.detectedFields).map((field) => ({
-                  name: field.name,
-                  ...convertToFieldDefinitionConfig(field),
-                }))
-              : undefined,
-        },
-      },
     })
   );
 }
+
+export const simulateProcessing = ({
+  streamsRepositoryClient,
+  input,
+  signal = null,
+}: {
+  streamsRepositoryClient: StreamsRepositoryClient;
+  input: SimulationRunnerInput;
+  signal?: AbortSignal | null;
+}) =>
+  streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
+    signal,
+    params: {
+      path: { name: input.streamName },
+      body: {
+        documents: input.documents,
+        processing: input.processors.map(processorConverter.toSimulateDefinition),
+        detected_fields:
+          input.detectedFields && !isEmpty(input.detectedFields)
+            ? getMappedSchemaFields(input.detectedFields).map((field) => ({
+                name: field.name,
+                ...convertToFieldDefinitionConfig(field),
+              }))
+            : undefined,
+      },
+    },
+  });
 
 export function createSimulationRunFailureNofitier({
   toasts,

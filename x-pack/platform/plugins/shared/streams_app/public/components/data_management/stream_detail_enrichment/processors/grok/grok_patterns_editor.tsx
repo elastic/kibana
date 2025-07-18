@@ -54,7 +54,7 @@ export const GrokPatternsEditor = () => {
     rules: {
       minLength: 1,
       validate: (expressions) => {
-        if (expressions.some((expression) => isEmpty(expression.getExpression()))) {
+        if (expressions.every((expression) => isEmpty(expression.getExpression()))) {
           return i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorRequiredError',
             { defaultMessage: 'Empty patterns are not allowed.' }
@@ -65,7 +65,7 @@ export const GrokPatternsEditor = () => {
     },
   });
 
-  const handlerPatternDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
+  const handlePatternDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       move(source.index, destination.index);
     }
@@ -101,7 +101,7 @@ export const GrokPatternsEditor = () => {
         error={errors.patterns?.root?.message as string}
       >
         <EuiPanel color="subdued" paddingSize="none">
-          <SortableList onDragItem={handlerPatternDrag}>
+          <SortableList onDragItem={handlePatternDrag}>
             {fields.map((field, idx) => (
               <DraggablePatternInput
                 key={field.id}

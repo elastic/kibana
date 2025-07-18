@@ -233,8 +233,8 @@ export const convertFormStateToProcessor = (
         grok: {
           if: formState.if,
           patterns: patterns
-            .map((pattern) => pattern.getExpression())
-            .filter((pattern): pattern is string => pattern !== undefined),
+            .map((pattern) => pattern.getExpression().trim())
+            .filter((pattern) => !isEmpty(pattern)),
           field,
           pattern_definitions,
           ignore_failure,
