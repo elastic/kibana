@@ -42,6 +42,19 @@ export interface OnSaveProps {
   newDescription: string;
 }
 
+export interface Reference {
+  type: string;
+  id: string;
+  name: string;
+}
+
+export interface SaveDashboardReturn {
+  id?: string;
+  error?: string;
+  references?: Reference[];
+  redirectRequired?: boolean;
+}
+
 interface Props {
   onSave: (props: OnSaveProps) => void;
   onClose: () => void;
@@ -259,13 +272,20 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       isLoading: true,
     });
 
-    await this.props.onSave({
-      newTitle: this.state.title,
-      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-      newDescription: this.state.visualizationDescription,
-    });
+    // Although `onSave` is an asynchronous function, it is typed as returning `void`
+    // somewhere deeper in the call chain, which causes its asynchronous nature to be lost.
+    // We still need to treat it as async here to properly handle the loading state.
+    try {
+      await this.props.onSave({
+        newTitle: this.state.title,
+        newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
+        isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
+        onTitleDuplicate: this.onTitleDuplicate,
+        newDescription: this.state.visualizationDescription,
+      });
+    } finally {
+      this.setState({ isLoading: false });
+    }
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
