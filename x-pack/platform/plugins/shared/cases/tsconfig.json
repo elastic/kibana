@@ -93,7 +93,9 @@
     "@kbn/elastic-assistant-common",
     "@kbn/test",
     "@kbn/dev-utils",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/react-hooks",
+    "@kbn/observability-ai-assistant-plugin"
   ],
   "exclude": ["target/**/*"]
 }
