@@ -501,13 +501,12 @@ This change updates all instances of `vulnerability.package` to the ECS standard
 
 [discrete]
 [[breaking-213916]]
-.[ES|QL] Now the fields / functions variables are being described with ?? in the query. The values variables use ? as before. (8.19)
+.Change to variable syntax in {esql} queries. (8.19)
 [%collapsible]
 ====
 *Details* +
-Now the fields / functions variables are being described with ?? in the query. The values variables use ? as before.
+Fields and functions variables are now described with `??` in {esql} queries. For value variables, you can continue to use `?`.
 
-*Impact* +
 View ({kibana-pull}213916[#213916])
 ====
       
@@ -1772,34 +1771,6 @@ The following rule action variables have been deprecated. Use the recommended va
 * tags (rule.tags)
 
 View {kibana-pull}161136[#161136].
-====
-
-[discrete]
-[[deprecation-225536]]
-.Removes Default Quick Prompts.
-[%collapsible]
-====
-*Details* +
-!!TODO!!
-
-*Impact* +
-!!TODO!!
-
-View ({kibana-pull}225536[#225536])
-====
-      
-[discrete]
-[[deprecation-197684]]
-.Remove no longer used feature flags for GA features.
-[%collapsible]
-====
-*Details* +
-!!TODO!!
-
-*Impact* +
-!!TODO!!
-
-View ({kibana-pull}197684[#197684])
 ====
 
 // Discover
