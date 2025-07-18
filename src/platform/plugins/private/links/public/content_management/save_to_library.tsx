@@ -28,9 +28,7 @@ const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   },
 });
 
-export const runSaveToLibrary = async (
-  newState: EditorState
-): Promise<EditorState | undefined> => {
+export const runSaveToLibrary = async (newState: EditorState): Promise<EditorState | undefined> => {
   return new Promise<EditorState | undefined>((resolve, reject) => {
     const onSave = async ({
       newTitle,

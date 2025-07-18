@@ -33,7 +33,7 @@ export async function getEditorFlyout({
 }: {
   initialState?: EditorState;
   parentDashboard?: unknown;
-  onCompleteEdit?: (state?: EditorState) => void;
+  onCompleteEdit?: (newState?: EditorState) => void;
   closeFlyout: () => void;
 }) {
   const flyoutId = `linksEditorFlyout-${uuidv4()}`;
@@ -49,8 +49,8 @@ export async function getEditorFlyout({
       onSaveToLibrary={async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
         const newState: EditorState = {
           ...initialState,
-          layout: newLayout,
           links: newLinks,
+          layout: newLayout,
         };
         if (initialState?.savedObjectId) {
           await linksClient.update({
@@ -63,10 +63,7 @@ export async function getEditorFlyout({
           onCompleteEdit?.(newState);
           closeFlyout();
         } else {
-          const saveResult = await runSaveToLibrary({
-            layout: newLayout,
-            links: newLinks,
-          });
+          const saveResult = await runSaveToLibrary(newState);
           onCompleteEdit?.(saveResult);
           // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
           if (saveResult) closeFlyout();

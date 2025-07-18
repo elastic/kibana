@@ -32,7 +32,8 @@ import {
 import { DashboardLinkComponent } from '../components/dashboard_link/dashboard_link_component';
 import { ExternalLinkComponent } from '../components/external_link/external_link_component';
 import { LinksApi, LinksParentApi, ResolvedLink } from '../types';
-import { DISPLAY_NAME, type LinksEmbeddableState } from '../../common';
+import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
+import { DISPLAY_NAME } from '../../common';
 
 import { checkForDuplicateTitle, linksClient } from '../content_management';
 import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
@@ -48,7 +49,7 @@ export const getLinksEmbeddableFactory = () => {
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
-      const savedObjectId = (initialState.rawState as { savedObjectId?: string }).savedObjectId;
+      const savedObjectId = (initialState.rawState as LinksByReferenceState).savedObjectId;
       const intialLinksState = savedObjectId
         ? await loadFromLibrary(savedObjectId)
         : (initialState.rawState as LinksState);
@@ -109,9 +110,9 @@ export const getLinksEmbeddableFactory = () => {
         onReset: async (lastSaved) => {
           titleManager.reinitializeState(lastSaved?.rawState);
           if (!savedObjectId) {
-            layout$.next((lastSaved?.rawState as LinksState)?.layout);
+            layout$.next((lastSaved?.rawState as LinksByValueState)?.layout);
             resolvedLinks$.next(
-              await resolveLinks((lastSaved?.rawState as LinksState)?.links ?? [])
+              await resolveLinks((lastSaved?.rawState as LinksByValueState)?.links ?? [])
             );
           }
         },
