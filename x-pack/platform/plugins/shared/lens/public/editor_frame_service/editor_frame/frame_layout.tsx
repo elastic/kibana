@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
+import classNames from 'classnames';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
@@ -111,7 +112,7 @@ export function FrameLayout(props: FrameLayoutProps) {
               {props.dataPanel}
             </section>
             <section
-              className="eui-scrollBar"
+              className={classNames('eui-scrollBar', 'lnsVisualizationWorkspace_container')}
               css={css`
                 min-width: 432px;
                 overflow: hidden auto;
