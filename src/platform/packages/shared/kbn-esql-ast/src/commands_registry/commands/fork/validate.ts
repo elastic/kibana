@@ -8,7 +8,11 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
+import { Walker } from '../../../walker';
 import { ICommandContext } from '../../types';
+import { validateCommandArguments } from '../../../definitions/utils/validation';
+import { esqlCommandRegistry } from '../..';
+import { errors } from '../../../definitions/utils';
 
 export const validate = (
   command: ESQLCommand,
@@ -26,6 +30,26 @@ export const validate = (
       type: 'error',
       code: 'forkTooFewBranches',
     });
+  }
+
+  messages.push(...validateCommandArguments(command, ast, context));
+
+  for (const arg of command.args.flat()) {
+    if (!Array.isArray(arg) && arg.type === 'query') {
+      // all the args should be commands
+      arg.commands.forEach((subCommand) => {
+        const subCommandMethods = esqlCommandRegistry.getCommandMethods(subCommand.name);
+        const validationMessages = subCommandMethods?.validate?.(subCommand, arg.commands, context);
+        messages.push(...(validationMessages || []));
+      });
+    }
+  }
+
+  const allCommands = Walker.commands(ast);
+  const forks = allCommands.filter(({ name }) => name === 'fork');
+
+  if (forks.length > 1) {
+    messages.push(errors.tooManyForks(forks[1]));
   }
 
   context?.fields.set('_fork', {

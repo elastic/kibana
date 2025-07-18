@@ -27,6 +27,8 @@ import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { IHttpFetchError } from '@kbn/core/public';
 
+jest.mock('../../../../../common/components/user_privileges');
+
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),

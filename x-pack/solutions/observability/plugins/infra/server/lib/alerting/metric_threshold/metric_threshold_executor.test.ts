@@ -118,8 +118,8 @@ describe('The metric threshold rule type', () => {
     jest.resetAllMocks();
 
     mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
-      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
-        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+      ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     );
 
     mockMetricsExplorerLocator.getRedirectUrl.mockImplementation(

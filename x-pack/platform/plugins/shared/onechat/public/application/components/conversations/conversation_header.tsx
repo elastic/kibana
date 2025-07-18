@@ -6,59 +6,31 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/css';
-import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSkeletonTitle,
-  useEuiTheme,
-  useEuiFontSize,
-} from '@elastic/eui';
+import { ConversationTitle } from './conversation_title';
+import { ConversationActions } from './conversation_actions';
+import { ConversationGrid } from './conversation_grid';
+import { ConversationSidebarToggle } from './conversation_sidebar/conversation_sidebar_toggle';
 import { useConversation } from '../../hooks/use_conversation';
-import { chatCommonLabels } from './i18n';
 
 interface ConversationHeaderProps {
-  conversationId: string | undefined;
+  isSidebarOpen: boolean;
+  onToggleSidebar: () => void;
 }
 
-export const ConversationHeader: React.FC<ConversationHeaderProps> = ({ conversationId }) => {
-  const { conversation, isLoading: isConvLoading } = useConversation({ conversationId });
-
-  const { euiTheme } = useEuiTheme();
-
-  const containerClass = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-    border-bottom: solid ${euiTheme.border.width.thin} ${euiTheme.border.color};
-  `;
-
-  const conversationTitleClass = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
-    font-size: ${useEuiFontSize('m').fontSize};
-  `;
-
+export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
+  isSidebarOpen,
+  onToggleSidebar,
+}) => {
+  const { conversation, hasActiveConversation } = useConversation();
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPanel
-        hasBorder={false}
-        hasShadow={false}
-        borderRadius="none"
-        color="subdued"
-        className={containerClass}
-      >
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow>
-            <EuiTitle>
-              <EuiSkeletonTitle size="m" isLoading={conversationId !== undefined && isConvLoading}>
-                <h3 className={conversationTitleClass}>
-                  {conversation?.title || chatCommonLabels.chat.conversations.newConversationLabel}
-                </h3>
-              </EuiSkeletonTitle>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiFlexItem>
+    <ConversationGrid>
+      <ConversationSidebarToggle isSidebarOpen={isSidebarOpen} onToggle={onToggleSidebar} />
+      {hasActiveConversation && (
+        <>
+          <ConversationTitle title={conversation?.title ?? ''} />
+          <ConversationActions />
+        </>
+      )}
+    </ConversationGrid>
   );
 };
