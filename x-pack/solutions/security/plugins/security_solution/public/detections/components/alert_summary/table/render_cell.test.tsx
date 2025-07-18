@@ -11,12 +11,13 @@ import type { Alert } from '@kbn/alerting-types';
 import { CellValue } from './render_cell';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_SEVERITY, TIMESTAMP } from '@kbn/rule-data-utils';
 import { BADGE_TEST_ID } from './kibana_alert_severity_cell_renderer';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID } from './kibana_alert_related_integrations_cell_renderer';
 import { INTEGRATION_ICON_TEST_ID } from '../common/integration_icon';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 const packages: PackageListItem[] = [
   {
@@ -28,6 +29,20 @@ const packages: PackageListItem[] = [
     version: '0.1.0',
   },
 ];
+const ruleResponse = {
+  rules: [
+    {
+      name: 'splunk',
+      related_integrations: [
+        {
+          package: 'splunk',
+        },
+      ],
+      rule_id: 'rule_rule_id',
+    } as RuleResponse,
+  ],
+  isLoading: false,
+};
 
 describe('CellValue', () => {
   beforeEach(() => {
@@ -45,7 +60,13 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -63,7 +84,13 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -81,7 +108,13 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -99,7 +132,13 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -117,7 +156,13 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -135,7 +180,13 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -153,7 +204,13 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -164,14 +221,20 @@ describe('CellValue', () => {
     const alert: Alert = {
       _id: '_id',
       _index: '_index',
-      [ALERT_RULE_PARAMETERS]: [{ related_integrations: { package: ['splunk'] } }],
+      'signal.rule.rule_id': 'rule_rule_id',
     };
-    const columnId = ALERT_RULE_PARAMETERS;
+    const columnId = 'signal.rule.rule_id';
     const schema = 'unknown';
 
     const { getByTestId } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -191,7 +254,13 @@ describe('CellValue', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
@@ -209,7 +278,13 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+        <CellValue
+          alert={alert}
+          columnId={columnId}
+          packages={packages}
+          ruleResponse={ruleResponse}
+          schema={schema}
+        />
       </TestProviders>
     );
 
