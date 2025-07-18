@@ -7,24 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiHighlight,
-  euiFontSize,
-  type UseEuiTheme,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon, FieldIconProps } from '@kbn/react-field';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { getFieldTypeName } from '@kbn/field-utils';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { FieldIcon, FieldIconProps } from '@kbn/react-field';
+import React from 'react';
 
 interface Props {
   fieldName: string;
@@ -45,8 +35,6 @@ export function FieldName({
   scripted = false,
   highlight = '',
 }: Props) {
-  const styles = useMemoCss(componentStyles);
-
   const typeName = getFieldTypeName(fieldType);
   const fieldMappingDisplayName = fieldMapping?.displayName ? fieldMapping.displayName : fieldName;
   const fieldDisplayName = displayNameOverride ?? fieldMappingDisplayName;
@@ -64,7 +52,7 @@ export function FieldName({
           alignItems="center"
           direction="row"
           wrap={false}
-          css={styles.fieldIconContainer}
+          className="kbnDocViewer__fieldName_icon"
         >
           <EuiFlexItem grow={false}>
             <FieldIcon type={fieldType!} label={typeName} scripted={scripted} {...fieldIconProps} />
@@ -76,7 +64,6 @@ export function FieldName({
         <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
           <EuiFlexItem
             className="kbnDocViewer__fieldName eui-textBreakAll"
-            css={styles.fieldName}
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
@@ -103,7 +90,7 @@ export function FieldName({
             >
               <EuiBadge
                 title=""
-                css={styles.multiFieldBadge}
+                className="kbnDocViewer__fieldName_multiFieldBadge"
                 color="default"
                 data-test-subj={`tableDocViewRow-${fieldName}-multifieldBadge`}
               >
@@ -119,31 +106,3 @@ export function FieldName({
     </EuiFlexGroup>
   );
 }
-
-const componentStyles = {
-  fieldIconContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
-      lineHeight: euiTheme.font.lineHeightMultiplier,
-    }),
-  fieldName: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
-    const { fontSize } = euiFontSize(themeContext, 's');
-
-    return css({
-      padding: euiTheme.size.xs,
-      paddingLeft: 0,
-      lineHeight: euiTheme.font.lineHeightMultiplier,
-
-      '.euiDataGridRowCell__popover &': {
-        fontSize,
-      },
-    });
-  },
-  multiFieldBadge: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      margin: `${euiTheme.size.xs} 0`,
-      fontWeight: euiTheme.font.weight.regular,
-      fontFamily: euiTheme.font.family,
-    }),
-};
