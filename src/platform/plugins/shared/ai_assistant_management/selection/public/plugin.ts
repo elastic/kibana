@@ -66,7 +66,7 @@ export class AIAssistantManagementPlugin
         const currentSpace = await firstValueFrom(spaces.getActiveSpace$());
         const isClassicSpace =
           currentSpace?.solution === 'classic' || currentSpace?.solution === undefined;
-        console.log('currentSpace: ', currentSpace);
+
         if (!isClassicSpace) {
           // Don't register for non-classic spaces (oblt, security, es)
           return;
