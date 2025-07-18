@@ -603,11 +603,17 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async expectSavedPlaygroundButtonToBeEnabled() {
         await testSubjects.existOrFail('saved-playground-save-button');
-        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.be(true);
+        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.equal(
+          true,
+          'Playground save button should be enabled'
+        );
       },
       async expectSavedPlaygroundButtonToBeDisabled() {
         await testSubjects.existOrFail('saved-playground-save-button');
-        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.be(false);
+        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.equal(
+          false,
+          'Playground save button should be disabled'
+        );
       },
       async clickSavedPlaygroundSaveButton() {
         await testSubjects.existOrFail('saved-playground-save-button');

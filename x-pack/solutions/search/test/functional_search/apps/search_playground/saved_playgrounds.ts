@@ -46,6 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       }
       await deleteIndices();
     });
+
     describe('View a Saved Playground', function () {
       it('should open saved playground', async () => {
         expect(testPlaygroundId).not.to.be(undefined);
