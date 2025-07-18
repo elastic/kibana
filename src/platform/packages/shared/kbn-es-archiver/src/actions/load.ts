@@ -98,6 +98,11 @@ export async function loadAction({
   const progress = new Progress();
   progress.activate(log);
 
+  const indexExistsResponseBefore = await client.indices.exists({
+    index: 'myfakeindex-3',
+  });
+  log.info('esArchiver.load - index exists', indexExistsResponseBefore);
+
   await createPromiseFromStreams([
     recordStream,
     createCreateIndexStream({
@@ -131,6 +136,16 @@ export async function loadAction({
       headers: ES_CLIENT_HEADERS,
     }
   );
+
+  const indexExistsResponseAfter = await client.indices.exists({
+    index: 'myfakeindex-3',
+  });
+  log.info('esArchiver.load - index exists', indexExistsResponseAfter);
+
+  const searchResponse = await client.search({
+    index: 'myfakeindex-3',
+  });
+  log.info('esArchiver.load - hits.total', searchResponse.hits.total);
 
   // If we affected saved objects indices, we need to ensure they are migrated...
   if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
