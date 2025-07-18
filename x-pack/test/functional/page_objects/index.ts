@@ -46,7 +46,6 @@ import { ObservabilityLogsExplorerPageObject } from './observability_logs_explor
 import { DatasetQualityPageObject } from './dataset_quality';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { RollupPageObject } from './rollup_page';
-import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { StatusPageObject } from './status_page';
 import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
@@ -95,7 +94,6 @@ export const pageObjects = {
   searchQueryRules: SearchQueryRulesPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
-  shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
   statusPage: StatusPageObject,

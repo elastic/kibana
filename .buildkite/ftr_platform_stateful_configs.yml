@@ -207,9 +207,9 @@ enabled:
   - x-pack/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
-  - x-pack/test/functional/apps/discover/group1/config.ts
-  - x-pack/test/functional/apps/discover/group2/config.ts
-  - x-pack/test/functional/apps/discover/group3/config.ts
+  - x-pack/platform/test/functional/apps/discover/group1/config.ts
+  - x-pack/platform/test/functional/apps/discover/group2/config.ts
+  - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/graph/config.ts
   - x-pack/platform/test/functional/apps/grok_debugger/config.ts
   - x-pack/platform/test/functional/apps/home/config.ts
