@@ -17,6 +17,7 @@
   ],
   "baseBranches": [
     "main",
+    "9.1",
     "9.0",
     "8.19",
     "8.18",
@@ -133,7 +134,7 @@
       ],
       "matchBaseBranches": [
         "main",
-        "/^[9].*/",
+        "/^9.[1-9].*/",
         "8.19"
       ],
       "labels": [
@@ -1833,7 +1834,8 @@
       ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true

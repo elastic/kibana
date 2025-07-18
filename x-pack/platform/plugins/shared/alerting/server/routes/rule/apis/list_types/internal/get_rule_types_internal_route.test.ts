@@ -116,6 +116,7 @@ describe('internalRuleTypesRoute', () => {
               "state": Array [],
             },
             "authorized_consumers": Object {},
+            "auto_recover_alerts": undefined,
             "category": "test",
             "default_action_group_id": "default",
             "default_schedule_interval": "10m",
