@@ -468,6 +468,7 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          'kibana.alert.grouping': { host: { name: 'host-1' } },
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(2, {
@@ -510,6 +511,7 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-2",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          'kibana.alert.grouping': { host: { name: 'host-2' } },
         },
       });
       expect(mockReport).toHaveBeenNthCalledWith(3, {
@@ -552,6 +554,7 @@ describe('es_query executor', () => {
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-3",
           'kibana.alert.url':
             'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
+          'kibana.alert.grouping': { host: { name: 'host-3' } },
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -976,6 +979,7 @@ describe('es_query executor', () => {
             'Number of matching documents for group "host-1" is greater than or equal to 200',
           'kibana.alert.evaluation.threshold': 200,
           'kibana.alert.evaluation.value': '291',
+          'kibana.alert.grouping': { host: { name: 'host-1' } },
           'kibana.alert.reason':
             'Document count is 291 in the last 5m for host-1. Alert when greater than or equal to 200.',
           'kibana.alert.title': "rule 'test-rule-name' matched query for group host-1",

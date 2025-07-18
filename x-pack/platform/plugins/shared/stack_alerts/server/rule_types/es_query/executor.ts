@@ -17,6 +17,7 @@ import {
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
   ALERT_REASON,
   ALERT_URL,
 } from '@kbn/rule-data-utils';
@@ -126,11 +127,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         dateEnd,
       });
 
-  const resultGroupSet = new Set<string>();
-  for (const result of parsedResults.results) {
-    resultGroupSet.add(result.group);
-  }
-
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const groupingObject = result.groupingObject
@@ -193,6 +189,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
         ...ecsGroups,
         ...actionContext.sourceFields,
+        [ALERT_GROUPING]: groupingObject,
       },
     });
     if (!isGroupAgg) {

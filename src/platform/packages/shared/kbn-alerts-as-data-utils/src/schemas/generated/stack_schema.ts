@@ -11,6 +11,7 @@
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
 import type { Either } from 'fp-ts/Either';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
@@ -76,6 +77,7 @@ const StackAlertOptional = rt.partial({
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaString,
   'kibana.alert.title': schemaString,
+  [ALERT_GROUPING]: rt.record(rt.string, schemaUnknown),
 });
 
 // prettier-ignore
