@@ -1971,7 +1971,7 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/navigational_search.ts @elastic/kibana-core
 /x-pack/test/stack_functional_integration/apps/savedobjects_upgrade_testing @elastic/kibana-core
-/x-pack/test/functional/page_objects/status_page.ts @elastic/kibana-core
+/x-pack/platform/test/functional/page_objects/status_page.ts @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/banners_page.ts @elastic/kibana-core
 /x-pack/platform/test/common/lib/test_data_loader.ts @elastic/kibana-core
