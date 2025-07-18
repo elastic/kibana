@@ -89,7 +89,7 @@ const exportContentRoute = createServerRoute({
       inheritedFields: Object.keys(inheritedFields)
         .filter((field) => !baseFields[field])
         .reduce((fields, field) => {
-          fields[field] = inheritedFields[field];
+          fields[field] = omit(inheritedFields[field], ['from']);
           return fields;
         }, {} as FieldDefinition),
     });
