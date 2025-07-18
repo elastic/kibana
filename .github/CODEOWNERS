@@ -1605,7 +1605,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 # Observability-ui
 /x-pack/test_serverless/api_integration/test_suites/observability/index.ts @elastic/observability-ui
-/x-pack/test/functional_solution_sidenav/tests/observability_sidenav.ts @elastic/observability-ui
+/x-pack/solutions/observability/test/functional_solution_sidenav/ @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/page_objects/observability_page.ts @elastic/observability-ui
 /x-pack/test_serverless/**/test_suites/observability/config.ts @elastic/observability-ui
 
@@ -2073,7 +2073,7 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 
 # AppEx AI Infra
 /x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
-/x-pack/test/functional_gen_ai/inference @elastic/appex-ai-infra
+/x-pack/platform/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
 /x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
@@ -2203,7 +2203,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/screenshot_creation/apps/response_ops_docs @elastic/response-ops
 /x-pack/solutions/observability/test/screenshot_creation/ @elastic/response-ops
 /x-pack/solutions/security/test/screenshot_creation/ @elastic/response-ops
-/x-pack/test/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
+/x-pack/platform/test/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 /x-pack/test/accessibility/apps/group3/rules_connectors.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_triggers_actions_ui_page.ts @elastic/response-ops
 /x-pack/test_serverless/functional/page_objects/svl_rule_details_ui_page.ts @elastic/response-ops
@@ -2252,7 +2252,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/platform/test/functional/fixtures/kbn_archiver/ccs @elastic/search-kibana
 /src/platform/test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
 /src/platform/test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
-/x-pack/test/functional_solution_sidenav/tests/search_sidenav.ts @elastic/search-kibana
+/x-pack/solutions/search/functional_solution_sidenav/ @elastic/search-kibana
 /x-pack/platform/test/functional/services/search_sessions.ts @elastic/search-kibana
 /x-pack/platform/test/functional/page_objects/search_sessions_management_page.ts @elastic/search-kibana
 /x-pack/test/functional/page_objects/search_* @elastic/search-kibana
@@ -2271,7 +2271,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test_serverless/api_integration/test_suites/search @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
-/x-pack/test/functional_search/ @elastic/search-kibana
+/x-pack/solutions/search/test/functional_search/ @elastic/search-kibana
 /x-pack/solutions/search/test/api_integration/apis/search_playground/ @elastic/search-kibana
 
 # workchat
@@ -2279,6 +2279,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test_serverless/api_integration/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/chat/ @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
+/x-pack/platform/test/onechat_api_integration @elastic/search-kibana @elastic/workchat-eng
+
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
@@ -2328,6 +2330,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/accessibility/apps/management.ts @elastic/kibana-management
 /src/platform/test/accessibility/apps/console.ts @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
 /x-pack/platform/test/functional/apps/grok_debugger @elastic/kibana-management
 /x-pack/test/functional/apps/index_lifecycle_management @elastic/kibana-management
@@ -2379,7 +2382,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/security_solution_ftr @elastic/security-solution
 /x-pack/test/functional/es_archives/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
-/x-pack/test/functional_solution_sidenav/tests/security_sidenav.ts @elastic/security-solution
+/x-pack/solutions/security/test/functional_solution_sidenav/ @elastic/security-solution
 /x-pack/test/common/utils/security_solution/index.ts @elastic/security-solution
 /x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 /x-pack/test/common/services/security_solution @elastic/security-solution
@@ -2831,7 +2834,7 @@ x-pack/test/functional/es_archives/kubernetes_security @elastic/kibana-cloud-sec
 x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
 ## SessionView tests
 x-pack/test/functional/es_archives/session_view @elastic/kibana-cloud-security-posture
-x-pack/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
+x-pack/solutions/security/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
 ## CSP tests
 x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
@@ -2908,10 +2911,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overview @elastic/appex-sharedux
-/x-pack/test/functional_solution_sidenav/config.ts @elastic/appex-sharedux
-/x-pack/test/functional_solution_sidenav/ftr_provider_context.ts @elastic/appex-sharedux
-/x-pack/test/functional_solution_sidenav/services.ts @elastic/appex-sharedux
-/x-pack/test/functional_solution_sidenav/index.ts @elastic/appex-sharedux
 /x-pack/platform/test/functional_cloud @elastic/appex-sharedux
 /x-pack/platform/test/functional/services/user_menu.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
