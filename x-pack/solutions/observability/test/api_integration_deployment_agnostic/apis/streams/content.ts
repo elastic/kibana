@@ -302,6 +302,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           type: 'keyword',
         });
       });
+
+      it('imports selected streams', async () => {
+        const exportBody = {
+          name: 'complete_tree',
+          description: 'Content pack from logs',
+          version: '1.0.0',
+          include: { all: {} },
+        };
+        const archiveBuffer = await exportContent(apiClient, 'logs', exportBody);
+
+        await putStream(apiClient, 'logs.branch_d', upsertRequest({}, []));
+
+        const importResponse = await importContent(apiClient, 'logs.branch_d', {
+          include: { objects: { streams: ['branch_b.child1'] } },
+          content: Readable.from(archiveBuffer),
+          filename: 'complete_tree-1.0.0.zip',
+        });
+        expect(importResponse.result.created).to.eql([
+          'logs.branch_d.branch_b',
+          'logs.branch_d.branch_b.child1',
+        ]);
+
+        const updatedStream = (await getStream(
+          apiClient,
+          'logs.branch_d',
+          200
+        )) as Streams.WiredStream.GetResponse;
+
+        expect(updatedStream.stream.ingest.wired.routing).to.eql([
+          {
+            destination: 'logs.branch_d.branch_b',
+            if: { never: {} },
+          },
+        ]);
+      });
     });
   });
 }
