@@ -70,7 +70,9 @@ async function main() {
     return;
   }
 
-  const changedFiles = execSync(`git diff --name-only ${process.env.GITHUB_PR_MERGE_BASE} HEAD`)
+  const changedFiles = execSync(
+    `git diff --name-only --diff-filter=M ${process.env.GITHUB_PR_MERGE_BASE} HEAD`
+  )
     .toString()
     .trim()
     .split('\n');
