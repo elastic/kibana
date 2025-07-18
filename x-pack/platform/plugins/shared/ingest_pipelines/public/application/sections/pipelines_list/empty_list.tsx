@@ -88,7 +88,6 @@ export const EmptyList: FunctionComponent = () => {
         >
           <EuiContextMenu
             initialPanelId={0}
-            data-test-subj="autoFollowPatternActionContextMenu"
             panels={[
               {
                 id: 0,

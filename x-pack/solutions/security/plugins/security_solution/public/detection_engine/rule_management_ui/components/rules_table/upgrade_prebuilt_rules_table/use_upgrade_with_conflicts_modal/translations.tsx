@@ -8,11 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { useKibana } from '../../../../../../common/lib/kibana';
 
 export const UPGRADE_CONFLICTS_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeConflictsModal.messageTitle',
   {
-    defaultMessage: 'Exclude rules with conflicts?',
+    defaultMessage: 'Conflicts found',
   }
 );
 
@@ -41,202 +43,139 @@ export const UPGRADE_RULES_WITH_CONFLICTS = (numOfRules: number) =>
     }
   );
 
-const PROCEED_WITH_NO_CONCERNS = (numOfRules: number) => (
+export const RULES_WITH_NON_SOLVABLE_CONFLICTS_TOTAL = (
+  numOfRulesWithNonSolvableConflicts: number
+) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.proceedWhenNoConcerns"
-    defaultMessage="If you have no concerns and want to continue with the update, click {updateRules}."
-    values={{ updateRules: <strong>{UPGRADE_RULES_WITH_CONFLICTS(numOfRules)}</strong> }}
-  />
-);
-
-const PROCEED_WITH_CONFLICT_FREE_RULES = (numOfRules: number) => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.proceedWithConflictFreeRules"
-    defaultMessage="Click {updateRulesWithoutConflicts} to update the {numOfRulesStrong} conflict-free {numOfRules, plural, =1 {rule} other {rules}}."
+    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithNonSolvableConflictsTotal"
+    defaultMessage="Rules with unresolved conflicts: {numOfRulesWithNonSolvableConflictsStrong}"
     values={{
-      numOfRules,
-      numOfRulesStrong: <strong>{numOfRules}</strong>,
-      updateRulesWithoutConflicts: <strong>{UPGRADE_RULES_WITHOUT_CONFLICTS(numOfRules)}</strong>,
-    }}
-  />
-);
-
-const PROCEED_WITH_CONFLICT_FREE_AND_SOLVABLE_CONFLICT_RULES = ({
-  numOfRulesWithoutConflicts,
-  numOfRulesWithSolvableConflicts,
-}: {
-  numOfRulesWithoutConflicts: number;
-  numOfRulesWithSolvableConflicts: number;
-}) => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.proceedWithConflictFreeRules"
-    defaultMessage="Click {updateRules} to update the {numOfRulesWithoutConflictsStrong} conflict-free {numOfRulesWithoutConflicts, plural, =1 {rule} other {rules}} and {numOfRulesWithSolvableConflictsStrong} {numOfRulesWithSolvableConflicts, plural, =1 {rule} other {rules}} with auto-resolved conflicts."
-    values={{
-      numOfRulesWithoutConflicts,
-      numOfRulesWithoutConflictsStrong: <strong>{numOfRulesWithoutConflicts}</strong>,
-      numOfRulesWithSolvableConflicts,
-      numOfRulesWithSolvableConflictsStrong: <strong>{numOfRulesWithSolvableConflicts}</strong>,
-      updateRules: (
-        <strong>
-          {UPGRADE_RULES_WITH_CONFLICTS(
-            numOfRulesWithoutConflicts + numOfRulesWithSolvableConflicts
-          )}
-        </strong>
+      numOfRulesWithNonSolvableConflictsStrong: (
+        <strong>{numOfRulesWithNonSolvableConflicts}</strong>
       ),
     }}
   />
 );
 
-export const ONLY_RULES_WITH_SOLVABLE_CONFLICTS = (numOfRules: number) => (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.onlySolvableConflicts"
-      defaultMessage="The selected {numOfRules, plural, =1 {rule has} other {rules have}} auto-resolved conflicts. To safely update the {numOfRules, plural, =1 {rule} other {rules}}, we recommend addressing the conflicts from the rule's update flyout."
-      values={{ numOfRules }}
-    />
-    <br />
-    <br />
-    {PROCEED_WITH_NO_CONCERNS(numOfRules)}
-  </>
-);
-
-export const ONLY_RULES_WITH_NON_SOLVABLE_CONFLICTS = (numOfRules: number) => (
+export const RULES_WITH_SOLVABLE_CONFLICTS_TOTAL = (numOfRulesWithSolvableConflicts: number) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.onlyNonSolvableConflicts"
-    defaultMessage="{numOfRulesStrong} selected {numOfRules, plural, =1 {rule has} other {rules have}} unresolved conflicts. Rules with unresolved conflicts can’t be bulk-updated. You must manually fix their conflicts before updating them."
-    values={{ numOfRules, numOfRulesStrong: <strong>{numOfRules}</strong> }}
+    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithSolvableConflictsTotal"
+    defaultMessage="Rules with auto-resolved conflicts: {numOfRulesWithSolvableConflictsStrong}"
+    values={{
+      numOfRulesWithSolvableConflictsStrong: <strong>{numOfRulesWithSolvableConflicts}</strong>,
+    }}
   />
 );
 
-export const ONLY_RULES_WITH_CONFLICTS = ({
-  numOfRulesWithSolvableConflicts,
-  numOfRulesWithNonSolvableConflicts,
-}: {
-  numOfRulesWithSolvableConflicts: number;
-  numOfRulesWithNonSolvableConflicts: number;
-}) => (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.onlyRulesWithConflicts"
-      defaultMessage="Selected rules have conflicts. To safely update the rules, we recommend addressing the conflicts from the rule's update flyout."
-    />
-    <br />
-    <br />
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.unresolvedConflictsCanNotBeBulkUpdated"
-      defaultMessage="{numOfRulesWithNonSolvableConflictsStrong} out of the selected {numOfRulesStrong} {numOfRules, plural, =1 {rule} other {rules}} with unresolved conflicts can’t be bulk-updated. You must manually fix their conflicts before updating them."
-      values={{
-        numOfRules: numOfRulesWithSolvableConflicts + numOfRulesWithNonSolvableConflicts,
-        numOfRulesStrong: (
-          <strong>{numOfRulesWithSolvableConflicts + numOfRulesWithNonSolvableConflicts}</strong>
-        ),
-        numOfRulesWithNonSolvableConflictsStrong: (
-          <strong>{numOfRulesWithNonSolvableConflicts}</strong>
-        ),
-      }}
-    />
-    <br />
-    <br />
-    {PROCEED_WITH_NO_CONCERNS(numOfRulesWithSolvableConflicts)}
-  </>
+export const RULES_WITHOUT_CONFLICTS_TOTAL = (numOfRulesWithoutConflicts: number) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithoutConflictsTotal"
+    defaultMessage="Rules without conflicts: {numOfRulesWithoutConflictsStrong}"
+    values={{
+      numOfRulesWithoutConflictsStrong: <strong>{numOfRulesWithoutConflicts}</strong>,
+    }}
+  />
 );
 
-export const RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_NON_SOLVABLE_CONFLICTS = ({
-  numOfRulesWithoutConflicts,
-  numOfRulesWithNonSolvableConflicts,
-}: {
-  numOfRulesWithoutConflicts: number;
-  numOfRulesWithNonSolvableConflicts: number;
-}) => (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithoutConflictsAndRulesWithNonSolvableConflicts"
-      defaultMessage="{numOfRulesWithNonSolvableConflictsStrong} of the {numOfRulesStrong} selected rules {numOfRulesWithNonSolvableConflicts, plural, =1 {has} other {have}} unresolved conflicts, which cannot be bulk-updated until you manually fix them."
-      values={{
-        numOfRulesStrong: (
-          <strong>{numOfRulesWithoutConflicts + numOfRulesWithNonSolvableConflicts}</strong>
-        ),
-        numOfRulesWithNonSolvableConflicts,
-        numOfRulesWithNonSolvableConflictsStrong: (
-          <strong>{numOfRulesWithNonSolvableConflicts}</strong>
-        ),
-      }}
-    />
-    <br />
-    <br />
-    {PROCEED_WITH_CONFLICT_FREE_RULES(numOfRulesWithoutConflicts)}
-  </>
+export const RULES_WITH_NON_SOLVABLE_CONFLICTS_GUIDANCE = (
+  numOfRulesWithNonSolvableConflicts: number
+) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithNonSolvableConflictsGuidance"
+    defaultMessage="{numOfRulesWithNonSolvableConflictsStrong} {numOfRulesWithNonSolvableConflicts, plural, =1 {rule} other {rules}} with unresolved {numOfRulesWithNonSolvableConflicts, plural, =1 {conflict} other {conflicts}} can’t be updated until you fix the {numOfRulesWithNonSolvableConflicts, plural, =1 {conflict} other {conflicts}}."
+    values={{
+      numOfRulesWithNonSolvableConflicts,
+      numOfRulesWithNonSolvableConflictsStrong: (
+        <strong>{numOfRulesWithNonSolvableConflicts}</strong>
+      ),
+    }}
+  />
 );
 
-export const RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_SOLVABLE_CONFLICTS = ({
-  numOfRulesWithoutConflicts,
+const ACCEPT_SOLVABLE_CONFLICTS_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeConflictsModal.acceptSolvableConflictsWarning',
+  {
+    defaultMessage:
+      'Only choose this option if you’re comfortable accepting the fixes Elastic suggested.',
+  }
+);
+
+export const RULES_WITH_AUTO_RESOLVED_CONFLICTS_GUIDANCE = ({
   numOfRulesWithSolvableConflicts,
+  numOfRulesWithoutConflicts,
 }: {
-  numOfRulesWithoutConflicts: number;
   numOfRulesWithSolvableConflicts: number;
-}) => (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithoutConflictsAndRulesWithSolvableConflicts"
-      defaultMessage="{numOfRulesWithSolvableConflictsStrong} of the {numOfRulesStrong} selected {numOfRules, plural, =1 {rule has} other {rules have}} auto-resolved conflicts. To safely update them, we recommend addressing the conflicts from the rule update flyout."
-      values={{
-        numOfRules: numOfRulesWithoutConflicts + numOfRulesWithSolvableConflicts,
-        numOfRulesStrong: (
-          <strong>{numOfRulesWithoutConflicts + numOfRulesWithSolvableConflicts}</strong>
-        ),
-        numOfRulesWithSolvableConflictsStrong: <strong>{numOfRulesWithSolvableConflicts}</strong>,
-      }}
-    />
-    <br />
-    <br />
-    {PROCEED_WITH_CONFLICT_FREE_RULES(numOfRulesWithoutConflicts)}
-    <br />
-    {PROCEED_WITH_CONFLICT_FREE_AND_SOLVABLE_CONFLICT_RULES({
+  numOfRulesWithoutConflicts: number;
+}) => {
+  const docsUrl = useKibana().services.docLinks.links.securitySolution.resolvePrebuiltRuleConflicts;
+
+  return (
+    <>
+      <div>
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithAutoResolvedConflictsGuidance"
+          defaultMessage="{numOfRulesWithSolvableConflictsStrong} {numOfRulesWithSolvableConflicts, plural, =1 {rule} other {rules}} with auto-resolved {numOfRulesWithSolvableConflicts, plural, =1 {conflict} other {conflicts}} can still be updated. Choose one of the following options:"
+          values={{
+            numOfRulesWithSolvableConflicts,
+            numOfRulesWithSolvableConflictsStrong: (
+              <strong>{numOfRulesWithSolvableConflicts}</strong>
+            ),
+          }}
+        />
+        <ul>
+          <li>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.useRuleUpdateFlyout"
+              defaultMessage="Use the rule update flyout to address auto-resolved conflicts. This is the safest option and gives you more control over the final update. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={docsUrl} target="_blank">
+                    <FormattedMessage
+                      id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.learnMore"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.bulkUpdateRules"
+              defaultMessage="Click {updateRules} to bulk-update rules with auto-resolved conflicts and rules without conflicts."
+              values={{
+                updateRules: (
+                  <strong>
+                    {UPGRADE_RULES_WITH_CONFLICTS(
+                      numOfRulesWithSolvableConflicts + numOfRulesWithoutConflicts
+                    )}
+                  </strong>
+                ),
+              }}
+            />
+          </li>
+          <EuiCallOut
+            title={ACCEPT_SOLVABLE_CONFLICTS_WARNING}
+            color="warning"
+            iconType="warning"
+          />
+        </ul>
+      </div>
+      <br />
+    </>
+  );
+};
+
+export const RULES_WITHOUT_CONFLICTS_GUIDANCE = (numOfRulesWithoutConflicts: number) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithoutConflictsGuidance"
+    defaultMessage="{numOfRulesWithoutConflictsStrong} {numOfRulesWithoutConflicts, plural, =1 {rule} other {rules}} without conflicts can still be updated by clicking {updateRulesWithoutConflicts}. Choose this option if you only want to update {numOfRulesWithoutConflicts, plural, =1 {the rule} other {rules}} without conflicts."
+    values={{
       numOfRulesWithoutConflicts,
-      numOfRulesWithSolvableConflicts,
-    })}
-  </>
-);
-
-export const ALL_KINDS_OF_RULES = ({
-  numOfRulesWithoutConflicts,
-  numOfRulesWithSolvableConflicts,
-  numOfRulesWithNonSolvableConflicts,
-}: {
-  numOfRulesWithoutConflicts: number;
-  numOfRulesWithSolvableConflicts: number;
-  numOfRulesWithNonSolvableConflicts: number;
-}) => (
-  <>
-    <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.allKindsOfRules"
-      defaultMessage="{numOfRulesWithConflictsStrong} of the {numOfRulesStrong} selected rules have conflicts. To safely update the {numOfRulesWithSolvableConflictsStrong} {numOfRulesWithSolvableConflicts, plural, =1 {rule} other {rules}} with auto-resolved conflicts, we recommend addressing the conflicts from the rule update flyout. The {numOfRulesWithNonSolvableConflictsStrong} {numOfRulesWithNonSolvableConflicts, plural, =1 {rule} other {rules}} with unresolved conflicts cannot be bulk-updated until you manually fix them."
-      values={{
-        numOfRulesStrong: (
-          <strong>
-            {numOfRulesWithoutConflicts +
-              numOfRulesWithSolvableConflicts +
-              numOfRulesWithNonSolvableConflicts}
-          </strong>
-        ),
-        numOfRulesWithConflictsStrong: (
-          <strong>{numOfRulesWithSolvableConflicts + numOfRulesWithNonSolvableConflicts}</strong>
-        ),
-        numOfRulesWithSolvableConflicts,
-        numOfRulesWithSolvableConflictsStrong: <strong>{numOfRulesWithSolvableConflicts}</strong>,
-        numOfRulesWithNonSolvableConflicts,
-        numOfRulesWithNonSolvableConflictsStrong: (
-          <strong>{numOfRulesWithNonSolvableConflicts}</strong>
-        ),
-      }}
-    />
-    <br />
-    <br />
-    {PROCEED_WITH_CONFLICT_FREE_RULES(numOfRulesWithoutConflicts)}
-    <br />
-    {PROCEED_WITH_CONFLICT_FREE_AND_SOLVABLE_CONFLICT_RULES({
-      numOfRulesWithoutConflicts,
-      numOfRulesWithSolvableConflicts,
-    })}
-  </>
+      numOfRulesWithoutConflictsStrong: <strong>{numOfRulesWithoutConflicts}</strong>,
+      updateRulesWithoutConflicts: (
+        <strong>{UPGRADE_RULES_WITHOUT_CONFLICTS(numOfRulesWithoutConflicts)}</strong>
+      ),
+    }}
+  />
 );
