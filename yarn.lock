@@ -2211,9 +2211,9 @@
   version "3.3.0"
   resolved "file:./elastic-eui-theme-borealis-3.3.0-3e7b9d781.tgz#63669b1e662bdb39c419e6df25ca0c166dee766a"
 
-"@elastic/eui-theme-common@file:./elastic-eui-theme-common-3.0.0-3e7b9d781.tgz":
+"@elastic/eui-theme-common@file:./elastic-eui-theme-common-3.0.0-fd7aec9d2.tgz":
   version "3.0.0"
-  resolved "file:./elastic-eui-theme-common-3.0.0-3e7b9d781.tgz#fe78f24ceb68ab7f527bc1cd80f2e7c913f41c2c"
+  resolved "file:./elastic-eui-theme-common-3.0.0-fd7aec9d2.tgz#26a98ede90c6075c9ae874ab6ecc086259e16fcc"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
