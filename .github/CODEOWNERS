@@ -1135,8 +1135,8 @@ x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-po
 x-pack/solutions/security/test
 x-pack/test
 x-pack/test_serverless
-x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
-x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+x-pack/platform/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
+x-pack/platform/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
@@ -1725,7 +1725,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/package @elastic/kibana-operations
 /src/platform/test/package/roles @elastic/kibana-operations
 /src/platform/test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
-/x-pack/test/plugin_functional/screenshots @elastic/kibana-operations # Assigned per https://github.com/elastic/kibana/pull/94370/files
+/x-pack/platform/test/plugin_functional/screenshots @elastic/kibana-operations # Assigned per https://github.com/elastic/kibana/pull/94370/files
 /src/dev/license_checker/config.ts @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
@@ -1786,7 +1786,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights* @elastic/appex-qa
 /src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare @elastic/appex-qa
 /src/platform/test/api_integration/fixtures/es_archiver/elasticsearch @elastic/appex-qa
-/x-pack/test/plugin_functional/services.ts @elastic/appex-qa
+/x-pack/platform/test/plugin_functional/services.ts @elastic/appex-qa
 /src/platform/test/server_integration/services/index.js @elastic/appex-qa
 /x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js @elastic/appex-qa
 /x-pack/test/stack_functional_integration/configs/consume_state.js @elastic/appex-qa
@@ -1795,9 +1795,9 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/kibana.jsonc @elastic/appex-qa
 /x-pack/platform/test/functional_with_es_ssl/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/test/stack_functional_integration/apps @elastic/appex-qa
-/x-pack/test/plugin_functional/config.ts @elastic/appex-qa
-/x-pack/test/plugin_functional/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/test/plugin_functional/page_objects.ts @elastic/appex-qa
+/x-pack/platform/test/plugin_functional/config.ts @elastic/appex-qa
+/x-pack/platform/test/plugin_functional/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/platform/test/plugin_functional/page_objects.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/config.ts @elastic/appex-qa
@@ -2384,12 +2384,12 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
 /x-pack/solutions/security/test/functional_solution_sidenav/ @elastic/security-solution
 /x-pack/test/common/utils/security_solution/index.ts @elastic/security-solution
-/x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+/x-pack/solutions/security/test/plugin_functional/ @elastic/security-solution
 /x-pack/test/common/services/security_solution @elastic/security-solution
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
-/x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
+/x-pack/platform/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
@@ -2908,7 +2908,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
 /src/platform/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /src/platform/test/functional/apps/home @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840075278
-/x-pack/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
+/x-pack/platform/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overview @elastic/appex-sharedux
 /x-pack/platform/test/functional_cloud @elastic/appex-sharedux
@@ -2919,7 +2919,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/global_search @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
-/x-pack/test/plugin_functional/test_suites/global_search @elastic/appex-sharedux
+/x-pack/platform/test/plugin_functional/test_suites/global_search @elastic/appex-sharedux
 /src/platform/test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
 /src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 /src/platform/test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
