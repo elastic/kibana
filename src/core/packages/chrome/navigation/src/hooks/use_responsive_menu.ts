@@ -9,88 +9,21 @@
 
 import { useCallback, useRef, useState, RefObject, useLayoutEffect } from 'react';
 
-import { MenuItem, NavigationStructure } from '../../types';
-
-/**
- * The larger height of the primary menu item when the label is 2 lines
- */
-const EXPANDED_MENU_ITEM_HEIGHT = 67;
-const COLLAPSED_MENU_ITEM_HEIGHT = 32;
-const MAX_MENU_ITEMS = 10;
+import { MenuCalculations, MenuItem, NavigationStructure } from '../../types';
+import { getActualItemHeights } from '../utils/get_actual_item_heights';
+import {
+  COLLAPSED_MENU_ITEM_HEIGHT,
+  EXPANDED_MENU_ITEM_HEIGHT,
+  MAX_MENU_ITEMS,
+} from '../constants';
+import { calculateVisibleItemCount } from '../utils/calculate_item_visible_count';
+import { partitionMenuItems } from '../utils/partition_menu_items';
 
 interface ResponsiveMenuState {
   primaryMenuRef: RefObject<HTMLElement>;
   visibleMenuItems: MenuItem[];
   overflowMenuItems: MenuItem[];
 }
-
-interface MenuCalculations {
-  availableHeight: number;
-  itemGap: number;
-  maxVisibleItems: number;
-}
-
-/**
- * Measures the actual height of menu items by querying existing DOM elements
- */
-const getActualItemHeights = (menuElement: HTMLElement): number[] => {
-  const menuItems = menuElement.querySelectorAll('[data-menu-item]');
-  const heights: number[] = [];
-
-  menuItems.forEach((item) => {
-    const rect = item.getBoundingClientRect();
-    heights.push(rect.height);
-  });
-
-  return heights;
-};
-
-/**
- * Calculates how many menu items can fit using cumulative height calculation
- */
-const calculateVisibleItemCount = (
-  calculations: MenuCalculations,
-  actualItemHeights: number[]
-): number => {
-  const { availableHeight, itemGap, maxVisibleItems } = calculations;
-
-  let cumulativeHeight = 0;
-  let visibleCount = 0;
-
-  for (let i = 0; i < Math.min(actualItemHeights.length, maxVisibleItems); i++) {
-    const itemHeight = actualItemHeights[i] || EXPANDED_MENU_ITEM_HEIGHT; // fallback to maximum expanded height
-    const heightWithGap = itemHeight + (i > 0 ? itemGap : 0);
-
-    if (cumulativeHeight + heightWithGap <= availableHeight) {
-      cumulativeHeight += heightWithGap;
-      visibleCount++;
-    } else {
-      break;
-    }
-  }
-
-  return visibleCount;
-};
-
-/**
- * Splits menu items into `visible` and `overflow` based on available space
- */
-const partitionMenuItems = (
-  allItems: MenuItem[],
-  maxVisibleCount: number
-): { visible: MenuItem[]; overflow: MenuItem[] } => {
-  if (maxVisibleCount >= allItems.length) {
-    return { visible: allItems, overflow: [] };
-  }
-
-  // Reserve one slot for "More" button when we have overflow
-  const visibleCount = Math.max(0, maxVisibleCount - 1);
-
-  return {
-    visible: allItems.slice(0, visibleCount),
-    overflow: allItems.slice(visibleCount),
-  };
-};
 
 /**
  * Custom hook for handling responsive menu behavior with dynamic height measurement
