@@ -89,14 +89,14 @@ interface ObservabilitySharedLocators {
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
-  private config?: ObservabilitySharedBrowserConfig;
+  private config: ObservabilitySharedBrowserConfig;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
-    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
     coreSetup.getStartServices().then(([coreStart]) => {
       coreStart.chrome
         .getChromeStyle$()
@@ -109,6 +109,7 @@ export class ObservabilitySharedPlugin implements Plugin {
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
+      config: this.config,
     };
   }
 
