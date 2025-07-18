@@ -15,6 +15,7 @@ export type {
   Link,
   LinkOptions,
   LinksState,
+  StoredLinksState,
 } from './content_management';
 
 export const plugin = async (initContext: PluginInitializerContext) => {

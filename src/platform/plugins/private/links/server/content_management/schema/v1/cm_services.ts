@@ -12,7 +12,6 @@ import type { ContentManagementServicesDefinition as ServicesDefinition } from '
 import {
   savedObjectSchema,
   createResultSchema,
-  updateOptionsSchema,
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
@@ -35,7 +34,7 @@ const baseLinkSchema = {
 export const dashboardLinkSchema = schema.object({
   ...baseLinkSchema,
   destination: schema.string({
-    meta: { description: 'The name of the SavedObject reference to the linked dashboard' },
+    meta: { description: 'Linked dashboard saved object id' },
   }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
   options: schema.maybe(
@@ -118,12 +117,7 @@ export const linksSearchOptionsSchema = schema.maybe(
 );
 
 export const linksCreateOptionsSchema = schema.object({
-  references: schema.maybe(createOptionsSchemas.references),
   overwrite: createOptionsSchemas.overwrite,
-});
-
-export const linksUpdateOptionsSchema = schema.object({
-  references: updateOptionsSchema.references,
 });
 
 export const linksGetResultSchema = objectTypeToGetResultSchema(linksSavedObjectSchema);
@@ -156,9 +150,6 @@ export const serviceDefinition: ServicesDefinition = {
   },
   update: {
     in: {
-      options: {
-        schema: linksUpdateOptionsSchema, // same schema as "create"
-      },
       data: {
         schema: linksSchema,
       },

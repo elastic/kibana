@@ -16,7 +16,6 @@ import {
   linksCreateResultSchema,
   linksGetResultSchema,
   linksSearchOptionsSchema,
-  linksUpdateOptionsSchema,
 } from './cm_services';
 
 export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
@@ -25,10 +24,14 @@ export type Link = DashboardLink | ExternalLink;
 export type LinkOptions = DashboardLink['options'] | ExternalLink['options'];
 
 export type LinksState = TypeOf<typeof linksSchema>;
-export type LinksSavedObjectAttributes = TypeOf<typeof linksSchema>;
+export type StoredLinksState = Omit<LinksState, 'links'> & {
+  links?: Array<StoredDashboardLink | ExternalLink>;
+};
+export type StoredDashboardLink = Omit<DashboardLink, 'destination'> & {
+  destinationRefName: string;
+};
 
 export type LinksCreateOptions = TypeOf<typeof linksCreateOptionsSchema>;
-export type LinksUpdateOptions = TypeOf<typeof linksUpdateOptionsSchema>;
 export type LinksSearchOptions = TypeOf<typeof linksSearchOptionsSchema>;
 
 export type LinksGetOut = TypeOf<typeof linksGetResultSchema>;

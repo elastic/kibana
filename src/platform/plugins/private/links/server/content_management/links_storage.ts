@@ -19,13 +19,12 @@ import {
   LinksCreateOptions,
   LinksCreateOut,
   LinksGetOut,
-  LinksSavedObjectAttributes,
   savedObjectToItem,
-  itemToSavedObject,
-  LinksUpdateOptions,
+  itemToAttributes,
   LinksUpdateOut,
   LinksSearchOptions,
   LinksState,
+  StoredLinksState,
 } from './schema/latest';
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
@@ -76,9 +75,9 @@ export class LinksStorage {
       alias_purpose: aliasPurpose,
       alias_target_id: aliasTargetId,
       outcome,
-    } = await soClient.resolve<LinksSavedObjectAttributes>(LINKS_SAVED_OBJECT_TYPE, id);
+    } = await soClient.resolve<StoredLinksState>(LINKS_SAVED_OBJECT_TYPE, id);
 
-    const item = savedObjectToItem(savedObject, false);
+    const item = savedObjectToItem(savedObject);
     const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
 
     const validationError = transforms.get.out.result.validate(response);
@@ -134,19 +133,16 @@ export class LinksStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, references: soReferences } = await itemToSavedObject({
-      attributes: dataToLatest,
-      references: options.references,
-    });
+    const { attributes, references } = await itemToAttributes(dataToLatest);
 
     // Save data in DB
-    const savedObject = await soClient.create<LinksSavedObjectAttributes>(
+    const savedObject = await soClient.create<StoredLinksState>(
       LINKS_SAVED_OBJECT_TYPE,
-      soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      attributes,
+      { ...optionsToLatest, references }
     );
 
-    const item = savedObjectToItem(savedObject, false);
+    const item = savedObjectToItem(savedObject);
 
     const validationError = transforms.create.out.result.validate({ item });
     if (validationError) {
@@ -173,12 +169,7 @@ export class LinksStorage {
     return value;
   }
 
-  async update(
-    ctx: StorageContext,
-    id: string,
-    data: LinksState,
-    options: LinksUpdateOptions
-  ): Promise<LinksUpdateOut> {
+  async update(ctx: StorageContext, id: string, data: LinksState): Promise<LinksUpdateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
 
@@ -191,28 +182,17 @@ export class LinksStorage {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 
-    const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
-      LinksUpdateOptions,
-      LinksUpdateOptions
-    >(options);
-    if (optionsError) {
-      throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
-    }
-
-    const { attributes: soAttributes, references: soReferences } = await itemToSavedObject({
-      attributes: dataToLatest,
-      references: options.references,
-    });
+    const { attributes, references } = await itemToAttributes(dataToLatest);
 
     // Save data in DB
-    const partialSavedObject = await soClient.update<LinksSavedObjectAttributes>(
+    const partialSavedObject = await soClient.update<StoredLinksState>(
       LINKS_SAVED_OBJECT_TYPE,
       id,
-      soAttributes,
-      { ...optionsToLatest, references: soReferences }
+      attributes,
+      { references }
     );
 
-    const item = savedObjectToItem(partialSavedObject, true);
+    const item = savedObjectToItem(partialSavedObject);
 
     const validationError = transforms.update.out.result.validate({ item });
     if (validationError) {
@@ -270,11 +250,11 @@ export class LinksStorage {
 
     const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
     // Execute the query in the DB
-    const soResponse = await soClient.find<LinksSavedObjectAttributes>(soQuery);
+    const soResponse = await soClient.find<StoredLinksState>(soQuery);
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
-          const item = savedObjectToItem(so, false);
+          const item = savedObjectToItem(so);
           return item;
         })
         // Ignore any saved objects that failed to convert to items.
@@ -315,13 +295,10 @@ export class LinksStorage {
 
   mSearch = {
     savedObjectType: LINKS_SAVED_OBJECT_TYPE,
-    toItemResult: (
-      ctx: StorageContext,
-      savedObject: SavedObject<LinksSavedObjectAttributes>
-    ): LinksItem => {
+    toItemResult: (ctx: StorageContext, savedObject: SavedObject<StoredLinksState>): LinksItem => {
       const transforms = ctx.utils.getTransforms(cmServicesDefinition);
 
-      const contentItem = savedObjectToItem(savedObject, false);
+      const contentItem = savedObjectToItem(savedObject);
 
       const validationError = transforms.mSearch.out.result.validate(contentItem);
       if (validationError) {
