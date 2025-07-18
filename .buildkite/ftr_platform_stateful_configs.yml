@@ -254,7 +254,7 @@ enabled:
   - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/spaces/config.ts
-  - x-pack/test/functional/apps/status_page/config.ts
+  - x-pack/platform/test/functional/apps/status_page/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
   - x-pack/platform/test/functional/apps/transform/actions/config.ts

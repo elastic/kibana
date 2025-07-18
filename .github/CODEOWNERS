@@ -1987,7 +1987,7 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 /src/platform/test/functional/services/usage_collection.ts @elastic/kibana-core
 /src/platform/test/api_integration/fixtures/import_managed.ndjson @elastic/kibana-core
 /src/platform/test/functional/services/apps_menu.ts @elastic/kibana-core
-/x-pack/test/functional/apps/status_page @elastic/kibana-core
+/x-pack/platform/test/functional/apps/status_page @elastic/kibana-core
 /x-pack/platform/test/cloud_integration @elastic/kibana-core
 /x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 /src/platform/test/server_integration @elastic/kibana-core
