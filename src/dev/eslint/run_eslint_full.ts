@@ -11,9 +11,11 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import Os from 'os';
 
 const batchSize = 250;
-const maxParallelism = 8;
+const cpuCount = Math.max(Os.cpus()?.length ?? 0, 1);
+const maxParallelism =  Math.max(cpuCount - 1, 8);
 
 run(
   async ({ log, flags }) => {
