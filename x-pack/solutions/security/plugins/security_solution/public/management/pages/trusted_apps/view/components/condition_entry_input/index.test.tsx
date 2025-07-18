@@ -11,8 +11,13 @@ import { keys } from 'lodash';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 
-import { ConditionEntryInput } from '.';
+import { ConditionEntryInput, ConditionEntryInputProps } from '.';
 import type { EuiSuperSelectProps } from '@elastic/eui';
+import { AppContextTestRender, createAppRootMockRenderer } from '@kbn/security-solution-plugin/public/common/mock/endpoint';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { OPERATOR_TITLES } from '../../translations';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
@@ -26,104 +31,99 @@ const baseEntry: Readonly<TrustedAppConditionEntry> = {
 };
 
 describe('Condition entry input', () => {
+  const formPrefix = 'condition-entry-input';
+  let props: jest.Mocked<ConditionEntryInputProps>;
+  let mockedContext: AppContextTestRender;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
+
   beforeEach(() => {
+    mockedContext = createAppRootMockRenderer();
     onRemoveMock = jest.fn();
     onChangeMock = jest.fn();
     onVisitedMock = jest.fn();
+    props = {
+      os: OperatingSystem.WINDOWS,
+      entry: baseEntry,
+      showLabels: true,
+      onRemove: onRemoveMock,
+      onChange: onChangeMock,
+      onVisited: onVisitedMock,
+      'data-test-subj': formPrefix,
+      isRemoveDisabled: false,
+    };
   });
 
-  interface GetElementProps {
-    os?: OperatingSystem;
-    isRemoveDisabled?: boolean;
-    entry?: TrustedAppConditionEntry;
-  }
+  afterEach(() => {
+    cleanup();
+  })
 
-  const getElement = (
-    subject: string,
-    {
-      os = OperatingSystem.WINDOWS,
-      isRemoveDisabled = false,
-      entry = baseEntry,
-    }: GetElementProps = {}
-  ) => (
-    <ConditionEntryInput
-      os={os}
-      entry={entry}
-      showLabels
-      onRemove={onRemoveMock}
-      onChange={onChangeMock}
-      onVisited={onVisitedMock}
-      data-test-subj={subject}
-      isRemoveDisabled={isRemoveDisabled}
-    />
-  );
+  const render = () => {
+    return (renderResult = mockedContext.render(
+      <ConditionEntryInput {...props} />));
+  };
 
-  // @ts-ignore
-  it.each(keys(ConditionEntryField).map((k) => [k]))(
-    'should call on change for field input with value %s',
-    (field) => {
-      const element = shallow(getElement('testOnChange'));
+  it.each(
+    [
+      { name: 'Hash md5, sha1, or sha256', expectedCall: ConditionEntryField.HASH },
+      { name: 'Path The full path of the application', expectedCall: ConditionEntryField.PATH },
+      { name: 'Signature The signer of the application', expectedCall: ConditionEntryField.SIGNER },
+      { name: 'Signature The signer of the application', expectedCall: ConditionEntryField.SIGNER_MAC },
+    ])('selecting `$name` should call onChange with `$expectedCall`', async ({ name, expectedCall }) => {
+      if (expectedCall === ConditionEntryField.SIGNER_MAC) {
+        props = { ...props, os: OperatingSystem.MAC }
+      }
+      render();
       expect(onChangeMock).toHaveBeenCalledTimes(0);
-      element
-        .find('[data-test-subj="testOnChange-field"]')
-        .first()
-        .simulate('change', { target: { value: field } });
+      const fieldOption = renderResult.getByTestId(`${formPrefix}-field`) as HTMLButtonElement;
+      await userEvent.click(fieldOption);
+      await waitForEuiPopoverOpen();
+      await userEvent.click(screen.getByRole('option', { name }));
       expect(onChangeMock).toHaveBeenCalledTimes(1);
-      expect(onChangeMock).toHaveBeenCalledWith(
-        {
-          ...baseEntry,
-          field: { target: { value: field } },
-        },
-        baseEntry
-      );
-    }
-  );
+      expect(onChangeMock).toHaveBeenCalledWith({ ...baseEntry, field: expectedCall }, baseEntry)
+    });
 
-  it('should call on remove for field input', () => {
-    const element = mount(getElement('testOnRemove'));
+  it('should call on remove for field input', async () => {
+    render();
     expect(onRemoveMock).toHaveBeenCalledTimes(0);
-    element.find('[data-test-subj="testOnRemove-remove"]').first().simulate('click');
+    const removeButton = renderResult.getByTestId(`${formPrefix}-remove`) as HTMLButtonElement;
+    await userEvent.click(removeButton);
     expect(onRemoveMock).toHaveBeenCalledTimes(1);
     expect(onRemoveMock).toHaveBeenCalledWith(baseEntry);
   });
 
-  it('should not be able to call on remove for field input because disabled', () => {
-    const element = mount(getElement('testOnRemove', { isRemoveDisabled: true }));
+  it('should not be able to call on remove for field input because disabled', async () => {
+    props = { ...props, isRemoveDisabled: true };
+    render();
     expect(onRemoveMock).toHaveBeenCalledTimes(0);
-    element.find('[data-test-subj="testOnRemove-remove"]').first().simulate('click');
+    const removeButton = renderResult.getByTestId(`${formPrefix}-remove`) as HTMLButtonElement;
+    await userEvent.click(removeButton);
     expect(onRemoveMock).toHaveBeenCalledTimes(0);
   });
 
-  it('should call on visited for field input', () => {
-    const element = shallow(getElement('testOnVisited'));
+  it('should call on visited for field input', async () => {
+    render();
     expect(onVisitedMock).toHaveBeenCalledTimes(0);
-    element.find('[data-test-subj="testOnVisited-value"]').first().simulate('blur');
+    const value = renderResult.getByTestId(`${formPrefix}-value`);
+    await fireEvent.blur(value);
     expect(onVisitedMock).toHaveBeenCalledTimes(1);
     expect(onVisitedMock).toHaveBeenCalledWith(baseEntry);
   });
 
-  it('should not call on visited for field change if value is empty', () => {
-    const emptyEntry = { ...baseEntry, value: '' };
-    const element = shallow(getElement('testOnVisited', { entry: emptyEntry }));
+  it('should not call on visited for field change if value is empty', async () => {
+    props = { ...props, entry: { ...baseEntry, value: '' } }
+    render();
     expect(onVisitedMock).toHaveBeenCalledTimes(0);
-    element.find('[data-test-subj="testOnVisited-field"]').first().simulate('change');
+    const field = renderResult.getByTestId(`${formPrefix}-field`);
+    await fireEvent.change(field)
+    await fireEvent.blur(field);
     expect(onVisitedMock).toHaveBeenCalledTimes(0);
   });
 
-  it('should call on visited for field change if value is not empty', () => {
-    const element = shallow(getElement('testOnVisited'));
-    expect(onVisitedMock).toHaveBeenCalledTimes(0);
-    element.find('[data-test-subj="testOnVisited-field"]').first().simulate('change');
-    expect(onVisitedMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('should change value for field input', () => {
-    const element = shallow(getElement('testOnChange'));
+  it('should change value for field input', async () => {
+    render();
     expect(onChangeMock).toHaveBeenCalledTimes(0);
-    element
-      .find('[data-test-subj="testOnChange-value"]')
-      .first()
-      .simulate('change', { target: { value: 'new value' } });
+    const value = renderResult.getByTestId(`${formPrefix}-value`);
+    await fireEvent.change(value, { target: { value: 'new value' } });
     expect(onChangeMock).toHaveBeenCalledTimes(1);
     expect(onChangeMock).toHaveBeenCalledWith(
       {
@@ -134,49 +134,30 @@ describe('Condition entry input', () => {
     );
   });
 
-  it('should be able to select three options when WINDOWS OS', () => {
-    const element = mount(getElement('testCheckSignatureOption'));
-    const superSelectProps = element
-      .find('[data-test-subj="testCheckSignatureOption-field"]')
-      .first()
-      .props() as EuiSuperSelectProps<string>;
-    expect(superSelectProps.options.length).toBe(3);
-  });
-
-  it('should be able to select two options when LINUX OS', () => {
-    const element = mount(getElement('testCheckSignatureOption', { os: OperatingSystem.LINUX }));
-    const superSelectProps = element
-      .find('[data-test-subj="testCheckSignatureOption-field"]')
-      .first()
-      .props() as EuiSuperSelectProps<string>;
-    expect(superSelectProps.options.length).toBe(2);
-  });
-
-  it('should be able to select three options when MAC OS', () => {
-    const element = mount(getElement('testCheckSignatureOption', { os: OperatingSystem.MAC }));
-    const superSelectProps = element
-      .find('[data-test-subj="testCheckSignatureOption-field"]')
-      .first()
-      .props() as EuiSuperSelectProps<string>;
-    expect(superSelectProps.options.length).toBe(3);
-  });
+  it.each(
+    [
+      { os: OperatingSystem.WINDOWS, expectedLength: 3 },
+      { os: OperatingSystem.LINUX, expectedLength: 2 },
+      { os: OperatingSystem.MAC, expectedLength: 3 },
+    ])(`should be able to select $expectedLength options when OS is $os`, async ({ os, expectedLength }) => {
+      props = { ...props, os }
+      render();
+      await userEvent.click(screen.getByTestId(`${formPrefix}-field`));
+      const options = screen.getAllByRole('option');
+      expect(options).toHaveLength(expectedLength);
+    });
 
   it('should have operator value selected when field is HASH', () => {
-    const element = shallow(getElement('testOperatorOptions'));
-    const inputField = element.find('[data-test-subj="testOperatorOptions-operator"]');
-    expect(inputField.contains('is'));
+    render();
+    const operatorField = renderResult.getByTestId(`${formPrefix}-operator`);
+    expect(operatorField).toHaveValue(OPERATOR_TITLES.is);
   });
 
-  it('should show operator dropdown with two values when field is PATH', () => {
-    const element = shallow(
-      getElement('testOperatorOptions', {
-        entry: { ...baseEntry, field: ConditionEntryField.PATH },
-      })
-    );
-    const superSelectProps = element
-      .find('[data-test-subj="testOperatorOptions-operator"]')
-      .first()
-      .props() as EuiSuperSelectProps<string>;
-    expect(superSelectProps.options.length).toBe(2);
+  it('should show operator dropdown with two values when field is PATH', async () => {
+    props = { ...props, entry: { ...baseEntry, field: ConditionEntryField.PATH } }
+    render();
+    await userEvent.click(screen.getByTestId(`${formPrefix}-operator`));
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(2);
   });
 });

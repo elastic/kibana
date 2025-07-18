@@ -659,7 +659,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           osTypes: trustedApp.os_types,
           showValueListModal: ShowValueListModal,
         }),
-      [autocompleteSuggestions, http, indexPatterns, trustedApp, handleOnBuilderChange]
+      [autocompleteSuggestions, getTestId, http, indexPatterns, trustedApp, handleOnBuilderChange]
     );
 
     if (isIndexPatternLoading || !trustedApp) {
