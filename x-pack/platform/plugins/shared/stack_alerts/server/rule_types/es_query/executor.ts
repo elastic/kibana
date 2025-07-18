@@ -178,7 +178,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     alertsClient.report({
       id,
       actionGroup: ActionGroupId,
-      state: { latestTimestamp, dateStart, dateEnd, grouping: groupingObject },
+      state: { latestTimestamp, dateStart, dateEnd },
       context: actionContext,
       payload: {
         [ALERT_URL]: actionContext.link,
@@ -211,7 +211,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
 
   for (const recoveredAlert of recoveredAlerts) {
     const alertId = recoveredAlert.alert.getId();
-    const recoveredAlertState = recoveredAlert.alert.getState();
 
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
@@ -229,7 +228,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
       sourceFields: [],
-      grouping: recoveredAlertState?.grouping,
+      grouping: recoveredAlert.hit?.[ALERT_GROUPING],
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,
@@ -249,7 +248,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
         [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
-        [ALERT_GROUPING]: recoveredAlertState?.grouping,
       },
     });
   }

@@ -18,6 +18,7 @@ import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import type { FetchEsQueryOpts } from './lib/fetch_es_query';
 import type { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
 import type { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -115,7 +116,7 @@ describe('es_query executor', () => {
       params: defaultProps,
       services,
       rule: { id: 'test-rule-id', name: 'test-rule-name' },
-      state: { latestTimestamp: undefined, grouping: undefined },
+      state: { latestTimestamp: undefined },
       spaceId: 'default',
       logger,
       getTimeRange: () => {
@@ -295,7 +296,6 @@ describe('es_query executor', () => {
           dateEnd: new Date(mockNow).toISOString(),
           dateStart: new Date(mockNow).toISOString(),
           latestTimestamp: undefined,
-          grouping: undefined,
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -354,7 +354,6 @@ describe('es_query executor', () => {
           dateEnd: new Date(mockNow).toISOString(),
           dateStart: new Date(mockNow).toISOString(),
           latestTimestamp: undefined,
-          grouping: undefined,
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -451,11 +450,6 @@ describe('es_query executor', () => {
           dateEnd: new Date(mockNow).toISOString(),
           dateStart: new Date(mockNow).toISOString(),
           latestTimestamp: undefined,
-          grouping: {
-            host: {
-              name: 'host-1',
-            },
-          },
         },
         payload: {
           'host.name': 'host-1',
@@ -494,11 +488,6 @@ describe('es_query executor', () => {
           dateEnd: new Date(mockNow).toISOString(),
           dateStart: new Date(mockNow).toISOString(),
           latestTimestamp: undefined,
-          grouping: {
-            host: {
-              name: 'host-2',
-            },
-          },
         },
         payload: {
           'host.name': 'host-2',
@@ -537,11 +526,6 @@ describe('es_query executor', () => {
           dateEnd: new Date(mockNow).toISOString(),
           dateStart: new Date(mockNow).toISOString(),
           latestTimestamp: undefined,
-          grouping: {
-            host: {
-              name: 'host-3',
-            },
-          },
         },
         payload: {
           'host.name': 'host-3',
@@ -612,7 +596,6 @@ describe('es_query executor', () => {
           dateEnd: new Date(mockNow).toISOString(),
           dateStart: new Date(mockNow).toISOString(),
           latestTimestamp: undefined,
-          grouping: undefined,
         },
       });
       expect(mockSetLimitReached).toHaveBeenCalledTimes(1);
@@ -668,11 +651,6 @@ describe('es_query executor', () => {
         {
           alert: {
             getId: () => 'query matched',
-            getState: () => {
-              return {
-                grouping: undefined,
-              };
-            },
           },
         },
       ]);
@@ -730,28 +708,24 @@ describe('es_query executor', () => {
         {
           alert: {
             getId: () => 'host-1',
-            getState: () => {
-              return {
-                grouping: {
-                  host: {
-                    name: 'host-1',
-                  },
-                },
-              };
+          },
+          hit: {
+            [ALERT_GROUPING]: {
+              host: {
+                name: 'host-1',
+              },
             },
           },
         },
         {
           alert: {
             getId: () => 'host-2',
-            getState: () => {
-              return {
-                grouping: {
-                  host: {
-                    name: 'host-2',
-                  },
-                },
-              };
+          },
+          hit: {
+            [ALERT_GROUPING]: {
+              host: {
+                name: 'host-2',
+              },
             },
           },
         },
@@ -844,11 +818,6 @@ describe('es_query executor', () => {
         {
           alert: {
             getId: () => 'query matched',
-            getState: () => {
-              return {
-                grouping: undefined,
-              };
-            },
           },
         },
       ]);
@@ -968,11 +937,6 @@ describe('es_query executor', () => {
           dateEnd: new Date(mockNow).toISOString(),
           dateStart: new Date(mockNow).toISOString(),
           latestTimestamp: undefined,
-          grouping: {
-            host: {
-              name: 'host-1',
-            },
-          },
         },
         payload: {
           'kibana.alert.evaluation.conditions':
