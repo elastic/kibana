@@ -13,7 +13,7 @@ import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { CONTENT_ID, LATEST_VERSION, LINKS_EMBEDDABLE_TYPE } from '../common';
 import { LinksState, LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
-import { transforms } from '../common/transforms';
+import { transforms } from '../common/transforms/transforms';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { transformIn } from './transform_in';
 import { transformOut } from './transform_out';
 
 export const transforms = {
+  transformIn,
   transformOut,
 };
