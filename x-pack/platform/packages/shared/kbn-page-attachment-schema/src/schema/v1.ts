@@ -26,9 +26,6 @@ export const pageAttachmentPersistedStateSchema = z.object({
      */
     label: z.string(),
     /**
-     * The icon representing the page type, displayed in the comment and action
-     */
-    /**
      * The icon, rendered via {@link EuiIcon}, representing the page type, displayed in the comment and action.
      */
     iconType: z.string().optional(),
