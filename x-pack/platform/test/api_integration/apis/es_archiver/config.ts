@@ -12,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
   const ssl = true;
-  const license = 'basic';
+  const license = 'trial';
 
   const servers = {
     ...baseIntegrationTestsConfig.get('servers'),
