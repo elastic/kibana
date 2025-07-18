@@ -1194,11 +1194,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packageInfo: pkgInfo,
         savedObjectsClient: soClient,
       });
+
       inputs = _compilePackagePolicyInputs(
         pkgInfo,
         restOfPackagePolicy.vars || {},
         inputs,
-        assetsMap
+        assetsMap,
+        id
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1573,7 +1575,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               pkgInfo,
               restOfPackagePolicy.vars || {},
               inputs,
-              assetsMap
+              assetsMap,
+              id
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -2731,8 +2734,8 @@ export function _compilePackagePolicyInputs(
     if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
       return {
         ...input,
-        otelcol_config: _compilePackageStreams(pkgInfo, vars, input, assetsMap, packagePolicyId),
-        streams: [],
+        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, packagePolicyId),
+        compiled_input: [],
       };
     }
     return {

@@ -869,28 +869,18 @@ export function getBinarySourceSettings(
   return config;
 }
 
+// Generate OTel Collector policy
 function generateOtelcolConfig(inputs: FullAgentPolicyInput[]) {
   const otelConfig = inputs.flatMap((input) => {
     if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-      // Generate OTel Collector input structure
-      const otelInputs: OTelCollectorConfig[] = (input?.otelcol_config ?? [])
-        .filter((config) => config.enabled === true)
-        .flatMap((config) => {
-          return {
-            ...(config?.compiled_stream?.receivers
-              ? { receivers: config?.compiled_stream?.receivers }
-              : {}),
-            ...(config?.compiled_stream?.service
-              ? { service: config?.compiled_stream?.service }
-              : {}),
-            ...(config?.compiled_stream?.extensions
-              ? { service: config?.compiled_stream?.extensions }
-              : {}),
-            ...(config?.compiled_stream?.processors
-              ? { service: config?.compiled_stream?.processors }
-              : {}),
-          };
-        });
+      const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).flatMap((inputStream) => {
+        return {
+          ...(inputStream?.receivers ? { receivers: inputStream.receivers } : {}),
+          ...(inputStream?.service ? { service: inputStream.service } : {}),
+          ...(inputStream?.extensions ? { service: inputStream.extensions } : {}),
+          ...(inputStream?.processors ? { service: inputStream.processors } : {}),
+        };
+      });
 
       return otelInputs;
     }

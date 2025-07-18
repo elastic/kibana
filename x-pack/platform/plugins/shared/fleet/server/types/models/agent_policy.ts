@@ -543,4 +543,3 @@ export const GetAgentPolicyOutputsResponseSchema = schema.object({
 export const GetListAgentPolicyOutputsResponseSchema = schema.object({
   items: schema.arrayOf(OutputsForAgentPolicySchema),
 });
-
