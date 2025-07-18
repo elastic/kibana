@@ -89,6 +89,18 @@ export function StreamDetailDashboardsView({
               setQuery(nextQuery.queryText);
             }}
           />
+          <EuiButton
+            data-test-subj="streamsAppStreamDetailAddDashboardButton"
+            iconType="plusInCircle"
+            disabled={!canLinkAssets}
+            onClick={() => {
+              setIsAddDashboardFlyoutOpen(true);
+            }}
+          >
+            {i18n.translate('xpack.streams.streamDetailDashboardView.addADashboardButtonLabel', {
+              defaultMessage: 'Add a dashboard',
+            })}
+          </EuiButton>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
