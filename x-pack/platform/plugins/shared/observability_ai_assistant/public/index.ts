@@ -76,6 +76,7 @@ export {
   E5_SMALL_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
   EIS_PRECONFIGURED_INFERENCE_IDS,
+  LEGACY_CUSTOM_INFERENCE_ID,
 } from '../common';
 
 export type {
@@ -93,11 +94,6 @@ export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetr
 
 export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
 export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
-export {
-  redactEntities,
-  unhashString,
-  NER_MODEL_ID,
-} from '../common/utils/anonymization/redaction';
 
 export type {
   ObservabilityAIAssistantAPIClientRequestParamsOf,
@@ -111,7 +107,6 @@ export { useKibana } from './hooks/use_kibana';
 export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
-  aiAssistantAnonymizationRules,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantPreferredAIAssistantType,
 } from '../common/ui_settings/settings_keys';
@@ -142,3 +137,8 @@ export {
   useElasticLlmCalloutDismissed,
   ElasticLlmCalloutKey,
 } from './hooks/use_elastic_llm_callout_dismissed';
+
+export {
+  ObservabilityAIAssistantFlyoutStateProvider,
+  useObservabilityAIAssistantFlyoutStateContext,
+} from './context/observability_ai_assistant_flyout_state_context';

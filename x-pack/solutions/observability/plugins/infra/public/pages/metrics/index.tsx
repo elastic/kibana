@@ -10,19 +10,14 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import {
-  EuiErrorBoundary,
-  EuiHeaderLinks,
-  EuiHeaderLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiHeaderLinks, EuiHeaderLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsSettingsPage } from './settings';
@@ -72,7 +67,7 @@ export const InfrastructurePage = () => {
   });
 
   return (
-    <EuiErrorBoundary>
+    <KibanaErrorBoundary>
       <ReactQueryProvider>
         <AlertPrefillProvider>
           <ReloadRequestTimeProvider>
@@ -145,7 +140,7 @@ export const InfrastructurePage = () => {
           </ReloadRequestTimeProvider>
         </AlertPrefillProvider>
       </ReactQueryProvider>
-    </EuiErrorBoundary>
+    </KibanaErrorBoundary>
   );
 };
 

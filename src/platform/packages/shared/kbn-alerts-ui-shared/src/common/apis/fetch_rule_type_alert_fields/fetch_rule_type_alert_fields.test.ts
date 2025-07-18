@@ -15,7 +15,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('fetchRuleTypeAlertFields', () => {
   test('should call aad fields endpoint with the correct params', async () => {
-    http.get.mockResolvedValueOnce(['mockData']);
+    http.get.mockResolvedValueOnce({ fields: ['mockData'] });
 
     const result = await fetchRuleTypeAlertFields({
       http,

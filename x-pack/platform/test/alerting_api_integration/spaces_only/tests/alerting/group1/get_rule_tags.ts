@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 
 const tags = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 
-// eslint-disable-next-line import/no-default-export
 export default function createAggregateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

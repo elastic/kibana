@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elast
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
@@ -21,6 +21,7 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { isDevMode } from '@kbn/xstate-utils';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { safeDecode } from '@kbn/rison';
+import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -28,6 +29,8 @@ import { HeaderActionMenuContext } from '../../containers/header_action_menu_pro
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
 import { NotFoundPage } from '../404';
 import { getLogsAppRoutes } from './routes';
+
+const StreamPage = dynamic(() => import('./stream').then((mod) => ({ default: mod.StreamPage })));
 
 const LogEntryCategoriesPage = dynamic(() =>
   import('./log_entry_categories').then((mod) => ({ default: mod.LogEntryCategoriesPage }))
@@ -50,6 +53,8 @@ const StateMachinePlayground = dynamic(() =>
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;
 
+  const isLogsStreamEnabled: boolean = useUiSetting(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
+
   const uiCapabilities = application?.capabilities;
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -59,7 +64,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const enableDeveloperRoutes = isDevMode();
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
-  const routes = getLogsAppRoutes();
+  const routes = getLogsAppRoutes({ isLogsStreamEnabled });
 
   const settingsLinkProps = useLinkProps({
     app: 'logs',
@@ -93,30 +98,34 @@ export const LogsPageContent: React.FunctionComponent = () => {
       )}
 
       <Routes>
-        <Route
-          path="/stream"
-          exact
-          render={(props) => {
-            const searchParams = new URLSearchParams(props.location.search);
-            const logFilterEncoded = searchParams.get('logFilter');
-            let locatorParams: LogsLocatorParams = {};
+        {routes.stream ? (
+          <Route path={routes.stream.path} component={StreamPage} />
+        ) : (
+          <Route
+            path="/stream"
+            exact
+            render={(props) => {
+              const searchParams = new URLSearchParams(props.location.search);
+              const logFilterEncoded = searchParams.get('logFilter');
+              let locatorParams: LogsLocatorParams = {};
 
-            if (logFilterEncoded) {
-              const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
-              locatorParams = {
-                timeRange: logFilter?.timeRange,
-                query: logFilter?.query,
-                filters: logFilter?.filters,
-                refreshInterval: logFilter?.refreshInterval,
-              };
-            }
+              if (logFilterEncoded) {
+                const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
+                locatorParams = {
+                  timeRange: logFilter?.timeRange,
+                  query: logFilter?.query,
+                  filters: logFilter?.filters,
+                  refreshInterval: logFilter?.refreshInterval,
+                };
+              }
 
-            share.url.locators
-              .get<LogsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
-              ?.navigate(locatorParams);
-            return null;
-          }}
-        />
+              share.url.locators
+                .get<LogsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+                ?.navigate(locatorParams);
+              return null;
+            }}
+          />
+        )}
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
         <Route path={routes.settings.path} component={LogsSettingsPage} />
