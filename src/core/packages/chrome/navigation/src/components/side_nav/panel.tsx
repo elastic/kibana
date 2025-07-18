@@ -8,8 +8,9 @@
  */
 
 import { EuiPanel, useEuiOverflowScroll, useEuiTheme } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { css } from '@emotion/react';
+import { useRovingIndex } from '../../utils/use_roving_index';
 
 export interface SideNavPanelProps {
   children: ReactNode;
@@ -19,27 +20,35 @@ export interface SideNavPanelProps {
  * Side navigation panel that opens on mouse click if the page contains sub-pages.
  *
  * `paddingSize="m"` is already `16px`, so we have to manually set `12px` padding
+ *
+ * TODO: pass ref to EuiPanel
  */
 export const SideNavPanel = ({ children }: SideNavPanelProps): JSX.Element => {
+  const ref = useRef<HTMLDivElement | null>(null);
+
   const { euiTheme } = useEuiTheme();
 
+  useRovingIndex(ref);
+
   return (
-    <EuiPanel
-      className="side_panel"
-      css={css`
-        ${useEuiOverflowScroll('y')}
-        border-right: 1px ${euiTheme.colors.borderBaseSubdued} solid;
-        height: 100%;
-      `}
-      color="subdued"
-      // > For instance, only plain or transparent panels can have a border and/or shadow.
-      // source: https://eui.elastic.co/docs/components/containers/panel/
-      // hasBorder
-      paddingSize="none"
-      borderRadius="none"
-      grow={false}
-    >
-      {children}
-    </EuiPanel>
+    <div ref={ref}>
+      <EuiPanel
+        className="side_panel"
+        css={css`
+          ${useEuiOverflowScroll('y')}
+          border-right: 1px ${euiTheme.colors.borderBaseSubdued} solid;
+          height: 100%;
+        `}
+        color="subdued"
+        // > For instance, only plain or transparent panels can have a border and/or shadow.
+        // source: https://eui.elastic.co/docs/components/containers/panel/
+        // hasBorder
+        paddingSize="none"
+        borderRadius="none"
+        grow={false}
+      >
+        {children}
+      </EuiPanel>
+    </div>
   );
 };

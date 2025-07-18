@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+
+import { useRovingIndex } from '../../utils/use_roving_index';
 
 export interface SideNavFooterProps {
   children: ReactNode;
@@ -17,7 +19,11 @@ export interface SideNavFooterProps {
 }
 
 export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JSX.Element => {
+  const ref = useRef<HTMLElement>(null);
+
   const { euiTheme } = useEuiTheme();
+
+  useRovingIndex(ref);
 
   return (
     <footer
@@ -32,6 +38,7 @@ export const SideNavFooter = ({ children, isCollapsed }: SideNavFooterProps): JS
         justify-content: center;
         padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
       `}
+      ref={ref}
     >
       {children}
     </footer>

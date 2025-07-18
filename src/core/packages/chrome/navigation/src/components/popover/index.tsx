@@ -116,7 +116,6 @@ export const SideNavPopover = ({
     () =>
       cloneElement(trigger, {
         ref: triggerRef,
-        tabIndex: 0,
         'aria-haspopup': hasContent,
         'aria-expanded': hasContent ? isOpen : undefined,
         onClick: (e: React.MouseEvent) => {
