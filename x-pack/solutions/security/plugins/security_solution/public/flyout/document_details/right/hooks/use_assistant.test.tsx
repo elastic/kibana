@@ -36,6 +36,7 @@ describe('useAssistant', () => {
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
+      isAssistantVisible: true,
     });
     useAssistantOverlayMock.mockReturnValue({
       showAssistantOverlay: jest.fn,
@@ -88,6 +89,7 @@ describe('useAssistant', () => {
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: false,
+      isAssistantVisible: true,
     });
 
     hookResult = renderUseAssistant();
@@ -104,6 +106,7 @@ describe('useAssistant', () => {
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
+      isAssistantVisible: true,
     });
 
     hookResult = renderUseAssistant();

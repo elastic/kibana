@@ -72,7 +72,7 @@ export interface LinksEditorProps {
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
 }
 
-const LinksEditor = ({
+export const LinksEditor = ({
   onSaveToLibrary,
   onAddToDashboard,
   onClose,

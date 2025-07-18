@@ -11,7 +11,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
@@ -34,6 +34,7 @@ import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import { setKibanaServices } from './kibana_services';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -42,7 +43,8 @@ interface SetupDeps {
   contentManagement: ContentManagementServerSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
+  embeddable: EmbeddableStart;
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
   savedObjectsTagging?: SavedObjectTaggingStart;
@@ -135,6 +137,8 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
+
+    setKibanaServices(plugins, this.logger);
 
     if (plugins.share) {
       plugins.share.url.locators.create(

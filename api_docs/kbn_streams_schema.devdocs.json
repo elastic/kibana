@@ -3968,6 +3968,21 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.MAX_NESTING_LEVEL",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_NESTING_LEVEL",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/hierarchy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.NamedFieldDefinitionConfig",
         "type": "Type",
         "tags": [],

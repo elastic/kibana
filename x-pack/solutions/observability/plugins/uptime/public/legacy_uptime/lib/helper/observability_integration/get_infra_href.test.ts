@@ -16,7 +16,8 @@ const mockAssetDetailsLocator = {
   getRedirectUrl: jest
     .fn()
     .mockImplementation(
-      ({ assetId, assetType }: AssetDetailsLocatorParams) => `/node-mock/${assetType}/${assetId}`
+      ({ entityId, entityType }: AssetDetailsLocatorParams) =>
+        `/node-mock/${entityType}/${entityId}`
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 

@@ -17,6 +17,7 @@
   ],
   "baseBranches": [
     "main",
+    "9.1",
     "9.0",
     "8.19",
     "8.18",
@@ -133,7 +134,7 @@
       ],
       "matchBaseBranches": [
         "main",
-        "/^[9].*/",
+        "/^9.[1-9].*/",
         "8.19"
       ],
       "labels": [
@@ -178,7 +179,7 @@
         "@aws-crypto/sha256-js",
         "@aws-crypto/util",
         "@langtrase/trace-attributes",
-        "@opentelemetry/sdk-trace-base",
+        "@arizeai/openinference-semantic-conventions",
         "@smithy/eventstream-serde-node",
         "@smithy/node-http-handler",
         "@smithy/types",
@@ -1833,7 +1834,8 @@
       ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3370,7 +3372,7 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },    
+    },
     {
       "groupName": "redux-actions",
       "matchDepNames": [
@@ -4346,36 +4348,33 @@
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
+        "@elastic/opentelemetry-node",
         "@opentelemetry/api",
-        "@opentelemetry/api-metrics",
-        "@opentelemetry/core",
+        "@opentelemetry/context-async-hooks",
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-prometheus",
-        "@opentelemetry/resources",
-        "@opentelemetry/sdk-metrics-base",
-        "@opentelemetry/semantic-conventions",
-        "@arizeai/openinference-semantic-conventions",
-        "@opentelemetry/context-async-hooks",
-        "@opentelemetry/exporter-trace-otlp-grpc",
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
-        "@opentelemetry/otlp-exporter-base",
-        "@opentelemetry/sdk-node",
-        "@opentelemetry/sdk-trace-node",
         "@opentelemetry/instrumentation",
-        "@opentelemetry/instrumentation-http",
-        "@opentelemetry/instrumentation-undici"
+        "@opentelemetry/instrumentation-undici",
+        "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
-        "team:stack-monitoring",
-        "team:kibana-core"
+        "team:appex-ai-infra",
+        "team:kibana-core",
+        "team:kibana-security",
+        "team:stack-monitoring"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
+        "Team:AI Infra",
         "Team:Monitoring",
-        "backport:all-open",
+        "Team:Core",
+        "Team:Security",
+        "backport:prev-minor",
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
