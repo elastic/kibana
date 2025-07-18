@@ -25,7 +25,7 @@ export interface EditorState {
   title?: string;
 }
 
-export async function getEditorFlyout({
+export function getEditorFlyout({
   initialState,
   parentDashboard,
   onCompleteEdit,

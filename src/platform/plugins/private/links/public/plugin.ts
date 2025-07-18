@@ -27,7 +27,6 @@ import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
-import { coreServices } from './services/kibana_services';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -106,29 +105,10 @@ export class LinksPlugin
                 title,
                 editor: {
                   onEdit: async (savedObjectId: string) => {
-                    const { openLazyFlyout } = await import('@kbn/presentation-util');
-                    openLazyFlyout({
-                      core: coreServices,
-                      loadContent: async ({ closeFlyout }) => {
-                        const [{ loadFromLibrary }, { getEditorFlyout }, { resolveLinks }] =
-                          await Promise.all([
-                            import('./content_management/load_from_library'),
-                            import('./editor/get_editor_flyout'),
-                            import('./lib/resolve_links'),
-                          ]);
-                        const linksState = await loadFromLibrary(savedObjectId);
-                        return await getEditorFlyout({
-                          initialState: {
-                            ...linksState,
-                            links: await resolveLinks(linksState.links ?? []),
-                          },
-                          closeFlyout,
-                        });
-                      },
-                      flyoutProps: {
-                        'data-test-subj': 'links--panelEditor--flyout',
-                      },
-                    });
+                    const { onVisualizationsEdit } = await import(
+                      './editor/on_visualizations_edit'
+                    );
+                    onVisualizationsEdit(savedObjectId);
                   },
                 },
                 description,
