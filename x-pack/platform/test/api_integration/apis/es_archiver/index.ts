@@ -15,10 +15,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('esArchiver', function () {
     beforeEach(async () => {
-      const indexExistsResponse = await es.indices.exists({
-        index: 'myfakeindex-3',
-      });
-      logger.info('index exists', indexExistsResponse);
+      // const indexExistsResponse = await es.indices.exists({
+      //   index: 'myfakeindex-3',
+      // });
+      // logger.info('index exists', indexExistsResponse);
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
       );
@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('assertions on inserted documents', () => {
-      Array(100)
+      Array(400)
         .fill(0)
         .forEach(() => {
           it('should have one document from the timestamp_override_3 archive', async () => {
