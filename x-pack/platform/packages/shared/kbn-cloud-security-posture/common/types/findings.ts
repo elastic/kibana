@@ -8,11 +8,9 @@
 import type { EcsDataStream, EcsEvent, EcsObserver } from '@elastic/ecs';
 import type { CspBenchmarkRuleMetadata } from '../schema/rules/latest';
 
-export interface CspFinding {
+// Base interface containing common fields for all finding types
+interface CspFindingBase {
   '@timestamp': string;
-  cluster_id?: string;
-  orchestrator?: CspFindingOrchestrator;
-  cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
   resource: CspFindingResource;
   rule: CspBenchmarkRuleMetadata;
@@ -25,6 +23,57 @@ export interface CspFinding {
     version: string;
   };
 }
+
+// CSPM findings contain cloud-specific fields
+interface CspFindingCspm extends CspFindingBase {
+  rule: CspBenchmarkRuleMetadata & {
+    benchmark: {
+      name: string;
+      posture_type: 'cspm';
+      id: string;
+      version: string;
+      rule_number?: string;
+    };
+  };
+  cloud: CspFindingCloud;
+  cluster_id?: never;
+  orchestrator?: never;
+}
+
+// KSPM findings contain cluster-specific fields
+interface CspFindingKspm extends CspFindingBase {
+  rule: CspBenchmarkRuleMetadata & {
+    benchmark: {
+      name: string;
+      posture_type: 'kspm';
+      id: string;
+      version: string;
+      rule_number?: string;
+    };
+  };
+  cluster_id?: string;
+  orchestrator?: CspFindingOrchestrator;
+  cloud?: never;
+}
+
+// Legacy findings without posture_type for backward compatibility
+interface CspFindingLegacy extends CspFindingBase {
+  rule: CspBenchmarkRuleMetadata & {
+    benchmark: {
+      name: string;
+      posture_type?: undefined;
+      id: string;
+      version: string;
+      rule_number?: string;
+    };
+  };
+  cluster_id?: string;
+  orchestrator?: CspFindingOrchestrator;
+  cloud?: CspFindingCloud;
+}
+
+// Discriminated union of all finding types
+export type CspFinding = CspFindingCspm | CspFindingKspm | CspFindingLegacy;
 
 interface CspFindingOrchestrator {
   cluster?: {
