@@ -38,20 +38,26 @@ export const exportExceptionListsRoute = (router: ListsPluginRouter): void => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const { include_expired_exceptions: includeExpiredExceptionsString } = request.query;
+          const {
+            filter,
+            include_expired_exceptions: includeExpiredExceptionsString,
+            namespace_type: namespaceType,
+          } = request.query;
           const exceptionListsClient = await getExceptionListClient(context);
 
           // Defaults to including expired exceptions if query param is not present
           const includeExpiredExceptions = (includeExpiredExceptionsString ?? 'true') === 'true';
 
           const exportContent = await exceptionListsClient.exportExceptionListsAndItems({
+            filter,
             includeExpiredExceptions,
+            namespaceType,
           });
 
           if (exportContent == null) {
             return siemResponse.error({
-              body: `TODO`,
-              statusCode: 400,
+              body: `No lists found for filter: "${filter}"`,
+              statusCode: 404,
             });
           }
 

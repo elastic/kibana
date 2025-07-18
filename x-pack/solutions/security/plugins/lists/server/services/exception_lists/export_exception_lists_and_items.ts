@@ -11,8 +11,6 @@ import type {
   ExportExceptionDetails,
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
-  // IdOrUndefined,
-  // ListIdOrUndefined,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
@@ -20,19 +18,16 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { findExceptionListPointInTimeFinder } from './find_exception_list_point_in_time_finder';
-import { findExceptionListItemsPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
+import { findExceptionListsItemsPointInTimeFinder } from './find_exception_lists_items_point_in_time_finder';
 
-interface ExportExceptionListAndItemsOptions {
-  // id: IdOrUndefined;
-  // listId: ListIdOrUndefined;
+interface ExportExceptionListsAndItemsOptions {
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   includeExpiredExceptions: boolean;
-  /** Optional KQL filter to be applied to the data that will be retrieved for export */
-  filter?: string;
+  filter: string | undefined;
 }
 
-export interface ExportExceptionListAndItemsReturn {
+export interface ExportExceptionListsAndItemsReturn {
   exportData: string;
   exportDetails: ExportExceptionDetails;
 }
@@ -41,8 +36,8 @@ export const exportExceptionListsAndItems = async ({
   namespaceType,
   includeExpiredExceptions,
   savedObjectsClient,
-  filter: dataFilter = undefined,
-}: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
+  filter: dataFilter,
+}: ExportExceptionListsAndItemsOptions): Promise<ExportExceptionListsAndItemsReturn | null> => {
   const exceptionLists: ExceptionListSchema[] = [];
   const listIds: string[] = [];
   const namespaceTypes: NamespaceType[] = [];
@@ -57,7 +52,7 @@ export const exportExceptionListsAndItems = async ({
 
   await findExceptionListPointInTimeFinder({
     executeFunctionOnStream: appendExceptionList,
-    filter: dataFilter, // TODO check filter
+    filter: dataFilter,
     maxSize: 10_000,
     namespaceType: [namespaceType],
     perPage: 1_000,
@@ -88,13 +83,12 @@ export const exportExceptionListsAndItems = async ({
     }
   }
 
-  // TODO this fetches each exception list separately. Write a new function.
-  await findExceptionListItemsPointInTimeFinder({
+  await findExceptionListsItemsPointInTimeFinder({
     executeFunctionOnStream: appendExceptionItem,
-    filter: filter ? [filter] : [], // TODO fix type
-    listId: listIds,
+    filter,
+    listIds,
     maxSize: 10_000,
-    namespaceType: namespaceTypes, // TODO can we have multiple namespaces?
+    namespaceTypes,
     perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     savedObjectsClient,
     sortField: 'exception-list.created_at',
