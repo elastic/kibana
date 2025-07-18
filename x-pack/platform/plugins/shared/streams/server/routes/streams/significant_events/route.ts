@@ -76,7 +76,7 @@ const previewSignificantEventsRoute = createServerRoute({
     const {
       body: { query },
       path: { name },
-      query: { bucketSize, from, to },
+      query: { from, to },
     } = params;
 
     const definition = await streamsClient.getStream(name);
@@ -84,7 +84,6 @@ const previewSignificantEventsRoute = createServerRoute({
     return await previewSignificantEvents(
       {
         definition,
-        bucketSize,
         from,
         to,
         query,

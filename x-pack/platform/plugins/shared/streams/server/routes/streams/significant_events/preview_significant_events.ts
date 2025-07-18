@@ -5,73 +5,18 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { badRequest } from '@hapi/boom';
 import { IScopedClusterClient } from '@kbn/core/server';
+import type { ChangePointType } from '@kbn/es-types/src';
 import {
   SignificantEventsPreviewResponse,
   StreamQueryKql,
   Streams,
   getIndexPatternsForStream,
 } from '@kbn/streams-schema';
-import { InferSearchResponseOf } from '@kbn/es-types';
-import { notFound } from '@hapi/boom';
-import type { ChangePointType } from '@kbn/es-types/src';
+import { getKqlAsCommandArg } from '../../../lib/streams/assets/query/helpers/query';
 
 type PreviewStreamQuery = Pick<StreamQueryKql, 'kql'>;
-
-function createSearchRequest({
-  from,
-  to,
-  query,
-  bucketSize,
-}: {
-  from: Date;
-  to: Date;
-  query: PreviewStreamQuery;
-  bucketSize: string;
-}) {
-  return {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: from.toISOString(),
-                lte: to.toISOString(),
-              },
-            },
-          },
-          {
-            kql: {
-              query: query.kql.query,
-            },
-            // TODO: kql is not in the ES client's types yet (06-2025)
-          } as QueryDslQueryContainer,
-        ],
-      },
-    },
-    aggs: {
-      occurrences: {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: bucketSize,
-          extended_bounds: {
-            min: from.toISOString(),
-            max: to.toISOString(),
-          },
-        },
-      },
-      change_points: {
-        change_point: {
-          buckets_path: 'occurrences>_count',
-        },
-        // TODO: change_points is not in the ES client's types yet (06-2025)
-      } as {},
-    },
-  };
-}
 
 export async function previewSignificantEvents(
   params: {
@@ -79,47 +24,76 @@ export async function previewSignificantEvents(
     query: PreviewStreamQuery;
     from: Date;
     to: Date;
-    bucketSize: string;
   },
   dependencies: {
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsPreviewResponse> {
-  const { bucketSize, from, to, definition, query } = params;
+  const { from, to, definition, query } = params;
   const { scopedClusterClient } = dependencies;
 
-  const searchRequest = createSearchRequest({
-    bucketSize,
+  const esqlRequest = createEsqlRequest({
+    index: getIndexPatternsForStream(definition),
     from,
     query,
     to,
   });
 
-  const response = (await scopedClusterClient.asCurrentUser.search({
-    index: getIndexPatternsForStream(definition),
-    track_total_hits: false,
-    ...searchRequest,
-  })) as InferSearchResponseOf<unknown, ReturnType<typeof createSearchRequest>>;
+  const esqlResponse = await scopedClusterClient.asCurrentUser.esql
+    .query({
+      query: esqlRequest,
+    })
+    .catch((err) => {
+      throw badRequest(err.message);
+    });
+  const { columns, values } = esqlResponse;
 
-  if (!response.aggregations) {
-    throw notFound();
+  const dateColIndex = columns.findIndex((col) => col.name === 'interval');
+  const countColIndex = columns.findIndex((col) => col.name === 'count');
+  const typeColIndex = columns.findIndex((col) => col.name === 'type');
+  const pValueColIndex = columns.findIndex((col) => col.name === 'pvalue');
+  if (dateColIndex === -1 || countColIndex === -1 || typeColIndex === -1 || pValueColIndex === -1) {
+    return { ...query, change_points: { type: {} }, occurrences: [] };
   }
 
-  const aggregations = response.aggregations as typeof response.aggregations & {
-    change_points: {
-      type: Record<ChangePointType, { p_value: number; change_point: number }>;
-    };
-  };
+  const occurrences = values.map((row) => ({
+    date: row[dateColIndex] as string,
+    count: row[countColIndex] as number,
+  }));
+
+  const changePoints = values
+    .map((row, index) => ({
+      type: row[typeColIndex] as ChangePointType,
+      pValue: row[pValueColIndex] as number,
+      changePoint: index,
+    }))
+    .filter((row) => row.type != null && row.pValue != null && !isNaN(row.pValue))
+    .reduce((acc, row) => {
+      acc[row.type] = { p_value: row.pValue, change_point: row.changePoint };
+      return acc;
+    }, {} as Record<ChangePointType, { p_value: number; change_point: number }>);
 
   return {
     ...query,
-    change_points: aggregations.change_points,
-    occurrences:
-      aggregations.occurrences.buckets.map((bucket) => {
-        return {
-          date: bucket.key_as_string,
-          count: bucket.doc_count,
-        };
-      }) ?? [],
+    change_points: { type: changePoints },
+    occurrences,
   };
+}
+
+function createEsqlRequest({
+  index,
+  from,
+  query,
+  to,
+}: {
+  index: string[];
+  from: Date;
+  query: Pick<StreamQueryKql, 'kql'>;
+  to: Date;
+}): string {
+  return `FROM ${index.join(',')}
+  | WHERE @timestamp >= "${from.toISOString()}" AND @timestamp <= "${to.toISOString()}"
+  | WHERE KQL("${getKqlAsCommandArg(query.kql.query)}")
+  | STATS count = COUNT(*) BY interval = BUCKET(@timestamp, 50, "${from.toISOString()}", "${to.toISOString()}")
+  | CHANGE_POINT count ON interval`;
 }
