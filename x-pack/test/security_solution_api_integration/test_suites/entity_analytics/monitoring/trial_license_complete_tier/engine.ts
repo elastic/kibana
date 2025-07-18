@@ -19,6 +19,8 @@ export default ({ getService }: FtrProviderContext) => {
   const privmon = privilegeMonitoringRouteHelpersFactory(supertest);
   const log = getService('log');
   const spaceName = 'monitoring-space';
+  const es = getService('es');
+  // const spaceName = 'default';
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
@@ -67,15 +69,11 @@ export default ({ getService }: FtrProviderContext) => {
       after(async () => {
         // Probable do not need cleanup before AND after. Debugging WIP
         await es.indices.delete({ index: indexName }, { ignore: [404] });
-        await privmon.deleteIndexSource(entitySource.name, { ignore404: true });
         await es.indices.delete({ index: 'default-monitoring-index' }, { ignore: [404] });
         await privmon.deleteIndexSource('default-monitoring-index', { ignore404: true });
+        await privmon.deleteIndexSource(entitySource.name, { ignore404: true });
       });
       before(async () => {
-        // Ensure index does not exist before creating it
-        await es.indices.delete({ index: indexName }, { ignore: [404] });
-        await es.indices.delete({ index: 'default-monitoring-index' }, { ignore: [404] });
-        await privmon.deleteIndexSource('default-monitoring-index', { ignore404: true });
         const soId = await kibanaServer.savedObjects.find<{
           type: typeof privilegeMonitoringTypeName;
           space: string;
@@ -91,6 +89,10 @@ export default ({ getService }: FtrProviderContext) => {
           });
         }
         // Delete quickly any existing source with the same name
+        // Ensure index does not exist before creating it
+        await es.indices.delete({ index: indexName }, { ignore: [404] });
+        await es.indices.delete({ index: 'default-monitoring-index' }, { ignore: [404] });
+        await privmon.deleteIndexSource('default-monitoring-index', { ignore404: true });
         await privmon.deleteIndexSource(entitySource.name, { ignore404: true });
         // await privmon.deleteIndexSource(entitySource.name);
         // Create index with mapping
@@ -134,9 +136,19 @@ export default ({ getService }: FtrProviderContext) => {
         const response = await privmon.registerIndexSource(entitySource);
         expect(response.status).to.be(200);
         // Call init to trigger the sync
-        // await privmon.initEngine();
+        await privmon.initEngine();
+        // default-monitoring-index should exist now
+        const result = await kibanaServer.savedObjects.find({
+          type: 'entity-analytics-monitoring-entity-source',
+          space: 'default',
+        });
+
+        const names = result.saved_objects.map((so) => so.attributes.name);
+        expect(names).to.contain('default-monitoring-index');
+        // How to make interval shorter to test the data syncs?
         // Now list the users in monitoring
-        // const res = await privmon.listUsers();
+        // const res = await privmon.listUsers(); // this should be undefined to start with. Can we change the interval to 1s?
+        // console.log('Users in monitoring:', res.body.users);
         // const userNames = res.body.users.map((u: any) => u.name);
         // expect(userNames).to.be.an('array');
         // expect(userNames.length).to.be.greaterThan(0);
