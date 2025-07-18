@@ -11,24 +11,29 @@ import { partition } from 'lodash';
 import { AnonymizationState } from './types';
 import { executeRegexRule } from './execute_regex_rule';
 import { executeNerRule } from './execute_ner_rule';
+import { RegexWorkerService } from './regex_worker_service';
 
 export async function anonymizeRecords<T extends Record<string, string | undefined>>({
   input,
   anonymizationRules,
+  regexWorker,
   esClient,
 }: {
   input: T[];
   anonymizationRules: AnonymizationRule[];
+  regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
 }): Promise<AnonymizationState>;
 
 export async function anonymizeRecords({
   input,
   anonymizationRules,
+  regexWorker,
   esClient,
 }: {
   input: Array<Record<string, string>>;
   anonymizationRules: AnonymizationRule[];
+  regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
 }): Promise<AnonymizationState> {
   let state: AnonymizationState = {
@@ -42,9 +47,10 @@ export async function anonymizeRecords({
   );
 
   for (const rule of regexRules) {
-    state = executeRegexRule({
+    state = await executeRegexRule({
       rule,
       state,
+      regexWorker,
     });
   }
 

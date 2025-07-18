@@ -23,6 +23,15 @@ test('can generate integer literal', () => {
   });
 });
 
+test('can generate a map', () => {
+  const node = expr('{"x": 1}');
+
+  expect(node).toMatchObject({
+    type: 'map',
+  });
+  expect(node + '').toBe('{"x": 1}');
+});
+
 test('can generate integer literal and keep comment', () => {
   const node = expr('42 /* my 42 */');
 

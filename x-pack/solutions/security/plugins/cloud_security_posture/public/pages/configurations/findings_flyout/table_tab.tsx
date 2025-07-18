@@ -66,7 +66,7 @@ const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
   {
     field: 'value',
     name: i18n.translate('xpack.csp.flyout.tableTab.fieldValueLabel', { defaultMessage: 'Value' }),
-    render: (value, record) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
+    render: (value, record) => <div css={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
   },
 ];
 

@@ -8,8 +8,8 @@
  */
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
-import { listCompleteItem } from '../../commands_registry/utils/complete_items';
-import { getFieldsOrFunctionsSuggestions } from './autocomplete';
+import { listCompleteItem } from '../../commands_registry/complete_items';
+import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
 import {
   type FunctionFilterPredicates,
   type FunctionParameterType,
@@ -83,7 +83,7 @@ export const getOperatorsSuggestionsAfterNot = (): ISuggestionItem[] => {
     .map(getOperatorSuggestion);
 };
 
-function isArrayType(type: string): type is ArrayType {
+export function isArrayType(type: string): type is ArrayType {
   return type.endsWith('[]');
 }
 

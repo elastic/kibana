@@ -21,6 +21,7 @@ import type {
 import { streamFromDefinition } from './stream_active_record/stream_from_definition';
 import type { StateDependencies, StreamChange } from './types';
 import { ConcurrentAccessError } from './errors/concurrent_access_error';
+import { InsufficientPermissionsError } from '../errors/insufficient_permissions_error';
 
 interface Changes {
   created: string[];
@@ -91,8 +92,9 @@ export class State {
             await desiredState.commitChanges(startingState);
             return { status: 'success' as const, changes: desiredState.changes(startingState) };
           } catch (error) {
-            // So here I'll capture the error message and send telemetry and then throw that error
-
+            if (error instanceof InsufficientPermissionsError) {
+              throw error;
+            }
             throw new FailedToChangeStateError(
               `Failed to change state: ${error.message}. The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`,
               error.statusCode ?? 500

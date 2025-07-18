@@ -156,6 +156,26 @@ export async function getAdminApiClient<TServerRouteRepository extends ServerRou
   return await getApiClient(supertestWithRoleScoped);
 }
 
+export async function getEditorApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<RepositorySupertestClient<TServerRouteRepository>> {
+  const supertestWithRoleScoped = await st.getSupertestWithRoleScope('editor', {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithRoleScoped);
+}
+
+export async function getViewerApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<RepositorySupertestClient<TServerRouteRepository>> {
+  const supertestWithRoleScoped = await st.getSupertestWithRoleScope('viewer', {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithRoleScoped);
+}
+
 type WithoutPromise<T extends Promise<any>> = Subtract<T, Promise<any>>;
 
 // this is a little intense, but without it, method overrides are lost

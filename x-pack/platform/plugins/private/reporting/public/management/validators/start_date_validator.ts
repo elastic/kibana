@@ -11,9 +11,10 @@ import { SCHEDULED_REPORT_FORM_START_DATE_TOO_EARLY_MESSAGE } from '../translati
 import { ScheduledReport } from '../../types';
 
 export const getStartDateValidator =
-  (today: Moment): ValidationFunc<ScheduledReport, string, Moment> =>
+  (today: Moment, timezone: string): ValidationFunc<Partial<ScheduledReport>, string, Moment> =>
   ({ value }) => {
-    if (value.isBefore(today)) {
+    const valueInTimezone = value.clone().tz(timezone, true);
+    if (valueInTimezone.isBefore(today)) {
       return {
         message: SCHEDULED_REPORT_FORM_START_DATE_TOO_EARLY_MESSAGE,
       };

@@ -24,45 +24,35 @@ import { UserProfilePageProvider } from '@kbn/test-suites-xpack-platform/functio
 import { SearchSessionsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/search_sessions_management_page';
 import { GraphPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/graph_page';
 import { MaintenanceWindowsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/maintenance_windows_page';
-import { ApiKeysPageProvider } from './api_keys_page';
+import { BannersPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/banners_page';
+import { NavigationalSearchPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/navigational_search';
+import { TagManagementPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/tag_management_page';
+import { CrossClusterReplicationPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/cross_cluster_replication_page';
+import { GrokDebuggerPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/grok_debugger_page';
+import { LicenseManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/license_management_page';
+import { ApiKeysPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/api_keys_page';
+import { IndexManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_management_page';
 import { AssetDetailsProvider } from './asset_details';
-import { BannersPageObject } from './banners_page';
-import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { GeoFileUploadPageObject } from './geo_file_upload';
-import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
-import { IndexManagementPageProvider } from './index_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
-import { InfraMetricsExplorerProvider } from './infra_metrics_explorer';
-import { InfraSavedViewsProvider } from './infra_saved_views';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
-import { LicenseManagementPageProvider } from './license_management_page';
 import { LogstashPageObject } from './logstash_page';
-import { NavigationalSearchPageObject } from './navigational_search';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
-import { ObservabilityPageProvider } from './observability_page';
-import { AlertControlsProvider } from './alert_controls';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { RollupPageObject } from './rollup_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { StatusPageObject } from './status_page';
-import { TagManagementPageObject } from './tag_management_page';
 import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchQueryRulesPageProvider } from './search_query_rules_page';
-import { SearchClassicNavigationProvider } from './search_classic_navigation';
 import { SearchStartProvider } from './search_start';
-import { SearchApiKeysProvider } from './search_api_keys';
-import { SearchIndexDetailPageProvider } from './search_index_details_page';
-import { SearchOverviewProvider } from './search_overview_page';
-import { SearchHomePageProvider } from './search_homepage';
-import { SearchNavigationProvider } from './search_navigation';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -84,8 +74,6 @@ export const pageObjects = {
   infraHome: InfraHomePageProvider,
   infraHostsView: InfraHostsViewProvider,
   infraLogs: InfraLogsPageProvider,
-  infraMetricsExplorer: InfraMetricsExplorerProvider,
-  infraSavedViews: InfraSavedViewsProvider,
   ingestPipelines: IngestPipelinesPageProvider,
   lens: LensPageProvider,
   licenseManagement: LicenseManagementPageProvider,
@@ -96,19 +84,11 @@ export const pageObjects = {
   navigationalSearch: NavigationalSearchPageObject,
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
   datasetQuality: DatasetQualityPageObject,
-  observability: ObservabilityPageProvider,
-  alertControls: AlertControlsProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
-  searchApiKeys: SearchApiKeysProvider,
-  searchClassicNavigation: SearchClassicNavigationProvider,
   searchStart: SearchStartProvider,
-  searchIndexDetailsPage: SearchIndexDetailPageProvider,
-  searchNavigation: SearchNavigationProvider,
-  searchOverview: SearchOverviewProvider,
-  searchHomePage: SearchHomePageProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,

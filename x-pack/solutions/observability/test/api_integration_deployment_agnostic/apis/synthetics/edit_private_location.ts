@@ -86,6 +86,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       rawExpect(apiResponse.body.locations).toEqual(rawExpect.arrayContaining(testResponse));
     });
 
+    it('successfully edits a private location label with no monitors assigned', async () => {
+      const privateLocation = privateLocations[0];
+
+      await supertestEditorWithApiKey
+        .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocation.id}`)
+        .send({ label: 'No monitors assigned' })
+        .expect(200);
+
+      // Set the label back, needed for the other tests
+      await supertestEditorWithApiKey
+        .put(`${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${privateLocation.id}`)
+        .send({ label: privateLocations[0].label })
+        .expect(200);
+    });
+
     it('adds a monitor in private location', async () => {
       newMonitor = {
         ...getFixtureJson('http_monitor'),
