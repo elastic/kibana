@@ -9,7 +9,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageHeader, EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 
 import { Section } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
@@ -93,11 +93,20 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   }
 
   const onSectionChange = (newSection: Section) => {
+    // This announcement happens when tab selected or mouse clicked. Announcement gets queued and happens
+    // after page load.
+    const liveRegion = document.getElementById('live-region');
+    if (liveRegion) {
+      liveRegion.textContent = `Navigated to new page: ${newSection} within Index Management`; // Announce the tab change for screen readers
+    }
     history.push(`/${newSection}`);
   };
 
   const indexManagementTabs = (
     <>
+      <EuiScreenReaderOnly>
+        <div id="live-region" aria-live="assertive" aria-atomic="true"></div>
+      </EuiScreenReaderOnly>
       <EuiPageHeader
         data-test-subj="indexManagementHeaderContent"
         pageTitle={
