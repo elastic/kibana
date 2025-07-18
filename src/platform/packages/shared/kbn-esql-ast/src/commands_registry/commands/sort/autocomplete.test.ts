@@ -209,24 +209,36 @@ describe('SORT Autocomplete', () => {
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField null', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField nulls', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
       await sortExpectSuggestions('from a | sort keywordField nulls ', [
         'ASC',
         'DESC',
         'NULLS FIRST',
         'NULLS LAST',
+        ', ',
+        '| ',
+        ...expressionOperatorSuggestions,
       ]);
     });
 
