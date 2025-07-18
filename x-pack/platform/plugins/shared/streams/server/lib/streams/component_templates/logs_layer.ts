@@ -58,9 +58,6 @@ export const baseFields: FieldDefinition = {
   'scope.version': {
     type: 'keyword',
   },
-  observed_timestamp: {
-    type: 'date',
-  },
   trace_id: {
     type: 'keyword',
   },
@@ -82,6 +79,9 @@ export const baseFields: FieldDefinition = {
   'resource.attributes.host.name': {
     type: 'keyword',
   },
+  'resource.attributes.service.name': {
+    type: 'keyword',
+  },
 };
 
 export const baseMappings: Record<string, MappingProperty> = {
@@ -89,7 +89,8 @@ export const baseMappings: Record<string, MappingProperty> = {
     type: 'object',
     properties: {
       structured: {
-        type: 'flattened',
+        type: 'object',
+        subobjects: false,
       },
       text: {
         type: 'match_only_text',
