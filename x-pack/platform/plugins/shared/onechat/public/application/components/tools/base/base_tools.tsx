@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -18,8 +16,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ToolDefinition } from '@kbn/onechat-common';
 import React from 'react';
-import { useOnechatEsqlTools } from '../../hooks/use_tools';
-import { truncateAtNewline } from '../../utils/truncate_at_newline';
+import { useOnechatBaseTools } from '../../../hooks/use_tools';
+import { truncateAtNewline } from '../../../utils/truncate_at_newline';
+import { OnechatToolTags } from '../tags/tool_tags';
 
 const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
   {
@@ -50,22 +49,12 @@ const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
     }),
     width: '15%',
     valign: 'top',
-    render: (tags: string[]) => {
-      return (
-        <EuiBadgeGroup>
-          {tags.map((tag) => (
-            <EuiBadge key={tag} color="primary">
-              {tag}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      );
-    },
+    render: (tags: string[]) => <OnechatToolTags tags={tags} />,
   },
 ];
 
-export const OnechatEsqlTools: React.FC = () => {
-  const { tools, isLoading, error } = useOnechatEsqlTools();
+export const OnechatBaseTools: React.FC = () => {
+  const { tools, isLoading, error } = useOnechatBaseTools();
   const errorMessage = error
     ? i18n.translate('xpack.onechat.tools.listToolsErrorMessage', {
         defaultMessage: 'Failed to fetch tools',
@@ -76,30 +65,22 @@ export const OnechatEsqlTools: React.FC = () => {
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiTitle size="s">
         <h2>
-          {i18n.translate('xpack.onechat.tools.esqlToolsTitle', { defaultMessage: 'ES|QL Tools' })}
+          {i18n.translate('xpack.onechat.tools.baseToolsTitle', { defaultMessage: 'Base Tools' })}
         </h2>
       </EuiTitle>
       <EuiText component="p" size="s">
-        {i18n.translate('xpack.onechat.tools.esqlToolsDescription', {
-          defaultMessage: 'Define your own custom tools using ES|QL queries.',
+        {i18n.translate('xpack.onechat.tools.baseToolsDescription', {
+          defaultMessage: 'Out-of-the-box tools ready for use in your chat experience.',
         })}
       </EuiText>
       <EuiHorizontalRule margin="xs" />
-      {tools.length > 0 ? (
-        <EuiBasicTable
-          loading={isLoading}
-          columns={columns}
-          items={tools}
-          itemId="id"
-          error={errorMessage}
-        />
-      ) : (
-        <EuiText component="p" size="s" textAlign="center" color="subdued">
-          {i18n.translate('xpack.onechat.tools.noEsqlToolsMessage', {
-            defaultMessage: "It looks like you don't have any ES|QL tools defined yet.",
-          })}
-        </EuiText>
-      )}
+      <EuiBasicTable
+        loading={isLoading}
+        columns={columns}
+        items={tools}
+        itemId="id"
+        error={errorMessage}
+      />
     </EuiFlexGroup>
   );
 };
