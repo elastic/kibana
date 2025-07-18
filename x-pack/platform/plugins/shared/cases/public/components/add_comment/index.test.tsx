@@ -329,87 +329,49 @@ describe('submit comment by key press', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('should add a comment on the correct key stroke - ctrl + enter', async () => {
-    renderWithTestingProviders(<AddComment {...addCommentProps} />);
 
-    fireEvent.change(screen.getByLabelText('caseComment'), {
-      target: { value: sampleData.comment },
-    });
+  it.each(['ctrlKey', 'metaKey'])(
+    'should add a comment on the keypress %s',
+    async (modifierKey: string) => {
+      renderWithTestingProviders(<AddComment {...addCommentProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByLabelText('caseComment')).toHaveValue(sessionStorage.getItem(draftKey));
-    });
+      fireEvent.change(screen.getByLabelText('caseComment'), {
+        target: { value: sampleData.comment },
+      });
 
-    fireEvent.keyDown(screen.getByLabelText('caseComment'), {
-      key: 'Enter',
-      code: 13,
-      ctrlKey: true,
-    });
+      await waitFor(() => {
+        expect(screen.getByLabelText('caseComment')).toHaveValue(sessionStorage.getItem(draftKey));
+      });
 
-    await waitFor(() => {
-      expect(onCommentSaving).toBeCalled();
-    });
+      fireEvent.keyDown(screen.getByLabelText('caseComment'), {
+        key: 'Enter',
+        code: 13,
+        [modifierKey]: true,
+      });
 
-    expect(createAttachmentsMock).toBeCalledWith(
-      {
-        caseId: addCommentProps.caseId,
-        attachments: [
-          {
-            comment: sampleData.comment,
-            type: AttachmentType.user,
-          },
-        ],
-        caseOwner: SECURITY_SOLUTION_OWNER,
-      },
-      { onSuccess: expect.any(Function) }
-    );
+      await waitFor(() => {
+        expect(onCommentSaving).toBeCalled();
+      });
 
-    await waitFor(() => {
-      expect(sessionStorage.getItem(draftKey)).toBe('');
-    });
+      expect(createAttachmentsMock).toBeCalledWith(
+        {
+          caseId: addCommentProps.caseId,
+          attachments: [
+            {
+              comment: sampleData.comment,
+              type: AttachmentType.user,
+            },
+          ],
+          caseOwner: SECURITY_SOLUTION_OWNER,
+        },
+        { onSuccess: expect.any(Function) }
+      );
 
-    expect(screen.getByLabelText('caseComment').textContent).toBe('');
-  });
+      await waitFor(() => {
+        expect(sessionStorage.getItem(draftKey)).toBe('');
+      });
 
-  it('should add a comment on the correct key stroke - meta + enter', async () => {
-    renderWithTestingProviders(<AddComment {...addCommentProps} />);
-
-    fireEvent.change(screen.getByLabelText('caseComment'), {
-      target: { value: sampleData.comment },
-    });
-
-    await waitFor(() => {
-      expect(screen.getByLabelText('caseComment')).toHaveValue(sessionStorage.getItem(draftKey));
-    });
-
-    fireEvent.keyDown(screen.getByLabelText('caseComment'), {
-      key: 'Enter',
-      code: 13,
-      metaKey: true,
-    });
-
-    await waitFor(() => {
-      expect(onCommentSaving).toBeCalled();
-    });
-
-    expect(createAttachmentsMock).toBeCalledWith(
-      {
-        caseId: addCommentProps.caseId,
-        attachments: [
-          {
-            comment: sampleData.comment,
-            type: AttachmentType.user,
-          },
-        ],
-        caseOwner: SECURITY_SOLUTION_OWNER,
-      },
-      { onSuccess: expect.any(Function) }
-    );
-
-    await waitFor(() => {
-      expect(sessionStorage.getItem(draftKey)).toBe('');
-    });
-
-    expect(screen.getByLabelText('caseComment').textContent).toBe('');
-  });
+      expect(screen.getByLabelText('caseComment').textContent).toBe('');
+    }
+  );
 });
