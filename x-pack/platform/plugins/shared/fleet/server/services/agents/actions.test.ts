@@ -108,7 +108,7 @@ describe('Agent actions', () => {
       });
     });
 
-    it.each(['UNENROLL', 'UPGRADE', 'MIRGATE'] as AgentActionType[])(
+    it.each(['UNENROLL', 'UPGRADE', 'MIGRATE'] as AgentActionType[])(
       'should sign %s action',
       async (actionType: AgentActionType) => {
         const esClient = elasticsearchServiceMock.createInternalClient();
