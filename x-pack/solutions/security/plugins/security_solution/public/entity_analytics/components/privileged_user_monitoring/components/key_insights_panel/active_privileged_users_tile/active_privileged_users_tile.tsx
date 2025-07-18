@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { right } from 'fp-ts/Either';
 import { getActivePrivilegedUsersEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
@@ -30,7 +31,7 @@ export const ActivePrivilegedUsersTile: React.FC<{
         />
       }
       getEsqlQuery={(namespace: string) =>
-        getActivePrivilegedUsersEsqlCount(namespace, sourcerDataView)
+        right(getActivePrivilegedUsersEsqlCount(namespace, sourcerDataView))
       }
       id="privileged-user-monitoring-active-users"
       spaceId={spaceId}

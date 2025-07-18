@@ -6,8 +6,10 @@
  */
 
 import type { Moment } from 'moment';
+import { isLeft, right } from 'fp-ts/Either';
 import { CURRENT_TIME, GRANTED_RIGHTS_DATA, PAGE_SIZE } from './constants';
 import type { UserRowData } from './types';
+import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitoring/queries/helpers';
 
 export const getToTime = () => CURRENT_TIME.clone().set({ minute: 0, second: 0, millisecond: 0 }); // Start of the current hour
 export const getFromTime = () => getToTime().subtract(1, 'day'); // 24 hours ago
@@ -24,11 +26,11 @@ const generateRandomDate = (from: Moment, to: Moment) => {
   return randomDate.toISOString();
 };
 
-const generateUserRowData = ({ quantity, user, target, right, ip }: UserRowData) => {
+const generateUserRowData = ({ quantity, user, target, right: userPrivilege, ip }: UserRowData) => {
   const userRowData = [];
   for (let i = 0; i < quantity; i++) {
     userRowData.push(
-      `"${user},${target},${right},${ip},${generateRandomDate(getFromTime(), getToTime())}"`
+      `"${user},${target},${userPrivilege},${ip},${generateRandomDate(getFromTime(), getToTime())}"`
     );
   }
   return userRowData.join(',');
@@ -44,13 +46,24 @@ export const generateESQLSource = () => {
 };
 
 export const generateListESQLQuery =
-  (esqlSource: string) =>
-  (sortField: string | number | symbol, sortDirection: string, currentPage: number) =>
-    `${esqlSource}
-        | SORT ${String(sortField)} ${sortDirection}
-        | LIMIT ${1 + currentPage * PAGE_SIZE}`; // Load one extra item for the pagination
+  (esqlSource: EsqlQueryOrInvalidFields) =>
+  (sortField: string | number | symbol, sortDirection: string, currentPage: number) => {
+    if (isLeft(esqlSource)) {
+      return esqlSource; // propagate the error
+    }
 
-export const generateVisualizationESQLQuery = (esqlSource: string) => (stackByField: string) =>
-  `${esqlSource}
+    return right(`${esqlSource.right}
+        | SORT ${String(sortField)} ${sortDirection}
+        | LIMIT ${1 + currentPage * PAGE_SIZE}`); // Load one extra item for the pagination
+  };
+
+export const generateVisualizationESQLQuery =
+  (esqlSource: EsqlQueryOrInvalidFields) => (stackByField: string) => {
+    if (isLeft(esqlSource)) {
+      return esqlSource; // propagate the error
+    }
+
+    return right(`${esqlSource.right}
     | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
-    | STATS results = COUNT(*) by timestamp, ${stackByField}`;
+    | STATS results = COUNT(*) by timestamp, ${stackByField}`);
+  };

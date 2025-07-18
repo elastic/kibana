@@ -6,11 +6,18 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { isLeft, right } from 'fp-ts/Either';
 import { getAccountSwitchesEsqlSource } from '../../../queries/account_switches_esql_query';
 
 export const getAccountSwitchesEsqlCount = (namespace: string, sourcerDataView: DataViewSpec) => {
   const indexPattern = sourcerDataView?.title ?? '';
   const fields = sourcerDataView?.fields ?? {};
-  return `${getAccountSwitchesEsqlSource(namespace, indexPattern, fields)}
-    | STATS COUNT(*)`;
+  const esqlSource = getAccountSwitchesEsqlSource(namespace, indexPattern, fields);
+
+  if (isLeft(esqlSource)) {
+    return esqlSource; // propagate the error
+  }
+
+  return right(`${esqlSource.right}
+    | STATS COUNT(*)`);
 };
