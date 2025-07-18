@@ -7,7 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
-import type { GetInfraAssetCountRequestBodyPayload } from '../../../../../common/http_api';
+import type { GetInfraEntityCountRequestBodyPayload } from '../../../../../common/http_api';
 import type { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { assertQueryStructure } from '../utils';
@@ -19,7 +19,8 @@ export async function getHostsCount({
   query,
   from,
   to,
-}: GetInfraAssetCountRequestBodyPayload & {
+  schema,
+}: GetInfraEntityCountRequestBodyPayload & {
   infraMetricsClient: InfraMetricsClient;
   apmDataAccessServices?: ApmDataAccessServicesWrapper;
 }) {
@@ -35,6 +36,7 @@ export async function getHostsCount({
     apmDocumentSources,
     from,
     to,
+    schema,
   });
 
   const response = await infraMetricsClient.search({

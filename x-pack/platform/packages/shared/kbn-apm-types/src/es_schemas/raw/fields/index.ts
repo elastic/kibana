@@ -22,3 +22,4 @@ export * from './timestamp_us';
 export * from './url';
 export * from './user_agent';
 export * from './user';
+export * from './otel';
