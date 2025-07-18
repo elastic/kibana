@@ -9,6 +9,8 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Dictionary } from 'lodash';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import type { IWaterfallLegend } from '../../../../../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '../../../../../../../../common/waterfall/legend';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
 import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type {
@@ -26,11 +28,6 @@ const ROOT_ID = 'root';
 export interface SpanLinksCount {
   linkedChildren: number;
   linkedParents: number;
-}
-
-export enum WaterfallLegendType {
-  ServiceName = 'serviceName',
-  SpanType = 'spanType',
 }
 
 export interface IWaterfall {
@@ -91,15 +88,7 @@ export type IWaterfallSpan = IWaterfallItemBase<WaterfallSpan, 'span'>;
 
 export type IWaterfallSpanOrTransaction = IWaterfallTransaction | IWaterfallSpan;
 
-export type IWaterfallGetRelatedErrorsHref = (docId: string) => string;
-
 export type IWaterfallItem = IWaterfallSpanOrTransaction;
-
-export interface IWaterfallLegend {
-  type: WaterfallLegendType;
-  value: string | undefined;
-  color: string;
-}
 
 export interface IWaterfallNode {
   id: string;

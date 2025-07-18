@@ -86,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.ingestPipelines.clickPipelineLink(0);
 
         // Open the manage context menu
-        await testSubjects.click('managePipelineButton');
+        await testSubjects.click('actionsPopoverButton');
         // Click the delete button
         await testSubjects.click('deletePipelineButton');
 

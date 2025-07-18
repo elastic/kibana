@@ -15,6 +15,7 @@ import type {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  NotificationsStart,
   Plugin,
   PluginInitializerContext,
   SecurityServiceStart,
@@ -159,6 +160,7 @@ export interface ApmPluginStartDeps {
   savedSearch: SavedSearchPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   share?: SharePublicStart;
+  notifications: NotificationsStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
