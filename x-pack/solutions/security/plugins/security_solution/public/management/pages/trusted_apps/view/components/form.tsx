@@ -760,12 +760,20 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                 <EuiIcon type="warningFilled" size="s" color="warning" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiText size="s" color="warning" data-test-subj={getTestId('advancedModeUsageWarningHeader')}>
+                <EuiText
+                  size="s"
+                  color="warning"
+                  data-test-subj={getTestId('advancedModeUsageWarningHeader')}
+                >
                   {USING_ADVANCED_MODE}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiText size="s" color="warning" data-test-subj={getTestId('advancedModeUsageWarningBody')}>
+            <EuiText
+              size="s"
+              color="warning"
+              data-test-subj={getTestId('advancedModeUsageWarningBody')}
+            >
               {USING_ADVANCED_MODE_DESCRIPTION}
             </EuiText>
           </>

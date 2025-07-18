@@ -55,8 +55,15 @@ const previewSignificantEventsRoute = createServerRoute({
     params,
     request,
     getScopedClients,
-    logger,
+    server,
   }): Promise<SignificantEventsPreviewResponse> => {
+    const isAvailableForTier = server.core.pricing.isFeatureAvailable(
+      STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
+    );
+    if (!isAvailableForTier) {
+      throw new SecurityError(`Cannot access API on the current pricing tier`);
+    }
+
     const { streamsClient, scopedClusterClient } = await getScopedClients({
       request,
     });

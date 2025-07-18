@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ExplorerChartInfoTooltip } from './explorer_chart_info_tooltip';
 
@@ -24,7 +24,7 @@ describe('ExplorerChartTooltip', () => {
       jobId: 'mock-job-id',
     };
 
-    const wrapper = shallowWithIntl(<ExplorerChartInfoTooltip {...infoTooltip} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = renderWithI18n(<ExplorerChartInfoTooltip {...infoTooltip} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
