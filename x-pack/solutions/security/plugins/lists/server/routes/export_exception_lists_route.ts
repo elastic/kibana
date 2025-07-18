@@ -12,7 +12,7 @@ import { ExportExceptionListsRequestQuery } from '@kbn/securitysolution-exceptio
 
 import type { ListsPluginRouter } from '../types';
 
-import { buildSiemResponse } from './utils';
+import { buildSiemResponse, getExceptionListClient } from './utils';
 
 export const exportExceptionListsRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -39,20 +39,14 @@ export const exportExceptionListsRoute = (router: ListsPluginRouter): void => {
 
         try {
           const { include_expired_exceptions: includeExpiredExceptionsString } = request.query;
-          console.log('reuqest.query', request.query);
-          console.log('includeExpiredExceptionsString', includeExpiredExceptionsString);
-          // const exceptionListsClient = await getExceptionListClient(context);
+          const exceptionListsClient = await getExceptionListClient(context);
 
           // Defaults to including expired exceptions if query param is not present
-          // const includeExpiredExceptions =
-          //   includeExpiredExceptionsString !== undefined
-          //     ? includeExpiredExceptionsString === 'true'
-          //     : true;
-          // TODO fix this to use the exceptionListsClient
-          const exportContent = { exportData: '', exportDetails: {} };
-          // const exportContent = await exceptionListsClient.exportExceptionListsAndItems({
-          //   includeExpiredExceptions,
-          // });
+          const includeExpiredExceptions = (includeExpiredExceptionsString ?? 'true') === 'true';
+
+          const exportContent = await exceptionListsClient.exportExceptionListsAndItems({
+            includeExpiredExceptions,
+          });
 
           if (exportContent == null) {
             return siemResponse.error({

@@ -68,6 +68,8 @@ import type {
 import { getExceptionList } from './get_exception_list';
 import type { ExportExceptionListAndItemsReturn } from './export_exception_list_and_items';
 import { exportExceptionListAndItems } from './export_exception_list_and_items';
+import type { ExportExceptionListsAndItemsReturn } from './export_exception_lists_and_items';
+import { exportExceptionListsAndItems } from './export_exception_lists_and_items';
 import { getExceptionListSummary } from './get_exception_list_summary';
 import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
@@ -1169,6 +1171,31 @@ export class ExceptionListClient {
     }
 
     return exportExceptionListAndItems({
+      ...options,
+      savedObjectsClient,
+    });
+  };
+
+  /**
+   * Export multiple exception lists and their items
+   * @param options
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   * @returns the ndjson of the list and items to export or null if none exists
+   */
+  public exportExceptionListsAndItems = async (
+    options: ExportExceptionListAndItemsOptions
+  ): Promise<ExportExceptionListAndItemsReturn | null> => {
+    const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreExport',
+        options,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return exportExceptionListsAndItems({
       ...options,
       savedObjectsClient,
     });

@@ -7,22 +7,24 @@
 
 import type {
   ExceptionListItemSchema,
+  ExceptionListSchema,
   ExportExceptionDetails,
   FoundExceptionListItemSchema,
-  IdOrUndefined,
-  ListIdOrUndefined,
+  FoundExceptionListSchema,
+  // IdOrUndefined,
+  // ListIdOrUndefined,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
-import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
-import { getExceptionList } from './get_exception_list';
+import { findExceptionListPointInTimeFinder } from './find_exception_list_point_in_time_finder';
+import { findExceptionListItemsPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';
 
 interface ExportExceptionListAndItemsOptions {
-  id: IdOrUndefined;
-  listId: ListIdOrUndefined;
+  // id: IdOrUndefined;
+  // listId: ListIdOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   includeExpiredExceptions: boolean;
@@ -35,29 +37,43 @@ export interface ExportExceptionListAndItemsReturn {
   exportDetails: ExportExceptionDetails;
 }
 
-export const exportExceptionListAndItems = async ({
-  id,
-  listId,
+export const exportExceptionListsAndItems = async ({
   namespaceType,
   includeExpiredExceptions,
   savedObjectsClient,
   filter: dataFilter = undefined,
 }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
-  const exceptionList = await getExceptionList({
-    id,
-    listId,
-    namespaceType,
+  const exceptionLists: ExceptionListSchema[] = [];
+  const listIds: string[] = [];
+  const namespaceTypes: NamespaceType[] = [];
+
+  const appendExceptionList = (response: FoundExceptionListSchema): void => {
+    response.data.forEach((list) => {
+      exceptionLists.push(list);
+      listIds.push(list.list_id);
+      namespaceTypes.push(list.namespace_type);
+    });
+  };
+
+  await findExceptionListPointInTimeFinder({
+    executeFunctionOnStream: appendExceptionList,
+    filter: dataFilter, // TODO check filter
+    maxSize: 10_000,
+    namespaceType: [namespaceType],
+    perPage: 1_000,
     savedObjectsClient,
+    sortField: 'exception-list.created_at',
+    sortOrder: 'desc',
   });
 
-  if (exceptionList == null) {
+  if (exceptionLists.length === 0) {
     return null;
   }
 
   // Stream the results from the Point In Time (PIT) finder into this array
-  let exceptionItems: ExceptionListItemSchema[] = [];
-  const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
-    exceptionItems = [...exceptionItems, ...response.data];
+  const exceptionItems: ExceptionListItemSchema[] = [];
+  const appendExceptionItem = (response: FoundExceptionListItemSchema): void => {
+    exceptionItems.push(...response.data);
   };
   const savedObjectPrefix = getSavedObjectType({ namespaceType });
   let filter = dataFilter;
@@ -72,24 +88,26 @@ export const exportExceptionListAndItems = async ({
     }
   }
 
-  await findExceptionListItemPointInTimeFinder({
-    executeFunctionOnStream,
-    filter,
-    listId: exceptionList.list_id,
-    maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-    namespaceType: exceptionList.namespace_type,
+  // TODO this fetches each exception list separately. Write a new function.
+  await findExceptionListItemsPointInTimeFinder({
+    executeFunctionOnStream: appendExceptionItem,
+    filter: filter ? [filter] : [], // TODO fix type
+    listId: listIds,
+    maxSize: 10_000,
+    namespaceType: namespaceTypes, // TODO can we have multiple namespaces?
     perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
     savedObjectsClient,
     sortField: 'exception-list.created_at',
     sortOrder: 'desc',
   });
-  const { exportData } = getExport([exceptionList, ...exceptionItems]);
+
+  const { exportData } = getExport([...exceptionLists, ...exceptionItems]);
 
   // TODO: Add logic for missing lists and items on errors
   return {
-    exportData: `${exportData}`,
+    exportData,
     exportDetails: {
-      exported_exception_list_count: 1,
+      exported_exception_list_count: exceptionLists.length,
       exported_exception_list_item_count: exceptionItems.length,
       missing_exception_list_item_count: 0,
       missing_exception_list_items: [],

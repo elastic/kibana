@@ -9,10 +9,11 @@ import expect from 'expect';
 import type SuperTest from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
 import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { ITEM_TYPE, ENDPOINT_TYPE } from '@kbn/lists-plugin/common/constants.mock';
 
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { deleteAllExceptions } from '../../../utils';
+import { binaryToString, deleteAllExceptions } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -20,7 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@serverless @ess Exceptions API - Exporting Exception Lists', () => {
+  describe.only('@serverless @ess Exceptions API - Exporting Exception Lists', () => {
     let ids: string[];
     let listIds: string[];
 
@@ -51,9 +52,13 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await supertest
         .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
         .set('kbn-xsrf', 'true')
-        .expect(200);
+        .send({ filter: { bool: { must: [{ term: { list_id: 'non-existent-list-id' } }] } } })
+        .expect(200)
+        .parse(binaryToString);
 
-      expect(body).toEqual([]);
+      const parsedItems = parseRows(body);
+
+      expect(parsedItems).toEqual([]);
     });
 
     it('returns a 400 error if the query is malformed', async () => {
@@ -71,7 +76,30 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('returns the full list of items if no filter is provided');
+    it('returns the full list of items if no filter is provided', async () => {
+      const { body } = await supertest
+        .post(`${EXCEPTION_LIST_URL}/_bulk_export`)
+        .set('kbn-xsrf', 'true')
+        .expect(200)
+        .parse(binaryToString);
+
+      const exportedRows: Array<{ type: string }> = parseRows(body);
+      const exportedLists = exportedRows.filter((row) => row?.type === ENDPOINT_TYPE);
+      const exportedItems = exportedRows.filter((row) => row?.type === ITEM_TYPE);
+
+      expect(exportedLists).toHaveLength(3); // 3 lists
+      expect(exportedItems).toHaveLength(6); // 3 lists * 2 items
+    });
+
+    it('does not include expired exceptions by default');
+    it('does not include rule exception lists');
+
+    describe('when exception list count exceeds the default export size limit', () => {
+      it('returns an error');
+      it('does not retrieve exception list items');
+    });
+
+    it('returns an error when exception list + items count exceeds the default export size limit');
     it('returns a partial list of items if a filter is provided');
     it('returns a 422 if the total size of the requested lists exceeds the limit');
   });
@@ -114,4 +142,12 @@ const bulkCreateExceptionLists = async (
   }
 
   return { ids, listIds, itemIds: itemIdsByListId };
+};
+
+const parseRows = (body: Buffer) => {
+  return body
+    .toString()
+    .trim()
+    .split('\n')
+    .map((row: string) => JSON.parse(row));
 };
