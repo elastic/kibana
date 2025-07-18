@@ -111,6 +111,57 @@ export default function ({ getService }: FtrProviderContext) {
             'victor',
           ]);
         });
+
+        it('sorts on root field only', async () => {
+          // This test verifies that when sorting by a root field that doesn't exist
+          // in the type mapping, it uses the root field value
+          const query = queryString.stringify({
+            type: 'sortTestingType',
+            sort_field: 'updated_at',
+            sort_order: 'desc',
+          });
+          const response = await supertest.get(
+            `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+          );
+          expect(response.status).to.eql(200, JSON.stringify(response.body));
+          expect(response.body.saved_objects).to.have.length(3);
+
+          // Verify that the documents are sorted by updated_at in descending order
+          const updatedAtValues = response.body.saved_objects.map((o: any) =>
+            new Date(o.updated_at).getTime()
+          );
+          const sortedDescending = [...updatedAtValues].sort((a, b) => b - a);
+          expect(updatedAtValues).to.eql(sortedDescending);
+        });
+
+        it('sorts when root and type field exists', async () => {
+          // When a field exists at both root and type levels, single-type queries use the TYPE field
+          const query = queryString.stringify({
+            type: 'sortTestingType',
+            sort_field: 'created_at',
+            sort_order: 'asc',
+          });
+          const response = await supertest.get(
+            `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+          );
+          expect(response.status).to.eql(200);
+          expect(response.body.saved_objects).to.have.length(3);
+
+          const typeCreatedAtValues = response.body.saved_objects.map(
+            (o: any) => o.attributes.created_at
+          );
+          const rootCreatedAtValues = response.body.saved_objects.map((o: any) => o.created_at);
+
+          // Assert type field is used for sorting (values in sorted order)
+          expect(typeCreatedAtValues.every((val: any) => val !== undefined)).to.be(true);
+          const sortedTypeValues = [...typeCreatedAtValues].sort();
+          expect(typeCreatedAtValues).to.eql(sortedTypeValues);
+
+          // Assert root field is NOT used for sorting (values not in sorted order)
+          expect(rootCreatedAtValues.every((val: any) => val !== undefined)).to.be(true);
+          const sortedRootValues = [...rootCreatedAtValues].sort();
+          expect(rootCreatedAtValues).to.not.eql(sortedRootValues);
+        });
       });
 
       describe('multiple types', () => {
@@ -305,6 +356,37 @@ export default function ({ getService }: FtrProviderContext) {
           // All values should be sorted numerically
           const sorted = [...values].sort((a: number, b: number) => a - b);
           expect(values).to.eql(sorted);
+        });
+
+        it('multi type sorting when root and type field exists', async () => {
+          // When a field exists at both root and type levels, multi-type queries use the ROOT field
+          const query = queryString.stringify({
+            type: sortTestTypes,
+            sort_field: 'created_at',
+            sort_order: 'asc',
+          });
+          const response = await supertest.get(
+            `${getUrlPrefix(defaultNamespace)}/api/saved_objects/_find?${query}`
+          );
+          expect(response.status).to.eql(200);
+          expect(response.body.saved_objects).to.have.length(6);
+
+          const rootCreatedAtValues = response.body.saved_objects.map((o: any) => o.created_at);
+          const typeCreatedAtValues = response.body.saved_objects.map(
+            (o: any) => o.attributes.created_at
+          );
+
+          // Assert root field is used for sorting
+          // All objects now have root created_at values and should be sorted chronologically
+          expect(rootCreatedAtValues.every((val: any) => val !== undefined)).to.be(true);
+          const sortedRootValues = [...rootCreatedAtValues].sort();
+          expect(rootCreatedAtValues).to.eql(sortedRootValues);
+
+          // Assert type field is NOT used for sorting
+          // Type field values exist but should NOT be in alphabetical order (proving root field was used)
+          expect(typeCreatedAtValues.every((val: any) => val !== undefined)).to.be(true);
+          const sortedTypeValues = [...typeCreatedAtValues].sort();
+          expect(typeCreatedAtValues).to.not.eql(sortedTypeValues);
         });
       });
     });

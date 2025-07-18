@@ -96,6 +96,7 @@ export class Plugin {
           },
           missingData: { type: 'keyword' },
           numericValue: { type: 'short' },
+          created_at: { type: 'keyword' }, // This conflicts with the root field 'created_at'
         },
       },
     });
@@ -117,6 +118,7 @@ export class Plugin {
           },
           missingData: { type: 'keyword' },
           numericValue: { type: 'long' },
+          created_at: { type: 'keyword' }, // This conflicts with the root field 'created_at'
         },
       },
     });

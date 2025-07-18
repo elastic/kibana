@@ -953,11 +953,13 @@
         "title": "Alpha",
         "titleKeyword": "alpha",
         "textWithKeyword": "zulu",
-        "numericValue": 100
+        "numericValue": 100,
+        "created_at": "type-level-2024-01-01"
       },
       "type": "sortTestingType",
       "namespaces": ["default"],
-      "updated_at": "2024-06-01T10:00:00.000Z"
+      "updated_at": "2024-06-01T10:00:00.000Z",
+      "created_at": "2024-01-03T10:00:00.000Z"
     }
   }
 }
@@ -972,11 +974,13 @@
         "title": "Bravo",
         "titleKeyword": "bravo",
         "textWithKeyword": "yankee",
-        "numericValue": 100
+        "numericValue": 100,
+        "created_at": "type-level-2024-02-01"
       },
       "type": "sortTestingType",
       "namespaces": ["default"],
-      "updated_at": "2024-06-01T10:01:00.000Z"
+      "updated_at": "2024-06-01T10:01:00.000Z",
+      "created_at": "2024-01-01T10:00:00.000Z"
     }
   }
 }
@@ -991,11 +995,13 @@
         "title": "Charlie",
         "titleKeyword": "charlie",
         "textWithKeyword": "xray",
-        "numericValue": 100
+        "numericValue": 100,
+        "created_at": "type-level-2024-04-01"
       },
       "type": "sortTestingType",
       "namespaces": ["space_1"],
-      "updated_at": "2024-06-01T10:02:00.000Z"
+      "updated_at": "2024-06-01T10:02:00.000Z",
+      "created_at": "2024-01-04T10:00:00.000Z"
     }
   }
 }
@@ -1009,11 +1015,13 @@
       "sortTestingType": {
         "title": "Delta",
         "titleKeyword": "delta",
-        "textWithKeyword": "whiskey"
+        "textWithKeyword": "whiskey",
+        "created_at": "type-level-2024-05-01"
       },
       "type": "sortTestingType",
       "namespaces": ["space_2"],
-      "updated_at": "2024-06-01T10:03:00.000Z"
+      "updated_at": "2024-06-01T10:03:00.000Z",
+      "created_at": "2024-01-05T10:00:00.000Z"
     }
   }
 }
@@ -1027,11 +1035,13 @@
       "sortTestingType": {
         "title": "Echo",
         "titleKeyword": "echo",
-        "textWithKeyword": "victor"
+        "textWithKeyword": "victor",
+        "created_at": "type-level-2024-03-01"
       },
       "type": "sortTestingType",
       "namespaces": ["default", "space_1"],
-      "updated_at": "2024-06-01T10:04:00.000Z"
+      "updated_at": "2024-06-01T10:04:00.000Z",
+      "created_at": "2024-01-02T10:00:00.000Z"
     }
   }
 }
@@ -1045,11 +1055,13 @@
       "sortTestingType": {
         "title": "Foxtrot",
         "titleKeyword": "foxtrot",
-        "textWithKeyword": "uniform"
+        "textWithKeyword": "uniform",
+        "created_at": "type-level-2024-06-01"
       },
       "type": "sortTestingType",
       "namespaces": ["space_2"],
-      "updated_at": "2024-06-01T10:05:00.000Z"
+      "updated_at": "2024-06-01T10:05:00.000Z",
+      "created_at": "2024-01-06T10:00:00.000Z"
     }
   }
 }
@@ -1064,11 +1076,13 @@
         "title": "Alpha2",
         "titleKeyword": "alpha2",
         "textWithKeyword": "zulu2",
-        "numericValue": 100000
+        "numericValue": 100000,
+        "created_at": "type-level-2024-07-01"
       },
       "type": "sortTestingType2",
       "namespaces": ["default"],
-      "updated_at": "2024-06-01T11:00:00.000Z"
+      "updated_at": "2024-06-01T11:00:00.000Z",
+      "created_at": "2024-02-01T10:00:00.000Z"
     }
   }
 }
@@ -1083,11 +1097,13 @@
         "title": "Bravo2",
         "titleKeyword": "bravo2",
         "textWithKeyword": "yankee2",
-        "numericValue": 100000
+        "numericValue": 100000,
+        "created_at": "type-level-2024-08-01"
       },
       "type": "sortTestingType2",
       "namespaces": ["default"],
-      "updated_at": "2024-06-01T11:01:00.000Z"
+      "updated_at": "2024-06-01T11:01:00.000Z",
+      "created_at": "2024-02-02T10:00:00.000Z"
     }
   }
 }
@@ -1102,11 +1118,13 @@
         "title": "Charlie2",
         "titleKeyword": "charlie2",
         "textWithKeyword": "xray2",
-        "numericValue": 900000
+        "numericValue": 900000,
+        "created_at": "type-level-2024-09-01"
       },
       "type": "sortTestingType2",
       "namespaces": ["space_1"],
-      "updated_at": "2024-06-01T11:02:00.000Z"
+      "updated_at": "2024-06-01T11:02:00.000Z",
+      "created_at": "2024-02-03T10:00:00.000Z"
     }
   }
 }
@@ -1121,11 +1139,13 @@
         "title": "Delta2",
         "titleKeyword": "delta2",
         "textWithKeyword": "whiskey2",
-        "numericValue": 100122
+        "numericValue": 100122,
+        "created_at": "type-level-2024-10-01"
       },
       "type": "sortTestingType2",
       "namespaces": ["space_2"],
-      "updated_at": "2024-06-01T11:03:00.000Z"
+      "updated_at": "2024-06-01T11:03:00.000Z",
+      "created_at": "2024-02-04T10:00:00.000Z"
     }
   }
 }
@@ -1139,11 +1159,13 @@
       "sortTestingType2": {
         "title": "Echo2",
         "titleKeyword": "echo2",
-        "textWithKeyword": "victor2"
+        "textWithKeyword": "victor2",
+        "created_at": "type-level-2024-11-01"
       },
       "type": "sortTestingType2",
       "namespaces": ["default", "space_1"],
-      "updated_at": "2024-06-01T11:04:00.000Z"
+      "updated_at": "2024-06-01T11:04:00.000Z",
+      "created_at": "2024-02-05T10:00:00.000Z"
     }
   }
 }
@@ -1157,11 +1179,13 @@
       "sortTestingType2": {
         "title": "Foxtrot2",
         "titleKeyword": "foxtrot2",
-        "textWithKeyword": "uniform2"
+        "textWithKeyword": "uniform2",
+        "created_at": "type-level-2024-12-01"
       },
       "type": "sortTestingType2",
       "namespaces": ["space_2"],
-      "updated_at": "2024-06-01T11:05:00.000Z"
+      "updated_at": "2024-06-01T11:05:00.000Z",
+      "created_at": "2024-02-06T10:00:00.000Z"
     }
   }
 }
