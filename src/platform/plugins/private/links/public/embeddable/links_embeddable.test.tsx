@@ -26,14 +26,14 @@ const getLinks = (): Link[] => [
     order: 0,
     type: 'dashboardLink',
     label: '',
-    destination: 'link_001_dashboard',
+    destination: '999',
   },
   {
     id: '002',
     order: 1,
     type: 'dashboardLink',
     label: 'Dashboard 2',
-    destination: 'link_002_dashboard',
+    destination: '888',
   },
   {
     id: '003',
@@ -86,21 +86,11 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
   },
 ];
 
-const references = [
-  {
-    id: '999',
-    name: 'link_001_dashboard',
-    type: 'dashboard',
-  },
-  {
-    id: '888',
-    name: 'link_002_dashboard',
-    type: 'dashboard',
-  },
-];
-
 jest.mock('../lib/resolve_links', () => {
   return {
+    serializeResolvedLinks: (resolvedLinks: ResolvedLink[]) => {
+      return resolvedLinks.map(({ title, description, error, ...linkToSave }) => linkToSave);
+    },
     resolveLinks: jest.fn().mockResolvedValue(getResolvedLinks()),
   };
 });
@@ -110,27 +100,20 @@ jest.mock('../content_management', () => {
     linksClient: {
       create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
       update: jest.fn().mockResolvedValue({ item: { id: '123' } }),
-      get: jest.fn((savedObjectId) => {
-        return Promise.resolve({
-          item: {
-            id: savedObjectId,
-            attributes: {
-              title: 'links 001',
-              description: 'some links',
-              links: getLinks(),
-              layout: 'vertical',
-            },
-            references,
-          },
-          meta: {
-            aliasTargetId: '123',
-            outcome: 'exactMatch',
-            aliasPurpose: 'sharing',
-            sourceId: savedObjectId,
-          },
-        });
-      }),
     },
+  };
+});
+
+jest.mock('../content_management/load_from_library', () => {
+  return {
+    loadFromLibrary: jest.fn((savedObjectId) => {
+      return Promise.resolve({
+        title: 'links 001',
+        description: 'some links',
+        links: getLinks(),
+        layout: 'vertical',
+      });
+    }),
   };
 });
 
@@ -187,14 +170,8 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: false,
+            savedObjectId: '123',
           },
-          references: [
-            {
-              id: '123',
-              name: 'savedObjectRef',
-              type: 'links',
-            },
-          ],
         });
         expect(await api.canUnlinkFromLibrary()).toBe(true);
         expect(api.defaultTitle$?.value).toBe('links 001');
@@ -213,14 +190,9 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: false,
-            attributes: {
-              description: 'some links',
-              title: 'links 001',
-              links: getLinks(),
-              layout: 'vertical',
-            },
+            links: getLinks(),
+            layout: 'vertical',
           },
-          references,
         });
       });
     });
@@ -252,12 +224,9 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: true,
-            attributes: {
-              links: getLinks(),
-              layout: 'horizontal',
-            },
+            links: getLinks(),
+            layout: 'horizontal',
           },
-          references,
         });
 
         expect(await api.canLinkToLibrary()).toBe(true);
@@ -276,7 +245,6 @@ describe('getLinksEmbeddableFactory', () => {
             links: getLinks(),
             layout: 'horizontal',
           },
-          options: { references },
         });
         expect(newId).toBe('333');
         expect(api.getSerializedStateByReference(newId)).toEqual({
@@ -284,14 +252,8 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'my links',
             description: 'just a few links',
             hidePanelTitles: true,
+            savedObjectId: '333',
           },
-          references: [
-            {
-              id: '333',
-              name: 'savedObjectRef',
-              type: 'links',
-            },
-          ],
         });
       });
     });
