@@ -624,8 +624,8 @@ export interface FindExceptionListPointInTimeFinderOptions {
 }
 
 /**
- * ExceptionListClient.findExceptionListsItemPointInTimeFinder
- * {@link ExceptionListClient.findExceptionListsItemPointInTimeFinder}
+ * ExceptionListClient.findExceptionListItemsPointInTimeFinder
+ * {@link ExceptionListClient.findExceptionListItemsPointInTimeFinder}
  */
 export interface FindExceptionListItemsPointInTimeFinderOptions {
   /** The "list_id" to find against */
