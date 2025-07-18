@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useMemo } from 'react';
-import { map, BehaviorSubject } from 'rxjs';
+import React, { ReactNode } from 'react';
+import { map } from 'rxjs';
 import {
   ChromeLayout,
-  ChromeLayoutConfigProvider,
   ChromeLayoutConfig,
+  ChromeLayoutConfigProvider,
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
 import useObservable from 'react-use/lib/useObservable';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
-  LayoutServiceStartDeps,
   LayoutServiceParams,
+  LayoutServiceStartDeps,
 } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
@@ -87,12 +87,8 @@ export class GridLayout implements LayoutService {
     const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
 
     // TODO: temporary solution to get the navigation width
-    const navigationWidth$ = new BehaviorSubject<number>(layoutConfigs.project.navigationWidth!);
-    const projectSideNavigationV2 = chrome.getProjectSideNavV2Component({
-      setWidth: (width) => {
-        navigationWidth$.next(width);
-      },
-    });
+
+    const projectSideNavigationV2 = chrome.getProjectSideNavV2Component();
 
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
@@ -101,15 +97,7 @@ export class GridLayout implements LayoutService {
       const chromeStyle = useObservable(chromeStyle$, 'classic');
       const hasAppMenu = useObservable(hasAppMenu$, false);
 
-      const _layoutConfig = layoutConfigs[chromeStyle];
-      const navigationWidth = useObservable(navigationWidth$, _layoutConfig.navigationWidth!);
-
-      const layoutConfig = useMemo(() => {
-        return {
-          ..._layoutConfig,
-          navigationWidth,
-        };
-      }, [_layoutConfig, navigationWidth]);
+      const layoutConfig = layoutConfigs[chromeStyle];
 
       // Assign main layout parts first
       let header: ReactNode;

@@ -9,7 +9,8 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
-import React from 'react';
+import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
+import React, { useCallback } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@kbn/shared-ux-router';
 import { Global, css } from '@emotion/react';
@@ -29,13 +30,17 @@ const demoItems = {
 export interface Props {
   isSideNavCollapsed$: BehaviorSubject<boolean>;
   history: InternalApplicationStart['history'];
-
-  /** TODO: remove this prop */
-  setWidth: (width: number) => void;
 }
 
-export const Navigation = ({ isSideNavCollapsed$, history, setWidth }: Props) => {
+export const Navigation = ({ isSideNavCollapsed$, history }: Props) => {
   const isCollapsed = useObservable(isSideNavCollapsed$, isSideNavCollapsed$.getValue());
+  const updateLayout = useLayoutUpdate();
+  const setWidth = useCallback(
+    (width: number) => {
+      updateLayout({ navigationWidth: width });
+    },
+    [updateLayout]
+  );
 
   return (
     <>
