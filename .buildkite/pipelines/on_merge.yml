@@ -68,7 +68,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4-highcpu-16
+      machineType: c3d-highcpu-16
       preemptible: true
       diskSizeGb: 85
     timeout_in_minutes: 60
