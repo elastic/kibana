@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { logLevelSynonyms } from '../../..';
 
 export enum LogLevelCoalescedValue {
   trace = 'trace',
@@ -32,6 +33,12 @@ export const getLogLevelCoalescedValue = (
   }
 
   const logLevelLowerCase = logLevelUnfolded.trim().toLowerCase();
+
+  // Logic to handle common spelling mistakes with log levels
+  const alias = logLevelSynonyms[logLevelLowerCase];
+  if (alias) {
+    return alias;
+  }
 
   if (logLevelLowerCase.startsWith('trace')) {
     return LogLevelCoalescedValue.trace;
