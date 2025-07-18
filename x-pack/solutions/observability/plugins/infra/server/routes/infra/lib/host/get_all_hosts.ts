@@ -8,11 +8,11 @@
 import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
-import type { InfraAssetMetadataType } from '../../../../../common/http_api';
+import type { InfraEntityMetadataType } from '../../../../../common/http_api';
 import { METADATA_AGGREGATION_NAME } from '../constants';
 import type { GetHostParameters } from '../types';
 import {
-  getFilterByIntegration,
+  getFilterForEntityType,
   getInventoryModelAggregations,
   getDocumentsFilter,
 } from '../helpers/query';
@@ -60,7 +60,7 @@ export const getAllHosts = async ({
     aggs: {
       // find hosts with metrics that are monitored by the system integration.
       monitoredHosts: {
-        filter: getFilterByIntegration('system'),
+        filter: getFilterForEntityType('host'),
         aggs: {
           names: {
             terms: {
@@ -130,7 +130,7 @@ export const getAllHosts = async ({
       const metadata = (bucket?.metadata.top ?? [])
         .flatMap((top) => Object.entries(top.metrics))
         .map(([key, value]) => ({
-          name: key as InfraAssetMetadataType,
+          name: key as InfraEntityMetadataType,
           value: typeof value === 'string' && value.trim().length === 0 ? null : value,
         }));
 

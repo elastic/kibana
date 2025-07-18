@@ -108,6 +108,8 @@ export interface ConversationRound {
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
   response: AssistantResponse;
+  /** when tracing is enabled, contains the traceId associated with this round */
+  trace_id?: string;
 }
 
 export interface Conversation {
@@ -119,3 +121,5 @@ export interface Conversation {
   updated_at: string;
   rounds: ConversationRound[];
 }
+
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
