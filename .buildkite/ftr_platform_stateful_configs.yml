@@ -230,10 +230,10 @@ enabled:
   - x-pack/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
   - x-pack/platform/test/functional/apps/management/config.ts
-  - x-pack/test/functional/apps/maps/group1/config.ts
-  - x-pack/test/functional/apps/maps/group2/config.ts
-  - x-pack/test/functional/apps/maps/group3/config.ts
-  - x-pack/test/functional/apps/maps/group4/config.ts
+  - x-pack/platform/test/functional/apps/maps/group1/config.ts
+  - x-pack/platform/test/functional/apps/maps/group2/config.ts
+  - x-pack/platform/test/functional/apps/maps/group3/config.ts
+  - x-pack/platform/test/functional/apps/maps/group4/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts

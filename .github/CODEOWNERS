@@ -1674,7 +1674,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-presentation
 /x-pack/platform/test/api_integration/apis/maps/ @elastic/kibana-presentation
-/x-pack/test/functional/apps/maps/ @elastic/kibana-presentation
+/x-pack/platform/test/functional/apps/maps/ @elastic/kibana-presentation
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment @elastic/kibana-presentation
