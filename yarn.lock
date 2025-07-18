@@ -4086,7 +4086,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
+"@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
 
@@ -5858,7 +5858,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/features-provider-plugin@link:x-pack/test/security_api_integration/plugins/features_provider":
+"@kbn/features-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/features_provider":
   version "0.0.0"
   uid ""
 
@@ -6714,7 +6714,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/oidc-provider-plugin@link:x-pack/test/security_api_integration/plugins/oidc_provider":
+"@kbn/oidc-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/oidc_provider":
   version "0.0.0"
   uid ""
 
@@ -7118,7 +7118,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saml-provider-plugin@link:x-pack/test/security_api_integration/plugins/saml_provider":
+"@kbn/saml-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/saml_provider":
   version "0.0.0"
   uid ""
 
@@ -7318,7 +7318,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-api-integration-helpers@link:x-pack/test/security_api_integration/packages/helpers":
+"@kbn/security-api-integration-helpers@link:x-pack/platform/test/security_api_integration/packages/helpers":
   version "0.0.0"
   uid ""
 
@@ -7406,7 +7406,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-test-endpoints-plugin@link:x-pack/test/security_functional/plugins/test_endpoints":
+"@kbn/security-test-endpoints-plugin@link:x-pack/platform/test/security_functional/plugins/test_endpoints":
   version "0.0.0"
   uid ""
 
@@ -8218,7 +8218,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/user-profiles-consumer-plugin@link:x-pack/test/security_api_integration/plugins/user_profiles_consumer":
+"@kbn/user-profiles-consumer-plugin@link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer":
   version "0.0.0"
   uid ""
 
@@ -9791,13 +9791,21 @@
     "@opentelemetry/semantic-conventions" "^1.27.0"
     "@types/tedious" "^4.0.14"
 
-"@opentelemetry/instrumentation-undici@^0.13.0", "@opentelemetry/instrumentation-undici@^0.13.2":
+"@opentelemetry/instrumentation-undici@^0.13.0":
   version "0.13.2"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-undici/-/instrumentation-undici-0.13.2.tgz#71d4710135b4251a0a5bae57233152e8f7eb8fca"
   integrity sha512-rO8CNuHnVN13rKrXayvtuXMXwPQkem3H0r/UWZhyNGQeHlqlQgpgtu5mR9dzSuv9kLRrxZb/WjK+sGOP5kwetg==
   dependencies:
     "@opentelemetry/core" "^2.0.0"
     "@opentelemetry/instrumentation" "^0.202.0"
+
+"@opentelemetry/instrumentation-undici@^0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-undici/-/instrumentation-undici-0.14.0.tgz#7a9cd276f7664773b5daf5ae53365b3593e6e7a9"
+  integrity sha512-2HN+7ztxAReXuxzrtA3WboAKlfP5OsPA57KQn2AdYZbJ3zeRPcLXyW4uO/jpLE6PLm0QRtmeGCmfYpqRlwgSwg==
+  dependencies:
+    "@opentelemetry/core" "^2.0.0"
+    "@opentelemetry/instrumentation" "^0.203.0"
 
 "@opentelemetry/instrumentation-winston@^0.47.0":
   version "0.47.0"
