@@ -17,6 +17,11 @@ import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
 import type { TimelineModel } from '../../../..';
 import type { ResolveTimelineResponse } from '../../../../../common/api/timeline';
+import { useDataView } from '@kbn/security-solution-plugin/public/data_view_manager/hooks/use_data_view';
+import {
+  getMockDataView,
+  getMockDataViewWithMatchedIndices,
+} from '@kbn/security-solution-plugin/public/data_view_manager/mocks/mock_data_view';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/utils/global_query_string/helpers');
@@ -114,6 +119,10 @@ describe('useRuleFromTimeline', () => {
         selectedPatterns: ['awesome-*'],
         sourcererDataView: {},
       });
+
+      const dataView = getMockDataViewWithMatchedIndices(['awesome-*']);
+      dataView.id = 'custom-data-view-id';
+      jest.mocked(useDataView).mockReturnValue({ status: 'ready', dataView });
     });
 
     it('does not reset timeline sourcerer if it originally had same data view as the timeline used in the rule', async () => {
@@ -138,6 +147,17 @@ describe('useRuleFromTimeline', () => {
           dataViewId: 'custom-data-view-id',
           selectedPatterns: ['awesome-*'],
         });
+
+      const initialDataView = getMockDataView();
+      initialDataView.id = 'security-solution';
+
+      const customDataView = getMockDataViewWithMatchedIndices(['awesome-*']);
+      customDataView.id = 'custom-data-view-id';
+
+      jest
+        .mocked(useDataView)
+        .mockReturnValueOnce({ status: 'ready', dataView: initialDataView })
+        .mockReturnValue({ status: 'ready', dataView: customDataView });
     });
     it('if no timeline id in URL, loading: false and query not set', async () => {
       (useGetInitialUrlParamValue as jest.Mock).mockReturnValue(() => undefined);
