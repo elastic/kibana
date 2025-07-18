@@ -18,30 +18,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
           activeFilter="all"
           card={
             Object {
-              "icon": "pivot",
-              "openEndpointModal": true,
-              "order": 1,
-              "solution": "search",
-              "telemetryId": "onboarding--search--elasticsearchEndpointApi",
-              "title": "Connect to the Elasticsearch API",
-            }
-          }
-          guidesState={Array []}
-          navigateToApp={[MockFunction]}
-        />
-        <EuiSpacer
-          size="m"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        key="1"
-      >
-        <GuideCard
-          activateGuide={[MockFunction]}
-          activeFilter="all"
-          card={
-            Object {
               "guideId": "databaseSearch",
               "icon": "database",
               "order": 1,
