@@ -80,6 +80,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
         }
       >
         <EuiComboBox
+          isInvalid={!isValid}
           placeholder={i18n.translate(
             'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.versionSelect.placeHolder',
             { defaultMessage: 'Select a version' }
