@@ -12,9 +12,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  AlertProvidedActionVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertProvidedActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPlainObject } from 'lodash';
 import {
   PagerDutyConfig,
