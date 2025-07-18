@@ -3861,8 +3861,8 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "sampleDataIngest",
+                "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
               },
               {
                 "plugin": "searchprofiler",
@@ -6569,12 +6569,8 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_permissions_route.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
-              },
-              {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+                "plugin": "sampleDataIngest",
+                "path": "x-pack/platform/plugins/shared/sample_data_ingest/server/routes/installation.ts"
               },
               {
                 "plugin": "searchprofiler",
@@ -6766,7 +6762,19 @@
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -14477,7 +14485,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
@@ -14485,11 +14497,15 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/conversations.ts"
               },
               {
                 "plugin": "onechat",
@@ -14886,6 +14902,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileged_access_detection/pad_get_installation_status.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileges.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15412,11 +15432,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "osquery",
@@ -16195,6 +16215,10 @@
               },
               {
                 "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
+              },
+              {
+                "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
@@ -16204,10 +16228,6 @@
               {
                 "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/chat.ts"
-              },
-              {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
               },
               {
                 "plugin": "onechat",
@@ -17069,11 +17089,11 @@
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/tools.ts"
               },
               {
                 "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/server/routes/esql_tools.ts"
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/agents.ts"
               },
               {
                 "plugin": "onechat",

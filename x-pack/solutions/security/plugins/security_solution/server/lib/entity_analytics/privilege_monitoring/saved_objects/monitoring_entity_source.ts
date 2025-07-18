@@ -20,40 +20,16 @@ export interface MonitoringEntitySourceDependencies {
 export class MonitoringEntitySourceDescriptorClient {
   constructor(private readonly dependencies: MonitoringEntitySourceDependencies) {}
 
-  getDynamicSavedObjectId(attributes: CreateMonitoringEntitySource) {
-    const { type, indexPattern, integrationName } = this.assertValidIdFields(attributes);
-    const sourceName = indexPattern || integrationName;
-    return `entity-analytics-monitoring-entity-source-${this.dependencies.namespace}-${type}${
-      sourceName ? `-${sourceName}` : ''
-    }`;
-  }
-
   async create(attributes: CreateMonitoringEntitySource) {
-    const savedObjectId = this.getDynamicSavedObjectId(attributes);
-    await this.assertNameUniqueness({ ...attributes, id: savedObjectId });
+    await this.assertNameUniqueness(attributes);
 
-    try {
-      // If exists, update it.
-      const { attributes: updated } =
-        await this.dependencies.soClient.update<MonitoringEntitySource>(
-          monitoringEntitySourceTypeName,
-          savedObjectId,
-          attributes,
-          { refresh: 'wait_for' }
-        );
-      return updated;
-    } catch (e) {
-      if (e.output?.statusCode !== 404) throw e;
+    const { id, attributes: created } =
+      await this.dependencies.soClient.create<CreateMonitoringEntitySource>(
+        monitoringEntitySourceTypeName,
+        { ...attributes, managed: attributes.managed ?? false } // Ensure managed is set to true on creation
+      );
 
-      // Does not exist, create it.
-      const { attributes: created } =
-        await this.dependencies.soClient.create<CreateMonitoringEntitySource>(
-          monitoringEntitySourceTypeName,
-          { ...attributes, managed: attributes.managed ?? false }, // Ensure managed is set to true on creation
-          { id: savedObjectId }
-        );
-      return { ...created, id: savedObjectId };
-    }
+    return { ...created, id };
   }
 
   async update(monitoringEntitySource: Partial<MonitoringEntitySource> & { id: string }) {
@@ -86,30 +62,16 @@ export class MonitoringEntitySourceDescriptorClient {
       .join(' and ');
   };
 
-  /**
-   * Need to update to understand the id based on the
-   * type and indexPattern or integrationName.
-   *
-   * Two options: create a getById method that takes the id,
-   * or use a dynamic ID based on the type and indexPattern/integrationName.
-   */
-  async get() {
+  async get(id: string): Promise<MonitoringEntitySource> {
     const { attributes } = await this.dependencies.soClient.get<MonitoringEntitySource>(
       monitoringEntitySourceTypeName,
-      'temp-id' // TODO: https://github.com/elastic/security-team/issues/12851
+      id
     );
     return attributes;
   }
 
-  /**
-   * Need to update to understand the id based on the
-   * type and indexPattern or integrationName.
-   *
-   * * Two options: create a getById method that takes the id,
-   * or use a dynamic ID based on the type and indexPattern/integrationName.
-   */
-  async delete() {
-    await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, 'temp-id'); // TODO: https://github.com/elastic/security-team/issues/12851
+  async delete(id: string) {
+    await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, id);
   }
 
   public async findByIndex(): Promise<MonitoringEntitySource[]> {
@@ -124,13 +86,6 @@ export class MonitoringEntitySourceDescriptorClient {
     return result.saved_objects
       .filter((so) => so.attributes.type !== 'csv') // from the spec we are not using CSV on monitoring
       .map((so) => ({ ...so.attributes, id: so.id }));
-  }
-
-  private assertValidIdFields(source: Partial<MonitoringEntitySource>): MonitoringEntitySource {
-    if (!source.type || (!source.indexPattern && !source.integrationName)) {
-      throw new Error('Missing required fields for ID generation');
-    }
-    return source as MonitoringEntitySource;
   }
 
   private async assertNameUniqueness(attributes: Partial<MonitoringEntitySource>): Promise<void> {

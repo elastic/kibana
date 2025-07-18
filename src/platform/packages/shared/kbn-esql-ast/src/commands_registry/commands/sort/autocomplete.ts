@@ -15,7 +15,7 @@ import {
   getFieldsOrFunctionsSuggestions,
   pushItUpInTheList,
   columnExists,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getSortPos, sortModifierSuggestions } from './utils';
 
@@ -25,14 +25,16 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
   }
+  const innerText = query.substring(0, cursorPosition);
   const prependSpace = (s: ISuggestionItem) => ({ ...s, text: ' ' + s.text });
 
-  const commandText = query.slice(command.location.min);
+  const commandText = innerText.slice(command.location.min);
 
   const { pos, nulls } = getSortPos(commandText);
 
@@ -49,7 +51,7 @@ export async function autocomplete(
     }
     case 'order': {
       return handleFragment(
-        query,
+        innerText,
         (fragment) => ['ASC', 'DESC'].some((completeWord) => noCaseCompare(completeWord, fragment)),
         (_fragment, rangeToReplace) => {
           return Object.values(sortModifierSuggestions).map((suggestion) => ({
@@ -83,11 +85,11 @@ export async function autocomplete(
     }
     case 'nulls': {
       return handleFragment(
-        query,
+        innerText,
         (fragment) =>
           ['FIRST', 'LAST'].some((completeWord) => noCaseCompare(completeWord, fragment)),
         (_fragment) => {
-          const end = query.length + 1;
+          const end = innerText.length + 1;
           const start = end - nulls.length;
           return Object.values(sortModifierSuggestions).map((suggestion) => ({
             ...suggestion,
@@ -133,7 +135,7 @@ export async function autocomplete(
   );
 
   return await handleFragment(
-    query,
+    innerText,
     (fragment: string) => columnExists(fragment, context),
     (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
       // SORT fie<suggest>

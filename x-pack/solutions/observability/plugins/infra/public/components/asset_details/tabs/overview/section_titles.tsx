@@ -13,7 +13,7 @@ import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import { ServicesTooltipContent } from '../../components/services_tooltip_content';
 import { ContainerMetricsExplanationContent } from '../../../lens/metric_explanation/container_metrics_explanation_content';
 
-export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemType }) => {
+export const MetricsSectionTitle = ({ entityType }: { entityType: InventoryItemType }) => {
   return (
     <TitleWithTooltip
       tooltipAriaLabel={i18n.translate(
@@ -27,7 +27,7 @@ export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemTyp
       })}
       data-test-subj="infraAssetDetailsMetricsTitle"
       tooltipTestSubj="infraAssetDetailsMetricsPopoverButton"
-      tooltipContent={getTooltipContent(assetType)}
+      tooltipContent={getTooltipContent(entityType)}
     />
   );
 };
@@ -68,8 +68,8 @@ export const ServicesSectionTitle = () => (
   />
 );
 
-function getTooltipContent(assetType: InventoryItemType) {
-  switch (assetType) {
+function getTooltipContent(entityType: InventoryItemType) {
+  switch (entityType) {
     case 'host':
       return <HostMetricsExplanationContent />;
     default:
