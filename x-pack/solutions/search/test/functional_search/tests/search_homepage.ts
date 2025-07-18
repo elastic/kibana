@@ -67,7 +67,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await esDeleteAllIndices(indexName);
         });
 
-        it('should have embedded dev console', async () => {
+        // Skipping this test since this is flaky https://github.com/elastic/kibana/issues/225446
+        it.skip('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
         });
 
