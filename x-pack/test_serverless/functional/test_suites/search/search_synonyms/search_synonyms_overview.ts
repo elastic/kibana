@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const browser = getService('browser');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('Serverless Synonyms Overview', function () {
     before(async () => {
@@ -75,7 +76,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           method: 'GET',
         });
         expect(overwrittenSet.synonyms_set).to.eql([]);
-        await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectEmptyPromptToExist();
+
+        await retry.tryForTime(5000, async () => {
+          await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectEmptyPromptToExist();
+          await browser.refresh();
+        });
 
         await es.transport.request({
           path: '_synonyms/overwrite-test',
