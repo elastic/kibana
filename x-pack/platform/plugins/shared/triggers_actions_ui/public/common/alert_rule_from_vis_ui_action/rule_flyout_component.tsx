@@ -22,6 +22,7 @@ import { AggregateQuery } from '@kbn/es-query';
 import { parse, Walker } from '@kbn/esql-ast';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { RuleForm } from '@kbn/response-ops-rule-form/flyout';
 import { KibanaContextProvider } from '../lib/kibana';
 
 export interface ServiceDependencies {
@@ -34,14 +35,14 @@ export interface ServiceDependencies {
   contentManagement?: ContentManagementPublicStart;
 }
 
-export async function getRuleFlyoutComponent(
+export function getRuleFlyoutComponent(
   startDependencies: ServiceDependencies,
   ruleTypeRegistry: RuleTypeRegistryContract,
   actionTypeRegistry: ActionTypeRegistryContract,
   parentApi: unknown,
   closeFlyout: () => void,
   passedInitialValues?: RuleFormData<EsQueryRuleParams>
-): Promise<JSX.Element> {
+) {
   const { coreStart } = startDependencies;
   const ruleFormPlugins = {
     ...startDependencies,
@@ -76,8 +77,6 @@ export async function getRuleFlyoutComponent(
           ...passedInitialValues,
         }
   ) as RuleFormData<EsQueryRuleParams>;
-
-  const { RuleForm } = await import('@kbn/response-ops-rule-form/flyout');
 
   return (
     <KibanaContextProvider services={ruleFormPlugins}>
