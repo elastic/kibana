@@ -25,10 +25,6 @@ export interface InspectorPluginStartDeps {
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
-
-  __LEGACY: {
-    views: InspectorViewRegistry;
-  };
 }
 
 export interface Start {
@@ -69,10 +65,6 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
 
     return {
       registerView: this.views!.register.bind(this.views),
-
-      __LEGACY: {
-        views: this.views,
-      },
     };
   }
 
