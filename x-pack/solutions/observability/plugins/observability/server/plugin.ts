@@ -18,6 +18,10 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
@@ -66,6 +70,7 @@ interface PluginSetup {
   cloud?: CloudSetup;
   contentManagement: ContentManagementServerSetup;
   esql: ESQLSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
 }
 
 interface PluginStart {
@@ -74,6 +79,7 @@ interface PluginStart {
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dashboard: DashboardPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
 }
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
@@ -102,7 +108,10 @@ export class ObservabilityPlugin
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
 
-    if (plugins.cases) {
+    if (
+      plugins.cases &&
+      plugins.observabilityShared.config.unsafe?.investigativeExperienceEnabled
+    ) {
       plugins.cases.attachmentFramework.registerPersistableState({
         id: PAGE_ATTACHMENT_TYPE,
       });

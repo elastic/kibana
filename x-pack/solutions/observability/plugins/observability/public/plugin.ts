@@ -272,7 +272,10 @@ export class Plugin
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
-    if (pluginsSetup.cases) {
+    if (
+      pluginsSetup.cases &&
+      pluginsSetup.observabilityShared.config.unsafe?.investigativeExperienceEnabled
+    ) {
       pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
     }
 
