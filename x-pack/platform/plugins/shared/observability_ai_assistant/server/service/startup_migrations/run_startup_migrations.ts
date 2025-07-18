@@ -9,12 +9,15 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { LockManagerService, isLockAcquisitionError } from '@kbn/lock-manager';
+import { LEGACY_CUSTOM_INFERENCE_ID, ELSER_ON_ML_NODE_INFERENCE_ID } from '../../../common';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { hasKbWriteIndex } from '../knowledge_base_service/has_kb_index';
 import { updateExistingIndexAssets } from '../index_assets/update_existing_index_assets';
+import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
+import { KnowledgeBaseService } from '../knowledge_base_service';
 
 const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant:startup_migrations';
 
@@ -22,6 +25,7 @@ const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant:startup_migrations';
 // 1. Updates index assets to ensure mappings are correct
 // 2. If the knowledge base index does not support the `semantic_text` field, it is re-indexed.
 // 3. Populates the `semantic_text` field for knowledge base entries
+// 4. migrates legacy inference endpoints
 export async function runStartupMigrations({
   core,
   logger,
@@ -63,6 +67,20 @@ export async function runStartupMigrations({
       }
       logger.info('Startup migrations are already in progress. Aborting startup migrations');
     });
+
+  const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
+  logger.info(`Current inference ID: ${currentInferenceId}`);
+
+  // If the current inference ID is the legacy custom inference endpoint, migrate to the preconfigured inference endpoint (it will remove the legacy custom inference endpoint).
+  if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
+    const kbService = new KnowledgeBaseService({
+      core,
+      logger,
+      config,
+      esClient,
+    });
+    await kbService.setupKnowledgeBase(ELSER_ON_ML_NODE_INFERENCE_ID, true);
+  }
 }
 
 // Checks if the knowledge base index supports `semantic_text`

@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
+import { LEGACY_CUSTOM_INFERENCE_ID } from '../../../common';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -22,9 +23,12 @@ import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import { getSpaceQuery } from '../util/get_space_query';
 import {
+  deleteInferenceEndpoint,
   getInferenceEndpointsForEmbedding,
   getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
+  waitForKbModel,
+  warmupModel,
 } from '../inference_endpoint';
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
@@ -32,6 +36,8 @@ import { ObservabilityAIAssistantConfig } from '../../config';
 import { hasKbWriteIndex } from './has_kb_index';
 import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
 import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
+import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
+import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -537,5 +543,82 @@ export class KnowledgeBaseService {
     });
 
     return inferenceEndpoints;
+  };
+
+  setupKnowledgeBase = async (
+    nextInferenceId: string,
+    waitUntilComplete: boolean = false
+  ): Promise<{
+    reindex: boolean;
+    currentInferenceId: string | undefined;
+    nextInferenceId: string;
+  }> => {
+    const { esClient, core, logger, config } = this.dependencies;
+
+    logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
+
+    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient, logger);
+    if (currentInferenceId === nextInferenceId) {
+      logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
+      const warmupModelPromise = warmupModel({ esClient, logger, inferenceId: nextInferenceId });
+      if (waitUntilComplete) {
+        logger.debug('Waiting for warmup to complete...');
+        await warmupModelPromise;
+        logger.debug('Warmup completed.');
+      }
+      return { reindex: false, currentInferenceId, nextInferenceId };
+    }
+
+    await createOrUpdateKnowledgeBaseIndexAssets({
+      core,
+      logger,
+      inferenceId: nextInferenceId,
+    });
+
+    const kbSetupPromise = waitForKbModel({
+      core,
+      esClient,
+      logger,
+      config,
+      inferenceId: nextInferenceId,
+    })
+      .then(async () => {
+        logger.info(
+          `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
+        );
+
+        await reIndexKnowledgeBaseWithLock({
+          core,
+          logger,
+          esClient,
+        });
+
+        // If the inference ID switched to a preconfigured inference endpoint, delete the legacy custom inference endpoint if it exists.
+        if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
+          void deleteInferenceEndpoint({
+            esClient,
+            logger,
+            inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+          });
+        }
+      })
+      .catch((e) => {
+        if (isLockAcquisitionError(e)) {
+          logger.info(e.message);
+        } else {
+          logger.error(
+            `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
+          );
+          logger.debug(e);
+        }
+      });
+
+    if (waitUntilComplete) {
+      logger.debug('Waiting for knowledge base setup to complete...');
+      await kbSetupPromise;
+      logger.debug('Knowledge base setup completed.');
+    }
+
+    return { reindex: true, currentInferenceId, nextInferenceId };
   };
 }
