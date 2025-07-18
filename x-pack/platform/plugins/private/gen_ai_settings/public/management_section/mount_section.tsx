@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { GenAiSettingsApp } from '../components/gen_ai_settings_app';
 import { EnabledFeaturesContextProvider } from '../contexts/serverless_context';
 
@@ -28,6 +29,12 @@ export const mountManagementSection = async ({
   isServerless,
 }: MountSectionParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
+
+  coreStart.chrome.docTitle.change(
+    i18n.translate('xpack.genAiSettings.app.titleBar', {
+      defaultMessage: 'GenAI Settings',
+    })
+  );
 
   const GenAiSettingsAppWithContext = () => (
     <I18nProvider>
