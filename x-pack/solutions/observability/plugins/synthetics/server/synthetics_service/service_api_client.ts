@@ -111,8 +111,8 @@ export class ServiceAPIClient {
 
           const { allowed, signupUrl } = data;
           return { allowed, signupUrl };
-        } catch (e) {
-          this.logger.error(e);
+        } catch (error) {
+          this.logger.error(`Error getting isAllowed status, Error: ${error.message}`, { error });
         }
       }
     } else {
@@ -177,8 +177,8 @@ export class ServiceAPIClient {
   async syncMonitors(data: ServiceData) {
     try {
       return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error(`Error syncing Synthetics monitors, Error: ${error.message}`, { error });
     }
   }
 

@@ -18,7 +18,7 @@
       "_ml/trained_models/{model_id}/_stats",
       "_ml/trained_models/_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-trained-models-stats.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-get-trained-models-stats",
     "availability": {
       "stack": true,
       "serverless": true

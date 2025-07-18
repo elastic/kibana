@@ -8,19 +8,24 @@
 import { Streams, getParentId, isRoot } from '@kbn/streams-schema';
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
+import { getLogsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
 import { formatToIngestProcessors } from '../helpers/processing';
 
 export function generateIngestPipeline(
   name: string,
-  definition: Streams.all.Definition
+  definition: Streams.all.Definition,
+  {
+    isServerless,
+  }: {
+    isServerless: boolean;
+  }
 ): IngestPutPipelineRequest {
   const isWiredStream = Streams.WiredStream.Definition.is(definition);
   return {
     id: getProcessingPipelineName(name),
     processors: [
-      ...(isRoot(definition.name) ? logsDefaultPipelineProcessors : []),
+      ...(isRoot(definition.name) ? getLogsDefaultPipelineProcessors(isServerless) : []),
       ...(!isRoot(definition.name) && isWiredStream
         ? [
             {

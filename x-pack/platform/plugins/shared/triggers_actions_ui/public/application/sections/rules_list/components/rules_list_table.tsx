@@ -163,6 +163,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
       index,
       actionsCount: rule.actions.length,
       ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
+      autoRecoverAlerts: ruleTypeIndex.get(rule.ruleTypeId)?.autoRecoverAlerts,
       isEditable:
         hasAllPrivilege(rule.consumer, ruleTypeIndex.get(rule.ruleTypeId)) &&
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
@@ -182,6 +183,20 @@ const ruleSidebarActionCss = css`
     opacity: 1; /* 2 */
   }
 `;
+
+const LAST_RUN_CONTENT = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
+  {
+    defaultMessage: 'Start time of the last run.',
+  }
+);
+
+const SNOOZE_RULE_NOTIFICATIONS = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
+  {
+    defaultMessage: 'Snooze notifications for a rule.',
+  }
+);
 
 export const RulesListTable = (props: RulesListTableProps) => {
   const {
@@ -282,7 +297,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           )}
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
         />
         <PercentileSelectablePopover
@@ -331,6 +346,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           rule={rule}
           onRuleChanged={onRuleChanged}
           isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
+          autoRecoverAlerts={rule.autoRecoverAlerts}
         />
       );
     },
@@ -411,7 +427,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                             }
                           `}
                           data-test-subj="ruleDisabledByLicenseTooltip"
-                          type="questionInCircle"
+                          type="question"
                           content={checkEnabledResult.message}
                           position="right"
                         />
@@ -468,16 +484,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
             &nbsp;
             <EuiIconTip
               data-test-subj="rulesTableCell-lastExecutionDateTooltip"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
-                {
-                  defaultMessage: 'Start time of the last run.',
-                }
-              )}
+              content={LAST_RUN_CONTENT}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
+              aria-label={LAST_RUN_CONTENT}
             />
           </span>
         ),
@@ -520,16 +532,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
             &nbsp;
             <EuiIconTip
               data-test-subj="rulesTableCell-notifyTooltip"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
-                {
-                  defaultMessage: 'Snooze notifications for a rule.',
-                }
-              )}
+              content={SNOOZE_RULE_NOTIFICATIONS}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
+              aria-label={SNOOZE_RULE_NOTIFICATIONS}
             />
           </span>
         ),
@@ -541,18 +549,20 @@ export const RulesListTable = (props: RulesListTableProps) => {
           }
 
           return (
-            <RulesListNotifyBadge
-              showOnHover
-              snoozeSettings={rule}
-              loading={!!isLoadingMap[rule.id]}
-              disabled={!rule.isEditable}
-              onRuleChanged={onRuleChanged}
-              snoozeRule={async (snoozeSchedule) => {
-                await onSnoozeRule(rule, snoozeSchedule);
-              }}
-              unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
-              isRuleEditable={rule.isEditable}
-            />
+            <div data-test-subj={`ruleType_${rule.ruleTypeId}`}>
+              <RulesListNotifyBadge
+                showOnHover
+                snoozeSettings={rule}
+                loading={!!isLoadingMap[rule.id]}
+                disabled={!rule.isEditable}
+                onRuleChanged={onRuleChanged}
+                snoozeRule={async (snoozeSchedule) => {
+                  await onSnoozeRule(rule, snoozeSchedule);
+                }}
+                unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
+                isRuleEditable={rule.isEditable}
+              />
+            </div>
           );
         },
       },
@@ -642,7 +652,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>
@@ -724,7 +734,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>
@@ -777,7 +787,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '90px',
         render(rule: RuleTableItem) {
           return (
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              gutterSize="none"
+              data-test-subj={`ruleType_${rule.ruleTypeId}`}
+            >
               <EuiFlexItem grow={false} className="ruleSidebarItem">
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
                   {rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId) ? (

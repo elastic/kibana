@@ -25,6 +25,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { load } from 'js-yaml';
+import semverGt from 'semver/functions/gt';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -106,7 +107,7 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
-import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
+import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
@@ -124,7 +125,7 @@ import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
 import {
-  canDeployAsAgentlessOrThrow,
+  canDeployCustomPackageAsAgentlessOrThrow,
   handleExperimentalDatastreamFeatureOptIn,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
@@ -328,6 +329,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (useSpaceAwareness) {
         validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
       }
+
+      validateDeploymentModesForInputs(
+        packagePolicy.inputs,
+        agentPolicy?.supports_agentless || packagePolicy.supports_agentless
+          ? 'agentless'
+          : 'default',
+        basePkgInfo
+      );
     }
 
     // trailing whitespace causes issues creating API keys
@@ -391,7 +400,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       }
       validatePackagePolicyOrThrow(enrichedPackagePolicy, pkgInfo);
-      canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
+      canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
       if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndWriteSecrets({
@@ -453,6 +462,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch: { privileges: elasticsearchPrivileges },
           }),
           ...(secretReferences?.length && { secret_references: secretReferences }),
+          latest_revision: true,
           revision: 1,
           created_at: isoDate,
           created_by: options?.user?.username ?? 'system',
@@ -619,7 +629,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           const { pkgInfo, assetsMap } = packageInfoAndAsset;
           validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-          canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
+          canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
           inputs = pkgInfo
             ? await _compilePackagePolicyInputs(
@@ -653,6 +663,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             elasticsearch,
             policy_id: agentPolicyIdsOfPackagePolicy[0],
             policy_ids: agentPolicyIdsOfPackagePolicy,
+            latest_revision: true,
             revision: 1,
             created_at: isoDate,
             created_by: options?.user?.username ?? 'system',
@@ -849,7 +860,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         type: savedObjectType,
         filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(
           agentPolicyId
-        )}`,
+        )} AND ${savedObjectType}.attributes.latest_revision:true`,
         perPage: SO_SEARCH_LIMIT,
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
@@ -969,6 +980,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         )}`
     );
 
+    const filter = _normalizePackagePolicyKuery(
+      savedObjectType,
+      kuery
+        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        : `${savedObjectType}.attributes.latest_revision:true`
+    );
+
     const packagePolicies = await soClient
       .find<PackagePolicySOAttributes>({
         type: savedObjectType,
@@ -977,7 +995,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         page,
         perPage,
         fields,
-        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
+        filter,
         namespaces: isSpacesEnabled && options.spaceId ? [options.spaceId] : undefined,
       })
       .catch(catchAndSetErrorStackTrace.withMessage('failed to find package policies'));
@@ -1013,6 +1031,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<ListResult<string>> {
     const logger = this.getLogger('listIds');
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
 
     logger.debug(
       () =>
@@ -1021,8 +1041,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         )}]`
     );
 
-    const savedObjectType = await getPackagePolicySavedObjectType();
-    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const filter = _normalizePackagePolicyKuery(
+      savedObjectType,
+      kuery
+        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        : `${savedObjectType}.attributes.latest_revision:true`
+    );
+
     const packagePolicies = await soClient
       .find<{ name: string }>({
         type: savedObjectType,
@@ -1031,7 +1056,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         page,
         perPage,
         fields: ['name'],
-        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
+        filter,
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
       .catch(catchAndSetErrorStackTrace.withMessage('failed to find package policies IDs'));
@@ -1156,7 +1181,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicyUpdate,
       });
       validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-      canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
+      canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
       if (await isSecretStorageEnabled(esClient, soClient)) {
         const secretsRes = await extractAndUpdateSecrets({
@@ -1192,15 +1217,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    if ((packagePolicyUpdate.policy_ids?.length ?? 0) > 1) {
-      for (const policyId of packagePolicyUpdate.policy_ids) {
-        const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
-        if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
-          throw new FleetError(
-            'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
-          );
-        }
+    for (const policyId of packagePolicyUpdate.policy_ids) {
+      const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
+      if ((agentPolicy?.space_ids?.length ?? 0) > 1) {
+        throw new FleetError(
+          'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
+        );
       }
+
+      validateDeploymentModesForInputs(
+        packagePolicy.inputs,
+        agentPolicy?.supports_agentless || packagePolicy.supports_agentless
+          ? 'agentless'
+          : 'default',
+        pkgInfo
+      );
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -1209,6 +1240,49 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       esClient,
       packagePolicy: restOfPackagePolicy,
     });
+
+    // If the package version has increased, save the previous package policy revision.
+    if (
+      appContextService.getExperimentalFeatures().enablePackageRollback &&
+      packagePolicy.package &&
+      oldPackagePolicy.package &&
+      semverGt(packagePolicy.package.version, oldPackagePolicy.package.version)
+    ) {
+      logger.debug(
+        `Saving previous revision of package policy ${id} with package version ${oldPackagePolicy.version}`
+      );
+      const currentPackagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+        savedObjectType,
+        id
+      );
+      const previousRevisionSO = {
+        ...currentPackagePolicySO,
+        id: `${id}:prev`,
+        attributes: {
+          ...currentPackagePolicySO.attributes,
+          latest_revision: false,
+        },
+      };
+      try {
+        await soClient.update<PackagePolicySOAttributes>(
+          savedObjectType,
+          `${id}:prev`,
+          previousRevisionSO.attributes
+        );
+      } catch (error) {
+        if (error.output.statusCode === 404) {
+          await soClient.create<PackagePolicySOAttributes>(
+            savedObjectType,
+            previousRevisionSO.attributes,
+            {
+              id: `${id}:prev`,
+            }
+          );
+        } else {
+          throw error;
+        }
+      }
+    }
 
     logger.debug(`Updating SO with revision ${oldPackagePolicy.revision + 1}`);
     await soClient
@@ -1391,6 +1465,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }> = [];
+    const previousPolicyRevisionsToCreate: Array<
+      SavedObjectsBulkCreateObject<PackagePolicySOAttributes>
+    > = [];
+    const previousPolicyRevisionsToUpdate: Array<
+      SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>
+    > = [];
 
     const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
 
@@ -1430,6 +1510,40 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           this.keepPolicyIdInSync(oldPackagePolicy);
         }
 
+        // If the package version has increased, save the previous package policy revision.
+        if (
+          appContextService.getExperimentalFeatures().enablePackageRollback &&
+          packagePolicy.package &&
+          oldPackagePolicy.package &&
+          semverGt(packagePolicy.package.version, oldPackagePolicy.package.version)
+        ) {
+          logger.debug(
+            `Saving previous revision of package policy ${id} with package version ${oldPackagePolicy.version}`
+          );
+          const currentPackagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+            savedObjectType,
+            id
+          );
+          const previousRevisionSO = {
+            ...currentPackagePolicySO,
+            id: `${id}:prev`,
+            attributes: {
+              ...currentPackagePolicySO.attributes,
+              latest_revision: false,
+            },
+          };
+          try {
+            await soClient.get<PackagePolicySOAttributes>(savedObjectType, `${id}:prev`);
+            previousPolicyRevisionsToUpdate.push(previousRevisionSO);
+          } catch (error) {
+            if (error.output.statusCode === 404) {
+              previousPolicyRevisionsToCreate.push(previousRevisionSO);
+            } else {
+              throw error;
+            }
+          }
+        }
+
         let secretReferences: PolicySecretReference[] | undefined;
 
         const { version } = packagePolicyUpdate;
@@ -1452,7 +1566,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           if (pkgInfoAndAsset) {
             const { pkgInfo, assetsMap } = pkgInfoAndAsset;
             validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
-            canDeployAsAgentlessOrThrow(packagePolicy, pkgInfo);
+            canDeployCustomPackageAsAgentlessOrThrow(packagePolicy, pkgInfo);
 
             if (secretStorageEnabled) {
               const secretsRes = await extractAndUpdateSecrets({
@@ -1555,6 +1669,29 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
+    // Store previous revision.
+    if (appContextService.getExperimentalFeatures().enablePackageRollback) {
+      if (previousPolicyRevisionsToCreate.length > 0) {
+        await soClient
+          .bulkCreate<PackagePolicySOAttributes>(previousPolicyRevisionsToCreate)
+          .catch(
+            catchAndSetErrorStackTrace.withMessage(
+              'Saved objects bulk create of previous package policy revisions failed'
+            )
+          );
+      }
+      if (previousPolicyRevisionsToUpdate.length > 0) {
+        await soClient
+          .bulkUpdate<PackagePolicySOAttributes>(previousPolicyRevisionsToUpdate)
+          .catch(
+            catchAndSetErrorStackTrace.withMessage(
+              'Saved objects bulk update of previous package policy revisions failed'
+            )
+          );
+      }
+    }
+
+    // Update package policies SO.
     const { saved_objects: updatedPolicies } = await soClient
       .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate)
       .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed]`));
@@ -1956,19 +2093,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
-          // disable some inputs in case of agentless integration
-          const enabled = inputNotAllowedInAgentless(input.type, newPolicy?.supports_agentless)
-            ? false
-            : input.enabled;
 
           return {
             ...defaultInput,
-            enabled,
+            enabled: input.enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
               ...stream,
-              enabled,
+              enabled: input.enabled,
             })),
           } as NewPackagePolicyInput;
         });

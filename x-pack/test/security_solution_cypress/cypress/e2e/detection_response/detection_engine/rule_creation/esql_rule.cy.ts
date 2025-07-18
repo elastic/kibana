@@ -55,8 +55,7 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-// Failing: See https://github.com/elastic/kibana/issues/222182
-describe.skip(
+describe(
   'Detection ES|QL rules - Rule Creation',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -172,7 +171,7 @@ describe.skip(
       });
 
       it('shows syntax error when query is syntactically invalid - prioritizing it over missing metadata operator error', function () {
-        const invalidNonAggregatingQuery = 'from auditbeat* | limit 5 test';
+        const invalidNonAggregatingQuery = 'from auditbeat* | where true test';
         selectEsqlRuleType();
         fillEsqlQueryBar(invalidNonAggregatingQuery);
         getDefineContinueButton().click();

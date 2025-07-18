@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 import { chatClient, esClient, kibanaClient } from '../../services';
 
 const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
@@ -96,18 +97,35 @@ describe('Knowledge base', () => {
       );
     });
 
-    it('retrieves DevOps team structure and on-call information', async () => {
-      const prompt = 'What DevOps teams does we have and how is the on-call rotation managed?';
-      const conversation = await chatClient.complete({ messages: prompt });
+    describe('when asking about DevOps teams', () => {
+      let conversation: Awaited<ReturnType<typeof chatClient.complete>>;
+      before(async () => {
+        const prompt = 'What DevOps teams does we have and how is the on-call rotation managed?';
+        conversation = await chatClient.complete({ messages: prompt });
+      });
 
-      const result = await chatClient.evaluate(conversation, [
-        'Uses context function response to find information about ACME DevOps team structure',
-        "Correctly identifies all three teams: Platform Infrastructure, Application Operations, and Security Operations and destcribes each team's responsibilities",
-        'Mentions that on-call rotations are managed through PagerDuty and includes information about accessing the on-call schedule via Slack or Kibana',
-        'Does not invent unrelated or hallucinated details not present in the KB',
-      ]);
+      it('retrieves one entry from the KB', async () => {
+        const contextResponseMessage = conversation.messages.find(
+          (msg) => msg.name === CONTEXT_FUNCTION_NAME
+        )!;
+        const { learnings } = JSON.parse(contextResponseMessage.content!);
+        const firstLearning = learnings[0];
 
-      expect(result.passed).to.be(true);
+        expect(learnings.length).to.be(1);
+        expect(firstLearning.llmScore).to.be.greaterThan(4);
+        expect(firstLearning.id).to.be('acme_teams');
+      });
+
+      it('retrieves DevOps team structure and on-call information', async () => {
+        const result = await chatClient.evaluate(conversation, [
+          'Uses context function response to find information about ACME DevOps team structure',
+          "Correctly identifies all three teams: Platform Infrastructure, Application Operations, and Security Operations and destcribes each team's responsibilities",
+          'Mentions that on-call rotations are managed through PagerDuty and includes information about accessing the on-call schedule via Slack or Kibana',
+          'Does not invent unrelated or hallucinated details not present in the KB',
+        ]);
+
+        expect(result.passed).to.be(true);
+      });
     });
 
     it('retrieves monitoring thresholds and database infrastructure details', async () => {

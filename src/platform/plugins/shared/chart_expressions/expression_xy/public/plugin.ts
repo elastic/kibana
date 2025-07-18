@@ -8,7 +8,6 @@
  */
 
 import moment from 'moment';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -85,7 +84,6 @@ export class ExpressionXyPlugin {
 
       const { theme: kibanaTheme } = coreStart;
       const eventAnnotationService = await eventAnnotation.getService();
-      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
 
       return {
         data,
@@ -95,7 +93,6 @@ export class ExpressionXyPlugin {
         usageCollection,
         activeCursor,
         paletteService,
-        useLegacyTimeAxis,
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),
         timeFormat: core.uiSettings.get('dateFormat'),

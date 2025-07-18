@@ -7,7 +7,7 @@
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { casesFeatureId, sloFeatureId } from '@kbn/observability-shared-plugin/common';
+import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { ComponentType } from 'react';
@@ -44,14 +44,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
               read: true,
               write: true,
             },
-            [casesFeatureId]: { read_cases: true },
-          },
-        },
-        cases: {
-          getAllCases: () => <>Get All Cases component from Cases app</>,
-          helpers: { getUICapabilities: () => ({ read_cases: true }) },
-          ui: {
-            getCases: () => <>Get Cases component from Cases app</>,
           },
         },
         charts: {

@@ -56,9 +56,7 @@ describe('Service Inventory', () => {
         cy.intercept(method, endpoint).as(aliasName)
       );
       cy.loginAsViewerUser();
-      cy.visitKibana(serviceInventoryHref, {
-        localStorageOptions: [['apm.dismissedEntitiesInventoryCallout', 'false']],
-      });
+      cy.visitKibana(serviceInventoryHref);
     });
 
     it('has no detectable a11y violations on load', () => {

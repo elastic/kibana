@@ -6,8 +6,9 @@
  */
 
 export type {
-  RegisteredTool,
+  BuiltinToolDefinition,
   ToolHandlerFn,
+  ToolHandlerReturn,
   ToolHandlerContext,
   ToolProvider,
   ToolProviderHasOptions,
@@ -41,9 +42,6 @@ export type {
   AgentHandlerContext,
   AgentHandlerReturn,
   AgentHandlerFn,
-  ConversationalAgentParams,
-  ConversationalAgentHandlerFn,
-  ConversationalAgentResponse,
   RunAgentFn,
   RunAgentParams,
   RunAgentReturn,
@@ -51,14 +49,4 @@ export type {
   ScopedRunnerRunAgentParams,
   AgentEventEmitter,
   RunAgentOnEventFn,
-  AgentDefinitionBase,
-  ConversationalAgentDefinition,
-  AgentDefinition,
-  AgentProvider,
-  ExecutableAgent,
-  ExecutableAgentHandlerFn,
-  ExecutableAgentHandlerParams,
-  ExecutableAgentBase,
-  ExecutableConversationalAgent,
-  AgentRegistry,
 } from './agents';

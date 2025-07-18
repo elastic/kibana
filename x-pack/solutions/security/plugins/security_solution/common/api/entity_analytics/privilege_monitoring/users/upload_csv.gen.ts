@@ -16,7 +16,22 @@
 
 import { z } from '@kbn/zod';
 
-export type BulkUploadUsersCSVResponse = z.infer<typeof BulkUploadUsersCSVResponse>;
-export const BulkUploadUsersCSVResponse = z.object({
-  upserted_count: z.number().int().optional(),
+export type PrivmonUserCsvUploadErrorItem = z.infer<typeof PrivmonUserCsvUploadErrorItem>;
+export const PrivmonUserCsvUploadErrorItem = z.object({
+  message: z.string(),
+  username: z.string().nullable(),
+  index: z.number().int().nullable(),
+});
+
+export type PrivmonUserCsvUploadStats = z.infer<typeof PrivmonUserCsvUploadStats>;
+export const PrivmonUserCsvUploadStats = z.object({
+  successful: z.number().int(),
+  failed: z.number().int(),
+  total: z.number().int(),
+});
+
+export type PrivmonBulkUploadUsersCSVResponse = z.infer<typeof PrivmonBulkUploadUsersCSVResponse>;
+export const PrivmonBulkUploadUsersCSVResponse = z.object({
+  errors: z.array(PrivmonUserCsvUploadErrorItem),
+  stats: PrivmonUserCsvUploadStats,
 });

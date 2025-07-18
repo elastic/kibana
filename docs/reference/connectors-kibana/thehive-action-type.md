@@ -70,6 +70,10 @@ Description
 Severity
 :   The severity of the incident: `LOW`, `MEDIUM`, `HIGH` or `CRITICAL`.
 
+    ::::{note}
+    While creating an alert, use the Keep severity from rule toggle to create an alert with the rule's severity. If the rule does not have a defined severity, the alert will have the default MEDIUM severity.
+    ::::
+
 TLP
 :   The traffic light protocol designation for the incident: `CLEAR`, `GREEN`, `AMBER`, `AMBER+STRICT` or `RED`.
 
@@ -87,6 +91,27 @@ Source
 
 Source reference
 :   A source reference for the alert.
+
+Body
+:   A Json payload specifying additional parameter, such as observables and procedures. For example:
+
+    ```json
+    {
+      "observables": [
+        {
+          "dataType": "url",
+          "data": "<EXAMPLE_URL>"
+        }
+      ],
+      "procedures": [
+        {
+          "patternId": "TA0001",
+          "occurDate": 1640000000000,
+          "tactic": "tactic-name"
+        }
+      ]
+    }
+    ```
 
 ## Connector networking configuration [thehive-connector-networking-configuration]
 

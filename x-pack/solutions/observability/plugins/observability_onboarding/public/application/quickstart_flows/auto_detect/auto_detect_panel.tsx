@@ -23,6 +23,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -35,6 +36,7 @@ import { FeedbackButtons } from '../shared/feedback_buttons';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { SupportedIntegrationsList } from './supported_integrations_list';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
+import { usePricingFeature } from '../shared/use_pricing_feature';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   useFlowBreadcrumb({
@@ -44,7 +46,20 @@ export const AutoDetectPanel: FunctionComponent = () => {
     ),
   });
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
-  const command = data ? getAutoDetectCommand(data) : undefined;
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
+  const command = data
+    ? getAutoDetectCommand({
+        scriptDownloadUrl: data.scriptDownloadUrl,
+        onboardingId: data.onboardingFlow.id,
+        kibanaUrl: data.kibanaUrl,
+        installApiKey: data.installApiKey,
+        ingestApiKey: data.ingestApiKey,
+        elasticAgentVersion: data.elasticAgentVersionInfo.agentVersion,
+        metricsEnabled: metricsOnboardingEnabled,
+      })
+    : undefined;
   const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
   const { onPageReady } = usePerformanceContext();
   const {
@@ -89,12 +104,19 @@ export const AutoDetectPanel: FunctionComponent = () => {
               <>
                 <EuiText>
                   <p>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
-                      {
-                        defaultMessage: "We'll scan your host for logs and metrics, including:",
-                      }
-                    )}
+                    {metricsOnboardingEnabled
+                      ? i18n.translate(
+                          'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
+                          {
+                            defaultMessage: "We'll scan your host for logs and metrics, including:",
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
+                          {
+                            defaultMessage: "We'll scan your host for logs, including:",
+                          }
+                        )}
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
@@ -175,7 +197,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         switch (integration.pkgName) {
                           case 'system':
                             actionLinks =
-                              assetDetailsLocator !== undefined
+                              metricsOnboardingEnabled && assetDetailsLocator !== undefined
                                 ? [
                                     {
                                       id: 'inventory-host-details',
@@ -204,19 +226,68 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                       }),
                                     },
                                   ]
-                                : [];
+                                : [
+                                    {
+                                      id: 'inventory-host-details',
+                                      title: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsTitle',
+                                        {
+                                          defaultMessage: 'View and analyze system logs',
+                                        }
+                                      ),
+                                      label: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsLabel',
+                                        {
+                                          defaultMessage: 'Explore logs',
+                                        }
+                                      ),
+                                      href:
+                                        logsLocator?.getRedirectUrl({
+                                          dataViewSpec: {
+                                            name: integration.pkgName,
+                                            title: `logs-system*`,
+                                            timeFieldName: '@timestamp',
+                                          },
+                                        }) ?? '',
+                                    },
+                                  ];
                             break;
                           default:
                             actionLinks =
-                              dashboardLocator !== undefined
+                              dashboardLocator !== undefined && logsLocator !== undefined
                                 ? integration.kibanaAssets
                                     .filter((asset) => asset.type === 'dashboard')
                                     .map((asset) => {
                                       const dashboard =
                                         DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
-                                      const href = dashboardLocator.getRedirectUrl({
-                                        dashboardId: asset.id,
-                                      });
+
+                                      if (
+                                        dashboard.type === 'metrics' &&
+                                        !metricsOnboardingEnabled
+                                      ) {
+                                        return {
+                                          id: asset.id,
+                                          title: i18n.translate(
+                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataDiscoverTitle',
+                                            {
+                                              defaultMessage: 'View and analyze your logs',
+                                            }
+                                          ),
+                                          label: i18n.translate(
+                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDiscoverDataLabel',
+                                            {
+                                              defaultMessage: 'Explore logs',
+                                            }
+                                          ),
+                                          href: logsLocator.getRedirectUrl({
+                                            dataViewSpec: {
+                                              name: integration.pkgName,
+                                              title: `logs-${integration.pkgName}*`,
+                                              timeFieldName: '@timestamp',
+                                            },
+                                          }),
+                                        };
+                                      }
 
                                       return {
                                         id: asset.id,
@@ -250,7 +321,9 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                                   defaultMessage: 'Explore logs data',
                                                 }
                                               ),
-                                        href,
+                                        href: dashboardLocator.getRedirectUrl({
+                                          dashboardId: asset.id,
+                                        }),
                                       };
                                     })
                                 : [];

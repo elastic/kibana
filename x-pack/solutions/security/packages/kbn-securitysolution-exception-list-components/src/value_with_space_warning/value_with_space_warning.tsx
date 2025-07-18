@@ -19,7 +19,7 @@ interface ValueWithSpaceWarningProps {
 
 export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
   value,
-  tooltipIconType = 'iInCircle',
+  tooltipIconType = 'info',
   tooltipIconText,
 }) => {
   const { showSpaceWarningIcon, warningText } = useValueWithSpaceWarning({

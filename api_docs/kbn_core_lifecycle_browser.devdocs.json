@@ -464,48 +464,16 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/types.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
-              },
-              {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/platform/plugins/private/transform/public/app/mount_management_section.ts"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
-                "plugin": "dashboardEnhanced",
-                "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.test.ts"
               },
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
               },
               {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/types.ts"
-              },
-              {
                 "plugin": "visualizations",
                 "path": "src/platform/plugins/shared/visualizations/public/visualize_app/components/visualize_listing.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/platform/plugins/private/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
               }
             ]
           },
@@ -650,6 +618,22 @@
             ],
             "signature": [
               "PluginsServiceStart"
+            ],
+            "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-browser",
+            "id": "def-public.CoreStart.pricing",
+            "type": "Object",
+            "tags": [],
+            "label": "pricing",
+            "description": [
+              "{@link PricingServiceStart}"
+            ],
+            "signature": [
+              "PricingServiceStart"
             ],
             "path": "src/core/packages/lifecycle/browser/src/core_start.ts",
             "deprecated": false,

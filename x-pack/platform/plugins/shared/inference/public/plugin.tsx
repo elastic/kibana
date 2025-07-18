@@ -9,7 +9,6 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import { createOutputApi } from '../common/output';
 import type { GetConnectorsResponseBody } from '../common/http_apis';
-import { createChatCompleteApi } from './chat_complete';
 import type {
   ConfigSchema,
   InferencePublicSetup,
@@ -17,6 +16,7 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
+import { createChatCompleteRestApi } from '../common/rest/chat_complete';
 
 export class InferencePlugin
   implements
@@ -40,7 +40,7 @@ export class InferencePlugin
   }
 
   start(coreStart: CoreStart, pluginsStart: InferenceStartDependencies): InferencePublicStart {
-    const chatComplete = createChatCompleteApi({ http: coreStart.http });
+    const chatComplete = createChatCompleteRestApi({ fetch: coreStart.http.fetch });
     const output = createOutputApi(chatComplete);
 
     return {

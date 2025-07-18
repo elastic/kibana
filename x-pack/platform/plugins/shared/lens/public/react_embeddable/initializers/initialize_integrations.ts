@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import {
   getAggregateQueryMode,
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-publishing';
-import { SavedObjectReference } from '@kbn/core/types';
+import {
+  SAVED_OBJECT_REF_NAME,
+  type HasSerializableState,
+  type SerializedPanelState,
+} from '@kbn/presentation-publishing';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
+import { DOC_TYPE } from '../../../common/constants';
 
 function cleanupSerializedState({
   rawState,
   references,
 }: {
   rawState: LensRuntimeState;
-  references: SavedObjectReference[];
+  references: Reference[];
 }) {
   const cleanedState = omit(rawState, 'searchSessionId');
   return {
@@ -33,6 +39,7 @@ function cleanupSerializedState({
 
 export function initializeIntegrations(
   getLatestState: GetStateType,
+  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined,
   { attributeService }: LensEmbeddableStartServices
 ): {
   api: Omit<
@@ -44,14 +51,13 @@ export function initializeIntegrations(
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
-    | 'mountInlineFlyout'
   > &
     HasSerializableState;
 } {
   return {
     api: {
       /**
-       * This API is used by the dashboard to serialize the panel state to save it into its saved object.
+       * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
       serializeState: () => {
@@ -59,10 +65,33 @@ export function initializeIntegrations(
         const cleanedState = cleanupSerializedState(
           attributeService.extractReferences(currentState)
         );
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+          serializeDynamicActions?.() ?? {};
         if (cleanedState.rawState.savedObjectId) {
-          return { ...cleanedState, rawState: { ...cleanedState.rawState, attributes: undefined } };
+          const { savedObjectId, attributes, ...byRefState } = cleanedState.rawState;
+          return {
+            rawState: {
+              ...byRefState,
+              ...dynamicActionsState,
+            },
+            references: [
+              ...cleanedState.references,
+              ...(dynamicActionsReferences ?? []),
+              {
+                name: SAVED_OBJECT_REF_NAME,
+                type: DOC_TYPE,
+                id: savedObjectId,
+              },
+            ],
+          };
         }
-        return cleanedState;
+        return {
+          rawState: {
+            ...cleanedState.rawState,
+            ...dynamicActionsState,
+          },
+          references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+        };
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

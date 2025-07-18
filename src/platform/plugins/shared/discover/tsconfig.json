@@ -103,9 +103,15 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/shared-ux-page-analytics-no-data-types",
     "@kbn/core-application-browser-mocks",
+    "@kbn/rison",
     "@kbn/unified-tabs",
     "@kbn/unified-histogram",
-    "@kbn/alerts-ui-shared"
+    "@kbn/alerts-ui-shared",
+    "@kbn/core-pricing-browser-mocks",
+    "@kbn/css-utils",
+    "@kbn/restorable-state"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

@@ -650,7 +650,7 @@ export function FormulaEditor({
       minimap: { enabled: false },
       wordWrap: isWordWrapped ? 'on' : 'off',
       // Disable suggestions that appear when we don't provide a default suggestion
-      wordBasedSuggestions: 'off',
+      wordBasedSuggestions: false,
       autoIndent: 'brackets',
       wrappingIndent: 'none',
       dimension: { width: 320, height: 200 },
@@ -738,6 +738,7 @@ export function FormulaEditor({
                         })
                   }
                   position="top"
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}

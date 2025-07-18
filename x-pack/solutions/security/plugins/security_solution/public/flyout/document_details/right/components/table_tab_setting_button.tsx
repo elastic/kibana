@@ -70,6 +70,10 @@ interface TableTabSettingButtonProps {
    * The function to set the state of the popover
    */
   setIsPopoverOpen: (isPopoverOpen: boolean) => void;
+  /**
+   * Whether the document is an alert
+   */
+  isAlert: boolean;
 }
 
 /**
@@ -80,6 +84,7 @@ export const TableTabSettingButton = ({
   setTableTabState,
   isPopoverOpen,
   setIsPopoverOpen,
+  isAlert,
 }: TableTabSettingButtonProps) => {
   const { showHighlightedFields, hideEmptyFields, hideAlertFields } = tableTabState;
   const { euiTheme } = useEuiTheme();
@@ -154,16 +159,18 @@ export const TableTabSettingButton = ({
               compressed
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSwitch
-              data-test-subj={TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID}
-              label={HIDE_ALERT_FIELDS_LABEL}
-              aria-label={HIDE_ALERT_FIELDS_LABEL}
-              checked={hideAlertFields}
-              onChange={onToggleHideAlertFields}
-              compressed
-            />
-          </EuiFlexItem>
+          {isAlert && (
+            <EuiFlexItem>
+              <EuiSwitch
+                data-test-subj={TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID}
+                label={HIDE_ALERT_FIELDS_LABEL}
+                aria-label={HIDE_ALERT_FIELDS_LABEL}
+                checked={hideAlertFields}
+                onChange={onToggleHideAlertFields}
+                compressed
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPopover>
     </EuiToolTip>

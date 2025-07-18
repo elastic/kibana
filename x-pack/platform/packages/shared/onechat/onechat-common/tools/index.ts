@@ -5,20 +5,23 @@
  * 2.0.
  */
 
+export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
+export { isReservedToolId, isBuiltInToolId, idRegexp } from './tool_ids';
+export { builtinToolIds, builtinTags, builtInToolIdPrefix } from './constants';
 export {
-  type ToolDescriptor,
-  type ToolDescriptorMeta,
-  type PlainIdToolIdentifier,
-  type SerializedToolIdentifier,
-  type StructuredToolIdentifier,
-  type ToolIdentifier,
-  ToolSourceType,
-  isSerializedToolIdentifier,
-  isStructuredToolIdentifier,
-  isPlainToolIdentifier,
-  toStructuredToolIdentifier,
-  toSerializedToolIdentifier,
-  createBuiltinToolId,
-  toolDescriptorToIdentifier,
-  builtinSourceId,
-} from './tools';
+  type ByIdsToolSelection,
+  type ToolSelection,
+  type ToolSelectionRelevantFields,
+  isByIdsToolSelection,
+  toolMatchSelection,
+  filterToolsBySelection,
+  allToolsSelectionWildcard,
+  allToolsSelection,
+} from './tool_selection';
+export {
+  type EsqlToolConfig,
+  EsqlToolFieldType,
+  type EsqlToolFieldTypes,
+  type EsqlToolParam,
+  type EsqlToolDefinition,
+} from './esql';

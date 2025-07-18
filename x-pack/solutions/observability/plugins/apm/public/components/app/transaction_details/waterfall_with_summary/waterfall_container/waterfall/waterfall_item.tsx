@@ -10,6 +10,7 @@ import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import type { IWaterfallGetRelatedErrorsHref } from '../../../../../../../common/waterfall/typings';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
@@ -126,6 +127,7 @@ interface IWaterfallItemProps {
     color: string;
   }>;
   onClick?: (flyoutDetailTab: string) => unknown;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   isEmbeddable?: boolean;
 }
 
@@ -226,6 +228,7 @@ export function WaterfallItem({
   color,
   isSelected,
   errorCount,
+  getRelatedErrorsHref,
   marginLeftLevel,
   onClick,
   segments,
@@ -300,7 +303,11 @@ export function WaterfallItem({
 
         <Duration item={item} />
         {isEmbeddable ? (
-          <EmbeddableErrorIcon errorCount={errorCount} />
+          <EmbeddableRelatedErrors
+            item={item}
+            errorCount={errorCount}
+            getRelatedErrorsHref={getRelatedErrorsHref}
+          />
         ) : (
           <RelatedErrors item={item} errorCount={errorCount} />
         )}
@@ -320,12 +327,47 @@ export function WaterfallItem({
   );
 }
 
-function EmbeddableErrorIcon({ errorCount }: { errorCount: number }) {
-  const theme = useEuiTheme();
-  if (errorCount <= 0) {
-    return null;
+function EmbeddableRelatedErrors({
+  item,
+  errorCount,
+  getRelatedErrorsHref,
+}: {
+  item: IWaterfallSpanOrTransaction;
+  errorCount: number;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+}) {
+  const { euiTheme } = useEuiTheme();
+
+  const viewRelatedErrorsLabel = i18n.translate(
+    'xpack.apm.waterfall.embeddableRelatedErrors.errorCount',
+    {
+      defaultMessage:
+        '{errorCount, plural, one {View related error} other {View # related errors}}',
+      values: { errorCount },
+    }
+  );
+
+  if (errorCount > 0 && getRelatedErrorsHref) {
+    return (
+      // eslint-disable-next-line @elastic/eui/href-or-on-click
+      <EuiBadge
+        color={euiTheme.colors.danger}
+        iconType="arrowRight"
+        href={getRelatedErrorsHref(item.id) as any}
+        onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
+          e.stopPropagation();
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label={viewRelatedErrorsLabel}
+        onClickAriaLabel={viewRelatedErrorsLabel}
+      >
+        {viewRelatedErrorsLabel}
+      </EuiBadge>
+    );
   }
-  return <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />;
+
+  return <FailureBadge outcome={item.doc.event?.outcome} />;
 }
 
 function RelatedErrors({

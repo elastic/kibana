@@ -10,10 +10,12 @@ import {
   SearchAILakeConfigurationsSettingsManagement,
   CONVERSATIONS_TAB,
   type ManagementSettingsTabs,
+  AssistantSpaceIdProvider,
 } from '@kbn/elastic-assistant';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { SecurityPageName } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 
 export const AISettings: React.FC = () => {
   const { navigateTo } = useNavigation();
@@ -26,7 +28,7 @@ export const AISettings: React.FC = () => {
     },
     data: { dataViews },
   } = useKibana().services;
-
+  const spaceId = useSpaceId();
   const onTabChange = useCallback(
     (tab: string) => {
       navigateTo({
@@ -45,11 +47,13 @@ export const AISettings: React.FC = () => {
   if (!securityAIAssistantEnabled) {
     navigateToApp('home');
   }
-  return (
-    <SearchAILakeConfigurationsSettingsManagement
-      dataViews={dataViews}
-      onTabChange={onTabChange}
-      currentTab={currentTab}
-    />
-  );
+  return spaceId ? (
+    <AssistantSpaceIdProvider spaceId={spaceId}>
+      <SearchAILakeConfigurationsSettingsManagement
+        dataViews={dataViews}
+        onTabChange={onTabChange}
+        currentTab={currentTab}
+      />
+    </AssistantSpaceIdProvider>
+  ) : null;
 };

@@ -4,7 +4,9 @@ disabled:
 
 defaultQueue: 'n2-4-spot'
 enabled:
-  - x-pack/test/functional_search/config.ts
+  - x-pack/solutions/search/test/functional_search/config.ts
   - x-pack/test/functional/apps/search_playground/config.ts
+  - x-pack/solutions/search/test/functional/config/config.feature_flags.ts
   - x-pack/solutions/search/test/api_integration/apis/search_playground/config.ts
-
+  - x-pack/solutions/search/test/api_integration/apis/guided_onboarding/config.ts
+  - x-pack/solutions/search/test/functional_solution_sidenav/config.ts

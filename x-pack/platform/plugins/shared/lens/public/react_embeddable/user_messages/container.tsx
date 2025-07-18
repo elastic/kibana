@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React from 'react';
 import type { UserMessage } from '../../types';
 import { VisualizationErrorPanel } from './error_panel';
@@ -30,12 +29,12 @@ export function UserMessages({
     <>
       <VisualizationErrorPanel errors={blockingErrors} canEdit={canEdit} />
       <div
-        css={css({
+        css={{
           position: 'absolute',
           zIndex: 2,
           left: 0,
           bottom: 0,
-        })}
+        }}
       >
         <MessagesPopover messages={warningOrErrors} />
         <EmbeddableFeatureBadge messages={infoMessages} />

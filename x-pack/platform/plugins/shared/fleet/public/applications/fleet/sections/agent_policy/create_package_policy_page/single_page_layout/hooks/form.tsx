@@ -43,6 +43,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
 import { getMaxPackageName } from '../../../../../../../../common/services';
+import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -55,7 +56,6 @@ import {
   getCloudFormationPropsFromPackagePolicy,
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
-import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
@@ -206,6 +206,7 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges,
   setNewAgentPolicy,
   setSelectedPolicyTab,
+  hideAgentlessSelector,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -217,6 +218,7 @@ export function useOnSubmit({
   hasFleetAddAgentsPrivileges: boolean;
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
+  hideAgentlessSelector?: boolean;
 }) {
   const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
@@ -231,12 +233,14 @@ export function useOnSubmit({
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const isFetchingBasePackage = useRef<boolean>(false);
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     ...DEFAULT_PACKAGE_POLICY,
   });
+  const [integration, setIntegration] = useState<string | undefined>(integrationToEnable);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
@@ -308,37 +312,56 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (!packageInfo || packageInfo.name === packagePolicy.package?.name) {
+      if (
+        !packageInfo ||
+        (packageInfo.name === packagePolicy.package?.name && integrationToEnable === integration)
+      ) {
         return;
+      }
+      if (integrationToEnable !== integration) {
+        setIntegration(integrationToEnable);
       }
 
       // Fetch all packagePolicies having the package name
-      const { data: packagePolicyData } = await sendGetPackagePolicies({
-        perPage: SO_SEARCH_LIMIT,
-        page: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
-      });
-      const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
+      if (!isFetchingBasePackage.current) {
+        // Prevent multiple calls to fetch base package
+        isFetchingBasePackage.current = true;
+        const { data: packagePolicyData } = await sendGetPackagePolicies({
+          perPage: SO_SEARCH_LIMIT,
+          page: 1,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+        });
+        const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-      const basePackagePolicy = packageToPackagePolicy(
-        packageInfo,
-        agentPolicies.map((policy) => policy.id),
-        '',
-        DEFAULT_PACKAGE_POLICY.name || incrementedName,
-        DEFAULT_PACKAGE_POLICY.description,
-        integrationToEnable
-      );
-      updatePackagePolicy(basePackagePolicy);
-      setIsInitialized(true);
+        const basePackagePolicy = packageToPackagePolicy(
+          packageInfo,
+          agentPolicies.map((policy) => policy.id),
+          '',
+          DEFAULT_PACKAGE_POLICY.name || incrementedName,
+          DEFAULT_PACKAGE_POLICY.description,
+          integrationToEnable
+        );
+
+        // Set the package policy with the fetched package
+        updatePackagePolicy(basePackagePolicy);
+        setIsInitialized(true);
+        isFetchingBasePackage.current = false;
+      }
     }
-    init();
+    if (!isInitialized) {
+      // Fetch agent policies
+      init();
+    }
   }, [
+    isFetchingBasePackage,
     packageInfo,
     agentPolicies,
     updatePackagePolicy,
     integrationToEnable,
     isInitialized,
     packagePolicy.package?.name,
+    integration,
+    setIntegration,
   ]);
 
   useEffect(() => {
@@ -368,6 +391,7 @@ export function useOnSubmit({
     packageInfo,
     packagePolicy,
     integrationToEnable,
+    hideAgentlessSelector,
   });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change
@@ -380,12 +404,19 @@ export function useOnSubmit({
 
   const newInputs = useMemo(() => {
     return packagePolicy.inputs.map((input, i) => {
-      if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
+      if (
+        isInputAllowedForDeploymentMode(
+          input,
+          isAgentlessSelected ? 'agentless' : 'default',
+          packageInfo
+        )
+      ) {
+        return input;
+      } else {
         return { ...input, enabled: false };
       }
-      return packagePolicy.inputs[i];
     });
-  }, [packagePolicy.inputs, isAgentlessSelected]);
+  }, [packagePolicy.inputs, isAgentlessSelected, packageInfo]);
 
   useEffect(() => {
     if (prevSetupTechnology !== selectedSetupTechnology) {

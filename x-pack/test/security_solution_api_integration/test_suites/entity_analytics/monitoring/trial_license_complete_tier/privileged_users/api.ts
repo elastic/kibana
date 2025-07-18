@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../../utils/data_view';
 import { PrivMonUtils } from './utils';
+import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
@@ -19,9 +20,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users CRUD APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
+    const kibanaServer = getService('kibanaServer');
     before(async () => {
+      await enablePrivmonSetting(kibanaServer);
       await dataView.create('security-solution');
       await privMonUtils.initPrivMonEngine();
+    });
+
+    beforeEach(async () => {
+      await enablePrivmonSetting(kibanaServer);
     });
 
     after(async () => {
@@ -44,20 +51,19 @@ export default ({ getService }: FtrProviderContext) => {
         expect(res.body);
       });
 
-      it('should retrieve a user', async () => {
-        log.info(`retrieving a user`);
-        const { body } = await api.createPrivMonUser({
+      it('should not create a user if the advanced setting is disabled', async () => {
+        await disablePrivmonSetting(kibanaServer);
+        log.info(`creating a user with advanced setting disabled`);
+        const res = await api.createPrivMonUser({
           body: { user: { name: 'test_user2' } },
         });
 
-        const res = await api.getPrivMonUser({ params: { id: body.id } });
-
-        if (res.status !== 200) {
-          log.error(`Retrieving privmon user failed`);
+        if (res.status !== 403) {
+          log.error(`Creating privmon user with advanced setting disabled should fail`);
           log.error(JSON.stringify(res.body));
         }
 
-        expect(res.status).eql(200);
+        expect(res.status).eql(403);
       });
 
       it('should update a user', async () => {

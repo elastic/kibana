@@ -1201,14 +1201,6 @@
           },
           {
             "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
-            "path": "x-pack/platform/plugins/private/canvas/public/services/canvas_workpad_service.ts"
-          },
-          {
-            "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/public/components/home/hooks/use_upload_workpad.ts"
           },
           {
@@ -1956,27 +1948,11 @@
           },
           {
             "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/load_from_library.ts"
-          },
-          {
-            "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/save_to_library.ts"
           },
           {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/save_to_library.ts"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
           },
           {
             "plugin": "graph",
@@ -2011,12 +1987,12 @@
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/common/bwc/types.ts"
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/common/bwc/types.ts"
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -2124,23 +2100,23 @@
           },
           {
             "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/migrate_base_input.ts"
           },
           {
             "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/migrate_base_input.ts"
           },
           {
             "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/migrate_base_input.ts"
           },
           {
             "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/inject.ts"
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/inject.ts"
           },
           {
             "plugin": "embeddable",
-            "path": "src/platform/plugins/shared/embeddable/common/lib/inject.ts"
+            "path": "src/platform/plugins/shared/embeddable/server/persistable_state/inject.ts"
           },
           {
             "plugin": "uiActionsEnhanced",
@@ -2213,22 +2189,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/common/embeddable_factory/index.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/helper.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/helper.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
           },
           {
             "plugin": "maps",

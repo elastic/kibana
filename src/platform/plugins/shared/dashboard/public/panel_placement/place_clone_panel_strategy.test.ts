@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMockDashboardPanels } from '../mocks';
+import { getMockLayout, getMockLayoutWithSections } from '../mocks';
 import { placeClonePanel } from './place_clone_panel_strategy';
 
 describe('Clone panel placement strategies', () => {
@@ -16,7 +16,7 @@ describe('Clone panel placement strategies', () => {
       '1': {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
         type: 'lens',
-        explicitInput: { id: '1' },
+        panelConfig: {},
       },
     };
     const { newPanelPlacement, otherPanels } = placeClonePanel({
@@ -35,7 +35,7 @@ describe('Clone panel placement strategies', () => {
   });
 
   it('panel collision at desired clone location', () => {
-    const { panels } = getMockDashboardPanels();
+    const panels = getMockLayout().panels;
     const { newPanelPlacement, otherPanels } = placeClonePanel({
       width: 6,
       height: 6,
@@ -52,8 +52,7 @@ describe('Clone panel placement strategies', () => {
   });
 
   it('ignores panels in other sections', () => {
-    const { panels } = getMockDashboardPanels(true);
-
+    const panels = getMockLayoutWithSections().panels;
     const { newPanelPlacement, otherPanels } = placeClonePanel({
       width: 6,
       height: 6,

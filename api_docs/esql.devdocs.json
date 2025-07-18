@@ -54,6 +54,63 @@
     "interfaces": [
       {
         "parentPluginId": "esql",
+        "id": "def-public.DataErrorsControl",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataErrorsControl",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.DataErrorsControl.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.DataErrorsControl.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(value: boolean) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "esql",
+                "id": "def-public.DataErrorsControl.onChange.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esql",
         "id": "def-public.ESQLEditorProps",
         "type": "Interface",
         "tags": [],
@@ -500,6 +557,45 @@
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.dataErrorsControl",
+            "type": "Object",
+            "tags": [],
+            "label": "dataErrorsControl",
+            "description": [
+              "Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-editor",
+                "scope": "public",
+                "docId": "kibKbnEsqlEditorPluginApi",
+                "section": "def-public.DataErrorsControl",
+                "text": "DataErrorsControl"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.formLabel",
+            "type": "string",
+            "tags": [],
+            "label": "formLabel",
+            "description": [
+              "Optional form field label to show above the query editor"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -565,6 +661,48 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "esql",
+          "id": "def-public.EsqlPluginStart.getInferenceEndpointsAutocomplete",
+          "type": "Function",
+          "tags": [],
+          "label": "getInferenceEndpointsAutocomplete",
+          "description": [],
+          "signature": [
+            "((taskType: ",
+            "InferenceTaskType",
+            ") => Promise<",
+            {
+              "pluginId": "@kbn/esql-types",
+              "scope": "common",
+              "docId": "kibKbnEsqlTypesPluginApi",
+              "section": "def-common.InferenceEndpointsAutocompleteResult",
+              "text": "InferenceEndpointsAutocompleteResult"
+            },
+            ">) | undefined"
+          ],
+          "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "esql",
+              "id": "def-public.EsqlPluginStart.getInferenceEndpointsAutocomplete.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "taskType",
+              "description": [],
+              "signature": [
+                "InferenceTaskType"
+              ],
+              "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         },
         {

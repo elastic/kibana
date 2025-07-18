@@ -5,38 +5,27 @@
  * 2.0.
  */
 
+import zodToJsonSchema, { JsonSchema7ObjectType } from 'zod-to-json-schema';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { builtinSourceId, ToolSourceType, ToolDescriptor } from '@kbn/onechat-common';
-import type { Runner, RegisteredTool, ExecutableTool } from '@kbn/onechat-server';
-import { RegisteredToolWithMeta } from '../types';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { Runner, ExecutableTool } from '@kbn/onechat-server';
+import { InternalToolDefinition } from '../tool_provider';
 
-export const addBuiltinSystemMeta = <
+export const toExecutableTool = <
+  TConfig extends object = {},
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
->(
-  tool: RegisteredTool<RunInput, RunOutput>
-): RegisteredToolWithMeta<RunInput, RunOutput> => {
-  return {
-    ...tool,
-    meta: {
-      tags: tool.meta?.tags ?? [],
-      sourceType: ToolSourceType.builtIn,
-      sourceId: builtinSourceId,
-    },
-  };
-};
-
-export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
+>({
   tool,
   runner,
   request,
 }: {
-  tool: RegisteredTool<RunInput, RunOutput>;
+  tool: InternalToolDefinition<TConfig, RunInput, RunOutput>;
   runner: Runner;
   request: KibanaRequest;
-}): ExecutableTool<RunInput, RunOutput> => {
-  const { handler, ...toolParts } = addBuiltinSystemMeta(tool);
+}): ExecutableTool<TConfig, RunInput, RunOutput> => {
+  const { handler, ...toolParts } = tool;
 
   return {
     ...toolParts,
@@ -51,7 +40,8 @@ export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
  *
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
-export const toolToDescriptor = <T extends ToolDescriptor>(tool: T): ToolDescriptor => {
-  const { id, name, description, meta } = tool;
-  return { id, name, description, meta };
+export const toDescriptorWithSchema = (tool: InternalToolDefinition): ToolDefinitionWithSchema => {
+  const { id, type, description, tags, configuration, schema } = tool;
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
+  return { id, type, description, tags, configuration, schema: jsonSchema };
 };

@@ -11,7 +11,7 @@ import { createKbnFieldTypes, kbnFieldTypeUnknown } from './kbn_field_types_fact
 import { KbnFieldType } from './kbn_field_type';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
-/** @private */
+/** @internal */
 const registeredKbnTypes = createKbnFieldTypes();
 
 /**

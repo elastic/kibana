@@ -8,9 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { KueryNode } from '@kbn/es-query';
 import React, { useMemo, useCallback, useState } from 'react';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { RuleTableItem, BulkEditActions, UpdateRulesToBulkEditProps } from '../../../../types';
 import {
@@ -54,13 +53,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const { euiTheme } = useEuiTheme();
-
-  const bulkDeleteButtonCss = css`
-    .euiButtonEmpty__text {
-      padding-top: ${euiTheme.size.xs};
-    }
-  `;
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
 
   const isPerformingAction = isEnablingRules || isDisablingRules || isBulkEditing;
@@ -71,6 +63,14 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     }
     return !!selectedItems.find((alertItem) => !alertItem.enabledInLicense);
   }, [selectedItems, isAllSelected]);
+
+  const hasAutoRecoverAlertsRuleTypes = useMemo(() => {
+    if (isAllSelected) {
+      // Show "untrack active alerts" confirmation modal if all alerts are selected
+      return true;
+    }
+    return !!selectedItems.find((alertItem) => alertItem.autoRecoverAlerts !== false);
+  }, [isAllSelected, selectedItems]);
 
   async function deleteSelectedItems() {
     onPerformingAction();
@@ -241,8 +241,12 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   const onDisableClick = useCallback(() => {
-    setIsUntrackAlertsModalOpen(true);
-  }, []);
+    if (hasAutoRecoverAlertsRuleTypes) {
+      setIsUntrackAlertsModalOpen(true);
+    } else {
+      onDisable(false);
+    }
+  }, [hasAutoRecoverAlertsRuleTypes, onDisable]);
 
   const onModalClose = useCallback(() => {
     setIsUntrackAlertsModalOpen(false);
@@ -367,7 +371,6 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
             color="danger"
             isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
             data-test-subj="bulkDelete"
-            css={bulkDeleteButtonCss}
             className="actBulkActionPopover__deleteAll"
           >
             <FormattedMessage

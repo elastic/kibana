@@ -10,6 +10,7 @@ import React from 'react';
 import { Failure } from './failure';
 import { EmptyPrompt } from './empty_prompt';
 import { showFailurePrompt, showNoAlertsPrompt, showWelcomePrompt } from '../../helpers';
+import type { SettingsOverrideOptions } from '../history/types';
 import { NoAlerts } from './no_alerts';
 import { Welcome } from './welcome';
 
@@ -20,7 +21,7 @@ interface Props {
   connectorId: string | undefined;
   failureReason: string | null;
   isLoading: boolean;
-  onGenerate: () => Promise<void>;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   upToAlertsCount: number;
 }
 
@@ -36,6 +37,11 @@ const EmptyStatesComponent: React.FC<Props> = ({
 }) => {
   const isDisabled = connectorId == null;
 
+  // Return null when loading or when attack discoveries are present
+  if (isLoading || attackDiscoveriesCount > 0) {
+    return null;
+  }
+
   if (showWelcomePrompt({ aiConnectorsCount, isLoading })) {
     return <Welcome />;
   }
@@ -49,14 +55,16 @@ const EmptyStatesComponent: React.FC<Props> = ({
   }
 
   return (
-    <EmptyPrompt
-      aiConnectorsCount={aiConnectorsCount}
-      alertsCount={upToAlertsCount}
-      attackDiscoveriesCount={attackDiscoveriesCount}
-      isDisabled={isDisabled}
-      isLoading={isLoading}
-      onGenerate={onGenerate}
-    />
+    <div data-test-subj="emptyStates">
+      <EmptyPrompt
+        aiConnectorsCount={aiConnectorsCount}
+        alertsCount={upToAlertsCount}
+        attackDiscoveriesCount={attackDiscoveriesCount}
+        isDisabled={isDisabled}
+        isLoading={isLoading}
+        onGenerate={onGenerate}
+      />
+    </div>
   );
 };
 

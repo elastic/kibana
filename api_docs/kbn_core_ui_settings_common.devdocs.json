@@ -479,6 +479,23 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.UiSettingsParams.technicalPreview",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "technicalPreview",
+            "description": [
+              "A flag indicating that this setting is a technical preview. If true, the setting will display a tech preview badge after the title."
+            ],
+            "signature": [
+              "TechnicalPreviewSettings",
+              " | undefined"
+            ],
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
             "id": "def-common.UiSettingsParams.order",
             "type": "number",
             "tags": [],
@@ -693,7 +710,24 @@
           "\nType for the readonly mode of the readonly settings.\n'strict' indicates that the value cannot be changed through API and is not displayed in the UI\n'ui' indicates that the value is just not displayed in the UI"
         ],
         "signature": [
-          "\"strict\" | \"ui\""
+          "\"ui\" | \"strict\""
+        ],
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.TechnicalPreviewSettings",
+        "type": "Type",
+        "tags": [],
+        "label": "TechnicalPreviewSettings",
+        "description": [
+          "\nType for the technical preview settings."
+        ],
+        "signature": [
+          "boolean | { message?: string | undefined; docLinksKey?: string | undefined; }"
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,

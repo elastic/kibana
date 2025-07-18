@@ -22,15 +22,15 @@ load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install
 # Setup the Node.js toolchain for the architectures we want to support
 node_repositories(
   node_repositories = {
-    "20.18.2-darwin_amd64": ("node-v20.18.2-darwin-x64.tar.gz", "node-v20.18.2-darwin-x64", "00a16bb0a82a2ad5d00d66b466ae1afa678482283747c27e9bce96668f334744"),
-    "20.18.2-darwin_arm64": ("node-v20.18.2-darwin-arm64.tar.gz", "node-v20.18.2-darwin-arm64", "fa76d5b5340f14070ebaa88ef8faa28c1e9271502725e830cb52f0cf5b6493de"),
-    "20.18.2-linux_arm64": ("node-v20.18.2-linux-arm64.tar.xz", "node-v20.18.2-linux-arm64", "1b4b1745ef7b6d342ddf998352438cfc61dbfcdf0895c9db7e9f1d8a427815d2"),
-    "20.18.2-linux_amd64": ("node-v20.18.2-linux-x64.tar.xz", "node-v20.18.2-linux-x64", "1a6e1fbd768437e130eac1a54c5535736d6992df700c09a6ce58f22040d6a34c"),
-    "20.18.2-windows_amd64": ("node-v20.18.2-win-x64.zip", "node-v20.18.2-win-x64", "ed790b94570518a7dce67b62485e16bc4bffecee4ec3b6df35ed220ae91117a5"),
+    "22.17.1-darwin_amd64": ("node-v22.17.1-darwin-x64.tar.gz", "node-v22.17.1-darwin-x64", "b925103150fac0d23a44a45b2d88a01b73e5fff101e5dcfbae98d32c08d4bee3"),
+    "22.17.1-darwin_arm64": ("node-v22.17.1-darwin-arm64.tar.gz", "node-v22.17.1-darwin-arm64", "a983f4f2a7b71512b78d7935b9ccf6b72120a255810070afd635c4146bca7b31"),
+    "22.17.1-linux_arm64": ("node-v22.17.1-linux-arm64.tar.xz", "node-v22.17.1-linux-arm64", "37bb596033e6477b5cec845ab18fd02bc6dc8af846f1ace813a005e91298e9ea"),
+    "22.17.1-linux_amd64": ("node-v22.17.1-linux-x64.tar.xz", "node-v22.17.1-linux-x64", "45431ec948e80f63819de4767581e838119bc9a13daa15805b205f447d086bee"),
+    "22.17.1-windows_amd64": ("node-v22.17.1-win-x64.zip", "node-v22.17.1-win-x64", "b1fdb5635ba860f6bf71474f2ca882459a582de49b1d869451e3ad188e3943eb"),
   },
-  node_version = "20.18.2",
+  node_version = "22.17.1",
   node_urls = [
-    "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v{version}/{filename}",
+    "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-glibc-217/dist/v{version}/{filename}",
   ],
   yarn_repositories = {
     "1.22.21": ("yarn-v1.22.21.tar.gz", "yarn-v1.22.21", "a55bb4e85405f5dfd6e7154a444e7e33ad305d7ca858bad8546e932a6688df08"),

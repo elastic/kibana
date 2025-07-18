@@ -35,11 +35,11 @@ export type CustomComparators<StateType> = {
   [KeyType in keyof StateType]?: ComparatorFunction<StateType, KeyType>;
 };
 
-type SubjectsOf<T extends object> = {
+export type SubjectsOf<T extends object> = {
   [KeyType in keyof Required<T> as `${string & KeyType}$`]: PublishingSubject<T[KeyType]>;
 };
 
-type SettersOf<T extends object> = {
+export type SettersOf<T extends object> = {
   [KeyType in keyof Required<T> as `set${Capitalize<string & KeyType>}`]: (
     value: T[KeyType]
   ) => void;

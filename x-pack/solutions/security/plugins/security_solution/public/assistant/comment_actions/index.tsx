@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
@@ -106,7 +106,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     <EuiFlexGroup alignItems="center" gutterSize="none">
       {isModelEvaluationEnabled && apmTraceLink != null && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE}>
+          <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={i18n.VIEW_APM_TRACE}
               color="primary"
@@ -128,27 +128,17 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={i18n.ADD_TO_CASE_EXISTING_CASE}>
+        <EuiToolTip
+          position="top"
+          content={i18n.ADD_TO_CASE_EXISTING_CASE}
+          disableScreenReaderOutput
+        >
           <EuiButtonIcon
             aria-label={i18n.ADD_TO_CASE_EXISTING_CASE}
             color="primary"
             iconType="addDataApp"
             onClick={onAddToExistingCase}
           />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
-          <EuiCopy textToCopy={getSelfContainedContent(content)}>
-            {(copy) => (
-              <EuiButtonIcon
-                aria-label={i18n.COPY_TO_CLIPBOARD}
-                color="primary"
-                iconType="copyClipboard"
-                onClick={copy}
-              />
-            )}
-          </EuiCopy>
         </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -148,7 +148,7 @@ export interface KibanaFeatureConfig {
   privilegesTooltip?: string;
 
   /**
-   * @private
+   * @internal
    */
   reserved?: {
     description: string;
