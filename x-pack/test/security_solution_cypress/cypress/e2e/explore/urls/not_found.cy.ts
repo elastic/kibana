@@ -21,7 +21,7 @@ import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 
 import { NOT_FOUND } from '../../../screens/common/page';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
-import { ruleEditUrl } from '../../../urls/edit_rule';
+import { ruleEditUrl } from '../../../urls/rule_edit';
 
 const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 

@@ -16,7 +16,7 @@ import {
   GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
 } from '../../../screens/date_picker';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
-import { ruleEditUrl } from '../../../urls/edit_rule';
+import { ruleEditUrl } from '../../../urls/rule_edit';
 
 const LEGACY_DETECTIONS_URL_1 = '/app/siem#/detections';
 const LEGACY_DETECTIONS_URL_2 = '/app/security/detections';

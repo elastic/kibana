@@ -10,7 +10,7 @@ import {
   SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN,
 } from '../screens/create_new_rule';
 import { BACK_TO_RULE_DETAILS, EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
-import { ruleEditUrl } from '../urls/edit_rule';
+import { ruleEditUrl } from '../urls/rule_edit';
 import { visit } from './navigation';
 
 export function visitRuleEditPage(ruleId: string): void {
