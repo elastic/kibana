@@ -88,6 +88,7 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Formats the **Last activity** value in the {{fleet}} agent details view as a datetime [#215531]({{kib-pull}}215531).
 * Adds support for `searchAfter` and point-in-time (`pit`) parameters in the get agents list API [#213486]({{kib-pull}}213486).
 * Registers a custom integrations search provider [#213013]({{kib-pull}}213013).
+* Adds support for collapsible sections in integration overview pages [#223916]({{kib-pull}}223916).
 
 **Discover**:
 * Adds an **Attributes** tab in **Discover** when exploring OTel documents [#222391]({{kib-pull}}222391).
@@ -100,6 +101,7 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 * Adds a warning and a tooltip for explaining the `_score` column in **Discover** [#211013]({{kib-pull}}211013).
 * Adds support for `command`/`ctrl` + click to open links in a new tab, for example allowing to conduct simultaneous searches in parallel more efficiently [#210982]({{kib-pull}}210982).
 * Improves the **Display options** menu layout [#210180]({{kib-pull}}210180).
+* Updates styles for Color formatter to look like badges [#189391]({{kib-pull}}189391).
 
 **{{esql}} editor**:
 * The {{esql}} `LOOKUP_JOIN` command is now GA [#225117]({{kib-pull}}225117).
@@ -124,11 +126,20 @@ For the Elastic Observability 9.1.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.1.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Adds unused url cleanup task [#220138]({{kib-pull}}220138).
+* Adds an option to User Settings that allows to display the Kibana interface in high contrast mode [#216242]({{kib-pull}}216242).
+* Adds an unused "URL" saved objects cleanup task to reduce upgrade downtime [#220138]({{kib-pull}}220138).
+* Adds a `defaultSolution` setting to spaces configuration to allow starting Kibana with its default space set to specific solution view [#218360]({{kib-pull}}218360).
+* Kibana logging's pattern layout, used by default for the console appender, will now use a new default pattern layout: `[%date][%level][%logger] %message %error`. This includes the error name and stack trace if these were included in the log entry. To opt out of this behavior, you can omit the `%error` placeholder from your log pattern configuration in `kibana.yml` [#219940]({{kib-pull}}219940). For example: 
 
-**Kibana security**:
-* Render accordion in integration readme [#223916]({{kib-pull}}223916).
-* Adds defaultSolution to spaces config [#218360]({{kib-pull}}218360).
+```yml
+logging:
+  appenders:
+    console:
+      type: console
+      layout:
+        type: pattern
+        pattern: "[%date][%level][%logger] %message"
+```
 
 **Machine Learning**:
 * Moves job and trained model management features into Stack Management [#204290]({{kib-pull}}204290).
@@ -147,37 +158,17 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Improves the UX for deploying trained models [#205699]({{kib-pull}}205699).
 
 **Management**:
-* These changes add autocompletion for ESQL query requests in Console [#219980]({{kib-pull}}219980).
-* Adds loader when datasources are being loaded [#225005]({{kib-pull}}225005).
-* Listing and overview page improvements [#223603]({{kib-pull}}223603).
-* Significant events view [#220197]({{kib-pull}}220197).
-* Remove enablement check in `PUT /api/streams/{id}` for classic streams [#212289]({{kib-pull}}212289).
-* Enable `/api/streams/{id}/_group` endpoints for GroupStreams [#210114]({{kib-pull}}210114).
-* Update styles for Color formatter to look like a badge [#189391]({{kib-pull}}189391).
+* Adds autocomplete suggestions for {{esql}} queries in Console [#219980]({{kib-pull}}219980).
+* Adds a loader indicator when datasources are being loaded [#225005]({{kib-pull}}225005).
 
-**Personal settings**:
-* Adds an option to User Settings that allows to display the Kibana interface in high contrast mode [#216242]({{kib-pull}}216242).
 
-**Search**:
-* Enable query rules by default [#227226]({{kib-pull}}227226).
-% !!TODO!! The above PR had a lengthy release note description:
-% Added a section to enable add, update and delete Query Rules written on top of Query Rules APIs to easily pin or exclude documents to a query according to criterias you set.
-* Adds Search Home page in Stack Classic and Solution navigation [#225162]({{kib-pull}}225162).
-* Create a home page in serverless env [#223172]({{kib-pull}}223172).
-* Updates the side navigation for Serverless Elasticsearch streamlining available options [#225709]({{kib-pull}}225709).
-* Updated the Elasticsearch solution navigations and elasticsearch classic navigation items available [#224755]({{kib-pull}}224755).
+**Search solution**:
+* Adds a section that enables adding, updating and deleting query rules written on top of the Query Rules APIs to pin or exclude documents to a query according to criteria you set. [#227226]({{kib-pull}}227226).
+* Adds a **Home** page dedicated to the Elasticsearch solution to Classic and Elasticsearch solution views [#225162]({{kib-pull}}225162).
+* Updates the navigation items available for the Elasticsearch solution view and Elasticsearch section of the Classic view [#224755]({{kib-pull}}224755).
 
 **Sharing**:
-* Adds the ability to switch between relative and absolute time range [#218056]({{kib-pull}}218056).
-* Navigation for Overview Page in Entity Analytics [#221748]({{kib-pull}}221748).
-* Indicate if failure store isn't enabled for data stream [#221644]({{kib-pull}}221644).
-* Adds executable name tab to TopN view [#224291]({{kib-pull}}224291).
-
-* Extend default log pattern on server-side to include error information [#219940]({{kib-pull}}219940).
-% !!TODO!! The above PR had a lengthy release note description:
-% Kibana logging's pattern layout, used by default for the console appender, will now use a new default pattern layout `[%date][%level][%logger] %message %error`. This will include the error name and stack trace if these were included in the log entry. To opt out of this behavior users can omit the `%error` placeholder from their log pattern config in kibana.yml e.g.:
-* Adds 'page reload' screen reader warning [#214822]({{kib-pull}}214822).
-
+* Adds the ability to switch between relative and absolute time range when sharing objects [#218056]({{kib-pull}}218056).
 
 ### Fixes [kibana-9.1.0-fixes]
 
@@ -234,6 +225,7 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixes the parsing of index patterns in the **Inspect** feature of Kibana. Previously, certain index pattern strings were not being parsed and displayed correctly in the **Inspect** feature [#221084]({{kib-pull}}221084).
 * Fixes an issue that causes transitions from **Logs Stream** and **Logs Explorer** to **Discover** to lose some context such as the selected time range or KQL query [#215867]({{kib-pull}}215867).
 * Excludes only {{es}} metadata fields from the Summary column instead of all fields starting with `_` [#213255]({{kib-pull}}213255).
+* Fixes inability to clear Document ID in data view field editor preview [#220891]({{kib-pull}}220891).
 * Fixed multiple accessibility issues, including adding missing aria labels and column headers, improving keyboard navigation and interactions, and improving focus changes when interacting with **Discover** features [View list of fixes](https://github.com/elastic/kibana/issues?q=state:closed%20label:Project:Accessibility%20label:v9.1.0%20label:Team:DataDiscovery).
 
 **{{esql}} editor**:
@@ -253,8 +245,6 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixes a validation issue when a named parameter is used as a function [#213355]({{kib-pull}}213355).
 * Fixes an issue with suggestions for the `WHERE` command in case of a multiline query [#213240]({{kib-pull}}213240).
 
-
-
 **Elastic Observability solution**:
 For the Elastic Observability 9.1.0 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
@@ -262,12 +252,10 @@ For the Elastic Observability 9.1.0 release information, refer to [Elastic Obser
 For the Elastic Security 9.1.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana platform**:
-* Remove listing limit warning [#217945]({{kib-pull}}217945).
-* Custom link colour option for top banner [#214241]({{kib-pull}}214241).
-* Change in sortBy dropdown component option name wording [#206464]({{kib-pull}}206464).
-
-**Kibana security**:
-* Fixed spaces search functionality for spaces created with avatar type as image [#220398]({{kib-pull}}220398).
+* Removes listing limit warning [#217945]({{kib-pull}}217945).
+* Adds a setting to customize the link color of the top banner [#214241]({{kib-pull}}214241).
+* Updates the wording used in **Sort by** menu options [#206464]({{kib-pull}}206464).
+* Passes the correct namespace to `migrateInputDocument` [#222313]({{kib-pull}}222313).
 
 **Machine Learning**:
 * Fixes unknown fields not supported in Data Visualizer and Field Statistics [#223903]({{kib-pull}}223903).
@@ -280,22 +268,13 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * AIOps Hides saved query controls [#210556]({{kib-pull}}210556).
 
 **Management**:
-* Fixes flyout styles [#228078]({{kib-pull}}228078).
-* Fixes Outcome Preview Table so columns always fill width after resize [#226000]({{kib-pull}}226000).
-* Adds discernible text for refresh data preview button [#225816]({{kib-pull}}225816).
-* Fixes inability to clear Document ID in data view field editor preview [#220891]({{kib-pull}}220891).
-
-**Platform**:
-* Passing the correct namespace to migrateInputDocument [#222313]({{kib-pull}}222313).
+* Fixes spaces search functionality for spaces created with avatar type as image [#220398]({{kib-pull}}220398).
+* Fixes flyout styling issues in data views **Edit** flyout [#228078]({{kib-pull}}228078).
 
 **Search**:
-* Adjusted `z-index` of app menu header to not conflict with the portable dev console [#224708]({{kib-pull}}224708).
-* Fixed a bug with the solution nav submenu items when the nav is collapsed [#227705]({{kib-pull}}227705).
-* No need to remove a task [#226481]({{kib-pull}}226481).
-* Fixes false positive alerts for IM [#225248]({{kib-pull}}225248).
-* Apply chunking algorithm for getIndexBasicStats [#221153]({{kib-pull}}221153).
-* Automatic Import now produces correct pipeline to parse CSV files with special characters in column names [#212513]({{kib-pull}}212513).
-* Improve finding a function [#210437]({{kib-pull}}210437).
+* Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console [#224708]({{kib-pull}}224708).
+* Fixes an issue preventing solution navigation submenu items from being displayed when the navigation is collapsed [#227705]({{kib-pull}}227705).
+
 
 ## 9.0.3 [kibana-9.0.3-release-notes]
 
