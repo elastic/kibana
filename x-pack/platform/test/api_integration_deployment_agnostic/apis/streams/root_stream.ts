@@ -96,8 +96,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Should not allow processing changes', async () => {
-      throw new Error('the test executed');
-
       const body: Streams.WiredStream.UpsertRequest = {
         dashboards: [],
         queries: [],
