@@ -110,7 +110,7 @@ export class ReindexWorker {
       version
     );
 
-    this.reindexService.cleanupReindexOperations(['*']);
+    void this.reindexService.cleanupReindexOperations(['*']);
   }
 
   /**
