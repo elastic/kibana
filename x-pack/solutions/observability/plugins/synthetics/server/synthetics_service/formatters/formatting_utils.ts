@@ -122,3 +122,19 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
   }
   return JSON.stringify(formatted);
 };
+
+function escapeTemplateLiterals(script: string): string {
+  return script.replace(/\$\{/g, '$$${');
+}
+
+export const inlineSourceFormatter: FormatterFn = (fields, key) => {
+  const value = fields[key] as string;
+  if (!value?.trim()) return value;
+
+  // Re-indent with 2 spaces, but don't include `|-` here
+  try {
+    return escapeTemplateLiterals(value);
+  } catch (e) {
+    return value;
+  }
+};
