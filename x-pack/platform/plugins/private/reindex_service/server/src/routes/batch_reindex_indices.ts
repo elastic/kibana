@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
+import { API_BASE_PATH_REINDEX_SERVICE } from '../constants';
 import { ReindexWorker } from '../lib';
 import { reindexActionsFactory } from '../lib/reindex_actions';
 import { sortAndOrderReindexOperations } from '../lib/op_utils';
@@ -31,7 +31,7 @@ export function registerBatchReindexIndicesRoutes(
   }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
-  const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
+  const BASE_PATH = `${API_BASE_PATH_REINDEX_SERVICE}/reindex`;
 
   // Get the current batch queue
   router.get(
