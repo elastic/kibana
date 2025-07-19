@@ -32,7 +32,6 @@ import {
   useKibana,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { getMappedInferenceId } from '../../../helpers/inference_utils';
-import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
 export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
@@ -49,8 +48,6 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
   const currentlyDeployedInferenceId = getMappedInferenceId(
     knowledgeBase.status.value?.currentInferenceId
   );
-
-  const { installProductDoc } = useGetProductDoc(currentlyDeployedInferenceId);
 
   const [selectedInferenceId, setSelectedInferenceId] = useState(
     currentlyDeployedInferenceId || ''
@@ -165,7 +162,6 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
             if (isConfirmed) {
               setIsUpdatingModel(true);
               knowledgeBase.install(selectedInferenceId);
-              installProductDoc(selectedInferenceId);
             }
           });
       }
@@ -177,7 +173,6 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     isSelectedModelCurrentModel,
     overlays,
     confirmationMessages,
-    installProductDoc,
   ]);
 
   const superSelectOptions = modelOptions.map((option: ModelOptionsData) => ({

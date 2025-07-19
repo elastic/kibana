@@ -48,7 +48,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   // 2. The knowledge base is being reindexed (e.g., during model updates)
   if (
     statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL ||
-    statusRequest.value?.isReIndexing
+    statusRequest.value?.isReIndexing ||
+    statusRequest.value?.productDocStatus === 'installing'
   ) {
     isPolling = true;
   }

@@ -16,6 +16,8 @@ import {
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
 import { CoreSetup } from '@kbn/core/server';
+import { DocumentationManagerAPI } from '@kbn/product-doc-base-plugin/server/services/doc_manager';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { EIS_PRECONFIGURED_INFERENCE_IDS, KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
 import {
@@ -120,12 +122,14 @@ export async function getKbModelStatus({
   logger,
   config,
   inferenceId,
+  productDoc,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   inferenceId?: string;
+  productDoc: DocumentationManagerAPI;
 }): Promise<{
   enabled: boolean;
   endpoint?: InferenceInferenceEndpointInfo;
@@ -135,6 +139,7 @@ export async function getKbModelStatus({
   currentInferenceId?: string | undefined;
   concreteWriteIndex: string | undefined;
   isReIndexing: boolean;
+  productDocStatus: InstallationStatus;
 }> {
   const enabled = config.enableKnowledgeBase;
   const concreteWriteIndex = await getConcreteWriteIndex(esClient, logger);
@@ -150,16 +155,21 @@ export async function getKbModelStatus({
         kbState: KnowledgeBaseState.NOT_INSTALLED,
         concreteWriteIndex,
         isReIndexing,
+        productDocStatus: 'uninstalled',
       };
     }
 
     inferenceId = currentInferenceId;
   }
 
+  const productDocStatus = await productDoc.getStatus({
+    inferenceId,
+  });
   // check if inference ID is an EIS inference ID
   const isPreConfiguredInferenceIdInEIS = EIS_PRECONFIGURED_INFERENCE_IDS.includes(inferenceId);
 
   let endpoint: InferenceInferenceEndpointInfo;
+
   try {
     endpoint = await getInferenceEndpoint({ esClient, inferenceId });
     logger.debug(
@@ -176,6 +186,7 @@ export async function getKbModelStatus({
         currentInferenceId,
         concreteWriteIndex,
         isReIndexing,
+        productDocStatus: productDocStatus.status,
       };
     }
   } catch (error) {
@@ -191,6 +202,7 @@ export async function getKbModelStatus({
       currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
+      productDocStatus: productDocStatus.status,
     };
   }
 
@@ -214,6 +226,7 @@ export async function getKbModelStatus({
       currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
+      productDocStatus: productDocStatus.status,
     };
   }
 
@@ -258,6 +271,7 @@ export async function getKbModelStatus({
     concreteWriteIndex,
     currentInferenceId,
     isReIndexing,
+    productDocStatus: productDocStatus.status,
   };
 }
 
@@ -267,12 +281,14 @@ export async function waitForKbModel({
   logger,
   config,
   inferenceId,
+  productDoc,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   inferenceId: string;
+  productDoc: DocumentationManagerAPI;
 }) {
   logger.debug(`Waiting for knowledge base model to be ready for inference ID "${inferenceId}" !!`);
 
@@ -289,6 +305,7 @@ export async function waitForKbModel({
         logger,
         config,
         inferenceId,
+        productDoc,
       });
 
       if (kbState !== KnowledgeBaseState.READY) {
