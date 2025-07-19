@@ -30,6 +30,11 @@ export interface BuildkiteClientConfig {
 export interface BuildkiteGroup {
   group: string;
   steps: BuildkiteStep[];
+  allow_dependency_failure?: boolean;
+  if?: string;
+  key?: string;
+  depends_on?: string | string[];
+  label?: string;
 }
 
 export type BuildkiteStep =
