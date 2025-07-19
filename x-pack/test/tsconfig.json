@@ -80,8 +80,6 @@
     "@kbn/inference-common",
     "@kbn/apm-sources-access-plugin",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/upgrade-assistant-pkg-server",
-    "@kbn/upgrade-assistant-pkg-common",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-provider-plugin",
     "@kbn/ai-assistant-common",
