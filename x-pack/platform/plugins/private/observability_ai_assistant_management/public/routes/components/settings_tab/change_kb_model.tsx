@@ -31,15 +31,12 @@ import {
   LEGACY_CUSTOM_INFERENCE_ID,
   useKibana,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { UseProductDoc } from '../../../hooks/use_product_doc';
 
 export function ChangeKbModel({
   knowledgeBase,
-  productDoc,
   currentlyDeployedInferenceId,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
-  productDoc: UseProductDoc;
   currentlyDeployedInferenceId: string | undefined;
 }) {
   const { overlays } = useKibana().services;
@@ -166,7 +163,6 @@ export function ChangeKbModel({
             if (isConfirmed) {
               setIsUpdatingModel(true);
               knowledgeBase.install(selectedInferenceId);
-              productDoc.installProductDoc(selectedInferenceId);
             }
           });
       }
@@ -178,7 +174,6 @@ export function ChangeKbModel({
     isSelectedModelCurrentModel,
     overlays,
     confirmationMessages,
-    productDoc,
   ]);
 
   const superSelectOptions = modelOptions.map((option: ModelOptionsData) => ({

@@ -107,7 +107,7 @@ export function ProductDocEntry({
   const isLoading = isStatusLoading || status === 'installing' || status === 'uninstalling';
 
   const content = useMemo(() => {
-    if (status === 'installed') {
+    if (status === 'installed' || knowledgeBase.status.value?.productDocStatus === 'installed') {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -163,7 +163,15 @@ export function ProductDocEntry({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [canInstallProductDoc, onClickInstall, onClickUninstall, status, buttonText, isLoading]);
+  }, [
+    canInstallProductDoc,
+    onClickInstall,
+    onClickUninstall,
+    status,
+    buttonText,
+    isLoading,
+    knowledgeBase,
+  ]);
 
   return (
     <EuiDescribedFormGroup

@@ -12,6 +12,7 @@ import {
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
@@ -38,6 +39,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
+    productDocStatus: InstallationStatus;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
     return client.getKnowledgeBaseStatus();

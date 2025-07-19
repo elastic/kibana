@@ -196,7 +196,6 @@ export function SettingsTab() {
       {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
         <ChangeKbModel
           knowledgeBase={knowledgeBase}
-          productDoc={productDoc}
           currentlyDeployedInferenceId={currentlyDeployedInferenceId}
         />
       ) : undefined}
