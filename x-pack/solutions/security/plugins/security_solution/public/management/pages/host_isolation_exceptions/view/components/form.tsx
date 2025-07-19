@@ -139,6 +139,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           data-test-subj="hostIsolationExceptions-form-name-input-formRow"
         >
           <EuiFieldText
+            isInvalid={hasNameError && hasBeenInputNameVisited}
             id="eventFiltersFormInputName"
             placeholder={NAME_PLACEHOLDER}
             defaultValue={exception.name ?? ''}
@@ -167,6 +168,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           data-test-subj="hostIsolationExceptions-form-ip-input-formRow"
         >
           <EuiFieldText
+            isInvalid={hasIpError && hasBeenInputIpVisited}
             id="eventFiltersFormInputName"
             placeholder={IP_PLACEHOLDER}
             defaultValue={(exception.entries?.[0] as ExceptionIpEntry)?.value ?? ''}
