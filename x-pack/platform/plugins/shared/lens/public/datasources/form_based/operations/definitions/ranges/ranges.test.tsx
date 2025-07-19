@@ -156,7 +156,6 @@ describe('ranges', () => {
           label: sourceField,
           dataType: 'number',
           operationType: 'range',
-          isBucketed: true,
           sourceField,
           params: {
             type: MODES.Histogram,
@@ -167,7 +166,6 @@ describe('ranges', () => {
         col2: {
           label: 'Count',
           dataType: 'number',
-          isBucketed: false,
           sourceField: '___records___',
           operationType: 'count',
         },

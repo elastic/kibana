@@ -56,7 +56,6 @@ describe('last_value', () => {
         col1: {
           label: 'Top value of category',
           dataType: 'string',
-          isBucketed: true,
           operationType: 'terms',
           params: {
             orderBy: { type: 'alphabetical' },
@@ -68,7 +67,6 @@ describe('last_value', () => {
         col2: {
           label: 'Last value of a',
           dataType: 'number',
-          isBucketed: false,
           sourceField: 'a',
           operationType: 'last_value',
           params: {
@@ -134,7 +132,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'source',
         label: 'Last value of source',
-        isBucketed: true,
         dataType: 'string',
         params: {
           sortField: 'datefield',
@@ -162,7 +159,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'source',
         label: 'Last value of source',
-        isBucketed: true,
         dataType: 'string',
         filter: { language: 'kuery', query: 'source: *' },
         params: {
@@ -186,7 +182,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'source',
         label: 'Last value of source',
-        isBucketed: true,
         dataType: 'string',
         filter: { language: 'kuery', query: 'something_else: 123' },
         params: {
@@ -210,7 +205,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'source',
         label: 'Last value of source',
-        isBucketed: true,
         dataType: 'string',
         params: {
           sortField: 'datefield',
@@ -229,7 +223,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'bytes',
         label: 'Last value of bytes',
-        isBucketed: false,
         dataType: 'number',
         params: {
           sortField: 'datefield',
@@ -250,7 +243,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'bytes',
         label: 'Last value of bytes',
-        isBucketed: false,
         dataType: 'number',
         params: {
           sortField: 'datefield',
@@ -270,7 +262,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'bytes',
         label: 'Last value of bytes',
-        isBucketed: false,
         dataType: 'number',
         params: {
           sortField: 'datefield',
@@ -294,7 +285,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'bytes',
         label: 'Last value of bytes',
-        isBucketed: false,
         dataType: 'number',
         params: {
           sortField: 'datefield',
@@ -314,7 +304,6 @@ describe('last_value', () => {
         operationType: 'last_value',
         sourceField: 'bytes',
         label: 'Last value of bytes',
-        isBucketed: false,
         dataType: 'number',
         params: {
           sortField: 'datefield',
@@ -455,7 +444,6 @@ describe('last_value', () => {
             col1: {
               label: 'Count',
               dataType: 'number',
-              isBucketed: false,
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -509,7 +497,6 @@ describe('last_value', () => {
             col1: {
               label: 'Count',
               dataType: 'number',
-              isBucketed: false,
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -552,7 +539,6 @@ describe('last_value', () => {
           col1: {
             label: 'Count',
             dataType: 'number',
-            isBucketed: false,
             sourceField: '___records___',
             operationType: 'count',
           },
@@ -644,7 +630,6 @@ describe('last_value', () => {
             col1: {
               label: 'Count',
               dataType: 'number',
-              isBucketed: false,
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -663,7 +648,6 @@ describe('last_value', () => {
         previousColumn: {
           label: 'Count',
           dataType: 'number',
-          isBucketed: false,
           sourceField: '___records___',
           operationType: 'count',
           params: {
@@ -970,7 +954,6 @@ describe('last_value', () => {
         columns: {
           col1: {
             dataType: 'boolean',
-            isBucketed: false,
             label: 'Last value of test',
             operationType: 'last_value',
             params: { sortField: 'timestamp' },

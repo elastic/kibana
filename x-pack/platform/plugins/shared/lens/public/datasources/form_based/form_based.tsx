@@ -70,6 +70,7 @@ import {
   cloneLayer,
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
+  isBucketed,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -164,7 +165,7 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, operationType, timeShift, reducedTimeRange } = column;
+  const { dataType, label, operationType, timeShift, reducedTimeRange } = column;
 
   const operationDefinition = operationDefinitionMap[operationType];
   if (!operationDefinition) {
@@ -182,7 +183,7 @@ export function columnToOperation(
 
   return {
     dataType: normalizeOperationDataType(dataType),
-    isBucketed,
+    isBucketed: isBucketed(column),
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
@@ -855,7 +856,7 @@ export function getFormBasedDatasource({
           return (
             Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
             layer.columnOrder
-              .filter((colId) => layer.columns[colId].isBucketed)
+              .filter((colId) => isBucketed(layer.columns[colId]))
               .some((colId) => {
                 const column = layer.columns[colId];
                 return (
@@ -911,7 +912,7 @@ export function getFormBasedDatasource({
           const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
           return {
             id: colId,
-            role: col.isBucketed ? ('split' as const) : ('metric' as const),
+            role: isBucketed(col) ? ('split' as const) : ('metric' as const),
             operation: {
               ...columnToOperation(col, undefined, dataView),
               type: col.operationType,

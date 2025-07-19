@@ -18,7 +18,6 @@ function createLayerWithMathColumn(tinymathAst: string | TinymathAST): FormBased
         label: 'Math',
         dataType: 'number',
         operationType: 'math',
-        isBucketed: false,
         params: {
           tinymathAst,
         },

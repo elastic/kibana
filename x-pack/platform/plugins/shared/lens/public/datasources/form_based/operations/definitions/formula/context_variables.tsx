@@ -38,6 +38,7 @@ import {
   TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
+import { isBucketed } from '../../../utils';
 
 // copied over from layer_helpers
 // TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests
@@ -55,7 +56,7 @@ export function getColumnOrder(layer: FormBasedLayer): string[] {
     }
   });
 
-  const [aggregations, metrics] = partition(entries, ([, col]) => col.isBucketed);
+  const [aggregations, metrics] = partition(entries, ([, col]) => isBucketed(col));
 
   return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
@@ -236,7 +237,6 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
         label,
         dataType: 'number',
         operationType: type,
-        isBucketed: false,
         references: [],
       } as unknown as ColumnType;
     },

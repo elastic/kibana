@@ -262,6 +262,8 @@ interface BaseOperationDefinitionProps<
    * Should be i18n-ified.
    */
   displayName: string;
+
+  isBucketed?: boolean | ((column: C, indexPattern?: IndexPattern) => boolean);
   scale?: (column: C, dataView?: IndexPattern) => 'ratio' | 'ordinal' | 'interval';
   /**
    * The default label is assigned by the editor

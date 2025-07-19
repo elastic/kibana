@@ -130,7 +130,7 @@ const getMetricLayerConfiguration = (
     return {};
   };
 
-  const isBucketed = (op: OperationMetadata) => op.isBucketed;
+  const isBucketed = (op: OperationMetadata) => op.isBucketed || false;
   const canCollapseBy = isPrimaryMetricNumeric && props.state.collapseFn;
 
   return {

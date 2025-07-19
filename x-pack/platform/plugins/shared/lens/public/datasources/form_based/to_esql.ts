@@ -21,6 +21,7 @@ import { DateHistogramIndexPatternColumn } from './operations/definitions';
 import type { IndexPattern } from '../../types';
 import { resolveTimeShift } from './time_shift_utils';
 import { FormBasedLayer } from '../..';
+import { isBucketed } from './utils';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -70,7 +71,7 @@ export function getESQLForLayer(
 
   const [metricEsAggsEntries, bucketEsAggsEntries] = partition(
     esAggEntries,
-    ([_, col]) => !col.isBucketed
+    ([_, col]) => !isBucketed(col)
   );
 
   const metrics = metricEsAggsEntries.map(([colId, col], index) => {

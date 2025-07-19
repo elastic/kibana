@@ -83,7 +83,6 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
           operationType: 'formula',
           dataType: 'number',
           references: [],
-          isBucketed: false,
           filter,
           reducedTimeRange,
           timeScale,

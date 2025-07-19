@@ -24,7 +24,6 @@ describe('BucketNestingEditor', () => {
   function mockCol(col: Partial<GenericIndexPatternColumn> = {}): GenericIndexPatternColumn {
     return {
       dataType: 'string',
-      isBucketed: true,
       label: 'a',
       operationType: 'terms',
       params: {

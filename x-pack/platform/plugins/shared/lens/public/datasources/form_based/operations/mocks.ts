@@ -25,7 +25,6 @@ export const createMockedFullReference = () => {
     buildColumn: jest.fn((args) => {
       return {
         label: 'Test reference',
-        isBucketed: false,
         dataType: 'number',
 
         operationType: 'testReference',
@@ -50,7 +49,6 @@ export const createMockedManagedReference = () => {
     buildColumn: jest.fn((args) => {
       return {
         label: 'Test reference',
-        isBucketed: false,
         dataType: 'number',
 
         operationType: 'testReference',

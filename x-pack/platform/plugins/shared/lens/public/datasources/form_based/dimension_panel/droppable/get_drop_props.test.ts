@@ -230,13 +230,13 @@ describe('FormBasedDimensionEditorPanel#getDropProps', () => {
           // make it swappable
           target: {
             ...props.target,
-            filterOperations: (op: OperationMetadata) => op.isBucketed,
+            filterOperations: (op: OperationMetadata) => op.isBucketed || false,
             groupId: 'a',
             columnId: 'col2',
           },
           source: {
             ...mockedDndOperations.metric,
-            filterOperations: (op: OperationMetadata) => op.isBucketed,
+            filterOperations: (op: OperationMetadata) => op.isBucketed || false,
             groupId: 'c',
           },
         })
@@ -456,7 +456,7 @@ describe('FormBasedDimensionEditorPanel#getDropProps', () => {
           target: {
             ...props.target,
             groupId: 'a',
-            filterOperations: (op: OperationMetadata) => op.isBucketed,
+            filterOperations: (op: OperationMetadata) => op.isBucketed || false,
           },
           // drag the sum over the top values
           source: {
@@ -566,14 +566,12 @@ describe('FormBasedDimensionEditorPanel#getDropProps', () => {
               col1: {
                 label: 'Test reference',
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'cumulative_sum',
                 references: ['ref1'],
               },
               ref1: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },

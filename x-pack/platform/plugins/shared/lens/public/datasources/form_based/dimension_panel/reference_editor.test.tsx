@@ -58,7 +58,6 @@ describe('reference editor', () => {
       ref: {
         label: 'Top values of dest',
         dataType: 'string',
-        isBucketed: true,
         operationType: 'terms',
         sourceField: 'dest',
         params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'desc' },
@@ -149,7 +148,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Average of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'bytes',
         },
@@ -185,7 +183,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Unique count of dest',
           dataType: 'string',
-          isBucketed: false,
           operationType: 'unique_count',
           sourceField: 'dest',
         },
@@ -221,7 +218,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Average of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'bytes',
         },
@@ -261,7 +257,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Average of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'bytes',
         },
@@ -307,7 +302,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Unique count of dest',
           dataType: 'string',
-          isBucketed: false,
           operationType: 'unique_count',
           sourceField: 'dest',
         },
@@ -350,7 +344,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Average of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'bytes',
         },
@@ -439,7 +432,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Average of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'bytes',
         },
@@ -477,7 +469,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Average of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'bytes',
         },
@@ -535,7 +526,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Average of missing',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'missing',
         },
@@ -569,7 +559,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Last value of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'last_value',
           sourceField: 'bytes',
           params: {
@@ -603,7 +592,6 @@ describe('reference editor', () => {
         ref: {
           label: 'Last value of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'last_value',
           sourceField: 'bytes',
           params: {

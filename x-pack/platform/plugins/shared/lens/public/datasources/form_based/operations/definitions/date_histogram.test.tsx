@@ -128,7 +128,6 @@ describe('date_histogram', () => {
         col1: {
           label: 'Value of timestamp',
           dataType: 'date',
-          isBucketed: true,
 
           // Private
           operationType: 'date_histogram',
@@ -276,7 +275,6 @@ describe('date_histogram', () => {
         operationType: 'date_histogram',
         sourceField: 'timestamp',
         label: 'Date over timestamp',
-        isBucketed: true,
         dataType: 'date',
         params: {
           interval: 'd',
@@ -296,7 +294,6 @@ describe('date_histogram', () => {
         operationType: 'date_histogram',
         sourceField: 'timestamp',
         label: 'Date over timestamp',
-        isBucketed: true,
         dataType: 'date',
         params: {
           interval: 'auto',
@@ -340,7 +337,6 @@ describe('date_histogram', () => {
           col2: {
             label: 'Value of timestamp',
             dataType: 'date',
-            isBucketed: true,
 
             // Private
             operationType: 'date_histogram',
@@ -375,7 +371,6 @@ describe('date_histogram', () => {
           col1: {
             label: 'Value of timestamp',
             dataType: 'date',
-            isBucketed: true,
 
             // Private
             operationType: 'date_histogram',
@@ -410,7 +405,6 @@ describe('date_histogram', () => {
           col1: {
             label: 'Value of timestamp',
             dataType: 'date',
-            isBucketed: true,
 
             // Private
             operationType: 'date_histogram',
@@ -452,7 +446,6 @@ describe('date_histogram', () => {
           col1: {
             label: 'Value of timestamp',
             dataType: 'date',
-            isBucketed: true,
 
             // Private
             operationType: 'date_histogram',
@@ -494,7 +487,6 @@ describe('date_histogram', () => {
           col1: {
             label: 'Value of timestamp',
             dataType: 'date',
-            isBucketed: true,
 
             // Private
             operationType: 'date_histogram',
@@ -536,7 +528,6 @@ describe('date_histogram', () => {
           col1: {
             label: 'Value of timestamp',
             dataType: 'date',
-            isBucketed: true,
 
             // Private
             operationType: 'date_histogram',
@@ -737,7 +728,6 @@ describe('date_histogram', () => {
           col1: {
             label: 'Value of timestamp',
             dataType: 'date',
-            isBucketed: true,
 
             // Private
             operationType: 'date_histogram',
@@ -775,7 +765,6 @@ describe('date_histogram', () => {
           {
             label: '',
             dataType: 'date',
-            isBucketed: true,
             operationType: 'date_histogram',
             sourceField: 'missing',
             params: { interval: 'auto' },
@@ -784,7 +773,6 @@ describe('date_histogram', () => {
             col1: {
               label: '',
               dataType: 'date',
-              isBucketed: true,
               operationType: 'date_histogram',
               sourceField: 'missing',
               params: { interval: 'auto' },

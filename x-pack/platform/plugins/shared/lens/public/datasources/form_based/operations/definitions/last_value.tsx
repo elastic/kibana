@@ -259,7 +259,6 @@ export const lastValueOperation: OperationDefinition<
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: field.type as DataType,
       operationType: LAST_VALUE_ID,
-      isBucketed: false,
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
