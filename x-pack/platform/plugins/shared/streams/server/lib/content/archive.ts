@@ -154,11 +154,12 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
               );
             }
 
-            return {
+            const streamEntry: ContentPackStream = {
               type: 'stream',
               name: stream.name,
               request: stream.request,
-            } as ContentPackStream;
+            };
+            return streamEntry;
           });
 
         default:
