@@ -8,6 +8,7 @@
 import { uniq } from 'lodash';
 import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import { FieldDefinition, RoutingDefinition, getAncestorsAndSelf } from '@kbn/streams-schema';
+import { baseFields } from '../streams/component_templates/logs_layer';
 
 export function prepareStreamsForExport({
   root,
@@ -98,7 +99,12 @@ export function prepareStreamsForImport({
       // merge imported root stream's fields with the new root
       const rootFields = {
         ...root.request.stream.ingest.wired.fields,
-        ...request.stream.ingest.wired.fields,
+        ...Object.keys(request.stream.ingest.wired.fields)
+          .filter((field) => !baseFields[field])
+          .reduce((fields, field) => {
+            fields[field] = request.stream.ingest.wired.fields[field];
+            return fields;
+          }, {} as FieldDefinition),
       };
 
       return {
