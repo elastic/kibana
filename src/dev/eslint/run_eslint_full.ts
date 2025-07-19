@@ -15,7 +15,7 @@ import Os from 'os';
 
 const batchSize = 250;
 const cpuCount = Math.max(Os.cpus()?.length ?? 0, 1);
-const maxParallelism =  Math.max(Math.max(cpuCount - 1, 30), 8);
+const maxParallelism =  Math.max(Math.min(cpuCount - 1, 30), 8);
 
 run(
   async ({ log, flags }) => {
