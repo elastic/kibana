@@ -8,7 +8,7 @@
  */
 
 import { resolve } from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import { ToolingLog, LOG_LEVEL_FLAGS } from '@kbn/tooling-log';
 import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -134,14 +134,19 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const pwConfigPath = options.configPath;
   const pwProject = getPlaywrightProject(options.testTarget, options.mode);
 
-  const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
+  const pwBinPath = resolve(REPO_ROOT, './scripts/playwright');
   const pwCmdArgs = [
     'test',
     `--config=${pwConfigPath}`,
     `--grep=${pwGrepTag}`,
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
+    ...process.argv.filter((arg) =>
+      LOG_LEVEL_FLAGS.some((flag) => [`--${flag.name}`, `-${flag.name}`].includes(arg))
+    ),
   ];
+
+  log.info(`Running Playwright command: ${pwBinPath} ${pwCmdArgs.join(' ')}`);
 
   await withProcRunner(log, async (procs) => {
     const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);

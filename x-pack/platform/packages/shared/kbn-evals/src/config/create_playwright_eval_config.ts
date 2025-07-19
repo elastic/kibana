@@ -8,19 +8,22 @@
 import { ScoutTestOptions, createPlaywrightConfig } from '@kbn/scout';
 import { PlaywrightTestConfig, defineConfig } from '@playwright/test';
 import { AvailableConnectorWithId, getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
-import { getFlags } from '@kbn/dev-cli-runner';
-import {
-  ToolingLog,
-  pickLevelFromFlags,
-  LOG_LEVEL_FLAGS,
-  DEFAULT_LOG_LEVEL,
-} from '@kbn/tooling-log';
+import { ToolingLog, LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
 }
 
+function getLogLevel() {
+  const env = process.env.LOG_LEVEL;
+  const found = LOG_LEVEL_FLAGS.find(({ name }) => name === env);
+
+  if (found) {
+    return found.name === 'quiet' ? 'error' : found.name;
+  }
+  return DEFAULT_LOG_LEVEL;
+}
 /**
  * Exports a Playwright configuration specifically for offline evals
  */
@@ -29,20 +32,8 @@ export function createPlaywrightEvalsConfig({
 }: {
   testDir: string;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
-  const flags = getFlags(process.argv);
-
-  function getDefaultLogLevel() {
-    const env = process.env.LOG_LEVEL;
-    const found = LOG_LEVEL_FLAGS.find(({ name }) => name === env);
-
-    if (found) {
-      return found.name === 'quiet' ? 'silent' : found.name;
-    }
-    return DEFAULT_LOG_LEVEL;
-  }
-
   const log = new ToolingLog({
-    level: pickLevelFromFlags(flags, { default: getDefaultLogLevel() }),
+    level: getLogLevel(),
     writeTo: process.stdout,
   });
 
