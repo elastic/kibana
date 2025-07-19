@@ -68,7 +68,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2d-highcpu-48
+      machineType: n2d-standard-48
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 85
