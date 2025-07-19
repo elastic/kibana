@@ -6,6 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-require('../src/setup_node_env');
-require('../src/cli/apm')('functional-test-server', process.argv);
-require('@kbn/test').startServersCli();
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-apm-utils'],
+  setupFiles: [],
+  setupFilesAfterEnv: [],
+};

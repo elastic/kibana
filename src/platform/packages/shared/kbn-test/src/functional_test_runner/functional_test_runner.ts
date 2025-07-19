@@ -11,7 +11,6 @@ import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
-
 import type { Suite, Test } from './fake_mocha_types';
 import type { Providers, Config } from './lib';
 import {
