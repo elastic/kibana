@@ -18,12 +18,15 @@ export const initApm = (
   serviceName: string
 ) => {
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
+
+  process.env.ELASTIC_APM_ACTIVE = 'true';
+  process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY = '';
+  process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE = '1.0';
+
   const baseOptions = apmConfigLoader.getConfig(serviceName);
+
   const apmConfig = {
     ...baseOptions,
-    transactionSampleRate: 1,
-    active: true,
-    contextPropagationOnly: false,
   };
 
   const shouldRedactUsers = apmConfigLoader.isUsersRedactionEnabled();
