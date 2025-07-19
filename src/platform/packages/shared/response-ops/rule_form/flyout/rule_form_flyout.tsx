@@ -7,20 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyoutResizable, EuiLoadingElastic } from '@elastic/eui';
-import React, { Suspense, lazy, useCallback } from 'react';
+import { EuiFlyoutResizable } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import type { RuleFormProps } from '../src/rule_form';
 import type { RuleTypeMetaData } from '../src/types';
-import {
-  RuleFlyoutUIContextProvider,
-  useRuleFlyoutUIContext,
-  RuleFormErrorPromptWrapper,
-} from '../lib';
-
-const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<any>>> = lazy(() =>
-  import('../src/rule_form').then((module) => ({ default: module.RuleForm }))
-);
+import { RuleFlyoutUIContextProvider, useRuleFlyoutUIContext } from '../lib';
+import { RuleForm, type RuleFormProps } from '../src/rule_form';
 
 const inLineContainerCss = css`
   container-type: inline-size;
@@ -54,15 +46,7 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
       minWidth={500}
       hideCloseButton={hideCloseButton}
     >
-      <Suspense
-        fallback={
-          <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
-            <EuiLoadingElastic size="xl" />
-          </RuleFormErrorPromptWrapper>
-        }
-      >
-        <RuleForm {...props} isFlyout />
-      </Suspense>
+      <RuleForm {...props} isFlyout />
     </EuiFlyoutResizable>
   );
 };

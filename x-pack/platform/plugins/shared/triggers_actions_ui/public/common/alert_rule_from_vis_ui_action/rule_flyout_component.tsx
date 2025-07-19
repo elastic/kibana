@@ -22,6 +22,7 @@ import { AggregateQuery } from '@kbn/es-query';
 import { parse, Walker } from '@kbn/esql-ast';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { RuleForm } from '@kbn/response-ops-rule-form';
 import { KibanaContextProvider } from '../lib/kibana';
 
 export interface ServiceDependencies {
@@ -76,8 +77,6 @@ export async function getRuleFlyoutComponent(
           ...passedInitialValues,
         }
   ) as RuleFormData<EsQueryRuleParams>;
-
-  const { RuleForm } = await import('@kbn/response-ops-rule-form/flyout');
 
   return (
     <KibanaContextProvider services={ruleFormPlugins}>
