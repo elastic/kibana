@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-// import { generateNewIndexName } from '@kbn/reindex-service-plugin';
 import { getIndexState, Version } from '@kbn/upgrade-assistant-pkg-server';
 import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
 import { sortBy } from 'lodash';

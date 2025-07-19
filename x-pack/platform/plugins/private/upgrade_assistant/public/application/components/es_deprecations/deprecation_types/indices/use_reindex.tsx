@@ -200,7 +200,6 @@ export const useReindex = ({
   const updateStatus = useCallback(async () => {
     clearPollInterval();
 
-    // todo
     const { data, error } = await reindexService.getReindexStatus(indexName);
 
     if (error) {
@@ -273,7 +272,6 @@ export const useReindex = ({
       };
     });
 
-    // todo
     const { error } = await reindexService.cancelReindex(indexName);
 
     if (error) {

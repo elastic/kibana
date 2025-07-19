@@ -74,12 +74,15 @@ export class UpgradeAssistantServerPlugin
   }
 
   setup(
-    coreSetup: CoreSetup<UpgradeAssistantServerStartDependencies>,
-    pluginSetup: UpgradeAssistantServerSetupDependencies
+    { http, getStartServices, savedObjects }: CoreSetup<UpgradeAssistantServerStartDependencies>,
+    {
+      usageCollection,
+      features,
+      licensing,
+      logsShared,
+      security,
+    }: UpgradeAssistantServerSetupDependencies
   ) {
-    const { http, getStartServices, savedObjects } = coreSetup;
-    const { usageCollection, features, licensing, logsShared, security } = pluginSetup;
-
     savedObjects.registerType(mlSavedObjectType);
 
     features.registerElasticsearchFeature({
