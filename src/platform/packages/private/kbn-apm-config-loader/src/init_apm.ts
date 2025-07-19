@@ -9,6 +9,7 @@
 
 import { loadConfiguration } from './config_loader';
 import { piiFilter } from './filters/pii_filter';
+import { patchMocha } from './patch_mocha';
 
 export const initApm = (
   argv: string[],
@@ -17,7 +18,13 @@ export const initApm = (
   serviceName: string
 ) => {
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
-  const apmConfig = apmConfigLoader.getConfig(serviceName);
+  const baseOptions = apmConfigLoader.getConfig(serviceName);
+  const apmConfig = {
+    ...baseOptions,
+    transactionSampleRate: 1,
+    active: true,
+    contextPropagationOnly: false,
+  };
 
   const shouldRedactUsers = apmConfigLoader.isUsersRedactionEnabled();
 
@@ -29,6 +36,8 @@ export const initApm = (
   if (shouldRedactUsers) {
     apm.addFilter(piiFilter);
   }
+
+  patchMocha(apm);
 
   apm.start(apmConfig);
 };
