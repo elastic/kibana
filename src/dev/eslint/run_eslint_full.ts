@@ -15,7 +15,7 @@ import Os from 'os';
 
 const batchSize = 250;
 const minCpu = 8;
-const maxCpu = 24;
+const maxCpu = 20;
 const cpuCount = Math.max(Os.cpus()?.length ?? 0, 1);
 const maxParallelism =  Math.max(Math.min(cpuCount - 1, maxCpu), minCpu);
 
