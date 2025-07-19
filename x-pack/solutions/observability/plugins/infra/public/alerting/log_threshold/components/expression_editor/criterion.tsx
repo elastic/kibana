@@ -202,6 +202,8 @@ export const Criterion: React.FC<Props> = ({
                   error={errors.field as string}
                 >
                   <EuiComboBox
+                    // @ts-expect-error upgrade typescript v5.1.6
+                    isInvalid={errors.field.length > 0}
                     compressed
                     fullWidth
                     isClearable={false}
@@ -260,6 +262,8 @@ export const Criterion: React.FC<Props> = ({
                       error={errors.comparator as string}
                     >
                       <EuiSelect
+                        // @ts-expect-error upgrade typescript v5.1.6
+                        isInvalid={errors.comparator.length > 0}
                         data-test-subj="infraCriterionSelect"
                         compressed
                         hasNoInitialSelection={criterion.comparator == null}
