@@ -51,9 +51,8 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: c3d-highcpu-30
+      machineType: n2-standard-32
       preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 85
     key: linting
     timeout_in_minutes: 60
