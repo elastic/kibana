@@ -14,8 +14,10 @@ import execa from 'execa';
 import Os from 'os';
 
 const batchSize = 250;
+const minCpu = 8;
+const maxCpu = 24;
 const cpuCount = Math.max(Os.cpus()?.length ?? 0, 1);
-const maxParallelism =  Math.max(Math.min(cpuCount - 1, 30), 8);
+const maxParallelism =  Math.max(Math.min(cpuCount - 1, maxCpu), minCpu);
 
 run(
   async ({ log, flags }) => {
