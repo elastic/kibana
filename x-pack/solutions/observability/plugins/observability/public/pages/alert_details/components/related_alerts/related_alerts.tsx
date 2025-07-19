@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { RelatedAlertsTable } from './related_alerts_table';
-import { AlertData } from '../../../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../../../hooks/use_fetch_alert_detail';
 
 interface Props {
   alertData?: AlertData | null;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 export interface AlertDetailsSource {
   label: ReactNode | string;

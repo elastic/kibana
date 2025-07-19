@@ -10,7 +10,7 @@ import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/comm
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getMonitorSpaceToAppend } from './use_edit_monitor_locator';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 
 export function useMonitorDetailLocator({
   configId,

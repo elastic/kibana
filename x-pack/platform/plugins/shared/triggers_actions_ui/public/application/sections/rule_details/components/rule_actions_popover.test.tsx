@@ -8,7 +8,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as React from 'react';
 import { RuleActionsPopover } from './rule_actions_popover';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Rule } from '../../../..';
+import type { Rule } from '../../../..';
 
 describe('rule_actions_popover', () => {
   const onDeleteMock = jest.fn();

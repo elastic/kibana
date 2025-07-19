@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
 import { Duration, DurationUnit } from '../domain/models';

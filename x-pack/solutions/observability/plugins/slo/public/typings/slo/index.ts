@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { Dependency } from '../../../common/types';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { Dependency } from '../../../common/types';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 

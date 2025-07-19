@@ -6,7 +6,7 @@
  */
 
 import { stringify } from 'query-string';
-import { UptimeUrlParams } from '..';
+import type { UptimeUrlParams } from '..';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 const {

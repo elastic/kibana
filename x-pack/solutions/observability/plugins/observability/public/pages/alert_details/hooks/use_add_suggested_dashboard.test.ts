@@ -6,10 +6,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useAddSuggestedDashboards } from './use_add_suggested_dashboard';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
+import type { DashboardMetadata } from '../components/related_dashboards/dashboard_tile';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 let capturedOnSuccess: (data: Rule) => Promise<void> | undefined;

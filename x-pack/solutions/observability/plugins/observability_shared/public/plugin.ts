@@ -12,7 +12,7 @@ import type {
   SharePluginSetup,
   SharePluginStart,
 } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
@@ -43,10 +43,8 @@ import {
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-import {
-  DependencyOverviewLocator,
-  DependencyOverviewLocatorDefinition,
-} from '../common/locators/apm/dependency_overview_locator';
+import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
+import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }

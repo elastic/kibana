@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
   EuiText,
   EuiFlexGroup,

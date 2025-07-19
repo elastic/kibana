@@ -13,7 +13,7 @@ import {
   REQUEST_HEADERS,
   RESPONSE_HEADERS,
 } from './waterfall_flyout';
-import { WaterfallMetadataEntry } from '../../../common/network_data/types';
+import type { WaterfallMetadataEntry } from '../../../common/network_data/types';
 import { render } from '../../../../../utils/testing';
 
 describe('WaterfallFlyout', () => {

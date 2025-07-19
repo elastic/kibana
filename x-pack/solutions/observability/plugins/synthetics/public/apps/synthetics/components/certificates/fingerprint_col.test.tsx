@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { FingerprintCol } from './fingerprint_col';
 import { render } from '../../utils/testing';
-import { Cert } from '../../../../../common/runtime_types';
+import type { Cert } from '../../../../../common/runtime_types';
 
 describe('FingerprintCol', () => {
   const cert = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Page, BrowserContext } from '@playwright/test';
+import type { Page, BrowserContext } from '@playwright/test';
 
 export class OtelKubernetesFlowPage {
   page: Page;

@@ -8,12 +8,12 @@
 import React, { useEffect, useState } from 'react';
 import { uniqBy } from 'lodash';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { MAX_SELECTABLE_SOURCE_FIELDS, validSourceFields } from '../../../common/constants';
-import { SourceField } from '../es_query/types';
+import type { SourceField } from '../es_query/types';
 
 interface SourceFieldsOption {
   label: string;

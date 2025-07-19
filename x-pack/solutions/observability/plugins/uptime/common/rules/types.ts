@@ -17,7 +17,7 @@ import type {
   WebhookConnectorTypeId,
   EmailConnectorTypeId,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
-import { SlackApiConfig } from '@kbn/stack-connectors-plugin/common/slack_api/types';
+import type { SlackApiConfig } from '@kbn/stack-connectors-plugin/common/slack_api/types';
 
 import type { ActionConnector as RawActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 

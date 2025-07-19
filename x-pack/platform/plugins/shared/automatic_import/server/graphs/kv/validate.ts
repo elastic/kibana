@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { ESProcessorItem } from '../../../common';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ESProcessorItem } from '../../../common';
 import type { KVState } from '../../types';
 import type { HandleKVNodeParams } from './types';
 import { testPipeline } from '../../util';

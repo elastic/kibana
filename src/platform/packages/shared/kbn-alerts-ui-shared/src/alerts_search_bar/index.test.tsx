@@ -10,11 +10,12 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import { ToastsStart } from '@kbn/core-notifications-browser';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { useAlertsDataView } from '../common/hooks';
 import { AlertsSearchBar } from '.';
-import { HttpStart } from '@kbn/core-http-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 
 const mockDataPlugin = dataPluginMock.createStartContract();
 jest.mock('@kbn/kibana-utils-plugin/public');

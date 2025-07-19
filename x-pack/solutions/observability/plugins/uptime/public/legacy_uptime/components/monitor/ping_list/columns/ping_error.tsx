@@ -7,7 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import type { Ping } from '../../../../../../common/runtime_types/ping';
 
 const StyledSpan = styled.span`
   display: -webkit-box;

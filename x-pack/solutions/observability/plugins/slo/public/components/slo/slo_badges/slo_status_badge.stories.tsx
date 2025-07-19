@@ -10,7 +10,8 @@ import type { StoryFn } from '@storybook/react';
 import { EuiFlexGroup } from '@elastic/eui';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloStatusBadge as Component, SloStatusProps } from './slo_status_badge';
+import type { SloStatusProps } from './slo_status_badge';
+import { SloStatusBadge as Component } from './slo_status_badge';
 import { buildSlo } from '../../../data/slo/slo';
 
 export default {

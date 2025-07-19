@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsClientContract,
-  type SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  type SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  type SavedObjectsCreateOptions,
+  type SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { isEmpty, isEqual } from 'lodash';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -25,13 +27,13 @@ import {
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
 import { formatSecrets, normalizeSecrets } from '../synthetics_service/utils';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 
 const getSuccessfulResult = <T>(
   results: Array<PromiseSettledResult<T>>

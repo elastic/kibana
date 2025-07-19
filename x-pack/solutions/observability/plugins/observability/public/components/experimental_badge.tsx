@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiBetaBadgeProps } from '@elastic/eui';
+import type { EuiBetaBadgeProps } from '@elastic/eui';
+import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 

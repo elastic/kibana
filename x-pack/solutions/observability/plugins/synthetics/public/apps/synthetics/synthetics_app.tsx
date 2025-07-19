@@ -20,7 +20,8 @@ import { SyntheticsSharedContext } from './contexts/synthetics_shared_context';
 import { kibanaService } from '../../utils/kibana_service';
 import { ActionMenu } from './components/common/header/action_menu';
 import { TestNowModeFlyoutContainer } from './components/test_now_mode/test_now_mode_flyout_container';
-import { SyntheticsAppProps, SyntheticsSettingsContextProvider } from './contexts';
+import type { SyntheticsAppProps } from './contexts';
+import { SyntheticsSettingsContextProvider } from './contexts';
 import { PageRouter } from './routes';
 import { setBasePath, store } from './state';
 

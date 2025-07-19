@@ -8,5 +8,5 @@
  */
 
 export * from './client';
-export * from './types';
+export type * from './types';
 export * from './emitPipeline';

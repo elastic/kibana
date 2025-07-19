@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { EuiText } from '@elastic/eui';
 import { formatDuration } from '../../../../../../utils/formatting';
 import { selectOverviewTrends } from '../../../../../../state';
-import { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 
 export const MonitorsDuration = ({
   monitor,

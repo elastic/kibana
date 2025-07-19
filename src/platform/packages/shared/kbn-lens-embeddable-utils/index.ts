@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './attribute_builder/types';
+export type * from './attribute_builder/types';
 
 export type {
   MetricLayerOptions,

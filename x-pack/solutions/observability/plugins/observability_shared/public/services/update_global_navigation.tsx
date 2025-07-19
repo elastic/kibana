@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import {
-  AppUpdater,
-  ApplicationStart,
-  AppDeepLink,
-  type PricingServiceStart,
-} from '@kbn/core/public';
+import type { Subject } from 'rxjs';
+import type { AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
+import { type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
 

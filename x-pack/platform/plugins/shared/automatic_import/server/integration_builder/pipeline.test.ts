@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Pipeline } from '../../common';
+import type { Pipeline } from '../../common';
 import { createSync } from '../util';
 import { createPipeline } from './pipeline';
 

@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { SyncFieldSelector } from './sync_field_selector';
 
 export function AdvancedSettings() {

@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './build';
-export * from './job';
-export * from './pipeline';
+export type * from './build';
+export type * from './job';
+export type * from './pipeline';

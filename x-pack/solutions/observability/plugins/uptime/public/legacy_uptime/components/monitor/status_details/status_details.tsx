@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { LocationAvailability } from './location_availability/location_availability';
-import { MonitorLocations } from '../../../../../common/runtime_types';
+import type { MonitorLocations } from '../../../../../common/runtime_types';
 import { MonitorStatusBar } from './status_bar';
 
 interface MonitorStatusDetailsProps {

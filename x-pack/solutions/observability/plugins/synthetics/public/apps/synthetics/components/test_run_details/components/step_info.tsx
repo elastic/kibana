@@ -20,7 +20,7 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { ErrorDetailsButton } from '../../common/links/error_details_link';
 import { StepDetailsLinkIcon } from '../../common/links/step_details_link';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const StepMetaInfo = ({
   step,

@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UMServerLibs } from '../lib/lib';
-import { DynamicSettings } from '../../../common/runtime_types';
-import { DynamicSettingsAttributes } from '../../runtime_types/settings';
-import { UMRestApiRouteFactory } from '.';
+import type { UMServerLibs } from '../lib/lib';
+import type { DynamicSettings } from '../../../common/runtime_types';
+import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
+import type { UMRestApiRouteFactory } from '.';
 import { savedObjectsAdapter } from '../lib/saved_objects/saved_objects';
 import { VALUE_MUST_BE_AN_INTEGER } from '../../../common/translations';
 import { API_URLS } from '../../../common/constants';

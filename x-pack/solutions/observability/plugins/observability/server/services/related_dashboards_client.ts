@@ -6,7 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardSection } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { get, pick } from 'lodash';
-import { ConfigKey, MonitorTypeEnum, FormMonitorType, MonitorFields, ScheduleUnit } from '../types';
+import type { MonitorTypeEnum, MonitorFields } from '../types';
+import { ConfigKey, FormMonitorType, ScheduleUnit } from '../types';
 import { DEFAULT_FIELDS } from '../constants';
 
 export const serializeNestedFormField = (fields: Record<string, any>) => {

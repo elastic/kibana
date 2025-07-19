@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { TLSRuleComponent } from '../../../components/alerts/tls_rule_ui';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { getSyntheticsAppProps } from '../../../render_app';
 import { SyntheticsSharedContext } from '../../../contexts/synthetics_shared_context';

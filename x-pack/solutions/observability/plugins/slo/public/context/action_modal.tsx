@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { ReactNode, createContext, useContext, useState } from 'react';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { SloBulkDeleteConfirmationModal } from '../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
 import { SloDeleteConfirmationModal } from '../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';

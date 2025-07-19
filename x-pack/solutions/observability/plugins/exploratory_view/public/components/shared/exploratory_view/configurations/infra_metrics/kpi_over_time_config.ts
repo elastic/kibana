@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProps, SeriesConfig } from '../../types';
+import type { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
 import {
   SYSTEM_CPU_PERCENTAGE_FIELD,

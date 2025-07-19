@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFormRow,
   EuiPanel,
@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 import { OptionalText } from './common/optional_text';
 import { MAX_WIDTH } from '../constants';
 

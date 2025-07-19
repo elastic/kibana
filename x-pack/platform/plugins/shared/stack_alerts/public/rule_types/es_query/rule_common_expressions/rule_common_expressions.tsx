@@ -9,21 +9,23 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCheckbox, EuiFormRow, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   builtInAggregationTypes,
   ForLastExpression,
   GroupByExpression,
-  IErrorObject,
   OfExpression,
   ThresholdExpression,
   ValueExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { builtInGroupByTypes, FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { builtInGroupByTypes } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { SourceFields } from '../../components/source_fields_select';
-import { CommonRuleParams, SourceField } from '../types';
+import type { CommonRuleParams, SourceField } from '../types';
 import { DEFAULT_VALUES } from '../constants';
-import { TestQueryRow, TestQueryRowProps } from '../test_query_row';
+import type { TestQueryRowProps } from '../test_query_row';
+import { TestQueryRow } from '../test_query_row';
 import { QueryThresholdHelpPopover } from './threshold_help_popover';
 
 export interface RuleCommonExpressionsProps extends CommonRuleParams {

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-import { OverviewStatusState } from '../../../../../../../common/runtime_types';
+import type { OverviewStatusState } from '../../../../../../../common/runtime_types';
 
 import * as labels from '../labels';
 import { MonitorTestRunsCount } from './monitor_test_runs';

@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Action } from 'redux-actions';
+import type { Action } from 'redux-actions';
 
-import { monitorStatusReducer, MonitorStatusState, MonitorStatusPayload } from './monitor_status';
+import type { MonitorStatusState, MonitorStatusPayload } from './monitor_status';
+import { monitorStatusReducer } from './monitor_status';
 import { getMonitorStatusAction } from '../actions/monitor_status';
 
 describe('selectedFiltersReducer', () => {

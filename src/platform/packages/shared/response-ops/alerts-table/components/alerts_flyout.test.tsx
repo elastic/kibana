@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { AlertsFlyout } from './alerts_flyout';
-import { AlertsField, FlyoutSectionRenderer } from '../types';
+import type { FlyoutSectionRenderer } from '../types';
+import { AlertsField } from '../types';
 import { createPartialObjectMock } from '../utils/test';
 
 type FlyoutProps = ComponentProps<FlyoutSectionRenderer>;

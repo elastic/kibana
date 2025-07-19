@@ -7,7 +7,7 @@
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
   legacyMonitorAttributes,

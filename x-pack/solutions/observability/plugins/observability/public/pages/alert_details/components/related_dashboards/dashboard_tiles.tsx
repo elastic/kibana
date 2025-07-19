@@ -16,7 +16,8 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import { ActionButtonProps, DashboardTile, DashboardMetadata } from './dashboard_tile';
+import type { ActionButtonProps, DashboardMetadata } from './dashboard_tile';
+import { DashboardTile } from './dashboard_tile';
 
 export function DashboardTiles({
   title,

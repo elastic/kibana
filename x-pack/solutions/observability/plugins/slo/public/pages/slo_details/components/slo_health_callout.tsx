@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';

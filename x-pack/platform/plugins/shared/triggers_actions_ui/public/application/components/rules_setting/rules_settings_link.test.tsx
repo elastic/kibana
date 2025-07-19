@@ -11,7 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
-import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
+import type { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
 import { RulesSettingsLink } from './rules_settings_link';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';

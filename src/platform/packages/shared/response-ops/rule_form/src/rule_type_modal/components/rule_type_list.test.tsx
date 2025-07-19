@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RuleTypeList } from './rule_type_list';
-import { RuleTypeWithDescription } from '../types';
+import type { RuleTypeWithDescription } from '../types';
 
 const ruleTypes: RuleTypeWithDescription[] = [
   {

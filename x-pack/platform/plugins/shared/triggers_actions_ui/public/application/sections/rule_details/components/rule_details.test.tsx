@@ -13,10 +13,11 @@ import { userEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
-import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
+import type { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
+import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
-  ActionGroup,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
   ALERTING_FEATURE_ID,

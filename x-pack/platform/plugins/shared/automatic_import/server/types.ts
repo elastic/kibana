@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
   ActionsClientGeminiChatModel,
@@ -16,7 +16,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server/plugin';
-import { ESProcessorItem, SamplesFormat, CelAuthType } from '../common';
+import type { ESProcessorItem, SamplesFormat, CelAuthType } from '../common';
 
 export interface AutomaticImportPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;

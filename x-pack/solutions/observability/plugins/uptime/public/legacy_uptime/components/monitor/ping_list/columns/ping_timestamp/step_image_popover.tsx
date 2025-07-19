@@ -9,7 +9,7 @@ import { EuiImage, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LoadingImageState } from './no_image_available';
-import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
+import type { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
 import { fullSizeImageAlt } from './translations';
 import { useCompositeImage } from '../../../../../hooks/use_composite_image';
 

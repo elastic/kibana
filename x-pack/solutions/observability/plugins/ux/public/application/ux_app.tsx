@@ -10,8 +10,9 @@ import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
-import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
+import type { RouteComponentProps, RouteProps } from 'react-router-dom';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -23,7 +24,7 @@ import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
-import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';

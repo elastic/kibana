@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { ExploratoryViewPublicPluginsStart } from '../../../..';
+import type { ExploratoryViewPublicPluginsStart } from '../../../..';
 
 export const useLensFormulaHelper = () => {
   const {

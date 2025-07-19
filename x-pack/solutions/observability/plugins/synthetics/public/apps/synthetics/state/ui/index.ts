@@ -7,12 +7,12 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import {
+import type {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../../../common/constants/synthetics_alerts';
+import type { PopoverState } from './actions';
 import {
-  PopoverState,
   toggleIntegrationsPopover,
   setBasePath,
   setEsKueryString,

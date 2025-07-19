@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin/common';
-import { InspectResponse } from '../../typings/common';
-import { WrappedElasticsearchClientError } from './unwrap_es_response';
+import type { InspectResponse } from '../../typings/common';
+import type { WrappedElasticsearchClientError } from './unwrap_es_response';
 
 /**
  * Get statistics to show on inspector tab.

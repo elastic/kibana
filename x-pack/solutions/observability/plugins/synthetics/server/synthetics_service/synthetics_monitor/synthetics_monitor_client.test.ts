@@ -5,19 +5,16 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { CoreStart } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { SyntheticsMonitorClient } from './synthetics_monitor_client';
 import { SyntheticsService } from '../synthetics_service';
 import times from 'lodash/times';
-import {
-  LocationStatus,
-  MonitorFields,
-  SyntheticsMonitorWithId,
-} from '../../../common/runtime_types';
+import type { MonitorFields, SyntheticsMonitorWithId } from '../../../common/runtime_types';
+import { LocationStatus } from '../../../common/runtime_types';
 import { mockEncryptedSO } from '../utils/mocks';
-import { SyntheticsServerSetup } from '../../types';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import type { SyntheticsServerSetup } from '../../types';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
 

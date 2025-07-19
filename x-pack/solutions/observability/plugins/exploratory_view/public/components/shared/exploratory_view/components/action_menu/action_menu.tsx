@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { EmbedAction } from '../../header/embed_action';
 import { AddToCaseAction } from '../../header/add_to_case_action';
 import { useKibana } from '../../hooks/use_kibana';

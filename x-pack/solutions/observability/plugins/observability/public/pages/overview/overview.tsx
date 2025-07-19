@@ -35,11 +35,8 @@ import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
-import {
-  DataContextApps,
-  HasDataMap,
-  appLabels,
-} from '../../context/has_data_context/has_data_context';
+import type { DataContextApps, HasDataMap } from '../../context/has_data_context/has_data_context';
+import { appLabels } from '../../context/has_data_context/has_data_context';
 
 export function OverviewPage() {
   const {

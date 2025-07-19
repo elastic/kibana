@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 

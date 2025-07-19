@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ScoutPage, createLazyPageObject, ObltPageObjects } from '@kbn/scout-oblt';
+import type { ScoutPage, ObltPageObjects } from '@kbn/scout-oblt';
+import { createLazyPageObject } from '@kbn/scout-oblt';
 import { AnnotationsApp } from './annotations_app';
 import { SLOApp } from './slo_app';
 

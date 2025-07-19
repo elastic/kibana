@@ -8,7 +8,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { ExecutedStep } from '../executed_step';
-import { JourneyStep } from '../../../../../common/runtime_types/ping';
+import type { JourneyStep } from '../../../../../common/runtime_types/ping';
 
 interface HookProps {
   loading: boolean;

@@ -11,8 +11,8 @@ import {
   getSyntheticsEnablementSuccess,
   getSyntheticsEnablementFailure,
 } from './actions';
-import { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
-import { IHttpSerializedFetchError } from '../utils/http_error';
+import type { MonitorManagementEnablementResult } from '../../../../../common/runtime_types';
+import type { IHttpSerializedFetchError } from '../utils/http_error';
 
 export interface SyntheticsEnablementState {
   loading: boolean;

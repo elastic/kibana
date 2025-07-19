@@ -6,7 +6,7 @@
  */
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { APMTransactionDurationIndicator } from '@kbn/slo-schema';
+import type { APMTransactionDurationIndicator } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -15,7 +15,7 @@ import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
 import { GroupByField } from '../../common/group_by_field';
 import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { useFetchApmIndex } from '../../../../../hooks/use_fetch_apm_indices';
-import { CreateSLOForm } from '../../../types';
+import type { CreateSLOForm } from '../../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';

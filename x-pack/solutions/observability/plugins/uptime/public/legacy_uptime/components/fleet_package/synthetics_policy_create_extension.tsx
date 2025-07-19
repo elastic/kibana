@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DeprecateNoticeModal } from './deprecate_notice_modal';

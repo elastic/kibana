@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { WebhookActionParams } from '../types';
+import type { WebhookActionParams } from '../types';
 
 const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActionParams>> = ({
   actionParams,

@@ -8,8 +8,8 @@
 import { EuiFlexGrid, EuiPanel, EuiText, useIsWithinBreakpoints } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
-  SLOWithSummaryResponse,
   occurrencesBudgetingMethodSchema,
   querySchema,
   rollingTimeWindowTypeSchema,

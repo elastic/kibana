@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   PluginInitializerContext,
   CoreStart,
   CoreSetup,
@@ -14,7 +14,7 @@ import {
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { initUptimeServer } from './legacy_uptime/uptime_server';
-import {
+import type {
   UptimeCorePluginsSetup,
   UptimeCorePluginsStart,
   UptimeServerSetup,
@@ -23,7 +23,7 @@ import {
   registerUptimeSavedObjects,
   savedObjectsAdapter,
 } from './legacy_uptime/lib/saved_objects/saved_objects';
-import { UptimeConfig } from '../common/config';
+import type { UptimeConfig } from '../common/config';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { uptimeRuleTypeFieldMap } from './legacy_uptime/lib/alerts/common';
 
