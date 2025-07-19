@@ -32,7 +32,6 @@
     "@kbn/alerting-plugin",
     "@kbn/apm-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/global-search-plugin",
     "@kbn/infra-plugin",
     "@kbn/ml-plugin",
     "@kbn/observability-plugin",
