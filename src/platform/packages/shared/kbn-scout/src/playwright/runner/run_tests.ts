@@ -134,8 +134,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const pwConfigPath = options.configPath;
   const pwProject = getPlaywrightProject(options.testTarget, options.mode);
 
-  const pwBinPath = resolve(REPO_ROOT, './scripts/playwright');
+  const pwScriptPath = resolve(REPO_ROOT, './scripts/playwright');
   const pwCmdArgs = [
+    pwScriptPath,
     'test',
     `--config=${pwConfigPath}`,
     `--grep=${pwGrepTag}`,
@@ -146,19 +147,19 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     ),
   ];
 
-  log.info(`Running Playwright command: ${pwBinPath} ${pwCmdArgs.join(' ')}`);
+  log.info(`Running Playwright command: node ${pwCmdArgs.join(' ')}`);
 
   await withProcRunner(log, async (procs) => {
-    const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    const exitCode = await hasTestsInPlaywrightConfig(log, 'node', pwCmdArgs, pwConfigPath);
 
     if (exitCode !== 0) {
       process.exit(exitCode);
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs);
+      await runLocalServersAndTests(procs, log, options, 'node', pwCmdArgs);
     } else {
-      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs);
+      await runPlaywrightTest(procs, 'node', pwCmdArgs);
     }
 
     reportTime(runStartTime, 'ready', {
