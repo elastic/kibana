@@ -12,6 +12,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import { API_BASE_PATH_REINDEX_SERVICE } from '../constants';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -84,7 +85,7 @@ describe('reindex API', () => {
     jest.clearAllMocks();
   });
 
-  describe('POST /api/upgrade_assistant/reindex/batch', () => {
+  describe(`POST ${API_BASE_PATH_REINDEX_SERVICE}/reindex/batch`, () => {
     const queueSettingsArg = {
       enqueue: true,
     };
@@ -102,7 +103,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/batch',
+        pathPattern: `${API_BASE_PATH_REINDEX_SERVICE}/reindex/batch`,
       })(
         routeHandlerContextMock,
         createRequestMock({ body: { indexNames: ['theIndex1', 'theIndex2', 'theIndex3'] } }),
@@ -153,7 +154,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/batch',
+        pathPattern: `${API_BASE_PATH_REINDEX_SERVICE}/reindex/batch`,
       })(
         routeHandlerContextMock,
         createRequestMock({ body: { indexNames: ['theIndex1', 'theIndex2', 'theIndex3'] } }),

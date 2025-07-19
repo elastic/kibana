@@ -14,7 +14,7 @@ import {
   ReindexOperationCancelResponse,
   ReindexOperation,
 } from '@kbn/upgrade-assistant-pkg-common';
-import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
+import { API_BASE_PATH_REINDEX_SERVICE } from '../constants';
 import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../lib';
 import { reindexActionsFactory } from '../lib/reindex_actions';
 import { RouteDependencies } from '../../types';
@@ -33,7 +33,7 @@ export function registerReindexIndicesRoutes(
   }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
-  const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
+  const BASE_PATH = `${API_BASE_PATH_REINDEX_SERVICE}/reindex`;
 
   // Start reindex for an index
   router.post(

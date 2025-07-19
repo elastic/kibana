@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { getIndexState, Version } from '@kbn/upgrade-assistant-pkg-server';
+import { API_BASE_PATH_REINDEX_SERVICE } from '@kbn/reindex-service-plugin/server';
 import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -27,8 +28,9 @@ export default function ({ getService }: FtrProviderContext) {
     let lastState;
 
     while (true) {
-      lastState = (await supertest.get(`/api/upgrade_assistant/reindex/${indexName}`).expect(200))
-        .body.reindexOp;
+      lastState = (
+        await supertest.get(`${API_BASE_PATH_REINDEX_SERVICE}/reindex/${indexName}`).expect(200)
+      ).body.reindexOp;
       // Once the operation is completed or failed and unlocked, stop polling.
       if (lastState.status !== ReindexStatus.inProgress && lastState.locked === null) {
         break;
@@ -67,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(`${API_BASE_PATH_REINDEX_SERVICE}/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
@@ -121,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(`${API_BASE_PATH_REINDEX_SERVICE}/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
@@ -161,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.create({ index: 'reindexed-v8-dummydata' });
 
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(`${API_BASE_PATH_REINDEX_SERVICE}/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
@@ -197,7 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Reindex
       await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(`${API_BASE_PATH_REINDEX_SERVICE}/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
       const lastState = await waitForReindexToComplete('dummydata');
@@ -215,7 +217,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('shows reindex and read-only warnings', async () => {
-      const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`); // reusing the index previously migrated in v7->v8 UA tests
+      const resp = await supertest.get(
+        `${API_BASE_PATH_REINDEX_SERVICE}/reindex/reindexed-v7-6.0-data`
+      ); // reusing the index previously migrated in v7->v8 UA tests
       expect(resp.body.warnings.length).to.be(2);
       // By default, all reindexing operations will replace an index with an alias (with the same name)
       // pointing to a newly created "reindexed" index.
@@ -227,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('reindexes old 7.0 index', async () => {
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`) // reusing the index previously migrated in v7->v8 UA tests
+        .post(`${API_BASE_PATH_REINDEX_SERVICE}/reindexed-v7-6.0-data`) // reusing the index previously migrated in v7->v8 UA tests
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
@@ -246,7 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
         queueLength: number
       ) => {
         const response = await supertest
-          .get(`/api/upgrade_assistant/reindex/batch/queue`)
+          .get(`${API_BASE_PATH_REINDEX_SERVICE}/reindex/batch/queue`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
@@ -269,6 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const cleanupReindex = async (indexName: string) => {
         try {
+          // todo
           // await es.indices.delete({ index: generateNewIndexName(indexName, versionService) });
         } catch (e) {
           try {
@@ -288,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
         await es.indices.close({ index: test1 });
 
         const result = await supertest
-          .post(`/api/upgrade_assistant/reindex/batch`)
+          .post(`${API_BASE_PATH_REINDEX_SERVICE}/reindex/batch`)
           .set('kbn-xsrf', 'xxx')
           .send({ indexNames: [test1, test2, test3] })
           .expect(200);
