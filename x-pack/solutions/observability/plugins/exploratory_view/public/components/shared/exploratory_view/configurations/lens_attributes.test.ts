@@ -133,7 +133,6 @@ describe('Lens Attribute', () => {
       },
       ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
         acc[`y-axis-column-${index === 0 ? 'layer' + index + '-0' : index}`] = {
-          customLabel: true,
           dataType: 'number',
           filter: {
             language: 'kuery',
@@ -155,7 +154,6 @@ describe('Lens Attribute', () => {
   it('should return main y axis', function () {
     expect(lnsAttr.getMainYAxis(layerConfig, 'layer0', '')).toEqual([
       {
-        customLabel: true,
         dataType: 'number',
         isBucketed: false,
         label: 'test-series',
@@ -537,7 +535,6 @@ describe('Lens Attribute', () => {
             sourceField: LCP_FIELD,
           },
           'y-axis-column-layer0-0': {
-            customLabel: true,
             dataType: 'number',
             filter: {
               language: 'kuery',
@@ -561,7 +558,6 @@ describe('Lens Attribute', () => {
             references: ['y-axis-column-layer0X3'],
           },
           'y-axis-column-layer0X0': {
-            customLabel: true,
             dataType: 'number',
             filter: {
               language: 'kuery',
@@ -577,7 +573,6 @@ describe('Lens Attribute', () => {
             sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X1': {
-            customLabel: true,
             dataType: 'number',
             filter: {
               language: 'kuery',
@@ -593,7 +588,6 @@ describe('Lens Attribute', () => {
             sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X2': {
-            customLabel: true,
             dataType: 'number',
             isBucketed: false,
             label: 'Part of Pages loaded',
@@ -601,7 +595,6 @@ describe('Lens Attribute', () => {
             references: ['y-axis-column-layer0X1'],
           },
           'y-axis-column-layer0X3': {
-            customLabel: true,
             dataType: 'number',
             isBucketed: false,
             label: 'Part of Pages loaded',

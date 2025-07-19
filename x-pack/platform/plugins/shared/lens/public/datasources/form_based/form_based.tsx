@@ -184,7 +184,7 @@ export function columnToOperation(
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
-    label: uniqueLabel || label,
+    label: uniqueLabel || label || '',
     isStaticValue: operationType === 'static_value',
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
@@ -522,13 +522,12 @@ export function getFormBasedDatasource({
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
           columnLabelMap[columnId] = uniqueLabelGenerator(
-            column.customLabel
-              ? column.label
-              : operationDefinitionMap[column.operationType].getDefaultLabel(
-                  column,
-                  layer.columns,
-                  indexPatternsMap[layer.indexPatternId]
-                )
+            column.label ??
+              operationDefinitionMap[column.operationType].getDefaultLabel(
+                column,
+                layer.columns,
+                indexPatternsMap[layer.indexPatternId]
+              )
           );
         });
       });

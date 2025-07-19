@@ -46,7 +46,6 @@ export const testMobileKPIAttr = {
                 operationType: 'median',
                 params: {},
                 sourceField: 'system.memory.usage',
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   query:

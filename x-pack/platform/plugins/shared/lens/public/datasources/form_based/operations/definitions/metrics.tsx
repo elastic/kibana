@@ -155,7 +155,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
-        label: labelLookup(field.displayName, previousColumn),
         dataType: supportsDate && field.type === 'date' ? 'date' : 'number',
         operationType: type,
         sourceField: field.name,

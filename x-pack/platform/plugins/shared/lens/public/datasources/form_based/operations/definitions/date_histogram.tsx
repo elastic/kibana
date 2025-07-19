@@ -185,7 +185,6 @@ export const dateHistogramOperation: OperationDefinition<
   },
   buildColumn({ field }, columnParams) {
     return {
-      label: field.displayName,
       dataType: 'date',
       operationType: 'date_histogram',
       sourceField: field.name,

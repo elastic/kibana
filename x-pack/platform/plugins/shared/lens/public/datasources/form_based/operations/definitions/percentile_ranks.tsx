@@ -122,12 +122,6 @@ export const percentileRanksOperation: OperationDefinition<
     const newPercentileRanksParam =
       columnParams?.value ?? (existingPercentileRanksParam || DEFAULT_PERCENTILE_RANKS_VALUE);
     return {
-      label: ofName(
-        getSafeName(field.name, indexPattern),
-        newPercentileRanksParam,
-        previousColumn?.timeShift,
-        previousColumn?.reducedTimeRange
-      ),
       dataType: 'number',
       operationType: 'percentile_rank',
       sourceField: field.name,
@@ -190,15 +184,15 @@ export const percentileRanksOperation: OperationDefinition<
         }
         paramEditorUpdater({
           ...currentColumn,
-          label: currentColumn.customLabel
-            ? currentColumn.label
-            : ofName(
-                indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
-                  currentColumn.sourceField,
-                Number(value),
-                currentColumn.timeShift,
-                currentColumn.reducedTimeRange
-              ),
+          label:
+            currentColumn.label ??
+            ofName(
+              indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
+                currentColumn.sourceField,
+              Number(value),
+              currentColumn.timeShift,
+              currentColumn.reducedTimeRange
+            ),
           params: {
             ...currentColumn.params,
             value: Number(value),

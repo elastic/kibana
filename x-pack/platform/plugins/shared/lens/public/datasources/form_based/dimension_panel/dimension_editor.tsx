@@ -1182,7 +1182,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <>
             {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
               <NameInput
-                value={selectedColumn.label}
+                value={selectedColumn.label ?? ''}
                 defaultValue={defaultLabel}
                 onChange={(value) => {
                   updateLayer({
@@ -1190,13 +1190,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       ...state.layers[layerId].columns,
                       [columnId]: {
                         ...selectedColumn,
-                        label: value,
-                        customLabel:
-                          operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
-                            selectedColumn,
-                            state.layers[layerId].columns,
-                            props.indexPatterns[state.layers[layerId].indexPatternId]
-                          ) !== value,
+                        ...(operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                          selectedColumn,
+                          state.layers[layerId].columns,
+                          props.indexPatterns[state.layers[layerId].indexPatternId]
+                        ) !== value
+                          ? { label: value }
+                          : { label: undefined }),
                       },
                     },
                   });

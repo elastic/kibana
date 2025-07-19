@@ -36,7 +36,6 @@ Object {
             ],
             "columns": Object {
               "column-event-outcome-failure-id-generated-uuid": Object {
-                "customLabel": true,
                 "dataType": "number",
                 "filter": Object {
                   "language": "kuery",
@@ -51,7 +50,6 @@ Object {
               "column-timestamp-failure-id-generated-uuid": Object {
                 "dataType": "date",
                 "isBucketed": true,
-                "label": "@timestamp",
                 "operationType": "date_histogram",
                 "params": Object {
                   "interval": "auto",
@@ -69,7 +67,6 @@ Object {
             ],
             "columns": Object {
               "column-event-outcome-success-id-generated-uuid": Object {
-                "customLabel": true,
                 "dataType": "number",
                 "filter": Object {
                   "language": "kuery",

@@ -162,11 +162,9 @@ test('generates metric chart config with trendline', async () => {
               params: {
                 emptyAsNull: false,
               },
-              customLabel: true,
             },
             ['formula_accessor_0_0']: {
               label: 'count()',
-              customLabel: true,
               operationType: 'formula',
               dataType: 'number',
               references: ['formula_accessor_0_0X0'],
@@ -217,7 +215,6 @@ test('generates metric chart config with trendline', async () => {
                 ],
                 "columns": Object {
                   "formula_accessor_0_0": Object {
-                    "customLabel": true,
                     "dataType": "number",
                     "isBucketed": false,
                     "label": "count()",
@@ -238,7 +235,6 @@ test('generates metric chart config with trendline', async () => {
                     "timeScale": "s",
                   },
                   "formula_accessor_0_0X0": Object {
-                    "customLabel": true,
                     "dataType": "number",
                     "isBucketed": false,
                     "label": "Part of count()",
@@ -258,7 +254,6 @@ test('generates metric chart config with trendline', async () => {
                 ],
                 "columns": Object {
                   "formula_accessor_0_0": Object {
-                    "customLabel": true,
                     "dataType": "number",
                     "isBucketed": false,
                     "label": "count()",
@@ -279,7 +274,6 @@ test('generates metric chart config with trendline', async () => {
                     "timeScale": "s",
                   },
                   "formula_accessor_0_0X0": Object {
-                    "customLabel": true,
                     "dataType": "number",
                     "isBucketed": false,
                     "label": "Part of count()",
