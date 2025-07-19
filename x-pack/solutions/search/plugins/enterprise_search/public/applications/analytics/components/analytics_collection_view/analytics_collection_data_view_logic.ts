@@ -44,7 +44,6 @@ export const AnalyticsCollectionDataViewLogic = kea<
   }),
   path: ['enterprise_search', 'analytics', 'collection', 'dataView'],
   reducers: () => ({
-    // @ts-expect-error upgrade typescript v5.1.6
     dataView: [null, { setDataView: (_, { dataView }) => dataView }],
   }),
 });

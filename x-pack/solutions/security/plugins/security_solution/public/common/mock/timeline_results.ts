@@ -10,9 +10,9 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
-import type { TimelineResponse } from '../../../common/api/timeline';
 import {
   type ColumnHeaderResult,
+  type TimelineResponse,
   RowRendererIdEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,

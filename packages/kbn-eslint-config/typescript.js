@@ -5,6 +5,44 @@
 
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
+const commonOverridesConfig = {
+  parser: '@typescript-eslint/parser',
+
+  plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
+
+  env: {
+    es6: true,
+    node: true,
+    mocha: true,
+    browser: true,
+  },
+
+  parserOptions: {
+    sourceType: 'module',
+    ecmaVersion: 2018,
+    ecmaFeatures: {
+      jsx: true,
+    },
+    // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
+    // typescript eslint. As we are not using rules that need types information, we can safely
+    // disabling that feature setting the project to undefined. That issue is being addressed
+    // by the typescript eslint team. More info could be found here:
+    // https://github.com/typescript-eslint/typescript-eslint/issues/389
+    // https://github.com/typescript-eslint/typescript-eslint/issues/243
+    // https://github.com/typescript-eslint/typescript-eslint/pull/361
+    project: undefined,
+  },
+};
+
+const commonOverridesTSTypesConfig = {
+  ...commonOverridesConfig,
+  plugins: ['@typescript-eslint'],
+  parserOptions: {
+    ...commonOverridesConfig.parserOptions,
+    projectService: true,
+  }
+};
+
 // The current implementation excluded all the variables matching the regexp.
 // We should remove it as soon as multiple underscores are supported by the linter.
 // https://github.com/typescript-eslint/typescript-eslint/issues/1712
@@ -14,32 +52,7 @@ module.exports = {
   overrides: [
     {
       files: ['**/*.{ts,tsx}'],
-      parser: '@typescript-eslint/parser',
-
-      plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
-
-      env: {
-        es6: true,
-        node: true,
-        mocha: true,
-        browser: true,
-      },
-
-      parserOptions: {
-        sourceType: 'module',
-        ecmaVersion: 2018,
-        ecmaFeatures: {
-          jsx: true,
-        },
-        // NOTE: That is to avoid a known performance issue related with the `ts.Program` used by
-        // typescript eslint. As we are not using rules that need types information, we can safely
-        // disabling that feature setting the project to undefined. That issue is being addressed
-        // by the typescript eslint team. More info could be found here:
-        // https://github.com/typescript-eslint/typescript-eslint/issues/389
-        // https://github.com/typescript-eslint/typescript-eslint/issues/243
-        // https://github.com/typescript-eslint/typescript-eslint/pull/361
-        project: undefined,
-      },
+      ...commonOverridesConfig,
 
       // NOTE: we can't override the extends option here to apply
       // all the recommend rules as it is not allowed yet
@@ -55,43 +68,30 @@ module.exports = {
           //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
-          '@typescript-eslint/array-type': [
-            'error',
-            { default: 'array-simple', readonly: 'array-simple' },
-          ],
-          '@typescript-eslint/ban-types': [
+          '@typescript-eslint/array-type': 'off',
+          // ##
+          // Replacing old @typescript-eslint/ban-types
+          '@typescript-eslint/no-restricted-types': [
             'error',
             {
               types: {
-                SFC: {
-                  message: 'Use FC or FunctionComponent instead.',
-                  fixWith: 'FC',
-                },
-                'React.SFC': {
-                  message: 'Use FC or FunctionComponent instead.',
-                  fixWith: 'React.FC',
-                },
-                StatelessComponent: {
-                  message: 'Use FunctionComponent instead.',
-                  fixWith: 'FunctionComponent',
-                },
-                'React.StatelessComponent': {
-                  message: 'Use FunctionComponent instead.',
-                  fixWith: 'React.FunctionComponent',
-                },
-                // used in the codebase in the wild
-                '{}': false,
-                object: false,
-                Function: false,
+                SFC: 'Use FC or FunctionComponent instead.',
+                'React.SFC': 'Use React.FC instead.',
+                StatelessComponent: 'Use FunctionComponent instead.',
+                'React.StatelessComponent': 'Use React.FunctionComponent instead.',
               },
             },
           ],
+          '@typescript-eslint/no-unsafe-function-type': 'off',
+          '@typescript-eslint/no-wrapper-object-types': 'off',
+          '@typescript-eslint/no-empty-object-type': 'off',
+          // ##
           camelcase: 'off',
           '@typescript-eslint/naming-convention': [
             'error',
             {
               selector: 'default',
-              format: ['camelCase'],
+              format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
               filter: {
                 regex: allowedNameRegexp,
                 match: false,
@@ -273,6 +273,72 @@ module.exports = {
         },
         eslintConfigPrettierRules
       ),
+    },
+    /**
+     * Specific ts overrides
+     */
+    {
+      files: ['**/*.{ts,tsx}'],
+      excludedFiles: ['**/__fixtures__/**', '**/*.d.ts', '**/cypress.config*.ts', '**/x-pack/test/security_solution_playwright/**', '**/*.gen.ts'],
+      ...commonOverridesTSTypesConfig,
+      rules: {
+        '@typescript-eslint/consistent-type-exports': 'error',
+      },
+    },
+    {
+      files: [
+        // Root level packages
+        'packages/kbn-mock-idp-plugin/**/*.{ts,tsx}',
+
+        // X-pack Observability
+        'x-pack/solutions/observability/packages/{kbn-alerts-grouping}/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+
+        // X-pack Security solution
+        'x-pack/solutions/security/packages/{data-stream-adapter,features,navigation}/**/*.{ts,tsx}',
+        'x-pack/solutions/security/plugins/{ecs_data_quality_dashboard,security_solution,security_solution_ess,security_solution_serverless}/**/*.{ts,tsx}',
+
+        // X-pack test cases
+        'x-pack/solutions/**/test/cases_api_integration/**/*.{ts,tsx}',
+        'x-pack/test/api_integration/apis/cases/**/*.{ts,tsx}',
+
+        // Platform and X-pack platform plugins
+        'src/platform/plugins/private/{interactive_setup}/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/{discover,saved_search,osquery}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/private/{data_visualizer,transform,file_upload}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/{fleet,automatic_import,aiops,ml,cases,encrypted_saved_objects,security,spaces,alerting,actions,stack_alerts,stack_connectors,triggers_actions_ui,event_log,rule_registry,task_manager,embeddable_alerts_table}/**/*.{ts,tsx}',
+
+        // Platform and X-pack packages
+        'src/platform/packages/private/{kbn-mock-idp-utils}/**/*.{ts,tsx}',
+        'src/platform/packages/shared/{kbn-cell-actions,kbn-security-hardening,kbn-user-profile-components,response-ops,kbn-alerts-ui-shared,kbn-alerting-types,kbn-cases-components,kbn-actions-types,kbn-alerts-as-data-utils,kbn-grouping,kbn-rule,kbn-rule-data-utils,kbn-triggers-actions-ui-types}/**/*.{ts,tsx}',
+        'x-pack/platform/packages/private/{ml,security}/**/*.{ts,tsx}',
+        'x-pack/platform/packages/shared/{ml,security,kbn-alerting-comparators}/**/*.{ts,tsx}',
+
+        // Tests and X-pack
+        'src/platform/test/{interactive_setup_api_integration,interactive_setup_functional}/**/*.{ts,tsx}',
+        'x-pack/platform/test/{spaces_api_integration,security_api_integration,security_functional,encrypted_saved_objects_api_integration,alerting_api_integration,cases_api_integration,rule_registry}/**/*.{ts,tsx}',
+      ],
+      excludedFiles: ['**/__fixtures__/**', '**/*.d.ts', '**/cypress.config*.ts', '**/x-pack/test/security_solution_playwright/**', '**/*.gen.ts'],
+      ...commonOverridesTSTypesConfig,
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
+    {
+      files: ['server/**/*.{ts,tsx}', '*functional*/**/*.{ts,tsx}', '*api_integration*/**/*.{ts,tsx}'],
+      ...commonOverridesTSTypesConfig,
+      rules: {
+        // Let's focus on server-side errors first to avoid server crashes.
+        // We'll tackle /public eventually.
+        '@typescript-eslint/no-floating-promises': 'error',
+      },
+    },
+    {
+      files: ['*spaces_api_integration/common/services/basic_auth_supertest.ts'],
+      ...commonOverridesTSTypesConfig,
+      rules: {
+        '@typescript-eslint/no-floating-promises': 'off',
+      },
     },
   ],
 };

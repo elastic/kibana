@@ -9,11 +9,15 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import Os from 'os';
 
 const batchSize = 250;
-const maxParallelism = 8;
+const minCpu = 8;
+const maxCpu = 24;
+const cpuCount = Math.max(Os.cpus()?.length ?? 0, 1);
+const maxParallelism =  Math.max(Math.min(cpuCount - 1, maxCpu), minCpu);
 
 run(
   async ({ log, flags }) => {
@@ -83,13 +87,13 @@ function getLintableFileBatches() {
 }
 
 async function lintFileBatch({
-  batch,
-  bail,
-  idx,
-  eslintArgs,
-  batchCount,
-  log,
-}: {
+                               batch,
+                               bail,
+                               idx,
+                               eslintArgs,
+                               batchCount,
+                               log,
+                             }: {
   batch: string[];
   bail: boolean;
   idx: number;
@@ -106,6 +110,7 @@ async function lintFileBatch({
     env: {
       // Disable CI stats for individual runs, to avoid overloading ci-stats
       CI_STATS_DISABLED: 'true',
+      NODE_OPTIONS: '--max-old-space-size=8192',
     },
     reject: bail, // Don't throw on non-zero exit code
   });

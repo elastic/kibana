@@ -38,7 +38,6 @@ export const GenerateApiKeyModalLogic = kea<
     keyName: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setKeyName: (_, { keyName }) => keyName,
       },
     ],

@@ -64,7 +64,6 @@ export const SearchApplicationIndicesFlyoutLogic = kea<
       null,
       {
         closeFlyout: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         openFlyout: (_, { name }) => name,
       },
     ],

@@ -128,7 +128,6 @@ export const AddAnalyticsCollectionLogic = kea<
     inputError: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setInputError: (_, { inputError }) => inputError,
         setNameValue: () => null,
       },
@@ -136,7 +135,6 @@ export const AddAnalyticsCollectionLogic = kea<
     name: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setNameValue: (_, { name }) => name,
       },
     ],

@@ -33,7 +33,6 @@ export const SearchApplicationNameLogic = kea<
       // Short-circuiting this to empty string is necessary to enable testing logics relying on this
       props.searchApplicationName ?? '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setSearchApplicationName: (_, { name }) => name,
       },
     ],

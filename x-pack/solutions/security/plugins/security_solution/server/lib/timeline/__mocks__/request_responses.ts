@@ -14,13 +14,11 @@ import {
   TIMELINE_URL,
   TIMELINE_PREPACKAGED_URL,
 } from '../../../../common/constants';
-import type {
-  SavedTimeline,
-  PatchTimelineRequestBody,
-  CreateTimelinesRequestBody,
-  GetTimelineRequestQuery,
-} from '../../../../common/api/timeline';
 import {
+  type SavedTimeline,
+  type PatchTimelineRequestBody,
+  type CreateTimelinesRequestBody,
+  type GetTimelineRequestQuery,
   type TimelineType,
   TimelineTypeEnum,
   TimelineStatusEnum,

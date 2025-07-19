@@ -122,14 +122,12 @@ export const AttachIndexLogic = kea<
     connector: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setConnector: (_, connector) => connector,
       },
     ],
     indexExists: [
       {},
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         checkIndexExistsApiSuccess: (state, { exists, indexName }) => ({
           ...state,
           [indexName]: exists,

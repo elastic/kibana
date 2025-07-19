@@ -90,6 +90,7 @@ export const createListItemsBulk = async ({
       index: listItemIndex,
       refresh,
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // TODO: Log out the error with return values from the bulk insert into another index or saved object
   }

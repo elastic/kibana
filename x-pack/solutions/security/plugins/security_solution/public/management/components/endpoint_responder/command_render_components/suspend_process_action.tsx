@@ -40,7 +40,9 @@ export const SuspendProcessActionResult = memo<
 
   return useConsoleActionSubmitter<SuspendProcessRequestBody, SuspendProcessActionOutputContent>({
     ResultComponent,
+    // @ts-expect-error upgrade typescript v5.4.5
     setStore,
+    // @ts-expect-error upgrade typescript v5.4.5
     store,
     status,
     setStatus,
