@@ -36,10 +36,10 @@ const idPrefix = htmlIdGenerator()();
 export function RowHeightSettings({
   lineCountInput,
   label,
-  rowHeight,
+  rowHeight = RowHeightMode.custom,
   onChangeRowHeight,
   onChangeLineCountInput,
-  maxRowHeight,
+  maxRowHeight = 20,
   ['data-test-subj']: dataTestSubj,
 }: RowHeightSettingsProps) {
   const rowHeightModeOptions = [
@@ -74,7 +74,7 @@ export function RowHeightSettings({
             legend={label}
             buttonSize="compressed"
             options={rowHeightModeOptions}
-            idSelected={`${idPrefix}${rowHeight ?? RowHeightMode.custom}`}
+            idSelected={`${idPrefix}${rowHeight}`}
             onChange={(optionId) => {
               const newMode = optionId.replace(idPrefix, '') as RowHeightSettingsProps['rowHeight'];
               onChangeRowHeight(newMode);
@@ -89,7 +89,7 @@ export function RowHeightSettings({
               onChangeLineCountInput(lineCount, e.target.checkValidity());
             }}
             min={1}
-            max={maxRowHeight ?? 20}
+            max={maxRowHeight}
             required
             step={1}
             disabled={rowHeight !== RowHeightMode.custom}
