@@ -22,12 +22,12 @@ export enum RowHeightMode {
   custom = 'custom',
 }
 export interface RowHeightSettingsProps {
-  lineCountInput: number;
+  lineCountInput: number | undefined;
   rowHeight?: RowHeightMode;
   maxRowHeight?: number;
   label: string;
   onChangeRowHeight: (newHeightMode: RowHeightMode | undefined) => void;
-  onChangeLineCountInput: (newRowHeightLines: number) => void;
+  onChangeLineCountInput: (newRowHeightLines: number, isValid: boolean) => void;
   'data-test-subj'?: string;
 }
 
@@ -86,10 +86,11 @@ export function RowHeightSettings({
             value={lineCountInput}
             onChange={(e) => {
               const lineCount = Number(e.currentTarget.value);
-              onChangeLineCountInput(lineCount);
+              onChangeLineCountInput(lineCount, e.target.checkValidity());
             }}
             min={1}
             max={maxRowHeight ?? 20}
+            required
             step={1}
             disabled={rowHeight !== RowHeightMode.custom}
             data-test-subj={`${dataTestSubj}_lineCountNumber`}

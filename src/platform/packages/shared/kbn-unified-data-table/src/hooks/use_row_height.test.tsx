@@ -36,6 +36,7 @@ const renderRowHeightHook = (
     storage,
     consumer: 'discover',
     key: 'dataGridRowHeight',
+    defaultRowHeight: CONFIG_ROW_HEIGHT,
     configRowHeight: CONFIG_ROW_HEIGHT,
     rowHeightState,
     onUpdateRowHeight,
@@ -127,7 +128,7 @@ describe('useRowHeightsOptions', () => {
       storage,
       hook: { result },
     } = renderRowHeightHook({ onUpdateRowHeight });
-    result.current.onChangeRowHeightLines?.(2);
+    result.current.onChangeRowHeightLines?.(2, true);
     expect(storage.get('discover:dataGridRowHeight')).toEqual({
       previousRowHeight: 2,
       previousConfigRowHeight: CONFIG_ROW_HEIGHT,
