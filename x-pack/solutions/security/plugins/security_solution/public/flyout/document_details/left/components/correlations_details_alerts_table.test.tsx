@@ -82,7 +82,9 @@ describe('CorrelationsDetailsAlertsTable', () => {
   });
 
   it('renders EuiBasicTable with correct props', () => {
-    const { getByTestId, getAllByTestId, queryAllByRole } = renderCorrelationsTable();
+    const { container, getByTestId, getAllByTestId, queryAllByTestId } = renderCorrelationsTable(
+      mockContextValue.scopeId
+    );
 
     expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
     expect(getByTestId(`${TEST_ID}Table`)).toBeInTheDocument();
@@ -90,12 +92,14 @@ describe('CorrelationsDetailsAlertsTable', () => {
 
     expect(jest.mocked(usePaginatedAlerts)).toHaveBeenCalled();
 
-    expect(queryAllByRole('columnheader').length).toBe(5);
-    expect(queryAllByRole('row').length).toBe(3); // 1 header row and 2 data rows
-    expect(queryAllByRole('row')[1].textContent).toContain('Jan 1, 2022 @ 00:00:00.000');
-    expect(queryAllByRole('row')[1].textContent).toContain('Reason1');
-    expect(queryAllByRole('row')[1].textContent).toContain('Rule1');
-    expect(queryAllByRole('row')[1].textContent).toContain('Severity1');
+    expect(queryAllByTestId(/tableHeaderCell_/).length).toBe(5);
+    expect(container.querySelectorAll('.euiTableRow').length).toBe(2); // 2 data rows
+    expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain(
+      'Jan 1, 2022 @ 00:00:00.000'
+    );
+    expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('Reason1');
+    expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('Rule1');
+    expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('Severity1');
   });
 
   it('renders open preview button', () => {

@@ -411,7 +411,7 @@ describe('document selection', () => {
         getButton: async () => {
           const menuButton = await screen.findByTestId('unifiedDataTableSelectionBtn');
           await userEvent.click(menuButton);
-          return screen.queryByRole('button', { name: /Compare/ });
+          return screen.queryByTestId('unifiedDataTableCompareSelectedDocuments');
         },
       };
     };
