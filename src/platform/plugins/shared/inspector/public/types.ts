@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OverlayRef } from '@kbn/core/public';
-import { EuiFlyoutProps } from '@elastic/eui';
+import { OverlayFlyoutOpenOptions, OverlayRef } from '@kbn/core/public';
 import { Adapters } from '../common';
 
 /**
@@ -57,14 +56,12 @@ export interface InspectorViewDescription {
  * @property {string} title - An optional title, that will be shown in the header
  *    of the inspector. Can be used to give more context about what is being inspected.
  * @property {unknown} options - A set of specific payload to be passed to inspector views
- * @property {'push' | 'overlay' } flyoutType - The type of flyout that will be used to open the inspector.
- * @property {string} focusedPanelId - The id of the panel that should be focused when opening the inspector
+ * @property {object} flyoutProps - Optional props passed to `openLazyFlyout` (e.g. size, className, etc).
  */
 export interface InspectorOptions {
   title?: string;
   options?: unknown;
-  flyoutType?: EuiFlyoutProps['type'];
-  focusedPanelId?: string;
+  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
 }
 
 export type InspectorSession = OverlayRef;

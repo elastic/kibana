@@ -52,6 +52,10 @@ export interface Start {
   open: (adapters: Adapters, options?: InspectorOptions, parentApi?: unknown) => InspectorSession;
 }
 
+const closeButtonLabel = i18n.translate('inspector.closeButton', {
+  defaultMessage: 'Close Inspector',
+});
+
 export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   views: InspectorViewRegistry | undefined;
 
@@ -70,10 +74,6 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   public start(core: CoreStart, startDeps: InspectorPluginStartDeps) {
     const isAvailable: Start['isAvailable'] = (adapters) =>
       this.views!.getVisible(adapters).length > 0;
-
-    const closeButtonLabel = i18n.translate('inspector.closeButton', {
-      defaultMessage: 'Close Inspector',
-    });
 
     const open: Start['open'] = (adapters, options = {}, parentApi) => {
       const views = this.views!.getVisible(adapters);
@@ -111,11 +111,10 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
           'data-test-subj': 'inspectorPanel',
           'aria-labelledby': 'inspector-panel-title',
           closeButtonProps: { 'aria-label': closeButtonLabel },
-          type: options.flyoutType,
           size: 'm',
           paddingSize: 'l',
+          ...options.flyoutProps,
         },
-        uuid: options.focusedPanelId,
       });
       return flyoutRef;
     };
