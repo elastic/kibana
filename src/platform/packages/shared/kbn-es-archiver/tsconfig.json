@@ -21,6 +21,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
     "@kbn/jest-serializers",
+    "@kbn/apm-utils",
   ],
   "exclude": [
     "target/**/*",
