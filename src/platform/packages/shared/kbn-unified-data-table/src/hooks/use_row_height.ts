@@ -20,7 +20,7 @@ import {
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
 import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
 
-interface UseRowHeightProps {
+export interface UseRowHeightProps {
   storage: Storage;
   consumer: string;
   key: string;
