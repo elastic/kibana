@@ -8,4 +8,4 @@
  */
 
 export type * as v1 from './v1';
-export * from './latest';
+export type * from './latest';
