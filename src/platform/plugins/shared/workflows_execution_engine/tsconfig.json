@@ -17,6 +17,7 @@
     "@kbn/actions-plugin",
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*"
