@@ -146,7 +146,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onCancel?: () => void;
-  onDraftChange?: (draft: UnifiedSearchDraft | null) => void;
+  onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
   placeholder?: string;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   query?: Query | QT;
@@ -461,7 +461,7 @@ export const QueryBarTopRow = React.memo(
               dateRangeFrom: showDatePicker ? draftDateRangeFrom : undefined,
               dateRangeTo: showDatePicker ? draftDateRangeTo : undefined,
             }
-          : null,
+          : undefined,
       [
         onDraftChange,
         draftIsDirty,

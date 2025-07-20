@@ -10,7 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import { isEqual } from 'lodash';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -219,14 +218,10 @@ export const DiscoverTopNav = ({
   const searchDraftUiState = useCurrentTabSelector((state) => state.uiState.searchDraft);
   const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
   const onDraftChange = useCallback(
-    (draft: UnifiedSearchDraft | null) => {
+    (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
       dispatch(
         setSearchDraftUiState({
-          searchDraftUiState: {
-            query: draft?.query ?? undefined,
-            dateRangeFrom: draft?.dateRangeFrom ?? undefined,
-            dateRangeTo: draft?.dateRangeTo ?? undefined,
-          },
+          searchDraftUiState: newSearchDraftUiState,
         })
       );
     },
@@ -234,25 +229,15 @@ export const DiscoverTopNav = ({
   );
 
   const draft = useMemo(() => {
-    const draftState: Partial<UnifiedSearchDraft> = {};
-
-    if (searchDraftUiState?.query && !isEqual(searchDraftUiState.query, query)) {
-      if (isOfAggregateQueryType(searchDraftUiState.query) !== isOfAggregateQueryType(query)) {
-        return undefined; // don't use the draft when query type is different
-      }
-
-      draftState.query = searchDraftUiState.query;
+    if (
+      searchDraftUiState?.query &&
+      isOfAggregateQueryType(searchDraftUiState.query) !== isOfAggregateQueryType(query)
+    ) {
+      // safeguard against query type mismatch
+      return undefined;
     }
 
-    if (searchDraftUiState?.dateRangeFrom) {
-      draftState.dateRangeFrom = searchDraftUiState.dateRangeFrom;
-    }
-
-    if (searchDraftUiState?.dateRangeTo) {
-      draftState.dateRangeTo = searchDraftUiState.dateRangeTo;
-    }
-
-    return Object.keys(draftState).length > 0 ? draftState : undefined;
+    return searchDraftUiState;
   }, [searchDraftUiState, query]);
 
   const shouldHideDefaultDataviewPicker =
