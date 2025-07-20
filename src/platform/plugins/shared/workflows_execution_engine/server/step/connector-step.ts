@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorStep } from '@kbn/workflows'; // Adjust path as needed
 import { ConnectorExecutor } from '../connector-executor';
 import { WorkflowContextManager } from '../workflow-context-manager/workflow-context-manager';
-import { RunStepResult, StepBase } from './step-base';
+import { RunStepResult, StepBase, BaseStep } from './step-base';
+
+// Extend BaseStep for connector-specific properties
+export interface ConnectorStep extends BaseStep {
+  'connector-id'?: string;
+  with?: Record<string, any>;
+}
 
 export class ConnectorStepImpl extends StepBase<ConnectorStep> {
   constructor(
@@ -25,9 +30,17 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
   public async _run(): Promise<RunStepResult> {
     const step = this.step;
 
+    this.contextManager.logInfo(`Starting connector step: ${step.type}`, {
+      event: { action: 'connector-step-start' },
+      tags: ['connector', step.type],
+    });
+
     // Evaluate optional 'if' condition
     const shouldRun = await this.evaluateCondition(step.if);
     if (!shouldRun) {
+      this.contextManager.logInfo('Step skipped due to condition evaluation', {
+        event: { action: 'step-skipped', outcome: 'success' },
+      });
       return { output: undefined, error: undefined };
     }
 
@@ -35,6 +48,7 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
     const context = this.contextManager.getContext();
 
     // Render inputs from 'with'
+    this.contextManager.logDebug('Rendering step inputs');
     const renderedInputs = Object.entries(step.with ?? {}).reduce(
       (acc: Record<string, any>, [key, value]) => {
         if (typeof value === 'string') {
@@ -49,13 +63,21 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
 
     // Execute the connector
     try {
+      this.contextManager.logInfo(`Executing connector: ${step.type}`, {
+        event: { action: 'connector-execution' },
+        tags: ['connector', 'execution'],
+      });
+
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console.log' || step.type === 'console') {
+        this.contextManager.logDebug(`Console output: ${step.with?.message}`);
         console.log(step.with?.message);
         return { output: step.with?.message, error: undefined };
       } else if (step.type === 'console.sleep') {
-        await new Promise((resolve) => setTimeout(resolve, step.with?.sleepTime ?? 1000));
-        console.log(`${step.with?.message} - slept for ${step.with?.sleepTime ?? 1000}ms`);
+        const sleepTime = step.with?.sleepTime ?? 1000;
+        this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
+        await new Promise((resolve) => setTimeout(resolve, sleepTime));
+        console.log(`${step.with?.message} - slept for ${sleepTime}ms`);
         return { output: step.with?.message, error: undefined };
       }
 
@@ -64,8 +86,18 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         step['connector-id']!,
         renderedInputs
       );
+
+      this.contextManager.logInfo(`Connector execution completed successfully`, {
+        event: { action: 'connector-success', outcome: 'success' },
+        tags: ['connector', 'success'],
+      });
+
       return { output, error: undefined };
     } catch (error) {
+      this.contextManager.logError(`Connector execution failed: ${step.type}`, error as Error, {
+        event: { action: 'connector-failed', outcome: 'failure' },
+        tags: ['connector', 'error'],
+      });
       return await this.handleFailure(error);
     }
   }

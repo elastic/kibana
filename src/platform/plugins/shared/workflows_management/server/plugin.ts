@@ -36,6 +36,7 @@ import {
   WORKFLOWS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTION_LOGS_INDEX,
 } from '../common';
 import { workflowSavedObjectType } from './saved_objects/workflow';
 
@@ -284,7 +285,8 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       this.logger,
       getSavedObjectsClient,
       WORKFLOWS_EXECUTIONS_INDEX,
-      WORKFLOWS_STEP_EXECUTIONS_INDEX
+      WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      WORKFLOWS_EXECUTION_LOGS_INDEX
     );
     this.api = new WorkflowsManagementApi(this.workflowsService);
 

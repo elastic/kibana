@@ -1,5 +1,4 @@
 import { WorkflowContextManager } from '../workflow-context-manager/workflow-context-manager';
-import { BaseStep, BaseStepSchema } from '@kbn/workflows';
 // Import specific step types as needed from schema
 import { z } from '@kbn/zod';
 // import { evaluate } from '@marcbachmann/cel-js'
@@ -11,7 +10,16 @@ export interface RunStepResult {
   error: any;
 }
 
-export type StepDefinition = z.infer<typeof BaseStepSchema>; // Base type; subclasses will use specific inferred types
+// Base step interface
+export interface BaseStep {
+  name: string;
+  type: string;
+  if?: string;
+  foreach?: string;
+  timeout?: number;
+}
+
+export type StepDefinition = BaseStep;
 
 export abstract class StepBase<TStep extends BaseStep> {
   protected step: TStep;
@@ -36,9 +44,56 @@ export abstract class StepBase<TStep extends BaseStep> {
   }
 
   public async run(): Promise<RunStepResult> {
-    const result = await this._run();
-    this.contextManager.appendStepResult(this.getName(), result);
-    return result;
+    const stepName = this.getName();
+    
+    // Set step context for logging
+    this.contextManager.setCurrentStep(stepName, stepName, this.step.type);
+    
+    // Log step start
+    this.contextManager.logStepStart(stepName);
+    
+    const stepEvent = {
+      event: { action: 'step-execution' },
+      message: `Executing step: ${stepName}`,
+    };
+    
+    // Start timing
+    this.contextManager.startTiming(stepEvent);
+    
+    try {
+      const result = await this._run();
+      
+      // Log success
+      this.contextManager.stopTiming({
+        ...stepEvent,
+        event: { ...stepEvent.event, outcome: 'success' },
+      });
+      
+      this.contextManager.logStepComplete(stepName, stepName, true);
+      this.contextManager.appendStepResult(stepName, result);
+      
+      return result;
+    } catch (error) {
+      // Log failure
+      this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
+        event: { action: 'step-failed' },
+      });
+      
+      this.contextManager.stopTiming({
+        ...stepEvent,
+        event: { ...stepEvent.event, outcome: 'failure' },
+      });
+      
+      this.contextManager.logStepComplete(stepName, stepName, false);
+      
+      const result = await this.handleFailure(error);
+      this.contextManager.appendStepResult(stepName, result);
+      
+      return result;
+    } finally {
+      // Clear step context
+      this.contextManager.clearCurrentStep();
+    }
   }
 
   // Subclasses implement this to execute the step logic

@@ -16,12 +16,13 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { ExecutionStatus, EsWorkflowExecution } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
 import { WorkflowExecution } from '../../workflow-detail/ui/workflow-execution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 // Add a type for the table items that matches the fields used in the table
 interface WorkflowExecutionTableItem {
@@ -39,17 +40,15 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
     error,
   } = useWorkflowExecutions(workflowId);
 
-  const [selectedWorkflowExecutionId, setSelectedWorkflowExecutionId] = useState<string | null>(
-    null
-  );
+  const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
   // Find the full execution object for the selected ID, if needed
   const selectedExecution = workflowExecutions?.results.find(
-    (exec: any) => exec.id === selectedWorkflowExecutionId
+    (exec: any) => exec.id === selectedExecutionId
   );
 
   const handleViewWorkflowExecution = (item: WorkflowExecutionTableItem) => {
-    setSelectedWorkflowExecutionId(item.id);
+    setSelectedExecution(item.id);
   };
 
   const columns: Array<EuiBasicTableColumn<WorkflowExecutionTableItem>> = [
@@ -129,14 +128,14 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
           responsiveBreakpoint={false}
           rowProps={(item) => ({
             onClick: () => handleViewWorkflowExecution(item),
-            className: item.id === selectedWorkflowExecutionId ? 'euiTableRow--marked' : undefined,
+            className: item.id === selectedExecutionId ? 'euiTableRow--marked' : undefined,
           })}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        {selectedWorkflowExecutionId ? (
+        {selectedExecutionId ? (
           <WorkflowExecution
-            workflowExecutionId={selectedWorkflowExecutionId}
+            workflowExecutionId={selectedExecutionId}
             fields={['stepId', 'status', 'executionTimeMs']}
           />
         ) : (
