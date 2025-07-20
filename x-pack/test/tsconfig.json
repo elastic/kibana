@@ -59,8 +59,6 @@
     "@kbn/es-archiver",
     "@kbn/es-query",
     "@kbn/visualizations-plugin",
-    "@kbn/controls-plugin",
-    "@kbn/rule-registry-plugin",
     "@kbn/apm-synthtrace-client",
     "@kbn/field-formats-plugin",
     "@kbn/server-route-repository",
