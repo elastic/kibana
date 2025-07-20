@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/reindex-service-plugin",
+  "owner": "@elastic/kibana-management",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "reindexService",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "reindex_service"
+    ],
+    "requiredPlugins": [
+    ],
+    "optionalPlugins": [
+    ],
+    "requiredBundles": [
+    ]
+  }
+}

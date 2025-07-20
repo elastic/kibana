@@ -14,7 +14,6 @@ import type {
   ClusterUpgradeState,
   ResponseError,
   SystemIndicesMigrationStatus,
-  ReindexStatusResponse,
   DataStreamReindexStatusResponse,
   DataStreamMetadata,
 } from '../../../common/types';
@@ -256,27 +255,6 @@ export class ApiService {
   /**
    * FINISH: Data Stream Migrations
    */
-
-  public async getReindexStatus(indexName: string) {
-    return await this.sendRequest<ReindexStatusResponse>({
-      path: `${API_BASE_PATH}/reindex/${indexName}`,
-      method: 'get',
-    });
-  }
-
-  public async startReindexTask(indexName: string) {
-    return await this.sendRequest({
-      path: `${API_BASE_PATH}/reindex/${indexName}`,
-      method: 'post',
-    });
-  }
-
-  public async cancelReindexTask(indexName: string) {
-    return await this.sendRequest({
-      path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
-      method: 'post',
-    });
-  }
 
   public async updateIndex(indexName: string, operations: UpdateIndexOperation[]) {
     return await this.sendRequest({

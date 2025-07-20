@@ -139,10 +139,15 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 export const IndexTableRow: React.FunctionComponent<TableRowProps> = (props) => {
   const {
     services: { api },
+    plugins: { reindexService },
   } = useAppContext();
 
   return (
-    <IndexStatusProvider deprecation={props.deprecation} api={api}>
+    <IndexStatusProvider
+      deprecation={props.deprecation}
+      api={api}
+      reindexService={reindexService.reindexService}
+    >
       <IndexTableRowCells {...props} />
     </IndexStatusProvider>
   );

@@ -16,6 +16,7 @@ import {
   scopedHistoryMock,
 } from '@kbn/core/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { ReindexService } from '@kbn/reindex-service-plugin/public';
 
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
@@ -112,6 +113,9 @@ export const getAppContextMock = (kibanaVersion: SemVer) => ({
     cloud: {
       ...cloudMock.createSetup(),
       isCloudEnabled: false,
+    },
+    reindexService: {
+      reindexService: new ReindexService(httpServiceMock.createSetupContract()),
     },
   },
   clusterUpgradeState: 'isPreparingForUpgrade',
