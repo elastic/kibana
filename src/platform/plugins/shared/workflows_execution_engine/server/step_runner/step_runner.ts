@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowStep } from '@kbn/workflows';
+import { BaseConnectorStepSchema } from '@kbn/workflows';
+import { z } from '@kbn/zod';
 import { TemplatingEngine } from '../templating_engine';
 import { ConnectorExecutor } from '../connector_executor';
 
@@ -16,6 +17,8 @@ export interface RunStepResult {
   error: any;
 }
 
+type WorkflowStep = z.infer<typeof BaseConnectorStepSchema>;
+
 export class StepRunner {
   constructor(
     private connectorExecutor: ConnectorExecutor,
@@ -23,7 +26,7 @@ export class StepRunner {
   ) {}
 
   public async runStep(step: WorkflowStep, context: Record<string, any>): Promise<RunStepResult> {
-    const providerInputs = step.inputs || {};
+    const providerInputs = step.with || {};
 
     const renderedInputs = Object.entries(providerInputs).reduce((accumulator, [key, value]) => {
       if (typeof value === 'string') {
@@ -36,8 +39,8 @@ export class StepRunner {
 
     try {
       const stepOutput = await this.connectorExecutor.execute(
-        step.connectorType,
-        step.connectorName,
+        step['connector-id']!,
+        step.name,
         renderedInputs
       );
       return {

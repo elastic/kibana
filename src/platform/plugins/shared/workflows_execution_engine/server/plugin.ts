@@ -16,9 +16,9 @@ import type {
 } from '@kbn/core/server';
 import {
   ExecutionStatus,
-  WorkflowExecution,
+  // WorkflowExecution,
   WorkflowExecutionEngineModel,
-  WorkflowStepExecution,
+  // WorkflowStepExecution,
 } from '@kbn/workflows';
 
 import { Client } from '@elastic/elasticsearch';
@@ -81,7 +81,7 @@ export class WorkflowsExecutionEnginePlugin
           status: workflowExecutionStatus,
           createdAt: workflowCreatedAt,
           startedAt: workflowStartedAt,
-        } as WorkflowExecution,
+        } as any,
       });
 
       try {
@@ -114,10 +114,10 @@ export class WorkflowsExecutionEnginePlugin
               stepId: currentStep.id,
               status: ExecutionStatus.RUNNING,
               startedAt: stepStartedAt,
-            } as WorkflowStepExecution,
+            } as any,
           });
 
-          const stepResult = await stepRunner.runStep(currentStep, stepsContext);
+          const stepResult = await stepRunner.runStep(currentStep as any, stepsContext);
 
           stepsContext.steps[currentStep.id] = { outputs: stepResult.output };
 
@@ -166,7 +166,7 @@ export class WorkflowsExecutionEnginePlugin
             error: workflowExecutionError,
             finishedAt: new Date(),
             duration: new Date().getTime() - workflowStartedAt.getTime(),
-          } as WorkflowExecution,
+          } as any,
         });
       }
     };
