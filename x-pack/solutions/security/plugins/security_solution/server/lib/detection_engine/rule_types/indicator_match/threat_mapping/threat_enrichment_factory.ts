@@ -6,73 +6,27 @@
  */
 
 import type { ThreatIndicatorPath } from '../../../../../../common/api/detection_engine';
-import type { GetThreatListOptions } from './types';
+import type { ThreatListItem } from './types';
 import type { SignalSourceHit } from '../../types';
-import { getThreatList } from './get_threat_list';
 import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
-import { type SignalsQueryMap } from './get_signals_map_from_threat_index';
+import { type SignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 
 interface ThreatEnrichmentFactoryOptions {
   threatIndicatorPath: ThreatIndicatorPath;
-  signalsQueryMap: SignalsQueryMap;
-  threatFilters: unknown[];
-  threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
+  signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap;
+  matchedThreats: ThreatListItem[];
 }
 
-/**
- * returns threatEnrichment method used events-first search
- */
 export const threatEnrichmentFactory = ({
-  signalsQueryMap,
+  signalIdToMatchedQueriesMap,
   threatIndicatorPath,
-  threatFilters,
-  threatSearchParams,
+  matchedThreats,
 }: ThreatEnrichmentFactoryOptions) => {
-  const threatEnrichment = (signals: SignalSourceHit[]): Promise<SignalSourceHit[]> => {
-    const getThreats = async () => {
-      const threatIds = signals
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .map((s) => s._id!)
-        .reduce<string[]>((acc, id) => {
-          return [
-            ...new Set([
-              ...acc,
-              ...(signalsQueryMap.get(id) ?? []).map((threatQueryMatched) => threatQueryMatched.id),
-            ]),
-          ];
-        }, [])
-        .flat();
-
-      const matchedThreatsFilter = {
-        query: {
-          bool: {
-            filter: {
-              ids: { values: threatIds },
-            },
-          },
-        },
-      };
-
-      const threatResponse = await getThreatList({
-        ...threatSearchParams,
-        threatListConfig: {
-          _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
-          fields: undefined,
-        },
-        threatFilters: [...threatFilters, matchedThreatsFilter],
-        searchAfter: undefined,
-      });
-
-      return threatResponse.hits.hits;
-    };
-
-    return enrichSignalThreatMatchesFromSignalsMap(
+  return (signals: SignalSourceHit[]) =>
+    enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      getThreats,
+      matchedThreats,
       threatIndicatorPath,
-      signalsQueryMap
+      signalIdToMatchedQueriesMap
     );
-  };
-
-  return threatEnrichment;
 };

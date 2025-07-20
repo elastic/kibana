@@ -32,6 +32,10 @@ implementations &mdash; a basic pretty-printer and a wrapping pretty-printer:
 
 - [`pretty_print` &mdash; Contains code for formatting AST to text](./src/pretty_print/README.md).
 
+The *Commands registry* allows you to register a new command:
+
+- [`commands_registry` &mdash; Provides a centralized system for managing and interacting with ES|QL commands](./src/commands_registry/README.md).
+
 
 ## Demo
 

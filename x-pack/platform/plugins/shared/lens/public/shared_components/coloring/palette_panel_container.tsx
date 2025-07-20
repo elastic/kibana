@@ -41,6 +41,7 @@ export function PalettePanelContainer(props: {
               content={i18n.translate('xpack.lens.colorMapping.editColors', {
                 defaultMessage: 'Edit colors',
               })}
+              disableScreenReaderOutput
             >
               <EuiButtonIcon
                 data-test-subj="lns_colorEditing_trigger"

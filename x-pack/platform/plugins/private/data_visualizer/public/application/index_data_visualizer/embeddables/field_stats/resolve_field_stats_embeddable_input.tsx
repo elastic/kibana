@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import { tracksOverlays } from '@kbn/presentation-containers';
+import { tracksOverlays } from '@kbn/presentation-util';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

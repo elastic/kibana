@@ -2156,24 +2156,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.useObservabilityTourContext",
-        "type": "Function",
-        "tags": [],
-        "label": "useObservabilityTourContext",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ObservabilityTourContextValue"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tour/tour.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-public.useQuickTimeRanges",
         "type": "Function",
         "tags": [],
@@ -3965,21 +3947,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.observTourStepStorageKey",
-        "type": "string",
-        "tags": [],
-        "label": "observTourStepStorageKey",
-        "description": [],
-        "signature": [
-          "\"guidedOnboarding.observability.tourStep\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tour/tour.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-public.ProfilingLocators",
         "type": "Type",
         "tags": [],
@@ -5649,10 +5616,10 @@
         "children": [
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.AssetDetailsLocatorParams.assetType",
+            "id": "def-common.AssetDetailsLocatorParams.entityType",
             "type": "string",
             "tags": [],
-            "label": "assetType",
+            "label": "entityType",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,
@@ -5660,10 +5627,10 @@
           },
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.AssetDetailsLocatorParams.assetId",
+            "id": "def-common.AssetDetailsLocatorParams.entityId",
             "type": "string",
             "tags": [],
-            "label": "assetId",
+            "label": "entityId",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,
@@ -6557,10 +6524,10 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.SupportedAssetTypes",
+        "id": "def-common.SupportedEntityTypes",
         "type": "Enum",
         "tags": [],
-        "label": "SupportedAssetTypes",
+        "label": "SupportedEntityTypes",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
         "deprecated": false,

@@ -166,6 +166,16 @@ export async function getEditorApiClient<TServerRouteRepository extends ServerRo
   return await getApiClient(supertestWithRoleScoped);
 }
 
+export async function getViewerApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<RepositorySupertestClient<TServerRouteRepository>> {
+  const supertestWithRoleScoped = await st.getSupertestWithRoleScope('viewer', {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithRoleScoped);
+}
+
 type WithoutPromise<T extends Promise<any>> = Subtract<T, Promise<any>>;
 
 // this is a little intense, but without it, method overrides are lost
