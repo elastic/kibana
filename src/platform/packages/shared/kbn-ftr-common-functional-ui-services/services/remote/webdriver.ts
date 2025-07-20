@@ -140,6 +140,12 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Use --disable-gpu to avoid an error from a missing Mesa library, as per
     // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
     options.addArguments('disable-gpu');
+
+    options.addArguments(
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+      '--disable-backgrounding-occluded-windows'
+    );
   }
 
   if (certValidation === '0') {
