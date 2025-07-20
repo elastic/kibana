@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { Meta, StoryObj } from '@storybook/react';
 import minimalAPMFixture from '../../../../../__fixtures__/span_apm_minimal.json';
 import minimalOtelFixture from '../../../../../__fixtures__/span_otel_minimal.json';
@@ -25,20 +24,20 @@ type Story = StoryObj<typeof SpanOverview>;
 export const MinimalApm: Story = {
   name: 'Minimal APM span',
   args: {
-    hit: buildDataTableRecord(minimalAPMFixture),
+    hit: minimalAPMFixture,
   },
 };
 
 export const MinimalOtel: Story = {
   name: 'Minimal Otel span',
   args: {
-    hit: buildDataTableRecord(minimalOtelFixture),
+    hit: minimalOtelFixture,
   },
 };
 
 export const RedisClientOtel: Story = {
   name: 'Redis client span (processed Otel)',
   args: {
-    hit: buildDataTableRecord(redisClientOtelFixture),
+    hit: redisClientOtelFixture,
   },
 };

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { ArgTypes, Args, Decorator } from '@storybook/react';
 import { produce } from 'immer';
-import React from 'react';
 import { mockUnifiedDocViewerServices } from '../public/__mocks__';
 import { setUnifiedDocViewerServices } from '../public/plugin';
 
@@ -23,11 +22,7 @@ const mockDataView = {
   fields: { getAll: jest.fn().mockReturnValue([]), getByName: () => jest.fn() },
 } as never;
 
-export type UnifiedDocViewerStorybookArgs<T> = T & {
-  hit: DataTableRecord;
-  hasApmShowCapability: boolean;
-};
-
+// Default args for all doc viewer stories.
 export const args: Args = {
   dataView: mockDataView,
   hasApmShowCapability: true,
@@ -40,12 +35,18 @@ export const args: Args = {
   },
 };
 
+// Allow toggling APM 'show' capability and disable controls for dataView and indexes.
 export const argTypes: ArgTypes = {
-  hasApmShowCapability: { control: 'boolean', name: "APM 'show' capability" },
+  hasApmShowCapability: {
+    control: 'boolean',
+    name: "APM 'show' capability",
+  },
+  dataView: { control: false },
+  indexes: { control: false },
 };
 
 export const decorators: Decorator[] = [
-  (Story, { args: { hasApmShowCapability } }) => {
+  (Story, { args: storyArgs }) => {
     // Override items provided by the mock unified doc view services.
     const unifiedDocViewerServices = produce(mockUnifiedDocViewerServices, (draft) => {
       // Mock locator return so the locator service returns as expected.
@@ -54,7 +55,9 @@ export const decorators: Decorator[] = [
         .fn()
         .mockReturnValue({ getRedirectUrl: jest.fn().mockReturnValue('#') });
 
-      draft.core.application.capabilities.apm = { show: hasApmShowCapability as boolean };
+      draft.core.application.capabilities.apm = {
+        show: storyArgs.hasApmShowCapability as boolean,
+      };
 
       // Mock for latency distribution chart
       draft.core.http.post = jest.fn().mockImplementation((url, options) => {
@@ -76,9 +79,11 @@ export const decorators: Decorator[] = [
         }
       });
     });
-
     setUnifiedDocViewerServices(unifiedDocViewerServices);
 
-    return <Story />;
+    // The document the doc viewer gets is a `DataTableRecord`, while our fixtures use a "raw" hit object.
+    // `buildDataTableRecord` adds the `flattened` fields.
+    const hit = buildDataTableRecord(storyArgs.hit);
+    return Story({ args: { ...storyArgs, hit } });
   },
 ];

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { Meta, StoryObj } from '@storybook/react';
 import httpServerOtelFixture from '../../../../../__fixtures__/transaction_http_server_otel.json';
+
 import { TransactionOverview } from './transaction_overview';
 
 const meta = {
@@ -23,6 +23,6 @@ type Story = StoryObj<typeof TransactionOverview>;
 export const OtelHttpServer: Story = {
   name: 'Otel HTTP server transaction',
   args: {
-    hit: buildDataTableRecord(httpServerOtelFixture),
+    hit: httpServerOtelFixture,
   },
 };

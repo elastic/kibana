@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { Meta, StoryObj } from '@storybook/react';
 import AttributesOverview from '.';
 import basicFixture from '../../../../../__fixtures__/attributes_basic.json';
@@ -17,13 +16,12 @@ const meta: Meta<typeof AttributesOverview> = {
   title: 'Attributes',
   component: AttributesOverview,
 };
-
 export default meta;
 type Story = StoryObj<typeof AttributesOverview>;
 
-export const Basic: Story = { args: { hit: buildDataTableRecord(basicFixture) } };
+export const Basic: Story = { args: { hit: basicFixture } };
 
 export const RedisSpan: Story = {
   name: 'Redis client span (processed)',
-  args: { hit: buildDataTableRecord(redisSpanFixture) },
+  args: { hit: redisSpanFixture },
 };
