@@ -3524,7 +3524,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/types.ts",
@@ -12233,7 +12239,13 @@
             "description": [],
             "signature": [
               "string | ",
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/types.ts",
@@ -12956,7 +12968,7 @@
             "label": "attributes",
             "description": [],
             "signature": [
-              "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; }"
+              "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; typeName?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
@@ -12970,7 +12982,13 @@
             "label": "references",
             "description": [],
             "signature": [
-              "Reference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
@@ -15949,7 +15967,7 @@
         "label": "VisualizationSavedObjectAttributes",
         "description": [],
         "signature": [
-          "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; }"
+          "{ title: string; description?: string | undefined; kibanaSavedObjectMeta?: { searchSourceJSON?: string | undefined; } | undefined; version?: string | undefined; visState?: string | undefined; uiStateJSON?: string | undefined; savedSearchRefName?: string | undefined; typeName?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/common/content_management/v1/types.ts",
         "deprecated": false,

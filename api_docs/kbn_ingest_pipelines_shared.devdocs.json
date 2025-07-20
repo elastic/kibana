@@ -29,7 +29,7 @@
           "\nA component for a Pipeline structure tree.\nChildren pipeline nodes represent Pipeline processors that run the\ncorresponding pipelines from the children node.\nSee more at https://www.elastic.co/docs/reference/enrich-processor/pipeline-processor"
         ],
         "signature": [
-          "({ pipelineTree }: ",
+          "({ pipelineTree, isExtension, }: ",
           "PipelineStructureTreeProps",
           ") => React.JSX.Element"
         ],
@@ -42,7 +42,7 @@
             "id": "def-common.PipelineStructureTree.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ pipelineTree }",
+            "label": "{\n  pipelineTree,\n  isExtension,\n}",
             "description": [],
             "signature": [
               "PipelineStructureTreeProps"
