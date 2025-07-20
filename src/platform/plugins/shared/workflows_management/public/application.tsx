@@ -12,9 +12,9 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { AppPluginStartDependencies } from './types';
 import { WorkflowsRoutes } from './routes';
-import { i18n } from '@kbn/i18n';
 
 const queryClient = new QueryClient();
 

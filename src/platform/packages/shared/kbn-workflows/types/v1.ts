@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowYaml } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
