@@ -82,6 +82,7 @@ export async function fetchEntityData(
   // Use ESQL to query entity data
   const esqlQuery = `FROM .entities.*.latest.security_*_${spaceId}
 | WHERE entity.id IN (${entityIds.map((_, idx) => `?entity_id${idx}`).join(', ')})
+| KEEP entity.*
 | LIMIT ${entityIds.length * 2}`;
 
   const params = entityIds.map((id, idx) => ({
