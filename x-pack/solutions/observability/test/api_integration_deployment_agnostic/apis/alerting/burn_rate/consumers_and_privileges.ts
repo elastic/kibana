@@ -30,7 +30,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const isServerless = config.get('serverless');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Burn rate rule', () => {
+  describe('Burn rate rule', function () {
+    // Custom roles not yet supported in MKI
+    this.tags(['failsOnMKI']);
+
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
