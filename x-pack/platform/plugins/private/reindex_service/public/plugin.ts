@@ -25,7 +25,6 @@ export class ReindexServerPublicPlugin
     >
 {
   private reindexService?: ReindexService;
-  // constructor(private ctx: PluginInitializerContext) {}
 
   setup({ http }: CoreSetup<SetupDependencies>) {
     this.reindexService = new ReindexService(http);
