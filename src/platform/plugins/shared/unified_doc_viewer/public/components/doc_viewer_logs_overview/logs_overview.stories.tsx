@@ -9,6 +9,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import otelExampleFixture from '../../__fixtures__/logs_otel_example.json';
+import errorApmOtelFixture from '../../__fixtures__/error_apm_otel.json';
 import { LogsOverview } from './logs_overview';
 
 const meta: Meta<typeof LogsOverview> = {
@@ -29,5 +30,12 @@ export const OtelExample: Story = {
   name: 'Otel example log',
   args: {
     hit: otelExampleFixture,
+  },
+};
+
+export const ApmErrorOtelExample: Story = {
+  name: 'APM Error (processed Otel)',
+  args: {
+    hit: errorApmOtelFixture,
   },
 };
