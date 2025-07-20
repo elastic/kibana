@@ -115,7 +115,7 @@ export async function fetchEntityData(
     );
     return entityDataMap;
   } catch (error) {
-    logger.error(`Error fetching entity data: ${error}`);
+    logger.error(error);
     throw error;
   }
 }
