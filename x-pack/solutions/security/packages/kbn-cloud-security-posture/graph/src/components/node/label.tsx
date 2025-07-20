@@ -6,7 +6,7 @@
  */
 
 import React, { memo, type PropsWithChildren } from 'react';
-import { EuiText, EuiTextTruncate, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiTextTruncate, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { NODE_LABEL_WIDTH, NODE_WIDTH } from './styles';
@@ -64,7 +64,6 @@ export interface LabelProps {
 
 const LabelComponent = ({ text = '' }: LabelProps) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
-  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiText
@@ -74,8 +73,8 @@ const LabelComponent = ({ text = '' }: LabelProps) => {
         width: ${NODE_LABEL_WIDTH}px;
         margin-left: ${-(NODE_LABEL_WIDTH - NODE_WIDTH) / 2}px;
         overflow: hidden;
-        max-height: ${euiTheme.size.xl};
-        font-weight: ${euiTheme.font.weight.bold};
+        text-overflow: ellipsis;
+        max-height: 32px;
       `}
     >
       <EuiToolTip content={isTruncated ? text : ''} position="bottom">

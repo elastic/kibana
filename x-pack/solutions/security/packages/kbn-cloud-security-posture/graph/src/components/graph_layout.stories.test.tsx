@@ -142,11 +142,20 @@ describe('GraphWithAssetInventoryData story', () => {
     const nodeElements = container.querySelectorAll('.react-flow__node');
 
     // Verify each expected node has the correct icon
-    for (const { id } of expectedNodes) {
+    for (const { id, expectedIcon } of expectedNodes) {
       // Find the DOM element for this node
       const nodeElement = Array.from(nodeElements).find((el) => el.getAttribute('data-id') === id);
 
       expect(nodeElement).not.toBeNull();
+
+      if (nodeElement) {
+        // Find the icon element - using an attribute selector that would match EUI icons
+        const iconElement = nodeElement.querySelector(`[data-euiicon-type="${expectedIcon}"]`);
+
+        // Verify the expected icon is present
+        expect(iconElement).not.toBeNull();
+        expect(iconElement?.getAttribute('data-euiicon-type')).toBe(expectedIcon);
+      }
     }
   });
 });

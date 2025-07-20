@@ -17,15 +17,7 @@ import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
 import { enhanceGraphWithEntityData } from './enhance_graph_with_entity_data';
 
-// Re-export types and functions for backward compatibility
-export {
-  type MappedNodeProps,
-  type NodeFieldsMapping,
-  mapEntityDataToNodeProps,
-  transformEntityTypeToIcon,
-} from './enhance_graph_with_entity_data';
-
-export interface GraphContextServices {
+interface GraphContextServices {
   logger: Logger;
   esClient: IScopedClusterClient;
   uiSettings: UiSettingsRequestHandlerContext;
