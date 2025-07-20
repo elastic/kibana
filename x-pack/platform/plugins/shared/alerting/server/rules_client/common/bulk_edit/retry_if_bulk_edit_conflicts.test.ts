@@ -5,12 +5,11 @@
  * 2.0.
  */
 import type { KueryNode } from '@kbn/es-query';
-
-import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
-import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { BulkEditSkipReason } from '../../../common/bulk_action';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
+import { RETRY_IF_CONFLICTS_ATTEMPTS } from '../wait_before_next_retry';
+import type { BulkEditSkipReason } from '../../../../common/bulk_action';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
 const mockFilter: KueryNode = {
   type: 'function',

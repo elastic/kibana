@@ -942,4 +942,73 @@ export function defineRoutes(
       }
     }
   );
+
+  router.post(
+    {
+      path: '/api/alerting_fixture/_bulk_edit_params',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          filter: schema.maybe(schema.string()),
+          ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          operations: schema.arrayOf(
+            schema.oneOf([
+              schema.object({
+                operation: schema.literal('set'),
+                field: schema.literal('exceptionsList'),
+                value: schema.arrayOf(
+                  schema.object({
+                    id: schema.string(),
+                    list_id: schema.string(),
+                    type: schema.oneOf([
+                      schema.literal('detection'),
+                      schema.literal('rule_default'),
+                      schema.literal('endpoint'),
+                      schema.literal('endpoint_trusted_apps'),
+                      schema.literal('endpoint_events'),
+                      schema.literal('endpoint_host_isolation_exceptions'),
+                      schema.literal('endpoint_blocklists'),
+                    ]),
+                    namespace_type: schema.oneOf([
+                      schema.literal('single'),
+                      schema.literal('agnostic'),
+                    ]),
+                  })
+                ),
+              }),
+            ])
+          ),
+        }),
+      },
+    },
+    async (
+      _: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const alerting = await alertingStart;
+      const rulesClient = await alerting.getRulesClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await rulesClient.bulkEditRuleParamsWithReadAuth({
+            ids: req.body.ids,
+            filter: req.body.filter,
+            operations: req.body.operations,
+          }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
+      }
+    }
+  );
 }

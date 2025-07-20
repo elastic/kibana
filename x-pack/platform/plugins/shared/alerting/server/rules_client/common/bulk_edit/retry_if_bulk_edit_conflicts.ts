@@ -13,23 +13,24 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type { BulkEditActionSkipResult } from '../../../common/bulk_action';
-import { convertRuleIdsToKueryNode } from '../../lib';
-import type { BulkOperationError } from '../types';
-import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { RawRule } from '../../types';
+import type { BulkEditActionSkipResult } from '../../../../common/bulk_action';
+import { convertRuleIdsToKueryNode } from '../../../lib';
+import type { BulkOperationError } from '../../types';
+import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from '../wait_before_next_retry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type { RawRule } from '../../../types';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;
 
-type BulkEditOperation = (filter: KueryNode | null) => Promise<{
+export interface BulkEditOperationResult {
   apiKeysToInvalidate: string[];
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
   skipped: BulkEditActionSkipResult[];
-}>;
+}
+export type BulkEditOperation = (filter: KueryNode | null) => Promise<BulkEditOperationResult>;
 
 interface ReturnRetry {
   apiKeysToInvalidate: string[];
