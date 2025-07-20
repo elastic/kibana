@@ -26,6 +26,7 @@ export interface ConnectorContract {
     name: string;
     type: 'string' | 'number' | 'boolean' | 'object';
   }>;
+  availableConnectorIds?: string[];
 }
 
 function getZodTypeForParam(param: ConnectorContract['params'][number]) {
@@ -53,7 +54,7 @@ function generateStepSchemaForConnector(connector: ConnectorContract) {
     type: z.literal(connector.type),
     with: z.object(paramSchema),
     ...(connector.availableConnectorIds
-      ? { 'connector-id': z.enum(connector.availableConnectorIds) }
+      ? { 'connector-id': z.enum(connector.availableConnectorIds as [string, ...string[]]) }
       : {}),
   });
 }
@@ -77,7 +78,7 @@ function createRecursiveStepSchema(connectors: ConnectorContract[]): z.ZodType {
       parallelSchema,
       mergeSchema,
       ...connectorSchemas,
-    ] as const);
+    ]);
   });
 
   return stepSchema;

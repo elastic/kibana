@@ -48,8 +48,9 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     steps: steps?.map((step) => ({
       id: step.name,
       connectorType: connectorTypeMap[step.type as keyof typeof connectorTypeMap],
-      // @ts-expect-error TODO: fix once the schema is stable
+      // TODO: fix once the schema is stable
       connectorName:
+        // @ts-expect-error
         step?.['connector-id'] ??
         defaultConnectorNameMap?.[step.type as keyof typeof defaultConnectorNameMap] ??
         undefined,
@@ -76,10 +77,12 @@ export function transformEsWorkflowToYamlJson(workflow: Omit<EsWorkflow, 'id'>):
     workflow: {
       name: workflow.name,
       enabled: workflow.status === WorkflowStatus.ACTIVE,
+      // @ts-expect-error
       triggers: workflow.triggers.map((trigger) => ({
         type: triggersMap[trigger.type] as EsWorkflowTrigger['type'],
         with: trigger.type === 'manual' ? undefined : { ...trigger.config },
       })),
+      // @ts-expect-error
       steps: workflow.steps.map((step) => ({
         name: step.id,
         type: connectorTypeMap[step.connectorType as keyof typeof connectorTypeMap],
