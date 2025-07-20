@@ -26,7 +26,11 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import { durationToNumber } from '@kbn/reporting-common';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportingAPIClient } from '@kbn/reporting-public';
-
+import {
+  reportingCsvExportShareIntegration,
+  reportingPDFExportShareIntegration,
+  reportingPNGExportShareIntegration,
+} from '@kbn/reporting-public/share/integrations';
 import { getSharedComponents } from '@kbn/reporting-public/share';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
@@ -213,42 +217,19 @@ export class ReportingPublicPlugin
 
     shareSetup.registerShareIntegration<ExportShare>(
       'search',
-      'integration-export-csvReports',
-      async () => {
-        // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-        const { reportingCsvExportProvider } = await import('@kbn/reporting-public/share');
-        return reportingCsvExportProvider({
-          apiClient,
-          startServices$,
-        });
-      }
+      // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+      reportingCsvExportShareIntegration({ apiClient, startServices$ })
     );
 
     if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
       shareSetup.registerShareIntegration<ExportShare>(
-        'search',
-        'integration-export-pdfReports',
-        async () => {
-          // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-          const { reportingPDFExportProvider } = await import('@kbn/reporting-public/share');
-          return reportingPDFExportProvider({
-            apiClient,
-            startServices$,
-          });
-        }
+        // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+        reportingPDFExportShareIntegration({ apiClient, startServices$ })
       );
 
       shareSetup.registerShareIntegration<ExportShare>(
-        'search',
-        'integration-export-imageReports',
-        async () => {
-          // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
-          const { reportingPNGExportProvider } = await import('@kbn/reporting-public/share');
-          return reportingPNGExportProvider({
-            apiClient,
-            startServices$,
-          });
-        }
+        // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+        reportingPNGExportShareIntegration({ apiClient, startServices$ })
       );
     }
 

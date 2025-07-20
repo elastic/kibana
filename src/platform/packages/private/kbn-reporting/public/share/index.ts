@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  reportingPDFExportProvider,
-  reportingPNGExportProvider,
-} from './share_context_menu/register_pdf_png_modal_reporting';
-export { reportingCsvExportProvider } from './share_context_menu/register_csv_modal_reporting';
+export * from './integrations';
 export type { JobParamsProviderOptions, StartServices } from './share_context_menu';
 export { getSharedComponents } from './shared';
 export type { ReportingPublicComponents } from './shared';

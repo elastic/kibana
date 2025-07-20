@@ -60,7 +60,10 @@ type ShareImplementationFactory<
       id: string;
       groupId?: string;
       shareType: T;
-      config: (ctx: ShareActionConfigArgs) => C;
+      /**
+       * callback that yields the share configuration for the share as a promise, enables the possibility to dynamically fetch the share configuration
+       */
+      config: (ctx: ShareActionConfigArgs) => Promise<C>;
       /**
        * when provided, this method will be used to evaluate if this integration should be available,
        * given the current license and capabilities of kibana
@@ -252,12 +255,17 @@ export interface SharingData {
 
 export type ShareIntegrationMapKey = `integration-${string}`;
 
+export interface RegisterShareIntegrationArgs<I extends ShareIntegration>
+  extends Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> {
+  getShareIntegrationConfig: (...args: Parameters<I['config']>) => ReturnType<I['config']>;
+}
+
 export interface ShareRegistryInternalApi {
   registerShareIntegration<I extends ShareIntegration>(
     shareObject: string,
-    key: ShareIntegrationMapKey,
-    getShareActionIntent: () => Promise<I>
+    arg: RegisterShareIntegrationArgs<I>
   ): void;
+  registerShareIntegration<I extends ShareIntegration>(arg: RegisterShareIntegrationArgs<I>): void;
 
   resolveShareItemsForShareContext(args: ShareContext): Promise<ShareConfigs[]>;
 }

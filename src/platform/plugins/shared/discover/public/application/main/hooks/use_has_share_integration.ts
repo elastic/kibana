@@ -7,28 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import type { DiscoverServices } from '../../../build_services';
 
 export function useHasShareIntegration({ share }: DiscoverServices) {
-  const [hasShareIntegration, setHasShareIntegration] = useState<boolean>(false);
+  return useMemo(() => {
+    if (!share) return false;
 
-  useEffect(() => {
-    let canceled = false;
-    if (!share) return;
-    const checkShareIntegration = async () => {
-      const integrations = await share.availableIntegrations('search', 'export');
-      if (!canceled) {
-        setHasShareIntegration(integrations.length > 0);
-      }
-    };
-
-    checkShareIntegration();
-
-    return () => {
-      canceled = true;
-    };
+    return share.availableIntegrations('search', 'export').length > 0;
   }, [share]);
-
-  return hasShareIntegration;
 }

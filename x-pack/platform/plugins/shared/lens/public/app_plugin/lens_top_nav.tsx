@@ -482,29 +482,17 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
   ]);
 
-  const [hasShareIntegration, setHasShareIntegration] = useState(false);
+  const hasShareIntegration = useMemo(() => {
+    if (!share) return false;
+    return share.availableIntegrations('lens', 'export').length > 0;
+  }, [share]);
 
   useEffect(() => {
-    let canceled = false;
-    if (!share) return;
-    const checkShareIntegration = async () => {
-      if (canceled) {
-        return;
-      }
-      const integrations = await share.availableIntegrations('lens', 'export');
-      if (canceled) return;
-
-      setHasShareIntegration(integrations.length > 0);
-    };
-
-    checkShareIntegration();
     return () => {
-      canceled = true;
       // Make sure to close the editors when unmounting
       closeFieldEditor.current?.();
       closeDataViewEditor.current?.();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
