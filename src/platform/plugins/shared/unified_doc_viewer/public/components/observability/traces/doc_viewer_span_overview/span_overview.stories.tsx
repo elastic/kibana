@@ -8,9 +8,9 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import minimalAPMFixture from '../../../../../__fixtures__/span_apm_minimal.json';
-import minimalOtelFixture from '../../../../../__fixtures__/span_otel_minimal.json';
-import redisClientOtelFixture from '../../../../../__fixtures__/span_otel_redis_client.json';
+import minimalAPMFixture from '../../../../__fixtures__/span_apm_minimal.json';
+import minimalOtelFixture from '../../../../__fixtures__/span_otel_minimal.json';
+import redisClientOtelFixture from '../../../../__fixtures__/span_otel_redis_client.json';
 import { SpanOverview } from './span_overview';
 
 const meta = {

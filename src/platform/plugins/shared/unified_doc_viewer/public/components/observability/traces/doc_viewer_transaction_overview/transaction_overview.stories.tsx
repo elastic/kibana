@@ -8,7 +8,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import httpServerOtelFixture from '../../../../../__fixtures__/transaction_http_server_otel.json';
+import httpServerOtelFixture from '../../../../__fixtures__/transaction_http_server_otel.json';
 
 import { TransactionOverview } from './transaction_overview';
 

@@ -9,8 +9,8 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import AttributesOverview from '.';
-import basicFixture from '../../../../../__fixtures__/attributes_basic.json';
-import redisSpanFixture from '../../../../../__fixtures__/attributes_redis_span.json';
+import basicFixture from '../../../../__fixtures__/span_otel_minimal.json';
+import redisSpanFixture from '../../../../__fixtures__/span_otel_redis_client.json';
 
 const meta: Meta<typeof AttributesOverview> = {
   title: 'Attributes',
