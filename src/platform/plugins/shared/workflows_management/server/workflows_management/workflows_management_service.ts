@@ -49,10 +49,10 @@ export class WorkflowsService {
     this.workflowIndex = workflowIndex;
     this.stepsExecutionIndex = stepsExecutionIndex;
     this.workflowsExecutionIndex = workflowsExecutionIndex;
-    this.initialize(esClientPromise);
+    void this.initialize(esClientPromise);
   }
 
-  private async initialize(esClientPromise: Promise<ElasticsearchClient>) {
+  private async initialize(esClientPromise: Promise<ElasticsearchClient>): Promise<void> {
     this.esClient = await esClientPromise;
     this.logger.debug('Elasticsearch client initialized');
     const indices = await this.esClient.indices.exists({
@@ -60,7 +60,7 @@ export class WorkflowsService {
     });
     if (!indices) {
       this.logger.debug(`Workflow index ${this.workflowIndex} does not exist`);
-      this.esClient.indices.create({
+      await this.esClient.indices.create({
         index: this.workflowIndex,
       });
       this.logger.debug(`Workflow index ${this.workflowIndex} created`);

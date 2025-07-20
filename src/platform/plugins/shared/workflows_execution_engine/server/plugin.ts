@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -20,10 +29,10 @@ import type {
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-import { StepRunner } from './step-runner/step-runner';
-import { TemplatingEngine } from './templating-engine';
+import { StepRunner } from './step_runner/step_runner';
+import { TemplatingEngine } from './templating_engine';
 
-import { ConnectorExecutor } from './connector-executor';
+import { ConnectorExecutor } from './connector_executor';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../common';
 
 export class WorkflowsExecutionEnginePlugin

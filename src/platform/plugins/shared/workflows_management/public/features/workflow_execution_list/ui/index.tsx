@@ -20,7 +20,7 @@ import React, { useState } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { ExecutionStatus, EsWorkflowExecution } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
-import { WorkflowExecution } from '../../workflow-detail/ui/workflow-execution';
+import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
 
 export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {

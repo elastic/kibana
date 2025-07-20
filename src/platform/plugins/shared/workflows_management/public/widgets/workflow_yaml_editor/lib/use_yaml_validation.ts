@@ -110,7 +110,8 @@ export function useYamlValidation({
           // Parse the YAML to JSON to get the workflow definition
           workflowDefinition = parseWorkflowYamlToJSON(text);
         } catch (e) {
-          console.warn('Unable to parse YAML for mustache validation', e);
+          // eslint-disable-next-line no-console
+          console.error(e);
         }
 
         // Collect markers to add to the model
@@ -159,7 +160,8 @@ export function useYamlValidation({
         // Set markers on the model for the problems panel
         monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
       } catch (error) {
-        console.error('Error validating mustache expressions:', error);
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
     },
     [findStepFromPath, findActionFromPath]

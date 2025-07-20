@@ -34,7 +34,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: await api.getWorkflow(id),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -64,7 +63,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           }),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -93,7 +91,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: createdWorkflow,
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -125,7 +122,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: await api.updateWorkflow(id, request.body),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -156,7 +152,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: await api.deleteWorkflows([id]),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -187,7 +182,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: await api.deleteWorkflows(ids),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -227,7 +221,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: workflowRunId,
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -258,7 +251,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: await api.getWorkflowExecutions(workflowId),
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -290,7 +282,6 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           body: workflowExecution,
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {

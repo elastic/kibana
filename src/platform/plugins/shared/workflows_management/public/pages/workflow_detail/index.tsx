@@ -22,13 +22,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
-import { WorkflowEditor } from '../../features/workflow-editor/ui';
+import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
-import { WorkflowExecutionList } from '../../features/workflow-execution-list/ui';
-import { WorkflowVisualEditor } from '../../features/workflow-visual-editor/ui';
+import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
+import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
-import { WorkflowEventModal } from '../../features/run-workflow/ui/WorkflowEventModal';
+import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
@@ -97,8 +97,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             toastLifeTimeMs: 3000,
           });
         },
-        onError: (error: unknown) => {
-          notifications?.toasts.addError(error, {
+        onError: (err: unknown) => {
+          notifications?.toasts.addError(err, {
             toastLifeTimeMs: 3000,
             title: 'Failed to run workflow',
           });

@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowsPlugin } from './plugin';
-
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin() {
-  return new WorkflowsPlugin();
+export function useWorkflowJsonSchema() {
+  return {
+    data: {},
+  };
 }
-export type { WorkflowsPluginSetup, WorkflowsPluginStart } from './types';
-export { WorkflowExecution } from './features/workflow_detail/ui/workflow_execution';

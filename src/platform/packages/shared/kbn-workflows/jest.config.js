@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/workflows'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-workflows'],
 };

@@ -1,6 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { WorkflowStep } from '@kbn/workflows';
-import { TemplatingEngine } from '../templating-engine';
-import { ConnectorExecutor } from '../connector-executor';
+import { TemplatingEngine } from '../templating_engine';
+import { ConnectorExecutor } from '../connector_executor';
 
 export interface RunStepResult {
   output: Record<string, any> | undefined;

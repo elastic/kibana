@@ -14,7 +14,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { navigateToErrorPosition } from '../lib/utils';
 import { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { useYamlValidation } from '../lib/useYamlValidation';
+import { useYamlValidation } from '../lib/use_yaml_validation';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { WORKFLOW_ZOD_SCHEMA } from '../../../../common';
 

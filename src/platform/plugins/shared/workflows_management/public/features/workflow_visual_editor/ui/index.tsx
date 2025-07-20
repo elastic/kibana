@@ -11,8 +11,8 @@ import React, { useMemo } from 'react';
 import { ReactFlow, Controls, Background, NodeTypes } from '@xyflow/react';
 import { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
 import { getLayoutedNodesAndEdges } from '../lib/get_layouted_nodes_and_edges';
-import { WorkflowGraphNode } from './WorkflowNode';
-import { WorkflowGraphEdge } from './WorkflowEdge';
+import { WorkflowGraphNode } from './workflow_node';
+import { WorkflowGraphEdge } from './workflow_edge';
 import '@xyflow/react/dist/style.css';
 
 const nodeTypes: NodeTypes = {

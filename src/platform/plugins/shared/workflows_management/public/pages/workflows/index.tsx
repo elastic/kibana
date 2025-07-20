@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CreateWorkflowCommand, WorkflowStatus } from '@kbn/workflows';
-import { WorkflowList } from '../../features/workflow-list/ui';
+import { WorkflowList } from '../../features/workflow_list/ui';
 import { useWorkflows } from '../../entities/workflows/model/useWorkflows';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 

@@ -37,11 +37,11 @@ export function WorkflowEventModal({
       try {
         if (services.security) {
           const user = await services.security.authc.getCurrentUser();
-          console.log(user);
           setCurrentUser(user);
         }
       } catch (error) {
-        console.error('Failed to get current user:', error);
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
     };
 

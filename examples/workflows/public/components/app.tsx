@@ -1,6 +1,6 @@
 // We need to adjust the whole workflow schema here to the actual workflow schema
 // https://docs.google.com/document/d/1c4cyLIMTzEYn9XxDFwrNSmFpVJVLavRVM9DOa_HI9w8
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
@@ -18,8 +18,8 @@ import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PLUGIN_NAME } from '../../common';
 import * as yaml from 'js-yaml';
+import { PLUGIN_NAME } from '../../common';
 
 interface WorkflowsAppDeps {
   basename: string;
@@ -39,11 +39,11 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
       try {
         if (services.security) {
           const user = await services.security.authc.getCurrentUser();
-          console.log(user);
           setCurrentUser(user);
         }
       } catch (error) {
-        console.error('Failed to get current user:', error);
+        // eslint-disable-next-line no-console
+        console.error(error);
       }
     };
 
@@ -58,95 +58,91 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
       setIsValidWorkflow(false);
     }
     setWorkflow(workflow);
-  }
+  };
 
   // Use React hooks to manage state.
   const [stringWorkflow, setWorkflow] = useState<string>(
-    yaml.dump(
-      {
-        id: 'example-workflow-1',
-        name: 'Example Workflow 1',
-        status: 'active',
-        triggers: [
-          {
-            id: 'detection-rule',
-            type: 'detection-rule',
-            enabled: true,
-            config: {},
+    yaml.dump({
+      id: 'example-workflow-1',
+      name: 'Example Workflow 1',
+      status: 'active',
+      triggers: [
+        {
+          id: 'detection-rule',
+          type: 'detection-rule',
+          enabled: true,
+          config: {},
+        },
+      ],
+      steps: [
+        {
+          id: 'step-with-console-log-1',
+          connectorType: 'console',
+          connectorName: 'console',
+          inputs: {
+            message: 'Step 1 executed "{{event.ruleName}}"',
           },
-        ],
-        steps: [
-          {
-            id: 'step-with-console-log-1',
-            connectorType: 'console',
-            connectorName: 'console',
-            inputs: {
-              message: 'Step 1 executed "{{event.ruleName}}"',
-            },
+        },
+        {
+          id: 'step-with-slow-console',
+          connectorName: 'slow-console',
+          connectorType: 'console',
+          inputs: {
+            message: 'Step 2 executed "{{event.additionalData.userName}}"',
           },
-          {
-            id: 'step-with-slow-console',
-            connectorName: 'slow-console',
-            connectorType: 'console',
-            inputs: {
-              message: 'Step 2 executed "{{event.additionalData.userName}}"',
-            },
+        },
+        {
+          id: 'step-with-slack-connector',
+          needs: ['step1', 'step2'],
+          connectorType: 'slack-connector',
+          connectorName: 'slack_keep',
+          inputs: {
+            message:
+              'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
           },
-          {
-            id: 'step-with-slack-connector',
-            needs: ['step1', 'step2'],
-            connectorType: 'slack-connector',
-            connectorName: 'slack_keep',
-            inputs: {
-              message:
-                'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
-            },
+        },
+        {
+          id: 'step-with-console-log-2',
+          needs: ['step3'],
+          connectorName: 'console',
+          connectorType: 'console',
+          inputs: {
+            message: 'Message from step 2: And this is the second step at {{ now() }}',
           },
-          {
-            id: 'step-with-console-log-2',
-            needs: ['step3'],
-            connectorName: 'console',
-            connectorType: 'console',
-            inputs: {
-              message: 'Message from step 2: And this is the second step at {{ now() }}',
-            },
+        },
+        {
+          id: 'step-with-5-seconds-delay',
+          connectorName: 'delay',
+          connectorType: 'delay',
+          inputs: {
+            delay: 5000,
           },
-          {
-            id: 'step-with-5-seconds-delay',
-            connectorName: 'delay',
-            connectorType: 'delay',
-            inputs: {
-              delay: 5000,
-            },
-          },
-        ],
-      }
-    )
+        },
+      ],
+    })
   );
 
   // Update workflow inputs with current user email
-  const getWorkflowInputs = () => {
+  const getWorkflowInputs = useCallback(() => {
     const userEmail = currentUser?.email || 'workflow-user@gmail.com';
     const userName = currentUser?.username || 'workflow-user';
-    return yaml.dump(
-      {
-        event: {
-          ruleName: 'Detect vulnerabilities',
-          additionalData: {
-            user: userEmail,
-            userName,
-          },
+    return yaml.dump({
+      event: {
+        ruleName: 'Detect vulnerabilities',
+        additionalData: {
+          user: userEmail,
+          userName,
         },
-      }
-    );
-  };
+      },
+    });
+  }, [currentUser]);
   const [workflowInputs, setWorkflowInputs] = useState<string>(getWorkflowInputs());
   const [isValidWorkflow, setIsValidWorkflow] = useState<boolean>(true);
 
   // Update workflow inputs when current user changes
   useEffect(() => {
     setWorkflowInputs(getWorkflowInputs());
-  }, [currentUser]);
+  }, [currentUser, getWorkflowInputs]);
 
   const [workflowExecutionId, setWorkflowExecutionId] = useState<string | null>(null);
 
@@ -160,7 +156,6 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
         }),
       })
       .then((res: any) => {
-        console.log('Workflow run response:', res);
         setWorkflowExecutionId(res.workflowExecutionId);
         // Use the core notifications service to display a success message.
         notifications.toasts.addSuccess(
@@ -223,7 +218,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                           languageId="yaml"
                           value={workflowInputs}
                           height={200}
-                          editorDidMount={() => { }}
+                          editorDidMount={() => {}}
                           onChange={setWorkflowInputs}
                           suggestionProvider={undefined}
                           dataTestSubj={'workflow-inputs-json-editor'}
@@ -231,7 +226,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                             readOnly: true,
                             language: 'yaml',
                           }}
-                          readOnlyMessage='You cannot edit the event sent to the workflow.'
+                          readOnlyMessage="You cannot edit the event sent to the workflow."
                         />
                       </div>
                     </EuiFlexItem>
@@ -250,7 +245,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                           languageId="yaml"
                           value={stringWorkflow}
                           height={500}
-                          editorDidMount={() => { }}
+                          editorDidMount={() => {}}
                           onChange={validateAndSetWorkflow}
                           suggestionProvider={undefined}
                           dataTestSubj={'workflow-json-editor'}
@@ -263,7 +258,12 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiButton type="submit" size="s" onClick={onClickHandler} disabled={!isValidWorkflow}>
+                  <EuiButton
+                    type="submit"
+                    size="s"
+                    onClick={onClickHandler}
+                    disabled={!isValidWorkflow}
+                  >
                     <FormattedMessage
                       id="workflowsExample.buttonText"
                       defaultMessage="Run workflow"

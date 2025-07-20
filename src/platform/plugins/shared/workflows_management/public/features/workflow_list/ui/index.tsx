@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiText,
   EuiFlexGroup,
@@ -51,32 +51,38 @@ export function WorkflowList() {
     setSelectedItems([]);
   };
 
-  const handleRunWorkflow = (item: WorkflowListItemDto) => {
-    runWorkflow.mutate(
-      { id: item.id, inputs: {} },
-      {
-        onSuccess: () => {
-          notifications?.toasts.addSuccess('Workflow run started', {
-            toastLifeTimeMs: 3000,
-          });
-        },
-        onError: (error: unknown) => {
-          notifications?.toasts.addError(error, {
-            toastLifeTimeMs: 3000,
-            title: 'Failed to run workflow',
-          });
-        },
-      }
-    );
-  };
+  const handleRunWorkflow = useCallback(
+    (item: WorkflowListItemDto) => {
+      runWorkflow.mutate(
+        { id: item.id, inputs: {} },
+        {
+          onSuccess: () => {
+            notifications?.toasts.addSuccess('Workflow run started', {
+              toastLifeTimeMs: 3000,
+            });
+          },
+          onError: (err: unknown) => {
+            notifications?.toasts.addError(err, {
+              toastLifeTimeMs: 3000,
+              title: 'Failed to run workflow',
+            });
+          },
+        }
+      );
+    },
+    [notifications, runWorkflow]
+  );
 
-  const handleDeleteWorkflow = (item: WorkflowListItemDto) => {
-    const confirmed = window.confirm(`Are you sure you want to delete ${item.name}?`);
-    if (!confirmed) {
-      return;
-    }
-    deleteWorkflows.mutate({ ids: [item.id] });
-  };
+  const handleDeleteWorkflow = useCallback(
+    (item: WorkflowListItemDto) => {
+      const confirmed = window.confirm(`Are you sure you want to delete ${item.name}?`);
+      if (!confirmed) {
+        return;
+      }
+      deleteWorkflows.mutate({ ids: [item.id] });
+    },
+    [deleteWorkflows]
+  );
 
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
@@ -198,6 +204,8 @@ export function WorkflowList() {
       euiTheme.colors.vis.euiColorVis0,
       euiTheme.colors.vis.euiColorVis1,
       euiTheme.colors.vis.euiColorVis6,
+      handleDeleteWorkflow,
+      handleRunWorkflow,
     ]
   );
 

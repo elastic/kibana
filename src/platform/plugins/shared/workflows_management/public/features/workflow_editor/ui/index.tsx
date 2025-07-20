@@ -9,12 +9,12 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { WorkflowYAMLEditor } from '../../../widgets/workflow-yaml-editor/ui';
+import { WorkflowYAMLEditor } from '../../../widgets/workflow_yaml_editor/ui';
 
 interface WorkflowEditorProps {
   workflowId: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (v: string) => void;
   hasChanges: boolean;
 }
 
@@ -89,7 +89,7 @@ export function WorkflowEditor({ workflowId, value, onChange, hasChanges }: Work
           workflowId={workflowId}
           filename={`${workflowId}.yaml`}
           value={value}
-          onChange={(value) => onChange(value ?? '')}
+          onChange={(v) => onChange(v ?? '')}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
