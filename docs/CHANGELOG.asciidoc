@@ -123,13 +123,13 @@ Fields and functions variables are now described with `??` in {esql} queries. Fo
 
 View ({kibana-pull}213916[#213916])
 ====
-      
+
 [float]
 [[deprecations-8.19.0]]
 === Deprecations
 
 There are no deprecations in this version.
-      
+
 [float]
 [[features-8.19.0]]
 === Features
@@ -140,7 +140,7 @@ Alerting::
 * Adds four dedicated case analytics indices that allow users to build dashboards and metrics using case data. These indices are automatically created when {kib} starts up and are updated periodically with cases, comments, attachments, and activity data ({kibana-pull}223405[#223405]).
 * Adds the `xpack.actions.email.services.enabled` {kib} setting, which allows you to enable or disable email services for email connectors ({kibana-pull}223363[#223363]).
 * Adds the `xpack.actions.webhook.ssl.pfx.enabled` {kib} setting, which allows you to disable Webhook connector PFX file support for SSL client authentication ({kibana-pull}222507[#222507]).
-* Adds the `xpack.actions.email.services.ses.host` {kib} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {kib} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors ({kibana-pull}221389[#221389]). 
+* Adds the `xpack.actions.email.services.ses.host` {kib} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {kib} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors ({kibana-pull}221389[#221389]).
 * Adds `rrule` notation support for task scheduling ({kibana-pull}217728[#217728]).
 * Publishes new public APIs for the Maintenance Window ({kibana-pull}216756[#216756]).
 * Adds an alert cleanup functionality that allows you to delete active or inactive (acknowledged, recovered, closed, or untracked) alerts with no status update for a period of time ({kibana-pull}216613[#216613]).
@@ -161,49 +161,40 @@ Discover::
 * When an ES|QL query times out (as a result of the `search:timeout` advanced setting), partial results that are available are now shown ({kibana-pull}219027[#219027]).
 * Adds click actions for Stacktrace and Degraded Fields when exploring logs in Discover ({kibana-pull}214413[#214413]).
 * Shows a **Load more** option instead of pagination when exploring Logs in **Discover** ({kibana-pull}211176[#211176]).
+* Adds **Read More** and **Read Less** functionality to highlight_fields in **Discover**({kibana-pull}215326[#215326]).
 
 Elastic Observability solution::
-* Registers UI setting for anonymization ({kibana-pull}224607[#224607]).
-* Adds accordion sections and attributes tables ({kibana-pull}224185[#224185]).
-* Adds the history tab view for calendar-based SLO in the SLO details page ({kibana-pull}223825[#223825]).
-* Renders suggested dashboards ({kibana-pull}223424[#223424]).
-* Adds primary **Add to case** button to Synthetics ({kibana-pull}223184[#223184]).
-* SLOs are now easier to manage with the ability to view definitions, delete SLOs, and purge SLI data from a single page, without the need to consider instances. ({kibana-pull}222238[#222238]).
+* Adds the advanced setting for anonymization for Observability AI Assistant ({kibana-pull}224607[#224607]).
+* Allows users to change the Knowledge Base model post-installation in AI Assistant Settings. ({kibana-pull}221319[#221319]).
+* Adds ELSER and e5 on EIS ({kibana-pull}220993[#220993]).
+* Only shows ELSER in EIS if the pre-configured endpoint is available ({kibana-pull}220096[#220096]).
+* Allows users to specify a Knowledge Base model to support non-English languages ({kibana-pull}218448[#218448]).
+* Allows users to archive conversations with the AI Assistant ({kibana-pull}216012[#216012]).
+* Allows users to share AI Assistant conversations ({kibana-pull}211854[#211854]).
+* Adds accordion sections for the **Attributes** tables ({kibana-pull}224185[#224185]).
+* Allows users to add the APM trace waterfall to other solutions ({kibana-pull}216098[#216098]).
+* Adds the **History** tab view for calendar-based SLOs to the SLO details page ({kibana-pull}223825[#223825]).
+* Allows users to view definitions, delete SLOs, and purge SLI data from a single page, without needing to consider instances ({kibana-pull}222238[#222238]).
+* Adds **Definition** tab to SLO pages ({kibana-pull}212826[#212826]).
+* Adds suggested dashboards to alerts ({kibana-pull}223424[#223424]).
+* Adds **Add to case** button to alerts ({kibana-pull}223184[#223184]).
+* Allows users to save group by information with dynamic mapping for custom threshold rules ({kibana-pull}219826[#219826]).
+* Allows users to link dashboards in rule and alert pages ({kibana-pull}219019[#219019]).
+* Allows users to add an investigation guide to alert details pages ({kibana-pull}217106[#217106]).
+* Adds KQL Filter to TLS alerting rule ({kibana-pull}215110[#215110]).
+* Adds the context.grouping action variable in SLO burn rate and ES query rules ({kibana-pull}213550[#213550]).
+* Adds the context.grouping action variable in custom threshold and APM rules ({kibana-pull}212895[#212895]).
+* Allows users to generate an alert for each row in query results in the ES query ES|QL rule ({kibana-pull}212135[#212135]).
+* Adds filter controls on Observability alerts pages ({kibana-pull}198495[#198495]).
 * Adds support for maintenance windows in Synthetics ({kibana-pull}222174[#222174]).
-* Uses bulk endpoint to import knowledge base entries ({kibana-pull}222084[#222084]).
-* Multi space monitors !! ({kibana-pull}221568[#221568]).
-* Edit private locations labels and tags in Synthetics ({kibana-pull}221515[#221515]).
-* Update Knowledge Base model via settings ({kibana-pull}221319[#221319]).
-* Enable ELSER and e5 on EIS ({kibana-pull}220993[#220993]).
-* The Data Set Quality page now supports Failure Store metrics ({kibana-pull}220874[#220874]).
-* Adds monitor downtime alert on no data ({kibana-pull}220127[#220127]).
-* Only show ELSER in EIS if available ({kibana-pull}220096[#220096]).
-* Save group by information with dynamic mapping ({kibana-pull}219826[#219826]).
-* Added compact view in monitors overview page ({kibana-pull}219060[#219060]).
-* Linked dashboards in Rule and Alert pages ({kibana-pull}219019[#219019]).
-* Specify embedding model during onboarding for the Knowledge Base ({kibana-pull}218448[#218448]).
-* Changed embeddable view when only one monitor in one location is selected ({kibana-pull}218402[#218402]).
-* Adds logical AND to monitor tags and locations filter ({kibana-pull}217985[#217985]).
-* Added drilldown to synthetics stats overview embeddable ({kibana-pull}217688[#217688]).
-* Investigation guide frontend ({kibana-pull}217106[#217106]).
-* Enable KQL filter for TLS rules ({kibana-pull}216973[#216973]).
-* Investigation Guide backend ({kibana-pull}216377[#216377]).
-* Embeddable Trace Waterfall ({kibana-pull}216098[#216098]).
-* Archiving conversations ({kibana-pull}216012[#216012]).
-* Related alerts based on scoring !! ({kibana-pull}215673[#215673]).
-* Service map support for span links ({kibana-pull}215645[#215645]).
-* Adds 'Read More', 'Read Less' functionality to highlight_fields ({kibana-pull}215326[#215326]).
-* Adds KQL Filter to TLS Alerting Rule ({kibana-pull}215110[#215110]).
-* Adds context.grouping action variable in SLO Burn rate and ES Query rules ({kibana-pull}213550[#213550]).
-* Adds context.grouping action variable in Custom threshold and APM rules ({kibana-pull}212895[#212895]).
-* SLO overview should give users a clear, immediate picture into key objective data. Previously, the user would have had to scroll past static data that describes the SLO definition before seeing valuable information about their SLIs. This static data has been moved to a separate tab, making charts more easily accessible. ({kibana-pull}212826[#212826]).
-* ES|QL rule type improvements - adding grouping per row ({kibana-pull}212135[#212135]).
-* Share conversations ({kibana-pull}211854[#211854]).
-* Duplicate conversations ({kibana-pull}208044[#208044]).
-* The create rule flyout, used by solutions, uses the new and improved rule form ({kibana-pull}206685[#206685]).
-* Replace the status filter with controls on the observability alerts pages ({kibana-pull}198495[#198495]).
+* Allows users to choose the spaces where Synthetics monitors are available ({kibana-pull}221568[#221568]).
+* Allows users to rename private location labels and tags in Synthetics. ({kibana-pull}221515[#221515]).
+* Adds monitor downtime alert when Synthetics monitor has no data ({kibana-pull}220127[#220127]).
+* Adds a compact view on Synthetics monitor overview page ({kibana-pull}219060[#219060]).
+* Adds drilldown functionality to Synthetics stats overview embeddable ({kibana-pull}217688[#217688]).
+* Adds Failure Store metrics to the Data Set Quality page ({kibana-pull}220874[#220874]).
+* Adds support for span links in the service map ({kibana-pull}215645[#215645]).
 * Adds support for `GroupStreamDefinition` to `/api/streams` endpoints [#208126]({kibana-pull}208126).
-* Indicates if failure store isn't enabled for data stream [#221644]({kibana-pull}221644).
 
 Elastic Security solution::
 For the Elastic Security 8.19.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -263,37 +254,38 @@ Discover::
 * Adds highlighting to code examples in the in-product documentation ({kibana-pull}214915[#214915]).
 * Suggests triple quotes when using `KQL` and `QSTR` functions ({kibana-pull}211457[#211457]).
 Elastic Observability solution::
-* Submit a comment in cases by pressing + Enter ({kibana-pull}228473[#228473]).
-* Update SLO starter prompt ({kibana-pull}224493[#224493]).
-* Integration new tail sampling settings ({kibana-pull}224479[#224479]).
-* Get model ID from anonymization rules ({kibana-pull}224280[#224280]).
-* Update system prompt to inform about anonymization ({kibana-pull}224211[#224211]).
+* Submits a comment in cases by pressing **+ Enter** ({kibana-pull}228473[#228473]).
+* Updates SLO starter prompt ({kibana-pull}224493[#224493]).
+* Integrates new tail sampling settings ({kibana-pull}224479[#224479]).
+* Gets model ID from anonymization rules ({kibana-pull}224280[#224280]).
+* Updates system prompt to inform about anonymization ({kibana-pull}224211[#224211]).
 * Adds investigation guide empty state ({kibana-pull}223974[#223974]).
-* Anonymization support ({kibana-pull}223351[#223351]).
-* Remapping `iInCircle` and `questionInCircle` and deprecating `help` icon ({kibana-pull}223142[#223142]).
-* Show cases on alert detail overview ({kibana-pull}222903[#222903]).
-* Remove is_correction and confidence attributes from kb entry ({kibana-pull}222814[#222814]).
-* Refetch alert detail rule data on edit flyout submit ({kibana-pull}222118[#222118]).
-* Update spec.max to 3.4 ({kibana-pull}221544[#221544]).
-* Adds Edot logging level to central config ({kibana-pull}219722[#219722]).
-* Remove metrics and logs from get_service_stats api ({kibana-pull}218346[#218346]).
-* Remove double confirmation when deleting conversation ({kibana-pull}217991[#217991]).
-* 790 deployment environment discrepancy ({kibana-pull}217899[#217899]).
-* Embeddable Trace Waterfall Enhancements ({kibana-pull}217679[#217679]).
-* Only return 404 if `screenshot_ref` is truly not present ({kibana-pull}215241[#215241]).
+* Adds anonymization support ({kibana-pull}223351[#223351]).
+* Remaps `iInCircle` and `questionInCircle` and deprecates `help` icon ({kibana-pull}223142[#223142]).
+* Shows cases on alert detail overview ({kibana-pull}222903[#222903]).
+* Removes is_correction and confidence attributes from knowledge base entry ({kibana-pull}222814[#222814]).
+* Refetches alert detail rule data on edit flyout submit ({kibana-pull}222118[#222118]).
+* Updates spec.max to 3.4 ({kibana-pull}221544[#221544]).
+* Adds EDOT logging level to central config ({kibana-pull}219722[#219722]).
+* Removes metrics and logs from get_service_stats API ({kibana-pull}218346[#218346]).
+* Removes double confirmation when deleting conversation ({kibana-pull}217991[#217991]).
+* Updates 790 deployment environment discrepancy ({kibana-pull}217899[#217899]).
+* Adds embeddable Trace Waterfall Enhancements ({kibana-pull}217679[#217679]).
+* Returns 404 if `screenshot_ref` only when truly not present ({kibana-pull}215241[#215241]).
 * Adds the ability to create an APM availability or latency SLO for all services ({kibana-pull}214653[#214653]).
-* Include spaceID in SLI documents ({kibana-pull}214278[#214278]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-SpaceId can now be referenced in document-based access filters for roles to restrict a user's access to SLI data for spaces where they do not have access.
-////
-* Update delete confirmation modal ({kibana-pull}212695[#212695]).
-* Enable syntax highlighting for ES|QL ({kibana-pull}212669[#212669]).
-* Runtime metrics show dashboards with different ingest path ({kibana-pull}211822[#211822]).
-* Adds the ability for a user to create an API Key in synthetics settings that applies only to specified space(s) ({kibana-pull}211816[#211816]).
-* Enable editing central config for EDOT Agents / SDKs ({kibana-pull}211468[#211468]).
+* Includes `spaceID` in SLI documents ({kibana-pull}214278[#214278]).
+* Updates delete confirmation modal ({kibana-pull}212695[#212695]).
+* Enables syntax highlighting for ES|QL ({kibana-pull}212669[#212669]).
+* Shows dashboards with different ingest path on runtime metrics ({kibana-pull}211822[#211822]).
+* Adds the ability for a user to create an API Key in Synthetics settings that applies only to specified spaces ({kibana-pull}211816[#211816]).
+* Enables editing central config for EDOT Agents and SDKs ({kibana-pull}211468[#211468]).
 * Adds the reason message to the rules recovery context ({kibana-pull}211411[#211411]).
 * Removes enablement check in `PUT /api/streams/{id}` for classic streams ({kibana-pull}212289[#212289]).
+* Uses bulk endpoint to import knowledge base entries ({kibana-pull}222084[#222084]).
+* Changes embeddable view when only one monitor if one location is selected ({kibana-pull}218402[#218402]).
+* Improves how related alerts are suggested ({kibana-pull}215673[#215673]).
+* Updates handling of duplicate conversations in hte AI Assistant({kibana-pull}208044[#208044]).
+* Indicates when failure store is not enabled for a data stream [#221644]({kibana-pull}221644).
 
 Elastic Security solution::
 For the Elastic Security 8.19.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -397,76 +389,77 @@ Discover::
 * Fixes an issue with suggestions for the `WHERE` command in case of a multiline query ({kibana-pull}213240[#213240]).
 
 Elastic Observability solution::
-* Fixes for metric_item component ({kibana-pull}227969[#227969]).
-* Fixes incorrect rendering of statistics in TransactionsTable ({kibana-pull}227494[#227494]).
-* Inject user prompt before tool call when query actions are clicked ({kibana-pull}227462[#227462]).
-* Fixed edit private location with no monitors assigned ({kibana-pull}227411[#227411]).
-* Fixes missing sparklines from dependency ({kibana-pull}227211[#227211]).
-* Throw tool validation error on MALFORMED_FUNCTION_CALL finish reason when processing Gemini Stream ({kibana-pull}227110[#227110]).
-* Available in stateful solution view if enabled ({kibana-pull}226999[#226999]).
-* Fix: product docs installation status ({kibana-pull}226919[#226919]).
+* Fixes for `metric_item` component ({kibana-pull}227969[#227969]).
+* Fixes incorrect rendering of statistics in **TransactionsTable** ({kibana-pull}227494[#227494]).
+* Injects user prompt before tool call when query actions are clicked ({kibana-pull}227462[#227462]).
+* Fixes editing of private location with no monitors assigned ({kibana-pull}227411[#227411]).
+* Fixes missing sparklines from **Dependencies** table ({kibana-pull}227211[#227211]).
+* Shows tool validation error when processing a Gemini stream finishes with `MALFORMED_FUNCTION_CALL` ({kibana-pull}227110[#227110]).
+* Makes Uptime available in stack solution view when enabled ({kibana-pull}226999[#226999]).
+* Fixes product docs installation status ({kibana-pull}226919[#226919]).
 * Fixes embeddings model dropdown with legacy endpoint on upgrade ({kibana-pull}226878[#226878]).
 * Fixes the EIS callout being cut off for large font sizes ({kibana-pull}226633[#226633]).
 * Fixes response handling of get_apm_dependencies tool call ({kibana-pull}226601[#226601]).
 * Fixes span flyout in operation page ({kibana-pull}226423[#226423]).
-* Collapse *query tool calls ({kibana-pull}226078[#226078]).
+* Collapses `*query` tool calls ({kibana-pull}226078[#226078]).
 * Fixes broken operation page ({kibana-pull}226036[#226036]).
-* Limit environment name length when creating ML job ({kibana-pull}225973[#225973]).
+* Limits environment name length when creating Machine Learning jobs ({kibana-pull}225973[#225973]).
 * Fixes schema page ({kibana-pull}225481[#225481]).
-* Hide Settings from serverless navigation ({kibana-pull}225436[#225436]).
-* Fixes Agent Explorer page ({kibana-pull}225071[#225071]).
+* Hides settings from Serverless navigation ({kibana-pull}225436[#225436]).
+* Fixes **Agent Explorer** page ({kibana-pull}225071[#225071]).
 * Adds query rewriting ({kibana-pull}224498[#224498]).
-* Fixes SLO federated view bug when remote clusters and index name listed exceeded 4096 bytes ({kibana-pull}224478[#224478]).
-* Suggested dashboards are returned only for custom threshold alerts ({kibana-pull}224458[#224458]).
+* Fixes SLO federated view bug when listed remote clusters and index name exceed 4096 bytes ({kibana-pull}224478[#224478]).
+* Returns suggested dashboards only for custom threshold alerts ({kibana-pull}224458[#224458]).
 * Fixes broken EDOT JVM metrics dashboard when classic agent metrics are present ({kibana-pull}224052[#224052]).
-* Use bulk helper for bulk importing knowledge base entries ({kibana-pull}223526[#223526]).
-* Remove run soon for sync private location task !! ({kibana-pull}222062[#222062]).
-* Adjust example to ndjson format ({kibana-pull}221617[#221617]).
-* Dataset quality: Make sure non-aggregatable message is not shown if no data matches ({kibana-pull}221599[#221599]).
-* Delete user instruction if text is empty ({kibana-pull}221560[#221560]).
-* Check for documents before starting semantic text migration ({kibana-pull}221152[#221152]).
-* Hide Data set details when dataStream is coming from remote cluster ({kibana-pull}220529[#220529]).
-* Make API tests more resilient ({kibana-pull}220503[#220503]).
-* Remove index write blocks ({kibana-pull}220362[#220362]).
-* Receive `aria-labelledby` from Elastic Charts svg ({kibana-pull}220298[#220298]).
-* Query alerts using the `alert.start` field and update alerts function API test to check alert information ({kibana-pull}219651[#219651]).
+* Uses bulk helper for bulk importing knowledge base entries ({kibana-pull}223526[#223526]).
+* Removes `run soon` for private location sync task ({kibana-pull}222062[#222062]).
+* Adjusts example to NDJSON format ({kibana-pull}221617[#221617]).
+* Prevents non-aggregatable messages from showing if no data matches ({kibana-pull}221599[#221599]).
+* Deletes user instruction if text is empty ({kibana-pull}221560[#221560]).
+* Checks for documents before starting semantic text migration ({kibana-pull}221152[#221152]).
+* Hides data set details when `dataStream` comes from a remote cluster ({kibana-pull}220529[#220529]).
+* Makes API tests more resilient ({kibana-pull}220503[#220503]).
+* Removes index write blocks ({kibana-pull}220362[#220362]).
+* Receives `aria-labelledby` from Elastic Charts svg ({kibana-pull}220298[#220298]).
+* Queries alerts using the `alert.start` field and updates alerts function API test to check alert information ({kibana-pull}219651[#219651]).
 * Fixes Alerts environment query follow up ({kibana-pull}219571[#219571]).
-* Don't open in flyout mode on mount ({kibana-pull}219420[#219420]).
-* Change the alerts query to include environment not defined value ({kibana-pull}219228[#219228]).
-* Disable use logical AND when filter is removed ({kibana-pull}218910[#218910]).
-* Ensure index template are created ({kibana-pull}218901[#218901]).
-* Use fields instead of _source in the metadata endpoint ({kibana-pull}218869[#218869]).
-* Fixes span url link when transactionId missing in Span Links ({kibana-pull}218232[#218232]).
-* Fixing error - Display results and Visualize query Bedrock Error ({kibana-pull}218213[#218213]).
-* Make create annotations form keyboard navigable ({kibana-pull}217918[#217918]).
-* EDOT error summary fix ({kibana-pull}217885[#217885]).
-* Remove direct function calling from the chat input ({kibana-pull}217359[#217359]).
+* Prevents flyout mode from opening on mount ({kibana-pull}219420[#219420]).
+* Changes the alerts query to include environment not defined value ({kibana-pull}219228[#219228]).
+* Disables using logical `AND` when filter is removed ({kibana-pull}218910[#218910]).
+* Ensures index templates are created ({kibana-pull}218901[#218901]).
+* Uses fields instead of `_source` in the metadata endpoint ({kibana-pull}218869[#218869]).
+* Fixes span url link when transactionId missing in span Links ({kibana-pull}218232[#218232]).
+* Fixes Bedrock error when displaying results and visualize query ({kibana-pull}218213[#218213]).
+* Makes create annotations from keyboard navigable ({kibana-pull}217918[#217918]).
+* Fixes EDOT error summary ({kibana-pull}217885[#217885]).
+* Removes direct function calling from the chat input ({kibana-pull}217359[#217359]).
 * Adds error text in environment filter when input is invalid ({kibana-pull}216782[#216782]).
-* Change tpm abbreviation to trace per minute for screen-readers ({kibana-pull}216282[#216282]).
+* Changes "TPM" abbreviation to trace per minute for screen-readers ({kibana-pull}216282[#216282]).
 * Fixes waterfall margin left position ({kibana-pull}216229[#216229]).
-* Adds `aria-label` to Transaction type select on service overview ({kibana-pull}216014[#216014]).
-* Use `nameTooltip` api for dependencies tables ({kibana-pull}215940[#215940]).
+* Adds `aria-label` to transaction type select on service overview ({kibana-pull}216014[#216014]).
+* Uses `nameTooltip` api for dependencies tables ({kibana-pull}215940[#215940]).
 * Fixes page height of the AI Assistant app in solution views ({kibana-pull}215646[#215646]).
-* Only allow .ndjson files when bulk importing to the knowledge base ({kibana-pull}215433[#215433]).
-* Remove unnecessary field service.environment from top dependency spans endpoint ({kibana-pull}215321[#215321]).
-* Update retrieve_elastic_doc api test ({kibana-pull}215237[#215237]).
+* Only allow `.ndjson` files when bulk importing to the knowledge base ({kibana-pull}215433[#215433]).
+* Removes unnecessary field service.environment from top dependency spans endpoint ({kibana-pull}215321[#215321]).
+* Updates retrieve_elastic_doc api test ({kibana-pull}215237[#215237]).
 * Fixes id overflow ({kibana-pull}215199[#215199]).
 * Fixes contextual insights scoring ({kibana-pull}214259[#214259]).
-* Update knowledge base installation flow ({kibana-pull}214133[#214133]).
-* Show inspect configuration button always !! ({kibana-pull}213619[#213619]).
-* Fixing - Failing test: Stateful Observability - Deployment-agnostic A… ({kibana-pull}213530[#213530]).
+* Updates knowledge base installation flow ({kibana-pull}214133[#214133]).
+* Always shows inspect configuration button ({kibana-pull}213619[#213619]).
+* Fixes failing test in Observability stack deployments `Deployment-agnostic A…` ({kibana-pull}213530[#213530]).
 * Fixes conversation tests ({kibana-pull}213338[#213338]).
 * Fixes sorting in profiler storage explorer ({kibana-pull}212583[#212583]).
 * Adds system message in copy conversation JSON payload ({kibana-pull}212009[#212009]).
-* Removed unnecessary breadcrumbs in profiling ({kibana-pull}211081[#211081]).
+* Removed unnecessary breadcrumbs in Universal Profiling ({kibana-pull}211081[#211081]).
 * Added minHeight to profiler flamegraphs ({kibana-pull}210443[#210443]).
 * Adds system message ({kibana-pull}209773[#209773]).
 * Ensures that when an SLO is created, the ID is verified across all spaces ({kibana-pull}214496[#214496]).
-* Fixes the Outcome Preview table so columns always fill the page width after a resize in Streams ({kibana-pull}226000[#226000]).
-* Adds discernible text for the **Refresh data preview** button in Streams ({kibana-pull}225816[#225816]).
-* Ensures the members array is unique for `GroupStreamDefinitions` in Streams ({kibana-pull}210089[#210089]).
+* Fixes the **Outcome Preview** table so columns always fill the page width after a resize in **Streams** ({kibana-pull}226000[#226000]).
+* Adds discernible text for the **Refresh data preview** button in **Streams** ({kibana-pull}225816[#225816]).
+* Ensures the members array is unique for `GroupStreamDefinitions` in **Streams** ({kibana-pull}210089[#210089]).
 * Applies chunking algorithm for `getIndexBasicStats` in Dataset Health ({kibana-pull}221153[#221153]).
-* Improves finding functions in Universal profiling ({kibana-pull}210437[#210437]).
+* Improves finding functions in Universal Profiling ({kibana-pull}210437[#210437]).
+* Adds logical `AND` to monitor tags and locations filter ({kibana-pull}217985[#217985]).
 
 Elastic Security solution::
 For the Elastic Security 8.19.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -682,7 +675,7 @@ Review the following information about the {kib} 8.18.0 release.
 [%collapsible]
 ====
 *Details* +
-Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
+Errors occur when rules run during an active maintenance window that has filters and a matching rule category.
 
 *Workaround* +
 Remove any filters added to the active maintenance window.
@@ -698,7 +691,7 @@ This issue is resolved in 8.18.3.
 [%collapsible]
 ====
 *Details* +
-The Observability AI assistant gets stuck in a loop when calling the `execute_connector` function. Instead of completing queries, it times out with the error message `Failed to parse function call arguments when converting messages for inference: SyntaxError: Unexpected non-whitespace character after JSON at position 72 and Error: Tool call arguments for execute_connector (...) were invalid`. 
+The Observability AI assistant gets stuck in a loop when calling the `execute_connector` function. Instead of completing queries, it times out with the error message `Failed to parse function call arguments when converting messages for inference: SyntaxError: Unexpected non-whitespace character after JSON at position 72 and Error: Tool call arguments for execute_connector (...) were invalid`.
 
 ====
 // end::known-issue-1508[]
@@ -764,7 +757,7 @@ For more information, check:
 [%collapsible]
 ====
 *Details* +
-The Elastic Managed LLM may be automatically selected as your default connector because of existing connector selection logic. 
+The Elastic Managed LLM may be automatically selected as your default connector because of existing connector selection logic.
 This can occur if you had not previously specified a connector for any of the following reasons:
 
 - You only had one connector available and it was always automatically picked for your conversations.
@@ -807,7 +800,7 @@ Before you upgrade to 8.18.0, review the breaking changes, then mitigate the imp
 *Details* +
 Permissions to manage private locations in the Synthetics app can now be granted with sub-feature privileges using the API or Kibana's role management UI. For more information, refer to ({kibana-pull}201100[#201100]).
 ====
-      
+
 [float]
 [[deprecations-8.18.0]]
 === Deprecations
@@ -833,7 +826,7 @@ All `v1` Kibana security HTTP endpoints have been removed.
 
 For more information, refer to {kibana-pull}199656[#199656].
 
-*Impact* + 
+*Impact* +
 Any HTTP API calls to the `v1` Kibana security endpoints will fail with a 404 status code starting from version 9.0.0.
 Third party OIDC and SAML identity providers configured with `v1` endpoints will no longer work.
 
@@ -851,7 +844,7 @@ Remove references to the `/api/security/v1/me` endpoint from any automations, ap
 *Details* +
 Legacy and unused configuration settings were deprecated for the Logs UI. For more information, refer to ({kibana-pull}201625[#201625]).
 ====
-      
+
 [float]
 [[features-8.18.0]]
 === Features
@@ -901,7 +894,7 @@ Alerting::
 * Adds new flyout to rule form library, responsive design and illustration to rule form page ({kibana-pull}206141[#206141]).
 Cases::
 * Case templates are now generally available ({kibana-pull}205940[#205940]).
-* ServiceNow connectors support the ability to send a JSON payload to ServiceNow using the "Additional fields" form field ({kibana-pull}201948[#201948]). 
+* ServiceNow connectors support the ability to send a JSON payload to ServiceNow using the "Additional fields" form field ({kibana-pull}201948[#201948]).
 Dashboards & Visualizations::
 * Allows custom MVT sources to style the map layers and provide custom legend ({kibana-pull}200656[#200656]).
 Data ingestion and Fleet::
@@ -960,7 +953,7 @@ Platform::
 Alerting::
 * Fixes alert mute/unmute action ({kibana-pull}204182[#204182]).
 Dashboards & Visualizations::
-* Fixes the unnecessary inclusion of some *Lens* embeddable attributes in the serialized state. ({kibana-pull}210765[#210765]). 
+* Fixes the unnecessary inclusion of some *Lens* embeddable attributes in the serialized state. ({kibana-pull}210765[#210765]).
 * Allows panel to extend past viewport on resize ({kibana-pull}208828[#208828]).
 * Disables pointer events on drag and resize ({kibana-pull}208647[#208647]).
 * Removes use of `fr` unit ({kibana-pull}208437[#208437]).
@@ -1375,7 +1368,7 @@ you make the necessary updates after you upgrade to 8.17.0.
 [%collapsible]
 ====
 *Details* +
-Both the Logs Explorer and Logs Stream applications are now deprecated and will be removed in 9.0. We continue to make enhancements to Discover to offer similar functionality in 9.x. 
+Both the Logs Explorer and Logs Stream applications are now deprecated and will be removed in 9.0. We continue to make enhancements to Discover to offer similar functionality in 9.x.
 ====
 
 
@@ -1411,7 +1404,7 @@ For more information about the features introduced in 8.17.0, refer to <<whats-n
 [[enhancements-and-bug-fixes-v8.17.0]]
 === Enhancements and bug fixes
 
-For detailed information about the 8.17.0 release, review the enhancements and bug fixes.   
+For detailed information about the 8.17.0 release, review the enhancements and bug fixes.
 
 [float]
 [[enhancement-v8.17.0]]
@@ -1747,7 +1740,7 @@ Before you upgrade to 8.16.0, review the breaking changes, then mitigate the imp
 ====
 *Details* +
 During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "Kibana is shutting down and not accepting new incoming requests"}`. For more information, refer to {kibana-pull}180986[#180986].
-==== 
+====
 
 [float]
 [[deprecations-8.16.0]]
@@ -1762,7 +1755,7 @@ you make the necessary updates after you upgrade to 8.16.0.
 [%collapsible]
 ====
 *Details* +
-New versions of Kibana builds for macOS x86_64 are deprecated and will no longer be released after 8.17.  Kibana for macOS AArch64 is unaffected. 
+New versions of Kibana builds for macOS x86_64 are deprecated and will no longer be released after 8.17.  Kibana for macOS AArch64 is unaffected.
 
 Use Docker to run new versions of Kibana on macOS 86x_64.
 ====
@@ -1777,7 +1770,7 @@ You can find the Logs Explorer app in the navigation menu under Logs > Explorer,
 *Impact* +
 You can still show the Logs Stream app again by navigating to Stack Management > Advanced Settings and by enabling the `observability:enableLogsStream` setting.
 ====
-      
+
 [discrete]
 .Deprecates the Observability AI Assistant specific advanced setting `observability:aiAssistantLogsIndexPattern`.
 [%collapsible]
@@ -1789,7 +1782,7 @@ The Observability AI Assistant specific advanced setting for Logs index patterns
 //!!TODO!!
 ====
 
-  
+
 [float]
 [[features-8.16.0]]
 === Features
@@ -2379,7 +2372,7 @@ If you do two or more requests in less than 10 seconds, the subsequent requests 
 Wait 10 seconds before uploading again.
 This change could potentially break automations for users that rely on frequent package uploads.
 ====
-      
+
 [float]
 [[features-8.15.0]]
 === Features
@@ -2435,7 +2428,7 @@ For more information about the features introduced in 8.15.0, refer to <<whats-n
 === Enhancements and bug fixes
 
 For detailed information about the 8.15.0 release, review the enhancements and bug fixes.
-      
+
 
 [float]
 [[enhancement-v8.15.0]]
@@ -4376,7 +4369,7 @@ For information about the {kib} 8.10.0 release, review the following information
 [%collapsible]
 ====
 *Details* +
-After upgrading to version 8.10.0 or higher, you may encounter errors when loading inventory views. 
+After upgrading to version 8.10.0 or higher, you may encounter errors when loading inventory views.
 
 For more information, refer to https://github.com/elastic/kibana/issues/187254[#187254].
 
@@ -4391,7 +4384,7 @@ You can mitigate the issue by completing the following steps:
 
 [source,js]
 ----------------------------------
-DELETE kbn:/api/infra/inventory-views/<id> 
+DELETE kbn:/api/infra/inventory-views/<id>
 ----------------------------------
 ====
 // end::known-issue-187254[]
