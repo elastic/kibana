@@ -37,6 +37,17 @@ const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
 };
 
+const fieldMapper = (field?: string) => {
+  switch (field) {
+    case 'updatedAt':
+      return 'updated_at';
+    case 'attributes.title':
+      return 'title'; // TODO: Error: Fielddata is disabled on [dashboard.title] in [.kibana_analytics_9.2.0_001]
+    default:
+      return field;
+  }
+};
+
 const searchArgsToSOFindOptions = (
   query: SearchQuery,
   options: DashboardSearchOptions
@@ -50,6 +61,8 @@ const searchArgsToSOFindOptions = (
     page: query.cursor ? +query.cursor : undefined,
     defaultSearchOperator: 'AND',
     namespaces: options?.spaces,
+    sortField: fieldMapper(query.sort?.field),
+    sortOrder: query.sort?.direction,
     ...tagsToFindOptions(query.tags),
   };
 };

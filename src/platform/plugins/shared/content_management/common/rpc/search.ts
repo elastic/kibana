@@ -25,6 +25,12 @@ export const searchQuerySchema = schema.oneOf([
       ),
       limit: schema.maybe(schema.number()),
       cursor: schema.maybe(schema.string()),
+      sort: schema.maybe(
+        schema.object({
+          field: schema.string(),
+          direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+        })
+      ),
     },
     {
       unknowns: 'forbid',
@@ -72,6 +78,10 @@ export interface SearchQuery {
   limit?: number;
   /** The cursor for this query. Can be a page number or a cursor */
   cursor?: string;
+  sort?: {
+    field: string;
+    direction: 'asc' | 'desc';
+  };
 }
 
 export interface SearchIn<T extends string = string, Options extends void | object = object> {

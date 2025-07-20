@@ -29,6 +29,10 @@ export interface SearchDashboardsArgs {
   search: string;
   size: number;
   cursor?: string;
+  sort?: {
+    field: string;
+    direction: 'asc' | 'desc';
+  };
 }
 
 export interface SearchDashboardsResponse {
@@ -41,8 +45,9 @@ export async function searchDashboards({
   hasReference,
   options,
   search,
-  cursor,
   size,
+  cursor,
+  sort,
 }: SearchDashboardsArgs): Promise<SearchDashboardsResponse> {
   const {
     hits,
@@ -52,7 +57,8 @@ export async function searchDashboards({
     query: {
       text: search ? `${search}*` : undefined,
       limit: size,
-      cursor: cursor ?? undefined,
+      cursor,
+      sort,
       tags: {
         included: (hasReference ?? []).map(({ id }) => id),
         excluded: (hasNoReference ?? []).map(({ id }) => id),

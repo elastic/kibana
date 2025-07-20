@@ -466,7 +466,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const showFetchError = Boolean(fetchError);
 
   const fetchItems = useCallback(
-    async (cursor?: string) => {
+    async ({
+      cursor,
+      sort,
+    }: {
+      cursor?: string;
+      sort?: { field: string; direction: 'asc' | 'desc' };
+    } = {}) => {
       dispatch({ type: 'onFetchItems' });
 
       try {
@@ -488,6 +494,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ? {
               cursor,
               pageSize: _pagination.pageSize,
+              sort,
             }
           : undefined;
 
@@ -538,9 +545,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const onChangePage = useCallback(
     async (pageIndex: number) => {
       const cursor = pageIndex + 1;
-      await fetchItems(cursor.toString());
+      await fetchItems({ cursor: cursor.toString(), sort: tableSort });
     },
-    [fetchItems]
+    [fetchItems, tableSort]
   );
 
   const updateQuery = useCallback(
@@ -922,11 +929,21 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   );
 
   const onSortChange = useCallback(
-    (field: SortColumnField, direction: Direction) => {
+    async (field: SortColumnField, direction: Direction) => {
       const sort = {
         field,
         direction,
       };
+
+      if (isServerSidePaginationAndSorting) {
+        const cursor = _pagination.pageIndex + 1;
+        // TODO: Handle getting recently viewed
+        await fetchItems({
+          sort: field === 'accessedAt' ? undefined : sort,
+          cursor: cursor.toString(),
+        });
+      }
+
       // persist the sorting changes caused by explicit user's interaction
       saveSorting(entityName, sort);
 
@@ -934,7 +951,13 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         sort,
       });
     },
-    [entityName, updateTableSortFilterAndPagination]
+    [
+      entityName,
+      updateTableSortFilterAndPagination,
+      fetchItems,
+      isServerSidePaginationAndSorting,
+      _pagination.pageIndex,
+    ]
   );
 
   const onFilterChange = useCallback(

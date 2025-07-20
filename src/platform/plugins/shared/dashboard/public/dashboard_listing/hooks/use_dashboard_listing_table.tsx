@@ -205,7 +205,15 @@ export const useDashboardListingTable = ({
         references?: SavedObjectsFindOptionsReference[];
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {},
-      { cursor, pageSize }: { cursor?: string; pageSize?: number } = {}
+      {
+        cursor,
+        pageSize,
+        sort,
+      }: {
+        cursor?: string;
+        pageSize?: number;
+        sort?: { field: string; direction: 'asc' | 'desc' };
+      } = {}
     ) => {
       const searchStartTime = window.performance.now();
 
@@ -221,6 +229,7 @@ export const useDashboardListingTable = ({
             fields: ['title', 'description', 'timeRestore'],
           },
           cursor,
+          sort,
         })
         .then(({ total, hits }) => {
           const searchEndTime = window.performance.now();
