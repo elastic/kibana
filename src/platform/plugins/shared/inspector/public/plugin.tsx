@@ -113,6 +113,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
           closeButtonProps: { 'aria-label': closeButtonLabel },
           size: 'm',
           paddingSize: 'l',
+          type: 'overlay',
           ...options.flyoutProps,
         },
       });

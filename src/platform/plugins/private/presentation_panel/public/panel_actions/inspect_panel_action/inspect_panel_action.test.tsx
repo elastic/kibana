@@ -76,10 +76,12 @@ describe('Inspect panel action', () => {
     expect(inspector.open).toHaveBeenCalledWith(
       { filters: 'My filters are extremely interesting. Please inspect them.' },
       {
-        flyoutType: 'push',
         options: { fileName: 'some-title' },
         title: 'some-title',
-        focusedPanelId: 'some-uuid',
+        flyoutProps: {
+          focusedPanelId: 'some-uuid',
+          type: 'push',
+        },
       },
       context.embeddable.parentApi
     );
