@@ -12,6 +12,7 @@ import {
   transformWorkflowYamlJsontoEsWorkflow,
   WorkflowExecutionDto,
   WorkflowListDto,
+  WorkflowExecutionHistoryModel,
 } from '@kbn/workflows';
 import {
   CreateWorkflowCommand,
@@ -24,7 +25,8 @@ import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { GetWorkflowsParams } from './workflows_management_api';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
+import { getYamlStringFromJSON, parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import { createIndexWithMappings } from './lib/create_index';
 import {
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -37,6 +39,7 @@ import {
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
+  private taskScheduler: WorkflowTaskScheduler | null = null;
   private logger: Logger;
   private getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   private workflowsExecutionIndex: string;
@@ -54,6 +57,10 @@ export class WorkflowsService {
     this.stepsExecutionIndex = stepsExecutionIndex;
     this.workflowsExecutionIndex = workflowsExecutionIndex;
     this.initialize(esClientPromise);
+  }
+
+  public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
+    this.taskScheduler = taskScheduler;
   }
 
   private async initialize(esClientPromise: Promise<ElasticsearchClient>) {
@@ -88,19 +95,66 @@ export class WorkflowsService {
       sortOrder: 'desc',
     });
 
-    const results = response.saved_objects.map((so) => ({
-      id: so.id,
-      name: so.attributes.name,
-      description: so.attributes.description || '',
-      status: so.attributes.status,
-      tags: so.attributes.tags,
-      createdAt: new Date(so.created_at!),
-      createdBy: so.attributes.createdBy,
-      lastUpdatedAt: new Date(so.updated_at!),
-      lastUpdatedBy: so.attributes.lastUpdatedBy,
-      definition: so.attributes.definition as any,
-      history: [],
-    }));
+    // Get workflow IDs to fetch execution history
+    const workflowIds = response.saved_objects.map((so) => so.id);
+
+    // Fetch execution history for all workflows in parallel
+    const executionHistoryPromises = workflowIds.map(async (workflowId) => {
+      try {
+        const executions = await this.searchWorkflowExecutions({ workflowId });
+        return {
+          workflowId,
+          history: executions.results.map((execution) => ({
+            id: execution.id,
+            workflowId: execution.workflowId,
+            workflowName: '', // Will be filled from workflow data
+            status: execution.status,
+            startedAt: execution.startedAt,
+            finishedAt: execution.finishedAt,
+            duration: execution.duration,
+          })),
+        };
+      } catch (error) {
+        this.logger.warn(`Failed to fetch execution history for workflow ${workflowId}: ${error}`);
+        return {
+          workflowId,
+          history: [],
+        };
+      }
+    });
+
+    const executionHistoryResults = await Promise.all(executionHistoryPromises);
+    
+    // Create a map for quick lookup
+    const historyByWorkflowId = executionHistoryResults.reduce((acc, result) => {
+      acc[result.workflowId] = result.history;
+      return acc;
+    }, {} as Record<string, WorkflowExecutionHistoryModel[]>);
+
+    const results = response.saved_objects.map((so) => {
+      const workflowName = so.attributes.name;
+      const workflowHistory = historyByWorkflowId[so.id] || [];
+      
+      // Update workflowName in history items
+      const historyWithWorkflowName = workflowHistory.map((historyItem: WorkflowExecutionHistoryModel) => ({
+        ...historyItem,
+        workflowName,
+      }));
+
+      return {
+        id: so.id,
+        name: so.attributes.name,
+        description: so.attributes.description || '',
+        status: so.attributes.status,
+        tags: so.attributes.tags,
+        createdAt: new Date(so.created_at!),
+        createdBy: so.attributes.createdBy,
+        lastUpdatedAt: new Date(so.updated_at!),
+        lastUpdatedBy: so.attributes.lastUpdatedBy,
+        definition: so.attributes.definition as any,
+        history: historyWithWorkflowName,
+      };
+    });
 
     return {
       results,
@@ -159,7 +213,7 @@ export class WorkflowsService {
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;
 
     const savedObjectData: WorkflowSavedObjectAttributes = {
       name: workflowToCreate.name,
@@ -176,6 +230,15 @@ export class WorkflowsService {
       WORKFLOW_SAVED_OBJECT_TYPE,
       savedObjectData
     );
+
+    // Schedule the workflow if it has triggers
+    if (this.taskScheduler && workflowToCreate.triggers) {
+      for (const trigger of workflowToCreate.triggers) {
+        if (trigger.type === 'schedule' && trigger.enabled) {
+          await this.taskScheduler.scheduleWorkflowTask(response.id, trigger.config);
+        }
+      }
+    }
 
     return {
       id: response.id,
@@ -205,7 +268,7 @@ export class WorkflowsService {
       if (!parsedYaml.success) {
         throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
       }
-      const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+      const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;
       updateData = {
         name: updatedWorkflow.name,
         description: updatedWorkflow.description,
@@ -215,6 +278,19 @@ export class WorkflowsService {
         definition: updatedWorkflow.definition,
         lastUpdatedBy: 'system', // TODO: get from context
       };
+
+      // Update scheduled tasks if triggers changed
+      if (this.taskScheduler && updatedWorkflow.definition?.workflow?.triggers) {
+        // Remove existing scheduled tasks for this workflow
+        await this.taskScheduler.unscheduleWorkflowTasks(id);
+        
+        // Add new scheduled tasks
+        for (const trigger of updatedWorkflow.definition.workflow.triggers) {
+          if (trigger.type === 'triggers.elastic.scheduled') {
+            await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
+          }
+        }
+      }
     } else {
       updateData = {
         ...rest,
@@ -237,6 +313,13 @@ export class WorkflowsService {
 
   public async deleteWorkflows(workflowIds: string[]): Promise<void> {
     const savedObjectsClient = await this.getSavedObjectsClient();
+
+    // Remove scheduled tasks for deleted workflows
+    if (this.taskScheduler) {
+      for (const workflowId of workflowIds) {
+        await this.taskScheduler.unscheduleWorkflowTasks(workflowId);
+      }
+    }
 
     await Promise.all(
       workflowIds.map((id) => savedObjectsClient.delete(WORKFLOW_SAVED_OBJECT_TYPE, id))

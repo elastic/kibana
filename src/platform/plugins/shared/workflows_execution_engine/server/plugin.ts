@@ -69,19 +69,28 @@ export class WorkflowsExecutionEnginePlugin
       const workflowStartedAt = new Date();
       let workflowExecutionStatus: ExecutionStatus = ExecutionStatus.RUNNING;
       let workflowExecutionError: string | null = null;
+      const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       await this.esClient.index({
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: workflowRunId,
         refresh: true,
         document: {
-          workflowId: workflow.id,
           id: workflowRunId,
+          workflowId: workflow.id,
           workflowDefinition: workflow.definition,
           status: workflowExecutionStatus,
           createdAt: workflowCreatedAt.toISOString(),
           startedAt: workflowStartedAt.toISOString(),
-          createdBy: context.createdBy,
-        } as Omit<EsWorkflowExecution, 'finishedAt' | 'duration' | 'error'>,
+          error: null,
+          createdBy: context.createdBy || '', // TODO: set if available
+          lastUpdatedAt: workflowCreatedAt.toISOString(),
+          lastUpdatedBy: context.createdBy || '', // TODO: set if available
+          finishedAt: null,
+          duration: null,
+          tags: [],
+          description: '',
+          triggeredBy, // <-- new field for scheduled workflows
+        } as any, // EsWorkflowExecution (add triggeredBy to type if needed)
       });
 
       try {
@@ -118,7 +127,11 @@ export class WorkflowsExecutionEnginePlugin
               stepId: currentStep.name,
               status: ExecutionStatus.RUNNING,
               startedAt: stepStartedAt.toISOString(),
-            } as Partial<EsWorkflowStepExecution>,
+              completedAt: null,
+              executionTimeMs: null,
+              error: null,
+              output: null,
+            } as any, // EsWorkflowStepExecution
           });
 
           // const stepResult = await stepRunner.runStep(currentStep, stepsContext);
@@ -145,7 +158,7 @@ export class WorkflowsExecutionEnginePlugin
               executionTimeMs,
               error: stepResult.error,
               output: stepResult.output,
-            } as Partial<EsWorkflowStepExecution>,
+            } as any, // EsWorkflowStepExecution
           });
 
           if (stepStatus === ExecutionStatus.FAILED) {
@@ -169,7 +182,9 @@ export class WorkflowsExecutionEnginePlugin
             error: workflowExecutionError,
             finishedAt: new Date().toISOString(),
             duration: new Date().getTime() - workflowStartedAt.getTime(),
-          } as Partial<EsWorkflowExecution>,
+            lastUpdatedAt: new Date().toISOString(),
+            lastUpdatedBy: context.createdBy || '', // TODO: set if available
+          } as any, // EsWorkflowExecution
         });
       }
     };

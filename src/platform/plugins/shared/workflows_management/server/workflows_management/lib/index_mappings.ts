@@ -96,6 +96,9 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     duration: {
       type: 'long',
     },
+    triggeredBy: {
+      type: 'keyword',
+    },
   },
 };
 

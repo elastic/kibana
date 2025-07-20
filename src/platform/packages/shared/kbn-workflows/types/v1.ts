@@ -34,6 +34,7 @@ export interface EsWorkflowExecution {
   startedAt: string;
   finishedAt: string;
   duration: number;
+  triggeredBy?: string; // 'manual' or 'scheduled'
 }
 
 export interface ProviderInput {
@@ -93,6 +94,7 @@ export interface WorkflowExecutionDto {
   workflowName?: string;
   stepExecutions: EsWorkflowStepExecution[];
   duration: number | null;
+  triggeredBy?: string; // 'manual' or 'scheduled'
 }
 
 export type WorkflowExecutionListItemDto = Omit<WorkflowExecutionDto, 'stepExecutions'>;

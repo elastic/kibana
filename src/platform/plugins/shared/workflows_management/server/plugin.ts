@@ -30,7 +30,13 @@ import { WorkflowsManagementApi } from './workflows_management/workflows_managem
 import { WorkflowsService } from './workflows_management/workflows_management_service';
 import type { WorkflowsExecutionEnginePluginStartDeps } from './types';
 import { SchedulerService } from './scheduler/scheduler_service';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../common';
+import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
+import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
+import {
+  WORKFLOWS_INDEX,
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../common';
 import { workflowSavedObjectType } from './saved_objects/workflow';
 
 /**
@@ -43,8 +49,10 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   private readonly logger: Logger;
   private workflowsService: WorkflowsService | null = null;
   private schedulerService: SchedulerService | null = null;
+  private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private coreSetup: CoreSetup | null = null;
   // TODO: replace with esClient promise from core
   private esClient: Client = new Client({
     node: 'http://localhost:9200', // or your ES URL
@@ -60,6 +68,43 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+    this.coreSetup = core;
+
+    // Register workflow task definition
+    if (plugins.taskManager) {
+      plugins.taskManager.registerTaskDefinitions({
+        'workflow:scheduled': {
+          title: 'Scheduled Workflow Execution',
+          description: 'Executes workflows on a scheduled basis',
+          timeout: '5m',
+          maxAttempts: 3,
+          createTaskRunner: ({ taskInstance }) => {
+            // Capture the plugin instance in a closure
+            const plugin = this;
+            // Use a factory pattern to get dependencies when the task runs
+            return {
+              async run() {
+                // Get dependencies when the task actually runs
+                const [coreStart, pluginsStart] = await core.getStartServices();
+                
+                // Create the actual task runner with dependencies
+                const taskRunner = createWorkflowTaskRunner({
+                  logger: plugin.logger,
+                  workflowsService: plugin.workflowsService!,
+                  workflowsExecutionEngine: (pluginsStart as any).workflowsExecutionEngine,
+                  actionsClient: plugin.unsecureActionsClient!,
+                })({ taskInstance });
+                
+                return taskRunner.run();
+              },
+              async cancel() {
+                // Cancel function for the task
+              },
+            };
+          },
+        },
+      });
+    }
 
     // Register saved object types
     core.savedObjects.registerType(workflowSavedObjectType);
@@ -255,6 +300,17 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.logger.info('Workflows Management: Start');
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
+
+    // Initialize workflow task scheduler with the start contract
+    this.workflowTaskScheduler = new WorkflowTaskScheduler(
+      this.logger,
+      plugins.taskManager
+    );
+
+    // Set task scheduler in workflows service
+    if (this.workflowsService) {
+      this.workflowsService.setTaskScheduler(this.workflowTaskScheduler);
+    }
 
     const actionsTypes = plugins.actions.getAllTypes();
     this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);

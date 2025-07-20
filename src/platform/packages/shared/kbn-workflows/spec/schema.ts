@@ -39,7 +39,7 @@ export const ScheduledTriggerSchema = z.object({
   with: z.union([
     z.object({
       every: z.string().min(1),
-      unit: z.enum(['minute', 'hour', 'day', 'week', 'month', 'year']),
+      unit: z.enum(['second', 'minute', 'hour', 'day', 'week', 'month', 'year']),
     }),
     z.object({ cron: z.string().min(1) }),
   ]),
