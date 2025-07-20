@@ -20,6 +20,15 @@ interface EntityDataToNodePropsParams {
 }
 
 /**
+ * Interface for the output properties from mapEntityDataToNodeProps
+ */
+export interface MappedNodeProps {
+  label?: string;
+  icon?: string;
+  // Additional properties can be added here in the future
+}
+
+/**
  * Type that defines mapping from MappedAssetProps fields to MappedNodeProps fields
  * with optional transform functions
  */
@@ -33,21 +42,12 @@ export type NodeFieldsMapping = {
 };
 
 /**
- * Interface for the output properties from mapEntityDataToNodeProps
- */
-export interface MappedNodeProps {
-  label?: string;
-  icon?: string;
-  // Additional properties can be added here in the future
-}
-
-/**
  * Enhances graph nodes with entity data from asset inventory
  *
  * @param logger Logger instance for reporting issues
  * @param graphData Graph data from parseRecords function
  * @param esClient Elasticsearch client for fetching entity data
- * @param assetInventoryEnabled Whether asset inventory feature is enabled
+ * @param spaceId Namespace id
  * @returns Enhanced graph data with entity information
  */
 export const enhanceGraphWithEntityData = async ({
