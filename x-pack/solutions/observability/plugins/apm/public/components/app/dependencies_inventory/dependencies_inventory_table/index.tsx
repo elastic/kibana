@@ -91,7 +91,10 @@ export function DependenciesInventoryTable() {
 
   const { data: timeseriesData, status: timeseriesStatus } = useFetcher(
     (callApmApi) => {
-      if (data?.requestId && visibleDependenciesNames?.length) {
+      if (!visibleDependenciesNames?.length) {
+        return Promise.resolve();
+      }
+      if (data?.requestId) {
         return callApmApi('POST /internal/apm/dependencies/top_dependencies/statistics', {
           params: {
             query: {
@@ -212,10 +215,7 @@ export function DependenciesInventoryTable() {
     ]
   );
   const showRandomSamplerBadge = data?.sampled && status === FETCH_STATUS.SUCCESS;
-  const fetchingStatus =
-      isPending(status) || (visibleDependenciesNames?.length && isPending(timeseriesStatus))
-      ? FETCH_STATUS.LOADING
-      : FETCH_STATUS.SUCCESS;
+  const fetchingStatus =status;
   return (
     <>
       <div
