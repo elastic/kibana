@@ -151,47 +151,6 @@ const Demo = () => {
 };
 ```
 
-## `notifications` service
-
-Wrapper around Core's `notifications` service, allows you to render React elements
-directly without having to use `react-dom` library to mount to DOM nodes.
-
-```tsx
-import { createKibanaReactContext } from 'kibana-react';
-
-class MyPlugin {
-  start(core) {
-    const {
-      value: { notifications },
-    } = createKibanaReactContext(core);
-
-    notifications.toasts.show({
-      title: <div>Hello</div>,
-      body: <div>world!</div>,
-    });
-  }
-}
-```
-
-- `notifications.toasts.show()` &mdash; show generic toast message.
-- `notifications.toasts.success()` &mdash; show positive toast message.
-- `notifications.toasts.warning()` &mdash; show warning toast message.
-- `notifications.toasts.danger()` &mdash; show error toast message.
-
-You can access `notifications` service through React context.
-
-```tsx
-const Demo = () => {
-  const { notifications } = useKibana();
-  useEffect(() => {
-    notifications.toasts.danger({
-      title: 'Oooops!',
-      body: errorMessage,
-    });
-  }, [errorMessage]);
-};
-```
-
 ## RedirectAppLinks
 
 Utility component that will intercept click events on children anchor (`<a>`) elements to call

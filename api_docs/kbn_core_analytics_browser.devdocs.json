@@ -873,11 +873,11 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/execute_tools.ts"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title.ts"
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title.ts"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/execute_tools.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -2160,6 +2160,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/public/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "security",

@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body).to.eql({
         statusCode: 400,
         error: 'Bad Request',
-        message: '[request body.applications.2]: Invalid application id',
+        message: '[request body.applications.2]: Invalid application id: bad%app',
       });
     });
   });

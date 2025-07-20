@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import { Conversation } from '@kbn/onechat-common';
-import {
-  ConversationRound,
-  ToolCallStep,
-  createEmptyConversation,
-  isToolCallStep,
-} from '@kbn/onechat-common/chat/conversation';
+import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
+import { useEffect, useMemo } from 'react';
 import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
+import { useConversationId } from './use_conversation_id';
+import { createNewConversation, newConversationId } from '../utils/new_conversation';
 
 const createActions = ({
   queryClient,
   queryKey,
-  navigateToNewConversation,
+  navigateToConversation,
 }: {
   queryClient: QueryClient;
   queryKey: QueryKey;
-  navigateToNewConversation: ({ newConversationId }: { newConversationId: string }) => void;
+  navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => void;
 }) => {
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
@@ -41,9 +38,21 @@ const createActions = ({
       })
     );
   };
+  const [_, conversationId] = queryKey;
+  const isNewConversation = conversationId === newConversationId;
   return {
     invalidateConversation: () => {
-      queryClient.invalidateQueries({ queryKey });
+      if (isNewConversation) {
+        // Purge the query cache since we never fetch for conversation id "new"
+        queryClient.removeQueries({ queryKey });
+        // Invalidate all conversations to refresh conversation history
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+      } else {
+        queryClient.invalidateQueries({ queryKey });
+      }
+    },
+    addConversation: () => {
+      setConversation(() => createNewConversation());
     },
     addConversationRound: ({ userMessage }: { userMessage: string }) => {
       setConversation(
@@ -53,12 +62,20 @@ const createActions = ({
             response: { message: '' },
             steps: [],
           };
-          if (!draft) {
-            const nextConversation = createEmptyConversation();
-            nextConversation.rounds.push(nextRound);
-            return nextConversation;
+          draft?.rounds?.push(nextRound);
+        })
+      );
+    },
+    setAgentId: (agentId: string) => {
+      // We allow to change agent only at the start of the conversation
+      if (!isNewConversation) {
+        return;
+      }
+      setConversation(
+        produce((draft) => {
+          if (draft) {
+            draft.agent_id = agentId;
           }
-          draft.rounds.push(nextRound);
         })
       );
     },
@@ -69,9 +86,7 @@ const createActions = ({
     },
     setToolCallResult: ({ result, toolCallId }: { result: string; toolCallId: string }) => {
       setCurrentRound((round) => {
-        const step = round.steps.find(
-          (s) => isToolCallStep(s) && s.tool_call_id === toolCallId
-        ) as ToolCallStep;
+        const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
         if (step) {
           step.result = result;
         }
@@ -87,7 +102,7 @@ const createActions = ({
         round.response.message += messageChunk;
       });
     },
-    onConversationUpdate: ({
+    onConversationCreated: ({
       conversationId: id,
       title,
     }: {
@@ -104,35 +119,53 @@ const createActions = ({
           })
         );
       }
-      navigateToNewConversation({ newConversationId: id });
+      navigateToConversation({ nextConversationId: id });
     },
   };
 };
 
-export const useConversation = ({ conversationId }: { conversationId: string | undefined }) => {
+export const useConversation = () => {
+  const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
-  const queryKey = queryKeys.conversations.byId(conversationId ?? 'new');
+  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
   const { data: conversation, isLoading } = useQuery({
     queryKey,
-    queryFn: async () => {
-      if (conversationId) {
-        return conversationsService.get({ conversationId });
+    enabled: Boolean(conversationId),
+    queryFn: () => {
+      if (!conversationId) {
+        return Promise.reject(new Error('Invalid conversation id'));
       }
-      return null;
+      return conversationsService.get({ conversationId });
     },
   });
   const { navigateToOnechatUrl } = useNavigation();
 
+  const actions = useMemo(
+    () =>
+      createActions({
+        queryClient,
+        queryKey,
+        navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
+          navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+        },
+      }),
+    [queryClient, queryKey, navigateToOnechatUrl]
+  );
+
+  useEffect(() => {
+    if (!conversationId && !conversation) {
+      actions.addConversation();
+    }
+  }, [conversationId, actions, conversation]);
+
   return {
     conversation,
+    conversationId,
+    hasActiveConversation: Boolean(
+      conversationId || (conversation && conversation.rounds.length > 0)
+    ),
     isLoading,
-    actions: createActions({
-      queryClient,
-      queryKey,
-      navigateToNewConversation: ({ newConversationId }: { newConversationId: string }) => {
-        navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: newConversationId }));
-      },
-    }),
+    actions,
   };
 };

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
+
 export const CANVAS_APP_LOCATOR = 'CANVAS_APP_LOCATOR';
 
 export const DISCOVER_APP_ID = 'discover';
