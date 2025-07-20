@@ -28,6 +28,7 @@ export async function onVisualizationsEdit(savedObjectId: string) {
 
       return getEditorFlyout({
         initialState: {
+          savedObjectId,
           ...linksState,
           links: await resolveLinks(linksState.links ?? []),
         },

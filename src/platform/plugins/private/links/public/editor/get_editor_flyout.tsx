@@ -47,14 +47,15 @@ export function getEditorFlyout({
         closeFlyout();
       }}
       onSaveToLibrary={async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
-        const newState: EditorState = {
-          ...initialState,
+        const { savedObjectId, ...rest } = initialState ?? {};
+        const newState = {
+          ...rest,
           links: newLinks,
           layout: newLayout,
         };
-        if (initialState?.savedObjectId) {
+        if (savedObjectId) {
           await linksClient.update({
-            id: initialState.savedObjectId,
+            id: savedObjectId,
             data: {
               ...newState,
               links: serializeResolvedLinks(newLinks),
