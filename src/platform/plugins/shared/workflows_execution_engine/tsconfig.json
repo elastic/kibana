@@ -13,13 +13,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-router",
-    "@kbn/core-application-browser",
-    "@kbn/navigation-plugin",
     "@kbn/config-schema",
+    "@kbn/actions-plugin",
+    "@kbn/workflows",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*"

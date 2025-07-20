@@ -20,6 +20,15 @@
     "@kbn/core-application-browser",
     "@kbn/navigation-plugin",
     "@kbn/config-schema",
+    "@kbn/workflows",
+    "@kbn/zod",
+    "@kbn/code-editor",
+    "@kbn/security-plugin-types-common",
+    "@kbn/monaco",
+    "@kbn/actions-plugin",
+    "@kbn/features-plugin",
+    "@kbn/workflows-execution-engine",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*"

@@ -5,6 +5,8 @@
     "types": ["jest", "node"]
   },
   "include": ["**/*.ts"],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/zod",
+  ],
   "exclude": ["target/**/*"]
 }
