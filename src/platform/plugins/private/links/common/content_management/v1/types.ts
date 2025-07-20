@@ -10,7 +10,6 @@
 import type {
   ContentManagementCrudTypes,
   SavedObjectCreateOptions,
-  SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
 
 import { LinksContentType } from '../../types';
@@ -26,7 +25,7 @@ export type LinksCrudTypes = ContentManagementCrudTypes<
   LinksContentType,
   Omit<LinksState, 'title'> & { title: string }, // saved object attributes always have a title
   Pick<SavedObjectCreateOptions, 'references'>,
-  Pick<SavedObjectUpdateOptions, 'references'>,
+  {},
   {
     /** Flag to indicate to only search the text on the "title" field */
     onlyTitle?: boolean;

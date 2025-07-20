@@ -22,6 +22,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
+import { VisualizationSavedObject } from '@kbn/visualizations-plugin/common';
 import {
   APP_ICON,
   APP_NAME,
@@ -31,7 +32,6 @@ import {
   LINKS_SAVED_OBJECT_TYPE,
   LinksEmbeddableState,
 } from '../common';
-import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
@@ -104,7 +104,11 @@ export class LinksPlugin
             docTypes: [LINKS_SAVED_OBJECT_TYPE],
             searchFields: ['title^3'],
             client: getLinksClient,
-            toListItem(linkItem: LinksCrudTypes['Item']) {
+            toListItem(
+              linkItem: Omit<VisualizationSavedObject, 'attributes'> & {
+                attributes: { title: string; description?: string };
+              }
+            ) {
               const { id, type, updatedAt, attributes } = linkItem;
               const { title, description } = attributes;
 
