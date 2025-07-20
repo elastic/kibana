@@ -133,7 +133,7 @@ import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { LensDocument } from './persistence/saved_object_store';
+import { LensDocument } from './persistence';
 import {
   CONTENT_ID,
   LATEST_VERSION,
@@ -146,6 +146,7 @@ import {
   ACTION_EDIT_LENS_EMBEDDABLE,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
+import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 export type { SaveProps } from './app_plugin';
 
@@ -431,25 +432,19 @@ export class LensPlugin {
 
       share.registerShareIntegration<ExportShare>(
         'lens',
-        'integration-export-csvDownloadLens',
-        async () => {
-          const { downloadCsvLensShareProvider } = await import(
-            './app_plugin/csv_download_provider/csv_download_provider'
-          );
-          return downloadCsvLensShareProvider({
-            uiSettings: core.uiSettings,
-            formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
-            atLeastGold: () => {
-              let isGold = false;
-              startServices()
-                .plugins.licensing?.license$.pipe()
-                .subscribe((license) => {
-                  isGold = license.hasAtLeast('gold');
-                });
-              return isGold;
-            },
-          });
-        }
+        downloadCsvLensShareProvider({
+          uiSettings: core.uiSettings,
+          formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
+          atLeastGold: () => {
+            let isGold = false;
+            startServices()
+              .plugins.licensing?.license$.pipe()
+              .subscribe((license) => {
+                isGold = license.hasAtLeast('gold');
+              });
+            return isGold;
+          },
+        })
       );
     }
 

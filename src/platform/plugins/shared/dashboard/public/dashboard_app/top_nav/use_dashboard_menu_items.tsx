@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -260,22 +260,11 @@ export const useDashboardMenuItems = ({
    */
   const isLabsEnabled = useMemo(() => coreServices.uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI), []);
 
-  const [hasExportIntegration, setHasExportIntegration] = useState(false);
-  useEffect(() => {
-    let canceled = false;
-    const checkExportIntegration = async () => {
-      if (shareService) {
-        const integrations = await shareService.availableIntegrations('dashboard', 'export');
-        if (canceled) return;
-
-        setHasExportIntegration(integrations.length > 0);
-      }
-    };
-    checkExportIntegration();
-    return () => {
-      canceled = true;
-    };
+  const hasExportIntegration = useMemo(() => {
+    if (!shareService) return false;
+    return shareService.availableIntegrations('dashboard', 'export').length > 0;
   }, []);
+
   const viewModeTopNavConfig = useMemo(() => {
     const { showWriteControls } = getDashboardCapabilities();
 

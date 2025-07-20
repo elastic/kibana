@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
-import type { DiscoverServices } from '../../../build_services';
-
-export function useHasShareIntegration({ share }: DiscoverServices) {
-  return useMemo(() => {
-    if (!share) return false;
-
-    return share.availableIntegrations('search', 'export').length > 0;
-  }, [share]);
-}
+export { reportingCsvExportShareIntegration } from './csv';
+export { reportingPDFExportShareIntegration } from './pdf';
+export { reportingPNGExportShareIntegration } from './png';

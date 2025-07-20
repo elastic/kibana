@@ -19,18 +19,15 @@ import type {
   ShareIntegration,
   ShareRegistryApiStart,
   ShareMenuProviderLegacy,
-  ShareIntegrationMapKey,
+  RegisterShareIntegrationArgs,
 } from '../types';
 import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-
-type ShareContextMapKey = InternalShareActionIntent | ShareIntegrationMapKey | 'legacy';
 
 export class ShareRegistry implements ShareRegistryPublicApi {
   private urlService?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
   private capabilities?: ApplicationStart['capabilities'];
   private getLicense?: () => ILicense | undefined;
-  private readonly shareObjectResolutionCache: Record<string, ShareActionIntents> = {};
 
   private readonly globalMarker: string = '*';
 
@@ -42,7 +39,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
 
   private readonly shareOptionsStore: Record<
     string,
-    Map<ShareContextMapKey, () => Promise<ShareActionIntents>>
+    Map<InternalShareActionIntent | `integration-${string}` | 'legacy', ShareActionIntents>
   > = {
     [this.globalMarker]: new Map(),
   };
@@ -74,98 +71,98 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     };
   }
 
-  // Async registration for share actions
-  private async registerShareIntentAction(
+  private registerShareIntentAction(
     shareObject: string,
-    key: ShareContextMapKey,
-    getShareActionIntent: () => Promise<ShareActionIntents>
-  ): Promise<void> {
+    shareActionIntent: ShareActionIntents
+  ): void {
     if (!this.shareOptionsStore[shareObject]) {
       this.shareOptionsStore[shareObject] = new Map();
     }
 
     const shareContextMap = this.shareOptionsStore[shareObject];
 
-    if (shareContextMap.has(key)) {
+    const recordKey =
+      shareActionIntent.shareType === 'integration'
+        ? (`integration-${shareActionIntent.groupId || 'unknown'}-${shareActionIntent.id}` as const)
+        : shareActionIntent.shareType;
+
+    if (shareContextMap.has(recordKey)) {
       throw new Error(
-        `Share action with key [${key}] for app [${shareObject}] has already been registered.`
+        `Share action with type [${shareActionIntent.shareType}] for app [${shareObject}] has already been registered.`
       );
     }
 
-    shareContextMap.set(key, getShareActionIntent);
+    shareContextMap.set(recordKey, shareActionIntent);
   }
 
   private registerLinkShareAction(): void {
-    this.registerShareIntentAction(this.globalMarker, 'link', async () => ({
+    this.registerShareIntentAction(this.globalMarker, {
       shareType: 'link',
       config: ({ urlService }) => ({
         shortUrlService: urlService?.shortUrls.get(null)!,
       }),
-    }));
+    });
   }
 
   private registerEmbedShareAction(): void {
-    this.registerShareIntentAction(this.globalMarker, 'embed', async () => ({
+    this.registerShareIntentAction(this.globalMarker, {
       shareType: 'embed',
       config: ({ urlService, anonymousAccessServiceProvider }) => ({
         anonymousAccess: anonymousAccessServiceProvider!(),
         shortUrlService: urlService.shortUrls.get(null),
       }),
-    }));
+    });
   }
 
   /**
    * @description provides an escape hatch to support allowing legacy share menu items to be registered
    */
-  private register(value: ShareMenuProviderLegacy | Promise<ShareMenuProviderLegacy>) {
-    this.registerShareIntentAction(this.globalMarker, 'legacy', async () => {
-      const resolvedValue = await Promise.resolve(value);
-      return {
-        shareType: 'legacy',
-        id: resolvedValue.id,
-        config: resolvedValue.getShareMenuItemsLegacy,
-      };
+  private register(value: ShareMenuProviderLegacy) {
+    // implement backwards compatibility for the share plugin
+    this.registerShareIntentAction(this.globalMarker, {
+      shareType: 'legacy',
+      id: value.id,
+      config: value.getShareMenuItemsLegacy,
     });
   }
 
   private registerShareIntegration<I extends ShareIntegration>(
-    shareObject: string,
-    key: ShareIntegrationMapKey,
-    getShareActionIntent: () => Promise<Omit<I, 'shareType'>>
+    ...args: [string, RegisterShareIntegrationArgs<I>] | [RegisterShareIntegrationArgs<I>]
   ): void {
-    this.registerShareIntentAction(shareObject, key, async () => ({
+    const [shareObject, shareActionIntent] =
+      args.length === 1 ? [this.globalMarker, args[0]] : args;
+
+    this.registerShareIntentAction(shareObject, {
       shareType: 'integration',
-      ...(await getShareActionIntent()),
-    }));
+      id: shareActionIntent.id,
+      groupId: shareActionIntent.groupId,
+      config: shareActionIntent.getShareIntegrationConfig,
+      prerequisiteCheck: shareActionIntent.prerequisiteCheck,
+    });
   }
 
-  private async getShareConfigOptionsForObject(
+  private getShareConfigOptionsForObject(
     objectType: ShareContext['objectType']
-  ): Promise<ShareActionIntents[]> {
+  ): ShareActionIntents[] {
     const shareContextMap = this.shareOptionsStore[objectType];
     const globalOptions = Array.from(this.shareOptionsStore[this.globalMarker].values());
 
-    const allFactories = shareContextMap
-      ? [...globalOptions, ...Array.from(shareContextMap.values())]
-      : globalOptions;
+    if (!shareContextMap) {
+      return globalOptions;
+    }
 
-    return Promise.all(allFactories.map((factory) => factory()));
+    return globalOptions.concat(Array.from(shareContextMap.values()));
   }
 
   /**
    * Returns all share actions that are available for the given object type.
    */
-  private async availableIntegrations(
-    objectType: string,
-    groupId?: string
-  ): Promise<ShareActionIntents[]> {
+  private availableIntegrations(objectType: string, groupId?: string): ShareActionIntents[] {
     if (!this.capabilities || !this.getLicense) {
       throw new Error('ShareOptionsManager#start was not invoked');
     }
 
-    const shareActions = await this.getShareConfigOptionsForObject(objectType);
-
-    return shareActions.filter((share) => {
+    return this.getShareConfigOptionsForObject(objectType).filter((share) => {
       if (
         groupId &&
         (share.shareType !== 'integration' ||
@@ -187,7 +184,7 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     });
   }
 
-  private async resolveShareItemsForShareContext({
+  async resolveShareItemsForShareContext({
     objectType,
     isServerless,
     ...shareContext
@@ -196,36 +193,36 @@ export class ShareRegistry implements ShareRegistryPublicApi {
       throw new Error('ShareOptionsManager#start was not invoked');
     }
 
-    const shareActions = await this.availableIntegrations(objectType);
+    return (
+      await Promise.all(
+        this.availableIntegrations(objectType).map(async (shareAction) => {
+          let config: ShareConfigs['config'] | null;
 
-    return shareActions
-      .map((shareAction) => {
-        let config: ShareConfigs['config'] | null;
+          if (shareAction.shareType === 'legacy') {
+            config = shareAction.config.call(null, {
+              objectType,
+              ...shareContext,
+            });
+          } else {
+            config = await shareAction.config.call(null, {
+              urlService: this.urlService!,
+              anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
+              objectType,
+              ...shareContext,
+            });
+          }
 
-        if (shareAction.shareType === 'legacy') {
-          config = shareAction.config.call(null, {
-            objectType,
-            ...shareContext,
-          });
-        } else {
-          config = shareAction.config.call(null, {
-            urlService: this.urlService!,
-            anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
-            objectType,
-            ...shareContext,
-          });
-        }
-
-        return {
-          ...shareAction,
-          config,
-        } as ShareConfigs;
-      })
-      .filter((shareAction) => {
-        return isServerless
-          ? shareAction.shareType !== 'embed' && shareAction.config
-          : shareAction.config;
-      });
+          return {
+            ...shareAction,
+            config,
+          } as ShareConfigs;
+        })
+      )
+    ).filter((shareAction) => {
+      return isServerless
+        ? shareAction.shareType !== 'embed' && shareAction.config
+        : shareAction.config;
+    });
   }
 }
 
