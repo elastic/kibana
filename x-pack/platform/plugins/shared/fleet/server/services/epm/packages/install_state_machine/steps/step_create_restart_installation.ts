@@ -6,6 +6,7 @@
  */
 
 import semverGt from 'semver/functions/gt';
+import semverLt from 'semver/functions/lt';
 
 import { ConcurrentInstallOperationError } from '../../../../../errors';
 import { MAX_TIME_COMPLETE_INSTALL } from '../../../../../constants';
@@ -31,9 +32,12 @@ export async function stepCreateRestartInstallation(context: InstallContext) {
 
   // if some installation already exists
   if (installedPkg) {
-    const previousVersion = semverGt(pkgVersion, installedPkg.attributes.install_version)
-      ? installedPkg.attributes.install_version
-      : undefined;
+    let previousVersion: string | null | undefined;
+    if (semverGt(pkgVersion, installedPkg.attributes.install_version)) {
+      previousVersion = installedPkg.attributes.install_version;
+    } else if (semverLt(pkgVersion, installedPkg.attributes.install_version)) {
+      previousVersion = null;
+    }
     const isStatusInstalling = installedPkg.attributes.install_status === 'installing';
     const hasExceededTimeout =
       Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
