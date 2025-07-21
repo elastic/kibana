@@ -28,29 +28,53 @@
  */
 
 export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooterHeight) {
-  var rootScroller = document.scrollingElement || document.documentElement;
+  var scrollContainerId = 'app-main-scroll';
+  var rootScroller;
+  var isContainerScroll = false;
+
+  // Check if a specific container is provided for scrolling
+  if (scrollContainerId && document.getElementById(scrollContainerId)) {
+    rootScroller = document.getElementById(scrollContainerId);
+    isContainerScroll = true;
+  } else {
+    // Fall back to document root scroller
+    rootScroller = document.scrollingElement || document.documentElement;
+  }
+
   if (!rootScroller) {
-    throw new Error('Unable to find document.scrollingElement or document.documentElement');
+    throw new Error('Unable to find scroller element');
   }
 
   var rootRect = rootScroller.getBoundingClientRect();
   var targetRect = target.getBoundingClientRect();
 
   var viewportHeight = window.visualViewport ? visualViewport.height : window.innerHeight;
-
   var viewportWidth = window.visualViewport ? visualViewport.width : window.innerWidth;
 
+  // If using a container, adjust viewport dimensions to container dimensions
+  if (isContainerScroll) {
+    viewportHeight = rootRect.height;
+    viewportWidth = rootRect.width;
+  }
+
   function isInView() {
-    return (
-      targetRect.top >= 0 &&
-      targetRect.left >= 0 &&
-      targetRect.bottom <= viewportHeight &&
-      targetRect.right <= viewportWidth &&
-      targetRect.top >= rootRect.top &&
-      targetRect.bottom <= rootRect.bottom &&
-      targetRect.left >= rootRect.left &&
-      targetRect.right <= rootRect.right
-    );
+    if (isContainerScroll) {
+      // For container scrolling, check if the element is within the container's bounds
+      return (
+        targetRect.top >= rootRect.top &&
+        targetRect.left >= rootRect.left &&
+        targetRect.bottom <= rootRect.bottom &&
+        targetRect.right <= rootRect.right
+      );
+    } else {
+      // For document scrolling, check if element is in viewport
+      return (
+        targetRect.top >= 0 &&
+        targetRect.left >= 0 &&
+        targetRect.bottom <= viewportHeight &&
+        targetRect.right <= viewportWidth
+      );
+    }
   }
 
   if (!isInView()) {
@@ -58,16 +82,32 @@ export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooter
   }
 
   var boundingRect = target.getBoundingClientRect();
-  var additionalScrollNecessary = fixedHeaderHeight - boundingRect.top;
+
+  // Calculate the additional scroll needed based on whether we're in container or document scrolling
+  var additionalScrollNecessary;
+  if (isContainerScroll) {
+    // For container scrolling, we need to calculate the offset relative to the container's top
+    additionalScrollNecessary = fixedHeaderHeight - (boundingRect.top - rootRect.top);
+  } else {
+    // For document scrolling, use the original calculation
+    additionalScrollNecessary = fixedHeaderHeight - boundingRect.top;
+  }
 
   if (additionalScrollNecessary > 0) {
     rootScroller.scrollTop = rootScroller.scrollTop - additionalScrollNecessary;
   }
 
   if (fixedFooterHeight) {
-    var bottomOfVisibility = viewportHeight - fixedFooterHeight;
-    if (bottomOfVisibility < boundingRect.bottom) {
-      rootScroller.scrollTop = rootScroller.scrollTop + fixedFooterHeight;
+    var bottomOfVisibility = isContainerScroll
+      ? rootRect.height - fixedFooterHeight
+      : viewportHeight - fixedFooterHeight;
+
+    var elementBottom = isContainerScroll
+      ? boundingRect.bottom - rootRect.top
+      : boundingRect.bottom;
+
+    if (bottomOfVisibility < elementBottom) {
+      rootScroller.scrollTop = rootScroller.scrollTop + (elementBottom - bottomOfVisibility);
     }
   }
 }
