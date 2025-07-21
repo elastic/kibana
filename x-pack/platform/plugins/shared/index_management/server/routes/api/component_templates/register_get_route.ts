@@ -42,17 +42,6 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
             client.asCurrentUser.indices.getIndexTemplate(),
           ]);
 
-        /*
-        const body = componentTemplates.map((componentTemplate) => {
-          const deserializedComponentTemplateListItem = deserializeComponentTemplateList(
-            componentTemplate as ComponentTemplateFromEs,
-            // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
-            indexTemplates
-          );
-          return deserializedComponentTemplateListItem;
-        });
-        */
-
         const body = deserializeComponentTemplateList(
           componentTemplates as ComponentTemplateFromEs[],
           // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
