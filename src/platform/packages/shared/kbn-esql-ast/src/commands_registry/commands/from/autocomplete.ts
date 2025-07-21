@@ -15,7 +15,7 @@ import {
 } from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
-import { withinQuotes } from '../../../definitions/utils/autocomplete';
+import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 
@@ -23,9 +23,11 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (withinQuotes(query) || !callbacks?.getByType) {
+  const innerText = query.substring(0, cursorPosition);
+  if (withinQuotes(innerText) || !callbacks?.getByType) {
     return [];
   }
 
@@ -33,12 +35,12 @@ export async function autocomplete(
 
   const indexes = getSourcesFromCommands([command], 'index');
 
-  const metadataSuggestions = getMetadataSuggestions(command, query);
+  const metadataSuggestions = getMetadataSuggestions(command, innerText);
   if (metadataSuggestions) {
     return metadataSuggestions;
   }
 
-  const metadataOverlap = getOverlapRange(query, 'METADATA');
+  const metadataOverlap = getOverlapRange(innerText, 'METADATA');
 
   // FROM /
   if (indexes.length === 0) {
@@ -50,7 +52,7 @@ export async function autocomplete(
     );
   }
   // FROM something /
-  else if (indexes.length > 0 && /\s$/.test(query) && !isRestartingExpression(query)) {
+  else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
@@ -62,7 +64,7 @@ export async function autocomplete(
     );
   }
   // FROM something MET/
-  else if (indexes.length > 0 && /^FROM\s+\S+\s+/i.test(query) && metadataOverlap) {
+  else if (indexes.length > 0 && /^FROM\s+\S+\s+/i.test(innerText) && metadataOverlap) {
     suggestions.push(metadataSuggestion);
   }
   // FROM someth/
@@ -76,7 +78,7 @@ export async function autocomplete(
       callbacks?.getByType
     );
     const additionalSuggestions = await additionalSourcesSuggestions(
-      query,
+      innerText,
       sources,
       indexes.map(({ name }) => name),
       recommendedQuerySuggestions

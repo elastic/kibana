@@ -62,7 +62,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
 
   const renderRemoveButton = useCallback(
     (axis: ValueAxis) => (
-      <EuiToolTip position="bottom" content={removeButtonTooltip}>
+      <EuiToolTip position="bottom" content={removeButtonTooltip} disableScreenReaderOutput>
         <EuiButtonIcon
           color="danger"
           iconType="cross"
@@ -112,7 +112,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="bottom" content={addButtonTooltip}>
+          <EuiToolTip position="bottom" content={addButtonTooltip} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="plusInCircleFilled"
               onClick={addValueAxis}
