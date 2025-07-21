@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import { SortOrder } from '../common_attributes.gen';
 import { AnonymizationFieldResponse } from './bulk_crud_anonymization_fields_route.gen';
@@ -59,6 +59,10 @@ export const FindAnonymizationFieldsRequestQuery = z.object({
    * AnonymizationFields per page
    */
   per_page: z.coerce.number().int().min(0).optional().default(20),
+  /**
+   * If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
+   */
+  all_data: BooleanFromString.optional(),
 });
 export type FindAnonymizationFieldsRequestQueryInput = z.input<
   typeof FindAnonymizationFieldsRequestQuery
@@ -70,4 +74,32 @@ export const FindAnonymizationFieldsResponse = z.object({
   perPage: z.number().int(),
   total: z.number().int(),
   data: z.array(AnonymizationFieldResponse),
+  all: z.array(AnonymizationFieldResponse).optional(),
+  aggregations: z
+    .object({
+      field_status: z
+        .object({
+          buckets: z
+            .object({
+              anonymized: z
+                .object({
+                  doc_count: z.number().int().optional().default(0),
+                })
+                .optional(),
+              allowed: z
+                .object({
+                  doc_count: z.number().int().optional().default(0),
+                })
+                .optional(),
+              denied: z
+                .object({
+                  doc_count: z.number().int().optional().default(0),
+                })
+                .optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 });

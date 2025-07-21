@@ -20,8 +20,11 @@ import type {
   PackagePolicySOAttributes,
   OutputSOAttributes,
 } from '../types';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
+import { getPackagePolicySavedObjectType } from '../services/package_policy';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
+
 import {
   CLOUD_KIBANA_CONFIG,
   CLOUD_KIBANA_CONFIG_WITHOUT_APM,
@@ -34,6 +37,8 @@ const logFilePath = Path.join(__dirname, 'logs.log');
 describe('Fleet cloud preconfiguration', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
+  let agentPolicyType: string;
+  let packagePolicyType: string;
 
   const registryUrl = useDockerRegistry();
 
@@ -141,6 +146,8 @@ describe('Fleet cloud preconfiguration', () => {
     describe('With a full preconfigured cloud policy', () => {
       beforeAll(async () => {
         await startServers();
+        agentPolicyType = await getAgentPolicySavedObjectType();
+        packagePolicyType = await getPackagePolicySavedObjectType();
       });
 
       afterAll(async () => {
@@ -151,7 +158,7 @@ describe('Fleet cloud preconfiguration', () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
           .createInternalRepository()
           .find<AgentPolicySOAttributes>({
-            type: 'ingest-agent-policies',
+            type: agentPolicyType,
             perPage: 10000,
           });
 
@@ -367,7 +374,7 @@ describe('Fleet cloud preconfiguration', () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
           .createInternalRepository()
           .find<PackagePolicySOAttributes>({
-            type: 'ingest-package-policies',
+            type: packagePolicyType,
             perPage: 10000,
           });
 
@@ -433,6 +440,8 @@ describe('Fleet cloud preconfiguration', () => {
 
         // 2. Add APM to the preconfigured policy
         await startOrRestartKibana(CLOUD_KIBANA_CONFIG);
+        agentPolicyType = await getAgentPolicySavedObjectType();
+        packagePolicyType = await getPackagePolicySavedObjectType();
       });
 
       afterAll(async () => {
@@ -443,7 +452,7 @@ describe('Fleet cloud preconfiguration', () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
           .createInternalRepository()
           .find<AgentPolicySOAttributes>({
-            type: 'ingest-agent-policies',
+            type: agentPolicyType,
             perPage: 10000,
           });
 
@@ -472,7 +481,7 @@ describe('Fleet cloud preconfiguration', () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
           .createInternalRepository()
           .find<PackagePolicySOAttributes>({
-            type: 'ingest-package-policies',
+            type: packagePolicyType,
             perPage: 10000,
           });
 
@@ -498,6 +507,8 @@ describe('Fleet cloud preconfiguration', () => {
 
         // 2. Add pacakge policy ids to the preconfigured policy
         await startOrRestartKibana(CLOUD_KIBANA_CONFIG);
+        agentPolicyType = await getAgentPolicySavedObjectType();
+        packagePolicyType = await getPackagePolicySavedObjectType();
       });
 
       afterAll(async () => {
@@ -508,7 +519,7 @@ describe('Fleet cloud preconfiguration', () => {
         const agentPolicies = await kbnServer.coreStart.savedObjects
           .createInternalRepository()
           .find<AgentPolicySOAttributes>({
-            type: 'ingest-agent-policies',
+            type: agentPolicyType,
             perPage: 10000,
           });
 
@@ -523,7 +534,7 @@ describe('Fleet cloud preconfiguration', () => {
         const packagePolicies = await kbnServer.coreStart.savedObjects
           .createInternalRepository()
           .find<PackagePolicySOAttributes>({
-            type: 'ingest-package-policies',
+            type: packagePolicyType,
             perPage: 10000,
           });
 
@@ -571,6 +582,7 @@ describe('Fleet cloud preconfiguration', () => {
             },
           },
         });
+        agentPolicyType = await getAgentPolicySavedObjectType();
       });
 
       afterAll(async () => {

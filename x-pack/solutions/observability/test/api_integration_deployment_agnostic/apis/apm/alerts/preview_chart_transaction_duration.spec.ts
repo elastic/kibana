@@ -56,7 +56,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     },
   });
 
-  describe('preview chart transaction duration', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/228503
+  // Failing: See https://github.com/elastic/kibana/issues/228478
+  // Failing: See https://github.com/elastic/kibana/issues/228392
+  describe.skip('preview chart transaction duration', () => {
     describe(`without data loaded`, () => {
       it('transaction_duration (without data)', async () => {
         const options = getOptions();
@@ -304,7 +307,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe(`with data loaded and using KQL filter`, () => {
-      describe('transaction_duration: with data loaded and using KQL filter', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/228495
+      describe.skip('transaction_duration: with data loaded and using KQL filter', () => {
         let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
         before(async () => {

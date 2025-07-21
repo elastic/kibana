@@ -8,10 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 
-const SECURITY_DETECTION_ENGINE_PACKAGES_PATH = path.join(
-  path.dirname(__filename),
-  '../../fixtures/packages'
-);
+const PACKAGES_PATH = path.join(path.dirname(__filename), '../../fixtures/packages');
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -33,7 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          *  location defined in BUNDLED_PACKAGE_DIR.
          */
         `--xpack.fleet.isAirGapped=true`,
-        `--xpack.fleet.developer.bundledPackageLocation=${SECURITY_DETECTION_ENGINE_PACKAGES_PATH}`,
+        `--xpack.fleet.developer.bundledPackageLocation=${PACKAGES_PATH}`,
       ],
     },
     junit: {
