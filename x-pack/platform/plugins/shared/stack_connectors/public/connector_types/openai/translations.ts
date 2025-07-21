@@ -18,13 +18,6 @@ export const API_KEY_LABEL = i18n.translate('xpack.stackConnectors.components.ge
   defaultMessage: 'API key',
 });
 
-export const CONTEXT_WINDOW_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.genAi.contextWindowLengthTextFieldLabel',
-  {
-    defaultMessage: 'Context window length',
-  }
-);
-
 export const DEFAULT_MODEL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel',
   {
@@ -43,13 +36,6 @@ export const PROJECT_ID_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.projectIdTextFieldLabel',
   {
     defaultMessage: 'OpenAI Project',
-  }
-);
-
-export const OPTIONAL_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.genAi.optionalLabel',
-  {
-    defaultMessage: 'Optional',
   }
 );
 

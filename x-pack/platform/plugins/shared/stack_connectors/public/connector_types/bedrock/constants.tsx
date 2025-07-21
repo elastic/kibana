@@ -8,12 +8,13 @@
 import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import {
   DEFAULT_BEDROCK_MODEL,
   DEFAULT_BEDROCK_URL,
   DEFAULT_TOKEN_LIMIT,
 } from '../../../common/bedrock/constants';
+import { contextWindowLengthField } from '../../common/genai_connectors';
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
@@ -71,24 +72,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_BEDROCK_MODEL,
   },
-  {
-    id: 'contextWindowLength',
-    label: i18n.CONTEXT_WINDOW_LABEL,
-    isRequired: false,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Can be set to manually define the context length of the default model used by the connector. Useful for open source models or models more recent than this version of Kibana"
-        id="xpack.stackConnectors.components.bedrock.contextWindowLength"
-      />
-    ),
-    euiFieldProps: {
-      append: (
-        <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
-        </EuiText>
-      ),
-    },
-  },
+  contextWindowLengthField,
 ];
 
 export const bedrockSecrets: SecretsFieldSchema[] = [

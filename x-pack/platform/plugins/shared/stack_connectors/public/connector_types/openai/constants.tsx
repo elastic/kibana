@@ -10,6 +10,8 @@ import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { contextWindowLengthField } from '../../common/genai_connectors';
+import * as commonI18n from '../../common/genai_connectors/translations';
 import * as i18n from './translations';
 import { Config } from './types';
 
@@ -54,25 +56,6 @@ export const getDefaultBody = (config?: Config) => {
   return DEFAULT_BODY;
 };
 
-const contextWindowField: ConfigFieldSchema = {
-  id: 'contextWindowLength',
-  label: i18n.CONTEXT_WINDOW_LABEL,
-  isRequired: false,
-  helpText: (
-    <FormattedMessage
-      defaultMessage="Can be set to manually define the context length of the default model used by the connector. Useful for open source models or models more recent than this version of Kibana"
-      id="xpack.stackConnectors.components.genAi.contextWindowLengthTextHelpText"
-    />
-  ),
-  euiFieldProps: {
-    append: (
-      <EuiText size="xs" color="subdued">
-        {i18n.OPTIONAL_LABEL}
-      </EuiText>
-    ),
-  },
-};
-
 export const openAiConfig: ConfigFieldSchema[] = [
   {
     id: 'apiUrl',
@@ -109,7 +92,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_OPENAI_MODEL,
   },
-  contextWindowField,
+  contextWindowLengthField,
   {
     id: 'organizationId',
     label: i18n.ORG_ID_LABEL,
@@ -123,7 +106,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
     euiFieldProps: {
       append: (
         <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
+          {commonI18n.OPTIONAL_LABEL}
         </EuiText>
       ),
     },
@@ -146,7 +129,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
       },
       append: (
         <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
+          {commonI18n.OPTIONAL_LABEL}
         </EuiText>
       ),
     },
@@ -178,7 +161,7 @@ export const azureAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
-  contextWindowField,
+  contextWindowLengthField,
 ];
 
 export const otherOpenAiConfig: ConfigFieldSchema[] = [
@@ -215,7 +198,7 @@ export const otherOpenAiConfig: ConfigFieldSchema[] = [
       />
     ),
   },
-  contextWindowField,
+  contextWindowLengthField,
 ];
 
 export const openAiSecrets: SecretsFieldSchema[] = [

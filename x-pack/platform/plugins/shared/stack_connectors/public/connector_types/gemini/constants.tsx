@@ -8,7 +8,7 @@
 import React from 'react';
 import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import {
   DEFAULT_GEMINI_MODEL,
   DEFAULT_GEMINI_URL,
@@ -16,6 +16,7 @@ import {
   DEFAULT_GCP_REGION,
 } from '../../../common/gemini/constants';
 import * as i18n from './translations';
+import { contextWindowLengthField } from '../../common/genai_connectors';
 
 const generationConfig = {
   temperature: 0,
@@ -129,24 +130,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_GEMINI_MODEL,
   },
-  {
-    id: 'contextWindowLength',
-    label: i18n.CONTEXT_WINDOW_LABEL,
-    isRequired: false,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="Can be set to manually define the context length of the default model used by the connector. Useful for open source models or models more recent than this version of Kibana"
-        id="xpack.stackConnectors.components.genAi.contextWindowLengthTextHelpText"
-      />
-    ),
-    euiFieldProps: {
-      append: (
-        <EuiText size="xs" color="subdued">
-          {i18n.OPTIONAL_LABEL}
-        </EuiText>
-      ),
-    },
-  },
+  contextWindowLengthField,
 ];
 
 export const geminiSecrets: SecretsFieldSchema[] = [
