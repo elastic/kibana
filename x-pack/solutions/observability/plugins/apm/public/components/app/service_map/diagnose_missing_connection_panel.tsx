@@ -58,39 +58,6 @@ export function DiagnoseMissingConnectionPanel({
 
   const steps = [
     {
-      title: 'Provide Trace Information',
-      children: (
-        <>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.description', {
-              defaultMessage: 'Enter a trace ID',
-            })}
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            label={i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.traceIdLabel', {
-              defaultMessage: 'Trace ID',
-            })}
-            fullWidth
-          >
-            <SuggestionsSelect
-              fieldName="trace.id"
-              onChange={(value) => setTraceId(value)}
-              placeholder={i18n.translate(
-                'xpack.apm.serviceMap.diagnoseMissingConnection.traceIdPlaceholder',
-                {
-                  defaultMessage: 'Enter Trace ID',
-                }
-              )}
-              start={start}
-              end={end}
-            />
-          </EuiFormRow>
-        </>
-      ),
-    },
-
-    {
       title: 'Configure Missing Nodes',
       children: (
         <div>
@@ -178,6 +145,38 @@ export function DiagnoseMissingConnectionPanel({
         </div>
       ),
     },
+    {
+      title: 'Provide Trace Information',
+      children: (
+        <>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.description', {
+              defaultMessage: 'Enter a trace ID',
+            })}
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.translate('xpack.apm.serviceMap.diagnoseMissingConnection.traceIdLabel', {
+              defaultMessage: 'Trace ID',
+            })}
+            fullWidth
+          >
+            <SuggestionsSelect
+              fieldName="trace.id"
+              onChange={(value) => setTraceId(value)}
+              placeholder={i18n.translate(
+                'xpack.apm.serviceMap.diagnoseMissingConnection.traceIdPlaceholder',
+                {
+                  defaultMessage: 'Enter Trace ID',
+                }
+              )}
+              start={start}
+              end={end}
+            />
+          </EuiFormRow>
+        </>
+      ),
+    },
   ];
 
   return (
@@ -193,7 +192,6 @@ export function DiagnoseMissingConnectionPanel({
       <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiSpacer size="s" />
 
-        {/* <DiagnoseSteps /> */}
         <EuiSteps headingElement="h2" steps={steps} />
       </EuiPanel>
     </>

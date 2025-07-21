@@ -11,11 +11,12 @@ import {
   EuiFlyoutResizable,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiTitle,
   EuiSpacer,
   EuiButton,
-  EuiCallOut,
-  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -24,6 +25,7 @@ import { DiagnoseMissingConnectionPanel } from './diagnose_missing_connection_pa
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
+// import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
@@ -41,16 +43,16 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const [diagnosticResult, setDiagnosticResult] = useState<string | null>(null);
+  // const [diagnosticResult, setDiagnosticResult] = useState<string | null>(null);
   const [isRunningDiagnostic, setIsRunningDiagnostic] = useState(false);
 
-  const handleCheck = () => {
-    setDiagnosticResult(
-      i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.noDataFound', {
-        defaultMessage: 'Checked: No service.destination.resource.data found for this dependency.',
-      })
-    );
-  };
+  // const handleCheck = () => {
+  //   setDiagnosticResult(
+  //     i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.noDataFound', {
+  //       defaultMessage: 'Checked: No service.destination.resource.data found for this dependency.',
+  //     })
+  //   );
+  // };
 
   const handleRunDiagnostic = async (
     traceId: string,
@@ -58,32 +60,19 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     dependencyService: string
   ) => {
     setIsRunningDiagnostic(true);
-    try {
-      // Simulate diagnostic process
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      if (traceId) {
-        setDiagnosticResult(
-          i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.traceIdResult', {
-            defaultMessage: 'Diagnostic completed for trace ID: {traceId}',
-            values: { traceId },
-          })
-        );
-      } else {
-        setDiagnosticResult(
-          i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.serviceConnectionResult', {
-            defaultMessage: 'Diagnostic completed for connection: {service} → {dependencyService}',
-            values: { service, dependencyService },
-          })
-        );
-      }
-    } catch (error) {
-      setDiagnosticResult(
-        i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.diagnosticError', {
-          defaultMessage: 'Error running diagnostic. Please try again.',
-        })
-      );
-    } finally {
-      setIsRunningDiagnostic(false);
+
+    if (start && end) {
+      return await callApmApi('GET /internal/apm/diagnostics/service-map/{nodeName}', {
+        params: {
+          path: {
+            nodeName: selectedNode?.id,
+          },
+          query: {
+            start,
+            end,
+          },
+        },
+      });
     }
   };
 
@@ -128,70 +117,61 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <DiagnoseMissingConnectionPanel
+          onRunDiagnostic={handleRunDiagnostic}
+          selectedNode={selectedNode}
+        />
+        <EuiSpacer size="m" />
+
         {isPending(status) ? (
           <EuiLoadingSpinner size="xl" />
-        ) : (
-          data &&
-          data?.response?.aggregations?.destination_resources?.buckets?.length > 0 && (
+        ) : data ? (
+          data.hasConnections ? (
             <>
               <EuiTitle size="xs">
                 <h3>
                   {i18n.translate(
                     'xpack.apm.serviceMap.diagnosticFlyout.highlightedExitSpansTitle',
                     {
-                      defaultMessage: 'Connections found ',
+                      defaultMessage: 'Connections found',
                     }
                   )}
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <HighlightedExitSpansTable
-                items={data?.response?.aggregations?.destination_resources?.buckets?.map(
-                  (item: any) => {
-                    // Defensive mapping, handle missing fields
-                    const src = item?.sample_doc?.hits?.hits?.[0]?._source;
-                    return {
-                      'span.destination.service.resource':
-                        src?.span?.destination?.service?.resource ?? '',
-                      'span.subtype': src?.span?.subtype ?? '',
-                      'span.id': src?.span?.id ?? '',
-                      'span.type': src?.span?.type ?? '',
-                      'transaction.id': src?.transaction?.id ?? '',
-                      'service.node.name': src?.service?.node?.name ?? '',
-                      'trace.id': src?.trace?.id ?? '',
-                    };
-                  }
-                )}
-              />
+              <HighlightedExitSpansTable items={data.connections} />
+            </>
+          ) : (
+            <>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.noConnectionsTitle', {
+                    defaultMessage: 'No connections found',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText color="subdued">
+                <p>
+                  {i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.noConnectionsMessage', {
+                    defaultMessage:
+                      'No connections were found between the specified services during the selected time range.',
+                  })}
+                </p>
+              </EuiText>
             </>
           )
-        )}
+        ) : null}
         <EuiSpacer size="m" />
-        <DiagnoseMissingConnectionPanel
-          onRunDiagnostic={handleRunDiagnostic}
-          selectedNode={selectedNode}
-        />
-        {diagnosticResult && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              title={i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.diagnosticResultTitle', {
-                defaultMessage: 'Diagnostic Result',
-              })}
-              color="primary"
-              iconType="search"
-            >
-              <p>{diagnosticResult}</p>
-            </EuiCallOut>
-          </>
-        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton data-test-subj="apmDiagnosticFlyoutCloseButton" onClick={onClose}>
-          {i18n.translate('xpack.apm.diagnosticFlyout.closeButtonLabel', {
-            defaultMessage: 'Close',
-          })}
-        </EuiButton>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
+          <EuiButton data-test-subj="apmDiagnosticFlyoutCloseButton" onClick={handleRunDiagnostic}>
+            {i18n.translate('xpack.apm.diagnosticFlyout.closeButtonLabel', {
+              defaultMessage: 'Run diagnostic',
+            })}
+          </EuiButton>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyoutResizable>
   );

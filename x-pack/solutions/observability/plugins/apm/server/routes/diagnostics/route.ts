@@ -126,7 +126,31 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
     });
 
     console.log('destinationParentIds', destinationParentIds);
-    return { response: exitSpans };
+    
+    // Process the exit spans data to create a flatter structure
+    const connections = exitSpans?.response?.aggregations?.destination_resources?.buckets?.map(
+      (item: any) => {
+        // Defensive mapping, handle missing fields
+        const src = item?.sample_doc?.hits?.hits?.[0]?._source;
+        return {
+          'span.destination.service.resource': src?.span?.destination?.service?.resource ?? '',
+          'span.subtype': src?.span?.subtype ?? '',
+          'span.id': src?.span?.id ?? '',
+          'span.type': src?.span?.type ?? '',
+          'transaction.id': src?.transaction?.id ?? '',
+          'service.node.name': src?.service?.node?.name ?? '',
+          'trace.id': src?.trace?.id ?? '',
+          docCount: item?.doc_count ?? 0,
+        };
+      }
+    ) || [];
+
+    return {
+      connections,
+      totalConnections: connections.length,
+      hasConnections: connections.length > 0,
+      rawResponse: exitSpans, // Keep raw response for debugging if needed
+    };
   },
 });
 
