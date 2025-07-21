@@ -38,12 +38,11 @@ interface SessionAgentListStateOptions {
 
 type SessionAgentListState = AgentListTableState & {
   clearFilters: () => void;
-  resetToDefaults: () => void;
   updateTableState: (partialState: Partial<AgentListTableState>) => void;
   onTableChange: (changes: Partial<CriteriaWithPagination<Agent>>) => void;
 };
 
-export const getDefaultAgentListState = (): AgentListTableState => ({
+export const defaultAgentListState: AgentListTableState = {
   search: '',
   selectedAgentPolicies: [],
   selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
@@ -57,7 +56,7 @@ export const getDefaultAgentListState = (): AgentListTableState => ({
     index: 0,
     size: 20,
   },
-});
+};
 
 export const useSessionAgentListState = ({
   defaultState,
@@ -138,24 +137,24 @@ export const useSessionAgentListState = ({
     [setSessionState, getLatestState]
   );
 
+  // Clear filters by resetting to defaults
+  // Do not reset sort parameters, but reset page back to index 0
   const clearFilters = useCallback(() => {
     const latestState = getLatestState();
+    const { search, selectedAgentPolicies, selectedStatus, selectedTags, showUpgradeable } =
+      defaultAgentListState;
     updateTableState({
-      search: '',
-      selectedAgentPolicies: [],
-      selectedStatus: defaultState.selectedStatus,
-      selectedTags: [],
-      showUpgradeable: false,
+      search,
+      selectedAgentPolicies,
+      selectedStatus,
+      selectedTags,
+      showUpgradeable,
       page: {
         ...latestState.page,
         index: 0, // Reset to first page
       },
     });
-  }, [updateTableState, defaultState, getLatestState]);
-
-  const resetToDefaults = useCallback(() => {
-    setSessionState(defaultState);
-  }, [setSessionState, defaultState]);
+  }, [updateTableState, getLatestState]);
 
   return {
     // Current state
@@ -169,7 +168,6 @@ export const useSessionAgentListState = ({
 
     // Utility functions
     clearFilters,
-    resetToDefaults,
     updateTableState,
     onTableChange,
   };

@@ -30,8 +30,8 @@ import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../..
 import { getKuery } from '../utils/get_kuery';
 
 import {
+  defaultAgentListState,
   useSessionAgentListState,
-  getDefaultAgentListState,
   type AgentListTableState,
 } from './use_session_agent_list_state';
 
@@ -112,9 +112,8 @@ export function useFetchAgentsData() {
 
   // Initialize default state for session storage
   const getInitialState = useCallback((): AgentListTableState => {
-    const baseState = getDefaultAgentListState();
     return {
-      ...baseState,
+      ...defaultAgentListState,
       search: defaultKuery,
       selectedStatus: [
         'healthy',
@@ -143,6 +142,23 @@ export function useFetchAgentsData() {
     page,
     updateTableState,
   } = sessionState;
+
+  // Flag to indicate if filters are applied by comparing with default state
+  const isUsingFilter = useMemo(() => {
+    return (
+      sessionState.search !== defaultAgentListState.search ||
+      !isEqual(sessionState.selectedAgentPolicies, defaultAgentListState.selectedAgentPolicies) ||
+      !isEqual(sessionState.selectedTags, defaultAgentListState.selectedTags) ||
+      !isEqual(sessionState.selectedStatus, defaultAgentListState.selectedStatus) ||
+      sessionState.showUpgradeable !== defaultAgentListState.showUpgradeable
+    );
+  }, [
+    sessionState.search,
+    sessionState.selectedAgentPolicies,
+    sessionState.selectedStatus,
+    sessionState.selectedTags,
+    sessionState.showUpgradeable,
+  ]);
 
   // Create individual setters using updateTableState
   const setSearchState = useCallback(
@@ -474,10 +490,8 @@ export function useFetchAgentsData() {
     currentRequestRef,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
-
-    // Session storage utilities
+    isUsingFilter,
     clearFilters: sessionState.clearFilters,
-    resetToDefaults: sessionState.resetToDefaults,
     onTableChange: sessionState.onTableChange,
   };
 }

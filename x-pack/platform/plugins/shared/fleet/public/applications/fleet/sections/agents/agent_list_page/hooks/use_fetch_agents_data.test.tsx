@@ -17,30 +17,39 @@ import { useFetchAgentsData } from './use_fetch_agents_data';
 jest.mock('../../../../../../services/experimental_features');
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
-jest.mock('./use_session_agent_list_state', () => ({
-  useSessionAgentListState: jest.fn().mockReturnValue({
-    search: '',
-    selectedAgentPolicies: [],
-    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
-    selectedTags: [],
-    showUpgradeable: false,
-    sort: { field: 'enrolled_at', direction: 'desc' },
-    page: { index: 0, size: 20 },
-    updateTableState: jest.fn(),
-    onTableChange: jest.fn(),
-    clearFilters: jest.fn(),
-    resetToDefaults: jest.fn(),
-  }),
-  getDefaultAgentListState: jest.fn(() => ({
-    search: '',
-    selectedAgentPolicies: [],
-    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
-    selectedTags: [],
-    showUpgradeable: false,
-    sort: { field: 'enrolled_at', direction: 'desc' },
-    page: { index: 0, size: 20 },
-  })),
-}));
+const defaultState = {
+  search: '',
+  selectedAgentPolicies: [],
+  selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+  selectedTags: [],
+  showUpgradeable: false,
+  sort: { field: 'enrolled_at', direction: 'desc' },
+  page: { index: 0, size: 20 },
+};
+
+jest.mock('./use_session_agent_list_state', () => {
+  let currentMockState = { ...defaultState };
+
+  const mockUseSessionAgentListState = jest.fn(() => {
+    const mockUpdateTableState = jest.fn((updates: any) => {
+      currentMockState = { ...currentMockState, ...updates };
+    });
+
+    return {
+      ...currentMockState,
+      updateTableState: mockUpdateTableState,
+      onTableChange: jest.fn(),
+      clearFilters: jest.fn(),
+      resetToDefaults: jest.fn(),
+    };
+  });
+
+  return {
+    useSessionAgentListState: mockUseSessionAgentListState,
+    getDefaultAgentListState: jest.fn(() => defaultState),
+    defaultAgentListState: defaultState,
+  };
+});
 
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),

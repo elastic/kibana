@@ -123,6 +123,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     currentRequestRef,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    isUsingFilter,
     onTableChange,
     clearFilters: clearFiltersFromSession,
   } = useFetchAgentsData();
@@ -135,14 +136,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       });
     },
     [setSearch, onTableChange, page.size]
-  );
-
-  const isUsingFilter = !!(
-    search.trim() ||
-    selectedAgentPolicies.length ||
-    selectedStatus.length ||
-    selectedTags.length ||
-    showUpgradeable
   );
 
   const clearFilters = useCallback(() => {

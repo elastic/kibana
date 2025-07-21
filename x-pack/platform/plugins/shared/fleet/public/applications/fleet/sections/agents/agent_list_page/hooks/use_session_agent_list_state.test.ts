@@ -8,8 +8,8 @@
 import { renderHook, act } from '@testing-library/react';
 
 import {
+  defaultAgentListState,
   useSessionAgentListState,
-  getDefaultAgentListState,
   type AgentListTableState,
 } from './use_session_agent_list_state';
 
@@ -22,17 +22,17 @@ jest.mock('react-use/lib/useSessionStorage', () => {
 });
 
 describe('useSessionAgentListState', () => {
-  const defaultState = getDefaultAgentListState();
-
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset mock to return default state
-    mockSessionState.mockReturnValue(defaultState);
+    mockSessionState.mockReturnValue(defaultAgentListState);
   });
 
   describe('initialization', () => {
     it('should initialize with default state', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       expect(result.current.search).toBe('');
       expect(result.current.selectedAgentPolicies).toEqual([]);
@@ -51,97 +51,111 @@ describe('useSessionAgentListState', () => {
 
     it('should use custom storage key and namespace', () => {
       const customOptions = {
-        defaultState,
+        defaultState: defaultAgentListState,
         storageKey: 'customKey',
         namespace: 'customNamespace',
       };
 
       const { result } = renderHook(() => useSessionAgentListState(customOptions));
 
-      expect(result.current.search).toBe(defaultState.search);
-      expect(result.current.sort).toEqual(defaultState.sort);
-      expect(result.current.page).toEqual(defaultState.page);
+      expect(result.current.search).toBe(defaultAgentListState.search);
+      expect(result.current.sort).toEqual(defaultAgentListState.sort);
+      expect(result.current.page).toEqual(defaultAgentListState.page);
     });
 
     it('should fallback to default state when session state is null', () => {
       mockSessionState.mockReturnValue(null);
 
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
-      expect(result.current.search).toBe(defaultState.search);
-      expect(result.current.sort).toEqual(defaultState.sort);
-      expect(result.current.page).toEqual(defaultState.page);
+      expect(result.current.search).toBe(defaultAgentListState.search);
+      expect(result.current.sort).toEqual(defaultAgentListState.sort);
+      expect(result.current.page).toEqual(defaultAgentListState.page);
     });
   });
 
   describe('updateTableState', () => {
     it('should update search state', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({ search: 'test query' });
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         search: 'test query',
       });
     });
 
     it('should update selected agent policies', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({ selectedAgentPolicies: ['policy1', 'policy2'] });
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         selectedAgentPolicies: ['policy1', 'policy2'],
       });
     });
 
     it('should update selected status', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({ selectedStatus: ['healthy', 'offline'] });
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         selectedStatus: ['healthy', 'offline'],
       });
     });
 
     it('should update selected tags', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({ selectedTags: ['tag1', 'tag2'] });
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         selectedTags: ['tag1', 'tag2'],
       });
     });
 
     it('should update show upgradeable flag', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({ showUpgradeable: true });
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         showUpgradeable: true,
       });
     });
 
     it('should update sort configuration', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({
@@ -150,13 +164,15 @@ describe('useSessionAgentListState', () => {
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         sort: { field: 'status', direction: 'asc' },
       });
     });
 
     it('should update pagination configuration', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({
@@ -165,13 +181,15 @@ describe('useSessionAgentListState', () => {
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         page: { index: 1, size: 50 },
       });
     });
 
     it('should update multiple properties at once', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       const partialUpdate: Partial<AgentListTableState> = {
         search: 'new search',
@@ -184,7 +202,7 @@ describe('useSessionAgentListState', () => {
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         ...partialUpdate,
       });
     });
@@ -192,7 +210,9 @@ describe('useSessionAgentListState', () => {
 
   describe('onTableChange', () => {
     it('should update table state atomically with pagination changes', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.onTableChange({
@@ -201,13 +221,15 @@ describe('useSessionAgentListState', () => {
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         page: { index: 2, size: 50 },
       });
     });
 
     it('should update table state atomically with sort changes', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.onTableChange({
@@ -216,13 +238,15 @@ describe('useSessionAgentListState', () => {
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         sort: { field: 'status', direction: 'asc' },
       });
     });
 
     it('should update both pagination and sort atomically', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.onTableChange({
@@ -232,19 +256,21 @@ describe('useSessionAgentListState', () => {
       });
 
       expect(mockSetSessionState).toHaveBeenCalledWith({
-        ...defaultState,
+        ...defaultAgentListState,
         page: { index: 2, size: 50 },
         sort: { field: 'status', direction: 'asc' },
       });
     });
 
     it('should not update if no changes are detected', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.onTableChange({
-          page: defaultState.page,
-          sort: defaultState.sort,
+          page: defaultAgentListState.page,
+          sort: defaultAgentListState.sort,
         });
       });
 
@@ -253,12 +279,14 @@ describe('useSessionAgentListState', () => {
 
     it('should only update changed properties', () => {
       const customState = {
-        ...defaultState,
+        ...defaultAgentListState,
         sort: { field: 'status' as const, direction: 'asc' as const },
       };
       mockSessionState.mockReturnValue(customState);
 
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.onTableChange({
@@ -277,7 +305,7 @@ describe('useSessionAgentListState', () => {
   describe('clearFilters', () => {
     it('should clear filters and reset pagination to first page', () => {
       const customState = {
-        ...defaultState,
+        ...defaultAgentListState,
         search: 'test',
         selectedAgentPolicies: ['policy1'],
         selectedTags: ['tag1'],
@@ -286,7 +314,9 @@ describe('useSessionAgentListState', () => {
       };
       mockSessionState.mockReturnValue(customState);
 
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.clearFilters();
@@ -296,7 +326,7 @@ describe('useSessionAgentListState', () => {
         ...customState,
         search: '',
         selectedAgentPolicies: [],
-        selectedStatus: defaultState.selectedStatus,
+        selectedStatus: defaultAgentListState.selectedStatus,
         selectedTags: [],
         showUpgradeable: false,
         page: {
@@ -308,13 +338,15 @@ describe('useSessionAgentListState', () => {
 
     it('should preserve page size when clearing filters', () => {
       const customState = {
-        ...defaultState,
+        ...defaultAgentListState,
         search: 'test',
         page: { index: 2, size: 100 },
       };
       mockSessionState.mockReturnValue(customState);
 
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.clearFilters();
@@ -324,7 +356,7 @@ describe('useSessionAgentListState', () => {
         ...customState,
         search: '',
         selectedAgentPolicies: [],
-        selectedStatus: defaultState.selectedStatus,
+        selectedStatus: defaultAgentListState.selectedStatus,
         selectedTags: [],
         showUpgradeable: false,
         page: {
@@ -335,30 +367,11 @@ describe('useSessionAgentListState', () => {
     });
   });
 
-  describe('resetToDefaults', () => {
-    it('should reset all state to default values', () => {
-      const customState = {
-        ...defaultState,
-        search: 'test',
-        selectedAgentPolicies: ['policy1'],
-        sort: { field: 'status' as const, direction: 'asc' as const },
-        page: { index: 2, size: 50 },
-      };
-      mockSessionState.mockReturnValue(customState);
-
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
-
-      act(() => {
-        result.current.resetToDefaults();
-      });
-
-      expect(mockSetSessionState).toHaveBeenCalledWith(defaultState);
-    });
-  });
-
   describe('state consistency', () => {
     it('should handle rapid sequential updates correctly', () => {
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({ search: 'search1' });
@@ -376,14 +389,16 @@ describe('useSessionAgentListState', () => {
     });
 
     it('should maintain state consistency across re-renders', () => {
-      const { result, rerender } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result, rerender } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       act(() => {
         result.current.updateTableState({ search: 'test' });
       });
 
       // Update mock to return updated state
-      const updatedState = { ...defaultState, search: 'test' };
+      const updatedState = { ...defaultAgentListState, search: 'test' };
       mockSessionState.mockReturnValue(updatedState);
 
       rerender();
@@ -392,9 +407,9 @@ describe('useSessionAgentListState', () => {
     });
   });
 
-  describe('getDefaultAgentListState', () => {
+  describe('defaultAgentListState', () => {
     it('should return correct default state structure', () => {
-      const result = getDefaultAgentListState();
+      const result = defaultAgentListState;
 
       expect(result).toEqual({
         search: '',
@@ -412,14 +427,6 @@ describe('useSessionAgentListState', () => {
         },
       });
     });
-
-    it('should return a new object each time (not a singleton)', () => {
-      const result1 = getDefaultAgentListState();
-      const result2 = getDefaultAgentListState();
-
-      expect(result1).not.toBe(result2); // Different object references
-      expect(result1).toEqual(result2); // Same content
-    });
   });
 
   describe('error handling', () => {
@@ -427,24 +434,27 @@ describe('useSessionAgentListState', () => {
       // Simulate session storage failure by returning null instead of throwing
       mockSessionState.mockReturnValue(null);
 
-      const { result } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       // Should fallback to default state without throwing
-      expect(result.current.search).toBe(defaultState.search);
-      expect(result.current.sort).toEqual(defaultState.sort);
-      expect(result.current.page).toEqual(defaultState.page);
+      expect(result.current.search).toBe(defaultAgentListState.search);
+      expect(result.current.sort).toEqual(defaultAgentListState.sort);
+      expect(result.current.page).toEqual(defaultAgentListState.page);
     });
   });
 
   describe('function stability', () => {
     it('should have stable function references across re-renders', () => {
-      const { result, rerender } = renderHook(() => useSessionAgentListState({ defaultState }));
+      const { result, rerender } = renderHook(() =>
+        useSessionAgentListState({ defaultState: defaultAgentListState })
+      );
 
       const initialFunctions = {
         updateTableState: result.current.updateTableState,
         onTableChange: result.current.onTableChange,
         clearFilters: result.current.clearFilters,
-        resetToDefaults: result.current.resetToDefaults,
       };
 
       rerender();
@@ -452,7 +462,6 @@ describe('useSessionAgentListState', () => {
       expect(result.current.updateTableState).toBe(initialFunctions.updateTableState);
       expect(result.current.onTableChange).toBe(initialFunctions.onTableChange);
       expect(result.current.clearFilters).toBe(initialFunctions.clearFilters);
-      expect(result.current.resetToDefaults).toBe(initialFunctions.resetToDefaults);
     });
   });
 });

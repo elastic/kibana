@@ -44,7 +44,7 @@ export const AgentTableHeader: React.FunctionComponent<{
 }) => {
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
             <AgentsSelectionStatus

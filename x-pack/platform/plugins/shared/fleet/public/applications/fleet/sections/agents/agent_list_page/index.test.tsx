@@ -123,6 +123,15 @@ jest.mock('./hooks/use_session_agent_list_state', () => ({
     sort: { field: 'enrolled_at', direction: 'desc' },
     page: { index: 0, size: 20 },
   })),
+  defaultAgentListState: {
+    search: '',
+    selectedAgentPolicies: [],
+    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+    selectedTags: [],
+    showUpgradeable: false,
+    sort: { field: 'enrolled_at', direction: 'desc' },
+    page: { index: 0, size: 20 },
+  },
 }));
 
 jest.mock('./components/search_and_filter_bar', () => {
