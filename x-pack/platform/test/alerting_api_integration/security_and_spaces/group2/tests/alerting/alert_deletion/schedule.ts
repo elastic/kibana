@@ -74,11 +74,15 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
 
   const cleanupEventLog = async () => {
     log.info(`Cleaning up event log`);
-    const numToDelete = await es.search<IValidatedEvent>({
-      index: '.kibana-event-log*',
-      query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+    const numToDelete = await retry.try(async () => {
+      const results = await es.search<IValidatedEvent>({
+        index: '.kibana-event-log*',
+        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+      });
+      expect(results.hits.hits.length).to.be.greaterThan(0);
+      return results.hits.hits.length;
     });
-    log.info(`Found ${numToDelete.hits.hits.length} event log entries to delete`);
+    log.info(`Found ${numToDelete} event log entries to delete`);
     await retry.try(async () => {
       const results = await es.deleteByQuery({
         index: '.kibana-event-log*',
