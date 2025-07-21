@@ -8,10 +8,10 @@
  */
 
 import { BasicPrettyPrinter } from '../../pretty_print';
-import { expr } from '../expr';
+import { exp } from '../expression';
 
 test('can be used as templated string tag', () => {
-  const node = expr`42`;
+  const node = exp`42`;
 
   expect(node).toMatchObject({
     type: 'literal',
@@ -21,9 +21,13 @@ test('can be used as templated string tag', () => {
   });
 });
 
+test('throws on invalid expression', () => {
+  expect(() => exp`.`).toThrow();
+});
+
 test('can specify parsing options', () => {
-  const node1 = expr({ withFormatting: true })`42 /* comment */`;
-  const node2 = expr({ withFormatting: false })`42 /* comment */`;
+  const node1 = exp({ withFormatting: true })`42 /* comment */`;
+  const node2 = exp({ withFormatting: false })`42 /* comment */`;
   const text1 = BasicPrettyPrinter.expression(node1);
   const text2 = BasicPrettyPrinter.expression(node2);
 
@@ -32,18 +36,18 @@ test('can specify parsing options', () => {
 });
 
 test('can compose nodes into templated string', () => {
-  const field = expr`a.b.c`;
-  const value = expr`fn(1, ${field})`;
-  const assignment = expr`${field} = ${value}`;
+  const field = exp`a.b.c`;
+  const value = exp`fn(1, ${field})`;
+  const assignment = exp`${field} = ${value}`;
   const text = BasicPrettyPrinter.expression(assignment);
 
   expect(text).toBe('a.b.c = FN(1, a.b.c)');
 });
 
 test('creates a list of nodes separated by command, if array passed in', () => {
-  const arg1 = expr`1`;
-  const arg2 = expr`a.b.c`;
-  const value = expr`fn(${[arg1, arg2]})`;
+  const arg1 = exp`1`;
+  const arg2 = exp`a.b.c`;
+  const value = exp`fn(${[arg1, arg2]})`;
   const text = BasicPrettyPrinter.expression(value);
 
   expect(text).toBe('FN(1, a.b.c)');
