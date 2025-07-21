@@ -620,19 +620,19 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.notifyUsage(actionRequest.command);
 
-    const actionId = actionRequest.actionId || uuidv4();
-    const tags = actionRequest.tags ?? [];
-
-    // With automated response action, it's possible to reach this point and not have any `endpoint_ids`
-    // defined in the action. That's because with automated response actions we always create an
-    // action request, even when there is a failure - like if the agent was un-enrolled in between
-    // the event sent and the detection engine processing that event.
-    const agentPolicyInfo =
-      isSpacesEnabled && actionRequest.endpoint_ids.length
+    // It's possible with Automated Response actions that we could reach this point with
+    // no endpoint IDs in the action request - case where they are no longer enrolled.
+    // In these cases, we don't attempt to build the agent policy info and instead add
+    // the `integration deleted` tag to the action request, which means these are only
+    // visible in the space configured (via ref. data) show orphaned actions
+    const agentPolicyInfo: LogsEndpointAction['agent']['policy'] =
+      isSpacesEnabled && actionRequest.endpoint_ids.length > 0
         ? await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids)
         : [];
+    const tags: LogsEndpointAction['tags'] = actionRequest.tags ?? [];
+    const actionId = actionRequest.actionId || uuidv4();
 
-    if (isSpacesEnabled && agentPolicyInfo.length === 0) {
+    if (agentPolicyInfo.length === 0) {
       tags.push(ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted);
     }
 
