@@ -8,9 +8,7 @@
 import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_page';
 import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
-// Tests are not stable following the enablement of feature flag for space awareness. Issue is
-// being worked and these will be re-enabled soon.
-describe.skip(
+describe(
   'Blocklist RBAC',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
 

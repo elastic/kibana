@@ -10713,6 +10713,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enablePrivilegedUserMonitoring": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "securitySolution:defaultAnomalyScore": {
           "type": "long",
           "_meta": {
@@ -11281,6 +11287,12 @@
           }
         },
         "observability:aiAssistantSearchConnectorIndexPattern": {
+          "type": "text",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "ai:anonymizationSettings": {
           "type": "text",
           "_meta": {
             "description": "Non-default value of setting."
