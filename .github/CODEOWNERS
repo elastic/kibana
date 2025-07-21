@@ -2330,6 +2330,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/accessibility/apps/console.ts @elastic/kibana-management
 /x-pack/test/api_integration/services/index_management.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/index_lifecycle_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
 /x-pack/platform/test/functional/apps/grok_debugger @elastic/kibana-management
 /x-pack/platform/test/functional/apps/index_lifecycle_management @elastic/kibana-management
