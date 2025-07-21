@@ -24,7 +24,10 @@ export type UnifiedDocViewerStorybookArgs<T> = Omit<T, 'hit'> & {
 // The components will not render if some of these methods are not present, so add them here.
 const mockDataView = {
   ...dataViewMockWithTimeField,
-  fields: { getAll: jest.fn().mockReturnValue([]), getByName: () => jest.fn() },
+  fields: {
+    getAll: jest.fn().mockReturnValue([]),
+    getByName: jest.fn().mockReturnValue(jest.fn()),
+  },
 } as never;
 
 // Default args for all doc viewer stories.
