@@ -22,4 +22,10 @@ export class TelemetryClient implements ITelemetryClient {
       rule_type: ruleType,
     });
   }
+
+  reportLinkedDashboardViewed(dashboardId: string): void {
+    this.analytics.reportEvent(TelemetryEventTypes.LINKED_DASHBOARD_VIEW, {
+      dashboard_id: dashboardId,
+    });
+  }
 }

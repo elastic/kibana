@@ -12,11 +12,13 @@ export type TelemetryServiceStart = ITelemetryClient;
 export interface ITelemetryClient {
   reportRelatedAlertsLoaded(count: number): void;
   reportAlertDetailsPageView(ruleType: string): void;
+  reportLinkedDashboardViewed(dashboardId: string): void;
 }
 
 export enum TelemetryEventTypes {
   RELATED_ALERTS_LOADED = 'Related Alerts Loaded',
   ALERT_DETAILS_PAGE_VIEW = 'Alert Details Page View',
+  LINKED_DASHBOARD_VIEW = 'Linked Dashboard View',
 }
 
 interface RelatedAlertsLoadedParams {
@@ -36,6 +38,21 @@ interface AlertDetailsPageViewEvent {
   schema: RootSchema<AlertDetailsPageViewParams>;
 }
 
-export type TelemetryEvent = AlertDetailsPageViewEvent | RelatedAlertsLoadedEvent;
+interface LinkedDashboardViewParams {
+  dashboard_id: string;
+}
 
-export type TelemetryEventParams = RelatedAlertsLoadedParams | AlertDetailsPageViewParams;
+interface LinkedDashboardViewEvent {
+  eventType: TelemetryEventTypes.LINKED_DASHBOARD_VIEW;
+  schema: RootSchema<LinkedDashboardViewParams>;
+}
+
+export type TelemetryEvent =
+  | AlertDetailsPageViewEvent
+  | RelatedAlertsLoadedEvent
+  | LinkedDashboardViewEvent;
+
+export type TelemetryEventParams =
+  | RelatedAlertsLoadedParams
+  | AlertDetailsPageViewParams
+  | LinkedDashboardViewParams;

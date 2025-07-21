@@ -40,6 +40,7 @@ export function DashboardTile({
 }) {
   const {
     services: {
+      telemetryClient,
       share: { url: urlService },
     },
   } = useKibana();
@@ -49,12 +50,19 @@ export function DashboardTile({
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id}>
         <EuiFlexItem key={dashboard.id}>
+          {/* Allowing both href and onClick to allow telemetry to be reported */}
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
             data-test-subj="o11yDashboardTileLink"
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
             })}
             target="_blank"
+            onClick={() => {
+              if (telemetryClient) {
+                telemetryClient.reportLinkedDashboardViewed(dashboard.id);
+              }
+            }}
           >
             {dashboard.title}
           </EuiLink>
