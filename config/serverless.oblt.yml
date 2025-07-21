@@ -93,16 +93,8 @@ xpack.ml.dfa.enabled: true
 xpack.ml.nlp:
   enabled: true
   modelDeployment:
-    allowStaticAllocations: false
     vCPURange:
-      low:
-        min: 0
-        max: 2
-      medium:
-        min: 0
-        max: 32
       high:
-        min: 0
         max: 128
 xpack.ml.compatibleModuleType: 'observability'
 
