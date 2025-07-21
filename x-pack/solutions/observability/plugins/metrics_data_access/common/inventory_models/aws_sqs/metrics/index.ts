@@ -10,11 +10,11 @@ import { awsSQSMessagesDelayed } from './tsvb/aws_sqs_messages_delayed';
 import { awsSQSMessagesSent } from './tsvb/aws_sqs_messages_sent';
 import { awsSQSMessagesEmpty } from './tsvb/aws_sqs_messages_empty';
 import { awsSQSOldestMessage } from './tsvb/aws_sqs_oldest_message';
-import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
 import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
 import type { SQSAggregations } from './snapshot';
+import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 
-export const metrics = createInventoryModelMetrics<SQSAggregations>({
+export const metrics: InventoryMetricsConfig<SQSAggregations> = {
   tsvb: {
     awsSQSMessagesVisible,
     awsSQSMessagesDelayed,
@@ -29,4 +29,4 @@ export const metrics = createInventoryModelMetrics<SQSAggregations>({
   },
   defaultSnapshot: 'sqsMessagesVisible',
   defaultTimeRangeInSeconds: 14400,
-});
+};

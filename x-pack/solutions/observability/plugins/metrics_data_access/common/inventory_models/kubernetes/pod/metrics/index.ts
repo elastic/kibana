@@ -10,11 +10,11 @@ import { podCpuUsage } from './tsvb/pod_cpu_usage';
 import { podLogUsage } from './tsvb/pod_log_usage';
 import { podMemoryUsage } from './tsvb/pod_memory_usage';
 import { podNetworkTraffic } from './tsvb/pod_network_traffic';
-import { createInventoryModelMetrics } from '../../../shared/create_inventory_model';
 import { MetricsCatalog } from '../../../shared/metrics/metrics_catalog';
 import type { PodAggregations } from './snapshot';
+import type { InventoryMetricsConfig } from '../../../shared/metrics/types';
 
-export const metrics = createInventoryModelMetrics<PodAggregations>({
+export const metrics: InventoryMetricsConfig<PodAggregations> = {
   tsvb: {
     podOverview,
     podCpuUsage,
@@ -29,4 +29,4 @@ export const metrics = createInventoryModelMetrics<PodAggregations>({
   },
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
-});
+};

@@ -8,11 +8,10 @@
 import { awsEC2CpuUtilization } from './tsvb/aws_ec2_cpu_utilization';
 import { awsEC2NetworkTraffic } from './tsvb/aws_ec2_network_traffic';
 import { awsEC2DiskIOBytes } from './tsvb/aws_ec2_diskio_bytes';
-import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
 import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
 import type { SQSAggregations } from './snapshot';
-
-export const metrics = createInventoryModelMetrics<SQSAggregations>({
+import type { InventoryMetricsConfig } from '../../shared/metrics/types';
+export const metrics: InventoryMetricsConfig<SQSAggregations> = {
   tsvb: {
     awsEC2CpuUtilization,
     awsEC2NetworkTraffic,
@@ -25,4 +24,4 @@ export const metrics = createInventoryModelMetrics<SQSAggregations>({
   },
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
-});
+};

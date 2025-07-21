@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
 import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
+import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 import type { ContainerCharts } from './charts';
 import type { ContainerFormulas } from './formulas';
 import type { ContainerAggregations } from './snapshot';
 
-export const metrics = createInventoryModelMetrics<
+export const metrics: InventoryMetricsConfig<
   ContainerAggregations,
   ContainerFormulas,
   ContainerCharts
->({
+> = {
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema);
@@ -29,4 +29,4 @@ export const metrics = createInventoryModelMetrics<
   getCharts: async () => import('./charts').then(({ charts }) => charts),
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
-});
+};

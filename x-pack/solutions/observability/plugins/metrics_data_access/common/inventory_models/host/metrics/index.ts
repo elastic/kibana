@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createInventoryModelMetrics } from '../../shared/create_inventory_model';
 import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
 import type { HostAggregations } from './snapshot';
 import type { HostFormulas } from './formulas';
 import type { HostCharts } from './charts';
+import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 
-export const metrics = createInventoryModelMetrics<HostAggregations, HostFormulas, HostCharts>({
+export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, HostCharts> = {
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema);
@@ -27,4 +27,4 @@ export const metrics = createInventoryModelMetrics<HostAggregations, HostFormula
   },
   defaultSnapshot: 'cpuV2',
   defaultTimeRangeInSeconds: 3600, // 1 hour
-});
+};
