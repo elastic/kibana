@@ -410,7 +410,7 @@ describe('SearchBar', () => {
     });
   });
 
-  it('Should prefill with the draft query if provided', () => {
+  it('should prefill with the draft query if provided', () => {
     const draft = {
       query: { language: 'kuery', query: 'test_draft' },
       dateRangeFrom: 'now-30m',

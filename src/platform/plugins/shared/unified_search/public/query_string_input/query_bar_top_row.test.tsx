@@ -406,7 +406,7 @@ describe('QueryBarTopRowTopRow', () => {
   });
 
   describe('draft', () => {
-    it('Should call onDraftChange when in dirty state', () => {
+    it('should call onDraftChange when in dirty state', () => {
       const onDraftChange = jest.fn();
       const state = {
         query: kqlQuery,
@@ -425,7 +425,7 @@ describe('QueryBarTopRowTopRow', () => {
       expect(onDraftChange).toHaveBeenCalledWith(state);
     });
 
-    it('Should call onDraftChange when in dirty state and no date picker', () => {
+    it('should call onDraftChange when in dirty state and no date picker', () => {
       const onDraftChange = jest.fn();
       const state = {
         query: kqlQuery,
@@ -449,7 +449,7 @@ describe('QueryBarTopRowTopRow', () => {
       });
     });
 
-    it('Should call onDraftChange with empty draft when in normal state', () => {
+    it('should call onDraftChange with empty draft when in normal state', () => {
       const onDraftChange = jest.fn();
       const state = {
         query: kqlQuery,
@@ -465,7 +465,7 @@ describe('QueryBarTopRowTopRow', () => {
       );
 
       expect(getByText(kqlQuery.query)).toBeInTheDocument();
-      expect(onDraftChange).toHaveBeenCalledWith(null);
+      expect(onDraftChange).toHaveBeenCalledWith(undefined);
     });
   });
 });
