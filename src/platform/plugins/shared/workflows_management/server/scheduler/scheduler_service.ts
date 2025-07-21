@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/core/server';
-import { WorkflowExecutionEngineModel, EsWorkflow } from '@kbn/workflows';
-import { WorkflowsService } from '../workflows_management/workflows_management_service';
-import { extractConnectorIds } from './lib/extract_connector_ids';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import { v4 as generateUuid } from 'uuid';
-import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import { Logger } from '@kbn/core/server';
+import { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import { v4 as generateUuid } from 'uuid';
 import { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from './lib/extract_connector_ids';
 
