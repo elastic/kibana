@@ -334,11 +334,20 @@ export function LensEditConfigurationFlyout({
             .euiAccordion__childWrapper {
               min-block-size: 0;
             }
+
             .euiAccordion {
               display: flex;
               flex: 1;
               flex-direction: column;
             }
+
+            .euiAccordion-isOpen {
+              .euiAccordion__childWrapper {
+                block-size: auto !important; // Override euiAccordion__childWrapper blockSize
+                flex: 1;
+              }
+            }
+
             .euiAccordion__childWrapper {
               ${euiScrollBarStyles(euiTheme)}
               overflow-y: auto !important;
@@ -347,11 +356,6 @@ export function LensEditConfigurationFlyout({
               margin-left: -${euiThemeVars.euiFormMaxWidth};
               > * {
                 pointer-events: auto;
-              }
-
-              .euiAccordion-isOpen & {
-                block-size: auto !important;
-                flex: 1;
               }
             }
             .lnsIndexPatternDimensionEditor-advancedOptions {
@@ -364,7 +368,14 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <EuiFlexItem grow={false}><EuiFlexGroup css={css({'>': {flexGrow: 0 }})} gutterSize='none'  direction="column" ref={editorContainer} /></EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              css={css({ '>': { flexGrow: 0 } })}
+              gutterSize="none"
+              direction="column"
+              ref={editorContainer}
+            />
+          </EuiFlexItem>
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
