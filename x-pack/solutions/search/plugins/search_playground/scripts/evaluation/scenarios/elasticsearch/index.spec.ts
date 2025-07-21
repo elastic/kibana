@@ -110,7 +110,7 @@ describe('Elasticsearch function', () => {
               prompt: 'You are an assistant for question-answering tasks.',
               citations: true,
               elasticsearch_query:
-                '{"retriever":{"standard":{"query":{"semantic":{"field":"text","query":"{query}"}}}},"highlight":{"fields":{"text":{"type":"semantic","number_of_fragments":2,"order":"score"}}}}',
+                '{"retriever":{"standard":{"query":{"match_all":{}}}},"highlight":{"fields":{"text":{"type":"semantic","number_of_fragments":2,"order":"score"}}}}',
               summarization_model: 'anthropic.claude-3-haiku-20240307-v1:0',
               doc_size: 1,
               source_fields: '{"search-azwv":["text"]}',
@@ -118,9 +118,24 @@ describe('Elasticsearch function', () => {
             messages: [{ role: 'human', content: 'Die hard' }],
           }
         );
-        // console.log('Response for /internal/search_playground/chat:');
-        // const arr = response?.data as any[];
-        // console.log(arr);
+
+        const chatMessages = [
+          {
+            role: MessageRole.User,
+            content: response.data as string,
+            data: response.data as string,
+          },
+        ];
+
+        const result = await chatClient.evaluate(
+          {
+            messages: chatMessages,
+            errors: [],
+          },
+          ['The assistant does not have enough context to answer the question']
+        );
+
+        expect(result.passed).to.be(true);
       });
 
       after(async () => {
