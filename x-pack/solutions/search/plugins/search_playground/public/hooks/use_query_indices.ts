@@ -7,8 +7,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
-import { useKibana } from './use_kibana';
+import { SearchPlaygroundQueryKeys } from '../../common';
 import { APIRoutes } from '../types';
+import { useKibana } from './use_kibana';
 
 export const useQueryIndices = (
   {
@@ -22,7 +23,7 @@ export const useQueryIndices = (
   const { services } = useKibana();
 
   const { data, isLoading, isFetched } = useQuery({
-    queryKey: ['indices', query],
+    queryKey: [SearchPlaygroundQueryKeys.QueryIndices, query],
     queryFn: async () => {
       try {
         const response = await services.http.get<{
