@@ -2769,8 +2769,8 @@ paths:
               properties:
                 objects:
                   description: >-
-                    Array of rule signature `rule_id` fields. Exports all rules
-                    when unspecified.
+                    Array of objects with a rule's `rule_id` field. Do not use
+                    rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -4143,8 +4143,8 @@ components:
           type: string
         ids:
           description: >
-            Array of saved object rule IDs to which a bulk action will be
-            applied. Rule signature ID `rule_id` is supported.
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
 
             Only valid when query property is undefined.
           items:
@@ -4171,8 +4171,8 @@ components:
           type: string
         ids:
           description: >
-            Array of saved object rule IDs to which a bulk action will be
-            applied. Rule signature ID `rule_id` is supported.
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
 
             Only valid when query property is undefined.
           items:
@@ -4212,8 +4212,8 @@ components:
           type: string
         ids:
           description: >
-            Array of saved object rule IDs to which a bulk action will be
-            applied. Rule signature ID `rule_id` is supported.
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
 
             Only valid when query property is undefined.
           items:
@@ -4320,8 +4320,8 @@ components:
           type: string
         ids:
           description: >
-            Array of saved object rule IDs to which a bulk action will be
-            applied. Rule signature ID `rule_id` is supported.
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
 
             Only valid when query property is undefined.
           items:
@@ -4353,8 +4353,8 @@ components:
           type: string
         ids:
           description: >
-            Array of saved object rule IDs to which a bulk action will be
-            applied. Rule signature ID `rule_id` is supported.
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
 
             Only valid when query property is undefined.
           items:
@@ -4383,8 +4383,8 @@ components:
           type: string
         ids:
           description: >
-            Array of saved object rule IDs to which a bulk action will be
-            applied. Rule signature ID `rule_id` is supported.
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
 
             Only valid when query property is undefined.
           items:
@@ -4430,8 +4430,8 @@ components:
           type: string
         ids:
           description: >
-            Array of saved object rule IDs to which a bulk action will be
-            applied. Rule signature ID `rule_id` is supported.
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
 
             Only valid when query property is undefined.
           items:
@@ -4459,8 +4459,8 @@ components:
           type: string
         ids:
           description: >
-            Array of saved object rule IDs to which a bulk action will be
-            applied. Rule signature ID `rule_id` is supported.
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
 
             Only valid when query property is undefined.
           items:
