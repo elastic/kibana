@@ -9,11 +9,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { 
-  createKbnUrlStateStorage, 
+import {
+  createKbnUrlStateStorage,
   withNotifyOnErrors,
   syncState,
-  createStateContainer 
+  createStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -84,13 +84,13 @@ export function useWorkflowUrlStateAdvanced() {
   const setActiveTab = useCallback(
     (tab: 'workflow' | 'executions') => {
       const updates: Partial<WorkflowUrlStateAdvanced> = { tab };
-      
+
       // When switching to workflow tab, clear execution-specific state
       if (tab === 'workflow') {
         updates.executionId = undefined;
         updates.executionFilters = undefined;
       }
-      
+
       stateContainer.set({
         ...state,
         ...updates,
@@ -135,15 +135,15 @@ export function useWorkflowUrlStateAdvanced() {
     activeTab: state.tab,
     selectedExecutionId: state.executionId,
     executionFilters: state.executionFilters,
-    
+
     // State setters
     setActiveTab,
     setSelectedExecution,
     setExecutionFilters,
     updateState,
-    
+
     // Full state for advanced usage
     state,
     stateContainer,
   };
-} 
+}

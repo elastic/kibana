@@ -9,9 +9,9 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
 
 export interface WorkflowTaskParams {
@@ -45,7 +45,7 @@ export function createWorkflowTaskRunner({
     return {
       async run() {
         logger.info(`Running scheduled workflow task for workflow ${workflowId}`);
-        
+
         try {
           // Get the workflow
           const workflow = await workflowsService.getWorkflow(workflowId);
@@ -62,7 +62,10 @@ export function createWorkflowTaskRunner({
           };
 
           // Extract connector credentials for the workflow
-          const connectorCredentials = await extractConnectorIds(workflowExecutionModel, actionsClient);
+          const connectorCredentials = await extractConnectorIds(
+            workflowExecutionModel,
+            actionsClient
+          );
 
           // Execute the workflow
           const executionId = await workflowsExecutionEngine.executeWorkflow(
@@ -80,7 +83,9 @@ export function createWorkflowTaskRunner({
             }
           );
 
-          logger.info(`Successfully executed scheduled workflow ${workflowId}, execution ID: ${executionId}`);
+          logger.info(
+            `Successfully executed scheduled workflow ${workflowId}, execution ID: ${executionId}`
+          );
 
           return {
             state: {
@@ -93,7 +98,7 @@ export function createWorkflowTaskRunner({
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           logger.error(`Failed to execute scheduled workflow ${workflowId}: ${errorMessage}`);
-          
+
           return {
             state: {
               ...state,
@@ -110,4 +115,4 @@ export function createWorkflowTaskRunner({
       },
     };
   };
-} 
+}

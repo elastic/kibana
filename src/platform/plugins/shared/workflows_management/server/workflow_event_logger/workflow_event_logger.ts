@@ -89,7 +89,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
   public logEvent(eventProperties: WorkflowLogEvent): void {
     const event: WorkflowLogEvent = this.createBaseEvent();
-    
+
     // Merge context, default properties, and provided properties
     merge(event, eventProperties);
 
@@ -116,9 +116,13 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     });
   }
 
-  public logError(message: string, error?: Error, additionalData: Partial<WorkflowLogEvent> = {}): void {
+  public logError(
+    message: string,
+    error?: Error,
+    additionalData: Partial<WorkflowLogEvent> = {}
+  ): void {
     const errorData: Partial<WorkflowLogEvent> = {};
-    
+
     if (error) {
       errorData.error = {
         message: error.message,
@@ -176,7 +180,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   public startTiming(event: WorkflowLogEvent): void {
     const timingKey = this.getTimingKey(event);
     this.timings.set(timingKey, new Date());
-    
+
     // Log start event
     this.logEvent({
       ...event,
@@ -191,11 +195,11 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   public stopTiming(event: WorkflowLogEvent): void {
     const timingKey = this.getTimingKey(event);
     const startTime = this.timings.get(timingKey);
-    
+
     if (startTime) {
       const endTime = new Date();
       const duration = endTime.getTime() - startTime.getTime();
-      
+
       this.logEvent({
         ...event,
         event: {
@@ -207,23 +211,22 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
           outcome: event.event?.outcome || 'success',
         },
       });
-      
+
       this.timings.delete(timingKey);
     }
   }
 
-  public createStepLogger(stepId: string, stepName?: string, stepType?: string): IWorkflowEventLogger {
-    return new WorkflowEventLogger(
-      this.esClient,
-      this.logger,
-      this.indexName,
-      {
-        ...this.context,
-        stepId,
-        stepName,
-        stepType,
-      }
-    );
+  public createStepLogger(
+    stepId: string,
+    stepName?: string,
+    stepType?: string
+  ): IWorkflowEventLogger {
+    return new WorkflowEventLogger(this.esClient, this.logger, this.indexName, {
+      ...this.context,
+      stepId,
+      stepName,
+      stepType,
+    });
   }
 
   private createBaseEvent(): WorkflowLogEvent {
@@ -245,18 +248,20 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
   }
 
   private getTimingKey(event: WorkflowLogEvent): string {
-    return `${this.context.executionId || 'unknown'}-${event.event?.action || 'unknown'}-${this.context.stepId || 'workflow'}`;
+    return `${this.context.executionId || 'unknown'}-${event.event?.action || 'unknown'}-${
+      this.context.stepId || 'workflow'
+    }`;
   }
 
   private queueEvent(doc: Doc): void {
     this.eventQueue.push(doc);
-    
+
     // Buffer events and flush them periodically
     if (this.eventQueue.length >= 10) {
-      this.flushEvents();
+      void this.flushEvents();
     } else if (!this.flushTimeout) {
       this.flushTimeout = setTimeout(() => {
-        this.flushEvents();
+        void this.flushEvents();
       }, 5000); // Flush every 5 seconds
     }
   }
@@ -266,7 +271,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
     const events = [...this.eventQueue];
     this.eventQueue = [];
-    
+
     if (this.flushTimeout) {
       clearTimeout(this.flushTimeout);
       this.flushTimeout = null;
@@ -274,7 +279,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
     try {
       const bulkBody: Array<Record<string, unknown>> = [];
-      
+
       for (const doc of events) {
         bulkBody.push({ create: {} });
         bulkBody.push(doc.body);
@@ -292,7 +297,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
         eventsCount: events.length,
         error: error.stack,
       });
-      
+
       // Re-queue events for retry (optional)
       this.eventQueue.unshift(...events);
     }
@@ -303,8 +308,8 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
       clearTimeout(this.flushTimeout);
       this.flushTimeout = null;
     }
-    
+
     // Flush any remaining events
     await this.flushEvents();
   }
-} 
+}

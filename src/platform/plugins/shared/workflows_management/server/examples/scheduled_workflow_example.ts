@@ -127,4 +127,4 @@ workflow:
         message: 'Generating daily report for {{now}}'
 `,
   };
-}; 
+};

@@ -10,7 +10,11 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createIndexWithMappings } from '../workflows_management/lib/create_index';
 import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
-import { WorkflowEventLogger, IWorkflowEventLogger, WorkflowEventLoggerContext } from './workflow_event_logger';
+import {
+  WorkflowEventLogger,
+  IWorkflowEventLogger,
+  WorkflowEventLoggerContext,
+} from './workflow_event_logger';
 
 export interface WorkflowEventLoggerServiceOptions {
   esClient: ElasticsearchClient;
@@ -56,12 +60,7 @@ export class WorkflowEventLoggerService {
       throw new Error('WorkflowEventLoggerService not initialized. Call initialize() first.');
     }
 
-    return new WorkflowEventLogger(
-      this.esClient,
-      this.logger,
-      this.indexName,
-      context
-    );
+    return new WorkflowEventLogger(this.esClient, this.logger, this.indexName, context);
   }
 
   public createWorkflowLogger(workflowId: string, workflowName?: string): IWorkflowEventLogger {
@@ -178,4 +177,4 @@ export class WorkflowEventLoggerService {
     // Implementation for graceful shutdown
     this.logger.debug('Workflow event logger service shutting down');
   }
-} 
+}

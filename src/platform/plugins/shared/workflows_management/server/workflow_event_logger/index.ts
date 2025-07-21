@@ -8,5 +8,10 @@
  */
 
 export { WorkflowEventLoggerService } from './workflow_event_logger_service';
-export { WorkflowEventLogger, type IWorkflowEventLogger, type WorkflowEventLoggerContext, type WorkflowLogEvent } from './workflow_event_logger';
-export { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings'; 
+export {
+  WorkflowEventLogger,
+  type IWorkflowEventLogger,
+  type WorkflowEventLoggerContext,
+  type WorkflowLogEvent,
+} from './workflow_event_logger';
+export { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';

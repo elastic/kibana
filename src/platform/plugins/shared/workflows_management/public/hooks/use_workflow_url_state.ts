@@ -31,7 +31,7 @@ export function useWorkflowUrlState() {
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>) => {
       const currentParams = parse(location.search);
-      
+
       // Update the params with new values
       const newParams = {
         ...currentParams,
@@ -84,10 +84,10 @@ export function useWorkflowUrlState() {
     // Current state
     activeTab: urlState.tab,
     selectedExecutionId: urlState.executionId,
-    
+
     // State setters
     setActiveTab,
     setSelectedExecution,
     updateUrlState,
   };
-} 
+}

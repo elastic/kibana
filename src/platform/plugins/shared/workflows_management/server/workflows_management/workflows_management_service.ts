@@ -57,7 +57,7 @@ export class WorkflowsService {
     this.getSavedObjectsClient = getSavedObjectsClient;
     this.stepsExecutionIndex = stepsExecutionIndex;
     this.workflowsExecutionIndex = workflowsExecutionIndex;
-    this.initialize(esClientPromise, workflowExecutionLogsIndex);
+    void this.initialize(esClientPromise, workflowExecutionLogsIndex);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {

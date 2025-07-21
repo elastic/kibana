@@ -115,4 +115,4 @@ export const WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'keyword',
     },
   },
-}; 
+};

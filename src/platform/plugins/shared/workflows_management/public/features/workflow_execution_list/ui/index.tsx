@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { ExecutionStatus, EsWorkflowExecution } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
 import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
@@ -64,7 +64,7 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
     {
       field: 'triggeredBy',
       name: 'Triggered by',
-      render: (value: string) => value ? value.charAt(0).toUpperCase() + value.slice(1) : '',
+      render: (value: string) => (value ? value.charAt(0).toUpperCase() + value.slice(1) : ''),
     },
     {
       field: 'startedAt',

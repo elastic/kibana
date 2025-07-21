@@ -33,7 +33,6 @@ import { SchedulerService } from './scheduler/scheduler_service';
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import {
-  WORKFLOWS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
   WORKFLOWS_EXECUTION_LOGS_INDEX,
@@ -87,7 +86,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
               async run() {
                 // Get dependencies when the task actually runs
                 const [coreStart, pluginsStart] = await core.getStartServices();
-                
+
                 // Create the actual task runner with dependencies
                 const taskRunner = createWorkflowTaskRunner({
                   logger: plugin.logger,
@@ -95,7 +94,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
                   workflowsExecutionEngine: (pluginsStart as any).workflowsExecutionEngine,
                   actionsClient: plugin.unsecureActionsClient!,
                 })({ taskInstance });
-                
+
                 return taskRunner.run();
               },
               async cancel() {
@@ -304,10 +303,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
     // Initialize workflow task scheduler with the start contract
-    this.workflowTaskScheduler = new WorkflowTaskScheduler(
-      this.logger,
-      plugins.taskManager
-    );
+    this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
 
     // Set task scheduler in workflows service
     if (this.workflowsService) {

@@ -70,4 +70,4 @@ export function useWorkflowExecutionLogs({
   });
 }
 
-export type { WorkflowExecutionLogEntry, WorkflowExecutionLogsResponse }; 
+export type { WorkflowExecutionLogEntry, WorkflowExecutionLogsResponse };

@@ -316,7 +316,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       try {
         const { workflowExecutionId } = request.params;
         const { limit, offset, sortField, sortOrder } = request.query;
-        
+
         const logs = await api.getWorkflowExecutionLogs({
           executionId: workflowExecutionId,
           limit,
@@ -324,12 +324,11 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
           sortField,
           sortOrder,
         });
-        
+
         return response.ok({
           body: logs,
         });
       } catch (error) {
-        console.error(error);
         return response.customError({
           statusCode: 500,
           body: {
@@ -339,6 +338,4 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       }
     }
   );
-
-
 }

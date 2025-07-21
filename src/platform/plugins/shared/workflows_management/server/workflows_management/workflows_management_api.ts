@@ -113,7 +113,7 @@ export class WorkflowsManagementApi {
     params: GetWorkflowExecutionLogsParams
   ): Promise<WorkflowExecutionLogsDto> {
     const result = await this.workflowsService.getExecutionLogs(params.executionId);
-    
+
     // Transform the logs to match our API format
     return {
       logs: result.logs.map((log: any) => ({
@@ -132,6 +132,4 @@ export class WorkflowsManagementApi {
       offset: params.offset || 0,
     };
   }
-
-
 }

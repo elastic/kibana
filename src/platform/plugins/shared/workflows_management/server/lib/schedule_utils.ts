@@ -8,12 +8,12 @@
  */
 
 // Define the trigger type based on the schema
-type WorkflowTrigger = {
+interface WorkflowTrigger {
   id: string;
   type: 'triggers.elastic.detectionRule' | 'triggers.elastic.scheduled' | 'triggers.elastic.manual';
   with?: Record<string, any>;
   enabled?: boolean;
-};
+}
 
 /**
  * Converts a workflow scheduled trigger to a task manager schedule format
@@ -24,7 +24,7 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
   }
 
   const config = trigger.with || {};
-  
+
   // Handle interval-based scheduling (e.g., every 5 minutes)
   if (config.every && config.unit) {
     // Map common units to Task Manager cadence abbreviations
@@ -57,19 +57,21 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
     const cadence = unitMap[unit];
     if (!cadence) {
       throw new Error(
-        `Invalid schedule configuration: unsupported unit "${config.unit}". Supported units: ${Object.keys(unitMap).join(', ')}`
+        `Invalid schedule configuration: unsupported unit "${
+          config.unit
+        }". Supported units: ${Object.keys(unitMap).join(', ')}`
       );
     }
 
     const interval = `${every}${cadence}`;
     return { interval };
   }
-  
+
   // Handle cron-based scheduling
   if (config.cron) {
     return { interval: config.cron };
   }
-  
+
   throw new Error('Invalid schedule configuration. Must have either "every" and "unit" or "cron"');
 }
 
@@ -77,12 +79,16 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
  * Checks if a workflow has any scheduled triggers
  */
 export function hasScheduledTriggers(triggers: WorkflowTrigger[]): boolean {
-  return triggers.some(trigger => trigger.type === 'triggers.elastic.scheduled' && trigger.enabled);
+  return triggers.some(
+    (trigger) => trigger.type === 'triggers.elastic.scheduled' && trigger.enabled
+  );
 }
 
 /**
  * Gets all scheduled triggers from a workflow
  */
 export function getScheduledTriggers(triggers: WorkflowTrigger[]): WorkflowTrigger[] {
-  return triggers.filter(trigger => trigger.type === 'triggers.elastic.scheduled' && trigger.enabled);
-} 
+  return triggers.filter(
+    (trigger) => trigger.type === 'triggers.elastic.scheduled' && trigger.enabled
+  );
+}
