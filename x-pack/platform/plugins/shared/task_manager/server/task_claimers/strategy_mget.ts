@@ -28,7 +28,7 @@ import type {
 } from '../task';
 import { TaskStatus, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
-import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
+import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import type { TaskClaim } from '../task_events';
 import { asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
@@ -91,19 +91,10 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const initialCapacity = getCapacity();
   const stopTaskTimer = startTaskTimer();
 
-  const taskTypes = new Set<string>();
-  batches.forEach((batch) => {
-    if (isLimited(batch)) {
-      taskTypes.add(batch.tasksTypes);
-    } else {
-      batch.tasksTypes.forEach((type) => taskTypes.add(type));
-    }
-  });
-
   // get a list of candidate tasks to claim, with their version info
   const { docs, versionMap } = await searchAvailableTasks({
     definitions,
-    taskTypes,
+    taskTypes: new Set(definitions.getAllTypes()),
     excludedTaskTypePatterns: excludedTaskTypes,
     taskStore,
     events$,
