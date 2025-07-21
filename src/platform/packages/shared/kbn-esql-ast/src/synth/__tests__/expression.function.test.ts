@@ -10,10 +10,10 @@
 import { BasicPrettyPrinter } from '../../pretty_print';
 import { ESQLProperNode } from '../../types';
 import { Walker } from '../../walker/walker';
-import { expr } from '../expr';
+import { exp } from '../expression';
 
 test('can generate integer literal', () => {
-  const node = expr('42');
+  const node = exp('42');
 
   expect(node).toMatchObject({
     type: 'literal',
@@ -24,7 +24,7 @@ test('can generate integer literal', () => {
 });
 
 test('can generate a map', () => {
-  const node = expr('{"x": 1}');
+  const node = exp('{"x": 1}');
 
   expect(node).toMatchObject({
     type: 'map',
@@ -33,7 +33,7 @@ test('can generate a map', () => {
 });
 
 test('can generate integer literal and keep comment', () => {
-  const node = expr('42 /* my 42 */');
+  const node = exp('42 /* my 42 */');
 
   expect(node).toMatchObject({
     type: 'literal',
@@ -52,7 +52,7 @@ test('can generate integer literal and keep comment', () => {
 });
 
 test('can generate a function call expression', () => {
-  const node = expr('fn(1, "test")');
+  const node = exp('fn(1, "test")');
 
   expect(node).toMatchObject({
     type: 'function',
@@ -74,7 +74,7 @@ test('can generate a function call expression', () => {
 
 test('can generate assignment expression', () => {
   const src = 'a.b.c = AGG(123)';
-  const node = expr(src);
+  const node = exp(src);
   const text = BasicPrettyPrinter.expression(node);
 
   expect(text).toBe(src);
@@ -82,7 +82,7 @@ test('can generate assignment expression', () => {
 
 test('can generate comparison expression', () => {
   const src = 'a.b.c >= FN(123)';
-  const node = expr(src);
+  const node = exp(src);
   const text = BasicPrettyPrinter.expression(node);
 
   expect(text).toBe(src);
@@ -130,7 +130,7 @@ describe('can generate various expression types', () => {
 
   for (const [name, src] of cases) {
     test(name, () => {
-      const node = expr(src);
+      const node = exp(src);
       const text = BasicPrettyPrinter.expression(node);
 
       expect(text).toBe(src);
@@ -140,7 +140,7 @@ describe('can generate various expression types', () => {
 
 test('parser fields are empty', () => {
   const src = 'a.b.c >= FN(123)';
-  const ast = expr(src);
+  const ast = exp(src);
 
   const assertParserFields = (node: ESQLProperNode) => {
     expect(node.location.min).toBe(0);
