@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { right } from 'fp-ts/Either';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { getLensAttributes } from './get_lens_attributes';
 import { useColumns } from './use_columns';
@@ -26,7 +25,7 @@ import type { TableItemType } from './types';
 
 const PrivilegedUserMonitoringSampleDashboardComponent = () => {
   const columns = useColumns();
-  const esqlSource = useMemo(() => right(generateESQLSource()), []); // It needs to be memoized to avoid re-generating source data on every render
+  const esqlSource = useMemo(() => generateESQLSource(), []); // It needs to be memoized to avoid re-generating source data on every render
   const bucketTimerange = useMemo(() => getBucketTimeRange(), []);
   const generateTableQuery = useMemo(() => generateListESQLQuery(esqlSource), [esqlSource]);
   const generateVisualizationQuery = useMemo(

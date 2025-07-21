@@ -38,11 +38,11 @@ const generateUserRowData = ({ quantity, user, target, right: userPrivilege, ip 
 
 export const generateESQLSource = () => {
   const rows = GRANTED_RIGHTS_DATA.map((row) => generateUserRowData(row)).join(',');
-  return `ROW data=[${rows}]
+  return right(`ROW data=[${rows}]
             | MV_EXPAND data
             | EVAL row = SPLIT(data, ",")
             | EVAL privileged_user = MV_SLICE(row, 0), target_user = MV_SLICE(row, 1), right = MV_SLICE(row, 2), ip = MV_SLICE(row, 3), @timestamp = MV_SLICE(row, 4)
-            | DROP row`;
+            | DROP row`);
 };
 
 export const generateListESQLQuery =
