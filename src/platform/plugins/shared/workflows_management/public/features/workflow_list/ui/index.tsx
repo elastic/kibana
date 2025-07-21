@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
 import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiLink,
-  EuiBadge,
-  useEuiTheme,
-  toSentenceCase,
-  EuiSpacer,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  toSentenceCase,
+  useEuiTheme,
 } from '@elastic/eui';
-import { Link } from 'react-router-dom';
-import { Chart, BarSeries, ScaleType, Settings } from '@elastic/charts';
-import { ExecutionStatus, WorkflowListItemDto } from '@kbn/workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
+import { ExecutionStatus, WorkflowListItemDto } from '@kbn/workflows';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useWorkflowActions } from '../../../entities/workflows/model/useWorkflowActions';
+import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
 
 export function WorkflowList() {
   const { euiTheme } = useEuiTheme();

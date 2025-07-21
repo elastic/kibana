@@ -9,34 +9,32 @@
 
 import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
-  transformWorkflowYamlJsontoEsWorkflow,
-  WorkflowExecutionDto,
-  WorkflowListDto,
-  WorkflowExecutionHistoryModel,
-} from '@kbn/workflows';
-import {
   CreateWorkflowCommand,
   EsWorkflow,
+  transformWorkflowYamlJsontoEsWorkflow,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
+  WorkflowListDto,
 } from '@kbn/workflows';
-import { getWorkflowExecution } from './lib/get_workflow_execution';
-import { GetWorkflowsParams } from './workflows_management_api';
-import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
-import { getYamlStringFromJSON, parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
-import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import { createIndexWithMappings } from './lib/create_index';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-} from './lib/index_mappings';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
 import {
   WORKFLOW_SAVED_OBJECT_TYPE,
   WorkflowSavedObjectAttributes,
 } from '../saved_objects/workflow';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import { WorkflowEventLoggerService, type IWorkflowEventLogger } from '../workflow_event_logger';
+import { createIndexWithMappings } from './lib/create_index';
+import { getWorkflowExecution } from './lib/get_workflow_execution';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+} from './lib/index_mappings';
+import { searchWorkflowExecutions } from './lib/search_workflow_executions';
+import { GetWorkflowsParams } from './workflows_management_api';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -66,7 +64,10 @@ export class WorkflowsService {
     this.taskScheduler = taskScheduler;
   }
 
-  private async initialize(esClientPromise: Promise<ElasticsearchClient>, workflowExecutionLogsIndex: string) {
+  private async initialize(
+    esClientPromise: Promise<ElasticsearchClient>,
+    workflowExecutionLogsIndex: string
+  ) {
     this.esClient = await esClientPromise;
     this.logger.debug('Elasticsearch client initialized');
 
@@ -94,7 +95,9 @@ export class WorkflowsService {
       }),
     ]);
 
-    this.logger.debug('Workflow execution indices and event logger initialized with proper mappings');
+    this.logger.debug(
+      'Workflow execution indices and event logger initialized with proper mappings'
+    );
   }
 
   public async searchWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
@@ -135,7 +138,7 @@ export class WorkflowsService {
     });
 
     const executionHistoryResults = await Promise.all(executionHistoryPromises);
-    
+
     // Create a map for quick lookup
     const historyByWorkflowId = executionHistoryResults.reduce((acc, result) => {
       acc[result.workflowId] = result.history;
@@ -145,12 +148,14 @@ export class WorkflowsService {
     const results = response.saved_objects.map((so) => {
       const workflowName = so.attributes.name;
       const workflowHistory = historyByWorkflowId[so.id] || [];
-      
+
       // Update workflowName in history items
-      const historyWithWorkflowName = workflowHistory.map((historyItem: WorkflowExecutionHistoryModel) => ({
-        ...historyItem,
-        workflowName,
-      }));
+      const historyWithWorkflowName = workflowHistory.map(
+        (historyItem: WorkflowExecutionHistoryModel) => ({
+          ...historyItem,
+          workflowName,
+        })
+      );
 
       return {
         id: so.id,
@@ -224,6 +229,7 @@ export class WorkflowsService {
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
     }
+    // @ts-expect-error - TODO: fix this
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;
 
     const savedObjectData: WorkflowSavedObjectAttributes = {
@@ -246,7 +252,7 @@ export class WorkflowsService {
     if (this.taskScheduler && workflowToCreate.triggers) {
       for (const trigger of workflowToCreate.triggers) {
         if (trigger.type === 'schedule' && trigger.enabled) {
-          await this.taskScheduler.scheduleWorkflowTask(response.id, trigger.config);
+          await this.taskScheduler.scheduleWorkflowTask(response.id, 'default', trigger);
         }
       }
     }
@@ -279,6 +285,7 @@ export class WorkflowsService {
       if (!parsedYaml.success) {
         throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
       }
+      // @ts-expect-error - TODO: fix this
       const updatedWorkflow = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data) as any;
       updateData = {
         name: updatedWorkflow.name,
@@ -294,7 +301,7 @@ export class WorkflowsService {
       if (this.taskScheduler && updatedWorkflow.definition?.workflow?.triggers) {
         // Remove existing scheduled tasks for this workflow
         await this.taskScheduler.unscheduleWorkflowTasks(id);
-        
+
         // Add new scheduled tasks
         for (const trigger of updatedWorkflow.definition.workflow.triggers) {
           if (trigger.type === 'triggers.elastic.scheduled') {
@@ -367,7 +374,11 @@ export class WorkflowsService {
     if (!this.workflowEventLoggerService) {
       throw new Error('Workflow event logger service not initialized');
     }
-    return this.workflowEventLoggerService.createExecutionLogger(workflowId, executionId, workflowName);
+    return this.workflowEventLoggerService.createExecutionLogger(
+      workflowId,
+      executionId,
+      workflowName
+    );
   }
 
   public getStepLogger(

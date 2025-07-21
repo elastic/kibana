@@ -27,7 +27,7 @@ import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
 import { useWorkflowDetail } from '../../../entities/workflows/model/useWorkflowDetail';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common';
-import { WorkflowExecutionLogsTable } from '../../workflow-execution-logs/ui';
+import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui';
 
 interface WorkflowExecutionProps {
   workflowExecutionId: string;

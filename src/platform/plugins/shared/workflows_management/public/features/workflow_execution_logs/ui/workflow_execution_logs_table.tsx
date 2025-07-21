@@ -12,7 +12,6 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBadge,
-  EuiText,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -22,9 +21,9 @@ import {
   EuiIcon,
   formatDate,
 } from '@elastic/eui';
-import { 
-  useWorkflowExecutionLogs, 
-  type WorkflowExecutionLogEntry 
+import {
+  useWorkflowExecutionLogs,
+  type WorkflowExecutionLogEntry,
 } from '../../../entities/workflows/api/use_workflow_execution_logs';
 
 interface WorkflowExecutionLogsTableProps {
@@ -71,11 +70,11 @@ export const WorkflowExecutionLogsTable: React.FC<WorkflowExecutionLogsTableProp
             warn: 'warning',
             error: 'danger',
           } as const;
-          
+
           if (!level) {
             return <EuiBadge color="default">UNKNOWN</EuiBadge>;
           }
-          
+
           return <EuiBadge color={colorMap[level]}>{level.toUpperCase()}</EuiBadge>;
         },
       },
@@ -86,11 +85,10 @@ export const WorkflowExecutionLogsTable: React.FC<WorkflowExecutionLogsTableProp
         render: (stepName: string | undefined, log: WorkflowExecutionLogEntry) => {
           const displayName = stepName || log.stepId || 'Workflow';
           const icon = stepName || log.stepId ? 'node' : 'workflow';
-          
+
           return (
             <EuiBadge color="hollow">
-              <EuiIcon type={icon} size="s" />{' '}
-              {displayName}
+              <EuiIcon type={icon} size="s" /> {displayName}
             </EuiBadge>
           );
         },
@@ -127,11 +125,7 @@ export const WorkflowExecutionLogsTable: React.FC<WorkflowExecutionLogsTableProp
         iconType="error"
         title={<h3>Error loading execution logs</h3>}
         body={<p>Failed to load workflow execution logs. Please try again.</p>}
-        actions={[
-          <button onClick={() => refetch()}>
-            Retry
-          </button>
-        ]}
+        actions={[<button onClick={() => refetch()}>Retry</button>]}
       />
     );
   }
@@ -152,11 +146,7 @@ export const WorkflowExecutionLogsTable: React.FC<WorkflowExecutionLogsTableProp
         <h3>Execution Logs</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiBasicTable
-        columns={columns}
-        items={logsData.logs}
-        responsiveBreakpoint={false}
-      />
+      <EuiBasicTable columns={columns} items={logsData.logs} responsiveBreakpoint={false} />
     </div>
   );
 };

@@ -1,9 +1,17 @@
-import { WorkflowContextManager } from '../workflow-context-manager/workflow-context-manager';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 // Import specific step types as needed from schema
-import { z } from '@kbn/zod';
 // import { evaluate } from '@marcbachmann/cel-js'
-import { WorkflowTemplatingEngine } from '../templating-engine';
-import { ConnectorExecutor } from '../connector-executor';
+import { WorkflowTemplatingEngine } from '../templating_engine';
+import { ConnectorExecutor } from '../connector_executor';
+import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 
 export interface RunStepResult {
   output: any;
@@ -45,50 +53,50 @@ export abstract class StepBase<TStep extends BaseStep> {
 
   public async run(): Promise<RunStepResult> {
     const stepName = this.getName();
-    
+
     // Set step context for logging
     this.contextManager.setCurrentStep(stepName, stepName, this.step.type);
-    
+
     // Log step start
     this.contextManager.logStepStart(stepName);
-    
+
     const stepEvent = {
       event: { action: 'step-execution' },
       message: `Executing step: ${stepName}`,
     };
-    
+
     // Start timing
     this.contextManager.startTiming(stepEvent);
-    
+
     try {
       const result = await this._run();
-      
+
       // Log success
       this.contextManager.stopTiming({
         ...stepEvent,
         event: { ...stepEvent.event, outcome: 'success' },
       });
-      
+
       this.contextManager.logStepComplete(stepName, stepName, true);
       this.contextManager.appendStepResult(stepName, result);
-      
+
       return result;
     } catch (error) {
       // Log failure
       this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
         event: { action: 'step-failed' },
       });
-      
+
       this.contextManager.stopTiming({
         ...stepEvent,
         event: { ...stepEvent.event, outcome: 'failure' },
       });
-      
+
       this.contextManager.logStepComplete(stepName, stepName, false);
-      
+
       const result = await this.handleFailure(error);
       this.contextManager.appendStepResult(stepName, result);
-      
+
       return result;
     } finally {
       // Clear step context

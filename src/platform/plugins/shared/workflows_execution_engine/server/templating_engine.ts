@@ -17,10 +17,7 @@ export class WorkflowTemplatingEngine {
     this.syntax = syntax;
   }
 
-  public render(
-    template: string,
-    context: Record<string, any>
-  ): string {
+  public render(template: string, context: Record<string, any>): string {
     switch (this.syntax) {
       case 'nunjucks':
         return this.renderNunjucks(template, context);

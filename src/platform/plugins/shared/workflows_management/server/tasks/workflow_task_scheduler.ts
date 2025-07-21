@@ -13,11 +13,11 @@ import type { EsWorkflow } from '@kbn/workflows';
 import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
 
 // Define the trigger type based on the schema
-type WorkflowTrigger = {
+interface WorkflowTrigger {
   id: string;
   type: 'triggers.elastic.detectionRule' | 'triggers.elastic.scheduled' | 'triggers.elastic.manual';
   with?: Record<string, any>;
-};
+}
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -42,9 +42,13 @@ export class WorkflowTaskScheduler {
       try {
         const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger);
         scheduledTaskIds.push(taskId);
-        this.logger.info(`Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.id}, task ID: ${taskId}`);
+        this.logger.info(
+          `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.id}, task ID: ${taskId}`
+        );
       } catch (error) {
-        this.logger.error(`Failed to schedule workflow task for workflow ${workflow.id}, trigger ${trigger.id}: ${error}`);
+        this.logger.error(
+          `Failed to schedule workflow task for workflow ${workflow.id}, trigger ${trigger.id}: ${error}`
+        );
         throw error;
       }
     }
@@ -61,7 +65,7 @@ export class WorkflowTaskScheduler {
     trigger: WorkflowTrigger
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
-    
+
     const taskInstance = {
       id: `workflow:${workflowId}:${trigger.type}`,
       taskType: 'workflow:scheduled',
@@ -87,7 +91,7 @@ export class WorkflowTaskScheduler {
   /**
    * Unschedules all tasks for a workflow
    */
-  
+
   async unscheduleWorkflowTasks(workflowId: string): Promise<void> {
     try {
       // Find all tasks for this workflow
@@ -96,14 +100,14 @@ export class WorkflowTaskScheduler {
           bool: {
             must: [
               { term: { 'task.taskType': 'workflow:scheduled' } },
-              { term: { '_id': `task:workflow:${workflowId}:triggers.elastic.scheduled` } },
+              { term: { _id: `task:workflow:${workflowId}:triggers.elastic.scheduled` } },
             ],
           },
         },
       });
 
       // Remove all tasks
-      const taskIds = tasks.docs.map(task => task.id);
+      const taskIds = tasks.docs.map((task) => task.id);
       if (taskIds.length > 0) {
         await this.taskManager.bulkRemove(taskIds);
         this.logger.info(`Unscheduled ${taskIds.length} tasks for workflow ${workflowId}`);
@@ -120,8 +124,8 @@ export class WorkflowTaskScheduler {
   async updateWorkflowTasks(workflow: EsWorkflow, spaceId: string): Promise<void> {
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
-    
+
     // Then, schedule new tasks for enabled scheduled triggers
     await this.scheduleWorkflowTasks(workflow, spaceId);
   }
-} 
+}

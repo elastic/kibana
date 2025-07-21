@@ -14,12 +14,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import {
-  EsWorkflowExecution,
-  EsWorkflowStepExecution,
-  ExecutionStatus,
-  WorkflowExecutionEngineModel,
-} from '@kbn/workflows';
+import { ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 import { Client } from '@elastic/elasticsearch';
 
@@ -30,10 +25,14 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 
-import { ConnectorExecutor } from './connector-executor';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
-import { StepFactory } from './step/step-factory';
-import { WorkflowContextManager } from './workflow-context-manager/workflow-context-manager';
+import { ConnectorExecutor } from './connector_executor';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTION_LOGS_INDEX,
+} from '../common';
+import { StepFactory } from './step/step_factory';
+import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -114,7 +113,6 @@ export class WorkflowsExecutionEnginePlugin
       contextManager.logWorkflowStart();
 
       try {
-
         for (const currentStep of workflow.definition.workflow.steps) {
           const step = new StepFactory().create(
             currentStep as any,
@@ -142,7 +140,6 @@ export class WorkflowsExecutionEnginePlugin
             } as any, // EsWorkflowStepExecution
           });
 
-          // const stepResult = await stepRunner.runStep(currentStep, stepsContext);
           const stepResult = await step.run();
 
           let stepStatus: ExecutionStatus;

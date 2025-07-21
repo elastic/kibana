@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConnectorExecutor } from '../connector-executor';
-import { WorkflowContextManager } from '../workflow-context-manager/workflow-context-manager';
-import { RunStepResult, StepBase, BaseStep } from './step-base';
+import { ConnectorExecutor } from '../connector_executor';
+import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import { RunStepResult, StepBase, BaseStep } from './step_base';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
@@ -71,13 +71,11 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console.log' || step.type === 'console') {
         this.contextManager.logDebug(`Console output: ${step.with?.message}`);
-        console.log(step.with?.message);
         return { output: step.with?.message, error: undefined };
       } else if (step.type === 'console.sleep') {
         const sleepTime = step.with?.sleepTime ?? 1000;
         this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
         await new Promise((resolve) => setTimeout(resolve, sleepTime));
-        console.log(`${step.with?.message} - slept for ${sleepTime}ms`);
         return { output: step.with?.message, error: undefined };
       }
 

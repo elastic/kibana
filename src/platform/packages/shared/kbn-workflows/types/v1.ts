@@ -137,7 +137,7 @@ export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 export interface UpdatedWorkflowResponseDto {
   id: string;
   lastUpdatedAt: Date;
-  lastUpdatedBy: string;
+  lastUpdatedBy: string | undefined;
 }
 
 export interface WorkflowDetailDto {

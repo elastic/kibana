@@ -7,21 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ForEachStepSchema,
-  IfStepSchema,
-  ParallelStepSchema,
-  MergeStepSchema,
-  BaseConnectorStepSchema,
-  BaseStep,
-  ConnectorStep,
-} from '@kbn/workflows'; // Adjust path as needed
-import { z } from '@kbn/zod';
-import { StepBase } from './step-base';
-import { WorkflowContextManager } from '../workflow-context-manager/workflow-context-manager';
+import { BaseStep } from '@kbn/workflows'; // Adjust path as needed
+import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import { StepBase } from './step_base';
 // Import schema and inferred types
-import { ConnectorExecutor } from '../connector-executor';
-import { ConnectorStepImpl } from './connector-step';
+import { ConnectorExecutor } from '../connector_executor';
+import { ConnectorStepImpl } from './connector_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -34,6 +25,7 @@ export class StepFactory {
     step: TStep, // Use z.infer<typeof StepSchema> when fully defined
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor // this is temporary, we will remove it when we have a proper connector executor
+    // @ts-expect-error - TODO: fix this
   ): StepBase<TStep> {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
