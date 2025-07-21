@@ -119,7 +119,7 @@ export const CreateIndexModal = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.description"
-              defaultMessage="Create an index for your privileged users and make sure to index documents with the {nameField} field using your method of choice after creating the index."
+              defaultMessage="Create an index to store your privileged users. After creating it, make sure to index documents with the {nameField} field using your preferred method."
               values={{
                 nameField: <EuiCode>{'user.name'}</EuiCode>,
               }}
