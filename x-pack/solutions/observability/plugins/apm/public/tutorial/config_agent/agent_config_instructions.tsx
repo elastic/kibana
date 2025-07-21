@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -80,6 +81,20 @@ export function AgentConfigInstructions({
         data={{ apmServerUrl, secretToken, ...defaultValues }}
       />
       <EuiSpacer />
+      <EuiCallOut
+        title={i18n.translate('xpack.apm.onboarding.agentConfigInstructions.callout.title', {
+          defaultMessage: `The command below doesn't show secrets values`,
+        })}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate('xpack.apm.onboarding.agentConfigInstructions.callout.body', {
+            defaultMessage: 'Copy to clipboard to get the full command with secrets',
+          })}
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="s" />
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
         <EuiFlexGroup direction="row">
           <EuiFlexItem>

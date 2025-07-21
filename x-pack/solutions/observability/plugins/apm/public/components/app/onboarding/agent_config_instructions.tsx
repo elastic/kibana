@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
   copyToClipboard,
+  EuiCallOut,
 } from '@elastic/eui';
 import {
   getApmAgentCommands,
@@ -69,9 +70,23 @@ export function AgentConfigInstructions({
         createApiKeyLoading={createApiKeyLoading}
       />
       <EuiSpacer />
+      <EuiCallOut
+        title={i18n.translate('xpack.apm.onboarding.agentConfigInstructions.callout.title', {
+          defaultMessage: `The command below doesn't show secrets values`,
+        })}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate('xpack.apm.onboarding.agentConfigInstructions.callout.body', {
+            defaultMessage: 'Copy to clipboard to get the full command with secrets',
+          })}
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="s" />
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
         <EuiFlexGroup direction="row">
-          <EuiFlexItem>
+          <EuiFlexItem grow={1}>
             <EuiCodeBlock
               copyAriaLabel={i18n.translate(
                 'xpack.apm.onboarding.agentConfigInstructions.euiCodeBlock.copyAriaLabel',
