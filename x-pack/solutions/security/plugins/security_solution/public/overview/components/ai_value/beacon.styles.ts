@@ -34,7 +34,6 @@ export const useBeaconSize = (iconSize: string = '100px') => {
   } = useEuiTheme();
 
   // Size of the icon.
-  console.log('size', size);
   const baseSize = parseInt(iconSize, 10);
 
   // Distance between the icon and the ring.
@@ -69,9 +68,6 @@ export const useStyles = ({
 
   const background = colors[backgroundColor];
   const ringsColor = rColor ?? colors.primary;
-  console.log('background', background);
-
-  console.log('border', ringsColor);
   const root = css`
     // background-color: ${background};
     display: flex;

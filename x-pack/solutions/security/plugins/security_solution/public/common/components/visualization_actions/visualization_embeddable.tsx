@@ -23,7 +23,6 @@ import { useVisualizationResponse } from './use_visualization_response';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
-  console.log('lens props', props);
   const dispatch = useDispatch();
   const {
     inputId = InputsModelId.global,

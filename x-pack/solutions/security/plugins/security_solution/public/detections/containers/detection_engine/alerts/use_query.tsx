@@ -129,11 +129,7 @@ export const useQueryAlerts = <Hit, Aggs>({
         setLoading(false);
       }
     };
-    console.log('useQuery UE ==>', {
-      query,
-      skip,
-      isE: isEmpty(query),
-    });
+
     if (!isEmpty(query) && !skip) {
       fetchData();
     }

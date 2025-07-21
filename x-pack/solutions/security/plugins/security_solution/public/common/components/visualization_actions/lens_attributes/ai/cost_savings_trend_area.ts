@@ -11,7 +11,8 @@ const xColumn0 = 'cost_columnX0';
 const xColumn1 = 'cost_columnX1';
 const dateColumn = 'date_column';
 const costColumn = 'cost_column';
-export const getCostSavingsTrendAreaLensAttributes: GetLensAttributes = ({ euiTheme }) => {
+
+export const getCostSavingsTrendAreaLensAttributes: GetLensAttributes = ({ extraOptions }) => {
   return {
     description: '',
     state: {
@@ -113,7 +114,7 @@ export const getCostSavingsTrendAreaLensAttributes: GetLensAttributes = ({ euiTh
           },
         },
       },
-      filters: [],
+      filters: extraOptions?.filters ?? [],
       internalReferences: [],
       query: {
         language: 'kuery',

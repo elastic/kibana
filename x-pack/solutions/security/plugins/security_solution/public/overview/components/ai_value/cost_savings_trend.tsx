@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { ChartHeight } from '../../../explore/components/stat_items/utils';
@@ -15,18 +15,43 @@ import { getCostSavingsTrendAreaLensAttributes } from '../../../common/component
 interface Props {
   from: string;
   to: string;
+  attackAlertIds: string[];
 }
 const ID = 'CostSavingsTrendQuery';
-const CostSavingsTrendComponent: React.FC<Props> = ({ from, to }) => {
-  // const { euiTheme } = useEuiTheme();
+const CostSavingsTrendComponent: React.FC<Props> = ({ attackAlertIds, from, to }) => {
+  const extraVisualizationOptions = useMemo(
+    () => ({
+      filters: [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+          },
+          query: {
+            bool: {
+              // only query alerts that are not part of an attack discovery
+              must_not: attackAlertIds.map((uuid: string) => ({
+                match_phrase: { 'kibana.alert.uuid': uuid },
+              })),
+            },
+          },
+        },
+      ],
+    }),
+    [attackAlertIds]
+  );
+
   return (
     <VisualizationEmbeddable
       data-test-subj="embeddable-area-chart"
+      extraOptions={extraVisualizationOptions}
       getLensAttributes={getCostSavingsTrendAreaLensAttributes}
       timerange={{ from, to }}
       id={`${ID}-area-embeddable`}
       height={ChartHeight}
-      inspectTitle={'Trend'}
+      width={'95%'}
+      inspectTitle={'Cost Savings Trend'}
       scopeId={SourcererScopeName.detections}
     />
   );

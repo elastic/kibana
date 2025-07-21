@@ -37,7 +37,8 @@ import bg from './bg.svg';
 import { UsdIcon } from './usd_icon';
 
 interface Props {
-  alertsInAttacks: number;
+  attackAlertsCount: number;
+  attackAlertIds: string[];
   attackDiscoveryCount: number;
   totalAlerts: number;
   from: string;
@@ -45,7 +46,8 @@ interface Props {
 }
 
 export const AIValueMetrics: React.FC<Props> = ({
-  alertsInAttacks,
+  attackAlertsCount,
+  attackAlertIds,
   attackDiscoveryCount,
   totalAlerts,
   from,
@@ -53,7 +55,7 @@ export const AIValueMetrics: React.FC<Props> = ({
 }) => {
   const data = {
     totalAlerts,
-    filteredAlerts: totalAlerts - alertsInAttacks,
+    filteredAlerts: totalAlerts - attackAlertsCount,
     aiDetected: attackDiscoveryCount,
     traditionalDetected: 80,
   };
@@ -99,9 +101,6 @@ export const AIValueMetrics: React.FC<Props> = ({
     ringsColor: colors.accentSecondary,
     size: responsiveSizes.ringSize,
   });
-  console.log('root/rings', { root, rings });
-  console.log('alertStats', alertStats);
-  console.log('detectionComparison', detectionComparison);
   const responseTimeTrend = getResponseTimeTrend([30, 28, 32], [20, 18, 22]); // beforeAI and afterAI arrays
   return (
     <>
@@ -132,14 +131,12 @@ export const AIValueMetrics: React.FC<Props> = ({
                 className="eui-textCenter"
               >
                 <EuiText size="xs" color="subdued">
-                  <p>
-                    <EuiIcon type={UsdIcon as unknown as ComponentType} size="l" color="accent" />
-                    <EuiSpacer size="xs" /> {'Cost savings '}
-                    <EuiIconTip
-                      type="info"
-                      content="Estimated cost reduction based on analyst time saved"
-                    />
-                  </p>
+                  <EuiIcon type={UsdIcon as unknown as ComponentType} size="l" color="accent" />
+                  <EuiSpacer size="xs" /> {'Cost savings '}
+                  <EuiIconTip
+                    type="info"
+                    content="Estimated cost reduction based on analyst time saved"
+                  />
                 </EuiText>
 
                 <EuiTitle size="l">
@@ -175,7 +172,7 @@ export const AIValueMetrics: React.FC<Props> = ({
                 <EuiText size="s" color="subdued">
                   <p>{'Cumulative savings from AI-driven SOC operations'}</p>
                 </EuiText>
-                <CostSavingsTrend from={from} to={to} />
+                <CostSavingsTrend from={from} to={to} attackAlertIds={attackAlertIds} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

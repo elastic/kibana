@@ -217,11 +217,11 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     findAttackDiscoveryAlertsParams: FindAttackDiscoveryAlertsParams;
     logger: Logger;
   }): Promise<AttackDiscoveryFindResponse> => {
-    const aggs = getFindAttackDiscoveryAlertsAggregation();
     const {
       alertIds,
       connectorNames, // <-- as a filter input
       end,
+      includeUniqueAlertIds,
       ids,
       search,
       shared,
@@ -232,6 +232,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       page = FIRST_PAGE,
       perPage = DEFAULT_PER_PAGE,
     } = findAttackDiscoveryAlertsParams;
+    const aggs = getFindAttackDiscoveryAlertsAggregation(includeUniqueAlertIds);
 
     const index = this.getScheduledAndAdHocIndexPattern();
 
@@ -263,9 +264,10 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       sortOrder: sortOrder as estypes.SortOrder,
     });
 
-    const { data, uniqueAlertIdsCount } = transformSearchResponseToAlerts({
+    const { data, uniqueAlertIdsCount, uniqueAlertIds } = transformSearchResponseToAlerts({
       logger,
       response: result.data,
+      includeUniqueAlertIds,
     });
 
     const alertConnectorNames = await this.getAlertConnectorNames({
@@ -290,6 +292,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       per_page: result.perPage,
       total: result.total,
       unique_alert_ids_count: uniqueAlertIdsCount,
+      ...(includeUniqueAlertIds ? { unique_alert_ids: uniqueAlertIds } : {}),
     };
   };
 

@@ -302,6 +302,10 @@ export const FindAttackDiscoveryAlertsParams = z.object({
    */
   end: z.string().optional(),
   /**
+   * whether to include attack alert IDs in the response
+   */
+  includeUniqueAlertIds: z.boolean().optional(),
+  /**
    * filter by Attack discovery IDs
    */
   ids: z.array(z.string()).optional(),

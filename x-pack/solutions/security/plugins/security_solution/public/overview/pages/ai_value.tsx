@@ -58,8 +58,7 @@ const AIValueComponent = () => {
   const { from, to } = useDeepEqualSelector((state) =>
     pick(['from', 'to'], inputsSelectors.valueReportTimeRangeSelector(state))
   );
-  console.log('from ==>', from);
-  console.log('to ==>', to);
+
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status } = useDataView();
 
@@ -80,6 +79,7 @@ const AIValueComponent = () => {
   } = useFindAttackDiscoveries({
     end: to,
     http,
+    includeUniqueAlertIds: true,
     isAssistantEnabled: assistantAvailability.isAssistantEnabled,
     start: from,
     status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
@@ -91,7 +91,6 @@ const AIValueComponent = () => {
     signalIndexName,
   });
   console.log('ad data ==>', data);
-  console.log('alert data ==>', alertCount);
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
@@ -126,7 +125,8 @@ const AIValueComponent = () => {
                     to={to}
                     totalAlerts={alertCount}
                     attackDiscoveryCount={data.total}
-                    alertsInAttacks={data.unique_alert_ids_count}
+                    attackAlertsCount={data.unique_alert_ids_count}
+                    attackAlertIds={data.unique_alert_ids ?? []}
                   />
                 )}
               </EuiFlexItem>

@@ -66,9 +66,6 @@ const HistoryComponent: React.FC<Props> = ({
   const { assistantAvailability, http } = useAssistantContext();
 
   const { ids: filterByAlertIds, setIdsUrl: setFilterByAlertIds } = useIdsFromUrl();
-  useEffect(() => {
-    console.log('filterByAlertIds ==>', filterByAlertIds);
-  }, [filterByAlertIds]);
   const { historyStart, setHistoryStart, historyEnd, setHistoryEnd } =
     useAttackDiscoveryHistoryTimerange();
 
