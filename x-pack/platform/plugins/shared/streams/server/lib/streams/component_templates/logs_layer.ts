@@ -92,9 +92,6 @@ export const baseMappings: Record<string, MappingProperty> = {
         type: 'object',
         subobjects: false,
       },
-      text: {
-        type: 'match_only_text',
-      },
     },
   },
   attributes: {
