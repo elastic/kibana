@@ -12,11 +12,13 @@ import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useState, KeyboardEvent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { IndexUpdateService } from '../../index_update_service';
 import { useAddColumnName } from '../../hooks/use_add_column_name';
 import { COLUMN_PLACEHOLDER_PREFIX } from '../../constants';
 
 export const getColumnInputRenderer = (
-  columnName: string
+  columnName: string,
+  indexUpdateService: IndexUpdateService
 ): ((props: CustomGridColumnProps) => EuiDataGridColumn) => {
   const initialColumnName = !columnName.startsWith(COLUMN_PLACEHOLDER_PREFIX)
     ? columnName
@@ -25,7 +27,26 @@ export const getColumnInputRenderer = (
   return ({ column }) => ({
     ...column,
     display: <AddColumnHeader initialColumnName={initialColumnName} />,
-    actions: false,
+    actions: {
+      showHide: false,
+      additional: initialColumnName
+        ? [
+            {
+              label: (
+                <FormattedMessage
+                  id="indexEditor.flyout.grid.columnHeader.deleteAction"
+                  defaultMessage="Delete field and values"
+                />
+              ),
+              size: 'xs',
+              iconType: 'trash',
+              onClick: () => {
+                indexUpdateService.deleteColumn(columnName);
+              },
+            },
+          ]
+        : null,
+    },
     isExpandable: false,
   });
 };

@@ -182,11 +182,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const customGridColumnsConfiguration = useMemo(() => {
     return renderedColumns.reduce((acc, columnName) => {
       if (!props.dataView.fields.getByName(columnName)) {
-        acc[columnName] = getColumnInputRenderer(columnName);
+        acc[columnName] = getColumnInputRenderer(columnName, indexUpdateService);
       }
       return acc;
     }, {} as CustomGridColumnsConfiguration);
-  }, [renderedColumns, props.dataView]);
+  }, [renderedColumns, props.dataView, indexUpdateService]);
 
   return (
     <>

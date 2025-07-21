@@ -71,6 +71,7 @@ type Action =
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
   | { type: 'add-column'; payload: ColumnAddition }
   | { type: 'edit-column'; payload: ColumnUpdate }
+  | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'discard-unsaved-columns' }
   | { type: 'discard-unsaved-changes' }
   | { type: 'new-row-added'; payload: Record<string, any> };
@@ -396,6 +397,9 @@ export class IndexUpdateService {
                   : column
               );
             }
+            if (action.type === 'delete-column') {
+              return acc.filter((column) => column.name !== action.payload.name);
+            }
             if (action.type === 'saved') {
               action.payload.updates.forEach((update) => {});
               // Filter out columns that were saved with a value from _pendingColumnsToBeSaved$
@@ -536,6 +540,10 @@ export class IndexUpdateService {
 
   public editColumn(name: string, previousName: string) {
     this.actions$.next({ type: 'edit-column', payload: { name, previousName } });
+  }
+
+  public deleteColumn(name: string) {
+    this.actions$.next({ type: 'delete-column', payload: { name } });
   }
 
   public setExitAttemptWithUnsavedFields(value: boolean) {
