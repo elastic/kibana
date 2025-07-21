@@ -1,10 +1,16 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
   },
-  "exclude": ["target/**/*"],
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "exclude": [
+    "target/**/*",
+  ],
+  "include": [
+    "common/**/*", 
+    "public/**/*",
+    "server/**/*",
+    ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/charts-plugin",
