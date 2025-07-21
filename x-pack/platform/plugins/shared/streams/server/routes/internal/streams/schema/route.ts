@@ -285,7 +285,7 @@ async function simulateIngest(
     })
   ).index_templates[0].index_template;
 
-  // We need to build a batched index template isntead of using mapping_addition
+  // We need to build a patched index template instead of using mapping_addition
   // because of https://github.com/elastic/elasticsearch/issues/131608
   const patchedIndexTemplate = {
     ...indexTemplate,
