@@ -74,6 +74,29 @@ export function createIndexDocRecordsStream(
     });
     log.info('esArchiver.indexDocs after bulk - hits.total', searchResponseAfter.hits.total);
 
+    await client.indices.refresh(
+      { index: 'myfakeindex-3', allow_no_indices: true },
+      { headers: ES_CLIENT_HEADERS }
+    );
+
+    const searchResponseAfterRefresh = await client.search({
+      index: 'myfakeindex-3',
+    });
+    log.info(
+      'esArchiver.indexDocs after bulk + refresh - hits.total',
+      searchResponseAfterRefresh.hits.total
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 10 * 1000));
+
+    const searchResponseAfterDelay = await client.search({
+      index: 'myfakeindex-3',
+    });
+    log.info(
+      'esArchiver.indexDocs after bulk + refresh + delay - hits.total',
+      searchResponseAfterDelay.hits.total
+    );
+
     if (errors.length) {
       throw new AggregateError(errors);
     }
