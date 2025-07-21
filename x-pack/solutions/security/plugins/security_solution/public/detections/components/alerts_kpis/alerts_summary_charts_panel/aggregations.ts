@@ -9,14 +9,6 @@ import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 
 const DEFAULT_QUERY_SIZE = 1000;
 
-export const docCountAgg = {
-  doc_count: {
-    value_count: {
-      field: '@timestamp',
-    },
-  },
-};
-
 export const severityAggregations = {
   statusBySeverity: {
     terms: {

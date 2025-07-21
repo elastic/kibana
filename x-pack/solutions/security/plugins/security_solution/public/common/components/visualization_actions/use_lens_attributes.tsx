@@ -169,7 +169,6 @@ export const useLensAttributes = ({
     filters,
     dataViewId,
   ]);
-
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
     ? lensAttrsWithInjectedData
     : null;
