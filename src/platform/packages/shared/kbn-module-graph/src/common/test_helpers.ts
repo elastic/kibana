@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+import { transformFromAstSync, transformSync, types } from '@babel/core';
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export function format(code: string) {
+  return transformSync(code, { parserOpts: { plugins: ['typescript'] } })?.code!;
+}
+
+export function formatAst(file: types.File) {
+  return transformFromAstSync(file, undefined, { parserOpts: { plugins: ['typescript'] } })?.code!;
+}

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+export { createBlazeJestConfig } from './src/config/create_blaze_jest_config';
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export { base } from './src/preset/base';
+export { browser } from './src/preset/browser';
+export { node } from './src/preset/node';

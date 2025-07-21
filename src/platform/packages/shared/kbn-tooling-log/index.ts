@@ -17,6 +17,7 @@ export {
   LOG_LEVEL_FLAGS,
   pickLevelFromFlags,
   parseLogLevel,
+  parseEnvLogLevel,
   getLogLevelFlagsHelp,
 } from './src/log_levels';
 export { ToolingLogCollectingWriter } from './src/tooling_log_collecting_writer';

@@ -7,8 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+import { ItemName } from '../../edge_extractor/types';
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export interface PluginState {
+  filename?: string;
+}
+
+export interface VisitorContext {
+  withEdgeRewrite: (
+    itemName: ItemName,
+    specifier: string,
+    cb: (rewrite: { filePath: string; itemName: ItemName }) => void
+  ) => void;
+}

@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+import { Config } from '@jest/types';
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+export function createBlazeJestConfig(config: Config.InitialOptions): Config.InitialOptions {
+  return {
+    ...config,
+    transform: {
+      ...config.transform,
+      '^.+\\.(js|tsx?)$': require.resolve('../transformer/create_transformer'),
+    },
+    haste: {
+      ...config.haste,
+      hasteMapModulePath: require.resolve('../haste'),
+    },
+  };
+}

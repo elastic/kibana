@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+// CJS entry file for haste_map.ts, as Jest might load the haste map
+// earlier than we get to include setup_node_env.
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+require('../../../../../../setup_node_env');
+
+module.exports = require('./haste_map');

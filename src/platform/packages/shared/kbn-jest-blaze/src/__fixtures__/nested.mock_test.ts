@@ -6,9 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+/* eslint-disable @kbn/imports/no_unresolvable_imports */
+// @ts-expect-error
+import { deepValue } from './barrel';
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
-
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+describe('Nested Re-export Test', () => {
+  test('should import through nested barrels and get rewritten', () => {
+    expect(deepValue).toBe('deep');
+  });
+});

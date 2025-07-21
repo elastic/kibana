@@ -1,0 +1,40 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { Config } from '@jest/types';
+import { FileWalker, ChangeTracker } from '@kbn/module-graph';
+
+export interface JestTransformerOptions {
+  moduleDirectories?: string[];
+  ignorePatterns?: string | string[];
+  fileWalker: FileWalker;
+  changeTracker: ChangeTracker;
+  rewrite?: boolean;
+  profile?: boolean;
+}
+
+export interface InternalJestTransformerOptions {
+  moduleDirectories: string[];
+  ignorePatterns: Array<string | RegExp>;
+  rewrite: boolean;
+  profile: boolean;
+}
+
+// Jest's own types are a weird union type that is hard to satisfy
+export interface GetCacheKeyOptions {
+  config: Config.ProjectConfig;
+  configString: string;
+  instrument: boolean;
+}
+
+export type GetCacheKeyFunction = (
+  sourceText: string,
+  sourcePath: string,
+  options: GetCacheKeyOptions
+) => string;
