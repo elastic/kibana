@@ -21,7 +21,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ") => \"single-alert\" | \"single-event\" | \"single-entity\" | \"grouped-events\" | \"grouped-entities\" | \"na\""
+          ") => \"na\" | \"single-alert\" | \"single-event\" | \"single-entity\" | \"grouped-events\" | \"grouped-entities\""
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
         "deprecated": false,

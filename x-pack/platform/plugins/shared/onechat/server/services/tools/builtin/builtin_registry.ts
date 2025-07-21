@@ -6,6 +6,7 @@
  */
 
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { isBuiltinToolId } from '../utils';
 
 export interface BuiltinToolRegistry {
   register(tool: BuiltinToolDefinition<any, any>): void;
@@ -26,6 +27,11 @@ class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
   register(tool: BuiltinToolDefinition) {
     if (this.tools.has(tool.id)) {
       throw new Error(`Tool with id ${tool.id} already registered`);
+    }
+    if (!isBuiltinToolId(tool.id)) {
+      throw new Error(
+        `Invalid id: "${tool.id}". Built-in tool ids must start with a dot and only contains alphanumeric characters, hyphens, and underscores.`
+      );
     }
     this.tools.set(tool.id, tool);
   }

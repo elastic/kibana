@@ -21,7 +21,6 @@ import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_regis
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import {
   attachTriggerCommand,
-  createCompletionContext,
   createCustomCallbackMocks,
   fields,
   getFieldNamesByType,
@@ -226,8 +225,7 @@ describe('autocomplete', () => {
       const statement = 'from index_b | drop keywordField | eval col0 = abs(doubleField) ';
 
       const triggerOffset = statement.lastIndexOf(' ');
-      const context = createCompletionContext(statement[triggerOffset]);
-      await suggest(statement, triggerOffset + 1, context, callbackMocks);
+      await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({
         query: 'from index_b',
       });
@@ -236,8 +234,7 @@ describe('autocomplete', () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
       const statement = 'from index_d | drop | eval col0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
-      const context = createCompletionContext(statement[triggerOffset]);
-      await suggest(statement, triggerOffset + 1, context, callbackMocks);
+      await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from index_d' });
     });
   });

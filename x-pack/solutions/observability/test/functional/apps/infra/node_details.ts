@@ -105,13 +105,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   const navigateToNodeDetails = async (
-    assetId: string,
-    assetType: string,
+    entityId: string,
+    entityType: string,
     queryParams?: QueryParams
   ) => {
     await pageObjects.common.navigateToUrlWithBrowserHistory(
       'infraOps',
-      `/${NODE_DETAILS_PATH}/${assetType}/${assetId}`,
+      `/${NODE_DETAILS_PATH}/${entityType}/${entityId}`,
       `assetDetails=${getNodeDetailsUrl(queryParams)}`,
       {
         insertTimestamp: false,
