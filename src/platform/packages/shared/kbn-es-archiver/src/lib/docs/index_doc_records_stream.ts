@@ -63,6 +63,7 @@ export function createIndexDocRecordsStream(
           const ej = JSON.stringify(dropped.error);
           errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
         },
+        refreshOnCompletion: true,
       },
       {
         headers: ES_CLIENT_HEADERS,
