@@ -80,7 +80,7 @@ const AIValueComponent = () => {
     start: from,
     status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
   });
-  const compareTimeRange = useMemo(() => getPreviousTimeRange({ from, to }), []);
+  const compareTimeRange = useMemo(() => getPreviousTimeRange({ from, to }), [from, to]);
   const { data: compareAdData } = useFindAttackDiscoveries({
     end: compareTimeRange.to,
     http,

@@ -23,7 +23,6 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { CostComparePercentage } from './cost_compare_percentage';
-import { getPercChange } from '../detection_response/soc_trends/helpers';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { useStyles } from './beacon.styles';
 import {
@@ -36,6 +35,7 @@ import {
 } from './metrics';
 import bg from './bg.svg';
 import { UsdIcon } from './usd_icon';
+import { getTimeRangeAsDays } from './utils';
 
 interface Props {
   attackAlertsCountCompare: number;
@@ -65,11 +65,6 @@ export const AIValueMetrics: React.FC<Props> = ({
     aiDetected: attackDiscoveryCount,
     traditionalDetected: 80,
   };
-  console.log('compare!', {
-    attackAlertsCountCompare,
-    attackAlertsCount,
-    compare: getPercChange(attackAlertsCount, attackAlertsCountCompare),
-  });
 
   const hoursSaved = getTimeSavedHours(data.filteredAlerts);
   const costSavings = getCostSavings(data.filteredAlerts);
@@ -114,6 +109,7 @@ export const AIValueMetrics: React.FC<Props> = ({
     size: responsiveSizes.ringSize,
   });
   const responseTimeTrend = getResponseTimeTrend([30, 28, 32], [20, 18, 22]); // beforeAI and afterAI arrays
+
   return (
     <>
       <EuiFlexGroup gutterSize="xl" responsive={false}>
@@ -161,6 +157,7 @@ export const AIValueMetrics: React.FC<Props> = ({
                   currentCount={data.filteredAlerts}
                   previousCount={data.filteredAlertsCompare}
                   previousCost={formatDollars(costSavingsCompare)}
+                  timeRange={getTimeRangeAsDays({ from, to })}
                 />
 
                 <EuiText size="xs" color="subdued">

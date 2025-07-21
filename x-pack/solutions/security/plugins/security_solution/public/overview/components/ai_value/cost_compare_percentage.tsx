@@ -7,15 +7,21 @@
 
 import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { NO_CHANGE, STAT_DIFFERENCE } from '../detection_response/soc_trends/translations';
+import * as i18n from './translations';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
 
 interface Props {
   currentCount: number;
   previousCount: number;
   previousCost: string;
+  timeRange: string;
 }
-export const CostComparePercentage = ({ currentCount, previousCount, previousCost }: Props) => {
+export const CostComparePercentage = ({
+  currentCount,
+  previousCount,
+  previousCost,
+  timeRange,
+}: Props) => {
   const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
 
   const isNegative = percentageChange.charAt(0) === '-';
@@ -25,8 +31,8 @@ export const CostComparePercentage = ({ currentCount, previousCount, previousCos
     percent: isNegative || isZero ? percentageChange : `+${percentageChange}`,
     color: isZero ? 'hollow' : isNegative ? 'danger' : 'success',
     note: isZero
-      ? NO_CHANGE('cost savings')
-      : STAT_DIFFERENCE({
+      ? i18n.NO_CHANGE('cost savings')
+      : i18n.STAT_DIFFERENCE({
           upOrDown: isNegative ? 'down' : 'up',
           percentageChange: isNegative ? percentageChange.substring(1) : percentageChange,
           stat: previousCost,
@@ -36,12 +42,10 @@ export const CostComparePercentage = ({ currentCount, previousCount, previousCos
   return (
     <span style={{ display: 'flex', alignItems: 'center', gap: 8, zIndex: 9999 }}>
       <EuiToolTip content={percentInfo.note}>
-        <EuiBadge color={percentInfo.color}>
-          {percentInfo.percent != null ? percentInfo.percent : '-'}
-        </EuiBadge>
+        <EuiBadge color={percentInfo.color}>{percentInfo.percent}</EuiBadge>
       </EuiToolTip>
       <EuiText size="xs" color="subdued">
-        <p>{'over the last 30 days'}</p>
+        <p>{i18n.TIME_RANGE(timeRange)}</p>
       </EuiText>
     </span>
   );
