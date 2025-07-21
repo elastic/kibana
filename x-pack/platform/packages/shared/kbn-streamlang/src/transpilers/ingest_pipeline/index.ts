@@ -10,10 +10,16 @@ import { StreamlangDSL } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';
 import { convertStreamlangDSLActionsToIngestPipelineProcessors } from './conversions';
 
-export const transpile = (streamlang: StreamlangDSL) => {
-  const processors = pipe(
-    flattenSteps(streamlang.steps),
-    convertStreamlangDSLActionsToIngestPipelineProcessors
+export interface IngestPipelineTranspilationOptions {
+  ignoreMalformed?: boolean;
+}
+
+export const transpile = (
+  streamlang: StreamlangDSL,
+  transpilationOptions?: IngestPipelineTranspilationOptions
+) => {
+  const processors = pipe(flattenSteps(streamlang.steps), (steps) =>
+    convertStreamlangDSLActionsToIngestPipelineProcessors(steps, transpilationOptions)
   );
 
   return {

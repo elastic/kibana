@@ -51,8 +51,6 @@ export interface ManualIngestPipelineProcessor extends ProcessorBaseWithWhere {
   ignore_failure?: boolean;
   tag?: string;
   on_failure?: Array<Record<string, unknown>>;
-  /* Ignore malformed processors */
-  ignore_malformed?: boolean;
 }
 
 export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema.extend({
@@ -60,7 +58,6 @@ export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema.
   processors: z.array(z.record(z.enum(elasticsearchProcessorTypes), z.unknown())),
   tag: z.optional(z.string()),
   on_failure: z.optional(z.array(z.record(z.unknown()))),
-  ignore_malformed: z.optional(z.boolean()),
 }) satisfies z.Schema<ManualIngestPipelineProcessor>;
 
 /**
@@ -109,8 +106,6 @@ export interface DateProcessor extends ProcessorBaseWithWhere {
   from: string;
   to?: string;
   formats: string[];
-  // timezone?: string;
-  // locale?: string;
   output_format?: string;
 }
 
@@ -119,8 +114,6 @@ export const dateProcessorSchema = processorBaseWithWhereSchema.extend({
   from: NonEmptyString,
   to: z.optional(NonEmptyString),
   formats: z.array(NonEmptyString),
-  // timezone: z.optional(NonEmptyString),
-  // locale: z.optional(NonEmptyString),
   output_format: z.optional(NonEmptyString),
 }) satisfies z.Schema<DateProcessor>;
 

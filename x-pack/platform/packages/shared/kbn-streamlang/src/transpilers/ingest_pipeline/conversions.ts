@@ -21,6 +21,7 @@ import {
 } from '../../../types/processors/ingest_pipeline_processors';
 import { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
+import type { IngestPipelineTranspilationOptions } from '.';
 
 interface ActionToIngestType {
   grok: IngestPipelineGrokProcessor;
@@ -54,7 +55,8 @@ function renameFields<T extends Record<string, any>>(obj: T, renames: Record<str
 }
 
 export function convertStreamlangDSLActionsToIngestPipelineProcessors(
-  actionSteps: StreamlangProcessorDefinition[]
+  actionSteps: StreamlangProcessorDefinition[],
+  transpilationOptions?: IngestPipelineTranspilationOptions
 ): IngestProcessorContainer[] {
   return actionSteps.flatMap((actionStep) => {
     const renames = processorFieldRenames[actionStep.action] || {};
@@ -73,7 +75,8 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
 
     if (action === 'manual_ingest_pipeline') {
       return processManualIngestPipelineProcessors(
-        processorWithCompiledConditions as IngestPipelineManualIngestPipelineProcessor
+        processorWithCompiledConditions as IngestPipelineManualIngestPipelineProcessor,
+        transpilationOptions
       );
     }
 
@@ -88,14 +91,15 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
 }
 
 const processManualIngestPipelineProcessors = (
-  manualIngestPipelineProcessor: IngestPipelineManualIngestPipelineProcessor
+  manualIngestPipelineProcessor: IngestPipelineManualIngestPipelineProcessor,
+  transpilationOptions?: IngestPipelineTranspilationOptions
 ) => {
   // manual_ingest_pipeline processor is a special case, since it has nested Elasticsearch-level processors and doesn't support if
   // directly - we need to add it to each nested processor
   return manualIngestPipelineProcessor.processors.flatMap((nestedProcessor) => {
     const nestedType = Object.keys(nestedProcessor)[0];
     if (!elasticsearchProcessorTypes.includes(nestedType as ElasticsearchProcessorType)) {
-      if (manualIngestPipelineProcessor.ignore_malformed) {
+      if (transpilationOptions?.ignoreMalformed) {
         return [];
       }
       throw new Error(
@@ -109,7 +113,7 @@ const processManualIngestPipelineProcessors = (
       unknown
     >;
     if (typeof nestedConfig !== 'object' || nestedConfig === null) {
-      if (manualIngestPipelineProcessor.ignore_malformed) {
+      if (transpilationOptions?.ignoreMalformed) {
         return [];
       }
       throw new Error(
