@@ -163,7 +163,7 @@ export async function cleanDiskCache(log) {
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
 export async function installYarnDeps(log, opts = undefined) {
-  await runBazel(log, ['run', '@nodejs//:yarn'], {
+  await runBazel(log, ['run', '@nodejs//:yarn', '--', 'install'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
   });
