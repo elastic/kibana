@@ -119,8 +119,6 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          // Enable custom roles
-          '--xpack.security.roleManagementEnabled=true',
           ...(options.serverlessProject === 'oblt'
             ? [
                 // defined in MKI control plane. Necessary for Synthetics app testing
