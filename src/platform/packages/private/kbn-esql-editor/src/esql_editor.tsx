@@ -32,7 +32,15 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  ComponentProps,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
@@ -62,8 +70,12 @@ import {
   EDITOR_MAX_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
-import { useRestorableState } from './restorable_state';
+import type {
+  ESQLEditorProps as ESQLEditorPropsInternal,
+  ESQLEditorDeps,
+  ControlsContext,
+} from './types';
+import { useRestorableState, withRestorableState } from './restorable_state';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -88,7 +100,7 @@ const triggerControl = async (
   });
 };
 
-export const ESQLEditor = memo(function ESQLEditor({
+const ESQLEditorInternal = memo(function ESQLEditor({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
@@ -113,7 +125,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   expandToFitQueryOnMount,
   dataErrorsControl,
   formLabel,
-}: ESQLEditorProps) {
+}: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editor1 = useRef<monaco.editor.IStandaloneCodeEditor>();
@@ -1068,3 +1080,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   return editorPanel;
 });
+
+export const ESQLEditor = withRestorableState(ESQLEditorInternal);
+
+export type ESQLEditorProps = ComponentProps<typeof ESQLEditor>;

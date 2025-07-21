@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import { withRestorableState, type ESQLEditorRestorableState } from '@kbn/esql-editor';
+import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
@@ -210,9 +210,7 @@ export const DiscoverTopNav = ({
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
   const SearchBar = useMemo(
-    () =>
-      searchBarCustomization?.CustomSearchBar ??
-      withRestorableState(navigation.ui.AggregateQueryTopNavMenu),
+    () => searchBarCustomization?.CustomSearchBar ?? navigation.ui.AggregateQueryTopNavMenu,
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
@@ -220,7 +218,6 @@ export const DiscoverTopNav = ({
   const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
   const onInitialStateChange = useCallback(
     (newEsqlEditorUiState: Partial<ESQLEditorRestorableState>) => {
-      console.log('onInitialStateChange', newEsqlEditorUiState);
       dispatch(
         setEsqlEditorUiState({
           esqlEditorUiState: newEsqlEditorUiState,
@@ -229,8 +226,6 @@ export const DiscoverTopNav = ({
     },
     [dispatch, setEsqlEditorUiState]
   );
-
-  console.log(esqlEditorUiState);
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
@@ -269,8 +264,8 @@ export const DiscoverTopNav = ({
           ) : undefined
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
-        initialState={esqlEditorUiState}
-        onInitialStateChange={onInitialStateChange}
+        esqlEditorInitialState={esqlEditorUiState}
+        onEsqlEditorInitialStateChange={onInitialStateChange}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
