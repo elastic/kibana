@@ -13,7 +13,7 @@ import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
@@ -29,6 +29,7 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { validateUnwiredFields } from '../../helpers/validate_fields';
 import { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
+import { hasRemovedFields } from './has_removed_fields';
 
 interface UnwiredStreamChanges extends StreamChanges {
   processing: boolean;
@@ -215,15 +216,15 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
         },
       });
     }
-    if (Object.keys(this._definition.ingest.unwired.field_overrides || {}).length > 0) {
+    if (
+      this._definition.ingest.unwired.field_overrides &&
+      isMappingProperties(this._definition.ingest.unwired.field_overrides)
+    ) {
       actions.push({
         type: 'update_data_stream_mappings',
         request: {
           name: this._definition.name,
-          mappings: this._definition.ingest.unwired.field_overrides! as Record<
-            string,
-            MappingProperty
-          >,
+          mappings: this._definition.ingest.unwired.field_overrides,
         },
       });
     }
@@ -286,13 +287,15 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     }
 
     if (this._changes.field_overrides) {
+      const mappings = this._definition.ingest.unwired.field_overrides || {};
+      if (!isMappingProperties(mappings)) {
+        throw new Error('Field overrides must be a valid mapping properties object');
+      }
       actions.push({
         type: 'update_data_stream_mappings',
         request: {
           name: this._definition.name,
-          mappings:
-            (this._definition.ingest.unwired.field_overrides as Record<string, MappingProperty>) ||
-            {},
+          mappings,
           forceRollover: this.fieldOverridesRemoved(startingState),
         },
       });
@@ -314,13 +317,10 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     ) {
       return false;
     }
-    const previousFieldOverrides = Object.keys(
-      startingStateStreamDefinition.ingest.unwired.field_overrides || {}
+    return hasRemovedFields(
+      startingStateStreamDefinition.ingest.unwired.field_overrides,
+      this._definition.ingest.unwired.field_overrides
     );
-    const currentFieldOverrides = Object.keys(
-      this._definition.ingest.unwired.field_overrides || {}
-    );
-    return _.difference(previousFieldOverrides, currentFieldOverrides).length > 0;
   }
 
   private async createUpsertPipelineActions(): Promise<ElasticsearchAction[]> {

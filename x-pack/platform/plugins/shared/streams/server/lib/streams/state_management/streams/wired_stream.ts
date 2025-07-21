@@ -50,6 +50,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
+import { hasRemovedFields } from './has_removed_fields';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -609,9 +610,10 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     ) {
       return false;
     }
-    const previousFieldOverrides = Object.keys(startingStateStreamDefinition.ingest.wired.fields);
-    const currentFieldOverrides = Object.keys(this._definition.ingest.wired.fields);
-    return _.difference(previousFieldOverrides, currentFieldOverrides).length > 0;
+    return hasRemovedFields(
+      startingStateStreamDefinition.ingest.wired.fields,
+      this._definition.ingest.wired.fields
+    );
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {

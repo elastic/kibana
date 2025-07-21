@@ -6,7 +6,7 @@
  */
 
 import { EcsFlat } from '@elastic/ecs';
-import { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   FieldDefinition,
   InheritedFieldDefinition,
@@ -106,7 +106,7 @@ export const baseFields: FieldDefinition = {
   },
 };
 
-export const baseMappings: Record<string, MappingProperty> = {
+export const baseMappings: MappingTypeMapping['properties'] = {
   body: {
     type: 'object',
     properties: {
@@ -248,7 +248,7 @@ export function addAliasesForNamespacedFields(
   );
 
   // Add aliases defined in the base mappings
-  Object.entries(baseMappings).forEach(([key, fieldDef]) => {
+  Object.entries(baseMappings || {}).forEach(([key, fieldDef]) => {
     if (fieldDef.type === 'alias') {
       inheritedFields[key] = {
         type: baseFields[fieldDef.path!].type,

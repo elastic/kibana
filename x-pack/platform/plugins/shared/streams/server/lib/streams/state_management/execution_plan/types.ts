@@ -10,9 +10,9 @@ import type {
   IndicesPutIndexTemplateRequest,
   IngestProcessorContainer,
   IngestPutPipelineRequest,
-  MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -96,7 +96,7 @@ export interface UpdateDataStreamMappingsAction {
   request: {
     name: string;
     forceRollover?: boolean;
-    mappings: Record<string, MappingProperty>;
+    mappings: StreamsMappingProperties;
   };
 }
 

@@ -15,11 +15,9 @@ import {
   isIlmLifecycle,
   isInheritLifecycle,
 } from '@kbn/streams-schema';
-import {
-  IndicesSimulateTemplateTemplate,
-  MappingProperty,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { omit } from 'lodash';
+import { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -45,7 +43,7 @@ interface UpdateDataStreamsMappingsOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
   name: string;
-  mappings: Record<string, MappingProperty>;
+  mappings: StreamsMappingProperties;
   forceRollover?: boolean;
 }
 

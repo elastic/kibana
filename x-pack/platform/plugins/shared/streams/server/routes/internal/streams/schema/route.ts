@@ -9,7 +9,7 @@ import { SampleDocument, fieldDefinitionConfigSchema, Streams } from '@kbn/strea
 import { z } from '@kbn/zod';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { SearchHit } from '@kbn/es-types';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -272,7 +272,7 @@ const DUMMY_PIPELINE_NAME = '__dummy_pipeline__';
 async function simulateIngest(
   sampleResultsAsSimulationDocs: Array<SearchHit<unknown>>,
   dataStreamName: string,
-  propertiesForSimulation: Record<string, MappingProperty>,
+  propertiesForSimulation: StreamsMappingProperties,
   scopedClusterClient: IScopedClusterClient
 ) {
   // fetch the index template to get the base mappings

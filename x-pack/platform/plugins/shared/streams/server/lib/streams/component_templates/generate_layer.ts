@@ -8,9 +8,10 @@
 import {
   ClusterPutComponentTemplateRequest,
   MappingDateProperty,
-  MappingProperty,
+  MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import { Streams, getAdvancedParameters, isRoot, namespacePrefixes } from '@kbn/streams-schema';
+import { AllowedMappingProperty, StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings, otelEquivalentLookupMap } from './logs_layer';
 import { getComponentTemplateName } from './name';
@@ -21,12 +22,13 @@ export function generateLayer(
   definition: Streams.WiredStream.Definition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
-  const properties: Record<string, MappingProperty> = {};
+  const properties: StreamsMappingProperties = {};
+  const aliases: MappingTypeMapping['properties'] = {};
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
     if (props.type === 'system') {
       return;
     }
-    const property: MappingProperty = {
+    const property: AllowedMappingProperty = {
       type: props.type,
     };
 
@@ -48,7 +50,7 @@ export function generateLayer(
     const matchingPrefix = namespacePrefixes.find((prefix) => field.startsWith(prefix));
     if (matchingPrefix) {
       const aliasName = field.substring(matchingPrefix.length);
-      properties[aliasName] = {
+      aliases[aliasName] = {
         type: 'alias',
         path: field,
       };
@@ -63,7 +65,7 @@ export function generateLayer(
       const aliasName = field.substring(matchingPrefix.length);
       const otelEquivalent = otelEquivalentLookupMap[aliasName];
       if (otelEquivalent) {
-        properties[otelEquivalent] = {
+        aliases[otelEquivalent] = {
           type: 'alias',
           path: field,
         };
@@ -81,6 +83,7 @@ export function generateLayer(
           ? {
               ...baseMappings,
               ...properties,
+              ...aliases,
             }
           : properties,
       },
