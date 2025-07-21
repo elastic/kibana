@@ -14,7 +14,6 @@ import {
   DEFAULT_BEDROCK_URL,
   DEFAULT_TOKEN_LIMIT,
 } from '../../../common/bedrock/constants';
-import { contextWindowLengthField } from '../../common/genai_connectors';
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
@@ -72,7 +71,6 @@ export const bedrockConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_BEDROCK_MODEL,
   },
-  contextWindowLengthField,
 ];
 
 export const bedrockSecrets: SecretsFieldSchema[] = [
