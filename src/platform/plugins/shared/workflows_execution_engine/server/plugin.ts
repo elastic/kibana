@@ -142,7 +142,7 @@ export class WorkflowsExecutionEnginePlugin
               executionTimeMs, // Placeholder, calculate if needed
               error: stepResult.error,
               output: stepResult.output,
-            } as WorkflowStepExecution,
+            },
           });
 
           if (stepStatus === ExecutionStatus.FAILED) {
