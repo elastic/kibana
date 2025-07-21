@@ -8,7 +8,7 @@ set -euo pipefail
 cacheDir="$ES_CACHE_DIR/cache"
 if [[ -d "$cacheDir" ]]; then
   mkdir -p .es/cache
-  echo "--- Copying ES snapshot cache"
-  echo "Copying cached snapshots from $cacheDir to .es/cache"
+  echo "--- Move ES snapshot cache"
+  echo "Moving cached snapshots from $cacheDir to .es/cache"
   mv "$cacheDir"/* .es/cache/
 fi
