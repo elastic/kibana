@@ -558,7 +558,7 @@ export const getMetricVisualization = ({
     });
     // early return if there's no datasource found
     if (!datasourceLayer) {
-      return { state, savedObjectReferences: [] };
+      return { state, references: [] };
     }
 
     // this should clean up the secondary trend state if in conflict
@@ -582,11 +582,11 @@ export const getMetricVisualization = ({
           secondaryPrefix: undefined,
           secondaryTrend: getDefaultConfigForMode(colorMode),
         },
-        savedObjectReferences: [],
+        references: [],
       };
     }
     // if there are no conflicts, it's all persistable as is
-    return { state, savedObjectReferences: [] };
+    return { state, references: [] };
   },
 
   setDimension({ prevState, columnId, groupId }) {

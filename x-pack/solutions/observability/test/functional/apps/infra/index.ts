@@ -11,7 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('InfraOps App', function () {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./page_not_found'));
-    loadTestFile(require.resolve('./tour'));
 
     describe('Metrics UI', function () {
       loadTestFile(require.resolve('./home_page'));

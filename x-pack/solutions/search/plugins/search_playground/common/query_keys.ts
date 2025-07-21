@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+export enum SearchPlaygroundQueryKeys {
+  PlaygroundsList = 'searchPlaygroundPlaygroundsList',
+  SearchPlaygroundMutationKeys = 'search-preview-results',
+  SearchPreviewResults = 'searchPlaygroundSearchPreviewResults',
+  SearchQueryTest = 'searchPlaygroundQueryTest',
+  LoadConnectors = 'searchPlaygroundLoadConnectors',
+  LLMsQuery = 'searchPlaygroundLLMsQuery',
+  QueryIndices = 'searchPlaygroundQueryIndices',
+  IndicesFields = 'searchPlaygroundIndicesFields',
+  IndexMappings = 'searchPlaygroundIndexMappings',
+}
+
 export enum SearchPlaygroundMutationKeys {
   DeletePlayground = 'searchPlaygroundDeletePlayground',
   SavePlayground = 'searchPlaygroundSavePlayground',
