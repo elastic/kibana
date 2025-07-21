@@ -207,6 +207,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
           }
         >
           <EuiSelect
+            isInvalid={!!policyErrorMessage}
             options={options}
             value={selectedPolicyName}
             onChange={(e) => {

@@ -183,6 +183,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
               }
             >
               <EuiComboBox
+                isInvalid={!!templateError}
                 isLoading={isLoading}
                 placeholder={i18n.translate(
                   'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyToTemplateConfirmModal.chooseTemplateMessage',
