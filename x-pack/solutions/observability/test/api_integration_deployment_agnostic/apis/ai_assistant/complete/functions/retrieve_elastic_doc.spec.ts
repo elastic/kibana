@@ -6,19 +6,19 @@
  */
 
 import expect from '@kbn/expect';
+import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { last } from 'lodash';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { ChatCompletionMessageParam } from 'openai/resources';
-import { last } from 'lodash';
-import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { TINY_ELSER_INFERENCE_ID } from '../../utils/model_and_inference';
-import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
-import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
+import { chatComplete } from '../../utils/conversation';
+import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import {
+  TINY_ELSER_INFERENCE_ID,
   deployTinyElserAndSetupKb,
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../utils/model_and_inference';
+import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
