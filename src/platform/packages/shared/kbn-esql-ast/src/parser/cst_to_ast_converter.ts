@@ -2322,21 +2322,21 @@ export class CstToAstConverter {
   ): ast.ESQLTimeInterval {
     const value = ctx.integerValue().INTEGER_LITERAL().getText();
     const unit = ctx.UNQUOTED_IDENTIFIER().symbol.text;
-
-    return {
-      type: 'timeInterval',
-      quantity: Number(value),
+    const parserFields = this.createParserFields(ctx);
+    const qualifiedInteger = Builder.expression.literal.qualifiedInteger(
+      Number(value),
       unit,
-      text: ctx.getText(),
-      location: getPosition(ctx.start, ctx.stop),
-      name: value + ' ' + unit,
-      incomplete: Boolean(ctx.exception),
-    };
+      parserFields
+    );
+
+    return qualifiedInteger;
   }
 
   // ---------------------------------------- constant expression: "identifier"
 
-  private fromIdentifierOrParam(ctx: cst.IdentifierOrParameterContext) {
+  private fromIdentifierOrParam(
+    ctx: cst.IdentifierOrParameterContext
+  ): ast.ESQLIdentifier | ast.ESQLParam | undefined {
     const identifier = ctx.identifier();
 
     if (identifier) {
