@@ -12,7 +12,7 @@ import { createModelVersionTestMigrator } from '@kbn/core-test-helpers-model-ver
 import { getSavedObjectTypes } from '../..';
 
 import type { PackagePolicy } from '../../../../common';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
+import { LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
 
 describe('backfill for modelVersion 10 - fix on_write_scan field', () => {
   let migrator: ModelVersionTestMigrator;
@@ -20,7 +20,7 @@ describe('backfill for modelVersion 10 - fix on_write_scan field', () => {
 
   beforeEach(() => {
     migrator = createModelVersionTestMigrator({
-      type: getSavedObjectTypes()[PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+      type: getSavedObjectTypes()[LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE],
     });
 
     policyConfigSO = {
@@ -74,7 +74,7 @@ describe('backfill for modelVersion 10 - fix on_write_scan field', () => {
           },
         ],
       },
-      type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       references: [],
     };
   });

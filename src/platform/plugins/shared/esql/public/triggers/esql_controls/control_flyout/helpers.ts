@@ -8,7 +8,8 @@
  */
 import { monaco } from '@kbn/monaco';
 import { ESQLVariableType, ESQLControlVariable, VariableNamePrefix } from '@kbn/esql-types';
-import { timeUnits } from '@kbn/esql-validation-autocomplete';
+import { timeUnits } from '@kbn/esql-ast';
+import { css } from '@emotion/react';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
@@ -107,19 +108,17 @@ export const getRecurrentVariableName = (name: string, existingNames: Set<string
   return newName;
 };
 
-export const getFlyoutStyling = () => {
-  return `
-          .euiFlyoutBody__overflow {
-            -webkit-mask-image: none;
-            padding-left: inherit;
-            margin-left: inherit;
-            transform: initial;
-          }
-          .euiFlyoutBody__overflowContent {
-            block-size: 100%;
-          }
-  `;
-};
+export const flyoutStyles = css({
+  '.euiFlyoutBody__overflow': {
+    WebkitMaskImage: 'none',
+    paddingLeft: 'inherit',
+    marginLeft: 'inherit',
+    transform: 'initial',
+  },
+  '.euiFlyoutBody__overflowContent': {
+    blockSize: '100%',
+  },
+});
 
 export const validateVariableName = (variableName: string, prefix: '??' | '?') => {
   let text = variableName

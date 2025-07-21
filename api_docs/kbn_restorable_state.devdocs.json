@@ -27,7 +27,7 @@
             "section": "def-public.RestorableStateProviderApi",
             "text": "RestorableStateProviderApi"
           },
-          ">>; useRestorableState: <TKey extends keyof TState>(key: TKey, initialValue: InitialValue<TState, TKey>, options?: { shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey> | undefined; shouldStoreDefaultValueRightAway?: boolean | undefined; } | undefined) => readonly [TState[TKey], (value: React.SetStateAction<TState[TKey]>) => void]; useRestorableRef: <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey], options?: { shouldStoreDefaultValueRightAway?: boolean | undefined; } | undefined) => React.MutableRefObject<TState[TKey]>; }"
+          ">>; useRestorableState: <TKey extends keyof TState>(key: TKey, initialValue: InitialValue<TState, TKey>, options?: { shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey> | undefined; shouldStoreDefaultValueRightAway?: boolean | undefined; } | undefined) => readonly [TState[TKey], (value: React.SetStateAction<TState[TKey]>) => void]; useRestorableRef: <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey], options?: { shouldStoreDefaultValueRightAway?: boolean | undefined; } | undefined) => React.MutableRefObject<TState[TKey]>; useRestorableLocalStorage: <TKey extends keyof TState>(key: TKey, localStorageKey: string, initialValue: TState[TKey]) => readonly [TState[TKey], (value: React.SetStateAction<TState[TKey]>) => void]; }"
         ],
         "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
         "deprecated": false,

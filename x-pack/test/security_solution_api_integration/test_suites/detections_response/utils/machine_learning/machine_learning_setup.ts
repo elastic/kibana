@@ -8,7 +8,7 @@
 import type SuperTest from 'supertest';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
-import { getCommonRequestHeader } from '../../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '@kbn/test-suites-xpack-platform/functional/services/ml/common_api';
 
 interface ModuleJob {
   id: string;

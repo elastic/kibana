@@ -20,26 +20,26 @@ yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
 
 ### Deployment-agnostic API tests
 
-The deployment-agnostic API tests are located in [`x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality`](/x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/).
+The deployment-agnostic API tests are located in [`x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality`](/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/).
 
 #### Start server and run test (stateful)
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/ion_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/$
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/$
 ```
 
 #### Start server and run test (serverless)
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
 
 # run tests
-node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality/$
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/$
 ```
 
 ### API integration tests
@@ -53,7 +53,7 @@ node scripts/functional_test_runner --config x-pack/test/api_integration/deploym
 | --inspect    | Add --inspect-brk flag to the ftr for debugging |
 | --times      | Repeat the test n number of times               |
 
-The API tests are located in [`x-pack/test/dataset_quality_api_integration/`](/x-pack/test/dataset_quality_api_integration/).
+The API tests are located in [`x-pack/solutions/observability/test/dataset_quality_api_integration/`](/x-pack/solutions/observability/test/dataset_quality_api_integration/).
 
 #### Start server and run test (single process)
 
@@ -87,23 +87,27 @@ export set FLEET_PACKAGE_REGISTRY_PORT=12345
 To unset the variable, and run the tests against the real endpoint again, execute
 
 ```
-unset FLEET_PACKAGE_REGISTRY_PORT 
+unset FLEET_PACKAGE_REGISTRY_PORT
 ```
 
 ### Functional Tests
 
 #### Stateful
+
 ##### FTR Server
+
 ```
 yarn test:ftr:server --config ./x-pack/test/functional/apps/dataset_quality/config.ts
 ```
 
 ##### FTR Runner
+
 ```
 yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/index.ts
 ```
 
 ##### Running Individual Tests
+
 ```
 yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/config.ts --include ./x-pack/test/functional/apps/dataset_quality/$1
 ```
@@ -111,15 +115,19 @@ yarn test:ftr:runner --config ./x-pack/test/functional/apps/dataset_quality/conf
 #### Serverless
 
 ##### Server
+
 ```
 yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
 ```
 
 ##### Runner
+
 ```
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/index.ts
 ```
+
 ##### Running Individual Tests
+
 ```
 yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/dataset_quality/$1
 ```

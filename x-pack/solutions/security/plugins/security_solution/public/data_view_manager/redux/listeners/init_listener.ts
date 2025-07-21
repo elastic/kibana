@@ -14,6 +14,7 @@ import { sharedDataViewManagerSlice } from '../slices';
 import { DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
+import { createExploreDataView } from '../../utils/create_explore_data_view';
 
 /**
  * Creates a Redux listener for initializing the Data View Manager state.
@@ -46,9 +47,7 @@ export const createInitListener = (dependencies: {
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
       try {
-        // Initialize default security data view first
-        // Note: this is subject to change, as we might want to add specific data view just for alerts
-
+        // Initialize default data views first
         const { defaultDataView, alertDataView } = await createDefaultDataView({
           dataViewService: dependencies.dataViews,
           uiSettings: dependencies.uiSettings,
@@ -56,6 +55,17 @@ export const createInitListener = (dependencies: {
           application: dependencies.application,
           http: dependencies.http,
         });
+
+        const exploreDataView = await createExploreDataView(
+          {
+            dataViews: dependencies.dataViews,
+            spaces: dependencies.spaces,
+          },
+          defaultDataView.title.split(','),
+          alertDataView.title
+        );
+
+        listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(exploreDataView));
 
         // NOTE: This is later used in the data view manager drop-down selector
         const dataViews = await dependencies.dataViews.getAllDataViewLazy();
@@ -81,25 +91,35 @@ export const createInitListener = (dependencies: {
           DataViewManagerScopeName.analyzer,
           DataViewManagerScopeName.timeline,
           DataViewManagerScopeName.default,
+          DataViewManagerScopeName.explore,
         ]
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
             if (scope === DataViewManagerScopeName.detections) {
-              listenerApi.dispatch(
+              return listenerApi.dispatch(
                 selectDataViewAsync({
                   id: alertDataView.id,
                   scope,
                 })
               );
-            } else {
-              listenerApi.dispatch(
+            }
+
+            if (scope === DataViewManagerScopeName.explore) {
+              return listenerApi.dispatch(
                 selectDataViewAsync({
-                  id: defaultDataView.id,
+                  id: exploreDataView.id,
                   scope,
                 })
               );
             }
+
+            listenerApi.dispatch(
+              selectDataViewAsync({
+                id: defaultDataView.id,
+                scope,
+              })
+            );
           });
 
         // NOTE: if there is a list of data views to preload other than default one (eg. coming in from the url storage)

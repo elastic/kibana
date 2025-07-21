@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import '@kbn/core-provider-plugin/types';
 import { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import { GlobalSearchTestApi } from '@kbn/global-search-test-plugin/public/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -27,7 +28,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }, t);
   };
 
-  describe('GlobalSearch providers', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/228679
+  // Failing: See https://github.com/elastic/kibana/issues/228679
+  describe.skip('GlobalSearch providers', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
