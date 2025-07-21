@@ -366,7 +366,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <div ref={editorContainer} />
+          <EuiFlexItem grow={false}><EuiFlexGroup css={css({'>': {flexGrow: 0 }})} gutterSize='none'  direction="column" ref={editorContainer} /></EuiFlexItem>
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
