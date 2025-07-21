@@ -505,9 +505,7 @@ This change updates all instances of `vulnerability.package` to the ECS standard
 [%collapsible]
 ====
 *Details* +
-Fields and functions variables are now described with `??` in {esql} queries. For value variables, you can continue to use `?`.
-
-View ({kibana-pull}213916[#213916])
+Fields and functions variables are now described with `??` in {esql} queries. For value variables, you can continue to use `?`. View ({kibana-pull}213916[#213916])
 ====
       
 [discrete]
