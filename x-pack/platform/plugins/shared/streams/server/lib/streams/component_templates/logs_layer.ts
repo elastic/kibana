@@ -91,9 +91,6 @@ export const baseMappings: Record<string, MappingProperty> = {
       structured: {
         type: 'flattened',
       },
-      text: {
-        type: 'match_only_text',
-      },
     },
   },
   attributes: {

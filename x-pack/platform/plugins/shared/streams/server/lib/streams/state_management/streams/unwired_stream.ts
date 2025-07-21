@@ -150,7 +150,6 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       }
     }
 
-    // necessary or not?
     if (this._changes.field_overrides) {
       const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request(
         {
