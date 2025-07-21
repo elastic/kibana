@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { FieldsConfiguration } from './types/types';
 import { FieldType } from './types/types';
-import { gemini, DOCUMENTATION_BASE as DOCUMENTATION } from './translations';
+import { GEMINI, DOCUMENTATION_BASE as DOCUMENTATION } from './translations';
 
 export enum ServiceProviderKeys {
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
@@ -38,7 +38,7 @@ export const GEMINI_REGION_DOC_LINK = (
     href="https://cloud.google.com/vertex-ai/docs/reference/rest#rest_endpoints"
     target="_blank"
   >
-    {`${gemini} ${DOCUMENTATION}`}
+    {`${GEMINI} ${DOCUMENTATION}`}
   </EuiLink>
 );
 
@@ -48,7 +48,7 @@ export const GEMINI_PROJECT_ID_DOC_LINK = (
     href="https://cloud.google.com/vertex-ai/docs/start/cloud-environment"
     target="_blank"
   >
-    {`${gemini} ${DOCUMENTATION}`}
+    {`${GEMINI} ${DOCUMENTATION}`}
   </EuiLink>
 );
 

@@ -185,7 +185,7 @@ export const ENDPOINT_UPDATE_FAILED = i18n.translate(
   }
 );
 
-export const gemini = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
+export const GEMINI = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
   defaultMessage: 'Google Gemini',
 });
 
