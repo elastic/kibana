@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeContainer,
@@ -23,10 +23,17 @@ import { EllipseHoverShape, EllipseShape } from './shapes/ellipse_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { NodeDetails } from './node_details';
-import { GRAPH_ENTITY_NODE_HOVER_SHAPE_ID, GRAPH_ENTITY_NODE_ID } from '../test_ids';
+import {
+  GRAPH_ENTITY_NODE_ID,
+  GRAPH_ENTITY_NODE_HOVER_SHAPE_ID,
+  GRAPH_STACKED_SHAPE_ID,
+} from '../test_ids';
+import { showStackedShape } from '../utils';
 
 const NODE_SHAPE_WIDTH = 90;
-const NODE_SHAPE_HEIGHT = 90;
+const NODE_SHAPE_HEIGHT = 99;
+const NODE_SHAPE_Y_POS_DELTA = 2;
+const NODE_SHAPE_ON_HOVER_Y_POS_DELTA = 2;
 
 export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -44,6 +51,8 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
+  const fillColor = useNodeFillColor(color ?? 'primary');
+  const strokeColor = euiTheme.colors[color ?? 'primary'];
   return (
     <NodeContainer data-test-subj={GRAPH_ENTITY_NODE_ID}>
       <NodeShapeContainer>
@@ -53,24 +62,47 @@ export const EllipseNode = memo<NodeProps>((props: NodeProps) => {
             width={NODE_SHAPE_WIDTH}
             height={NODE_SHAPE_HEIGHT}
             viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
+            yPosDelta={NODE_SHAPE_ON_HOVER_Y_POS_DELTA}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <EllipseHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
+            <EllipseHoverShape stroke={strokeColor} />
           </NodeShapeOnHoverSvg>
         )}
         <NodeShapeSvg
           width="72"
-          height="72"
-          viewBox="0 0 72 72"
+          height="81"
+          viewBox="0 0 72 81"
+          yPosDelta={NODE_SHAPE_Y_POS_DELTA}
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           shadow={shadow}
         >
-          <EllipseShape
-            fill={useNodeFillColor(color)}
-            stroke={euiTheme.colors[color ?? 'primary']}
-          />
+          {showStackedShape(count) && (
+            <EllipseShape
+              data-test-subj={GRAPH_STACKED_SHAPE_ID}
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.8) translateY(16px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.3),
+              }}
+            />
+          )}
+          {showStackedShape(count) && (
+            <EllipseShape
+              data-test-subj={GRAPH_STACKED_SHAPE_ID}
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.9) translateY(7px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.5),
+              }}
+            />
+          )}
+          <EllipseShape fill={fillColor} stroke={strokeColor} />
           {icon && <NodeIcon x="11" y="12" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (
