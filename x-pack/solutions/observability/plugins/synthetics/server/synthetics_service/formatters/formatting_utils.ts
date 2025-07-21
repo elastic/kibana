@@ -131,7 +131,7 @@ export const inlineSourceFormatter: FormatterFn = (fields, key) => {
   const value = fields[key] as string;
   if (!value?.trim()) return value;
 
-  // Re-indent with 2 spaces, but don't include `|-` here
+  // Escape template literals to prevent unintended interpolation
   try {
     return escapeTemplateLiterals(value);
   } catch (e) {
