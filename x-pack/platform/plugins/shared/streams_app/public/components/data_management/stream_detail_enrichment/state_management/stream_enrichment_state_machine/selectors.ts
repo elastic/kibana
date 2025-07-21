@@ -22,7 +22,7 @@ export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
 };
 
 /**
- * Selects the documents used for the data preview table.
+ * Selects whether there are any new processors before the persisted ones.
  */
 export const selectWhetherAnyProcessorBeforePersisted = createSelector(
   [(snapshot: StreamEnrichmentActorSnapshot) => snapshot.context.processorsRefs],

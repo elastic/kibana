@@ -28,7 +28,9 @@ export const ProcessorStatusIndicator = ({
   processorRef: ProcessorConfigurationProps['processorRef'];
 }) => {
   const { euiTheme } = useEuiTheme();
+
   const isNew = useSelector(processorRef, (snapshot) => snapshot.context.isNew);
+
   const hasSimulation = useSimulatorSelector((snapshot) => Boolean(snapshot.context.simulation));
   const isParticipatingInSimulation = useSimulatorSelector((snapshot) =>
     snapshot.context.processors.find((p) => p.id === processorRef.id)
@@ -36,7 +38,6 @@ export const ProcessorStatusIndicator = ({
   const isSimulationRunning = useSimulatorSelector((snapshot) =>
     snapshot.matches('runningSimulation')
   );
-
   const isPending = useSimulatorSelector(
     (snapshot) =>
       snapshot.context.simulation &&
