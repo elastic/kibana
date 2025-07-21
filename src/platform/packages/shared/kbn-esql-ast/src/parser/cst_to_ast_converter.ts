@@ -2163,11 +2163,10 @@ export class CstToAstConverter {
       return this.toStringLiteral(ctx.string_());
     } else if (ctx instanceof cst.NumericArrayLiteralContext) {
       return this.fromNumericArrayLiteral(ctx);
-    } else if (
-      ctx instanceof cst.BooleanArrayLiteralContext ||
-      ctx instanceof cst.StringArrayLiteralContext
-    ) {
-      return this.toList(ctx);
+    } else if (ctx instanceof cst.BooleanArrayLiteralContext) {
+      return this.fromBooleanArrayLiteral(ctx);
+    } else if (ctx instanceof cst.StringArrayLiteralContext) {
+      return this.fromStringArrayLiteral(ctx);
     } else if (ctx instanceof cst.InputParameterContext && ctx.children) {
       // TODO: Make a method out of this.
       const values: ast.ESQLLiteral[] = [];
@@ -2309,21 +2308,18 @@ export class CstToAstConverter {
     return Builder.expression.list.literal({ values }, parserFields);
   }
 
-  private toList(
-    ctx: cst.BooleanArrayLiteralContext | cst.StringArrayLiteralContext
-  ): ast.ESQLList {
-    const values: ast.ESQLLiteral[] = [];
+  private fromBooleanArrayLiteral(ctx: cst.BooleanArrayLiteralContext): ast.ESQLList {
+    const values = ctx.booleanValue_list().map((childCtx) => this.getBooleanValue(childCtx)!);
+    const parserFields = this.createParserFields(ctx);
 
-    for (const booleanValue of ctx.getTypedRuleContexts(cst.BooleanValueContext)) {
-      values.push(this.getBooleanValue(booleanValue)!);
-    }
-    for (const string of ctx.getTypedRuleContexts(cst.StringContext)) {
-      const literal = this.toStringLiteral(string);
+    return Builder.expression.list.literal({ values }, parserFields);
+  }
 
-      values.push(literal);
-    }
+  private fromStringArrayLiteral(ctx: cst.StringArrayLiteralContext): ast.ESQLList {
+    const values = ctx.string__list().map((childCtx) => this.toStringLiteral(childCtx)!);
+    const parserFields = this.createParserFields(ctx);
 
-    return Builder.expression.list.literal({ values }, this.createParserFields(ctx));
+    return Builder.expression.list.literal({ values }, parserFields);
   }
 
   // -------------------------------------- constant expression: "timeInterval"
