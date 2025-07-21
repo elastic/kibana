@@ -2171,7 +2171,7 @@
 "@elastic/eui-amsterdam@npm:@elastic/eui@104.0.0-amsterdam.0", "@elastic/eui@104.0.0-amsterdam.0":
   version "104.0.0-amsterdam.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.0.tgz#9eb69d025bf50367dbed544f21c6d2adedc2dd45"
-  integrity "sha1-nradAlv1A2fb7VRPIcbSre3C3UU= sha512-mXZL4+TdFtfBYnB4GV3FMNgZTlywG4YFuqsUgE55ncdepsMRButzralO+i/8usdMIEFMmkEsUM8k/xgjxGQqWA=="
+  integrity "sha1-Gdf0fAZtW3q+0utCUhSRVH4ocoM= sha512-LEoNMpybeRvSQRGK2XBSm9drbFNqoZqf+04LX9tegNig1XslQfWAx9LDMc0l33iNMeVJNFOjIUbJjNtrnzVUJw=="
   dependencies:
     "@elastic/eui-theme-common" "2.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
