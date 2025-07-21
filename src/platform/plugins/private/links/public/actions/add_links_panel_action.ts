@@ -24,6 +24,7 @@ import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
 import { coreServices } from '../services/kibana_services';
 import { getEditorFlyout } from '../editor/get_editor_flyout';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import { createLinksSavedObjectRef } from '../lib/saved_object_ref_utils';
 
 export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
   apiIsPresentationContainer(parentApi) &&
@@ -54,9 +55,8 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
 
               if (runtimeState.savedObjectId !== undefined) {
                 return {
-                  rawState: {
-                    savedObjectId: runtimeState.savedObjectId,
-                  },
+                  rawState: {},
+                  references: [createLinksSavedObjectRef(runtimeState.savedObjectId)],
                 };
               }
 

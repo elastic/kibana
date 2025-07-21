@@ -33,6 +33,7 @@ import {
   getDefaultConfigForMode,
   getPrefixSelected,
   getTrendPalette,
+  getSecondaryDynamicTrendBaselineValue,
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
 
@@ -165,6 +166,7 @@ export const toExpression = (
   const secondaryPrefixConfig = getPrefixSelected(state, {
     defaultPrefix: '',
     colorMode: secondaryDynamicColorMode,
+    isPrimaryMetricNumeric: isMetricNumeric,
   });
 
   const secondaryTrendConfig =
@@ -176,15 +178,13 @@ export const toExpression = (
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
     secondaryPrefix:
-      secondaryPrefixConfig.mode === 'custom' ? secondaryPrefixConfig.label : undefined,
+      secondaryPrefixConfig.mode === 'custom' ? secondaryPrefixConfig.label : state.secondaryPrefix,
     secondaryColor: secondaryTrendConfig.type === 'static' ? secondaryTrendConfig.color : undefined,
     secondaryTrendVisuals:
       secondaryTrendConfig.type === 'dynamic' ? secondaryTrendConfig.visuals : undefined,
     secondaryTrendBaseline:
       secondaryTrendConfig.type === 'dynamic'
-        ? isMetricNumeric
-          ? secondaryTrendConfig.baselineValue ?? 0
-          : 0
+        ? getSecondaryDynamicTrendBaselineValue(isMetricNumeric, secondaryTrendConfig.baselineValue)
         : undefined,
     secondaryTrendPalette: getTrendPalette(
       secondaryDynamicColorMode,
