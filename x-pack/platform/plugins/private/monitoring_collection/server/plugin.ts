@@ -159,6 +159,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
       meterProvider.addMetricReader(
         new PeriodicExportingMetricReader({
+          // I think this is a typescript error
           exporter: new OTLPMetricExporter({ url, metadata }),
           exportIntervalMillis: otlpConfig.exportIntervalMillis,
         })
