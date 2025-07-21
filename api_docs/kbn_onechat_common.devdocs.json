@@ -2874,6 +2874,20 @@
       },
       {
         "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.EsqlToolFieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EsqlToolFieldType",
+        "description": [
+          "\nCommon ES Field Types"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.OnechatErrorCode",
         "type": "Enum",
         "tags": [],
@@ -3262,9 +3276,7 @@
         "type": "Type",
         "tags": [],
         "label": "EsqlToolFieldTypes",
-        "description": [
-          "\nCommon ES Field Types"
-        ],
+        "description": [],
         "signature": [
           "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
         ],
@@ -3840,6 +3852,21 @@
           "{ readonly indexExplorer: \".index_explorer\"; readonly relevanceSearch: \".relevance_search\"; readonly naturalLanguageSearch: \".nl_search\"; readonly listIndices: \".list_indices\"; readonly getIndexMapping: \".get_index_mapping\"; readonly getDocumentById: \".get_document_by_id\"; readonly generateEsql: \".generate_esql\"; readonly executeEsql: \".execute_esql\"; readonly researcherAgent: \".researcher_agent\"; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.idRegexp",
+        "type": "Object",
+        "tags": [],
+        "label": "idRegexp",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/tool_ids.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
