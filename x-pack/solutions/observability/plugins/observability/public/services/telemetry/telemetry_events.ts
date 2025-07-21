@@ -56,10 +56,23 @@ const relatedAlertAddedToCase: TelemetryEvent = {
     },
   },
 };
+const linkedDashboardView: TelemetryEvent = {
+  eventType: TelemetryEventTypes.LINKED_DASHBOARD_VIEW,
+  schema: {
+    dashboard_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'ID of the dashboard linked to the alert',
+        optional: false,
+      },
+    },
+  },
+};
 
 export const events: TelemetryEvent[] = [
   relatedAlertsLoaded,
   alertDetailsPageView,
   caseSelectedFromObservability,
   relatedAlertAddedToCase,
+  linkedDashboardView,
 ];

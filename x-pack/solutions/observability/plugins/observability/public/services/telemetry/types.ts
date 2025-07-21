@@ -75,6 +75,7 @@ interface LinkedDashboardViewEvent {
   eventType: TelemetryEventTypes.LINKED_DASHBOARD_VIEW;
   schema: RootSchema<LinkedDashboardViewParams>;
 }
+<<<<<<< HEAD
 
 interface CaseSelectedFromObservabilityParams {
   caseContext: string;
@@ -84,6 +85,8 @@ interface CaseSelectedFromObservabilityEvent {
   eventType: TelemetryEventTypes.CASE_SELECTED_FROM_OBSERVABILITY;
   schema: RootSchema<CaseSelectedFromObservabilityParams>;
 }
+=======
+>>>>>>> c6de2dc7c01e (feat: add telemetry tracking for linked dashboard views in alert details)
 
 export type TelemetryEvent =
   | AlertDetailsPageViewEvent
@@ -91,8 +94,12 @@ export type TelemetryEvent =
   | LinkedDashboardViewEvent
   | CaseSelectedFromObservabilityEvent
   | RelatedAlertAddedToCaseEvent
+<<<<<<< HEAD
   | LinkedDashboardViewEvent
   | CaseSelectedFromObservabilityEvent;
+=======
+  | LinkedDashboardViewEvent;
+>>>>>>> c6de2dc7c01e (feat: add telemetry tracking for linked dashboard views in alert details)
 
 export type TelemetryEventParams =
   | RelatedAlertsLoadedParams
@@ -100,5 +107,9 @@ export type TelemetryEventParams =
   | LinkedDashboardViewParams
   | CaseSelectedFromObservabilityParams
   | RelatedAlertAddedToCaseParams
+<<<<<<< HEAD
   | LinkedDashboardViewParams
   | CaseSelectedFromObservabilityParams;
+=======
+  | LinkedDashboardViewParams;
+>>>>>>> c6de2dc7c01e (feat: add telemetry tracking for linked dashboard views in alert details)
