@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  createParser,
-  parse,
-  parseErrors,
-  Parser,
-  type ParseOptions,
-  type ParseResult,
-} from './parser';
+export { parse, Parser } from './parser';
+export type { ParseOptions, ParseResult } from './parser';
