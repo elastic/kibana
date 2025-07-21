@@ -15,6 +15,8 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
   module.exports = require('@kbn/storybook').defaultConfig;
   ```
 
+- Add a reference to `@kbn/storybook` to the `kbn_references` of the package's tsconfig.json.
+
 - Add your plugin alias to the [`src/dev/storybook/aliases.ts` configuration file](/src/dev/storybook/aliases.ts).
 
 - Create sample Storybook stories. For example, in your plugin create a file at
