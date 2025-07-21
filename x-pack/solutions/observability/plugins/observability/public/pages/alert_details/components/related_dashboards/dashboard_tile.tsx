@@ -54,6 +54,17 @@ export function DashboardTile({
                 dashboardId: dashboard.id,
               })}
               target="_blank"
+              onClick={async (e) => {
+                e.preventDefault();
+                if (dashboardLocator) {
+                  const url = await dashboardLocator.getUrl({
+                    dashboardId: dashboard.id,
+                  });
+                  window.open(url, '_blank');
+                } else {
+                  console.error('Dashboard locator is not available');
+                }
+              }}
             >
               {dashboard.title}
             </a>
