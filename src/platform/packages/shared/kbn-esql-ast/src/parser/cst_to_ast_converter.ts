@@ -786,7 +786,7 @@ export class CstToAstConverter {
     command.args.push(primaryExpression);
 
     if (doParseStringAndOptions) {
-      const stringNode = this.createLiteralString(stringContext);
+      const stringNode = this.toStringLiteral(stringContext);
 
       command.args.push(stringNode);
       command.args.push(...this.fromCommandOptions(ctx.commandOptions()));
@@ -834,7 +834,7 @@ export class CstToAstConverter {
     command.args.push(primaryExpression);
 
     if (doParseStringAndOptions) {
-      const stringNode = this.createLiteralString(stringContext);
+      const stringNode = this.toStringLiteral(stringContext);
 
       command.args.push(stringNode);
     }
@@ -1661,7 +1661,7 @@ export class CstToAstConverter {
             if (arg) {
               fn.args.push(arg);
 
-              const literal = this.createLiteralString(regex.string_());
+              const literal = this.toStringLiteral(regex.string_());
 
               fn.args.push(literal);
             }
@@ -1864,7 +1864,7 @@ export class CstToAstConverter {
       );
     }
 
-    return this.createLiteralString(ctx);
+    return this.toStringLiteral(ctx);
   }
 
   // ----------------------------------------------------- expression: "column"
@@ -2133,7 +2133,7 @@ export class CstToAstConverter {
   private fromMapEntryExpression(ctx: cst.EntryExpressionContext): ast.ESQLMapEntry {
     const keyCtx = ctx._key;
     const valueCtx = ctx._value;
-    const key = this.createLiteralString(keyCtx) as ast.ESQLStringLiteral;
+    const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
     const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
     const entry = Builder.expression.entry(key, value, {
       location: getPosition(ctx.start, ctx.stop),
@@ -2160,9 +2160,10 @@ export class CstToAstConverter {
     } else if (ctx instanceof cst.BooleanLiteralContext) {
       return this.getBooleanValue(ctx);
     } else if (ctx instanceof cst.StringLiteralContext) {
-      return this.createLiteralString(ctx.string_());
+      return this.toStringLiteral(ctx.string_());
+    } else if (ctx instanceof cst.NumericArrayLiteralContext) {
+      return this.fromNumericArrayLiteral(ctx);
     } else if (
-      ctx instanceof cst.NumericArrayLiteralContext ||
       ctx instanceof cst.BooleanArrayLiteralContext ||
       ctx instanceof cst.StringArrayLiteralContext
     ) {
@@ -2236,7 +2237,19 @@ export class CstToAstConverter {
     ) as Type extends 'double' ? ast.ESQLDecimalLiteral : ast.ESQLIntegerLiteral;
   }
 
-  private createLiteralString(
+  private fromNumericValue(
+    ctx: cst.NumericValueContext
+  ): ast.ESQLDecimalLiteral | ast.ESQLIntegerLiteral {
+    const integerCtx = ctx.integerValue();
+
+    if (integerCtx) {
+      return this.toNumericLiteral(integerCtx, 'integer');
+    }
+
+    return this.toNumericLiteral(ctx.decimalValue()!, 'double');
+  }
+
+  private toStringLiteral(
     ctx: Pick<cst.StringContext, 'QUOTED_STRING'> & antlr.ParserRuleContext
   ): ast.ESQLStringLiteral {
     const quotedString = ctx.QUOTED_STRING()?.getText() ?? '""';
@@ -2289,25 +2302,23 @@ export class CstToAstConverter {
 
   // ---------------------------------------------- constant expression: "list"
 
+  private fromNumericArrayLiteral(ctx: cst.NumericArrayLiteralContext): ast.ESQLList {
+    const values = ctx.numericValue_list().map((childCtx) => this.fromNumericValue(childCtx));
+    const parserFields = this.createParserFields(ctx);
+
+    return Builder.expression.list.literal({ values }, parserFields);
+  }
+
   private toList(
-    ctx:
-      | cst.NumericArrayLiteralContext
-      | cst.BooleanArrayLiteralContext
-      | cst.StringArrayLiteralContext
+    ctx: cst.BooleanArrayLiteralContext | cst.StringArrayLiteralContext
   ): ast.ESQLList {
     const values: ast.ESQLLiteral[] = [];
 
-    for (const numericValue of ctx.getTypedRuleContexts(cst.NumericValueContext)) {
-      const isDecimal =
-        numericValue.decimalValue() !== null && numericValue.decimalValue() !== undefined;
-      const value = numericValue.decimalValue() || numericValue.integerValue();
-      values.push(this.toNumericLiteral(value!, isDecimal ? 'double' : 'integer'));
-    }
     for (const booleanValue of ctx.getTypedRuleContexts(cst.BooleanValueContext)) {
       values.push(this.getBooleanValue(booleanValue)!);
     }
     for (const string of ctx.getTypedRuleContexts(cst.StringContext)) {
-      const literal = this.createLiteralString(string);
+      const literal = this.toStringLiteral(string);
 
       values.push(literal);
     }
