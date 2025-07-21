@@ -61,7 +61,7 @@ describe('WebhookActionConnectorFields renders', () => {
         url: 'https://test.com',
         headers: [{ key: 'content-type', value: 'text' }],
         hasAuth: true,
-        authType: AuthType.OAuth2,
+        authType: AuthType.OAuth2ClientCredentials,
       },
       secrets: {},
       isDeprecated: false,

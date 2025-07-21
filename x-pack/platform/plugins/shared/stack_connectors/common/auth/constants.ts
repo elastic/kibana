@@ -8,7 +8,7 @@
 export enum AuthType {
   Basic = 'webhook-authentication-basic',
   SSL = 'webhook-authentication-ssl',
-  OAuth2 = 'webhook-authentication-oauth2',
+  OAuth2ClientCredentials = 'webhook-oauth2-client-credentials',
 }
 
 export enum SSLCertType {

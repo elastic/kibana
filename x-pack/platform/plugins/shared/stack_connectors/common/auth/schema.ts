@@ -16,7 +16,7 @@ export const authTypeSchema = schema.maybe(
       schema.literal(AuthType.Basic),
       schema.literal(AuthType.SSL),
       schema.literal(null),
-      schema.literal(AuthType.OAuth2),
+      schema.literal(AuthType.OAuth2ClientCredentials),
     ],
     {
       defaultValue: AuthType.Basic,
@@ -36,14 +36,10 @@ export const AuthConfiguration = {
   verificationMode: schema.maybe(
     schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
   ),
-  oauth2: schema.maybe(
-    schema.object({
-      accessTokenUrl: schema.maybe(schema.string()),
-      clientId: schema.maybe(schema.string()),
-      scope: schema.maybe(schema.string()),
-      additionalFields: schema.maybe(schema.string()),
-    })
-  ),
+  accessTokenUrl: schema.maybe(schema.string()),
+  clientId: schema.maybe(schema.string()),
+  scope: schema.maybe(schema.string()),
+  additionalFields: schema.maybe(schema.string()),
 };
 
 export const SecretConfiguration = {

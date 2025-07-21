@@ -109,9 +109,11 @@ export const AuthConfig: FunctionComponent<Props> = ({
       'data-test-subj': 'authSSL',
     },
     isOAuth2Enabled && {
-      value: AuthType.OAuth2,
+      value: AuthType.OAuth2ClientCredentials,
       label: i18n.AUTHENTICATION_OAUTH2,
-      children: authType === AuthType.OAuth2 && <OAuth2Fields readOnly={readOnly} />,
+      children: authType === AuthType.OAuth2ClientCredentials && (
+        <OAuth2Fields readOnly={readOnly} />
+      ),
       'data-test-subj': 'authOAuth2',
     },
   ].filter(Boolean);

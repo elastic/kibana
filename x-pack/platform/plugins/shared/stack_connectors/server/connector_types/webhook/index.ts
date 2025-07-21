@@ -168,7 +168,10 @@ export async function executor(
     authType,
     ca,
     verificationMode,
-    oauth2: { accessTokenUrl, clientId, scope, additionalFields } = {},
+    accessTokenUrl,
+    clientId,
+    scope,
+    additionalFields,
   } = config;
 
   let parsedAdditionalFields: Record<string, unknown> | undefined;
@@ -199,7 +202,7 @@ export async function executor(
   const clientSecret = secrets.clientSecret;
   const axiosInstance = axios.create();
 
-  if (authType === AuthType.OAuth2) {
+  if (authType === AuthType.OAuth2ClientCredentials) {
     if (!connectorTokenClient) {
       const serviceMessage = 'ConnectorTokenClient is not available for OAuth2 flow.';
       const errorMessage = `Error executing webhook action "${actionId}": ${serviceMessage}`;

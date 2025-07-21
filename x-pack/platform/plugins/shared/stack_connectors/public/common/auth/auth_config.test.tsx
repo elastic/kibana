@@ -528,7 +528,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
         },
       };
 
@@ -552,7 +552,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://token.url',
           clientId: 'client1',
           scope: 'scope1',
@@ -580,7 +580,7 @@ describe('AuthConfig renders', () => {
           data: {
             config: {
               hasAuth: true,
-              authType: AuthType.OAuth2,
+              authType: AuthType.OAuth2ClientCredentials,
               accessTokenUrl: 'https://token.url',
               clientId: 'client1',
               scope: 'scope1',
@@ -603,7 +603,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
           // Missing accessTokenUrl, clientId
         },
         secrets: {
@@ -639,7 +639,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://test.url',
           clientId: 'testClient',
         },
@@ -682,7 +682,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
         },
       };
 
@@ -716,7 +716,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://initial.url',
           clientId: 'initialClient',
           scope: 'readScope',
@@ -753,7 +753,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://initial.url',
           clientId: 'initialClient',
         },
@@ -799,7 +799,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://initial.url',
           clientId: 'initialClient',
         },
@@ -842,7 +842,7 @@ describe('AuthConfig renders', () => {
       const testFormData = {
         config: {
           hasAuth: true,
-          authType: AuthType.OAuth2,
+          authType: AuthType.OAuth2ClientCredentials,
           accessTokenUrl: 'https://initial.url',
           clientId: 'initialClient',
         },

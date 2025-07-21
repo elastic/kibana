@@ -63,7 +63,6 @@ export const ExternalIncidentServiceConfiguration = {
   certType: AuthConfiguration.certType,
   ca: AuthConfiguration.ca,
   verificationMode: AuthConfiguration.verificationMode,
-  oauth2: AuthConfiguration.oauth2,
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
