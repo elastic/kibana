@@ -22,19 +22,19 @@ import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle
 const stepPath = 'ilm.step';
 
 export const retryLifecycleActionExtension = ({ indices }: { indices: Index[] }) => {
-  const allHaveErrors = every(indices, (index) => {
+  const indicesWithFailedStep = indices.filter((index) => {
     return index.ilm?.managed && index.ilm.failed_step;
   });
-  if (!allHaveErrors) {
+  if (!indicesWithFailedStep.length) {
     return null;
   }
-  const indexNames = indices.map(({ name }: Index) => name);
+  const indexNames = indicesWithFailedStep.map(({ name }: Index) => name);
   return {
     requestMethod: retryLifecycleForIndex,
     icon: 'play',
     indexNames: [indexNames],
     buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.retryIndexLifecycleActionButtonLabel', {
-      defaultMessage: 'Retry lifecycle step',
+      defaultMessage: 'Retry failed lifecycle step',
     }),
     successMessage: i18n.translate(
       'xpack.indexLifecycleMgmt.retryIndexLifecycleAction.retriedLifecycleMessage',
