@@ -55,7 +55,7 @@ describe('softDeleteGaps', () => {
         logger: mockLogger,
         ruleId: 'test-rule-id',
         processGapsBatch: expect.any(Function),
-        statuses: Object.values(gapStatus)
+        statuses: Object.values(gapStatus),
       });
     });
 

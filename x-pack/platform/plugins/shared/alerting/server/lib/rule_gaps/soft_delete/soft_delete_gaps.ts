@@ -13,7 +13,6 @@ import { processAllRuleGaps } from '../process_all_rule_gaps';
 import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
 import { gapStatus } from '../../../../common/constants';
 
-
 interface SoftDeleteGapsParams {
   ruleId: string;
   eventLogger?: IEventLogger;
@@ -56,7 +55,7 @@ export const softDeleteGaps = async (params: SoftDeleteGapsParams) => {
       logger,
       eventLogClient,
       processGapsBatch,
-      statuses: Object.values(gapStatus)
+      statuses: Object.values(gapStatus),
     });
 
     if (hasErrors) {
