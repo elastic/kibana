@@ -45,7 +45,7 @@ export const getColumnInputRenderer = (
               },
             },
           ]
-        : null,
+        : [],
     },
     isExpandable: false,
   });
