@@ -22,6 +22,7 @@ interface ValueInputProps {
   onChange?: (value: string) => void;
   autoFocus: boolean;
   className?: string;
+  width?: number;
 }
 
 export const ValueInput: React.FC<ValueInputProps> = ({
@@ -33,6 +34,7 @@ export const ValueInput: React.FC<ValueInputProps> = ({
   onChange,
   autoFocus = false,
   className = '',
+  width,
 }) => {
   const [editValue, setEditValue] = useState(value);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +90,7 @@ export const ValueInput: React.FC<ValueInputProps> = ({
         onBlur={onBlur}
         onKeyDown={onKeyDown}
         className={className}
+        css={width ? { width } : undefined}
       />
     </EuiToolTip>
   );

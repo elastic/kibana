@@ -40,7 +40,7 @@ export const getValueInputPopover =
     onValueChange: OnCellValueChange;
     dataTableRef: RefObject<EuiDataGridRefProps>;
   }) =>
-  ({ columnId, rowIndex, colIndex }: EuiDataGridCellPopoverElementProps) => {
+  ({ columnId, rowIndex, colIndex, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
     const docId = row.raw._id;
     const cellValue = row.flattened[columnId]?.toString();
@@ -60,6 +60,11 @@ export const getValueInputPopover =
 
     const columnExists = columns.some((col) => col.id === columnId);
 
+    let inputWidth: number | undefined;
+    if (cellContentsElement) {
+      inputWidth = cellContentsElement.getBoundingClientRect().width;
+    }
+
     if (columnExists) {
       return (
         <ValueInput
@@ -68,6 +73,7 @@ export const getValueInputPopover =
           columns={columns}
           value={cellValue}
           autoFocus
+          width={inputWidth}
         />
       );
     } else {
