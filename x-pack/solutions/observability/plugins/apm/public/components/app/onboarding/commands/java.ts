@@ -6,8 +6,6 @@
  */
 
 import {
-  API_KEY_COMMAND_PLACEHOLDER,
-  SECRET_TOKEN_COMMAND_PLACEHOLDER,
   apiKeyHint,
   secretTokenHint,
   serverUrlHint,
@@ -36,10 +34,10 @@ export const javaLineNumbers = (apiKey?: string | null) => ({
 export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
 -Delastic.apm.service_name=<your-service-name> \\
 {{^secretToken}}
--Delastic.apm.api_key=${API_KEY_COMMAND_PLACEHOLDER} \\
+-Delastic.apm.api_key={{{apiKey}}} \\
 {{/secretToken}}
 {{#secretToken}}
--Delastic.apm.secret_token=${SECRET_TOKEN_COMMAND_PLACEHOLDER} \\
+-Delastic.apm.secret_token={{{secretToken}}} \\
 {{/secretToken}}
 -Delastic.apm.server_url={{{apmServerUrl}}} \\
 -Delastic.apm.environment=<your-environment> \\

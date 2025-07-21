@@ -35,7 +35,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
-        -Delastic.apm.secret_token=\\\\
+        -Delastic.apm.secret_token= \\\\
         -Delastic.apm.server_url= \\\\
         -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -55,7 +55,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
-        -Delastic.apm.secret_token=foobar\\\\
+        -Delastic.apm.secret_token=foobar \\\\
         -Delastic.apm.server_url=localhost:8220 \\\\
         -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -375,7 +375,7 @@ describe('getCommands', () => {
         "# Initialize using environment variables:
         export ELASTIC_APM_SERVICE_NAME=my-service-name
 
-        export ELASTIC_APM_SECRET_TOKEN=}
+        export ELASTIC_APM_SECRET_TOKEN=
 
         export ELASTIC_APM_SERVER_URL=
 
@@ -397,7 +397,7 @@ describe('getCommands', () => {
         "# Initialize using environment variables:
         export ELASTIC_APM_SERVICE_NAME=my-service-name
 
-        export ELASTIC_APM_SECRET_TOKEN=foobar}
+        export ELASTIC_APM_SECRET_TOKEN=foobar
 
         export ELASTIC_APM_SERVER_URL=localhost:8220
 

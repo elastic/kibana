@@ -48,7 +48,7 @@ export const go = `# ${i18n.translate(
 )}
 export ${goVariables.apmServiceName}={{{apmServiceName}}}
 
-export ${goVariables.secretToken}={{secretToken}}}
+export ${goVariables.secretToken}={{{secretToken}}}
 
 export ${goVariables.apmServerUrl}={{{apmServerUrl}}}
 

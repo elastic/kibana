@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export const phpVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'elastic_apm.secret_token' }),
   ...(!secretToken && { apiKey: 'elastic_apm.api_key' }),

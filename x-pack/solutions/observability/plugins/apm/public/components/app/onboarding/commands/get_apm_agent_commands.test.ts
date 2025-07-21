@@ -26,7 +26,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=<your-service-name> \\\\
-        -Delastic.apm.api_key=undefined \\\\
+        -Delastic.apm.api_key= \\\\
         -Delastic.apm.server_url= \\\\
         -Delastic.apm.environment=<your-environment> \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -43,7 +43,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=<your-service-name> \\\\
-        -Delastic.apm.secret_token=undefined \\\\
+        -Delastic.apm.secret_token=foobar \\\\
         -Delastic.apm.server_url=localhost:8220 \\\\
         -Delastic.apm.environment=<your-environment> \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -61,7 +61,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=<your-service-name> \\\\
-        -Delastic.apm.secret_token=undefined \\\\
+        -Delastic.apm.secret_token=foobar \\\\
         -Delastic.apm.server_url=localhost:8220 \\\\
         -Delastic.apm.environment=<your-environment> \\\\
         -Delastic.apm.application_packages=org.example \\\\
