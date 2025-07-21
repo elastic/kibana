@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/saved-object-types",
+  "owner": "@elastic/kibana-core",
+  "devOnly": true
+}

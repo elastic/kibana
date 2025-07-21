@@ -7364,6 +7364,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-object-types@link:packages/kbn-saved-object-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/saved-objects-finder-plugin@link:src/platform/plugins/shared/saved_objects_finder":
   version "0.0.0"
   uid ""
