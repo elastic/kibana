@@ -21,6 +21,7 @@ import {
   ReasoningEvent,
   ToolCallEvent,
 } from '@kbn/onechat-common';
+import { getCurrentTraceId } from '../../../../tracing';
 
 type SourceEvents = Exclude<ChatAgentEvent, RoundCompleteEvent>;
 
@@ -95,6 +96,7 @@ const createRoundFromEvents = ({
   const round: ConversationRound = {
     input,
     steps: stepEvents.map(eventToStep),
+    trace_id: getCurrentTraceId(),
     response: { message: messages[messages.length - 1].message_content },
   };
 
