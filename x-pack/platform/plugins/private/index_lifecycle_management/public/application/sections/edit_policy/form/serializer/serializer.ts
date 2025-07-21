@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
 import { merge, cloneDeep } from 'lodash';
 
 import { SerializedPolicy } from '../../../../../../common/types';
@@ -23,9 +22,9 @@ export const createSerializer =
 
     updatedPolicy.phases = { hot: { actions: {} }, ...updatedPolicy.phases };
 
-    return produce<SerializedPolicy>(originalPolicy ?? defaultPolicy, (draft) => {
-      // Copy over all updated fields
-      merge(draft, updatedPolicy);
+    const draft = cloneDeep<SerializedPolicy>(originalPolicy ?? defaultPolicy);
+    // Copy over all updated fields
+    merge(draft, updatedPolicy);
 
       /**
        * Important shared values for serialization
@@ -378,5 +377,6 @@ export const createSerializer =
       } else {
         delete draft.phases.delete;
       }
-    });
+
+    return draft;
   };
