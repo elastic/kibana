@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await es.helpers.bulk(
         {
-          retries: 5,
+          retries: 1,
           concurrency: 1,
           datasource: [{ message: 'hello world 3', '@timestamp': '2020-12-16T15:16:18.570Z' }],
           onDocument(doc) {
