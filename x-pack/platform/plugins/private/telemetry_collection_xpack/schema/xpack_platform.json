@@ -4324,6 +4324,9 @@
               },
               "enabled": {
                 "type": "boolean"
+              },
+              "agent_based": {
+                "type": "boolean"
               }
             }
           }

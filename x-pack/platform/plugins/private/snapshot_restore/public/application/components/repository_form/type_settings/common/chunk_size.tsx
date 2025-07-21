@@ -67,6 +67,7 @@ export const ChunkSizeField: React.FunctionComponent<Props> = ({
         }
       >
         <EuiFieldText
+          isInvalid={isInvalid}
           defaultValue={defaultValue}
           fullWidth
           onChange={(e) => updateSettings('chunkSize', e.target.value)}
