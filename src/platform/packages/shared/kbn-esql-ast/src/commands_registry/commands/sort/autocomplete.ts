@@ -66,6 +66,7 @@ export async function autocomplete(
         location: Location.SORT,
         context,
         advanceCursorInitially: false,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
       });
     }
 
@@ -98,6 +99,7 @@ export async function autocomplete(
           expressionRoot,
           location: Location.SORT,
           context,
+          hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
         });
         suggestions.push(...expressionSuggestions);
       }

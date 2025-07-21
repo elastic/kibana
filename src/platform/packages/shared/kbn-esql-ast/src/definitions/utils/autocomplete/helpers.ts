@@ -358,6 +358,7 @@ export async function suggestForExpression({
   getColumnsByType: GetColumnsByTypeFn;
   context?: ICommandContext;
   advanceCursorInitially?: boolean;
+  // @TODO should this be required?
   hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
 }): Promise<ISuggestionItem[]> {
   const suggestions: ISuggestionItem[] = [];
