@@ -56,8 +56,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     },
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/228503
-  describe.skip('preview chart transaction duration', () => {
+  describe('preview chart transaction duration', () => {
     describe(`without data loaded`, () => {
       it('transaction_duration (without data)', async () => {
         const options = getOptions();
@@ -203,12 +202,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(response.status).to.be(200);
           expect(response.body.latencyChartPreview.series.length).to.equal(2);
-          expect(
-            response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+          const responseSeries = response.body.latencyChartPreview.series
+            .map((item: PreviewChartResponseItem) => ({
               name: item.name,
               y: item.data[0].y,
             }))
-          ).to.eql([
+            .sort((a, b) => a.name.localeCompare(b.name));
+          expect(responseSeries).to.eql([
             { name: 'synth-go_production_request_GET /apple', y: 10000 },
             { name: 'synth-go_production_request_GET /banana', y: 5000 },
           ]);
@@ -258,12 +258,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           expect(response.status).to.be(200);
-          expect(
-            response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+          const responseSeries = response.body.latencyChartPreview.series
+            .map((item: PreviewChartResponseItem) => ({
               name: item.name,
               y: item.data[0].y,
             }))
-          ).to.eql([
+            .sort((a, b) => a.name.localeCompare(b.name));
+          expect(responseSeries).to.eql([
             { name: 'synth-go_production_request', y: 7500 },
             { name: 'synth-java_production_request', y: 7500 },
           ]);
@@ -289,15 +290,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(response.status).to.be(200);
           expect(response.body.latencyChartPreview.series.length).to.equal(4);
-          expect(
-            response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+          const responseSeries = response.body.latencyChartPreview.series
+            .map((item: PreviewChartResponseItem) => ({
               name: item.name,
               y: item.data[0].y,
             }))
-          ).to.eql([
+            .sort((a, b) => a.name.localeCompare(b.name));
+          expect(responseSeries).to.eql([
             { name: 'synth-go_production_request_GET /apple', y: 10000 },
-            { name: 'synth-java_production_request_GET /apple', y: 10000 },
             { name: 'synth-go_production_request_GET /banana', y: 5000 },
+            { name: 'synth-java_production_request_GET /apple', y: 10000 },
             { name: 'synth-java_production_request_GET /banana', y: 5000 },
           ]);
         });
@@ -449,12 +451,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(response.status).to.be(200);
           expect(response.body.latencyChartPreview.series.length).to.equal(2);
-          expect(
-            response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+          const responseSeries = response.body.latencyChartPreview.series
+            .map((item: PreviewChartResponseItem) => ({
               name: item.name,
               y: item.data[0].y,
             }))
-          ).to.eql([
+            .sort((a, b) => a.name.localeCompare(b.name));
+          expect(responseSeries).to.eql([
             { name: 'synth-go_production_request_GET /apple', y: 10000 },
             { name: 'synth-go_production_request_GET /banana', y: 5000 },
           ]);
@@ -513,12 +516,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           expect(response.status).to.be(200);
-          expect(
-            response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+          const responseSeries = response.body.latencyChartPreview.series
+            .map((item: PreviewChartResponseItem) => ({
               name: item.name,
               y: item.data[0].y,
             }))
-          ).to.eql([
+            .sort((a, b) => a.name.localeCompare(b.name));
+          expect(responseSeries).to.eql([
             { name: 'synth-go_production_request', y: 7500 },
             { name: 'synth-java_production_request', y: 7500 },
           ]);
@@ -547,15 +551,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(response.status).to.be(200);
           expect(response.body.latencyChartPreview.series.length).to.equal(4);
-          expect(
-            response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+          const responseSeries = response.body.latencyChartPreview.series
+            .map((item: PreviewChartResponseItem) => ({
               name: item.name,
               y: item.data[0].y,
             }))
-          ).to.eql([
+            .sort((a, b) => a.name.localeCompare(b.name));
+          expect(responseSeries).to.eql([
             { name: 'synth-go_production_request_GET /apple', y: 10000 },
-            { name: 'synth-java_production_request_GET /apple', y: 10000 },
             { name: 'synth-go_production_request_GET /banana', y: 5000 },
+            { name: 'synth-java_production_request_GET /apple', y: 10000 },
             { name: 'synth-java_production_request_GET /banana', y: 5000 },
           ]);
         });
