@@ -191,12 +191,13 @@ export const NodeShapeContainer = styled.div`
   height: ${NODE_HEIGHT}px;
 `;
 
-export const NodeShapeSvg = styled.svg<{ shadow?: string }>`
+export const NodeShapeSvg = styled.svg<{ shadow?: string; yPosDelta?: number }>`
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 1;
+
+  ${({ yPosDelta }) => `transform: translate(-50%, calc(-50% + ${yPosDelta || 0}px));`}
 
   ${({ shadow }) => `
     /* Apply shadow when node is selected */
