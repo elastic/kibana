@@ -35,6 +35,7 @@ import {
   isOnechatError,
   createInternalError,
 } from '@kbn/onechat-common';
+import { withConverseSpan, getCurrentTraceId } from '../../tracing';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -124,83 +125,97 @@ class ChatServiceImpl implements ChatService {
   }: ChatConverseParams): Observable<ChatEvent> {
     const isNewConversation = !conversationId;
 
-    return forkJoin({
-      conversationClient: defer(async () => this.conversationService.getScopedClient({ request })),
-      agent: defer(async () => {
-        const agentClient = await this.agentService.getScopedClient({ request });
-        return agentClient.get(agentId);
-      }),
-      chatModel: defer(async () => {
-        if (connectorId) {
-          return connectorId;
-        }
-        const connectors = await getConnectorList({ actions: this.actions, request });
-        const defaultConnector = getDefaultConnector({ connectors });
-        return defaultConnector.connectorId;
-      }).pipe(
-        switchMap((selectedConnectorId) => {
-          return this.inference.getChatModel({
-            request,
-            connectorId: selectedConnectorId,
-            chatModelOptions: {},
-          });
-        })
-      ),
-    }).pipe(
-      switchMap(({ conversationClient, chatModel, agent }) => {
-        const conversation$ = getConversation$({
-          agentId,
-          conversationId,
-          conversationClient,
-        });
-        const agentEvents$ = getExecutionEvents$({
-          agentId,
-          request,
-          mode,
-          conversation$,
-          nextInput,
-          agentService: this.agentService,
-        });
-
-        const title$ = isNewConversation
-          ? generatedTitle$({ chatModel, conversation$, nextInput })
-          : conversation$.pipe(
-              switchMap((conversation) => {
-                return of(conversation.title);
-              })
-            );
-
-        const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
-
-        const saveOrUpdateAndEmit$ = isNewConversation
-          ? createConversation$({
-              agentId,
-              conversationClient,
-              title$,
-              roundCompletedEvents$,
-            })
-          : updateConversation$({
-              conversationClient,
-              conversation$,
-              title$,
-              roundCompletedEvents$,
+    return withConverseSpan({ agentId, mode, conversationId }, (span) => {
+      return forkJoin({
+        conversationClient: defer(async () =>
+          this.conversationService.getScopedClient({ request })
+        ),
+        agent: defer(async () => {
+          const agentClient = await this.agentService.getScopedClient({ request });
+          return agentClient.get(agentId);
+        }),
+        chatModel: defer(async () => {
+          let selectedConnectorId = connectorId;
+          if (!selectedConnectorId) {
+            const connectors = await getConnectorList({ actions: this.actions, request });
+            const defaultConnector = getDefaultConnector({ connectors });
+            selectedConnectorId = defaultConnector.connectorId;
+          }
+          span?.setAttribute('elastic.connector.id', selectedConnectorId);
+          return selectedConnectorId;
+        }).pipe(
+          switchMap((selectedConnectorId) => {
+            return this.inference.getChatModel({
+              request,
+              connectorId: selectedConnectorId,
+              chatModelOptions: {},
             });
+          })
+        ),
+      }).pipe(
+        switchMap(({ conversationClient, chatModel, agent }) => {
+          const conversation$ = getConversation$({
+            agentId,
+            conversationId,
+            conversationClient,
+          });
+          const agentEvents$ = getExecutionEvents$({
+            agentId,
+            request,
+            mode,
+            conversation$,
+            nextInput,
+            agentService: this.agentService,
+          });
 
-        return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
-          catchError((err) => {
-            this.logger.error(`Error executing agent: ${err.stack}`);
-            return throwError(() =>
-              isOnechatError(err)
-                ? err
-                : createInternalError(`Error executing agent: ${err.message}`, {
+          const title$ = isNewConversation
+            ? generatedTitle$({ chatModel, conversation$, nextInput })
+            : conversation$.pipe(
+                switchMap((conversation) => {
+                  return of(conversation.title);
+                })
+              );
+
+          const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
+
+          const saveOrUpdateAndEmit$ = isNewConversation
+            ? createConversation$({
+                agentId,
+                conversationClient,
+                title$,
+                roundCompletedEvents$,
+              })
+            : updateConversation$({
+                conversationClient,
+                conversation$,
+                title$,
+                roundCompletedEvents$,
+              });
+
+          return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
+            catchError((err) => {
+              this.logger.error(`Error executing agent: ${err.stack}`);
+              return throwError(() => {
+                const traceId = getCurrentTraceId();
+                if (isOnechatError(err)) {
+                  err.meta = {
+                    ...err.meta,
+                    traceId,
+                  };
+                  return err;
+                } else {
+                  return createInternalError(`Error executing agent: ${err.message}`, {
                     statusCode: 500,
-                  })
-            );
-          }),
-          shareReplay()
-        );
-      })
-    );
+                    traceId,
+                  });
+                }
+              });
+            }),
+            shareReplay()
+          );
+        })
+      );
+    });
   }
 }
 
