@@ -19,6 +19,10 @@ import { NoDataViewsPromptProvider } from './services';
 
 import mdx from '../README.mdx';
 
+const mock = new NoDataViewsPromptStorybookMock();
+const argTypes = mock.getArgumentTypes();
+const args = mock.getArguments();
+
 export default {
   title: 'No Data/Prompt',
   description: 'A component to display when there are no user-created data views available.',
@@ -27,9 +31,9 @@ export default {
       page: mdx,
     },
   },
+  args,
+  argTypes,
 };
-
-const mock = new NoDataViewsPromptStorybookMock();
 
 export const CreateDataView = {
   render: (params: NoDataViewsPromptStorybookParams) => {
@@ -39,6 +43,4 @@ export const CreateDataView = {
       </NoDataViewsPromptProvider>
     );
   },
-
-  argTypes: mock.getArgumentTypes(),
 };

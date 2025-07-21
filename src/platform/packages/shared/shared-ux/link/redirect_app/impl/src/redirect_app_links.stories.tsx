@@ -15,6 +15,9 @@ import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-
 import { RedirectAppLinks as Component } from './redirect_app_links';
 import mdx from '../README.mdx';
 
+const mock = new RedirectAppLinksStorybookMock();
+const argTypes = mock.getArgumentTypes();
+const args = mock.getArguments();
 export default {
   title: 'Link/Redirect App Links',
   description:
@@ -24,9 +27,9 @@ export default {
       page: mdx,
     },
   },
+  args,
+  argTypes,
 };
-
-const mock = new RedirectAppLinksStorybookMock();
 
 export const RedirectAppLinks = {
   render: () => {
@@ -70,6 +73,4 @@ export const RedirectAppLinks = {
       </EuiFlexGroup>
     );
   },
-
-  argTypes: mock.getArgumentTypes(),
 };
