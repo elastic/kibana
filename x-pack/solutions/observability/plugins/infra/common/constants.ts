@@ -57,10 +57,10 @@ export const METRICSET_NAME = 'metricset.name';
 export const DATASTREAM_DATASET = 'data_stream.dataset';
 
 // OTel hostmetricsreceiver
-export const OTEL_RECEIVER_DATASET_VALUE = 'hostmetricsreceiver.otel';
 
 // integrations
 export const SYSTEM_INTEGRATION = 'system';
+export const HOST_METRICS_RECEIVER_OTEL = 'hostmetricsreceiver.otel';
 
 // logs
 export const MESSAGE_FIELD = 'message';
