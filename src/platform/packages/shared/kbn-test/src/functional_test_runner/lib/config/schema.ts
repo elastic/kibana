@@ -348,5 +348,8 @@ export const schema = Joi.object()
       .default(),
 
     dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
+
+    // settings for video recording during test execution
+    recordVideo: Joi.boolean().default(false),
   })
   .default();

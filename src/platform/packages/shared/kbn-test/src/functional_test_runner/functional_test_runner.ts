@@ -25,6 +25,8 @@ import {
   SuiteTracker,
   EsVersion,
   DedicatedTaskRunner,
+  VideoRecorder,
+  isVideoRecordingAvailable,
 } from './lib';
 import { createEsClientForFtrConfig } from '../es';
 
@@ -110,6 +112,51 @@ export class FunctionalTestRunner {
       if (abortSignal?.aborted) {
         this.log.warning('run aborted');
         return;
+      }
+
+      // Setup video recording if enabled
+      let videoRecorder: VideoRecorder | undefined;
+      if (this.config.get('recordVideo') && realServices) {
+        try {
+          const isAvailable = await isVideoRecordingAvailable();
+          if (isAvailable && providers.hasService('browser')) {
+            const browser = providers.getService('browser');
+            const configPath = Path.basename(this.config.path, '.ts');
+
+            // Start recording before tests begin
+            lifecycle.beforeTests.add(async () => {
+              try {
+                // Use the WebDriver browser instance directly for screenshot-based recording
+                videoRecorder = new VideoRecorder(this.log, browser, configPath);
+                await videoRecorder.start();
+              } catch (err) {
+                this.log.error(`Failed to start video recording: ${err.message}`);
+              }
+            });
+
+            // Stop recording on cleanup or test failure
+            lifecycle.cleanup.add(async () => {
+              if (videoRecorder?.isCurrentlyRecording()) {
+                await videoRecorder.stop();
+              }
+            });
+
+            lifecycle.testFailure.add(async () => {
+              if (videoRecorder?.isCurrentlyRecording()) {
+                await videoRecorder.stop();
+              }
+            });
+          } else if (!isAvailable) {
+            this.log.warning(
+              'Video recording requested but ffmpeg is not available. ' +
+                'Install ffmpeg: brew install ffmpeg (macOS) or apt-get install ffmpeg (Linux)'
+            );
+          } else {
+            this.log.warning('Video recording requested but browser service is not available');
+          }
+        } catch (error) {
+          this.log.error(`Failed to setup video recording: ${error.message}`);
+        }
       }
 
       await lifecycle.beforeTests.trigger(mocha.suite);
