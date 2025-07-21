@@ -10,6 +10,7 @@
 import { test as base } from '@playwright/test';
 import { KbnClient, SamlSessionManager } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
+import { LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL, LogLevel } from '@kbn/tooling-log';
 import {
   createKbnUrl,
   getEsClient,
@@ -17,13 +18,12 @@ import {
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
-  getLogger,
-  ScoutLogger,
   createElasticsearchCustomRole,
   createCustomRole,
   ElasticsearchRoleDescriptor,
   KibanaRole,
 } from '../../../common/services';
+import { ScoutLogger } from '../../../common/services/logger';
 import type { ScoutTestOptions } from '../../types';
 import type { ScoutTestConfig } from '.';
 
@@ -65,7 +65,14 @@ export const coreWorkerFixtures = base.extend<
       const workersCount = workerInfo.config.workers;
       const loggerContext =
         workersCount === 1 ? 'scout-worker' : `scout-worker-${workerInfo.parallelIndex + 1}`;
-      use(getLogger(loggerContext));
+
+      // Scout CLI supports default `--debug` and `--verbose` flags, but since Playwright reserves
+      // `--debug` for its own running mode, we use `SCOUT_PW_LOG_LEVEL` env variable to set the log level.
+      const envLogLevel = process.env.SCOUT_PW_LOG_LEVEL;
+      const scoutLogLevel =
+        LOG_LEVEL_FLAGS.find(({ name }) => name === envLogLevel)?.name || DEFAULT_LOG_LEVEL;
+
+      use(new ScoutLogger(loggerContext, scoutLogLevel as LogLevel));
     },
     { scope: 'worker' },
   ],
