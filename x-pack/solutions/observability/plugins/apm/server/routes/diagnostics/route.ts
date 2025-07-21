@@ -20,6 +20,13 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import type { ApmEvent } from './bundle/get_apm_events';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
+import {
+  getDestinationParentIds,
+  getExitSpansFromNode,
+  getSourceSpanIds,
+} from './service_map/get_exit_spans_from_node';
+import { rangeRt } from '../default_api_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 export interface IndiciesItem {
   index: string;
@@ -75,8 +82,53 @@ export type DiagnosticsBundle = Promise<{
       templateName: string;
     }>;
   }>;
-  params: { start: number; end: number; kuery?: string };
+  params: { start: number; end: number };
 }>;
+
+const getServiceMapDiagnosticsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/diagnostics/service-map/{nodeName}',
+  security: { authz: { requiredPrivileges: ['apm'] } },
+
+  params: t.type({
+    path: t.type({
+      nodeName: t.string,
+    }),
+    // query: t.type({ rangeRt, destinationNode: t.string, traceId: t.string }),
+    query: rangeRt,
+  }),
+  handler: async (resources) => {
+    const { start, end, destinationNode, traceId } = resources.params.query;
+    const { nodeName } = resources.params.path;
+    const apmEventClient = await getApmEventClient(resources);
+
+    const exitSpans = await getExitSpansFromNode({
+      apmEventClient,
+      start,
+      end,
+      serviceName: nodeName,
+    });
+
+    const { sourceSpanIdsRawResponse, spanIds } = await getSourceSpanIds({
+      apmEventClient,
+      start,
+      end,
+      serviceName: nodeName,
+    });
+
+    console.log('getSpanId', spanIds);
+
+    const destinationParentIds = await getDestinationParentIds({
+      apmEventClient,
+      start,
+      end,
+      ids: spanIds,
+      destinationNode,
+    });
+
+    console.log('destinationParentIds', destinationParentIds);
+    return { response: exitSpans };
+  },
+});
 
 const getDiagnosticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics',
@@ -154,4 +206,5 @@ const getDiagnosticsRoute = createApmServerRoute({
 
 export const diagnosticsRepository = {
   ...getDiagnosticsRoute,
+  ...getServiceMapDiagnosticsRoute,
 };

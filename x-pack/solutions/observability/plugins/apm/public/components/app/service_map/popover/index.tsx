@@ -27,6 +27,8 @@ import { DependencyContents } from './dependency_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
+import { withDiagnoseButton } from './with_diagnose_button';
+import { DiagnosticFlyout } from '../diagnostic_flyout';
 
 function getContentsComponent(
   selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition
@@ -58,6 +60,7 @@ interface ContentsProps {
   start: string;
   end: string;
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
+  onDiagnoseClick?: (state: boolean) => void;
 }
 
 interface PopoverProps {
@@ -76,6 +79,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
   const [selectedElement, setSelectedElement] = useState<
     cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined
   >(undefined);
+  const [isDiagnosticFlyoutOpen, setIsDiagnosticFlyoutOpen] = useState(false);
   const deselect = useCallback(() => {
     if (cy) {
       cy.elements().unselect();
@@ -160,49 +164,72 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
-  const ContentsComponent = getContentsComponent(selectedElementData);
+  const popoverContentComponent = getContentsComponent(selectedElementData);
+
+  // Example: show the diagnose button if selectedElementData has a certain property, or just hardcode true for now
+  const showDiagnoseButton = true; // TODO: replace with real condition if needed
+
+  const isTroubleshootingEnabled = true;
+  // Only wrap if there is a component
+  const ContentsComponent = isTroubleshootingEnabled
+    ? popoverContentComponent
+      ? withDiagnoseButton(popoverContentComponent)
+      : null
+    : popoverContentComponent;
+
+  // Handler to open the diagnostic flyout
+  const handleDiagnoseClick = () => setIsDiagnosticFlyoutOpen(true);
 
   const isOpen = !!selectedElement && !!ContentsComponent;
 
   return (
-    <EuiPopover
-      anchorPosition={'upCenter'}
-      button={trigger}
-      closePopover={() => {}}
-      isOpen={isOpen}
-      ref={popoverRef}
-      style={popoverStyle}
-    >
-      <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h3 style={{ wordBreak: 'break-all' }}>
-              {selectedElementData.label ?? selectedElementId}
-              {kuery && (
-                <EuiToolTip
-                  position="bottom"
-                  content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
-                    defaultMessage: 'The KQL filter is not applied in the displayed stats.',
-                  })}
-                >
-                  <EuiIcon tabIndex={0} type="info" />
-                </EuiToolTip>
-              )}
-            </h3>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </EuiFlexItem>
-        {ContentsComponent && (
-          <ContentsComponent
-            onFocusClick={onFocusClick}
-            elementData={selectedElementData}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-          />
-        )}
-      </EuiFlexGroup>
-    </EuiPopover>
+    <div>
+      <EuiPopover
+        anchorPosition={'upCenter'}
+        button={trigger}
+        closePopover={() => {}}
+        isOpen={isOpen}
+        ref={popoverRef}
+        style={popoverStyle}
+      >
+        <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h3 style={{ wordBreak: 'break-all' }}>
+                {selectedElementData.label ?? selectedElementId}
+                {kuery && (
+                  <EuiToolTip
+                    position="bottom"
+                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                      defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                    })}
+                  >
+                    <EuiIcon tabIndex={0} type="info" />
+                  </EuiToolTip>
+                )}
+              </h3>
+            </EuiTitle>
+            <EuiHorizontalRule margin="xs" />
+          </EuiFlexItem>
+          {ContentsComponent && (
+            <ContentsComponent
+              onFocusClick={onFocusClick}
+              elementData={selectedElementData}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+              showDiagnoseButton={showDiagnoseButton}
+              onDiagnoseClick={handleDiagnoseClick}
+            />
+          )}
+        </EuiFlexGroup>
+      </EuiPopover>
+      <DiagnosticFlyout
+        selectedNode={selectedElementData}
+        isOpen={isDiagnosticFlyoutOpen}
+        onClose={() => setIsDiagnosticFlyoutOpen(false)}
+      />
+    </div>
   );
 }
