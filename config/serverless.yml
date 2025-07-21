@@ -176,6 +176,7 @@ xpack.security.ui.userManagementEnabled: false
 xpack.security.ui.roleMappingManagementEnabled: false
 
 xpack.ml.nlp:
+  enabled: false
   modelDeployment:
     allowStaticAllocations: false
     vCPURange:
