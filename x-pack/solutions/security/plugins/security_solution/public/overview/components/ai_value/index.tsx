@@ -8,7 +8,6 @@
 import type { ComponentType } from 'react';
 import React, { useMemo } from 'react';
 import {
-  EuiBadge,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +22,8 @@ import {
   useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
+import { CostComparePercentage } from './cost_compare_percentage';
+import { getPercChange } from '../detection_response/soc_trends/helpers';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { useStyles } from './beacon.styles';
 import {
@@ -37,31 +38,42 @@ import bg from './bg.svg';
 import { UsdIcon } from './usd_icon';
 
 interface Props {
+  attackAlertsCountCompare: number;
   attackAlertsCount: number;
   attackAlertIds: string[];
   attackDiscoveryCount: number;
   totalAlerts: number;
+  totalAlertsCompare: number;
   from: string;
   to: string;
 }
 
 export const AIValueMetrics: React.FC<Props> = ({
+  attackAlertsCountCompare,
   attackAlertsCount,
   attackAlertIds,
   attackDiscoveryCount,
   totalAlerts,
+  totalAlertsCompare,
   from,
   to,
 }) => {
   const data = {
     totalAlerts,
     filteredAlerts: totalAlerts - attackAlertsCount,
+    filteredAlertsCompare: totalAlertsCompare - attackAlertsCountCompare,
     aiDetected: attackDiscoveryCount,
     traditionalDetected: 80,
   };
+  console.log('compare!', {
+    attackAlertsCountCompare,
+    attackAlertsCount,
+    compare: getPercChange(attackAlertsCount, attackAlertsCountCompare),
+  });
 
   const hoursSaved = getTimeSavedHours(data.filteredAlerts);
   const costSavings = getCostSavings(data.filteredAlerts);
+  const costSavingsCompare = getCostSavings(data.filteredAlertsCompare);
   const alertStats = getAlertStats({
     totalAlerts: data.totalAlerts,
     filteredAlerts: data.filteredAlerts,
@@ -145,14 +157,11 @@ export const AIValueMetrics: React.FC<Props> = ({
                   </h2>
                 </EuiTitle>
 
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <EuiBadge color="success" iconType="sortUp">
-                    {'+23%'}
-                  </EuiBadge>
-                  <EuiText size="xs" color="subdued">
-                    <p>{'over the last 30 days'}</p>
-                  </EuiText>
-                </span>
+                <CostComparePercentage
+                  currentCount={data.filteredAlerts}
+                  previousCount={data.filteredAlertsCompare}
+                  previousCost={formatDollars(costSavingsCompare)}
+                />
 
                 <EuiText size="xs" color="subdued">
                   <p>{'Based on analyst time saved'}</p>

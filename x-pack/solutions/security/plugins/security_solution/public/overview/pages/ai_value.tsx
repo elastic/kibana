@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { pick } from 'lodash/fp';
+import { getPreviousTimeRange } from '../../common/utils/get_time_range';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { useAlertCountQuery } from './use_alert_count_query';
@@ -71,12 +72,7 @@ const AIValueComponent = () => {
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
-  const {
-    cancelRequest: cancelFindAttackDiscoveriesRequest,
-    data,
-    isLoading,
-    refetch: refetchFindAttackDiscoveries,
-  } = useFindAttackDiscoveries({
+  const { data } = useFindAttackDiscoveries({
     end: to,
     http,
     includeUniqueAlertIds: true,
@@ -84,10 +80,35 @@ const AIValueComponent = () => {
     start: from,
     status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
   });
+  const compareTimeRange = useMemo(() => getPreviousTimeRange({ from, to }), []);
+  const { data: compareAdData } = useFindAttackDiscoveries({
+    end: compareTimeRange.to,
+    http,
+    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
+    start: compareTimeRange.from,
+    status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
+  });
+  console.log('compare ==>', {
+    current: {
+      from,
+      to,
+      data,
+    },
+    compare: {
+      data: compareAdData,
+      from: compareTimeRange.from,
+      to: compareTimeRange.to,
+    },
+  });
 
   const { alertCount } = useAlertCountQuery({
     to,
     from,
+    signalIndexName,
+  });
+  const { alertCount: alertCountCompare } = useAlertCountQuery({
+    to: compareTimeRange.to,
+    from: compareTimeRange.from,
     signalIndexName,
   });
   console.log('ad data ==>', data);
@@ -124,8 +145,10 @@ const AIValueComponent = () => {
                     from={from}
                     to={to}
                     totalAlerts={alertCount}
+                    totalAlertsCompare={alertCountCompare}
                     attackDiscoveryCount={data.total}
                     attackAlertsCount={data.unique_alert_ids_count}
+                    attackAlertsCountCompare={compareAdData?.unique_alert_ids_count ?? 0}
                     attackAlertIds={data.unique_alert_ids ?? []}
                   />
                 )}
