@@ -8,10 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
-import type {
-  GetHasDataResponse,
-  SupportedDataSources,
-} from '../../../../common/metrics_sources/get_has_data';
+import type { EntityTypes } from '../../../../common/http_api/shared/entity_type';
+import type { GetHasDataResponse } from '../../../../common/metrics_sources/get_has_data';
 import { NoRemoteCluster } from '../../empty_states';
 import { SourceErrorPage } from '../../source_error_page';
 import { useMetricsDataViewContext, useSourceContext } from '../../../containers/metrics_source';
@@ -27,7 +25,7 @@ export const InfraPageTemplate = ({
   onboardingFlow,
   ...pageTemplateProps
 }: Omit<LazyObservabilityPageTemplateProps, 'noDataConfig'> & {
-  dataSourceAvailability?: SupportedDataSources;
+  dataSourceAvailability?: EntityTypes;
   onboardingFlow?: OnboardingFlow;
 }) => {
   const {

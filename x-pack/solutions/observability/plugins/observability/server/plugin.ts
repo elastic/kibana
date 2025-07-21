@@ -16,7 +16,6 @@ import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
@@ -26,12 +25,9 @@ import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server'
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
+import { getLogsFeature } from './features/logs_feature';
 import { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
-import {
-  kubernetesGuideConfig,
-  kubernetesGuideId,
-} from '../common/guided_onboarding/kubernetes_guide_config';
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import {
   AnnotationsAPI,
@@ -54,7 +50,6 @@ export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 interface PluginSetup {
   alerting: AlertingServerSetup;
   features: FeaturesPluginSetup;
-  guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
@@ -97,6 +92,8 @@ export class ObservabilityPlugin
     plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
     plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
+
+    plugins.features.registerKibanaFeature(getLogsFeature());
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -151,10 +148,6 @@ export class ObservabilityPlugin
         isDev: this.initContext.env.mode.dev,
       });
     });
-    /**
-     * Register a config for the observability guide
-     */
-    plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
 
     setEsqlRecommendedQueries(plugins.esql);
 
@@ -168,6 +161,7 @@ export class ObservabilityPlugin
       },
       alertDetailsContextualInsightsService,
       alertsLocator,
+      managedOtlpServiceUrl: config.managedOtlpServiceUrl,
     };
   }
 
