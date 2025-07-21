@@ -169,6 +169,10 @@ export function getDashboardApi({
         ...getState(),
       });
 
+      if (!saveResult || saveResult.error) {
+        return;
+      }
+
       if (saveResult) {
         unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
