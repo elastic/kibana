@@ -13,7 +13,6 @@ import { agentStatusesToSummary } from '../../../../../../../common/services';
 
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../../types';
 import {
-  usePagination,
   useGetAgentPolicies,
   sendGetAgents,
   sendGetAgentStatus,
@@ -29,6 +28,12 @@ import { AgentStatusKueryHelper } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
+
+import {
+  useSessionAgentListState,
+  getDefaultAgentListState,
+  type AgentListTableState,
+} from './use_session_agent_list_state';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
@@ -105,30 +110,73 @@ export function useFetchAgentsData() {
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
 
-  // Agent data states
-  const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
+  // Initialize default state for session storage
+  const getInitialState = useCallback((): AgentListTableState => {
+    const baseState = getDefaultAgentListState();
+    return {
+      ...baseState,
+      search: defaultKuery,
+      selectedStatus: [
+        'healthy',
+        'unhealthy',
+        'orphaned',
+        'updating',
+        'offline',
+        ...(urlHasInactive ? ['inactive'] : []),
+      ],
+    };
+  }, [defaultKuery, urlHasInactive]);
 
-  // Table and search states
-  const [draftKuery, setDraftKuery] = useState<string>(defaultKuery);
-  const [search, setSearchState] = useState<string>(defaultKuery);
-  const { pagination, pageSizeOptions, setPagination } = usePagination();
-  const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  // Use session storage hook for table state
+  const sessionState = useSessionAgentListState({
+    defaultState: getInitialState(),
+  });
 
-  // Policies state for filtering
-  const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
+  // Extract state from session storage hook
+  const {
+    search,
+    selectedAgentPolicies,
+    selectedStatus,
+    selectedTags,
+    showUpgradeable,
+    sort,
+    page,
+    updateTableState,
+  } = sessionState;
 
-  // Status for filtering
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([
-    'healthy',
-    'unhealthy',
-    'orphaned',
-    'updating',
-    'offline',
-    ...(urlHasInactive ? ['inactive'] : []),
-  ]);
+  // Create individual setters using updateTableState
+  const setSearchState = useCallback(
+    (value: string) => updateTableState({ search: value }),
+    [updateTableState]
+  );
 
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const setSelectedAgentPolicies = useCallback(
+    (value: string[]) => updateTableState({ selectedAgentPolicies: value }),
+    [updateTableState]
+  );
+
+  const setSelectedStatus = useCallback(
+    (value: string[]) => updateTableState({ selectedStatus: value }),
+    [updateTableState]
+  );
+
+  const setSelectedTags = useCallback(
+    (value: string[]) => updateTableState({ selectedTags: value }),
+    [updateTableState]
+  );
+
+  const setShowUpgradeable = useCallback(
+    (value: boolean) => updateTableState({ showUpgradeable: value }),
+    [updateTableState]
+  );
+
+  const pageSizeOptions = [5, 20, 50];
+
+  // Sync draftKuery with session storage search
+  const [draftKuery, setDraftKuery] = useState<string>(search);
+  useEffect(() => {
+    setDraftKuery(search);
+  }, [search]);
 
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive') || selectedStatus.length === 0;
@@ -152,7 +200,7 @@ export function useFetchAgentsData() {
         });
       }
     },
-    [urlParams, history, toUrlParams]
+    [setSearchState, urlParams, history, toUrlParams]
   );
 
   // filters kuery
@@ -209,11 +257,11 @@ export function useFetchAgentsData() {
             actionStatusResponse,
           ] = await Promise.all([
             sendGetAgents({
-              page: pagination.currentPage,
-              perPage: pagination.pageSize,
+              page: page.index + 1,
+              perPage: page.size,
               kuery: kuery && kuery !== '' ? kuery : undefined,
-              sortField: getSortFieldForAPI(sortField),
-              sortOrder,
+              sortField: getSortFieldForAPI(sort.field),
+              sortOrder: sort.direction,
               showAgentless,
               showInactive,
               showUpgradeable,
@@ -355,11 +403,11 @@ export function useFetchAgentsData() {
       fetchDataAsync();
     },
     [
-      pagination.currentPage,
-      pagination.pageSize,
       kuery,
-      sortField,
-      sortOrder,
+      page.index,
+      page.size,
+      sort.field,
+      sort.direction,
       showAgentless,
       showInactive,
       showUpgradeable,
@@ -409,10 +457,7 @@ export function useFetchAgentsData() {
     setSearch,
     selectedAgentPolicies,
     setSelectedAgentPolicies,
-    sortField,
-    setSortField,
-    sortOrder,
-    setSortOrder,
+    sort,
     selectedStatus,
     setSelectedStatus,
     selectedTags,
@@ -420,9 +465,8 @@ export function useFetchAgentsData() {
     allAgentPolicies,
     agentPoliciesRequest,
     agentPoliciesIndexedById,
-    pagination,
+    page,
     pageSizeOptions,
-    setPagination,
     kuery,
     draftKuery,
     setDraftKuery,
@@ -430,5 +474,10 @@ export function useFetchAgentsData() {
     currentRequestRef,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+
+    // Session storage utilities
+    clearFilters: sessionState.clearFilters,
+    resetToDefaults: sessionState.resetToDefaults,
+    onTableChange: sessionState.onTableChange,
   };
 }
