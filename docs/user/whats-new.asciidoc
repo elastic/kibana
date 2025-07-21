@@ -36,7 +36,7 @@ image::images/esql-smart-help.png[ES|QL smart suggestions, width=50%]
 [discrete]
 ==== Unified Trace experience in Discover
 
-We've brought distributed tracing front and center in the new trace experience in Discover. When you open a trace or span document, you'll see key service and span attributes presented clearly, with improved formatting for duration and latency. A compact waterfall chart is now embedded right in the flyout, letting you instantly visualize trace timing and dependencies without leaving the page. You can expand the chart for a full detailed view, complete with direct links to related errors and full APM context. The interface is optimized for OTEL fields, supports fast filtering with ES|QL, and has been streamlined for clarity and speed. All of this makes troubleshooting complex, distributed systems in Discover faster and more intuitive than ever. 
+We've brought distributed tracing front and center in the new trace experience in Discover. When you open a trace or span document, you'll see key service and span attributes presented clearly, with improved formatting for duration and latency. A compact waterfall chart is now embedded right in the flyout, letting you instantly visualize trace timing and dependencies without leaving the page. You can expand the chart for a detailed view, complete with direct links to related errors and full APM context. The interface is optimized for OTel fields, supports fast filtering with ES|QL, and has been streamlined for clarity and speed. All of this makes troubleshooting complex, distributed systems in Discover faster and more intuitive than ever. 
 
 [discrete]
 === Dashboards and Visualizations
@@ -52,19 +52,19 @@ image::images/collapsible_sections.gif[Collapsible sections in dashboards]
 [discrete]
 ==== ES|QL controls and variables, create from anywhere
 
-We've improved ES|QL variables and dashboard controls in this release: You can now create variables and controls first before using them in visualizations. It's simpler to create a new control by just typing `?` in your ES|QL query, enabling you to use controls in more places. Speaking of more places, you can substitute variables for function names, field names, field values, and ES|QL configurations all at the same time. The controls editing experience is much easier to use than in the initial release, featuring better handling of common situations, such as no data returning from a query.
+We've improved ES|QL variables and dashboard controls in this release. You can now create variables and controls before using them in visualizations. It's simpler to create a new control by just typing `?` in your ES|QL query, enabling you to use controls in more places. You can also substitute variables for function names, field names, field values, and ES|QL configurations all at the same time. The controls editing experience is enhanced, featuring better handling of common situations such as no data returning from a query.
 
 [discrete]
 ==== Compare by trend in metric visualizations
 
-With this release, you can enable a new "Compare to" option in metric visualizations, which dynamically compares the value of the secondary metric to the primary metrics. This makes it easy for you to visually spot values that are improving. 
+With this release, you can enable a new **Compare to** option in metric visualizations, which dynamically compares the value of the secondary metric to the primary metrics. This makes it easy for you to visually spot values that are improving. 
 
 image::images/compare_to_metric.png[Compare to metric visualization]
 
 [discrete]
 ==== New visual options for Lens tables
 
-You can now render tables in Lens in "Compact" or "Expanded" mode depending on your visual preference. 
+You can now render tables in Lens in **Compact** or **Expanded** mode depending on your visual preference. 
 
 [discrete]
 ==== View chart configuration for read-only dashboards
@@ -91,16 +91,16 @@ This context-aware rule creation shortcut helps you improve monitoring while sta
 image::images/alerting_rules_from_visualizations.png[One Click Monitoring: Create Alerting rules from visualizations]
 
 [discrete]
-==== Alerts panel in Dashboards
+==== Alerts panel in dashboards
 
-You can now include Alerts tables as panels in Dashboards. Alerts panels provide real-time visibility into system-triggered alerts alongside other visualizations. You can correlate alerts with other dashboard components, such as logs, metrics, Discover sessions, or Lens visualizations, without needing to switch contexts.
+You can now include Alerts tables as panels in dashboards. Alerts panels provide real-time visibility into system-triggered alerts alongside other visualizations. You can correlate alerts with other dashboard components, such as logs, metrics, Discover sessions, or Lens visualizations, without needing to switch contexts.
 
 image::images/alerts_panel_dashboard.png[Alerts panel in Dashboards]
 
 [discrete]
 ==== Alerts history clean-up available in Technical Preview
 
-You can now manually trigger alerts deletion in bulk. This new feature starts a cleanup task that runs asynchronously in the background. You can specify a threshold for alert age or duration and choose to delete active alerts, inactive alerts, or both. This feature is only available under Stack Management for now.
+You can now manually trigger alerts deletion in bulk. This new feature starts a cleanup task that runs asynchronously in the background. You can specify a threshold for alert age or duration and choose to delete active alerts, inactive alerts, or both. This feature is currently only available under Stack Management.
 
 image::images/cleanup_alerts.png[Alerts history clean-up available in Technical Preview]
 
@@ -112,12 +112,12 @@ Maintenance windows now have public HTTP APIs, enabling programmatic management.
 [discrete]
 ==== Cases analytics index
 
-You can now explore Cases data in Dashboard and Discover. You can use the new Cases analytics index to build dashboards and visualizations of Cases activities and trends. These data points offer improved visibility into incident management efficiency in Kibana for operation managers.
+You can now explore Cases data in dashboards and Discover. You can use the new Cases analytics index to build dashboards and visualizations of Cases activities and trends. These data points offer improved visibility into incident management efficiency in Kibana for operation managers.
 
 [discrete]
 ==== ES|QL rule type ungrouped alerts
 
-We're introducing an ungrouped alerts option to configure alerts for the ES|QL rule type. The ES|QL rule type now allows you to generate an alert for each row in the query results, using a unique alert identifier.
+We're introducing an ungrouped alerts option to configure alerts for the ES|QL rule type. The ES|QL rule type now allows you to generate an alert for each row in the query results using a unique alert identifier.
 
 [discrete]
 === Kibana Reporting
@@ -125,7 +125,7 @@ We're introducing an ungrouped alerts option to configure alerts for the ES|QL r
 [discrete]
 ==== Scheduled exports
 
-Kibana's reporting feature now enables you to schedule one-time or recurring exports in PDF, PNG, and CSV formats. This allows you to capture and share snapshots of Dashboard visualizations or Discover results easily. With scheduled exports, you can configure your export settings once and Kibana will automatically generate exports on a regular schedule. With proper permissions, you can also schedule exports to be shared with others via email, streamlining your export process.
+Kibana's reporting feature now enables you to schedule one-time or recurring exports in PDF, PNG, and CSV formats. This allows you to easily capture and share snapshots of dashboard visualizations or Discover results. With scheduled exports, you can configure your export settings once and Kibana will automatically generate exports on a regular schedule. With proper permissions, you can also schedule exports to be shared with others through email, streamlining your export process.
 
 image::images/scheduled_exports.png[Scheduled exports, width=35%]
   

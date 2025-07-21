@@ -119,9 +119,7 @@ Before you upgrade to 8.19.0, review the breaking changes, then mitigate the imp
 [%collapsible]
 ====
 *Details* +
-Fields and functions variables are now described with `??` in {esql} queries. For value variables, you can continue to use `?`.
-
-View ({kibana-pull}213916[#213916])
+Fields and functions variables are now described with `??` in {esql} queries. For value variables, you can continue to use `?` ({kibana-pull}213916[#213916]).
 ====
 
 [float]
@@ -136,7 +134,7 @@ There are no deprecations in this version.
 {kib} 8.19.0 adds the following new and notable features.
 
 Alerting::
-* Adds the ability to schedule reports on a recurring basis and view previously scheduled reports ({kibana-pull}224849[#224849]), ({kibana-pull}221028[#221028]).
+* Adds the ability to schedule reports on a recurring basis and view previously scheduled reports ({kibana-pull}224849[#224849], {kibana-pull}221028[#221028]).
 * Adds four dedicated case analytics indices that allow users to build dashboards and metrics using case data. These indices are automatically created when {kib} starts up and are updated periodically with cases, comments, attachments, and activity data ({kibana-pull}223405[#223405]).
 * Adds the `xpack.actions.email.services.enabled` {kib} setting, which allows you to enable or disable email services for email connectors ({kibana-pull}223363[#223363]).
 * Adds the `xpack.actions.webhook.ssl.pfx.enabled` {kib} setting, which allows you to disable Webhook connector PFX file support for SSL client authentication ({kibana-pull}222507[#222507]).
@@ -146,25 +144,24 @@ Alerting::
 * Adds an alert cleanup functionality that allows you to delete active or inactive (acknowledged, recovered, closed, or untracked) alerts with no status update for a period of time ({kibana-pull}216613[#216613]).
 * Adds an embeddable panel for dashboards that allows you to show a simplified version of the Alerts table from {observability} or {elastic-sec} ({kibana-pull}216076[#216076]).
 Dashboards and Visualizations::
-* Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This allows you to generate an alert when the data on the chart crosses a certain threshold ({kibana-pull}217719[#217719]).
-* Adds collapsible sections to **Dashboard**. Collapsible sections allow you to group panels into logical groups, and to help your dashboards load faster by only loading their content when expanded ({kibana-pull}220877[#220877]).
+* Adds the **Create alert rule** action to ES|QL dashboard panels, usable from the panel context menu or by right-clicking a data point on the visualization. This rule allows you to generate an alert when the data on the chart crosses a certain threshold ({kibana-pull}217719[#217719]).
+* Adds collapsible sections to dashboards that allow you to group panels into logical groups. Collapsible sections also help dashboards load faster by only loading their content when expanded ({kibana-pull}220877[#220877]).
 * Adds the ability to mark a dashboard as favorite from within the dashboard in addition to the **Dashboards** page ({kibana-pull}201596[#201596]).
 * Adds the ability to resize and move dashboard panels using a keyboard ({kibana-pull}208286[#208286]).
 * Adds the ability to create {esql} controls from the dashboard **Controls** menu ({kibana-pull}219495[#219495]).
-* Adds the ability to create {esql} controls by typing a question mark `?` when editing an {esql} visualization's query ({kibana-pull}216839[#216839]).
-* Adds "Compare to" badge for Metric charts in **Lens** ({kibana-pull}214811[#214811]).
+* Adds the ability to create {esql} controls by typing a question mark (`?`) when editing an {esql} visualization's query ({kibana-pull}216839[#216839]).
+* Adds a **Compare to** badge for Metric charts in **Lens** ({kibana-pull}214811[#214811]).
 Data ingestion and Fleet::
 * Enables the `enableAutomaticAgentUpgrades` feature flag ({kibana-pull}219932[#219932]).
 * Adds support for Cloud Connectors in CSPM ({kibana-pull}212200[#212200]).
 Discover::
 * Adds an **Attributes** tab to the document viewer when exploring OTel documents in the Observability solution view ({kibana-pull}222391[#222391]).
-* When an ES|QL query times out (as a result of the `search:timeout` advanced setting), partial results that are available are now shown ({kibana-pull}219027[#219027]).
+* Shows any available results when an ES|QL query times out as a result of the `search:timeout` advanced setting ({kibana-pull}219027[#219027]).
 * Adds click actions for Stacktrace and Degraded Fields when exploring logs in Discover ({kibana-pull}214413[#214413]).
-* Shows a **Load more** option instead of pagination when exploring Logs in **Discover** ({kibana-pull}211176[#211176]).
-* Adds **Read More** and **Read Less** functionality to highlight_fields in **Discover**({kibana-pull}215326[#215326]).
-
+* Shows a **Load more** option instead of pagination when exploring Logs in Discover ({kibana-pull}211176[#211176]).
+* Adds **Read more** and **Read less** functionality to Document view fields in Discover ({kibana-pull}215326[#215326]).
 Elastic Observability solution::
-* Adds the advanced setting for anonymization for Observability AI Assistant ({kibana-pull}224607[#224607]).
+* Adds the anonymization advanced setting for Observability AI Assistant ({kibana-pull}224607[#224607]).
 * Allows users to change the Knowledge Base model post-installation in AI Assistant Settings. ({kibana-pull}221319[#221319]).
 * Adds ELSER and e5 on EIS ({kibana-pull}220993[#220993]).
 * Only shows ELSER in EIS if the pre-configured endpoint is available ({kibana-pull}220096[#220096]).
@@ -175,26 +172,26 @@ Elastic Observability solution::
 * Allows users to add the APM trace waterfall to other solutions ({kibana-pull}216098[#216098]).
 * Adds the **History** tab view for calendar-based SLOs to the SLO details page ({kibana-pull}223825[#223825]).
 * Allows users to view definitions, delete SLOs, and purge SLI data from a single page, without needing to consider instances ({kibana-pull}222238[#222238]).
-* Adds **Definition** tab to SLO pages ({kibana-pull}212826[#212826]).
+* Adds the **Definition** tab to SLO pages ({kibana-pull}212826[#212826]).
 * Adds suggested dashboards to alerts ({kibana-pull}223424[#223424]).
-* Adds **Add to case** button to alerts ({kibana-pull}223184[#223184]).
-* Allows users to save group by information with dynamic mapping for custom threshold rules ({kibana-pull}219826[#219826]).
-* Allows users to link dashboards in rule and alert pages ({kibana-pull}219019[#219019]).
-* Allows users to add an investigation guide to alert details pages ({kibana-pull}217106[#217106]).
-* Adds KQL Filter to TLS alerting rule ({kibana-pull}215110[#215110]).
-* Adds the context.grouping action variable in SLO burn rate and ES query rules ({kibana-pull}213550[#213550]).
-* Adds the context.grouping action variable in custom threshold and APM rules ({kibana-pull}212895[#212895]).
+* Adds the **Add to case** button to alerts ({kibana-pull}223184[#223184]).
+* Allows users to save `group by` information with dynamic mapping for custom threshold rules ({kibana-pull}219826[#219826]).
+* Allows users to link dashboards in **Rules** and **Alerts** pages ({kibana-pull}219019[#219019]).
+* Allows users to add an investigation guide to alert **Details** pages ({kibana-pull}217106[#217106]).
+* Adds KQL filter to TLS alerting rule ({kibana-pull}215110[#215110]).
+* Adds the `context.grouping` action variable in SLO burn rate and ES query rules ({kibana-pull}213550[#213550]).
+* Adds the `context.grouping` action variable in custom threshold and APM rules ({kibana-pull}212895[#212895]).
 * Allows users to generate an alert for each row in query results in the ES query ES|QL rule ({kibana-pull}212135[#212135]).
-* Adds filter controls on Observability alerts pages ({kibana-pull}198495[#198495]).
+* Adds filter controls on Observability **Alerts** pages ({kibana-pull}198495[#198495]).
 * Adds support for maintenance windows in Synthetics ({kibana-pull}222174[#222174]).
 * Allows users to choose the spaces where Synthetics monitors are available ({kibana-pull}221568[#221568]).
-* Allows users to rename private location labels and tags in Synthetics. ({kibana-pull}221515[#221515]).
+* Allows users to rename private location labels and tags in Synthetics ({kibana-pull}221515[#221515]).
 * Adds monitor downtime alert when Synthetics monitor has no data ({kibana-pull}220127[#220127]).
-* Adds a compact view on Synthetics monitor overview page ({kibana-pull}219060[#219060]).
+* Adds a compact view to the Synthetics **Overview** page ({kibana-pull}219060[#219060]).
 * Adds drilldown functionality to Synthetics stats overview embeddable ({kibana-pull}217688[#217688]).
-* Adds Failure Store metrics to the Data Set Quality page ({kibana-pull}220874[#220874]).
+* Adds failure store metrics to the **Data Set Quality** page ({kibana-pull}220874[#220874]).
 * Adds support for span links in the service map ({kibana-pull}215645[#215645]).
-* Adds support for `GroupStreamDefinition` to `/api/streams` endpoints [#208126]({kibana-pull}208126).
+* Adds support for `GroupStreamDefinition` to `/api/streams` endpoints ({kibana-pull}208126[#208126]).
 
 Elastic Security solution::
 For the Elastic Security 8.19.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -202,7 +199,7 @@ For the Elastic Security 8.19.0 release information, refer to {security-guide}/r
 Management::
 * Adds autocomplete suggestions for {esql} queries in Console ({kibana-pull}219980[#219980]).
 Search::
-* Adds a section that enables adding, updating, and deleting query rules written on top of the Query Rules APIs to pin or exclude documents to a query according to criteria you set. ({kibana-pull}227226[#227226]).
+* Adds a section that enables adding, updating, and deleting query rules written on top of the Query Rules APIs to pin or exclude documents according to criteria you set ({kibana-pull}227226[#227226]).
 
 For more information about the features introduced in 8.19.0, refer to <<whats-new,What's new in 8.19>>.
 
