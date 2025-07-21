@@ -1,24 +1,22 @@
-// We need to adjust the whole workflow schema here to the actual workflow schema
-// https://docs.google.com/document/d/1c4cyLIMTzEYn9XxDFwrNSmFpVJVLavRVM9DOa_HI9w8
-import React, { useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import {
   EuiButton,
-  EuiPageTemplate,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPageTemplate,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
+import type { AuthenticatedUser, CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
+import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import * as yaml from 'js-yaml';
+import React, { useCallback, useEffect, useState } from 'react';
 import { PLUGIN_NAME } from '../../common';
 
 interface WorkflowsAppDeps {
@@ -77,41 +75,31 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
       steps: [
         {
           id: 'step-with-console-log-1',
-          connectorType: 'console',
-          connectorName: 'console',
-          inputs: {
+          type: 'console.log',
+          with: {
             message: 'Step 1 executed "{{event.ruleName}}"',
           },
-        ],
-        steps: [
-          {
-            id: 'step-with-console-log-1',
-            type: 'console.log',
-            with: {
-              message: 'Step 1 executed "{{event.ruleName}}"',
-            },
+        },
+        {
+          id: 'step-with-slow-console',
+          type: 'console.sleep',
+          with: {
+            sleepTime: 1000,
+            message: 'Step 2 executed "{{event.additionalData.userName}}"',
           },
-          {
-            id: 'step-with-slow-console',
-            type: 'console.sleep',
-            with: {
-              sleepTime: 1000,
-              message: 'Step 2 executed "{{event.additionalData.userName}}"',
-            },
+        },
+        {
+          id: 'step-with-slack-connector',
+          needs: ['step1', 'step2'],
+          type: 'slack-connector',
+          'connector-id': 'slack_keep',
+          with: {
+            message:
+              'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
           },
-          {
-            id: 'step-with-slack-connector',
-            needs: ['step1', 'step2'],
-            type: 'slack-connector',
-            'connector-id': 'slack_keep',
-            with: {
-              message:
-                'Message from step 1: Detection rule name is "{{event.ruleName}}" and user is "{{event.additionalData.userName}}" and workflowRunId is "{{workflowRunId}}" and time now is {{ now() }}',
-            },
-          }
-        ]
-      }
-    )
+        },
+      ],
+    })
   );
 
   // Update workflow inputs with current user email
