@@ -71,7 +71,6 @@
     "@kbn/scout-info",
     "@kbn/inference-common",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/saved-search-plugin",
     "@kbn/response-ops-rule-params",
     "@kbn/ml-string-hash",
     "@kbn/uptime-plugin"
