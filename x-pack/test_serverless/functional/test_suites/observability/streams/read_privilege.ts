@@ -6,7 +6,7 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack-observability/api_integration_deployment_agnostic/ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
