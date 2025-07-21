@@ -97,6 +97,7 @@ export function getDiscoverStateMock({
         persistedDiscoverSession: finalSavedSearch
           ? {
               ...finalSavedSearch,
+              id: finalSavedSearch.id ?? '',
               title: finalSavedSearch.title ?? '',
               description: finalSavedSearch.description ?? '',
               tabs: [

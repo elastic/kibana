@@ -86,6 +86,7 @@ async function getState(
           spaceId: '',
           persistedDiscoverSession: {
             ...savedSearch,
+            id: savedSearch.id ?? '',
             title: savedSearch.title ?? '',
             description: savedSearch.description ?? '',
             tabs: [
