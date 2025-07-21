@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 
