@@ -38,7 +38,12 @@ import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
 import { MetricVisualizationState, SecondaryTrend } from './types';
-import { getColorMode, getDefaultConfigForMode, getTrendPalette } from './helpers';
+import {
+  getColorMode,
+  getDefaultConfigForMode,
+  getTrendPalette,
+  isSecondaryTrendConfigInvalid,
+} from './helpers';
 import { getAccessorType } from '../../shared_components';
 
 export const DEFAULT_MAX_COLUMNS = 3;
@@ -555,6 +560,7 @@ export const getMetricVisualization = ({
     if (!datasourceLayer) {
       return { state, savedObjectReferences: [] };
     }
+
     // this should clean up the secondary trend state if in conflict
     const { isNumeric: isMetricNumeric } = getAccessorType(datasourceLayer, state.metricAccessor);
     const colorMode = getColorMode(state.secondaryTrend, isMetricNumeric);
