@@ -58,7 +58,6 @@
     "@kbn/es-archiver",
     "@kbn/es-query",
     "@kbn/visualizations-plugin",
-    "@kbn/rule-registry-plugin",
     "@kbn/controls-plugin",
     "@kbn/apm-synthtrace-client",
     "@kbn/discover-plugin",
