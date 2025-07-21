@@ -8,18 +8,20 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import type { UnifiedDocViewerStorybookArgs } from '../../../../../.storybook/preview';
 import minimalAPMFixture from '../../../../__fixtures__/span_apm_minimal.json';
 import minimalOtelFixture from '../../../../__fixtures__/span_otel_minimal.json';
 import redisClientOtelFixture from '../../../../__fixtures__/span_otel_redis_client.json';
-import { SpanOverview } from './span_overview';
+import { SpanOverview, type SpanOverviewProps } from './span_overview';
 
+type Args = UnifiedDocViewerStorybookArgs<SpanOverviewProps>;
 const meta = {
   title: 'Span overview',
   component: SpanOverview,
 } satisfies Meta<typeof SpanOverview>;
 
 export default meta;
-type Story = StoryObj<typeof SpanOverview>;
+type Story = StoryObj<Args>;
 
 export const MinimalApm: Story = {
   name: 'Minimal APM span',

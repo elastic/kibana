@@ -8,17 +8,18 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import type { UnifiedDocViewerStorybookArgs } from '../../../../../.storybook/preview';
 import httpServerOtelFixture from '../../../../__fixtures__/transaction_http_server_otel.json';
+import { TransactionOverview, type TransactionOverviewProps } from './transaction_overview';
 
-import { TransactionOverview } from './transaction_overview';
-
+type Args = UnifiedDocViewerStorybookArgs<TransactionOverviewProps>;
 const meta = {
   title: 'Transaction overview',
   component: TransactionOverview,
-} satisfies Meta<typeof TransactionOverview>;
+} satisfies Meta<TransactionOverviewProps>;
 export default meta;
 
-type Story = StoryObj<typeof TransactionOverview>;
+type Story = StoryObj<Args>;
 
 export const OtelHttpServer: Story = {
   name: 'Otel HTTP server transaction',

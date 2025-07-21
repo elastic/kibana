@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { ArgTypes, Args, Decorator } from '@storybook/react';
 import { produce } from 'immer';
 import { mockUnifiedDocViewerServices } from '../public/__mocks__';
 import { setUnifiedDocViewerServices } from '../public/plugin';
+
+export type UnifiedDocViewerStorybookArgs<T> = Omit<T, 'hit'> & {
+  hasApmShowCapability: boolean;
+  hit: unknown;
+};
 
 // The data view mock provided by discover-utils adds the methods like `getByName` to the fields array, but Storybook does not seem to see them, perhaps because of some limitations on object extension.
 //
@@ -83,7 +88,7 @@ export const decorators: Decorator[] = [
 
     // The document the doc viewer gets is a `DataTableRecord`, while our fixtures use a "raw" hit object.
     // `buildDataTableRecord` adds the `flattened` fields.
-    const hit = buildDataTableRecord(storyArgs.hit);
+    const hit = buildDataTableRecord(storyArgs.hit as EsHitRecord);
     return Story({ args: { ...storyArgs, hit } });
   },
 ];

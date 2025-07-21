@@ -8,16 +8,18 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import otelExampleFixture from '../../__fixtures__/logs_otel_example.json';
+import type { UnifiedDocViewerStorybookArgs } from '../../../.storybook/preview';
 import errorApmOtelFixture from '../../__fixtures__/error_apm_otel.json';
-import { LogsOverview } from './logs_overview';
+import otelExampleFixture from '../../__fixtures__/logs_otel_example.json';
+import { LogsOverview, type LogsOverviewProps } from './logs_overview';
 
-const meta: Meta<typeof LogsOverview> = {
+type Args = UnifiedDocViewerStorybookArgs<LogsOverviewProps>;
+const meta = {
   title: 'Logs overview',
   component: LogsOverview,
-};
+} satisfies Meta<typeof LogsOverview>;
 export default meta;
-type Story = StoryObj<typeof LogsOverview>;
+type Story = StoryObj<Args>;
 
 export const Minimal: Story = {
   name: 'Minimal log',

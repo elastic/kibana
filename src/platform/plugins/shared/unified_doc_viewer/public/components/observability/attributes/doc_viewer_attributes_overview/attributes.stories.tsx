@@ -9,15 +9,17 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import AttributesOverview from '.';
+import type { UnifiedDocViewerStorybookArgs } from '../../../../../.storybook/preview';
 import basicFixture from '../../../../__fixtures__/span_otel_minimal.json';
 import redisSpanFixture from '../../../../__fixtures__/span_otel_redis_client.json';
 
+type Args = UnifiedDocViewerStorybookArgs<React.ComponentProps<typeof AttributesOverview>>;
 const meta: Meta<typeof AttributesOverview> = {
   title: 'Attributes',
   component: AttributesOverview,
 };
 export default meta;
-type Story = StoryObj<typeof AttributesOverview>;
+type Story = StoryObj<Args>;
 
 export const Basic: Story = { args: { hit: basicFixture } };
 
