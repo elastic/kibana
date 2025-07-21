@@ -5,7 +5,7 @@ Team assignment occurs once per ci run.
 The entry point is a [yaml config](https://buildkite.com/elastic/kibana-code-coverage-main/steps)  
 Within the yaml config, [this shell script](https://github.com/elastic/kibana/blob/main/.buildkite/scripts/steps/code_coverage/reporting/ingestData.sh) is used.  
 Search for `node scripts/generate_team_assignments.js` and you'll see how it is generated before ingestion begins.  
-The generated file's path is passed to the ingestion system via an environment variable: `--teamAssignmentsPath $TEAM_ASSIGN_PATH`  
+The generated file's path is passed to the ingestion system via an environment variable: `--teamAssignmentsPath $TEAM_ASSIGN_PATH`.  
 The ingestion system uses it [here](https://github.com/elastic/kibana/blob/main/src/dev/code_coverage/ingest_coverage/index.js#L33).
 
 ## Team Assignment Parsing (from .github/CODEOWNERS)
