@@ -16,7 +16,7 @@ import {
   SERVICE_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { HighlightField } from '../highlight_field';
-import ServiceNameWithIcon from '../service_name_with_icon';
+import { ServiceNameWithIcon } from '../service_name_with_icon';
 
 // eslint-disable-next-line import/no-default-export
 export default function ServiceNameColumn({

@@ -29,5 +29,3 @@ export function ServiceNameWithIcon({ agentName, formattedServiceName }: Props) 
     </EuiFlexGroup>
   );
 }
-// eslint-disable-next-line import/no-default-export
-export default ServiceNameWithIcon;
