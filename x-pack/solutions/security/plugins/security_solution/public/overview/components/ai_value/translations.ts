@@ -73,3 +73,43 @@ export const TIME_RANGE = (timeRange: string) =>
     defaultMessage: 'over the last {timeRange} days',
     values: { timeRange },
   });
+
+export const THREATS_DETECTED = i18n.translate(
+  'xpack.securitySolution.aiValue.threatsDetectedTitle',
+  {
+    defaultMessage: 'Real threats detected',
+  }
+);
+
+export const THREATS_DETECTED_DESC = i18n.translate(
+  'xpack.securitySolution.aiValue.threatsDetectedDesc',
+  {
+    defaultMessage: 'AI-identified genuine threats',
+  }
+);
+
+export const ATTACK_DISCOVERY_COUNT = i18n.translate(
+  'xpack.securitySolution.aiValue.attackDiscoveryCount',
+  {
+    defaultMessage: 'attack discovery count',
+  }
+);
+
+export const FILTERING_RATE = i18n.translate('xpack.securitySolution.aiValue.filteringRate', {
+  defaultMessage: 'Alert filtering rate',
+});
+
+export const FILTERING_RATE_DESC = i18n.translate(
+  'xpack.securitySolution.aiValue.filteringRateDesc',
+  {
+    defaultMessage: 'AI-filtered false positives',
+  }
+);
+
+export const TIME_SAVED = i18n.translate('xpack.securitySolution.aiValue.timeSavedTitle', {
+  defaultMessage: 'Analyst time saved',
+});
+
+export const TIME_SAVED_DESC = i18n.translate('xpack.securitySolution.aiValue.timeSavedTitle', {
+  defaultMessage: 'Time saved',
+});

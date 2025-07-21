@@ -6,103 +6,63 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGrid,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiStat,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { useValueMetrics } from './use_value_metrics';
+import { ThreatsDetected } from './threats_detected';
+import { FilteringRate } from './filtering_rate';
+import { TimeSaved } from './time_saved';
 import { CostSavings } from './cost_savings';
-import {
-  getTimeSavedHours,
-  getAlertStats,
-  getAttackDetectionComparison,
-  getResponseTimeTrend,
-} from './metrics';
 
 interface Props {
-  attackAlertsCountCompare: number;
-  attackAlertsCount: number;
-  attackAlertIds: string[];
-  attackDiscoveryCount: number;
-  totalAlerts: number;
-  totalAlertsCompare: number;
   from: string;
   to: string;
 }
 
-export const AIValueMetrics: React.FC<Props> = ({
-  attackAlertsCountCompare,
-  attackAlertsCount,
-  attackAlertIds,
-  attackDiscoveryCount,
-  totalAlerts,
-  totalAlertsCompare,
-  from,
-  to,
-}) => {
-  const data = {
-    totalAlerts,
-    filteredAlerts: totalAlerts - attackAlertsCount,
-    filteredAlertsCompare: totalAlertsCompare - attackAlertsCountCompare,
-    aiDetected: attackDiscoveryCount,
-    traditionalDetected: 80,
-  };
-
-  const hoursSaved = getTimeSavedHours(data.filteredAlerts);
-  const alertStats = getAlertStats({
-    totalAlerts: data.totalAlerts,
-    filteredAlerts: data.filteredAlerts,
-  });
-  const detectionComparison = getAttackDetectionComparison(
-    data.aiDetected,
-    data.traditionalDetected
-  );
-
-  const responseTimeTrend = getResponseTimeTrend([30, 28, 32], [20, 18, 22]); // beforeAI and afterAI arrays
+export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
+  const { attackAlertIds, valueMetrics, valueMetricsCompare } = useValueMetrics({ from, to });
+  //
+  // const hoursSaved = getTimeSavedHours(data.filteredAlerts);
+  // const alertStats = getAlertStats({
+  //   totalAlerts: data.totalAlerts,
+  //   filteredAlerts: data.filteredAlerts,
+  // });
+  // const detectionComparison = getAttackDetectionComparison(
+  //   data.aiDetected,
+  //   data.traditionalDetected
+  // );
+  //
+  // const responseTimeTrend = getResponseTimeTrend([30, 28, 32], [20, 18, 22]); // beforeAI and afterAI arrays
 
   return (
     <>
       <CostSavings
+        attackAlertIds={attackAlertIds}
+        filteredAlerts={valueMetrics.filteredAlerts}
+        filteredAlertsCompare={valueMetricsCompare.filteredAlerts}
         from={from}
         to={to}
-        attackAlertIds={attackAlertIds}
-        filteredAlerts={data.filteredAlerts}
-        filteredAlertsCompare={data.filteredAlertsCompare}
       />
       <EuiSpacer size="l" />
 
       <EuiFlexGrid columns={3} gutterSize="l" responsive={false}>
-        <EuiPanel paddingSize="l">
-          <EuiTitle size="s">
-            <h3>{'Real threats detected'}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiStat title="14" description="AI-identified genuine threats" titleColor="accent" />
-          <EuiText size="s">{'+45 % over the last 30 days'}</EuiText>
-        </EuiPanel>
-
-        <EuiPanel paddingSize="l">
-          <EuiTitle size="s">
-            <h3>{'Alert filtering rate'}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiStat title="89.7%" description="AI-filtered false positives" />
-          <EuiText size="s">{'+28 % over the last 30 days'}</EuiText>
-        </EuiPanel>
-
-        <EuiPanel paddingSize="l">
-          <EuiTitle size="s">
-            <h3>{'Analyst time saved'}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiStat title="3,211h" description="Time saved" />
-          <EuiText size="s">{'+31 % over the last 30 days'}</EuiText>
-          <EuiText size="s">{'You didn’t need to hire ~2 extra analysts'}</EuiText>
-        </EuiPanel>
+        <ThreatsDetected
+          attackDiscoveryCount={valueMetrics.attackDiscoveryCount}
+          attackDiscoveryCountCompare={valueMetricsCompare.attackDiscoveryCount}
+          from={from}
+          to={to}
+        />
+        <FilteringRate
+          filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
+          filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
+          from={from}
+          to={to}
+        />
+        <TimeSaved
+          hoursSaved={valueMetrics.hoursSaved}
+          hoursSavedCompare={valueMetricsCompare.hoursSaved}
+          from={from}
+          to={to}
+        />
       </EuiFlexGrid>
 
       <EuiSpacer size="l" />

@@ -4,21 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
-import { useAssistantContext } from '@kbn/elastic-assistant';
 import { pick } from 'lodash/fp';
-import { getPreviousTimeRange } from '../../common/utils/get_time_range';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
-import { useAlertCountQuery } from './use_alert_count_query';
-import {
-  ACKNOWLEDGED,
-  CLOSED,
-  OPEN,
-} from '../../attack_discovery/pages/results/history/search_and_filter/translations';
-import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
 import { AIValueMetrics } from '../components/ai_value';
 import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -27,7 +18,6 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
@@ -65,53 +55,11 @@ const AIValueComponent = () => {
 
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
-  const { http } = useKibana().services;
-  const { assistantAvailability } = useAssistantContext();
-  const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canReadCases = userCasesPermissions.read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
-  const { data } = useFindAttackDiscoveries({
-    end: to,
-    http,
-    includeUniqueAlertIds: true,
-    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
-    start: from,
-    status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
-  });
-  const compareTimeRange = useMemo(() => getPreviousTimeRange({ from, to }), [from, to]);
-  const { data: compareAdData } = useFindAttackDiscoveries({
-    end: compareTimeRange.to,
-    http,
-    isAssistantEnabled: assistantAvailability.isAssistantEnabled,
-    start: compareTimeRange.from,
-    status: [OPEN, ACKNOWLEDGED, CLOSED].map((s) => s.toLowerCase()),
-  });
-  console.log('compare ==>', {
-    current: {
-      from,
-      to,
-      data,
-    },
-    compare: {
-      data: compareAdData,
-      from: compareTimeRange.from,
-      to: compareTimeRange.to,
-    },
-  });
 
-  const { alertCount } = useAlertCountQuery({
-    to,
-    from,
-    signalIndexName,
-  });
-  const { alertCount: alertCountCompare } = useAlertCountQuery({
-    to: compareTimeRange.to,
-    from: compareTimeRange.from,
-    signalIndexName,
-  });
-  console.log('ad data ==>', data);
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
@@ -140,18 +88,7 @@ const AIValueComponent = () => {
           ) : (
             <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
               <EuiFlexItem>
-                {data && (
-                  <AIValueMetrics
-                    from={from}
-                    to={to}
-                    totalAlerts={alertCount}
-                    totalAlertsCompare={alertCountCompare}
-                    attackDiscoveryCount={data.total}
-                    attackAlertsCount={data.unique_alert_ids_count}
-                    attackAlertsCountCompare={compareAdData?.unique_alert_ids_count ?? 0}
-                    attackAlertIds={data.unique_alert_ids ?? []}
-                  />
-                )}
+                <AIValueMetrics from={from} to={to} />
               </EuiFlexItem>
             </EuiFlexGroup>
           )}

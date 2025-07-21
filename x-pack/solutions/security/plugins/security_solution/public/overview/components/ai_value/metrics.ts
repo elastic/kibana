@@ -13,6 +13,28 @@ export interface AlertData {
   totalAlerts: number;
   filteredAlerts: number;
 }
+export interface ValueMetrics {
+  attackDiscoveryCount: number;
+  filteredAlerts: number;
+  filteredAlertsPerc: number;
+  hoursSaved: number;
+  totalAlerts: number;
+}
+export const getValueMetrics = ({
+  attackDiscoveryCount,
+  totalAlerts,
+  attackAlertsCount,
+}: {
+  attackDiscoveryCount: number;
+  totalAlerts: number;
+  attackAlertsCount: number;
+}): ValueMetrics => ({
+  attackDiscoveryCount,
+  filteredAlerts: totalAlerts - attackAlertsCount,
+  filteredAlertsPerc: ((totalAlerts - attackAlertsCount) / totalAlerts) * 100,
+  hoursSaved: getTimeSavedHours(totalAlerts - attackAlertsCount),
+  totalAlerts,
+});
 
 export const getTimeSavedHours = (filteredAlerts: number): number => {
   const totalMinutesSaved = filteredAlerts * MINUTES_SAVED_PER_ALERT;
