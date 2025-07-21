@@ -29,7 +29,7 @@ export function Actions() {
       data-test-subj="monitorDetailsHeaderControlPopover"
       button={
         <EuiButton
-          data-test-subj="o11yHeaderControlActionsButton"
+          data-test-subj="monitorDetailsHeaderControlActionsButton"
           fill
           iconSide="right"
           iconType="arrowDown"
