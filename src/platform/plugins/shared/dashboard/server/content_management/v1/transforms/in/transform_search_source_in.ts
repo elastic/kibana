@@ -14,7 +14,7 @@ export function transformSearchSourceIn(
   kibanaSavedObjectMeta?: DashboardAttributes['kibanaSavedObjectMeta']
 ) {
   if (!kibanaSavedObjectMeta || !kibanaSavedObjectMeta.searchSource) {
-    return { searchSourceJSON: '', references: [] };
+    return { searchSourceJSON: '{}', references: [] };
   }
   const { searchSource } = kibanaSavedObjectMeta;
 
