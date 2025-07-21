@@ -30,7 +30,6 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   onChangeSampleSize?: (sampleSize: number) => void;
   lineCountInput: number | undefined;
   headerLineCountInput: number | undefined;
-  densityControl?: React.ReactNode;
 }
 
 const defaultOnChangeSampleSize = () => {};
