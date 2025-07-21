@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import {
@@ -24,7 +24,7 @@ import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { NodeDetails } from './node_details';
 
 const NODE_SHAPE_WIDTH = 99;
-const NODE_SHAPE_HEIGHT = 98;
+const NODE_SHAPE_HEIGHT = 107;
 
 export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -41,6 +41,8 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
     nodeClick,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
+  const fillColor = useNodeFillColor(color ?? 'primary');
+  const strokeColor = euiTheme.colors[color ?? 'primary'];
   return (
     <>
       <NodeShapeContainer>
@@ -52,20 +54,39 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <DiamondHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
+            <DiamondHoverShape stroke={strokeColor} />
           </NodeShapeOnHoverSvg>
         )}
         <NodeShapeSvg
           width="79"
-          height="78"
-          viewBox="0 0 79 78"
+          height="87"
+          viewBox="0 0 79 87"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <DiamondShape
-            fill={useNodeFillColor(color)}
-            stroke={euiTheme.colors[color ?? 'primary']}
-          />
+          {!!count && count > 0 && (
+            <DiamondShape
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.8) translateY(16px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.3),
+              }}
+            />
+          )}
+          {!!count && count > 0 && (
+            <DiamondShape
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.9) translateY(7px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.5),
+              }}
+            />
+          )}
+          <DiamondShape fill={fillColor} stroke={strokeColor} />
           {icon && <NodeIcon x="14.5" y="14.5" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (

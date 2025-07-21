@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
@@ -24,7 +24,7 @@ import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { NodeDetails } from './node_details';
 
 const NODE_SHAPE_WIDTH = 87;
-const NODE_SHAPE_HEIGHT = 96;
+const NODE_SHAPE_HEIGHT = 105;
 
 export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -41,6 +41,8 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
     nodeClick,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
+  const fillColor = useNodeFillColor(color ?? 'primary');
+  const strokeColor = euiTheme.colors[color ?? 'primary'];
   return (
     <>
       <NodeShapeContainer>
@@ -52,20 +54,39 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <HexagonHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
+            <HexagonHoverShape stroke={strokeColor} />
           </NodeShapeOnHoverSvg>
         )}
         <NodeShapeSvg
           width="71"
-          height="78"
-          viewBox="0 0 71 78"
+          height="87"
+          viewBox="0 0 71 87"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <HexagonShape
-            fill={useNodeFillColor(color)}
-            stroke={euiTheme.colors[color ?? 'primary']}
-          />
+          {!!count && count > 0 && (
+            <HexagonShape
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.8) translateY(16px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.3),
+              }}
+            />
+          )}
+          {!!count && count > 0 && (
+            <HexagonShape
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.9) translateY(7px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.5),
+              }}
+            />
+          )}
+          <HexagonShape fill={fillColor} stroke={strokeColor} />
           {icon && <NodeIcon x="11" y="15" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (

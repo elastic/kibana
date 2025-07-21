@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { Handle, Position } from '@xyflow/react';
 import {
@@ -29,7 +29,7 @@ const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
 `;
 
 const NODE_SHAPE_WIDTH = 91;
-const NODE_SHAPE_HEIGHT = 88;
+const NODE_SHAPE_HEIGHT = 97;
 
 export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -46,6 +46,8 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
     nodeClick,
   } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
+  const fillColor = useNodeFillColor(color ?? 'primary');
+  const strokeColor = euiTheme.colors[color ?? 'primary'];
   return (
     <>
       <NodeShapeContainer>
@@ -57,20 +59,39 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <PentagonHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
+            <PentagonHoverShape stroke={strokeColor} />
           </PentagonShapeOnHover>
         )}
         <NodeShapeSvg
           width="75"
-          height="72"
-          viewBox="0 0 75 72"
+          height="86"
+          viewBox="0 0 75 86"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <PentagonShape
-            fill={useNodeFillColor(color)}
-            stroke={euiTheme.colors[color ?? 'primary']}
-          />
+          {!!count && count > 0 && (
+            <PentagonShape
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.8) translateY(16px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.3),
+              }}
+            />
+          )}
+          {!!count && count > 0 && (
+            <PentagonShape
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.9) translateY(7px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.5),
+              }}
+            />
+          )}
+          <PentagonShape fill={fillColor} stroke={strokeColor} />
           {icon && <NodeIcon x="12.5" y="14.5" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (
