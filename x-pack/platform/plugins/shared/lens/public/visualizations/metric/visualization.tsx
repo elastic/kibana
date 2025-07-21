@@ -42,7 +42,7 @@ import {
   getColorMode,
   getDefaultConfigForMode,
   getTrendPalette,
-  isInConflictWithPrimary,
+  isSecondaryTrendConfigInvalid,
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
 
@@ -572,10 +572,7 @@ export const getMetricVisualization = ({
     );
     const colorMode = getColorMode(state.secondaryTrend, isSecondaryMetricNumeric);
 
-    if (
-      colorMode !== state.secondaryTrend?.type ||
-      isInConflictWithPrimary(state.secondaryTrend, isPrimaryMetricNumeric)
-    ) {
+    if (isSecondaryTrendConfigInvalid(state.secondaryTrend, colorMode, isPrimaryMetricNumeric)) {
       return {
         state: {
           ...state,
