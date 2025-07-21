@@ -132,9 +132,5 @@ export const inlineSourceFormatter: FormatterFn = (fields, key) => {
   if (!value?.trim()) return value;
 
   // Escape template literals to prevent unintended interpolation
-  try {
-    return escapeTemplateLiterals(value);
-  } catch (e) {
-    return value;
-  }
+  return escapeTemplateLiterals(value);
 };
