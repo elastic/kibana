@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('esArchiver falkiness', function () {
     // loadTestFile(require.resolve('./es_archiver_load'));
+    // loadTestFile(require.resolve('./es_client_bulk_helper'));
     loadTestFile(require.resolve('./es_client_bulk'));
   });
 }

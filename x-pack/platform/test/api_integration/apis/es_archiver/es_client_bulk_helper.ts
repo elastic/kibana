@@ -16,10 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ES_CLIENT_HEADERS = {
     'x-elastic-product-origin': 'kibana',
   };
-  const DATASET = [{ message: 'hello world 3', '@timestamp': '2020-12-16T15:16:18.570Z' }];
-  const OPERATIONS = DATASET.flatMap((doc) => [{ index: { _index: INDEX_NAME } }, doc]);
 
-  describe('es client bulk', function () {
+  describe('es client bulk helper', function () {
     beforeEach(async () => {
       const indexExistsResponse = await es.indices.exists({
         index: INDEX_NAME,
@@ -57,7 +55,25 @@ export default function ({ getService }: FtrProviderContext) {
       });
       logger.info('es_client_bulk before bulk - hits.total', searchResponseBefore.hits.total);
 
-      await es.bulk({ refresh: true, operations: OPERATIONS });
+      await es.helpers.bulk(
+        {
+          retries: 1,
+          concurrency: 1,
+          datasource: [{ message: 'hello world 3', '@timestamp': '2020-12-16T15:16:18.570Z' }],
+          onDocument(doc) {
+            return {
+              index: { _index: INDEX_NAME },
+            };
+          },
+          onDrop(dropped) {
+            logger.info('DROPPED DOC', dropped);
+          },
+          refreshOnCompletion: true,
+        },
+        {
+          headers: ES_CLIENT_HEADERS,
+        }
+      );
 
       const searchResponseAfter = await es.search({
         index: INDEX_NAME,
