@@ -18,7 +18,6 @@ disabled:
   - x-pack/platform/test/functional_basic/apps/transform/config.base.ts
   - x-pack/platform/test/api_integration_basic/config.basic_license.ts
   - x-pack/platform/test/ui_capabilities/common/config.ts
-  - x-pack/platform/test/functional/config.ccs.ts
 
   # QA suites that are run out-of-band
   - x-pack/platform/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -267,7 +266,7 @@ enabled:
   - x-pack/platform/test/functional/apps/visualize/config.ts
   - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
-  - x-pack/test/functional/config.ccs.ts
+  - x-pack/platform/test/functional/config.ccs.ts
   - x-pack/platform/test/functional/config.firefox.ts
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/platform/test/functional_cloud/config.ts
