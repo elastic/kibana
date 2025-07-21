@@ -46,7 +46,9 @@ export {
 } from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
+
 export * as synth from './src/synth';
+export { qry, cmd, exp } from './src/synth';
 
 export {
   LeafPrinter,

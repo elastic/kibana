@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useOnechatCreateTool } from '../../../hooks/use_tools';
+import { useCreateTool } from '../../../hooks/tools/use_tools';
 import { transformEsqlFormData } from '../../../utils/transform_esql_form_data';
 import { OnechatEsqlToolForm } from './form/esql_tool_form';
 import { useEsqlToolFormValidationResolver } from './form/validation/esql_tool_form_validation';
@@ -107,7 +107,7 @@ export const OnechatCreateEsqlToolFlyout: React.FC<OnechatCreateEsqlToolFlyoutPr
     prefix: 'newEsqlToolForm',
   });
 
-  const { createTool, isLoading: isSubmitting } = useOnechatCreateTool({
+  const { createTool, isLoading: isSubmitting } = useCreateTool({
     onSuccess,
     onError,
   });

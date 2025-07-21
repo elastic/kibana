@@ -82,23 +82,8 @@ xpack.painless_lab.enabled: false
 
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
-xpack.ml.nlp:
-  enabled: true
-  modelDeployment:
-    allowStaticAllocations: false
-    vCPURange:
-      low:
-        min: 0
-        max: 2
-        static: 2
-      medium:
-        min: 0
-        max: 32
-        static: 32
-      high:
-        min: 0
-        max: 512
-        static: 512
+xpack.ml.nlp.enabled: true
+
 xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
