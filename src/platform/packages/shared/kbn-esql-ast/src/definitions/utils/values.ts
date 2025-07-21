@@ -19,7 +19,7 @@ export const buildValueDefinitions = (
     text: `"${value}"${options?.addComma ? ',' : ''}${
       options?.advanceCursorAndOpenSuggestions ? ' ' : ''
     }`,
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
+    detail: i18n.translate('kbn-esql-ast.esql.autocomplete.valueDefinition', {
       defaultMessage: 'Literal value',
     }),
     kind: 'Value',

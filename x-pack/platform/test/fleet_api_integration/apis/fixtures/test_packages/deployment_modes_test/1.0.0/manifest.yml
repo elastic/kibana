@@ -1,0 +1,67 @@
+format_version: 3.0.0
+name: deployment_modes_test
+title: Test Package for Deployment Modes
+description: >-
+  Test package to verify deployment_modes functionality in Fleet
+type: integration
+version: 1.0.0
+license: basic
+categories:
+  - observability
+policy_templates:
+  - name: mixed_modes
+    title: Mixed Deployment Modes
+    description: Template with inputs supporting different deployment modes
+    deployment_modes:
+      default:
+        enabled: true
+      agentless:
+        enabled: true
+    inputs:
+      - type: logs
+        title: Log Collection
+        description: Collect logs (supports both default and agentless)
+        deployment_modes: ["default", "agentless"]
+      - type: metrics
+        title: Metrics Collection
+        description: Collect metrics (default mode only)
+        deployment_modes: ["default"]
+      - type: http_endpoint
+        title: HTTP Endpoint
+        description: HTTP endpoint monitoring (agentless only)
+        deployment_modes: ["agentless"]
+      - type: winlog
+        title: Windows Event Logs
+        description: Windows event logs (no deployment_modes specified - should fall back to blocklist)
+  - name: agentless_only
+    title: Agentless Only Template
+    description: Template that only supports agentless deployment
+    deployment_modes:
+      agentless:
+        enabled: true
+    inputs:
+      - type: cloudwatch
+        title: CloudWatch Metrics
+        description: AWS CloudWatch metrics
+        deployment_modes: ["agentless"]
+      - type: s3
+        title: S3 Access Logs
+        description: AWS S3 access logs
+        deployment_modes: ["agentless"]
+  - name: default_only
+    title: Default Only Template
+    description: Template that only supports default deployment
+    deployment_modes:
+      default:
+        enabled: true
+    inputs:
+      - type: filestream
+        title: File Stream
+        description: File stream input
+        deployment_modes: ["default"]
+      - type: system
+        title: System Metrics
+        description: System metrics collection
+        deployment_modes: ["default"]
+owner:
+  github: elastic/fleet
