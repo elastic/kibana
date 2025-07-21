@@ -85,6 +85,7 @@
     "**/@types/node": "22.15.3",
     "**/@typescript-eslint/utils": "5.62.0",
     "**/chokidar": "^3.5.3",
+    "**/compression/on-headers": "^1.1.0",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
     "**/globule/minimatch": "^3.1.2",
     "**/hoist-non-react-statics": "^3.3.2",
