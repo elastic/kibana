@@ -10,6 +10,10 @@
 module.exports = (_, options = {}) => {
   return {
     presets: [
+      {
+        plugins: [require.resolve('babel-plugin-transform-barrels')],
+      },
+
       [
         require.resolve('@babel/preset-env'),
         {
