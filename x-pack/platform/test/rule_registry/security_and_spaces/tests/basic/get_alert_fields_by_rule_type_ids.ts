@@ -230,8 +230,8 @@ export default ({ getService }: FtrProviderContext) => {
       securityRuleId = securityRule.id;
       stackRuleId = stackRule.id;
 
-      await waitForAlertDocs('.alerts-security.alerts-default', securityRuleId, 1);
-      await waitForAlertDocs('.alerts-stack.alerts-default', stackRuleId, 1);
+      await waitForAlertDocs('.alerts-security.*', securityRuleId, 1);
+      await waitForAlertDocs('.alerts-stack.*', stackRuleId, 1);
     });
 
     after(async () => {
