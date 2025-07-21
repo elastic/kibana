@@ -40,7 +40,7 @@ export const QueryRulesSets = () => {
   const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
 
   const { queryRulesSetsFilteredData, pagination } = useQueryRulesSetsTableData(
-    queryRulesData?.data,
+    queryRulesData,
     searchKey,
     pageIndex,
     pageSize
@@ -132,6 +132,7 @@ export const QueryRulesSets = () => {
           icon: 'trash',
           color: 'danger',
           type: 'icon',
+          'data-test-subj': 'queryRulesSetDeleteButton',
           isPrimary: true,
           onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) => {
             useTracker?.click?.(AnalyticsEvents.deleteRulesetInlineDropdownClicked);

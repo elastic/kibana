@@ -8,8 +8,8 @@
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
 import { decompressFromBase64 } from 'lz-string';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getSavedQuerySecurityUtils } from '../../../saved_query_management/utils/saved_query_security';
+import { getSavedQuerySecurityUtils } from '@kbn/test-suites-xpack-platform/functional/apps/saved_query_management/utils/saved_query_security';
+import { FtrProviderContext } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;

@@ -9,12 +9,14 @@ import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { Streams } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { RoutingDefinitionWithUIAttributes } from '../../types';
 
 export interface StreamRoutingServiceDependencies {
   forkSuccessNofitier: (streamName: string) => void;
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
+  timeState$: TimefilterHook['timeState$'];
   core: CoreStart;
   data: DataPublicPluginStart;
 }

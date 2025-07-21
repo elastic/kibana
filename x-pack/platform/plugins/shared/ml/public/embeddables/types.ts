@@ -75,7 +75,7 @@ export interface AnomalySwimlaneEmbeddableCustomInput
   filters?: Filter[];
   query?: Query;
   refreshConfig?: RefreshInterval;
-  timeRange: TimeRange | undefined;
+  timeRange?: TimeRange;
 }
 
 export interface AnomalySwimlaneServices {

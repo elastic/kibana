@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../saved_objects';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ProductDocInstallClient } from './product_doc_install_service';
+import { loggingSystemMock } from '@kbn/core/public/mocks';
 
+const inferenceId = '.elser-2-elasticsearch';
 const createObj = (attrs: TypeAttributes): SavedObjectsFindResult<TypeAttributes> => {
   return {
     id: attrs.product_name,
@@ -24,10 +26,12 @@ const createObj = (attrs: TypeAttributes): SavedObjectsFindResult<TypeAttributes
 describe('ProductDocInstallClient', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let service: ProductDocInstallClient;
+  let log: Logger;
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
-    service = new ProductDocInstallClient({ soClient });
+    log = loggingSystemMock.createLogger();
+    service = new ProductDocInstallClient({ soClient, log });
   });
 
   describe('getInstallationStatus', () => {
@@ -50,7 +54,7 @@ describe('ProductDocInstallClient', () => {
         page: 1,
       });
 
-      const installStatus = await service.getInstallationStatus();
+      const installStatus = await service.getInstallationStatus({ inferenceId });
 
       expect(Object.keys(installStatus).sort()).toEqual(Object.keys(DocumentationProduct).sort());
       expect(installStatus.kibana).toEqual({

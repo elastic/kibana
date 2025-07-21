@@ -121,7 +121,8 @@ export function AlertDetails() {
   // used to trigger refetch when rule edit flyout closes
   const onUpdate = useCallback(() => {
     refetch();
-  }, [refetch]);
+    refetchRelatedDashboards();
+  }, [refetch, refetchRelatedDashboards]);
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();

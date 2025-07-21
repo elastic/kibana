@@ -25,6 +25,13 @@ const imageSets = {
       defaultMessage: 'No results image for the streams app',
     }),
   },
+  significantEventsEmptyState: {
+    light: () => import('./sig_events_empty_state_light.png'),
+    dark: () => import('./sig_events_empty_state_dark.png'),
+    alt: i18n.translate('xpack.streams.significantEvents.emptyStateImage', {
+      defaultMessage: 'Empty state illustration for the Significant events view',
+    }),
+  },
   addStreams: {
     light: () => import('./add_streams_light.png'),
     dark: () => import('./add_streams_dark.png'),

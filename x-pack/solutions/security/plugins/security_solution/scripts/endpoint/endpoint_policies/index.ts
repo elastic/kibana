@@ -14,18 +14,22 @@ import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 
 class EndpointPolicyGenerator extends BaseDataGenerator {
+  private counter = 1;
+
   public policyName(preFix: string | number = '') {
-    return `${preFix}${preFix ? ' ' : ''}${this.randomString(5)} Endpoint Policy`;
+    return `${preFix}${preFix ? ' ' : ''}${this.randomString(5)}-${this.counter++} Endpoint Policy`;
   }
 }
 
 const generate = new EndpointPolicyGenerator();
 
-export const cli = () => {
-  run(
+export const cli = async () => {
+  await run(
     async ({ log, flags: { kibana, count } }) => {
       const kbn = new KbnClient({ log, url: kibana as string });
       const max = Number(count);
+      const maxErrors = 10; // Max errors encountered until the script exits
+      const errors: string[] = [];
       let created = 0;
 
       log.info(`Creating ${count} endpoint policies...`);
@@ -35,16 +39,24 @@ export const cli = () => {
         const endpointPackage = await getEndpointPackageInfo(kbn);
 
         while (created < max) {
-          created++;
           await indexFleetEndpointPolicy(
             kbn,
             generate.policyName(created),
             endpointPackage.version
           );
+          created++;
         }
       } catch (error) {
-        log.error(error);
-        throw createFailError(error.message);
+        error.push(error.message);
+
+        if (errors.length >= maxErrors) {
+          log.error(
+            `${errors.length} errors were encountered: ${JSON.stringify(errors, null, 2)}\n`
+          );
+          throw createFailError(
+            `Too many errors encountered (${errors.length}. Only ${created} policies were created`
+          );
+        }
       }
 
       log.success(`Done!`);

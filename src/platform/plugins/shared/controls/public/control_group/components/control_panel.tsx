@@ -98,6 +98,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const isEditable = viewMode === 'edit';
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
+  const controlLabel = isTwoLine ? panelTitle || defaultPanelTitle || '...' : undefined;
   const hasRoundedBorders = !api?.CustomPrependComponent && !isEditable && isTwoLine;
   const shouldHideComponent = Boolean(blockingError);
 
@@ -108,6 +109,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 
   return (
     <EuiFlexItem
+      component="li"
       ref={setNodeRef}
       style={{
         transition,
@@ -135,7 +137,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          label={isTwoLine ? panelTitle || defaultPanelTitle || '...' : undefined}
+          label={controlLabel}
+          id={`control-title-${uuid}`}
+          aria-label={`Control for ${controlLabel}`}
         >
           <EuiFormControlLayout
             fullWidth

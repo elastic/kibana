@@ -26,9 +26,10 @@ Running a [self-managed stack](https://www.elastic.co/guide/en/fleet/current/add
 
 Refer to the [Contributing to Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) documentation for getting started with developing for Kibana. As detailed under the Contributing section of the documentation, we follow the pattern of developing feature branches under your personal fork of Kibana.
 
-Fleet development usually requires running Kibana from source alongside a snapshot of Elasticsearch, as detailed in the  [Contributing to Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) documentation. The next section provides an overview of this process.
+Fleet development usually requires running Kibana from source alongside a snapshot of Elasticsearch, as detailed in the [Contributing to Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) documentation. The next section provides an overview of this process.
 
 In addition, it is typically needed to set up a Fleet Server and enroll Elastic Agents in Fleet. Refer to one of the following guides depending on your requirements for details:
+
 - [Running a local Fleet Server and enrolling Elastic Agents](dev_docs/local_setup/enrolling_agents.md) for developing Kibana in stateful (not serverless) mode
 - [Developing Kibana in serverless mode](dev_docs/local_setup/developing_kibana_in_serverless.md) for developing Kibana in serverless mode
 - [Developing Kibana and Fleet Server simultaneously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) for doing simultaneous Kibana and Fleet Server development
@@ -37,10 +38,12 @@ In addition, it is typically needed to set up a Fleet Server and enroll Elastic 
 ### Running Fleet locally in stateful mode
 
 Prerequisites:
+
 - Fork the Kibana repository and clone it locally
 - Install the `node` and `yarn` versions required by `.nvmrc`
 
 Once that is set up, the high level steps are:
+
 - Run Elasticsearch from snapshot
 - Configure Kibana settings
 - Run Kibana from source
@@ -52,6 +55,7 @@ Once that is set up, the high level steps are:
 As detailed in [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html), there are different ways to run Elasticsearch when developing Kibana, with snapshot being the most common.
 
 To do this, run the following from the Kibana root folder:
+
 ```sh
 yarn es snapshot --license trial
 ```
@@ -59,6 +63,7 @@ yarn es snapshot --license trial
 The `--license trial` flag provides the equivalent of a Platinum license (defaults to Basic).
 
 In addition, it can be useful to set a folder for preserving data between runs (by default, data is stored inside the snapshot and lost on exit) with the `-E path.data=<pathToSavedData>` setting. Common path choices are:
+
 - `../data` (or any other name, e.g. `../mycluster`), which saves the data in the `.es` folder (in the Kibana root folder)
 - `/tmp/es-data`
 
@@ -67,6 +72,7 @@ Note: the required API key service and token service (cf. [Security settings in 
 Finally, setting up a Fleet Server requires setting the HTTP host to Fleet Server default host with `-E http.host=0.0.0.0`.
 
 The complete command usually looks like:
+
 ```sh
 yarn es snapshot --license trial -E path.data=../data -E http.host=0.0.0.0
 ```
@@ -78,17 +84,21 @@ Create a `config/kibana.dev.yml` file if you don't have one by copying the exist
 To get started, it is recommended to set the following settings:
 
 1\. The URL at which Kibana is available for end users: unless explicitly specified, this path is randomized in dev mode (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To set it, add the following to your `kibana.dev.yml`:
+
 ```yml
 server.basePath: /yourPath
 ```
+
 where `yourPath` is a path of your choice (e.g. your name; must not end with a slash).
 
 2\. The API version resolution: in dev mode, a version is required for all API requests. In other environements (e.g. production), the version falls back to `oldest` in stateful mode and `newest` in serverless mode for public APIs, while internal APIs always require a version. Set the API version resolution with:
+
 ```yml
 server.versioned.versionResolution: oldest
 ```
 
 3\. Fleet logging:
+
 ```yml
 logging:
   loggers:
@@ -140,6 +150,7 @@ yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js x-pac
 ```
 
 Or alternatively:
+
 ```sh
 yarn test:jest x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
 ```
@@ -152,28 +163,29 @@ Note: Docker needs to be running to run these tests.
 
 1\. In one terminal, run the server from the Kibana root folder with
 
-   ```sh
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/<configFile>
-   ```
+```sh
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/platform/test/fleet_api_integration/<configFile>
+```
 
-   where `configFile` is the relevant config file relevant from the following:
-   - config.agent.ts
-   - config.agent_policy.ts
-   - config.epm.ts
-   - config.fleet.ts
-   - config.package_policy.ts
+where `configFile` is the relevant config file relevant from the following:
+
+- config.agent.ts
+- config.agent_policy.ts
+- config.epm.ts
+- config.fleet.ts
+- config.package_policy.ts
 
 2\. In a second terminal, run the tests from the Kibana root folder with
 
-   ```sh
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile>
-   ```
+```sh
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/platform/test/fleet_api_integration/<configFile>
+```
 
-   Optionally, you can filter which tests you want to run using `--grep`
+Optionally, you can filter which tests you want to run using `--grep`
 
-   ```sh
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile> --grep='my filter string'
-   ```
+```sh
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/platform/test/fleet_api_integration/<configFile> --grep='my filter string'
+```
 
 Note: you can supply which Docker image to use for the Package Registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
 
@@ -192,12 +204,14 @@ FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true FLEET_PACKAGE_REGISTRY_PORT=12345 yarn 
 The process for running serverless API integration tests is similar to above. Security and observability project types have Fleet enabled. At the time of writing, the same tests exist for Fleet under these two project types.
 
 Security:
+
 ```sh
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
 ```
 
 Observability:
+
 ```sh
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
@@ -255,14 +269,14 @@ The projects below are dependent on Fleet, most using Fleet API as well. In case
 
 Fleet supports shipping integrations as `.zip` archives with Kibana's source code through a concept referred to as _bundled packages_. This allows integrations like APM, which is enabled by default in Cloud, to reliably provide upgrade paths without internet access, and generally improves stability around Fleet's installation/setup processes for several common integrations.
 
-The set of bundled packages included with Kibana is dictated by a top-level `fleet_packages.json` file in the Kibana repo. This file includes a list of packages with a pinned version that Kibana will consider bundled. When the Kibana distributable is built, a [build task](https://github.com/elastic/kibana/blob/main/src/dev/build/tasks/bundle_fleet_packages.ts) will resolve these packages from the Elastic Package Registry, download the appropriate version as a `.zip` archive, and place it in a directory configurable by a `xpack.fleet.bundledPackageLocation` value in `kibana.yml`. By default, these archives are stored in `x-pack/platform/plugins/shared/fleet/.target/bundled_packages/`. In CI/CD, we [override](https://github.com/elastic/kibana/blob/main/x-pack/test/fleet_api_integration/config.base.ts#L19) this default with `/tmp/fleet_bundled_packages`.
+The set of bundled packages included with Kibana is dictated by a top-level `fleet_packages.json` file in the Kibana repo. This file includes a list of packages with a pinned version that Kibana will consider bundled. When the Kibana distributable is built, a [build task](https://github.com/elastic/kibana/blob/main/src/dev/build/tasks/bundle_fleet_packages.ts) will resolve these packages from the Elastic Package Registry, download the appropriate version as a `.zip` archive, and place it in a directory configurable by a `xpack.fleet.bundledPackageLocation` value in `kibana.yml`. By default, these archives are stored in `x-pack/platform/plugins/shared/fleet/.target/bundled_packages/`. In CI/CD, we [override](https://github.com/elastic/kibana/blob/main/x-pack/platform/test/fleet_api_integration/config.base.ts#L19) this default with `/tmp/fleet_bundled_packages`.
 
 Until further automation is added, this `fleet_packages.json` file should be updated as part of the release process to ensure the latest compatible version of each bundled package is included with that Kibana version. **This must be done before the final BC for a release is built.**
 Tracking issues should be opened and tracked by the Fleet UI team. See https://github.com/elastic/kibana/issues/129309 as an example.
 
 As part of the bundled package update process, we'll likely also need to update the pinned Docker image that runs in Kibana's test environment. We configure this pinned registry image in
 
-- `x-pack/test/fleet_api_integration/config.ts`
+- `x-pack/platform/test/fleet_api_integration/config.ts`
 - `x-pack/platform/plugins/shared/fleet/server/integration_tests/helpers/docker_registry_helper.ts`
 - `x-pack/test/functional/config.base.js`
 

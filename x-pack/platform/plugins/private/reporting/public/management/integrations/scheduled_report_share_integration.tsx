@@ -13,12 +13,14 @@ import { EuiButton } from '@elastic/eui';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
+import type { ReportTypeId } from '../../types';
 import { getKey as getReportingHealthQueryKey } from '../hooks/use_get_reporting_health_query';
 import { queryClient } from '../../query_client';
 import { ScheduledReportFlyoutShareWrapper } from '../components/scheduled_report_flyout_share_wrapper';
 import { SCHEDULE_EXPORT_BUTTON_LABEL } from '../translations';
 import type { ReportingPublicPluginStartDependencies } from '../../plugin';
 import { getReportingHealth } from '../apis/get_reporting_health';
+import { supportedReportTypes } from '../report_params';
 
 export interface CreateScheduledReportProviderOptions {
   apiClient: ReportingAPIClient;
@@ -45,10 +47,16 @@ export const createScheduledReportShareIntegration = ({
       const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
       return {
         label: ({ openFlyout }) => (
-          <EuiButton iconType="calendar" onClick={openFlyout}>
+          <EuiButton iconType="calendar" onClick={openFlyout} data-test-subj="scheduleExport">
             {SCHEDULE_EXPORT_BUTTON_LABEL}
           </EuiButton>
         ),
+        shouldRender: ({ availableExportItems }) => {
+          const supportedExportItemsForScheduling = availableExportItems.filter((exportItem) =>
+            supportedReportTypes.includes(exportItem.config.exportType as ReportTypeId)
+          );
+          return supportedExportItemsForScheduling.length > 0;
+        },
         flyoutContent: ({ closeFlyout }) => {
           return (
             <ScheduledReportFlyoutShareWrapper

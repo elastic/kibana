@@ -80,5 +80,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const tableCellText = await firstTitleElem.getVisibleText();
       expect(tableCellText).to.be(`Tiểu thuyết`);
     });
+
+    describe('Schedules', () => {
+      it('allows user with reporting privileges to navigate to the Schedules tab', async () => {
+        await PageObjects.common.navigateToApp('reporting');
+        await (await testSubjects.find('reportingTabs-schedules')).click();
+        await testSubjects.existOrFail('reportSchedulesTable');
+      });
+    });
   });
 };

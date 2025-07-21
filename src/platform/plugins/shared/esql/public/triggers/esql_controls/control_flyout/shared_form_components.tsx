@@ -130,6 +130,7 @@ export function ControlType({
             fullWidth
             isDisabled={isDisabled}
             compressed
+            isClearable={false}
             data-test-subj="esqlControlTypeDropdown"
             inputPopoverProps={{
               'data-test-subj': 'esqlControlTypeInputPopover',

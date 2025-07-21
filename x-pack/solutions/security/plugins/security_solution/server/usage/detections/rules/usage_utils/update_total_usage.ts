@@ -13,7 +13,11 @@ import { updateResponseActionsUsage } from './update_response_actions_usage';
 export interface UpdateTotalUsageOptions {
   detectionRuleMetric: RuleMetric;
   updatedUsage: RulesTypeUsage;
-  totalType: 'custom_total' | 'elastic_total';
+  totalType:
+    | 'custom_total'
+    | 'elastic_total'
+    | 'elastic_customized_total'
+    | 'elastic_noncustomized_total';
 }
 
 export const updateTotalUsage = ({
@@ -56,6 +60,9 @@ export const updateTotalUsage = ({
       usage: updatedUsage[totalType],
       detectionRuleMetric,
     }),
+    has_exceptions: detectionRuleMetric.has_exceptions
+      ? updatedUsage[totalType].has_exceptions + 1
+      : updatedUsage[totalType].has_exceptions,
     response_actions: updateResponseActionsUsage({
       usage: updatedUsage[totalType],
       detectionRuleMetric,

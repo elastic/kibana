@@ -203,10 +203,10 @@ export interface InvalidateAPIKeyResult {
    */
   error_details?: Array<{
     type?: string;
-    reason?: string;
+    reason?: string | null;
     caused_by?: {
       type?: string;
-      reason?: string;
+      reason?: string | null;
     };
   }>;
 }

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import {
   type GroupOption,
   type GroupStatsItem,
@@ -21,6 +21,7 @@ import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { GetGroupStats, GroupingArgs, GroupPanelRenderer } from '@kbn/grouping/src';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
@@ -59,6 +60,10 @@ export interface AlertsTableComponentProps {
    * DataViewSpec object to use internally to fetch the data
    */
   dataViewSpec: DataViewSpec;
+  /**
+   * DataView object to use internally to fetch the data.
+   */
+  dataView?: DataView;
   defaultFilters?: Filter[];
   /**
    * Default values to display in the group selection dropdown.
@@ -135,7 +140,7 @@ const useStorage = (storage: Storage, tableId: string) =>
 
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
-
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const {
     services: { storage, telemetry },
   } = useKibana();
@@ -174,8 +179,24 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   );
 
   const fields = useMemo(
-    () => Object.values(props.dataViewSpec.fields || {}),
-    [props.dataViewSpec]
+    () =>
+      newDataViewPickerEnabled
+        ? props.dataView?.fields.map((field) => field.spec) || []
+        : Object.values(props.dataViewSpec.fields || {}),
+    [newDataViewPickerEnabled, props.dataView?.fields, props.dataViewSpec.fields]
+  );
+
+  const runtimeMappings = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? (props.dataView?.getRuntimeMappings() as RunTimeMappings)
+        : (props.dataViewSpec?.runtimeFieldMap as RunTimeMappings),
+    [newDataViewPickerEnabled, props.dataView, props.dataViewSpec?.runtimeFieldMap]
+  );
+
+  const dataViewTitle = useMemo(
+    () => (newDataViewPickerEnabled ? props.dataView?.title : props.dataViewSpec.title),
+    [newDataViewPickerEnabled, props.dataView?.title, props.dataViewSpec.title]
   );
 
   const groupingOptions = useMemo(
@@ -336,18 +357,28 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
           parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={rcc}
-          runtimeMappings={props.dataViewSpec.runtimeFieldMap as RunTimeMappings}
+          runtimeMappings={runtimeMappings}
           selectedGroup={selectedGroup}
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
-          signalIndexName={props.dataViewSpec.title}
+          signalIndexName={dataViewTitle}
         />
       );
     },
-    [getGrouping, groupStatusAggregations, pageIndex, pageSize, props, selectedGroups, setPageVar]
+    [
+      dataViewTitle,
+      getGrouping,
+      groupStatusAggregations,
+      pageIndex,
+      pageSize,
+      props,
+      runtimeMappings,
+      selectedGroups,
+      setPageVar,
+    ]
   );
 
-  if (isEmpty(props.dataViewSpec.title)) {
+  if (isEmpty(dataViewTitle)) {
     return null;
   }
 
