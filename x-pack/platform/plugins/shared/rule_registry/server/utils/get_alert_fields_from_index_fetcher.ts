@@ -19,17 +19,29 @@ export const getAlertFieldsFromIndexFetcher = async (
   indexPatternsFetcher: IndexPatternsFetcher,
   indices: string[]
 ): Promise<FieldDescriptor[]> => {
+  let result: {
+    fields: FieldDescriptor[];
+    indices: string[];
+  } = { fields: [], indices: [] };
+
   if (!indices || indices.length === 0) {
     return [];
   }
 
-  const result = await indexPatternsFetcher.getFieldsForWildcard({
-    pattern: indices,
-    metaFields: ['_id', '_index'],
-    fieldCapsOptions: { allow_no_indices: true },
-    includeEmptyFields: false,
-    indexFilter: ALERT_FIELDS_TIME_FILTER,
-  });
+  try {
+    result = await indexPatternsFetcher.getFieldsForWildcard({
+      pattern: indices,
+      metaFields: ['_id', '_index'],
+      fieldCapsOptions: { allow_no_indices: true },
+      includeEmptyFields: false,
+      indexFilter: ALERT_FIELDS_TIME_FILTER,
+    });
+  } catch (error) {
+    if (error.meta && error.meta.statusCode === 403) {
+      return [];
+    }
+    throw error;
+  }
 
   return result.fields;
 };

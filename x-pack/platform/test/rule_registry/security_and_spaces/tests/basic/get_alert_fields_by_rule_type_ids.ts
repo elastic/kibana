@@ -8,12 +8,10 @@
 import expect from 'expect';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleResponse as SecurityRuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
 import {
-  secOnlyRead,
+  secOnlyReadSpacesAll,
   noKibanaPrivileges,
   superUser,
   secOnlySpacesAllEsReadAll,
@@ -212,8 +210,8 @@ export default ({ getService }: FtrProviderContext) => {
       'xpack.ml.anomaly_detection_alert',
     ];
 
-    let stackRule: RuleResponse;
-    let securityRule: SecurityRuleResponse;
+    let stackRuleId: string;
+    let securityRuleId: string;
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
@@ -224,23 +222,26 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       const dataView = await getSampleWebLogsDataView();
-      [securityRule, stackRule] = await Promise.all([
+      const [securityRule, stackRule] = await Promise.all([
         createSecurityRule(dataView.id),
         createEsQueryRule(),
       ]);
 
-      await waitForAlertDocs('.alerts-security.alerts-default', securityRule.id, 1);
-      await waitForAlertDocs('.alerts-stack.alerts-default', stackRule.id, 1);
+      securityRuleId = securityRule.id;
+      stackRuleId = stackRule.id;
+
+      await waitForAlertDocs('.alerts-security.alerts-default', securityRuleId, 1);
+      await waitForAlertDocs('.alerts-stack.alerts-default', stackRuleId, 1);
     });
 
     after(async () => {
-      await deleteRule(stackRule.id);
+      await deleteRule(stackRuleId);
       await supertest
         .post(`/api/detection_engine/rules/_bulk_action?dry_run=false`)
         .set('kbn-xsrf', 'foo')
         .send({
           action: 'delete',
-          ids: [securityRule.id],
+          ids: [securityRuleId],
         })
         .expect(200);
       await supertest
@@ -346,8 +347,10 @@ export default ({ getService }: FtrProviderContext) => {
         await getAlertFieldsByFeatureId(secOnlySpaces2EsReadAll, ['siem.queryRule'], 'space2', 401);
       });
 
-      it(`${secOnlyRead.username} should NOT be able to get alert fields for siem rule types due to lack of ES access`, async () => {
-        await getAlertFieldsByFeatureId(secOnlyRead, ['siem.queryRule'], '', 403);
+      it(`${secOnlyReadSpacesAll.username} should get empty alert fields for siem rule types due to lack of ES access`, async () => {
+        const resp = await getAlertFieldsByFeatureId(secOnlyReadSpacesAll, ['siem.queryRule']);
+
+        verifyFields(resp.fields, [], ['event', 'kibana', 'signal']);
       });
 
       it(`${noKibanaPrivileges.username} should NOT be able to get alert fields`, async () => {
