@@ -79,24 +79,41 @@ export const createInnerAndClauses = ({
   return threatMappingEntries.reduce<QueryDslQueryContainer[]>((accum, threatMappingEntry) => {
     const value = get(threatMappingEntry[entryKey], threatListItem.fields);
     if (value != null && value.length === 1) {
-      const matchClause = {
-        match: {
-          [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: {
-            query: value[0],
-            _name: encodeThreatMatchNamedQuery({
-              id: threatListItem._id,
-              index: threatListItem._index,
-              field: threatMappingEntry.field,
-              value: threatMappingEntry.value,
-              queryType: ThreatMatchQueryType.match,
-              negate: threatMappingEntry.negate,
-            }),
-          },
-        },
-      };
+      const queryName = encodeThreatMatchNamedQuery({
+        id: threatListItem._id,
+        index: threatListItem._index,
+        field: threatMappingEntry.field,
+        value: threatMappingEntry.value,
+        queryType: ThreatMatchQueryType.match,
+        negate: threatMappingEntry.negate,
+      });
+
+      const matchKey = threatMappingEntry[entryKey === 'field' ? 'value' : 'field'];
 
       // These values could be potentially 10k+ large so mutating the array intentionally
-      accum.push(threatMappingEntry.negate ? { bool: { must_not: matchClause } } : matchClause);
+      accum.push(
+        threatMappingEntry.negate
+          ? {
+              bool: {
+                must_not: {
+                  match: {
+                    [matchKey]: {
+                      query: value[0],
+                    },
+                  },
+                },
+                _name: queryName,
+              },
+            }
+          : {
+              match: {
+                [matchKey]: {
+                  query: value[0],
+                  _name: queryName,
+                },
+              },
+            }
+      );
     }
 
     return accum;
