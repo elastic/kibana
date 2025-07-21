@@ -64,8 +64,10 @@ export const enhanceGraphWithEntityData = async ({
   // Collect all entity IDs from nodes to fetch entity data
   const entityIds = new Set<string>();
   graphData.nodes.forEach((node) => {
-    // assuming node.id is the entity ID
-    entityIds.add(node.id);
+    // filter out label and group nodes
+    if (node.shape !== 'label' && node.shape !== 'group') {
+      entityIds.add(node.id);
+    }
   });
 
   // Fetch entity data for all entity IDs

@@ -10,23 +10,9 @@ import type { AssetProps } from '@kbn/cloud-security-posture-common';
 import type { MappedAssetProps } from '@kbn/cloud-security-posture-common/types/assets';
 
 /**
- * Maps response fields to their corresponding entity fields
- * This makes the relationship between MappedAssetProps and AssetProps explicit
- */
-type EntityFieldMapper = Record<keyof MappedAssetProps, keyof AssetProps>;
-
-/**
- * Field mapping from response fields to entity fields
- */
-const ASSET_RESPONSE_TO_ENTITY_FIELD: EntityFieldMapper = {
-  entityName: 'entity.name',
-  entityType: 'entity.type',
-};
-
-/**
  * ID field name constant - used to identify entities
  */
-const ENTITY_ID_FIELD = 'entity.id' as keyof AssetProps;
+const ENTITY_ID_FIELD = 'entity.id';
 
 /**
  * Maps an entity record from the source format to the simplified response format
@@ -40,24 +26,14 @@ const mapEntityToResponseObject = (record: AssetProps): [string, MappedAssetProp
     return undefined;
   }
 
-  // Build response by mapping each field according to ASSET_RESPONSE_TO_ENTITY_FIELD
-  const assetResponse = Object.entries(ASSET_RESPONSE_TO_ENTITY_FIELD).reduce<
-    Partial<MappedAssetProps>
-  >((response, [responseField, entityField]) => {
-    // Check if the entity field exists in the record
-    if (entityField in record) {
-      const value = record[entityField] as string;
-
-      // Set the field only if it has a value
-      if (value) {
-        response[responseField as keyof MappedAssetProps] = value;
-      }
-    }
-    return response;
-  }, {}) as MappedAssetProps;
+  // Create response with direct property assignments
+  const assetResponse = {
+    entityName: record['entity.name'],
+    entityType: record['entity.type'],
+  };
 
   // Return tuple of [entityId, simplified asset response]
-  return [entityId as string, assetResponse];
+  return [entityId, assetResponse];
 };
 
 /**
@@ -77,7 +53,6 @@ export async function fetchEntityData(
   if (entityIds.length === 0) {
     return {};
   }
-
   logger.debug(`Fetching entity data for ${entityIds.length} entities`);
   // Use ESQL to query entity data
   const esqlQuery = `FROM .entities.*.latest.security_*_${spaceId}
