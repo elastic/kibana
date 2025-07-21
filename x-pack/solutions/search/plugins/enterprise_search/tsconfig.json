@@ -7,10 +7,10 @@
     "target/**/*",
   ],
   "include": [
-    "common/**/*", 
+    "common/**/*",
     "public/**/*",
     "server/**/*",
-    ],
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/charts-plugin",
