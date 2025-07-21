@@ -139,5 +139,5 @@ export interface LoadActionPerfOptions {
 
 const DEFAULT_PERFORMANCE_OPTIONS: LoadActionPerfOptions = {
   batchSize: 5000,
-  concurrency: 4,
+  concurrency: 1,
 } as const;
