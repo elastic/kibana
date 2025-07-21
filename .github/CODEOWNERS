@@ -1296,7 +1296,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/accessibility/apps/group2/lens.ts @elastic/kibana-visualizations
 /x-pack/test/functional/apps/visualize @elastic/kibana-visualizations
 /src/plugins/visualize/ @elastic/kibana-visualizations
-/x-pack/test/functional/apps/lens @elastic/kibana-visualizations
+/x-pack/platform/test/functional/apps/lens @elastic/kibana-visualizations
 /x-pack/test/api_integration/apis/lens/ @elastic/kibana-visualizations
 /src/platform/test/functional/apps/visualize/ @elastic/kibana-visualizations
 /x-pack/platform/test/functional/apps/graph @elastic/kibana-visualizations
