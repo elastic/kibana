@@ -24,8 +24,8 @@ const hasTrackedSpan = (spans: any): boolean => {
 };
 
 // Related to https://github.com/elastic/observability-dev/issues/4529
-// This filter is only applied on the 'user-interaction' type transactions
-// If the 'user-interaction' transactions only have EBT spans, they will be filtered out.
+// This filter is only applied to transactions of type 'user-interaction'.
+// If a 'user-interaction' transaction contains only EBT spans, it will be filtered out.
 export const ebtSpanFilter: FilterFn = (payload: Payload) => {
   try {
     if (payload.transactions) {
