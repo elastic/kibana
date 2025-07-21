@@ -53,7 +53,8 @@ export const changeObjectAccessControl = async <T>(
   const { actionType } = params;
 
   // Extract owner for changeOwnership or accessMode for changeAccessMode
-  const owner = actionType === 'changeOwnership' ? params.options.owner : undefined;
+  const newOwnerProfileUid =
+    actionType === 'changeOwnership' ? params.options.newOwnerProfileUid : undefined;
   const accessMode = actionType === 'changeAccessMode' ? params.options.accessMode : undefined;
   const {
     registry,
@@ -65,7 +66,7 @@ export const changeObjectAccessControl = async <T>(
     securityExtension,
   } = params;
 
-  if (actionType === 'changeOwnership' && !owner) {
+  if (actionType === 'changeOwnership' && !newOwnerProfileUid) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'The "owner" field is required to change ownership of a saved object.'
     );
@@ -85,11 +86,11 @@ export const changeObjectAccessControl = async <T>(
     );
   }
 
-  if (actionType === 'changeOwnership' && owner) {
-    const esUserProfile = await client.security?.getUserProfile({ uid: owner });
+  if (actionType === 'changeOwnership' && newOwnerProfileUid) {
+    const esUserProfile = await client.security?.getUserProfile({ uid: newOwnerProfileUid });
     if (esUserProfile?.errors) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
-        `Failed to get user profile for owner: ${owner}`
+        `Failed to get user profile for owner: ${newOwnerProfileUid}`
       );
     }
   }
@@ -230,10 +231,10 @@ export const changeObjectAccessControl = async <T>(
     if (actionType === 'changeOwnership') {
       documentToSave = {
         updated_at: time,
-        updated_by: owner,
+        updated_by: newOwnerProfileUid,
         accessControl: {
           ...(currentSource?.accessControl || {}),
-          owner,
+          owner: newOwnerProfileUid,
         },
       };
     } else {

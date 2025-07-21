@@ -67,7 +67,7 @@ interface Params {
   errors: SavedObjectsClient['errors'];
   checkPrivileges: CheckSavedObjectsPrivileges;
   getCurrentUser: () => AuthenticatedUser | null;
-  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
+  typeRegistry?: ISavedObjectTypeRegistry;
 }
 
 /**
@@ -331,7 +331,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     SecurityAction,
     { authzAction?: string; auditAction?: AuditAction }
   >;
-  private readonly typeRegistryFunc: () => Promise<ISavedObjectTypeRegistry>;
+  private readonly typeRegistry: ISavedObjectTypeRegistry | undefined;
   private readonly _accessControlService: AccessControlService;
 
   constructor({
@@ -340,7 +340,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     errors,
     checkPrivileges,
     getCurrentUser,
-    getTypeRegistry,
+    typeRegistry,
   }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
@@ -348,7 +348,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
     this._accessControlService = new AccessControlService();
-    this.typeRegistryFunc = getTypeRegistry;
+    this.typeRegistry = typeRegistry;
 
     // This comment block is a quick reference for the action map, which maps authorization actions
     // and audit actions to a "security action" as used by the authorization methods.
@@ -692,6 +692,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   async authorize<A extends string>(
     params: InternalAuthorizeParams
   ): Promise<CheckAuthorizationResult<string>> {
+    if (!this.typeRegistry) {
+      throw new Error('Type registry is not defined');
+    }
     if (params.actions.size === 0) {
       throw new Error('No actions specified for authorization');
     }
@@ -704,17 +707,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const currentUser = this.getCurrentUserFunc();
     this.accessControlService.setUserForOperation(currentUser);
-    const typeRegistry = await this.typeRegistryFunc();
 
     const { authzActions } = this.translateActions(params.actions);
 
     const accessControlObjects = params.auditOptions?.objects?.filter(({ type }) =>
-      typeRegistry.supportsAccessControl(type)
+      this.typeRegistry?.supportsAccessControl(type)
     );
     const { typesRequiringAccessControl } =
       this.accessControlService.getTypesRequiringPrivilegeCheck({
         objects: accessControlObjects || [],
-        typeRegistry,
+        typeRegistry: this.typeRegistry,
       });
 
     const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
@@ -1140,24 +1142,28 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         namespace: params.namespace,
         objects: params.objects,
       },
-      action
+      action,
+      operation
     );
   }
 
   async internalAuthorizeChangeAccessControl<A extends string>(
     params: AuthorizeBulkChangeOwnershipParams,
-    action: SecurityAction
+    action: SecurityAction,
+    operation: 'changeAccessMode' | 'changeOwnership'
   ): Promise<CheckAuthorizationResult<A>> {
+    if (!this.typeRegistry) {
+      throw new Error('Type registry is not defined');
+    }
     this.accessControlService.setUserForOperation(this.getCurrentUserFunc());
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
     const { auditAction, authzAction } = this.decodeSecurityAction(action);
-    const typeRegistry = await this.typeRegistryFunc();
 
     this.assertObjectsArrayNotEmpty(objects, action);
 
     const objectsNotSupportingAccessControl = objects.every(
-      ({ type }) => !typeRegistry.supportsAccessControl(type)
+      ({ type }) => !this.typeRegistry?.supportsAccessControl(type)
     );
 
     if (objectsNotSupportingAccessControl) {
@@ -1172,7 +1178,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const { typesRequiringAccessControl } =
       this.accessControlService.getTypesRequiringPrivilegeCheck({
         objects,
-        typeRegistry,
+        typeRegistry: this.typeRegistry,
       });
 
     if (typesRequiringAccessControl.size > 0) {

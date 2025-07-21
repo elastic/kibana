@@ -51,7 +51,6 @@ export const setupSpacesClient = ({
           checkPrivileges: authz.checkSavedObjectsPrivilegesWithRequest(request),
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
-          getTypeRegistry,
         })
       : undefined;
     return new SecureSpacesClientWrapper(

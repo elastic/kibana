@@ -18,7 +18,7 @@ export interface SavedObjectsChangeAccessControlObject {
 
 export interface SavedObjectsChangeOwnershipOptions<Attributes = unknown>
   extends SavedObjectsBaseOptions {
-  owner?: SavedObjectAccessControl['owner'];
+  newOwnerProfileUid?: SavedObjectAccessControl['owner'];
 }
 
 export interface SavedObjectsChangeAccessModeOptions<Attributes = unknown>

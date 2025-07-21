@@ -198,7 +198,7 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
         const soClient = (await context.core).savedObjects.client;
         try {
           const result = await soClient.changeOwnership(request.body.objects, {
-            owner: request.body.newOwner,
+            newOwnerProfileUid: request.body.newOwner,
           });
           return response.ok({
             body: result,

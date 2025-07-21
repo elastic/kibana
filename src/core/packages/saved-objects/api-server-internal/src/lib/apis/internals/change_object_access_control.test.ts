@@ -136,12 +136,12 @@ describe('changeObjectAccessControl', () => {
           changeObjectAccessControl({
             ...params,
             options: {
-              owner: undefined,
+              newOwnerProfileUid: undefined,
             },
             actionType: 'changeOwnership',
           })
         ).rejects.toThrow(
-          'The "owner" field is required to change ownership of a saved object.: Bad Request'
+          'The "newOwnerProfileUid" field is required to change ownership of a saved object.: Bad Request'
         );
       });
       it('returns error if no read-only objects are specified', async () => {
@@ -152,7 +152,7 @@ describe('changeObjectAccessControl', () => {
         const result = await changeObjectAccessControl({
           ...params,
           options: {
-            owner: 'owner-1',
+            newOwnerProfileUid: 'owner-1',
           },
           actionType: 'changeOwnership',
         });
@@ -173,7 +173,7 @@ describe('changeObjectAccessControl', () => {
         mockMgetResults([{ found: true, namespaces: ['default'] }]);
         const result = await changeObjectAccessControl({
           ...params,
-          options: { owner: 'new-owner' },
+          options: { newOwnerProfileUid: 'new-owner' },
           actionType: 'changeOwnership',
         });
         expect(client.mget).not.toHaveBeenCalled();
@@ -202,7 +202,7 @@ describe('changeObjectAccessControl', () => {
         await changeObjectAccessControl({
           ...params,
           securityExtension: params.securityExtension,
-          options: { owner: 'new-owner', namespace: 'default' },
+          options: { newOwnerProfileUid: 'new-owner', namespace: 'default' },
           actionType: 'changeOwnership',
         });
         expect(mockSecurityExt.authorizeChangeAccessControl).toHaveBeenCalledWith({
