@@ -72,7 +72,7 @@ telemetry.labels.serverless: search
 
 # Alerts and LLM config
 xpack.actions.enabledActionTypes:
-  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference']
+  ['.email', '.index', '.slack', '.slack_api', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'

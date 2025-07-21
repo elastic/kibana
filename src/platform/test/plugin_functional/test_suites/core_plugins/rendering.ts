@@ -268,6 +268,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.agentless.customIntegrations.enabled (boolean?)',
         'xpack.fleet.enableExperimental (array?)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number?)',
+        'xpack.fleet.internal.excludeDataStreamTypes (array?)',
         'xpack.fleet.internal.fleetServerStandalone (boolean?)',
         'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean?)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number?)',
