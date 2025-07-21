@@ -27,6 +27,8 @@ export {
   type EsqlToolFieldTypes,
   type EsqlToolParam,
   type EsqlToolDefinition,
+  EsqlToolFieldType,
+  idRegexp,
 } from './tools';
 export {
   OnechatErrorCode,
