@@ -39,15 +39,15 @@ export async function getUnifiedTraceErrors({
   start: number;
   end: number;
 }): Promise<UnifiedTraceErrors> {
-  const [apmErrors, unprocessedOtelError] = await Promise.all([
+  const [apmErrors, unprocessedOtelErrors] = await Promise.all([
     getApmTraceError({ apmEventClient, traceId, start, end }),
     getUnprocessedOtelErrors({ logsClient, traceId, start, end }),
   ]);
 
   return {
     apmErrors,
-    unprocessedOtelErrors: unprocessedOtelError,
-    totalErrors: apmErrors.length + unprocessedOtelError.length,
+    unprocessedOtelErrors,
+    totalErrors: apmErrors.length + unprocessedOtelErrors.length,
   };
 }
 
@@ -82,19 +82,28 @@ async function getUnprocessedOtelErrors({
     fields: requiredFields,
   });
 
-  return response.hits.hits.map((hit) => {
-    const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
-    if (!event) return null;
+  return response.hits.hits
+    .map((hit) => {
+      const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+      if (!event) return null;
 
-    return {
-      id: event.span?.id,
-      error: {
-        message: '',
-        exception: {
-          type: event.exception?.type,
-          message: event.exception?.message,
+      return {
+        id: event.span?.id,
+        error: {
+          message: '',
+          exception: {
+            type: event.exception?.type,
+            message: event.exception?.message,
+          },
         },
-      },
-    };
-  });
+      };
+    })
+    .filter(
+      (
+        doc
+      ): doc is {
+        id: string;
+        error: { message: string; exception: { type: string; message: string } };
+      } => !!doc
+    );
 }
