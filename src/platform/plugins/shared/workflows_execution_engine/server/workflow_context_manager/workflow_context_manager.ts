@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IScopedClusterClient, Logger, ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { WorkflowSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import {
-  WorkflowEventLogger,
-  type IWorkflowEventLogger,
-  type WorkflowLogEvent,
-} from '@kbn/workflows-management-plugin/server/workflow_event_logger';
 import { RunStepResult } from '../step/step_base';
 
 export interface ContextManagerInit {
@@ -34,7 +29,7 @@ export interface ContextManagerInit {
 export class WorkflowContextManager {
   private context: Record<string, any>; // Make it strongly typed
   private esClient: IScopedClusterClient;
-  private workflowLogger: IWorkflowEventLogger | null = null;
+  // private workflowLogger: IWorkflowEventLogger | null = null;
   private currentStepId: string | null = null;
   // Store original parameters for recreating logger
   private originalEsClient: ElasticsearchClient | null = null;
@@ -59,18 +54,18 @@ export class WorkflowContextManager {
     this.originalIndexName = init.workflowEventLoggerIndex || null;
 
     // Initialize workflow event logger if provided
-    if (init.logger && init.workflowEventLoggerIndex && init.esClient) {
-      this.workflowLogger = new WorkflowEventLogger(
-        init.esClient,
-        init.logger,
-        init.workflowEventLoggerIndex,
-        {
-          workflowId: init.workflowRunId,
-          workflowName: init.workflow.name,
-          executionId: init.workflowRunId,
-        }
-      );
-    }
+    // if (init.logger && init.workflowEventLoggerIndex && init.esClient) {
+    //   this.workflowLogger = new WorkflowEventLogger(
+    //     init.esClient,
+    //     init.logger,
+    //     init.workflowEventLoggerIndex,
+    //     {
+    //       workflowId: init.workflowRunId,
+    //       workflowName: init.workflow.name,
+    //       executionId: init.workflowRunId,
+    //     }
+    //   );
+    // }
   }
 
   private createEsClient(apiKey: string): IScopedClusterClient {
@@ -108,9 +103,9 @@ export class WorkflowContextManager {
   /**
    * Get the workflow-level logger (execution scoped)
    */
-  public get logger(): IWorkflowEventLogger | null {
-    return this.workflowLogger;
-  }
+  // public get logger(): IWorkflowEventLogger | null {
+  //   return this.workflowLogger;
+  // }
 
   /**
    * Set the current step context for logging
@@ -119,10 +114,10 @@ export class WorkflowContextManager {
   public setCurrentStep(stepId: string, stepName?: string, stepType?: string): void {
     this.currentStepId = stepId;
 
-    if (this.workflowLogger) {
-      // Create a new step-specific logger
-      this.workflowLogger = this.workflowLogger.createStepLogger(stepId, stepName, stepType);
-    }
+    // if (this.workflowLogger) {
+    //   // Create a new step-specific logger
+    //   this.workflowLogger = this.workflowLogger.createStepLogger(stepId, stepName, stepType);
+    // }
   }
 
   /**
@@ -131,102 +126,102 @@ export class WorkflowContextManager {
   public clearCurrentStep(): void {
     this.currentStepId = null;
 
-    if (
-      this.workflowLogger &&
-      this.originalEsClient &&
-      this.originalLogger &&
-      this.originalIndexName
-    ) {
-      // Reset to execution-level logger using original parameters
-      this.workflowLogger = new WorkflowEventLogger(
-        this.originalEsClient,
-        this.originalLogger,
-        this.originalIndexName,
-        {
-          workflowId: this.context.workflowRunId,
-          workflowName: this.context.workflow.name,
-          executionId: this.context.workflowRunId,
-        }
-      );
-    }
+    // if (
+    //   this.workflowLogger &&
+    //   this.originalEsClient &&
+    //   this.originalLogger &&
+    //   this.originalIndexName
+    // ) {
+    //   // Reset to execution-level logger using original parameters
+    //   this.workflowLogger = new WorkflowEventLogger(
+    //     this.originalEsClient,
+    //     this.originalLogger,
+    //     this.originalIndexName,
+    //     {
+    //       workflowId: this.context.workflowRunId,
+    //       workflowName: this.context.workflow.name,
+    //       executionId: this.context.workflowRunId,
+    //     }
+    //   );
+    // }
   }
 
   /**
    * Convenience logging methods that automatically include workflow/execution/step context
    */
-  public logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logInfo(message, additionalData);
-  }
+  // public logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
+  //   this.workflowLogger?.logInfo(message, additionalData);
+  // }
 
-  public logError(
-    message: string,
-    error?: Error,
-    additionalData?: Partial<WorkflowLogEvent>
-  ): void {
-    this.workflowLogger?.logError(message, error, additionalData);
-  }
+  // public logError(
+  //   message: string,
+  //   error?: Error,
+  //   additionalData?: Partial<WorkflowLogEvent>
+  // ): void {
+  //   this.workflowLogger?.logError(message, error, additionalData);
+  // }
 
-  public logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logWarn(message, additionalData);
-  }
+  // public logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
+  //   this.workflowLogger?.logWarn(message, additionalData);
+  // }
 
-  public logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logDebug(message, additionalData);
-  }
+  // public logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
+  //   this.workflowLogger?.logDebug(message, additionalData);
+  // }
 
-  public startTiming(event: WorkflowLogEvent): void {
-    this.workflowLogger?.startTiming(event);
-  }
+  // public startTiming(event: WorkflowLogEvent): void {
+  //   this.workflowLogger?.startTiming(event);
+  // }
 
-  public stopTiming(event: WorkflowLogEvent): void {
-    this.workflowLogger?.stopTiming(event);
-  }
+  // public stopTiming(event: WorkflowLogEvent): void {
+  //   this.workflowLogger?.stopTiming(event);
+  // }
 
   /**
    * Log workflow execution start
    */
   public logWorkflowStart(): void {
-    this.logInfo('Workflow execution started', {
-      event: { action: 'workflow-start', category: ['workflow'] },
-      tags: ['workflow', 'execution', 'start'],
-    });
+    // this.logInfo('Workflow execution started', {
+    //   event: { action: 'workflow-start', category: ['workflow'] },
+    //   tags: ['workflow', 'execution', 'start'],
+    // });
   }
 
   /**
    * Log workflow execution completion
    */
   public logWorkflowComplete(success: boolean = true): void {
-    this.logInfo(`Workflow execution ${success ? 'completed successfully' : 'failed'}`, {
-      event: {
-        action: 'workflow-complete',
-        category: ['workflow'],
-        outcome: success ? 'success' : 'failure',
-      },
-      tags: ['workflow', 'execution', 'complete'],
-    });
+    // this.logInfo(`Workflow execution ${success ? 'completed successfully' : 'failed'}`, {
+    //   event: {
+    //     action: 'workflow-complete',
+    //     category: ['workflow'],
+    //     outcome: success ? 'success' : 'failure',
+    //   },
+    //   tags: ['workflow', 'execution', 'complete'],
+    // });
   }
 
   /**
    * Log step execution start
    */
   public logStepStart(stepId: string, stepName?: string): void {
-    this.logInfo(`Step '${stepName || stepId}' started`, {
-      event: { action: 'step-start', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'start'],
-    });
+    // this.logInfo(`Step '${stepName || stepId}' started`, {
+    //   event: { action: 'step-start', category: ['workflow', 'step'] },
+    //   tags: ['workflow', 'step', 'start'],
+    // });
   }
 
   /**
    * Log step execution completion
    */
   public logStepComplete(stepId: string, stepName?: string, success: boolean = true): void {
-    this.logInfo(`Step '${stepName || stepId}' ${success ? 'completed' : 'failed'}`, {
-      event: {
-        action: 'step-complete',
-        category: ['workflow', 'step'],
-        outcome: success ? 'success' : 'failure',
-      },
-      tags: ['workflow', 'step', 'complete'],
-    });
+    // this.logInfo(`Step '${stepName || stepId}' ${success ? 'completed' : 'failed'}`, {
+    //   event: {
+    //     action: 'step-complete',
+    //     category: ['workflow', 'step'],
+    //     outcome: success ? 'success' : 'failure',
+    //   },
+    //   tags: ['workflow', 'step', 'complete'],
+    // });
   }
 }

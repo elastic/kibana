@@ -180,9 +180,9 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecutionStatus = ExecutionStatus.FAILED;
         workflowExecutionError = error instanceof Error ? error.message : String(error);
         // Log workflow failure
-        contextManager.logError('Workflow execution failed', error as Error, {
-          event: { action: 'workflow-failed', outcome: 'failure' },
-        });
+        // contextManager.logError('Workflow execution failed', error as Error, {
+        //   event: { action: 'workflow-failed', outcome: 'failure' },
+        // });
         contextManager.logWorkflowComplete(false);
       } finally {
         await this.esClient.update({
