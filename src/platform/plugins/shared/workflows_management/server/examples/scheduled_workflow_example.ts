@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CreateWorkflowCommand, WorkflowStatus } from '@kbn/workflows';
+import { CreateWorkflowCommand } from '@kbn/workflows';
 
 /**
  * Example of creating a workflow with scheduled triggers
@@ -15,44 +15,44 @@ import { CreateWorkflowCommand, WorkflowStatus } from '@kbn/workflows';
  */
 export const createScheduledWorkflowExample = (): CreateWorkflowCommand => {
   return {
-    name: 'Scheduled Data Processing Workflow',
-    description: 'A workflow that processes data every 5 minutes',
-    status: WorkflowStatus.ACTIVE,
-    triggers: [
-      {
-        id: 'scheduled-trigger',
-        type: 'schedule',
-        enabled: true,
-        config: {
-          every: '5',
-          unit: 'minute',
-        },
-      },
-    ],
-    steps: [
-      {
-        id: 'step-1',
-        connectorType: 'console',
-        connectorName: 'console',
-        inputs: {
-          message: 'Scheduled workflow executed at {{now}}',
-        },
-      },
-      {
-        id: 'step-2',
-        connectorType: 'http.request',
-        connectorName: 'http.request',
-        inputs: {
-          url: 'https://api.example.com/process-data',
-          method: 'POST',
-          body: {
-            timestamp: '{{now}}',
-            workflowId: '{{workflow.id}}',
-          },
-        },
-      },
-    ],
-    tags: ['scheduled', 'data-processing'],
+    //   name: 'Scheduled Data Processing Workflow',
+    //   description: 'A workflow that processes data every 5 minutes',
+    //   status: WorkflowStatus.ACTIVE,
+    //   triggers: [
+    //     {
+    //       id: 'scheduled-trigger',
+    //       type: 'schedule',
+    //       enabled: true,
+    //       config: {
+    //         every: '5',
+    //         unit: 'minute',
+    //       },
+    //     },
+    //   ],
+    //   steps: [
+    //     {
+    //       id: 'step-1',
+    //       connectorType: 'console',
+    //       connectorName: 'console',
+    //       inputs: {
+    //         message: 'Scheduled workflow executed at {{now}}',
+    //       },
+    //     },
+    //     {
+    //       id: 'step-2',
+    //       connectorType: 'http.request',
+    //       connectorName: 'http.request',
+    //       inputs: {
+    //         url: 'https://api.example.com/process-data',
+    //         method: 'POST',
+    //         body: {
+    //           timestamp: '{{now}}',
+    //           workflowId: '{{workflow.id}}',
+    //         },
+    //       },
+    //     },
+    //   ],
+    //   tags: ['scheduled', 'data-processing'],
     yaml: `
 version: '1'
 workflow:
@@ -86,30 +86,30 @@ workflow:
  */
 export const createCronWorkflowExample = (): CreateWorkflowCommand => {
   return {
-    name: 'Daily Report Workflow',
-    description: 'A workflow that generates daily reports at 9 AM',
-    status: WorkflowStatus.ACTIVE,
-    triggers: [
-      {
-        id: 'daily-trigger',
-        type: 'schedule',
-        enabled: true,
-        config: {
-          cron: '0 9 * * *', // Every day at 9 AM
-        },
-      },
-    ],
-    steps: [
-      {
-        id: 'generate-report',
-        connectorType: 'console',
-        connectorName: 'console',
-        inputs: {
-          message: 'Generating daily report for {{now}}',
-        },
-      },
-    ],
-    tags: ['daily', 'report'],
+    // name: 'Daily Report Workflow',
+    // description: 'A workflow that generates daily reports at 9 AM',
+    // status: WorkflowStatus.ACTIVE,
+    // triggers: [
+    //   {
+    //     id: 'daily-trigger',
+    //     type: 'schedule',
+    //     enabled: true,
+    //     config: {
+    //       cron: '0 9 * * *', // Every day at 9 AM
+    //     },
+    //   },
+    // ],
+    // steps: [
+    //   {
+    //     id: 'generate-report',
+    //     connectorType: 'console',
+    //     connectorName: 'console',
+    //     inputs: {
+    //       message: 'Generating daily report for {{now}}',
+    //     },
+    //   },
+    // ],
+    // tags: ['daily', 'report'],
     yaml: `
 version: '1'
 workflow:

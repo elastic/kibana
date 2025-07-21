@@ -19,15 +19,7 @@ interface WorkflowEditorProps {
 }
 
 export function WorkflowEditor({ workflowId, value, onChange, hasChanges }: WorkflowEditorProps) {
-  const { euiTheme } = useEuiTheme();
-
-  // useEffect(() => {
-  //   monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-  //     validate: true,
-  //     allowComments: true,
-  //     schemas: [{ uri: 'workflow.json', schema: jsonSchema, fileMatch: ['*'] }],
-  //   });
-  // }, []);
+  useEuiTheme();
 
   return (
     <EuiFlexGroup

@@ -21,7 +21,6 @@ const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineMod
 
 export class SchedulerService {
   private readonly logger: Logger;
-  private readonly workflowsService: WorkflowsService;
   private readonly actionsClient: IUnsecuredActionsClient;
   private readonly workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
 
@@ -32,7 +31,6 @@ export class SchedulerService {
     workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart
   ) {
     this.logger = logger;
-    this.workflowsService = workflowsService;
     this.actionsClient = actionsClient;
     this.workflowsExecutionEngine = workflowsExecutionEngine;
   }

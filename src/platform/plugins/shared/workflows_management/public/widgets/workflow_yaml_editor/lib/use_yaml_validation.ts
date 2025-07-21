@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useState } from 'react';
-import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import { MarkerSeverity, getSeverityString } from './utils';
+import { useCallback, useState } from 'react';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
-import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { MUSTACHE_REGEX } from './mustache';
+import { MarkerSeverity, getSeverityString } from './utils';
 
 interface UseYamlValidationProps {
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
@@ -103,12 +102,10 @@ export function useYamlValidation({
 
       try {
         const text = model.getValue();
-        const yamlDoc = parseDocument(text);
-        let workflowDefinition;
 
         try {
           // Parse the YAML to JSON to get the workflow definition
-          workflowDefinition = parseWorkflowYamlToJSON(text);
+          parseWorkflowYamlToJSON(text);
         } catch (e) {
           // eslint-disable-next-line no-console
           console.error(e);
@@ -120,23 +117,12 @@ export function useYamlValidation({
         const matches = [...text.matchAll(MUSTACHE_REGEX)];
         // TODO: check if the variable is inside quouted string or yaml | or > string section
         for (const match of matches) {
-          const matchStart = match.index;
+          const matchStart = match.index ?? 0;
           const matchEnd = matchStart + match[0].length; // match[0] is the entire {{...}} expression
 
           // Get the position (line, column) for the match
           const startPos = model.getPositionAt(matchStart);
           const endPos = model.getPositionAt(matchEnd);
-
-          // Get the current path in the YAML document
-          const path = getCurrentPath(yamlDoc, matchStart);
-
-          // Extract step information from the path
-          const stepInfo = findStepFromPath(path);
-          const actionInfo = findActionFromPath(path);
-
-          const currentStepType = stepInfo?.isInStep ? 'step' : 'action';
-          // Extract the content from the mustache expression (remove {{ and }})
-          const variableContent = match[1].trim();
 
           const errorMessage: string | null = null;
           const severity: YamlValidationErrorSeverity = 'warning';
@@ -164,7 +150,7 @@ export function useYamlValidation({
         console.error(error);
       }
     },
-    [findStepFromPath, findActionFromPath]
+    []
   );
 
   const handleMarkersChanged = useCallback(

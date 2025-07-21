@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { ExecutionStatus } from '@kbn/workflows';
+import React from 'react';
 
-export function StatusBadge({ status }: { status: ExecutionStatus }) {
+export function StatusBadge({ status }: { status: ExecutionStatus | undefined }) {
   switch (status) {
     case 'completed':
       return <EuiBadge color="success">{status}</EuiBadge>;

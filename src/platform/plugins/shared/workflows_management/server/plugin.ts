@@ -52,7 +52,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
-  private coreSetup: CoreSetup | null = null;
   // TODO: replace with esClient promise from core
   private esClient: Client = new Client({
     node: 'http://localhost:9200', // or your ES URL
@@ -68,7 +67,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
-    this.coreSetup = core;
 
     // Register workflow task definition
     if (plugins.taskManager) {
@@ -85,7 +83,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
             return {
               async run() {
                 // Get dependencies when the task actually runs
-                const [coreStart, pluginsStart] = await core.getStartServices();
+                const [, pluginsStart] = await core.getStartServices();
 
                 // Create the actual task runner with dependencies
                 const taskRunner = createWorkflowTaskRunner({
@@ -323,24 +321,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.api!.setSchedulerService(this.schedulerService!);
 
     this.logger.debug('Workflows Management: Started');
-
-    // TODO: REMOVE THIS AFTER TESTING
-    // Simulate pushing events every 10 seconds for testing purposes
-    // setInterval(() => {
-    //   pushEvent('detection-rule', {
-    //     ruleId: '123',
-    //     ruleName: 'Example Detection Rule',
-    //     timestamp: new Date().toISOString(),
-    //     severity: 'high',
-    //     description: 'This is an example detection rule that was triggered.',
-    //     additionalData: {
-    //       user: 'jdoe',
-    //       ip: '109.87.123.433',
-    //       action: 'login',
-    //       location: 'New York, USA',
-    //     },
-    //   });
-    // }, 10000);
 
     return {
       // TODO: use api abstraction instead of schedulerService methods directly

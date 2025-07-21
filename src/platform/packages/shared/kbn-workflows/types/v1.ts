@@ -161,6 +161,7 @@ export interface WorkflowListItemDto {
   definition: WorkflowYaml;
   createdAt: Date;
   history: WorkflowExecutionHistoryModel[];
+  tags?: string[];
 }
 
 export interface WorkflowListDto {

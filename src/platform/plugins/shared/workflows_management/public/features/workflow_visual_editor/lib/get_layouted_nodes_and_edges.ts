@@ -8,8 +8,8 @@
  */
 
 import dagre, { graphlib } from '@dagrejs/dagre';
-import { Position } from '@xyflow/react';
 import { WorkflowYaml } from '@kbn/workflows';
+import { Position } from '@xyflow/react';
 
 export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
 
@@ -160,8 +160,8 @@ export function transformYamlToNodesAndEdges(
       edges.push(...atomicEdges);
 
       // Create edge from atomic step to first nested step
-      if (step.steps.length > 0) {
-        const firstNestedId = step.steps[0].name.toLowerCase().replace(/\s+/g, '-');
+      if ((step.steps as any[]).length > 0) {
+        const firstNestedId = (step.steps as any[])[0].name.toLowerCase().replace(/\s+/g, '-');
         edges.push({
           id: `${id}:${firstNestedId}`,
           source: id,

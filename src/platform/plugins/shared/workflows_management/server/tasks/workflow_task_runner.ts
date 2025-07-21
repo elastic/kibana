@@ -39,7 +39,7 @@ export function createWorkflowTaskRunner({
   actionsClient: IUnsecuredActionsClient;
 }) {
   return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-    const { workflowId, spaceId } = taskInstance.params as WorkflowTaskParams;
+    const { workflowId } = taskInstance.params as WorkflowTaskParams;
     const state = taskInstance.state as WorkflowTaskState;
 
     return {

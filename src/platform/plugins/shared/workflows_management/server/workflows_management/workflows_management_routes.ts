@@ -30,9 +30,15 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        return response.ok({
-          body: await api.getWorkflow(id),
-        });
+        const workflow = await api.getWorkflow(id);
+        if (!workflow) {
+          return response.notFound({
+            body: {
+              message: `Workflow not found`,
+            },
+          });
+        }
+        return response.ok({ body: workflow });
       } catch (error) {
         return response.customError({
           statusCode: 500,
@@ -86,10 +92,10 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     },
     async (context, request, response) => {
       try {
-        const createdWorkflow = await api.createWorkflow(request.body);
-        return response.ok({
-          body: createdWorkflow,
+        const createdWorkflow = await api.createWorkflow({
+          yaml: (request.body as string) || '',
         });
+        return response.ok({ body: createdWorkflow });
       } catch (error) {
         return response.customError({
           statusCode: 500,
@@ -148,9 +154,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        return response.ok({
-          body: await api.deleteWorkflows([id]),
-        });
+        await api.deleteWorkflows([id]);
+        return response.ok();
       } catch (error) {
         return response.customError({
           statusCode: 500,
@@ -178,9 +183,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { ids } = request.body as { ids: string[] };
-        return response.ok({
-          body: await api.deleteWorkflows(ids),
-        });
+        await api.deleteWorkflows(ids);
+        return response.ok();
       } catch (error) {
         return response.customError({
           statusCode: 500,
@@ -277,10 +281,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId);
-        return response.ok({
-          body: workflowExecution,
-        });
+        await api.getWorkflowExecution(workflowExecutionId);
+        return response.ok({});
       } catch (error) {
         return response.customError({
           statusCode: 500,

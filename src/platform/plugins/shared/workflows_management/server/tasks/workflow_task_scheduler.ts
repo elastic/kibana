@@ -10,14 +10,11 @@
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
-import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
-
-// Define the trigger type based on the schema
-interface WorkflowTrigger {
-  id: string;
-  type: 'triggers.elastic.detectionRule' | 'triggers.elastic.scheduled' | 'triggers.elastic.manual';
-  with?: Record<string, any>;
-}
+import {
+  convertWorkflowScheduleToTaskSchedule,
+  getScheduledTriggers,
+  WorkflowTrigger,
+} from '../lib/schedule_utils';
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;

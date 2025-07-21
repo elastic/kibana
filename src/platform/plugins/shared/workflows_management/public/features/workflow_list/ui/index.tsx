@@ -62,7 +62,7 @@ export function WorkflowList() {
             });
           },
           onError: (err: unknown) => {
-            notifications?.toasts.addError(err, {
+            notifications?.toasts.addError(err as Error, {
               toastLifeTimeMs: 3000,
               title: 'Failed to run workflow',
             });
@@ -111,7 +111,7 @@ export function WorkflowList() {
         render: (value, item) => {
           return (
             <>
-              {item.tags.map((tag) => (
+              {item.tags?.map((tag: string) => (
                 <EuiBadge key={tag} color="hollow">
                   {tag}
                 </EuiBadge>

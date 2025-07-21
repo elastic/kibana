@@ -61,7 +61,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
         {
           field: 'status',
           name: 'Status',
-          render: (value: ExecutionStatus, item: WorkflowStepExecution) => {
+          render: (value: ExecutionStatus, item: EsWorkflowStepExecution) => {
             if (value === ExecutionStatus.FAILED) {
               return (
                 <EuiToolTip content={item.error}>
@@ -158,7 +158,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       <div css={{ height: '500px' }}>
         {workflowYamlObject && (
           <WorkflowVisualEditor
-            workflow={workflowYamlObject}
+            workflow={workflowYamlObject as any}
             stepExecutions={workflowExecution?.stepExecutions}
           />
         )}

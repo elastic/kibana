@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { Handle, Node, Position } from '@xyflow/react';
-import { EsWorkflowStepExecution, ExecutionStatus, WorkflowYaml } from '@kbn/workflows';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { EsWorkflowStepExecution, ExecutionStatus, WorkflowYaml } from '@kbn/workflows';
+import { Handle, Node, Position } from '@xyflow/react';
+import React from 'react';
 import { flowNodeTypes, NodeType } from '../lib/get_layouted_nodes_and_edges';
 
 const triggerNodeTypes = [
@@ -20,7 +20,7 @@ const triggerNodeTypes = [
 ];
 const actionNodeTypes = ['console', 'slack.sendMessage', 'delay'];
 
-function getNodeIcon(nodeType: NodeType, color: string) {
+function getNodeIcon(nodeType: string, color: string) {
   switch (nodeType) {
     case 'if':
       return <EuiIcon type="logstashIf" color={color} />;
@@ -120,6 +120,7 @@ const getNodeBorderColor = (status: ExecutionStatus | undefined, euiTheme: EuiTh
   }
 };
 
+// @ts-expect-error - TODO: fix this
 export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
   const { euiTheme } = useEuiTheme();
   return (

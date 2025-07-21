@@ -43,9 +43,9 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
   // Find the full execution object for the selected ID, if needed
-  const selectedExecution = workflowExecutions?.results.find(
-    (exec: any) => exec.id === selectedExecutionId
-  );
+  // const selectedExecution = workflowExecutions?.results.find(
+  //   (exec: any) => exec.id === selectedExecutionId
+  // );
 
   const handleViewWorkflowExecution = (item: WorkflowExecutionTableItem) => {
     setSelectedExecution(item.id);

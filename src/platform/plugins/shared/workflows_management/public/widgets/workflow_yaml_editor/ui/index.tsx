@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { WORKFLOW_ZOD_SCHEMA } from '../../../../common';
+import { YamlEditor } from '../../../shared/ui/yaml_editor';
+import { useYamlValidation } from '../lib/use_yaml_validation';
 import { navigateToErrorPosition } from '../lib/utils';
 import { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
-import { useYamlValidation } from '../lib/use_yaml_validation';
-import { YamlEditor } from '../../../shared/ui/yaml_editor';
-import { WORKFLOW_ZOD_SCHEMA } from '../../../../common';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -65,20 +65,6 @@ export const WorkflowYAMLEditor = ({
   }, [workflowJsonSchema]);
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
-
-  const getEditorValue = useCallback(() => {
-    if (!editorRef.current) {
-      return;
-    }
-    const model = editorRef.current.getModel();
-    if (!model) {
-      return;
-    }
-    if ('original' in model) {
-      return model.modified.getValue();
-    }
-    return model.getValue();
-  }, []);
 
   const validateMustacheExpressionsEverywhere = useCallback(() => {
     if (editorRef.current && monacoRef.current) {
@@ -166,6 +152,7 @@ export const WorkflowYAMLEditor = ({
           editorDidMount={handleEditorDidMount}
           onChange={handleChange}
           options={editorOptions}
+          // @ts-expect-error - TODO: fix this
           schemas={schemas}
           {...props}
         />

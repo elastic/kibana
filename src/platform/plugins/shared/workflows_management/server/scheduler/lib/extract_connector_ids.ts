@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 export const extractConnectorIds = async (
   workflow: WorkflowExecutionEngineModel,
@@ -16,7 +16,8 @@ export const extractConnectorIds = async (
 ): Promise<Record<string, Record<string, any>>> => {
   const connectorNames = workflow.definition.workflow.steps
     .filter((step) => step.type.endsWith('-connector'))
-    .map((step) => step['connector-id']!);
+    // TODO: fix this
+    .map((step) => (step as any)['connector-id']!);
   const distinctConnectorNames = Array.from(new Set(connectorNames));
   const allConnectors = await actionsClient.getAll('default');
   const connectorNameIdMap = new Map<string, string>(
