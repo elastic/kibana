@@ -128,7 +128,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
       cursorStart: 0,
       querySize: records.length,
     },
-    skip: nameFilterQuery === undefined || records.length === 0,
+    skip: nameFilterQuery === undefined,
   });
 
   const riskScores = riskScoreData && riskScoreData.length > 0 ? riskScoreData : [];
@@ -136,6 +136,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   const riskScoreByUserName: RiskScoresByUserName = Object.fromEntries(
     riskScores.map((riskScore) => [riskScore.user.name, riskScore])
   );
+
   const {
     data: assetCriticalityData,
     isError: assetCriticalityError,
@@ -143,8 +144,9 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   } = useAssetCriticalityFetchList({
     idField: 'user.name',
     idValues: records.map((user) => user['user.name']),
-    skip: !toggleStatus || records.length === 0,
+    skip: !toggleStatus,
   });
+
   const assetCriticalityRecords =
     assetCriticalityData && assetCriticalityData.records.length > 0
       ? assetCriticalityData.records
@@ -190,9 +192,8 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
     [records, riskScoreByUserName, assetCriticalityByUserName]
   );
 
-  const isLoading =
-    loadingPrivilegedUsers || (records.length > 0 && (loadingRiskScore || loadingAssetCriticality));
   const visibleRecords = take(currentPage * DEFAULT_PAGE_SIZE, enrichedRecords);
+
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="privileged-users-table-panel">
       <HeaderSection
@@ -223,12 +224,11 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
       {toggleStatus && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            {isLoading &&
-              (loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality) && (
-                <EuiProgress size="xs" color="accent" />
-              )}
+            {(loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality) && (
+              <EuiProgress size="xs" color="accent" />
+            )}
           </EuiFlexItem>
-          {records.length > 0 ? (
+          {records.length > 0 && (
             <>
               <EuiText size={'s'}>
                 <FormattedMessage
@@ -251,25 +251,16 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
               <EuiHorizontalRule margin="none" css={{ height: 2 }} />
               <EuiBasicTable
                 id={PRIVILEGED_USERS_TABLE_QUERY_ID}
-                loading={isLoading}
+                loading={loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality}
                 items={visibleRecords || []}
                 columns={columns}
               />
             </>
-          ) : (
-            !isLoading && (
-              <EuiText size="s" color="subdued" textAlign="center">
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.noData"
-                  defaultMessage="No privileged users found"
-                />
-              </EuiText>
-            )
           )}
           {records.length > currentPage * DEFAULT_PAGE_SIZE && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                isLoading={isLoading}
+                isLoading={loadingRiskScore || loadingPrivilegedUsers || loadingAssetCriticality}
                 onClick={() => {
                   setCurrentPage((page) => page + 1);
                 }}
