@@ -23,6 +23,7 @@ import { TransformProvider } from './transform';
 import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 import { RandomProvider } from './random';
 import { PipelineListProvider } from './pipeline_list';
+import { PipelineEditorProvider } from './pipeline_editor';
 import { DataStreamProvider } from './data_stream';
 
 // define the name and providers for services that should be
@@ -50,5 +51,6 @@ export const services = {
   reporting: ReportingFunctionalProvider,
   random: RandomProvider,
   pipelineList: PipelineListProvider,
+  pipelineEditor: PipelineEditorProvider,
   dataStream: DataStreamProvider,
 };
