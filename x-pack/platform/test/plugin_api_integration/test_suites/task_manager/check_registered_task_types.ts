@@ -101,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:apm.error_rate',
         'alerting:apm.transaction_duration',
         'alerting:apm.transaction_error_rate',
+        'alerting:attack-discovery',
         'alerting:datasetQuality.degradedDocs',
         'alerting:logs.alert.document.count',
         'alerting:metrics.alert.inventory.threshold',

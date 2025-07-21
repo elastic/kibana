@@ -56,9 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // assert legend
       expect(debugState?.legend!.items).to.eql([
         { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#61a2ff' },
-        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#a8caff' },
-        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#e8f1ff' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffafa6' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#c8deff' },
+        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#f6f9fc' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffccc6' },
         { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
 
@@ -78,9 +78,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
         { key: '7,125.997 - 8,529.22', name: '7,125.997 - 8,529.22', color: '#61a2ff' },
-        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#a8caff' },
-        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#e8f1ff' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffafa6' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#c8deff' },
+        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#f6f9fc' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffccc6' },
         { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
     });
@@ -92,9 +92,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
         { key: '7,125.99 - 8,529.2', name: '7,125.99 - 8,529.2', color: '#61a2ff' },
-        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8caff' },
-        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#e8f1ff' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffafa6' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c8deff' },
+        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffccc6' },
         {
           color: '#f6726a',
           key: '≥ 16,948.55',
@@ -111,9 +111,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // assert legend has changed
       expect(debugState?.legend!.items).to.eql([
         { key: '0 - 8,529.2', name: '0 - 8,529.2', color: '#61a2ff' },
-        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8caff' },
-        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#e8f1ff' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffafa6' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c8deff' },
+        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffccc6' },
         { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#f6726a' },
       ]);
     });
@@ -127,9 +127,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // assert legend has a rounded value
       expect(debugState?.legend!.items).to.eql([
         { key: '5,722.775 - 8,529.2', name: '5,722.775 - 8,529.2', color: '#61a2ff' },
-        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8caff' },
-        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#e8f1ff' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffafa6' },
+        { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#c8deff' },
+        { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#f6f9fc' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffccc6' },
         { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#f6726a' },
       ]);
       // assert the cell has the correct coloring despite the legend rounding
