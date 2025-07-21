@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { chatClient, esClient } from '../../services';
+import { chatClient, esClient, kibanaClient } from '../../services';
 
 describe('Elasticsearch function', () => {
   describe('health', () => {
@@ -97,6 +97,30 @@ describe('Elasticsearch function', () => {
         ]);
 
         expect(result.passed).to.be(true);
+      });
+
+      it('returns respone for /internal/search_playground/chat ', async () => {
+        const response = await kibanaClient.callKibana(
+          'post',
+          { pathname: '/internal/search_playground/chat' },
+          {
+            data: {
+              connector_id: 'e31e2627-57ce-42b6-b23d-b59faad9fe96',
+              indices: 'search-azwv',
+              prompt: 'You are an assistant for question-answering tasks.',
+              citations: true,
+              elasticsearch_query:
+                '{"retriever":{"standard":{"query":{"semantic":{"field":"text","query":"{query}"}}}},"highlight":{"fields":{"text":{"type":"semantic","number_of_fragments":2,"order":"score"}}}}',
+              summarization_model: 'anthropic.claude-3-haiku-20240307-v1:0',
+              doc_size: 1,
+              source_fields: '{"search-azwv":["text"]}',
+            },
+            messages: [{ role: 'human', content: 'Die hard' }],
+          }
+        );
+        // console.log('Response for /internal/search_playground/chat:');
+        // const arr = response?.data as any[];
+        // console.log(arr);
       });
 
       after(async () => {
