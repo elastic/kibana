@@ -376,7 +376,7 @@ paths:
                         duration:
                           value: 1
                           unit: 'h'
-                        missing_fields_strategy: 'suppress'    
+                        missing_fields_strategy: 'suppress'
               example28:
                 summary: Edit - Set alert suppression to threshold rules (idempotent)
                 description: The following request set alert suppression to threshold rules with the specified IDs.
@@ -1059,7 +1059,7 @@ components:
       type: string
       enum:
         - RULE_NOT_MODIFIED
-    
+
     BulkGapsFillingSkipReason:
       type: string
       enum:
@@ -1205,7 +1205,9 @@ components:
           description: Query to filter rules.
         ids:
           type: array
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           minItems: 1
           items:
             type: string
@@ -1308,7 +1310,7 @@ components:
           required:
             - action
             - run
-    
+
     BulkManualRuleFillGaps:
       allOf:
         - $ref: '#/components/schemas/BulkActionBase'
@@ -1601,7 +1603,6 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
         - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
-
 
     BulkEditRules:
       allOf:
