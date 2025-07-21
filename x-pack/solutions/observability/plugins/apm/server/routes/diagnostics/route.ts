@@ -88,7 +88,6 @@ export type DiagnosticsBundle = Promise<{
 const getServiceMapDiagnosticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics/service-map/{nodeName}',
   security: { authz: { requiredPrivileges: ['apm'] } },
-
   params: t.type({
     path: t.type({
       nodeName: t.string,
@@ -115,8 +114,6 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
       serviceName: nodeName,
     });
 
-    console.log('getSpanId', spanIds);
-
     const destinationParentIds = await getDestinationParentIds({
       apmEventClient,
       start,
@@ -125,31 +122,8 @@ const getServiceMapDiagnosticsRoute = createApmServerRoute({
       destinationNode,
     });
 
-    console.log('destinationParentIds', destinationParentIds);
-    
-    // Process the exit spans data to create a flatter structure
-    const connections = exitSpans?.response?.aggregations?.destination_resources?.buckets?.map(
-      (item: any) => {
-        // Defensive mapping, handle missing fields
-        const src = item?.sample_doc?.hits?.hits?.[0]?._source;
-        return {
-          'span.destination.service.resource': src?.span?.destination?.service?.resource ?? '',
-          'span.subtype': src?.span?.subtype ?? '',
-          'span.id': src?.span?.id ?? '',
-          'span.type': src?.span?.type ?? '',
-          'transaction.id': src?.transaction?.id ?? '',
-          'service.node.name': src?.service?.node?.name ?? '',
-          'trace.id': src?.trace?.id ?? '',
-          docCount: item?.doc_count ?? 0,
-        };
-      }
-    ) || [];
-
     return {
-      connections,
-      totalConnections: connections.length,
-      hasConnections: connections.length > 0,
-      rawResponse: exitSpans, // Keep raw response for debugging if needed
+      response: exitSpans,
     };
   },
 });

@@ -74,7 +74,26 @@ export async function getExitSpansFromNode({
     },
   });
 
-  return response;
+  const exitSpans =
+    response?.aggregations?.destination_resources?.buckets?.map((item: any) => {
+      const doc = item?.sample_doc?.hits?.hits?.[0]?._source;
+      return {
+        destinationService: doc?.span?.destination?.service?.resource ?? '',
+        spanSubType: doc?.span?.subtype ?? '',
+        spanId: doc?.span?.id ?? '',
+        spanType: doc?.span?.type ?? '',
+        transactionId: doc?.transaction?.id ?? '',
+        serviceNodeName: doc?.service?.node?.name ?? '',
+        traceId: doc?.trace?.id ?? '',
+        docCount: item?.doc_count ?? 0,
+      };
+    }) || [];
+
+  return {
+    exitSpans,
+    totalConnections: exitSpans.length,
+    rawResponse: response,
+  };
 }
 
 /**

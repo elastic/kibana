@@ -126,7 +126,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
         {isPending(status) ? (
           <EuiLoadingSpinner size="xl" />
         ) : data ? (
-          data.hasConnections ? (
+          data?.response?.exitSpans?.length > 0 ? (
             <>
               <EuiTitle size="xs">
                 <h3>
@@ -139,7 +139,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <HighlightedExitSpansTable items={data.connections} />
+              <HighlightedExitSpansTable items={data?.response?.exitSpans} />
             </>
           ) : (
             <>

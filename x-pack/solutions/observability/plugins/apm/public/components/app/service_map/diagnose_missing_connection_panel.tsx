@@ -45,15 +45,46 @@ export function DiagnoseMissingConnectionPanel({
   const [selectedService, setSelectedService] = useState('');
   const [selectedDependency, setSelectedDependency] = useState('');
 
+  // State for managing dropdown field selections and values
+  const [selectedFields, setSelectedFields] = useState<string[]>([
+    'service.name',
+    'span.destination.service.resource',
+  ]);
+  const [selectedValues, setSelectedValues] = useState<string[]>(['', '']);
+
   const handleRunDiagnostic = () => {
     onRunDiagnostic(traceId, selectedService, selectedDependency);
   };
 
+  const onChangeField = (fieldName: string, index: number) => {
+    const newSelectedFields = [...selectedFields];
+    newSelectedFields[index] = fieldName;
+    setSelectedFields(newSelectedFields);
+
+    // Reset the value when field changes to trigger new suggestions
+    const newSelectedValues = [...selectedValues];
+    newSelectedValues[index] = '';
+    setSelectedValues(newSelectedValues);
+  };
+
+  const onChangeValue = (value: string, index: number) => {
+    const newSelectedValues = [...selectedValues];
+    newSelectedValues[index] = value;
+    setSelectedValues(newSelectedValues);
+
+    // Update the appropriate state based on index
+    if (index === 0) {
+      setSelectedService(value);
+    } else {
+      setSelectedDependency(value);
+    }
+  };
+
   const isRunDisabled = !traceId && !selectedService && !selectedDependency;
 
-  const filters: EuiSelectOption[] = [
-    { value: undefined, text: 'service.name' },
-    { value: undefined, text: 'span.destination.service.resource' },
+  const fieldOptions: EuiSelectOption[] = [
+    { value: 'service.name', text: 'service.name' },
+    { value: 'span.destination.service.resource', text: 'span.destination.service.resource' },
   ];
 
   const steps = [
@@ -68,10 +99,8 @@ export function DiagnoseMissingConnectionPanel({
             })}
           </EuiText>
           <EuiSpacer size="m" />
-          {filters.map((filter, idx) => {
-            const { text: key, value } = filter;
+          {selectedFields.map((fieldName, idx) => {
             const filterId = `filter-${idx}`;
-            // const selectOptions = getSelectOptions(filters, key);
             return (
               <React.Fragment key={filterId}>
                 <EuiFormRow
@@ -104,34 +133,32 @@ export function DiagnoseMissingConnectionPanel({
                         data-test-subj={filterId}
                         id={filterId}
                         fullWidth
-                        options={filters}
-                        value={key}
+                        options={fieldOptions}
+                        value={fieldName}
                         prepend={i18n.translate(
                           'xpack.apm.settings.customLink.flyout.filters.prepend',
                           {
                             defaultMessage: 'Field',
                           }
                         )}
-                        onChange={(e) =>
-                          // set value to empty string to reset value when new field is selected
-                          onChangeFilter(e.target.value as FilterKey, '', idx)
-                        }
-                        isInvalid={!isEmpty(value) && isEmpty(key)}
+                        onChange={(e) => {
+                          onChangeField(e.target.value, idx);
+                        }}
+                        isInvalid={!isEmpty(selectedValues[idx]) && isEmpty(fieldName)}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <SuggestionsSelect
-                        key={filterId}
-                        dataTestSubj={`${key}.value`}
-                        fieldName={key}
+                        key={`${filterId}-${fieldName}`} // Include fieldName in key to force re-render when field changes
+                        dataTestSubj={`${fieldName}.value`}
+                        fieldName={fieldName}
                         placeholder={i18n.translate(
                           'xpack.apm.settings.customLink.flyOut.filters.defaultOption.value',
                           { defaultMessage: 'Value' }
                         )}
-                        defaultValue={selectedNode?.[key] as string}
-                        // onChange={(selectedValue) => onChangeFilter(key, selectedValue as string, idx)}
-                        onChange={(selectedValue) => console.log('etst')}
-                        isInvalid={!isEmpty(key) && isEmpty(value)}
+                        defaultValue={selectedValues[idx]}
+                        onChange={(selectedValue) => onChangeValue(selectedValue as string, idx)}
+                        isInvalid={!isEmpty(fieldName) && isEmpty(selectedValues[idx])}
                         start={start}
                         end={end}
                       />

@@ -32,37 +32,37 @@ export interface HighlightedExitSpansTableProps {
 
 const columns: Array<EuiBasicTableColumn<ExitSpanFields>> = [
   {
-    field: 'span.destination.service.resource',
+    field: 'destinationService',
     name: 'Destination Service',
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
-    field: 'span.subtype',
+    field: 'spanSubType',
     name: 'Subtype',
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
-    field: 'span.id',
+    field: 'spanId',
     name: 'Span ID',
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
-    field: 'span.type',
+    field: 'spanType',
     name: 'Span Type',
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
-    field: 'transaction.id',
+    field: 'transactionId',
     name: 'Transaction ID',
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
-    field: 'service.node.name',
+    field: 'serviceNodeName',
     name: 'Service Node',
     render: (value: string | undefined) => value || <em>—</em>,
   },
   {
-    field: 'trace.id',
+    field: 'traceId',
     name: 'Trace ID',
     render: (value: string | undefined) => value || <em>—</em>,
   },
