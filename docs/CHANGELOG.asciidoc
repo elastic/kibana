@@ -651,6 +651,8 @@ The 8.17.9 release includes the following fixes.
 === Fixes
 Alerting::
 * Fixes an issue causing reports to fail with an invalid header error ({kibana-pull}225919[#225919]).
+Dashboards and Visualizations::
+* Fixes issues with dashboard sharing links where copied links were not shortened and some users were unable to copy links in new spaces ({kibana-pull}227625[#227625]).
 Data ingestion and Fleet::
 * Fixes error on the **Agents** tab when a tag is added to an agent while the **No Tags** filter is selected ({kibana-pull}225413[#225413]).
 Discover::
