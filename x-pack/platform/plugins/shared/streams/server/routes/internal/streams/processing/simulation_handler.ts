@@ -19,7 +19,6 @@ import {
   SimulateIngestResponse,
   SimulateIngestSimulateIngestDocumentResult,
   FieldCapsResponse,
-  IndicesGetIndexTemplateIndexTemplateItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
@@ -39,7 +38,6 @@ import {
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
 import { StreamsClient } from '../../../../lib/streams/client';
 import { formatToIngestProcessors } from '../../../../lib/streams/helpers/processing';
-import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 
 export interface ProcessingSimulationParams {
   path: {
@@ -149,7 +147,7 @@ export const simulateProcessing = async ({
   streamsClient,
 }: SimulateProcessingDeps) => {
   /* 0. Retrieve required data to prepare the simulation */
-  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps, indexTemplate }] =
+  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
       streamsClient.getStream(params.path.name),
       getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
@@ -161,7 +159,6 @@ export const simulateProcessing = async ({
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
     streamIndexState,
-    indexTemplate,
     params
   );
   /**
@@ -306,7 +303,6 @@ const preparePipelineSimulationBody = (
 const prepareIngestSimulationBody = (
   simulationData: ReturnType<typeof prepareSimulationData>,
   streamIndex: IndicesIndexState,
-  indexTemplate: IndicesGetIndexTemplateIndexTemplateItem,
   params: ProcessingSimulationParams
 ): SimulateIngestRequest => {
   const { body } = params;
@@ -317,31 +313,6 @@ const prepareIngestSimulationBody = (
   const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
   const mappings = streamIndex.mappings;
 
-  // We need to build a patched index template isntead of using mapping_addition
-  // because of https://github.com/elastic/elasticsearch/issues/131608
-  const patchedIndexTemplate = {
-    ...indexTemplate.index_template,
-    priority:
-      indexTemplate.index_template.priority && indexTemplate.index_template.priority > MAX_PRIORITY
-        ? // max priority passed as a string so we don't lose precision
-          (`${MAX_PRIORITY}` as unknown as number)
-        : indexTemplate.index_template.priority,
-    composed_of: [
-      ...(indexTemplate.index_template.composed_of || []),
-      '__DUMMY_COMPONENT_TEMPLATE__',
-    ],
-    template: {
-      ...indexTemplate.index_template.template,
-      mappings: {
-        ...indexTemplate.index_template.template?.mappings,
-        properties: {
-          ...indexTemplate.index_template.template?.mappings?.properties,
-          ...(detected_fields && computeMappingProperties(detected_fields)),
-        },
-      },
-    },
-  };
-
   const simulationBody: SimulateIngestRequest = {
     docs,
     ...(defaultPipelineName && {
@@ -351,20 +322,6 @@ const prepareIngestSimulationBody = (
         },
       },
     }),
-    index_template_substitutions: {
-      [indexTemplate.name]: patchedIndexTemplate,
-    },
-    component_template_substitutions: {
-      __DUMMY_COMPONENT_TEMPLATE__: {
-        template: {
-          mappings: {
-            properties: {
-              ...(detected_fields && computeMappingProperties(detected_fields)),
-            },
-          },
-        },
-      },
-    },
     // Ideally we should not need to retrieve and merge the mappings from the stream index.
     // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
     // So we need to merge the mappings from the stream index with the detected fields.
@@ -771,7 +728,6 @@ const getStreamIndex = async (
 ): Promise<{
   indexState: IndicesIndexState;
   fieldCaps: FieldCapsResponse['fields'];
-  indexTemplate: IndicesGetIndexTemplateIndexTemplateItem;
 }> => {
   const dataStream = await streamsClient.getDataStream(streamName);
   const lastIndexRef = dataStream.indices.at(-1);
@@ -779,7 +735,7 @@ const getStreamIndex = async (
     throw new Error(`No writing index found for stream ${streamName}`);
   }
 
-  const [lastIndex, lastIndexFieldCaps, indexTemplate] = await Promise.all([
+  const [lastIndex, lastIndexFieldCaps] = await Promise.all([
     scopedClusterClient.asCurrentUser.indices.get({
       index: lastIndexRef.index_name,
     }),
@@ -787,15 +743,11 @@ const getStreamIndex = async (
       index: lastIndexRef.index_name,
       fields: '*',
     }),
-    await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
-      name: dataStream.template,
-    }),
   ]);
 
   return {
     indexState: lastIndex[lastIndexRef.index_name],
     fieldCaps: lastIndexFieldCaps.fields,
-    indexTemplate: indexTemplate.index_templates[0],
   };
 };
 
