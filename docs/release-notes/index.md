@@ -35,6 +35,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 ### Fixes [kibana-9.0.4-fixes]
 
 **Dashboards and Visualizations**:
+* Fixes an issue with dashboard sharing links where copied links were not shortened and some users were unable to copy links in new spaces [#227625]({{kib-pull}}227625).
 * Stops dashboards from recommending adhoc data views [#225705]({{kib-pull}}225705).
 * Prevents dashboards from initiating duplicate requests when making a selection on a control [#224761]({{kib-pull}}224761).
 
