@@ -11,6 +11,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   AuthorizeBulkGetObject,
@@ -18,7 +19,6 @@ import type {
   AuthorizeObjectWithExistingSpaces,
   AuthorizeUpdateObject,
   BulkResolveError,
-  ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
 import type {
   CheckPrivilegesResponse,
@@ -52,9 +52,6 @@ const addAuditEventSpy = jest.spyOn(
   'addAuditEvent'
 );
 const getCurrentUser = jest.fn();
-const typeRegistry: Partial<ISavedObjectTypeRegistry> = {
-  supportsAccessControl: jest.fn().mockImplementation((type) => type === 'dashboard'),
-} as unknown as jest.Mocked<ISavedObjectTypeRegistry>;
 
 const accessControlServiceMock = {
   setUserForOperation: jest.fn(),
@@ -132,13 +129,15 @@ function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: b
   } as unknown as jest.Mocked<SavedObjectsClient['errors']>;
   const checkPrivileges: jest.MockedFunction<CheckSavedObjectsPrivileges> = jest.fn();
 
+  const typeRegistryMocked = typeRegistryMock.create();
+  typeRegistryMocked.supportsAccessControl.mockImplementation((type) => type === 'dashboard');
   const securityExtension = new SavedObjectsSecurityExtension({
     actions,
     auditLogger,
     errors,
     checkPrivileges,
     getCurrentUser,
-    getTypeRegistry: jest.fn().mockReturnValue(typeRegistry),
+    typeRegistry: typeRegistryMocked,
   });
   return { actions, auditLogger, errors, checkPrivileges, securityExtension };
 }

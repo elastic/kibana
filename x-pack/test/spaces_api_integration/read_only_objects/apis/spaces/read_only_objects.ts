@@ -9,13 +9,23 @@ import { parse as parseCookie } from 'tough-cookie';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 
-import type { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
+
+  const createSimpleUser = async () => {
+    await es.security.putUser({
+      username: 'simple_user',
+      refresh: 'wait_for',
+      password: 'changeme',
+      roles: ['viewer'],
+    });
+  };
 
   const login = async (username: string, password: string | undefined) => {
     const response = await supertestWithoutAuth
@@ -42,12 +52,21 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
+  const loginAsSimpleUser = async () => {
+    const { cookie: simpleUserCookie, profileUid } = await login('simple_user', 'changeme');
+    return {
+      cookie: simpleUserCookie,
+      profileUid,
+    };
+  };
+
   describe('read only saved objects', () => {
     before(async () => {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
+      await createSimpleUser();
     });
     after(async () => {
-      await security.testUser.restoreDefaults();
+      // await security.testUser.restoreDefaults();
     });
     describe('create and access read only objects', () => {
       it('should create a read only object', async () => {
@@ -142,11 +161,16 @@ export default function ({ getService }: FtrProviderContext) {
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
+        const { profileUid: simpleUserProfileUid } = await loginAsSimpleUser();
+
         await supertestWithoutAuth
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ objects: [{ id: objectId, type: 'read_only_type' }], newOwner: 'new_owner' })
+          .send({
+            objects: [{ id: objectId, type: 'read_only_type' }],
+            newOwner: simpleUserProfileUid,
+          })
           .expect(200);
         const getResponse = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId}`)
@@ -154,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', testUserCookie.cookieString())
           .expect(200);
         expect(getResponse.body).to.have.property('accessControl');
-        expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
+        expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
       });
 
       it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
@@ -172,12 +196,17 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
 
+        const { profileUid: simpleUserProfileUid } = await loginAsSimpleUser();
+
         const { cookie: testUserCookie } = await loginAsTestUser();
         const transferResponse = await supertestWithoutAuth
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', testUserCookie.cookieString())
-          .send({ objects: [{ id: objectId, type: 'read_only_type' }], newOwner: 'new_owner' })
+          .send({
+            objects: [{ id: objectId, type: 'read_only_type' }],
+            newOwner: simpleUserProfileUid,
+          })
           .expect(403);
 
         expect(transferResponse.body).to.have.property('message');
@@ -197,11 +226,16 @@ export default function ({ getService }: FtrProviderContext) {
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
         const { cookie: adminCookie } = await login(adminTestUser.username, adminTestUser.password);
+
+        const { profileUid: simpleUserProfileUid } = await loginAsSimpleUser();
         await supertestWithoutAuth
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
           .set('cookie', adminCookie.cookieString())
-          .send({ objects: [{ id: objectId, type: 'read_only_type' }], newOwner: 'new_owner' })
+          .send({
+            objects: [{ id: objectId, type: 'read_only_type' }],
+            newOwner: simpleUserProfileUid,
+          })
           .expect(200);
 
         const getResponse = await supertestWithoutAuth
@@ -210,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', adminCookie.cookieString())
           .expect(200);
 
-        expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
+        expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
       });
 
       it('should allow bulk transfer ownership of allowed objects', async () => {
@@ -232,6 +266,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const secondObjectId = secondCreate.body.id;
 
+        const { profileUid: simpleUserProfileUid } = await loginAsSimpleUser();
+
         await supertestWithoutAuth
           .put('/read_only_objects/transfer')
           .set('kbn-xsrf', 'true')
@@ -241,7 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
               { id: firstObjectId, type: firstCreate.body.type },
               { id: secondObjectId, type: secondCreate.body.type },
             ],
-            newOwner: 'new_owner',
+            newOwner: simpleUserProfileUid,
           })
           .expect(200);
         {
@@ -251,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set('cookie', adminCookie.cookieString())
             .expect(200);
 
-          expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
+          expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
         }
         {
           const getResponse = await supertestWithoutAuth
@@ -259,7 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .set('cookie', adminCookie.cookieString())
             .expect(200);
-          expect(getResponse.body.accessControl).to.have.property('owner', 'new_owner');
+          expect(getResponse.body.accessControl).to.have.property('owner', simpleUserProfileUid);
         }
       });
     });

@@ -65,5 +65,8 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
    */
   managed?: boolean;
 
+  /**
+   * Access control settings for the saved object.
+   */
   accessControl?: SavedObjectAccessControl;
 }

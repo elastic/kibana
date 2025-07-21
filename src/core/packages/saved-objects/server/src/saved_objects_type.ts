@@ -201,7 +201,7 @@ export interface SavedObjectsType<Attributes = any> {
    *
    * When enabled, objects of this type can have an `accessControl` property containing:
    * - `owner`: The ID of the user who owns this object
-   * - `accessMode`: Optional access mode setting, currently supporting 'read_only'
+   * - `accessMode`: Optional access mode setting, currently supporting 'read_only'.
    *
    * This property works in conjunction with the SavedObjectAccessControl interface defined
    * in server_types.ts.
