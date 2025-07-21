@@ -111,7 +111,7 @@ The 8.18.4 release includes the following fixes.
 Alerting::
 * Fixes an issue causing reports to fail with an invalid header error ({kibana-pull}225919[#225919]).
 Dashboards and Visualizations::
-* Fixes issues with dashboard sharing links where copied links were not shortened and some users were unable to copy links in new spaces ({kibana-pull}227625[#227625]).
+* Fixes an issue with dashboard sharing links where copied links were not shortened and some users were unable to copy links in new spaces ({kibana-pull}227625[#227625]).
 Data ingestion and Fleet::
 * Fixes an issue with agentless integration policies appearing under the Agent-based section ({kibana-pull}225767[#225767]).
 * Fixes an issue where the background task was not deleting some unenrolled agents ({kibana-pull}224808[#224808]).
