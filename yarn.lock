@@ -5848,7 +5848,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-test-plugin@link:x-pack/test/plugin_functional/plugins/global_search_test":
+"@kbn/global-search-test-plugin@link:x-pack/platform/test/plugin_functional/plugins/global_search_test":
   version "0.0.0"
   uid ""
 
@@ -6860,7 +6860,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/resolver-test-plugin@link:x-pack/test/plugin_functional/plugins/resolver_test":
+"@kbn/resolver-test-plugin@link:x-pack/solutions/security/test/plugin_functional/plugins/resolver_test":
   version "0.0.0"
   uid ""
 

@@ -1422,9 +1422,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/security/test/fleet_api_integration @elastic/fleet
 /x-pack/platform/test/fleet_api_integration @elastic/fleet
 /x-pack/platform/test/fleet_packages @elastic/fleet
-^/src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/fleet
-/x-pack/test/fleet_cypress @elastic/fleet
-/x-pack/test/fleet_functional @elastic/fleet
+/src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/fleet
+/x-pack/platform/test/fleet_cypress @elastic/fleet
+/x-pack/platform/test/fleet_functional @elastic/fleet
 /src/dev/build/tasks/bundle_fleet_packages.ts @elastic/fleet @elastic/kibana-operations
 /x-pack/platform/plugins/shared/fleet/server/services/elastic_agent_manifest.ts @elastic/fleet @elastic/obs-cloudnative-monitoring
 /x-pack/test_serverless/**/test_suites/**/fleet/ @elastic/fleet
@@ -1436,7 +1436,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 ^/src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-ux-infra_services-team
-/x-pack/test/apm_cypress/ @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
 /src/platform/packages/shared/kbn-utility-types/src/dot_test.ts @dgieselaar
@@ -1617,10 +1617,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional_basic/apps/transform/ @elastic/ml-ui @elastic/kibana-management
 
 # Operations
-^/src/platform/test/package @elastic/kibana-operations
-^/src/platform/test/package/roles @elastic/kibana-operations
-^/src/platform/test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
-/x-pack/test/plugin_functional/screenshots @elastic/kibana-operations # Assigned per https://github.com/elastic/kibana/pull/94370/files
+/src/platform/test/package @elastic/kibana-operations
+/src/platform/test/package/roles @elastic/kibana-operations
+/src/platform/test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
+/x-pack/platform/test/plugin_functional/screenshots @elastic/kibana-operations # Assigned per https://github.com/elastic/kibana/pull/94370/files
 /src/dev/license_checker/config.ts @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
@@ -1667,32 +1667,32 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/functional/es_archives/event_log_legacy_ids @elastic/appex-qa
 /x-pack/test/functional/es_archives/dlstest @elastic/appex-qa # No usages found
 /x-pack/test/functional/es_archives/beats/list/data.json @elastic/appex-qa # No usages found
-^/src/platform/test/functional/fixtures/kbn_archiver/stress_test.json @elastic/appex-qa
-^/src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view.json @elastic/appex-qa
-^/src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern.json @elastic/appex-qa
-^/src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb.json @elastic/appex-qa
-^/src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_logsdb.json @elastic/appex-qa
-^/src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json @elastic/appex-qa
-^/src/platform/test/functional/fixtures/es_archiver/stress_test @elastic/appex-qa
-^/src/platform/test/functional/fixtures/es_archiver/many_fields @elastic/appex-qa
-^/src/platform/test/functional/fixtures/es_archiver/logstash_functional @elastic/appex-qa
-^/src/platform/test/functional/fixtures/es_archiver/long_window_logstash @elastic/appex-qa
-^/src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_* @elastic/appex-qa
-^/src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights* @elastic/appex-qa
-^/src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare @elastic/appex-qa
-^/src/platform/test/api_integration/fixtures/es_archiver/elasticsearch @elastic/appex-qa
-/x-pack/test/plugin_functional/services.ts @elastic/appex-qa
-^/src/platform/test/server_integration/services/index.js @elastic/appex-qa
-/x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js @elastic/appex-qa
-/x-pack/test/stack_functional_integration/configs/consume_state.js @elastic/appex-qa
-/x-pack/test/functional/services/remote_es/remote_es_archiver.ts @elastic/appex-qa
-^/src/platform/test/functional/services/remote_es/remote_es_archiver.ts @elastic/appex-qa
+/src/platform/test/functional/fixtures/kbn_archiver/stress_test.json @elastic/appex-qa
+/src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view.json @elastic/appex-qa
+/src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern.json @elastic/appex-qa
+/src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb.json @elastic/appex-qa
+/src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_logsdb.json @elastic/appex-qa
+/src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json @elastic/appex-qa
+/src/platform/test/functional/fixtures/es_archiver/stress_test @elastic/appex-qa
+/src/platform/test/functional/fixtures/es_archiver/many_fields @elastic/appex-qa
+/src/platform/test/functional/fixtures/es_archiver/logstash_functional @elastic/appex-qa
+/src/platform/test/functional/fixtures/es_archiver/long_window_logstash @elastic/appex-qa
+/src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_* @elastic/appex-qa
+/src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights* @elastic/appex-qa
+/src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare @elastic/appex-qa
+/src/platform/test/api_integration/fixtures/es_archiver/elasticsearch @elastic/appex-qa
+/x-pack/platform/test/plugin_functional/services.ts @elastic/appex-qa
+/src/platform/test/server_integration/services/index.js @elastic/appex-qa
+/x-pack/platform/test/stack_functional_integration/configs/config.stack_functional_integration_base.js @elastic/appex-qa
+/x-pack/platform/test/stack_functional_integration/configs/consume_state.js @elastic/appex-qa
+/x-pack/platform/test/functional/services/remote_es/remote_es_archiver.ts @elastic/appex-qa
+/src/platform/test/functional/services/remote_es/remote_es_archiver.ts @elastic/appex-qa
 /x-pack/test/kibana.jsonc @elastic/appex-qa
 /x-pack/platform/test/functional_with_es_ssl/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/test/stack_functional_integration/apps @elastic/appex-qa
-/x-pack/test/plugin_functional/config.ts @elastic/appex-qa
-/x-pack/test/plugin_functional/ftr_provider_context.d.ts @elastic/appex-qa
-/x-pack/test/plugin_functional/page_objects.ts @elastic/appex-qa
+/x-pack/platform/test/stack_functional_integration/apps @elastic/appex-qa
+/x-pack/platform/test/plugin_functional/config.ts @elastic/appex-qa
+/x-pack/platform/test/plugin_functional/ftr_provider_context.d.ts @elastic/appex-qa
+/x-pack/platform/test/plugin_functional/page_objects.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/upgrade/config.ts @elastic/appex-qa
@@ -2270,12 +2270,12 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
 /x-pack/solutions/security/test/functional_solution_sidenav/ @elastic/security-solution
 /x-pack/test/common/utils/security_solution/index.ts @elastic/security-solution
-/x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+/x-pack/solutions/security/test/plugin_functional/ @elastic/security-solution
 /x-pack/test/common/services/security_solution @elastic/security-solution
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
-/x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
+/x-pack/platform/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
@@ -2760,7 +2760,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 x-pack/platform/plugins/private/translations/translations
 
 # Profiling cypress tests
-x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/test/profiling_cypress @elastic/obs-ux-infra_services-team
 
 # Profiling api integration testing
 x-pack/solutions/observability/test/api_integration/profiling @elastic/obs-ux-infra_services-team
@@ -2779,7 +2779,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
 /src/platform/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /src/platform/test/functional/apps/home @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840075278
-/x-pack/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
+/x-pack/platform/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overview @elastic/appex-sharedux
 /x-pack/test/functional_solution_sidenav/config.ts @elastic/appex-sharedux
@@ -2796,18 +2796,18 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 ^/src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/global_search @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
-/x-pack/test/plugin_functional/test_suites/global_search @elastic/appex-sharedux
-^/src/platform/test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
-^/src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
-^/src/platform/test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
-^/src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
-^/src/platform/test/functional/apps/sharing/*.ts @elastic/appex-sharedux
-^/src/platform/test/functional/apps/kibana_overviews @elastic/appex-sharedux
-^/src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
-^/src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
-^/src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
-^/src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
-^/src/platform/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
+/x-pack/platform/test/plugin_functional/test_suites/global_search @elastic/appex-sharedux
+/src/platform/test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
+/src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
+/src/platform/test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
+/src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
+/src/platform/test/functional/apps/sharing/*.ts @elastic/appex-sharedux
+/src/platform/test/functional/apps/kibana_overviews @elastic/appex-sharedux
+/src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
+/src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
+/src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
+/src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
+/src/platform/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/solutions/search/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/platform/test/banners_functional @elastic/appex-sharedux
 /x-pack/platform/test/custom_branding @elastic/appex-sharedux
