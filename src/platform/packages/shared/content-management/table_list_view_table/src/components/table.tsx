@@ -22,7 +22,6 @@ import {
   useEuiTheme,
   EuiCode,
   EuiText,
-  EuiPaginationProps,
   EuiBasicTable,
   EuiSearchBar,
   EuiSearchBarProps,
@@ -88,9 +87,15 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   clearTagSelection: () => void;
   createdByEnabled: boolean;
   favoritesEnabled: boolean;
-  isServerSidePaginationAndSorting?: boolean;
   totalItems: number;
-  onChangePage?: EuiPaginationProps['onPageClick'];
+  isServerSidePaginationAndSorting?: boolean;
+  onChangePage?: ({
+    pageIndex,
+    isFavoritesTabVisible,
+  }: {
+    pageIndex: number;
+    isFavoritesTabVisible: boolean;
+  }) => Promise<void>;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -129,16 +134,17 @@ export function Table<T extends UserContentCommonSchema>({
   const [pageIndex, setPageIndex] = useState(pagination.pageIndex);
   const euiTheme = useEuiTheme();
   const { getTagList, isTaggingEnabled, isKibanaVersioningEnabled } = useServices();
+  const isFavoritesTabVisible = tableFilter.favorites;
 
   const handleTableChange = useCallback(
     (criteria: CriteriaWithPagination<T>) => {
       onTableChange(criteria);
       if (isServerSidePaginationAndSorting) {
         setPageIndex(criteria.page.index);
-        onChangePage?.(criteria.page.index);
+        onChangePage?.({ pageIndex: criteria.page.index, isFavoritesTabVisible });
       }
     },
-    [onTableChange, onChangePage, isServerSidePaginationAndSorting]
+    [onTableChange, onChangePage, isServerSidePaginationAndSorting, isFavoritesTabVisible]
   );
 
   const renderToolsLeft = useCallback(() => {
@@ -294,7 +300,7 @@ export function Table<T extends UserContentCommonSchema>({
 
   const hasQueryOrFilters = Boolean(searchQuery.text || tableFilter.createdBy.length > 0);
 
-  const noItemsMessage = tableFilter.favorites ? (
+  const noItemsMessage = isFavoritesTabVisible ? (
     <FavoritesEmptyState
       emptyStateType={hasQueryOrFilters ? 'noMatchingItems' : 'noItems'}
       entityName={entityName}
@@ -356,7 +362,7 @@ export function Table<T extends UserContentCommonSchema>({
   const favoritesFilter =
     favoritesEnabled && !favoritesError ? (
       <TabbedTableFilter
-        selectedTabId={tableFilter.favorites ? 'favorite' : 'all'}
+        selectedTabId={isFavoritesTabVisible ? 'favorite' : 'all'}
         onSelectedTabChanged={(newTab) => {
           onFilterChange({ favorites: newTab === 'favorite' });
         }}

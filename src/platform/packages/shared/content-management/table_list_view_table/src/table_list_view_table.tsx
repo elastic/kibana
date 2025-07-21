@@ -543,9 +543,18 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   );
 
   const onChangePage = useCallback(
-    async (pageIndex: number) => {
-      const cursor = pageIndex + 1;
-      await fetchItems({ cursor: cursor.toString(), sort: tableSort });
+    async ({
+      pageIndex,
+      isFavoritesTabVisible,
+    }: {
+      pageIndex: number;
+      isFavoritesTabVisible: boolean;
+    }) => {
+      // TODO: Handle isFavoritesTabVisible
+      if (!isFavoritesTabVisible) {
+        const cursor = pageIndex + 1;
+        await fetchItems({ cursor: cursor.toString(), sort: tableSort });
+      }
     },
     [fetchItems, tableSort]
   );
