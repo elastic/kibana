@@ -4009,7 +4009,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
+"@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
 
@@ -5749,7 +5749,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/features-provider-plugin@link:x-pack/test/security_api_integration/plugins/features_provider":
+"@kbn/features-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/features_provider":
   version "0.0.0"
   uid ""
 
@@ -6597,7 +6597,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/oidc-provider-plugin@link:x-pack/test/security_api_integration/plugins/oidc_provider":
+"@kbn/oidc-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/oidc_provider":
   version "0.0.0"
   uid ""
 
@@ -6997,7 +6997,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saml-provider-plugin@link:x-pack/test/security_api_integration/plugins/saml_provider":
+"@kbn/saml-provider-plugin@link:x-pack/platform/test/security_api_integration/plugins/saml_provider":
   version "0.0.0"
   uid ""
 
@@ -7193,7 +7193,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-api-integration-helpers@link:x-pack/test/security_api_integration/packages/helpers":
+"@kbn/security-api-integration-helpers@link:x-pack/platform/test/security_api_integration/packages/helpers":
   version "0.0.0"
   uid ""
 
@@ -7281,7 +7281,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-test-endpoints-plugin@link:x-pack/test/security_functional/plugins/test_endpoints":
+"@kbn/security-test-endpoints-plugin@link:x-pack/platform/test/security_functional/plugins/test_endpoints":
   version "0.0.0"
   uid ""
 
@@ -8093,7 +8093,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/user-profiles-consumer-plugin@link:x-pack/test/security_api_integration/plugins/user_profiles_consumer":
+"@kbn/user-profiles-consumer-plugin@link:x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer":
   version "0.0.0"
   uid ""
 
