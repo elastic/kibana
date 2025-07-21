@@ -12,7 +12,7 @@ import * as cst from '../antlr/esql_parser';
 import * as ast from '../types';
 import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
-import { getPosition, parseIdentifier, nonNullable } from './helpers';
+import { getPosition, nonNullable } from './helpers';
 import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
@@ -1192,7 +1192,7 @@ export class CstToAstConverter {
         inferenceId = Builder.identifier('', { incomplete: true });
       } else {
         withIncomplete = false;
-        inferenceId = this.createIdentifierOrParam(ctx._inferenceId)!;
+        inferenceId = this.fromIdentifierOrParam(ctx._inferenceId)!;
       }
     }
 
@@ -1879,8 +1879,7 @@ export class CstToAstConverter {
         const ID_PATTERN = identifierPattern.ID_PATTERN();
 
         if (ID_PATTERN) {
-          const name = parseIdentifier(ID_PATTERN.getText());
-          const node = Builder.identifier({ name }, this.createParserFields(identifierPattern));
+          const node = this.fromNodeToIdentifier(ID_PATTERN);
 
           args.push(node);
         } else {
@@ -1896,7 +1895,7 @@ export class CstToAstConverter {
 
       for (const item of list) {
         if (item instanceof cst.IdentifierOrParameterContext) {
-          const node = this.createIdentifierOrParam(item);
+          const node = this.fromIdentifierOrParam(item);
 
           if (node) {
             args.push(node);
@@ -2080,7 +2079,7 @@ export class CstToAstConverter {
     const identifierOrParameter = functionName.identifierOrParameter();
 
     if (identifierOrParameter instanceof cst.IdentifierOrParameterContext) {
-      const operator = this.createIdentifierOrParam(identifierOrParameter);
+      const operator = this.fromIdentifierOrParam(identifierOrParameter);
 
       if (operator) {
         node.operator = operator;
@@ -2337,11 +2336,11 @@ export class CstToAstConverter {
 
   // ---------------------------------------- constant expression: "identifier"
 
-  private createIdentifierOrParam(ctx: cst.IdentifierOrParameterContext) {
+  private fromIdentifierOrParam(ctx: cst.IdentifierOrParameterContext) {
     const identifier = ctx.identifier();
 
     if (identifier) {
-      return this.createIdentifier(identifier);
+      return this.fromIdentifier(identifier);
     }
 
     const parameter = ctx.parameter() ?? ctx.doubleParameter();
@@ -2351,10 +2350,25 @@ export class CstToAstConverter {
     }
   }
 
-  private createIdentifier(identifier: cst.IdentifierContext): ast.ESQLIdentifier {
-    const text = identifier.getText();
-    const name = parseIdentifier(text);
+  private fromIdentifier(ctx: cst.IdentifierContext): ast.ESQLIdentifier {
+    const node = ctx.QUOTED_IDENTIFIER() || ctx.UNQUOTED_IDENTIFIER() || ctx.start;
 
-    return Builder.identifier({ name }, this.createParserFields(identifier));
+    return this.fromNodeToIdentifier(node);
+  }
+
+  private fromNodeToIdentifier(node: antlr.TerminalNode): ast.ESQLIdentifier {
+    let name = node.getText();
+    const firstChar = name[0];
+    const lastChar = name[name.length - 1];
+    const isQuoted = firstChar === '`' && lastChar === '`';
+
+    if (isQuoted) {
+      name = name.slice(1, -1).replace(/``/g, '`');
+    }
+
+    const parserFields = this.createParserFieldsFromToken(node.symbol);
+    const identifier = Builder.identifier({ name }, parserFields);
+
+    return identifier;
   }
 }
