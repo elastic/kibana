@@ -10,9 +10,9 @@ import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import type { StoryFn, StoryObj } from '@storybook/react';
-import { NodeViewModel } from '../types';
-import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
+import { NodeViewModel } from '../../types';
+import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
+import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '..';
 
 import '@xyflow/react/dist/style.css';
 
