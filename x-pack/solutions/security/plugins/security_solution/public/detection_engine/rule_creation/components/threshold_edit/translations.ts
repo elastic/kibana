@@ -24,7 +24,7 @@ export const THRESHOLD_FIELD_HELP_TEXT = i18n.translate(
 export const THRESHOLD_FIELD_COUNT_VALIDATION_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.validations.thresholdFieldFieldData.arrayLengthGreaterThanMaxErrorMessage',
   {
-    defaultMessage: 'Number of fields must be 3 or less.',
+    defaultMessage: 'Number of fields must be 5 or less.',
   }
 );
 
