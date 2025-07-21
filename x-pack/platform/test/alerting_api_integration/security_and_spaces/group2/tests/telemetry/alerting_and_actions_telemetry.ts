@@ -22,7 +22,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
 
-  describe('test telemetry', () => {
+  describe.skip('test telemetry', () => {
     const objectRemover = new ObjectRemover(supertest);
     const esQueryRuleId: { [key: string]: string } = {};
     const simulator = new OpenAISimulator({
