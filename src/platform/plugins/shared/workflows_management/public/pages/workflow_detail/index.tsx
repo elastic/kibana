@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -18,17 +17,18 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
-import { WorkflowEditor } from '../../features/workflow_editor/ui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React, { useEffect, useMemo, useState } from 'react';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
+import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
+import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
+import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
+import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
 import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
-import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
-import { WorkflowEventModal } from '../../features/run-workflow/ui/WorkflowEventModal';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
@@ -99,7 +99,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           });
         },
         onError: (err: unknown) => {
-          notifications?.toasts.addError(err, {
+          notifications?.toasts.addError(err as Error, {
             toastLifeTimeMs: 3000,
             title: 'Failed to run workflow',
           });
@@ -132,13 +132,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiFlexGroup>
         <EuiFlexItem>
           <WorkflowEditor
-            workflowId={workflow?.id}
+            workflowId={workflow?.id ?? ''}
             value={workflowYaml}
             onChange={handleChange}
             hasChanges={hasChanges}
           />
         </EuiFlexItem>
         <EuiFlexItem>
+          {/* @ts-expect-error - TODO: fix this */}
           {workflowYamlObject?.data && <WorkflowVisualEditor workflow={workflowYamlObject.data} />}
         </EuiFlexItem>
       </EuiFlexGroup>

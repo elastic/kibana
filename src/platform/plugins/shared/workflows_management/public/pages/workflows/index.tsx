@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiPageHeader } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WorkflowList } from '../../features/workflow-list/ui';
-import { useWorkflows } from '../../entities/workflows/model/useWorkflows';
+import React from 'react';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
+import { useWorkflows } from '../../entities/workflows/model/useWorkflows';
+import { WorkflowList } from '../../features/workflow_list/ui';
 
 const workflowTemplateYaml = `workflow:
   name: New workflow
