@@ -159,23 +159,24 @@ const determineEntityNodeShape = (
 ): {
   shape: EntityNodeDataModel['shape'];
   icon?: string;
+  tag?: 'host' | 'user' | 'other types';
 } => {
-  // If actor is a user return ellipse
+  // If actor is a user return ellipse icon and user tag
   if (users.includes(actorId)) {
-    return { shape: 'ellipse', icon: 'user' };
+    return { shape: 'ellipse', icon: 'user', tag: 'user' };
   }
 
-  // If actor is a host return hexagon
+  // If actor is a host return hexagon icon and host tag
   if (hosts.includes(actorId)) {
-    return { shape: 'hexagon', icon: 'storage' };
+    return { shape: 'hexagon', icon: 'storage', tag: 'host' };
   }
 
-  // If actor is an IP return diamond
+  // If actor is an IP return diamond icon and other types tag
   if (ips.includes(actorId)) {
-    return { shape: 'diamond', icon: 'globe' };
+    return { shape: 'diamond', icon: 'globe', tag: 'other types' };
   }
 
-  return { shape: 'hexagon' };
+  return { shape: 'hexagon', tag: 'other types' };
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {

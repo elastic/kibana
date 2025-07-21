@@ -20,15 +20,26 @@ import {
 } from './styles';
 import { DiamondHoverShape, DiamondShape } from './shapes/diamond_shape';
 import { NodeExpandButton } from './node_expand_button';
-import { Label } from './label';
 import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
+import { NodeDetails } from './node_details';
 
 const NODE_SHAPE_WIDTH = 99;
 const NODE_SHAPE_HEIGHT = 98;
 
 export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
-    props.data as EntityNodeViewModel;
+  const {
+    id,
+    color,
+    icon,
+    label,
+    tag,
+    count,
+    ips,
+    countryCodes,
+    interactive,
+    expandButtonClick,
+    nodeClick,
+  } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
     <>
@@ -83,7 +94,13 @@ export const DiamondNode = memo<NodeProps>((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <Label text={label ? label : id} />
+      <NodeDetails
+        count={count}
+        tag={tag}
+        label={label ? label : id}
+        ips={ips}
+        countryCodes={countryCodes}
+      />
     </>
   );
 });
