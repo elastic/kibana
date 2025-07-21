@@ -6,15 +6,17 @@
  */
 
 import numeral from '@elastic/numeral';
+import { flattenObject } from '@kbn/object-utils';
 import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import { getEcsGroups, getFormattedGroups } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
   ALERT_GROUP,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
@@ -50,6 +52,7 @@ import {
   WindowSchema,
 } from './types';
 
+// should I add ALERT_GROUPING here?
 export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
   [ALERT_GROUP]?: Group[];
 };
@@ -122,14 +125,11 @@ export const getRuleExecutor = (basePath: IBasePath) =>
           window: windowDef,
         } = result;
 
-        const instances = instanceId.split(',');
-        const groups =
-          instanceId !== ALL_VALUE
-            ? [slo.groupBy].flat().reduce<Group[]>((resultGroups, groupByItem, index) => {
-                resultGroups.push({ field: groupByItem, value: instances[index].trim() });
-                return resultGroups;
-              }, [])
-            : undefined;
+        const groupingsFlattened = flattenObject(groupings ?? {});
+        const groupingsFlattenedString = Object.fromEntries(
+          Object.entries(groupingsFlattened).map(([key, value]) => [key, String(value)])
+        );
+        const groups = getFormattedGroups(groupingsFlattenedString);
 
         const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
         const viewInAppUrl = addSpaceIdToPath(
@@ -168,13 +168,13 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             actionGroup,
             state: {
               alertState: AlertStates.ALERT,
-              grouping: groupings,
             },
             payload: {
               [ALERT_REASON]: reason,
               [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
               [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
               [ALERT_GROUP]: groups,
+              [ALERT_GROUPING]: groupings, // Object, example: { host: { name: 'host-0' } }
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
@@ -226,8 +226,6 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         `/app/observability/slos/${slo.id}${urlQuery}`
       );
 
-      const recoveredAlertState = recoveredAlert.alert.getState();
-
       const context = {
         timestamp: startedAt.toISOString(),
         viewInAppUrl,
@@ -235,7 +233,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
         sloId: slo.id,
         sloName: slo.name,
         sloInstanceId: alertId,
-        grouping: recoveredAlertState?.grouping,
+        grouping: recoveredAlert.hit?.[ALERT_GROUPING],
       };
 
       alertsClient.setAlertData({
