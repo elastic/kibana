@@ -259,7 +259,10 @@ export const useReindex = ({
     }
 
     setReindexState((prevValue: ReindexState) => {
-      return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
+      return getReindexState(prevValue, {
+        reindexOp: reindexOp || undefined,
+        meta: prevValue.meta,
+      });
     });
     updateStatus();
   }, [api, indexName, updateStatus]);
