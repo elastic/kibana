@@ -19,7 +19,7 @@ export const ConfigSchema = schema.oneOf([
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
     apiUrl: schema.string(),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    contextWindowLength: schema.maybe(schema.number({ min: 32_000 })),
+    contextWindowLength: schema.maybe(schema.number({})),
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
@@ -28,7 +28,7 @@ export const ConfigSchema = schema.oneOf([
     projectId: schema.maybe(schema.string()),
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    contextWindowLength: schema.maybe(schema.number({ min: 32_000 })),
+    contextWindowLength: schema.maybe(schema.number({})),
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
@@ -41,7 +41,7 @@ export const ConfigSchema = schema.oneOf([
       )
     ),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    contextWindowLength: schema.maybe(schema.number({ min: 32_000 })),
+    contextWindowLength: schema.maybe(schema.number({})),
   }),
 ]);
 

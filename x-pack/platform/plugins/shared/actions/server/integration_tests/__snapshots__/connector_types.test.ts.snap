@@ -2382,14 +2382,6 @@ Object {
           "x-oas-optional": true,
         },
       ],
-      "rules": Array [
-        Object {
-          "args": Object {
-            "limit": 32000,
-          },
-          "name": "min",
-        },
-      ],
       "type": "number",
     },
     "defaultModel": Object {
@@ -7107,14 +7099,6 @@ Object {
       "metas": Array [
         Object {
           "x-oas-optional": true,
-        },
-      ],
-      "rules": Array [
-        Object {
-          "args": Object {
-            "limit": 32000,
-          },
-          "name": "min",
         },
       ],
       "type": "number",
