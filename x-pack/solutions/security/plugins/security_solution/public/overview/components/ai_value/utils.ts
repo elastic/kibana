@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment/moment';
+import moment from 'moment';
 
 export const getTimeRangeAsDays = ({ from, to }: { from: string; to: string }): string => {
   const duration = moment.duration(moment(to).diff(moment(from)));

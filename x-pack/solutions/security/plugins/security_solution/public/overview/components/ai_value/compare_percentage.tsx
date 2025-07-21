@@ -13,13 +13,15 @@ import { getPercChange } from '../detection_response/soc_trends/helpers';
 interface Props {
   currentCount: number;
   previousCount: number;
-  previousCost: string;
+  stat: string;
+  statType: string;
   timeRange: string;
 }
-export const CostComparePercentage = ({
+export const ComparePercentage = ({
   currentCount,
   previousCount,
-  previousCost,
+  stat,
+  statType,
   timeRange,
 }: Props) => {
   const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
@@ -33,10 +35,10 @@ export const CostComparePercentage = ({
     note: isZero
       ? i18n.NO_CHANGE('cost savings')
       : i18n.STAT_DIFFERENCE({
-          upOrDown: isNegative ? 'down' : 'up',
+          upOrDown: isNegative ? i18n.DOWN : i18n.UP,
           percentageChange: isNegative ? percentageChange.substring(1) : percentageChange,
-          stat: previousCost,
-          statType: 'cost savings',
+          stat,
+          statType,
         }),
   };
   return (

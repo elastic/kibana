@@ -6,6 +6,45 @@
  */
 
 import { i18n } from '@kbn/i18n';
+export const UP = i18n.translate('xpack.securitySolution.aiValue.up', {
+  defaultMessage: 'up',
+});
+
+export const DOWN = i18n.translate('xpack.securitySolution.aiValue.down', {
+  defaultMessage: 'up',
+});
+
+export const COST_SAVINGS = i18n.translate('xpack.securitySolution.aiValue.costSavings', {
+  defaultMessage: 'cost savings',
+});
+
+export const COST_SAVINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.aiValue.costSavingsTitle',
+  {
+    defaultMessage: 'Cost savings',
+  }
+);
+
+export const COST_SAVINGS_TREND = i18n.translate(
+  'xpack.securitySolution.aiValue.costSavingsTrend',
+  {
+    defaultMessage: 'Cost savings trend',
+  }
+);
+export const COST_SAVINGS_SOC = i18n.translate('xpack.securitySolution.aiValue.costSavingsSoc', {
+  defaultMessage: 'Cumulative savings from AI-driven SOC operations',
+});
+
+export const COST_SAVINGS_DESC = i18n.translate('xpack.securitySolution.aiValue.costSavingsDesc', {
+  defaultMessage: 'Estimated cost reduction based on analyst time saved',
+});
+
+export const COST_SAVINGS_BASIS = i18n.translate(
+  'xpack.securitySolution.aiValue.costSavingsBasis',
+  {
+    defaultMessage: 'Based on analyst time saved',
+  }
+);
 
 export const NO_CHANGE = (dataType: string) =>
   i18n.translate('xpack.securitySolution.aiValue.noChange', {

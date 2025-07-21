@@ -5,37 +5,23 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTitle,
-  useEuiTheme,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { CostComparePercentage } from './cost_compare_percentage';
-import { CostSavingsTrend } from './cost_savings_trend';
-import { useStyles } from './beacon.styles';
+import { CostSavings } from './cost_savings';
 import {
   getTimeSavedHours,
-  getCostSavings,
   getAlertStats,
   getAttackDetectionComparison,
   getResponseTimeTrend,
-  formatDollars,
 } from './metrics';
-import bg from './bg.svg';
-import { UsdIcon } from './usd_icon';
-import { getTimeRangeAsDays } from './utils';
 
 interface Props {
   attackAlertsCountCompare: number;
@@ -67,8 +53,6 @@ export const AIValueMetrics: React.FC<Props> = ({
   };
 
   const hoursSaved = getTimeSavedHours(data.filteredAlerts);
-  const costSavings = getCostSavings(data.filteredAlerts);
-  const costSavingsCompare = getCostSavings(data.filteredAlertsCompare);
   const alertStats = getAlertStats({
     totalAlerts: data.totalAlerts,
     filteredAlerts: data.filteredAlerts,
@@ -77,114 +61,18 @@ export const AIValueMetrics: React.FC<Props> = ({
     data.aiDetected,
     data.traditionalDetected
   );
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
 
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const isMedium = useIsWithinBreakpoints(['m', 'l']);
-
-  const responsiveSizes = useMemo(() => {
-    if (isMobile) {
-      return {
-        headerSize: '20px',
-        ringSize: '80px',
-      };
-    }
-    if (isMedium) {
-      return {
-        headerSize: '26px',
-        ringSize: '100px',
-      };
-    }
-    // large sizes
-    return {
-      headerSize: '32px',
-      ringSize: '130px',
-    };
-  }, [isMedium, isMobile]);
-
-  const { root, rings } = useStyles({
-    ringsColor: colors.accentSecondary,
-    size: responsiveSizes.ringSize,
-  });
   const responseTimeTrend = getResponseTimeTrend([30, 28, 32], [20, 18, 22]); // beforeAI and afterAI arrays
 
   return (
     <>
-      <EuiFlexGroup gutterSize="xl" responsive={false}>
-        <div
-          style={{
-            backgroundImage: `url(${bg})`,
-            backgroundPosition: 'center',
-            backgroundSize: '100% 100%',
-            backgroundRepeat: 'no-repeat',
-            borderRadius: 16,
-            width: '100%',
-            height: '100%',
-            minHeight: 0,
-            minWidth: 0,
-            display: 'flex',
-            flex: 1,
-          }}
-        >
-          {/* Left: Cost savings circle metric */}
-          <EuiFlexItem grow={false}>
-            <div css={root}>
-              <EuiFlexGroup
-                direction="column"
-                alignItems="center"
-                justifyContent="center"
-                gutterSize="s"
-                className="eui-textCenter"
-              >
-                <EuiText size="xs" color="subdued">
-                  <EuiIcon type={UsdIcon as unknown as ComponentType} size="l" color="accent" />
-                  <EuiSpacer size="xs" /> {'Cost savings '}
-                  <EuiIconTip
-                    type="info"
-                    content="Estimated cost reduction based on analyst time saved"
-                  />
-                </EuiText>
-
-                <EuiTitle size="l">
-                  <h2 style={{ fontSize: responsiveSizes.headerSize, color: colors.success }}>
-                    {formatDollars(costSavings)}
-                  </h2>
-                </EuiTitle>
-
-                <CostComparePercentage
-                  currentCount={data.filteredAlerts}
-                  previousCount={data.filteredAlertsCompare}
-                  previousCost={formatDollars(costSavingsCompare)}
-                  timeRange={getTimeRangeAsDays({ from, to })}
-                />
-
-                <EuiText size="xs" color="subdued">
-                  <p>{'Based on analyst time saved'}</p>
-                </EuiText>
-              </EuiFlexGroup>
-              <span css={rings} />
-            </div>
-          </EuiFlexItem>
-
-          {/* Right: Cost savings trend chart */}
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" justifyContent="spaceAround" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <h4>{'Cost savings trend'}</h4>
-                </EuiText>
-                <EuiText size="s" color="subdued">
-                  <p>{'Cumulative savings from AI-driven SOC operations'}</p>
-                </EuiText>
-                <CostSavingsTrend from={from} to={to} attackAlertIds={attackAlertIds} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </div>
-      </EuiFlexGroup>
-
+      <CostSavings
+        from={from}
+        to={to}
+        attackAlertIds={attackAlertIds}
+        filteredAlerts={data.filteredAlerts}
+        filteredAlertsCompare={data.filteredAlertsCompare}
+      />
       <EuiSpacer size="l" />
 
       <EuiFlexGrid columns={3} gutterSize="l" responsive={false}>
