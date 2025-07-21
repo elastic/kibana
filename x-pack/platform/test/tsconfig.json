@@ -143,6 +143,7 @@
     "@kbn/controls-plugin",
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
-    "@kbn/visualizations-plugin"
+    "@kbn/visualizations-plugin",
+    "@kbn/datemath"
   ]
 }
