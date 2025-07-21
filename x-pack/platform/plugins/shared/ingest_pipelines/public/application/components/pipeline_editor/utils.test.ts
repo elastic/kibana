@@ -109,7 +109,7 @@ describe('convert processors to json', () => {
     };
 
     const result = convertProccesorsToJson(obj);
-    
+
     expect(result).toEqual({
       field1: 'normalString',
       value: '',
@@ -119,7 +119,7 @@ describe('convert processors to json', () => {
       pattern_definitions: '',
       processor: '',
     });
-    
+
     // Explicitly check that empty strings are preserved and not converted to undefined
     expect(result.value).toBe('');
     expect(result.inference_config).toBe('');
@@ -137,7 +137,7 @@ describe('convert processors to json', () => {
     };
 
     const result = convertProccesorsToJson(obj);
-    
+
     expect(result).toEqual({
       value: undefined,
       inference_config: undefined,
