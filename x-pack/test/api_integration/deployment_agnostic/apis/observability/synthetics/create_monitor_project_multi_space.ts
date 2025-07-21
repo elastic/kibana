@@ -12,9 +12,9 @@ import {
   syntheticsMonitorSavedObjectType,
 } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('CreateProjectMonitorsMultiSpace', function () {
