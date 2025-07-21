@@ -39,7 +39,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   coreStart,
 }) => {
   const { application, http, docLinks } = coreStart;
-  const { showSpacesIntegration, isSolutionView, showAiBreadcrumb } = useEnabledFeatures();
+  const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
 
   useEffect(() => {
     const breadcrumbs = [
@@ -166,7 +166,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
               }
               description={
                 <p>
-                  {isSolutionView ? (
+                  {isPermissionsBased ? (
                     <FormattedMessage
                       id="genAiSettings.solutionViewDescriptionLabel"
                       defaultMessage="Turn AI-powered features on or off (for custom roles only) on the {permissionsTab} in the {spaces} settings. Create custom roles at {rolesLink}."
@@ -201,7 +201,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
               <EuiFormRow fullWidth>
                 <GoToSpacesButton
                   getUrlForSpaces={getUrlForSpaces}
-                  navigateToPermissions={isSolutionView}
+                  navigateToPermissions={isPermissionsBased}
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>

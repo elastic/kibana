@@ -14,14 +14,13 @@ import { useKibana } from '../hooks/use_kibana';
 
 export interface EnabledFeatures {
   showSpacesIntegration: boolean;
-  /** True when the current space is in a Solution (project) view */
-  isSolutionView: boolean;
+  isPermissionsBased: boolean;
   showAiBreadcrumb: boolean;
 }
 
 export const EnabledFeaturesContext = createContext<EnabledFeatures>({
   showSpacesIntegration: true,
-  isSolutionView: false,
+  isPermissionsBased: false,
   showAiBreadcrumb: true,
 });
 
@@ -43,12 +42,11 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   const activeSpace = useObservable(activeSpace$);
 
   const features: EnabledFeatures = useMemo(() => {
-    const isSolutionView =
-      !isServerless && Boolean(activeSpace?.solution && activeSpace.solution !== 'classic');
+    const isSolutionView = Boolean(activeSpace?.solution && activeSpace.solution !== 'classic');
 
     return {
       showSpacesIntegration: !isServerless,
-      isSolutionView,
+      isPermissionsBased: isSolutionView,
       showAiBreadcrumb: !isServerless,
     };
   }, [isServerless, activeSpace]);
