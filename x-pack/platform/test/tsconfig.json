@@ -145,5 +145,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/datemath"
+    "@kbn/global-search-plugin",
+    "@kbn/global-search-test-plugin"
   ]
 }
