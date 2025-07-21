@@ -9,6 +9,7 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
+// address ecs@mapping in the future: https://github.com/elastic/kibana/pull/228259/#discussion_r2218755096
 export const WORKFLOWS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
   properties: {
