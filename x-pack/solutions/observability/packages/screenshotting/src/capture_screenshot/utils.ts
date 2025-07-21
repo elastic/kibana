@@ -5,6 +5,57 @@
  * 2.0.
  */
 
+export const scrollAndLoadFullyIframe = (iframe: HTMLIFrameElement): Promise<void> => {
+  return new Promise((resolve) => {
+    const doc = iframe.contentDocument;
+    const win = iframe.contentWindow;
+
+    if (!doc || !win) return resolve();
+
+    const totalHeight = doc.body.scrollHeight;
+    const scrollStep = win.innerHeight / 6;
+    let currentY = 0;
+
+    function scrollDown() {
+      if (currentY >= totalHeight) {
+        win?.scrollTo(0, 0);
+        setTimeout(resolve, 500);
+        return;
+      }
+      win?.scrollTo(0, currentY);
+      currentY += scrollStep;
+      setTimeout(scrollDown, 200);
+    }
+
+    scrollDown();
+  });
+};
+
+export const scrollAndLoadFully = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const totalHeight = document.body.scrollHeight;
+    const scrollStep = window.innerHeight / 2;
+    let currentY = 0;
+
+    function scrollDown() {
+      if (currentY >= totalHeight) {
+        window.scrollTo(0, 0);
+        setTimeout(resolve, 500);
+        return;
+      }
+      window.scrollTo(0, currentY);
+      currentY += scrollStep;
+      setTimeout(scrollDown, 200);
+    }
+
+    scrollDown();
+  });
+};
+
+export const wait = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 export const waitForDomStability = async (
   iframe: HTMLIFrameElement,
   idleFor = 4000,
