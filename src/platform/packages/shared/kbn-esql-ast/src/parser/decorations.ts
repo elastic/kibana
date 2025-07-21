@@ -26,6 +26,12 @@ import type {
 import { HIDDEN_CHANNEL } from './constants';
 import { findVisibleToken, isLikelyPunctuation } from './helpers';
 
+/**
+ * @module
+ * @description Decorations are comments and extra whitespace lines that can
+ * be optionally collected and attached to the AST nodes.
+ */
+
 const commentSubtype = (text: string): ESQLAstComment['subtype'] | undefined => {
   if (text[0] === '/') {
     if (text[1] === '/') {
