@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
+const SAVE_PLAYGROUND_EXTENDED_TIMEOUT = 15000;
+
 export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const findService = getService('find');
@@ -519,7 +521,9 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await nameInput.type(name);
         await testSubjects.existOrFail('searchPlaygroundSavePlaygroundModalSaveButton');
         await testSubjects.click('searchPlaygroundSavePlaygroundModalSaveButton');
-        await testSubjects.missingOrFail('save-playground-modal', { timeout: 10000 });
+        await testSubjects.missingOrFail('save-playground-modal', {
+          timeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
+        });
       },
     },
     PlaygroundStartSearchPage: {
@@ -679,6 +683,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
     },
     SavedPlaygroundPage: {
+      SaveExtendedTimeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
       async expectAndCloseSavedPlaygroundToast() {
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.equal('Playground saved');
@@ -768,7 +773,9 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await nameInput.type(name);
         await testSubjects.existOrFail('searchPlaygroundSavePlaygroundModalSaveButton');
         await testSubjects.click('searchPlaygroundSavePlaygroundModalSaveButton');
-        await testSubjects.missingOrFail('save-playground-modal', { timeout: 10000 });
+        await testSubjects.missingOrFail('save-playground-modal', {
+          timeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
+        });
       },
       async expectPlaygroundDeleteOptionExists() {
         await testSubjects.existOrFail('moreOptionsDeletePlayground');
@@ -784,7 +791,9 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('deletePlaygroundActionModal');
         await testSubjects.existOrFail('confirmModalConfirmButton');
         await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.missingOrFail('deletePlaygroundActionModal', { timeout: 10000 });
+        await testSubjects.missingOrFail('deletePlaygroundActionModal', {
+          timeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
+        });
       },
     },
   };

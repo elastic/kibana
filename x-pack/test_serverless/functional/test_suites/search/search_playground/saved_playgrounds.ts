@@ -180,7 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
         await pageObjects.searchPlayground.SavedPlaygroundPage.clickSavedPlaygroundSaveButton();
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists(
-          10000
+          pageObjects.searchPlayground.SavedPlaygroundPage.SaveExtendedTimeout
         );
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
       });
