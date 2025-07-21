@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTreeView, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PipelineTreeNode } from './types';
@@ -34,8 +34,8 @@ export interface PipelineStructureTreeProps {
 export const PipelineStructureTree = ({
   pipelineTree,
   isExtension,
-                                        selectedPipeline,
-                                        setSelectedPipeline,
+  selectedPipeline,
+  setSelectedPipeline,
   clickMorePipelines,
   goBack,
 }: PipelineStructureTreeProps) => {
@@ -46,7 +46,7 @@ export const PipelineStructureTree = ({
     pipelineTree,
     selectedPipeline,
     setSelectedPipeline,
-    clickMorePipelines,
+    clickMorePipelines
   );
 
   return (

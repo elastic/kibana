@@ -43,9 +43,10 @@ import { stringifyJson } from '../../lib/utils';
 export interface Props {
   pipeline: Pipeline;
   pipelineTree: PipelineTreeNode | undefined;
+  setSelectedPipeline: (name: string) => void;
   hasExtenstionTree: boolean;
   addToTreeStack: (name: string) => void;
-  popTreeStack: (name: string) => void;
+  popTreeStack: () => void;
   onEditClick: (pipelineName: string) => void;
   onCloneClick: (pipelineName: string) => void;
   onDeleteClick: (pipelineName: Pipeline[]) => void;
@@ -55,6 +56,7 @@ export interface Props {
 export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
   pipeline,
   pipelineTree,
+  setSelectedPipeline,
   hasExtentionTree,
   addToTreeStack,
   popTreeStack,
@@ -189,6 +191,8 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
             <EuiFlexItem grow={5}>
               <PipelineStructureTree
                 pipelineTree={pipelineTree}
+                selectedPipeline={pipeline.name}
+                setSelectedPipeline={setSelectedPipeline}
                 isExtension={hasExtentionTree}
                 clickMorePipelines={(name: string) => addToTreeStack(name)}
                 goBack={popTreeStack}
