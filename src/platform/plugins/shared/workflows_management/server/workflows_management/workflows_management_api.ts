@@ -15,6 +15,7 @@ import {
   WorkflowDetailDto,
   EsWorkflow,
   WorkflowExecutionEngineModel,
+  UpdatedWorkflowResponseDto,
 } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
 import { SchedulerService } from '../scheduler/scheduler_service';
@@ -24,6 +25,33 @@ export interface GetWorkflowsParams {
   limit: number;
   offset: number;
   _full?: boolean;
+}
+
+export interface GetWorkflowExecutionLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface WorkflowExecutionLogEntry {
+  id: string;
+  timestamp: string;
+  level: 'info' | 'debug' | 'warn' | 'error';
+  message: string;
+  stepId?: string;
+  stepName?: string;
+  connectorType?: string;
+  duration?: number;
+  additionalData?: Record<string, any>;
+}
+
+export interface WorkflowExecutionLogsDto {
+  logs: WorkflowExecutionLogEntry[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export class WorkflowsManagementApi {
@@ -51,7 +79,7 @@ export class WorkflowsManagementApi {
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>
-  ): Promise<WorkflowDetailDto> {
+  ): Promise<UpdatedWorkflowResponseDto> {
     return await this.workflowsService.updateWorkflow(id, workflow);
   }
 
@@ -80,4 +108,30 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowExecutionDto | null> {
     return await this.workflowsService.getWorkflowExecution(workflowExecutionId);
   }
+
+  public async getWorkflowExecutionLogs(
+    params: GetWorkflowExecutionLogsParams
+  ): Promise<WorkflowExecutionLogsDto> {
+    const result = await this.workflowsService.getExecutionLogs(params.executionId);
+    
+    // Transform the logs to match our API format
+    return {
+      logs: result.logs.map((log: any) => ({
+        id: log.id,
+        timestamp: log.source['@timestamp'],
+        level: log.source.level,
+        message: log.source.message,
+        stepId: log.source.workflow?.step_id,
+        stepName: log.source.workflow?.step_name,
+        connectorType: log.source.workflow?.step_type,
+        duration: log.source.duration,
+        additionalData: log.source.additionalData,
+      })),
+      total: typeof result.total === 'number' ? result.total : result.total?.value || 0,
+      limit: params.limit || 100,
+      offset: params.offset || 0,
+    };
+  }
+
+
 }

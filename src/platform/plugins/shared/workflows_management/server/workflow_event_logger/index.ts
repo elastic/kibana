@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PLUGIN_ID = 'workflowsExecutionEngine';
-export const PLUGIN_NAME = 'Workflows Execution Engine';
-
-export const WORKFLOWS_INDEX = '.workflows';
-export const WORKFLOWS_EXECUTIONS_INDEX = '.workflow-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflow-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
+export { WorkflowEventLoggerService } from './workflow_event_logger_service';
+export { WorkflowEventLogger, type IWorkflowEventLogger, type WorkflowEventLoggerContext, type WorkflowLogEvent } from './workflow_event_logger';
+export { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings'; 

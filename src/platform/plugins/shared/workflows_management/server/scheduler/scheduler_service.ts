@@ -8,7 +8,10 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import { WorkflowExecutionEngineModel, WorkflowModel } from '@kbn/workflows';
+import { WorkflowExecutionEngineModel, EsWorkflow } from '@kbn/workflows';
+import { WorkflowsService } from '../workflows_management/workflows_management_service';
+import { extractConnectorIds } from './lib/extract_connector_ids';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
 import { v4 as generateUuid } from 'uuid';
 import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
@@ -51,7 +54,7 @@ export class SchedulerService {
     // }
   }
 
-  public async scheduleWorkflow(workflow: WorkflowModel) {
+  public async scheduleWorkflow(workflow: EsWorkflow) {
     this.logger.info(`Scheduling workflow ${workflow.id}`);
     // this.workflowsExecutionEngine.scheduleWorkflow(workflow);
   }
@@ -68,6 +71,7 @@ export class SchedulerService {
       inputs,
       event: 'event' in inputs ? inputs.event : undefined,
       connectorCredentials,
+      triggeredBy: 'manual', // <-- mark as manual
     });
 
     return workflowRunId;

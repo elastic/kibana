@@ -42,7 +42,7 @@ export const getWorkflowExecution = async ({
       return null;
     }
 
-    const stepExecutions = await searchStepExecutions({
+  const stepExecutions = await searchStepExecutions({
       esClient,
       logger,
       stepsExecutionIndex,
@@ -63,5 +63,6 @@ function transformToWorkflowExecutionDetailDto(
   return {
     ...workflowExecution,
     stepExecutions,
+    triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
   };
 }

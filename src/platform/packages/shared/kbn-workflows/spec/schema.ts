@@ -39,7 +39,7 @@ export const ScheduledTriggerSchema = z.object({
   with: z.union([
     z.object({
       every: z.string().min(1),
-      unit: z.enum(['minute', 'hour', 'day', 'week', 'month', 'year']),
+      unit: z.enum(['second', 'minute', 'hour', 'day', 'week', 'month', 'year']),
     }),
     z.object({ cron: z.string().min(1) }),
   ]),
@@ -68,7 +68,7 @@ export const WorkflowOnFailureSchema = z.object({
 });
 
 // Base step schema, with recursive steps property
-const BaseStepSchema = z.object({
+export const BaseStepSchema = z.object({
   name: z.string().min(1),
   if: z.string().optional(),
   foreach: z.string().optional(),
@@ -76,17 +76,21 @@ const BaseStepSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timeout: z.number().optional(),
 });
+export type BaseStep = z.infer<typeof BaseStepSchema>;
 
 export const BaseConnectorStepSchema = BaseStepSchema.extend({
+  type: z.string().min(1),
   'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
   with: z.record(z.string(), z.any()).optional(),
 });
+export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
-const ForEachStepSchema = BaseStepSchema.extend({
+export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
   foreach: z.string(),
   steps: z.array(BaseStepSchema).min(1),
 });
+export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
 export const getForEachStepSchema = (stepSchema: z.ZodType) => {
   return BaseStepSchema.extend({
@@ -96,12 +100,13 @@ export const getForEachStepSchema = (stepSchema: z.ZodType) => {
   });
 };
 
-const IfStepSchema = BaseStepSchema.extend({
+export const IfStepSchema = BaseStepSchema.extend({
   type: z.literal('if'),
   condition: z.string(),
   steps: z.array(BaseStepSchema),
   else: z.array(BaseStepSchema).optional(),
 });
+export type IfStep = z.infer<typeof IfStepSchema>;
 
 export const getIfStepSchema = (stepSchema: z.ZodType) => {
   return BaseStepSchema.extend({
@@ -112,19 +117,7 @@ export const getIfStepSchema = (stepSchema: z.ZodType) => {
   });
 };
 
-const AtomicStepSchema = BaseStepSchema.extend({
-  type: z.literal('atomic'),
-  steps: z.array(BaseStepSchema).optional(), // allow nesting even for atomic steps
-});
-
-export const getAtomicStepSchema = (stepSchema: z.ZodType) => {
-  return BaseStepSchema.extend({
-    type: z.literal('atomic'),
-    steps: z.array(stepSchema).optional(), // allow nesting even for atomic steps
-  });
-};
-
-const ParallelStepSchema = BaseStepSchema.extend({
+export const ParallelStepSchema = BaseStepSchema.extend({
   type: z.literal('parallel'),
   branches: z.array(
     z.object({
@@ -133,6 +126,7 @@ const ParallelStepSchema = BaseStepSchema.extend({
     })
   ),
 });
+export type ParallelStep = z.infer<typeof ParallelStepSchema>;
 
 export const getParallelStepSchema = (stepSchema: z.ZodType) => {
   return BaseStepSchema.extend({
@@ -141,11 +135,12 @@ export const getParallelStepSchema = (stepSchema: z.ZodType) => {
   });
 };
 
-const MergeStepSchema = BaseStepSchema.extend({
+export const MergeStepSchema = BaseStepSchema.extend({
   type: z.literal('merge'),
   sources: z.array(z.string()), // references to branches or steps to merge
   steps: z.array(BaseStepSchema), // steps to run after merge
 });
+export type MergeStep = z.infer<typeof MergeStepSchema>;
 
 export const getMergeStepSchema = (stepSchema: z.ZodType) => {
   return BaseStepSchema.extend({
@@ -210,10 +205,9 @@ const StepSchema = z.lazy(() =>
   z.discriminatedUnion('type', [
     ForEachStepSchema,
     IfStepSchema,
-    AtomicStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
-    // ConnectorStepSchema,
+    BaseConnectorStepSchema,
   ])
 );
 

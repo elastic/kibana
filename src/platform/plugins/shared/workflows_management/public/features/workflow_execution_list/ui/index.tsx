@@ -16,12 +16,22 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { ExecutionStatus, EsWorkflowExecution } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
 import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+
+// Add a type for the table items that matches the fields used in the table
+interface WorkflowExecutionTableItem {
+  id: string;
+  status: ExecutionStatus;
+  triggeredBy?: string;
+  startedAt: Date;
+  duration?: number;
+}
 
 export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
   const {
@@ -30,15 +40,18 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
     error,
   } = useWorkflowExecutions(workflowId);
 
-  const [selectedWorkflowExecutionId, setSelectedWorkflowExecutionId] = useState<string | null>(
-    null
+  const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+
+  // Find the full execution object for the selected ID, if needed
+  const selectedExecution = workflowExecutions?.results.find(
+    (exec: any) => exec.id === selectedExecutionId
   );
 
-  const handleViewWorkflowExecution = (item: EsWorkflowExecution) => {
-    setSelectedWorkflowExecutionId(item.id);
+  const handleViewWorkflowExecution = (item: WorkflowExecutionTableItem) => {
+    setSelectedExecution(item.id);
   };
 
-  const columns: Array<EuiBasicTableColumn<EsWorkflowExecution>> = [
+  const columns: Array<EuiBasicTableColumn<WorkflowExecutionTableItem>> = [
     {
       field: 'id',
       name: 'ID',
@@ -47,6 +60,11 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
       field: 'status',
       name: 'Status',
       render: (value: ExecutionStatus) => <StatusBadge status={value} />,
+    },
+    {
+      field: 'triggeredBy',
+      name: 'Triggered by',
+      render: (value: string) => value ? value.charAt(0).toUpperCase() + value.slice(1) : '',
     },
     {
       field: 'startedAt',
@@ -82,6 +100,17 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
     // },
   ];
 
+  // Map API results to table items, converting startedAt to Date
+  const tableItems: WorkflowExecutionTableItem[] = (workflowExecutions?.results ?? []).map(
+    (exec: any) => ({
+      id: exec.id,
+      status: exec.status,
+      triggeredBy: exec.triggeredBy,
+      startedAt: exec.startedAt ? new Date(exec.startedAt) : new Date(),
+      duration: exec.duration,
+    })
+  );
+
   if (isLoadingWorkflowExecutions) {
     return <EuiLoadingSpinner />;
   }
@@ -95,18 +124,18 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
       <EuiFlexItem>
         <EuiBasicTable
           columns={columns}
-          items={workflowExecutions?.results ?? []}
+          items={tableItems}
           responsiveBreakpoint={false}
           rowProps={(item) => ({
             onClick: () => handleViewWorkflowExecution(item),
-            className: item.id === selectedWorkflowExecutionId ? 'euiTableRow--marked' : undefined,
+            className: item.id === selectedExecutionId ? 'euiTableRow--marked' : undefined,
           })}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        {selectedWorkflowExecutionId ? (
+        {selectedExecutionId ? (
           <WorkflowExecution
-            workflowExecutionId={selectedWorkflowExecutionId}
+            workflowExecutionId={selectedExecutionId}
             fields={['stepId', 'status', 'executionTimeMs']}
           />
         ) : (

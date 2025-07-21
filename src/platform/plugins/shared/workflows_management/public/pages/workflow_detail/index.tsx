@@ -28,7 +28,8 @@ import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui
 import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
-import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
+import { WorkflowEventModal } from '../../features/run-workflow/ui/WorkflowEventModal';
+import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
@@ -68,9 +69,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setHasChanges(originalWorkflowYaml !== wfString);
   };
 
-  const [buttonGroupSelectedId, setButtonGroupSelectedId] = useState('workflow');
+  const { activeTab, setActiveTab } = useWorkflowUrlState();
   const handleButtonGroupChange = (buttonGroupId: string) => {
-    setButtonGroupSelectedId(buttonGroupId);
+    setActiveTab(buttonGroupId as 'workflow' | 'executions');
   };
 
   const { updateWorkflow, runWorkflow } = useWorkflowActions();
@@ -177,7 +178,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             <EuiButtonGroup
               color="primary"
               options={buttonGroupOptions}
-              idSelected={buttonGroupSelectedId}
+              idSelected={activeTab}
               legend="Switch between workflow and executions"
               type="single"
               onChange={handleButtonGroupChange}
@@ -186,7 +187,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         </EuiFlexGroup>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section restrictWidth={false}>
-        {buttonGroupSelectedId === 'workflow' ? renderWorkflowEditor() : renderWorkflowExecutions()}
+        {activeTab === 'workflow' ? renderWorkflowEditor() : renderWorkflowExecutions()}
       </EuiPageTemplate.Section>
       {workflowEventModalOpen && (
         <WorkflowEventModal

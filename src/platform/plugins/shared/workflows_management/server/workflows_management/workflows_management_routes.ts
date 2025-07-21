@@ -291,4 +291,54 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       }
     }
   );
+
+  router.get(
+    {
+      path: '/api/workflowExecutions/{workflowExecutionId}/logs',
+      security: {
+        authz: {
+          requiredPrivileges: ['all'],
+        },
+      },
+      validate: {
+        params: schema.object({
+          workflowExecutionId: schema.string(),
+        }),
+        query: schema.object({
+          limit: schema.maybe(schema.number({ min: 1, max: 1000 })),
+          offset: schema.maybe(schema.number({ min: 0 })),
+          sortField: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { workflowExecutionId } = request.params;
+        const { limit, offset, sortField, sortOrder } = request.query;
+        
+        const logs = await api.getWorkflowExecutionLogs({
+          executionId: workflowExecutionId,
+          limit,
+          offset,
+          sortField,
+          sortOrder,
+        });
+        
+        return response.ok({
+          body: logs,
+        });
+      } catch (error) {
+        console.error(error);
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+
+
 }

@@ -15,10 +15,11 @@ import {
   Logger,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
-import { Client } from '@elastic/elasticsearch';
+
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { Client } from '@elastic/elasticsearch';
 import type {
   WorkflowsManagementPluginServerDependenciesSetup,
   WorkflowsPluginSetup,
@@ -29,11 +30,15 @@ import { WorkflowsManagementApi } from './workflows_management/workflows_managem
 import { WorkflowsService } from './workflows_management/workflows_management_service';
 import type { WorkflowsExecutionEnginePluginStartDeps } from './types';
 import { SchedulerService } from './scheduler/scheduler_service';
+import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
+import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import {
   WORKFLOWS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTION_LOGS_INDEX,
 } from '../common';
+import { workflowSavedObjectType } from './saved_objects/workflow';
 
 /**
  * The order of appearance in the feature privilege page
@@ -45,8 +50,10 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   private readonly logger: Logger;
   private workflowsService: WorkflowsService | null = null;
   private schedulerService: SchedulerService | null = null;
+  private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private coreSetup: CoreSetup | null = null;
   // TODO: replace with esClient promise from core
   private esClient: Client = new Client({
     node: 'http://localhost:9200', // or your ES URL
@@ -62,6 +69,46 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+    this.coreSetup = core;
+
+    // Register workflow task definition
+    if (plugins.taskManager) {
+      plugins.taskManager.registerTaskDefinitions({
+        'workflow:scheduled': {
+          title: 'Scheduled Workflow Execution',
+          description: 'Executes workflows on a scheduled basis',
+          timeout: '5m',
+          maxAttempts: 3,
+          createTaskRunner: ({ taskInstance }) => {
+            // Capture the plugin instance in a closure
+            const plugin = this;
+            // Use a factory pattern to get dependencies when the task runs
+            return {
+              async run() {
+                // Get dependencies when the task actually runs
+                const [coreStart, pluginsStart] = await core.getStartServices();
+                
+                // Create the actual task runner with dependencies
+                const taskRunner = createWorkflowTaskRunner({
+                  logger: plugin.logger,
+                  workflowsService: plugin.workflowsService!,
+                  workflowsExecutionEngine: (pluginsStart as any).workflowsExecutionEngine,
+                  actionsClient: plugin.unsecureActionsClient!,
+                })({ taskInstance });
+                
+                return taskRunner.run();
+              },
+              async cancel() {
+                // Cancel function for the task
+              },
+            };
+          },
+        },
+      });
+    }
+
+    // Register saved object types
+    core.savedObjects.registerType(workflowSavedObjectType);
 
     plugins.features?.registerKibanaFeature({
       id: 'workflowsManagement',
@@ -223,12 +270,23 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     const router = core.http.createRouter();
 
     this.logger.debug('Workflows Management: Creating workflows service');
+
+    // Get ES client from core
+    const getEsClient = () => Promise.resolve(this.esClient);
+
+    // Get saved objects client from core
+    const getSavedObjectsClient = () =>
+      core
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
+
     this.workflowsService = new WorkflowsService(
-      Promise.resolve(this.esClient),
+      getEsClient(),
       this.logger,
-      WORKFLOWS_INDEX,
+      getSavedObjectsClient,
       WORKFLOWS_EXECUTIONS_INDEX,
-      WORKFLOWS_STEP_EXECUTIONS_INDEX
+      WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      WORKFLOWS_EXECUTION_LOGS_INDEX
     );
     this.api = new WorkflowsManagementApi(this.workflowsService);
 
@@ -245,7 +303,19 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
+    // Initialize workflow task scheduler with the start contract
+    this.workflowTaskScheduler = new WorkflowTaskScheduler(
+      this.logger,
+      plugins.taskManager
+    );
+
+    // Set task scheduler in workflows service
+    if (this.workflowsService) {
+      this.workflowsService.setTaskScheduler(this.workflowTaskScheduler);
+    }
+
     const actionsTypes = plugins.actions.getAllTypes();
+    this.logger.debug(`Available action types: ${actionsTypes.join(', ')}`);
 
     this.logger.debug('Workflows Management: Creating scheduler service');
     this.schedulerService = new SchedulerService(

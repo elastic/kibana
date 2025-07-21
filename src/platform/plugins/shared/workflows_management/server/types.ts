@@ -9,7 +9,7 @@
 
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskManagerStartContract, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
@@ -29,4 +29,5 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
 
 export interface WorkflowsManagementPluginServerDependenciesSetup {
   features?: FeaturesPluginSetup;
+  taskManager?: TaskManagerSetupContract;
 }
