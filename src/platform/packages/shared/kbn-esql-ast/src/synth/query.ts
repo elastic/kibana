@@ -8,19 +8,25 @@
  */
 
 import { ParseOptions, Parser } from '../parser';
-import { makeSynthNode, createSynthMethod } from './helpers';
+import { createTag, makeSynthNode } from './tag';
 import type { SynthGenerator } from './types';
-import type { ESQLAstExpression } from '../types';
+import type { ESQLAstQueryExpression } from '../types';
 
-const generator: SynthGenerator<ESQLAstExpression> = (
+const generator: SynthGenerator<ESQLAstQueryExpression> = (
   src: string,
   { withFormatting = true, ...rest }: ParseOptions = {}
-): ESQLAstExpression => {
-  const { root: expression } = Parser.parseExpression(src, { withFormatting, ...rest });
+): ESQLAstQueryExpression => {
+  src = src.trimStart();
+  const { root: node } = Parser.parseQuery(src, { withFormatting, ...rest });
 
-  makeSynthNode(expression);
+  makeSynthNode(node);
 
-  return expression;
+  return node;
 };
 
-export const expr = createSynthMethod<ESQLAstExpression>(generator);
+export const query = createTag<ESQLAstQueryExpression>(generator);
+
+/**
+ * Short 3-letter alias for DX convenience.
+ */
+export const qry = query;
