@@ -11,7 +11,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../common';
+import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
 
 export interface CoreApiService {
   /** * When running in test environments, the Config overrides can be updated without restarting Kibana
