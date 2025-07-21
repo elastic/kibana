@@ -90,28 +90,27 @@ export function DependenciesInventoryTable() {
   );
 
   const { data: timeseriesData, status: timeseriesStatus } = useFetcher(
-    (callApmApi) => {
-      if (!visibleDependenciesNames?.length) {
-        return Promise.resolve();
-      }
-      if (data?.requestId) {
-        return callApmApi('POST /internal/apm/dependencies/top_dependencies/statistics', {
-          params: {
-            query: {
-              start,
-              end,
-              environment,
-              numBuckets: 8,
-              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
-              kuery,
-            },
-            body: {
-              dependencyNames: JSON.stringify(visibleDependenciesNames),
-            },
+  (callApmApi) => {
+    if (data?.requestId && visibleDependenciesNames?.length) {
+      return callApmApi('POST /internal/apm/dependencies/top_dependencies/statistics', {
+        params: {
+          query: {
+            start,
+            end,
+            environment,
+            numBuckets: 8,
+            offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
+            kuery,
           },
-        });
-      }
-    },
+          body: {
+            dependencyNames: JSON.stringify(visibleDependenciesNames),
+          },
+        },
+      });
+    }
+
+    return Promise.resolve();
+  },
     // Disables exhaustive deps because the statistics api must only be called when the rendered items changed or when comparison is toggled or changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data?.requestId, visibleDependenciesNames, comparisonEnabled, offset],
