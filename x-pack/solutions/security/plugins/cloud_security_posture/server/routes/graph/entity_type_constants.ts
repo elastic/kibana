@@ -22,7 +22,6 @@ export interface EntityTypeMapping {
  */
 export const entityTypeMappings: EntityTypeMapping[] = [
   {
-    // User-related entity types
     // missing figma mapping - 'Organization'
     icon: 'user',
     values: [
@@ -36,12 +35,10 @@ export const entityTypeMappings: EntityTypeMapping[] = [
     ],
   },
   {
-    // Storage-related entity types
     icon: 'storage',
     values: ['host', 'virtual desktop', 'virtual workstation', 'virtual machine image'],
   },
   {
-    // Container-related entity types
     // need to add to figma mapping:
     // container registry
     // Container Repository
@@ -61,15 +58,13 @@ export const entityTypeMappings: EntityTypeMapping[] = [
     ],
   },
   {
-    // Kubernetes-related entity types
-    // missing figma mapping - 'namespace', 'Orchestrator Ingress Controller'
+    // missing figma mapping - 'Orchestrator Ingress Controller'
     icon: 'kubernetesNode',
     values: [
       'orchestrator',
       'orchestrator job',
       'deployment',
       'map reduce cluster',
-      'faas',
       'orchestrator cron job',
       'orchestrator storage class',
       'kubernetes container',
@@ -78,16 +73,14 @@ export const entityTypeMappings: EntityTypeMapping[] = [
       'orchestrator ingress',
       'controller revision',
       'orchestrator pod security policy',
+      'namespace',
     ],
   },
   {
-    // Application-related entity types
-    // Previously named tableDensityExpanded
-    icon: 'tableDensity',
+    icon: 'tableDensityExpanded',
     values: ['application (desktop or web app)', 'development service'],
   },
   {
-    // Database-related entity types
     icon: 'database',
     values: [
       'database',
@@ -109,7 +102,6 @@ export const entityTypeMappings: EntityTypeMapping[] = [
     ],
   },
   {
-    // Network-related entity types
     icon: 'globe',
     values: [
       'ip',
@@ -133,7 +125,6 @@ export const entityTypeMappings: EntityTypeMapping[] = [
     ],
   },
   {
-    // Cloud-related entity types
     icon: 'cloudStormy',
     values: [
       'development service',
@@ -148,13 +139,13 @@ export const entityTypeMappings: EntityTypeMapping[] = [
       'search index',
       'service',
       'faas package',
+      'faas',
       'ci runner',
       'ci runner config',
       'cicd service',
     ],
   },
   {
-    // Security-related entity types
     icon: 'securityApp',
     values: [
       'governance policy',
@@ -170,9 +161,7 @@ export const entityTypeMappings: EntityTypeMapping[] = [
     ],
   },
   {
-    // Repository-related entity types
-    // didnt find icon in the design system - 'icon-language-clients' in the design
-    icon: 'unknown',
+    icon: 'code',
     values: [
       'version control integration',
       'repository',
@@ -186,7 +175,6 @@ export const entityTypeMappings: EntityTypeMapping[] = [
   },
   {
     // Communication-related entity types
-    // gateway removed - mapped into globeIconEntityTypes already
     icon: 'comment',
     values: [
       'call center service',
