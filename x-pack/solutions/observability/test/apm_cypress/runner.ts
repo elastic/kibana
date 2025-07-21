@@ -9,7 +9,7 @@ import { createLogger, LogLevel, SynthtraceClientsManager } from '@kbn/apm-synth
 import Url from 'url';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 import { createEsClientForFtrConfig } from '@kbn/test';
-import type { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../functional/ftr_provider_context';
 
 export async function cypressTestRunner({ getService }: FtrProviderContext) {
   const config = getService('config');
