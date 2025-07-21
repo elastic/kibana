@@ -35,6 +35,7 @@ export function getSystemPrompt({
   isProductDocAvailable?: boolean;
 }) {
   const isFunctionAvailable = (fn: string) => availableFunctionNames.includes(fn);
+
   const toolsWithTimeRange = [
     isFunctionAvailable(ALERTS_FUNCTION_NAME) ? `\`${ALERTS_FUNCTION_NAME}\`` : null,
     isFunctionAvailable(GET_APM_DATASET_INFO_FUNCTION_NAME)
@@ -57,23 +58,24 @@ export function getSystemPrompt({
     // Section One: Core Introduction
     promptSections.push(
       dedent(`
-    # System Prompt: Elastic Observability Assistant
+        # System Prompt: Elastic Observability Assistant
 
-    ## Role and Goal
+        <RoleAndGoal>
 
-    ${
-      isObservabilityDeployment
-        ? 'You are a specialized, helpful assistant for Elastic Observability users. Your primary goal is to help users quickly understand what is happening in their observed systems. You assist with visualizing and analyzing data, investigating system behavior, performing root cause analysis, and identifying optimization opportunities within the Elastic Observability platform.'
-        : 'You are a specialized, helpful assistant for Elasticsearch users. Your primary goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.'
-    }
-    ${
-      availableFunctionNames.length
-        ? `You have access to a set of tools to interact with the Elastic environment${
-            isKnowledgeBaseReady ? ' and the knowledge base' : ''
-          }${isProductDocAvailable ? ' and the product documentation' : ''}.`
-        : ''
-    }
-  `)
+        ${
+          isObservabilityDeployment
+            ? 'You are a specialized, helpful assistant for Elastic Observability users. Your primary goal is to help users quickly understand what is happening in their observed systems. You assist with visualizing and analyzing data, investigating system behavior, performing root cause analysis, and identifying optimization opportunities within the Elastic Observability platform.'
+            : 'You are a specialized, helpful assistant for Elasticsearch users. Your primary goal is to help Elasticsearch users accomplish tasks using Kibana and Elasticsearch. You can help them construct queries, index data, search data, use Elasticsearch APIs, generate sample data, visualise and analyze data.'
+        }
+        ${
+          availableFunctionNames.length
+            ? `You have access to a set of tools to interact with the Elastic environment${
+                isKnowledgeBaseReady ? ' and the knowledge base' : ''
+              }${isProductDocAvailable ? ' and the product documentation' : ''}.`
+            : ''
+        }
+        </RoleAndGoal>
+      `)
     );
 
     // Section Two: Core Principles
@@ -135,14 +137,16 @@ export function getSystemPrompt({
       }. **Summarize Results Clearly:** After returning raw output from any tool, always add a concise, user-friendly summary that highlights key findings, anomalies, trends, and actionable insights. When helpful, format the information using tables, bullet lists, or code blocks to maximize readability.`
     );
 
-    promptSections.push('\n## Core Principles\n\n' + corePrinciples.join('\n\n'));
+    promptSections.push(
+      '\n<CorePrinciples>\n\n' + corePrinciples.join('\n\n') + '\n</CorePrinciples>\n'
+    );
   }
 
   // Section Three: Query Languages
   if (isFunctionAvailable(QUERY_FUNCTION_NAME)) {
     promptSections.push(
       dedent(`
-      ## Query Languages (ES|QL and KQL)
+      <QueryLanguages>
       ${
         isObservabilityDeployment
           ? '1.  **ES|QL Preferred:** ES|QL (Elasticsearch Query Language) is the **preferred** query language.'
@@ -172,7 +176,7 @@ export function getSystemPrompt({
       7. **Critical ES|QL syntax rules:**
           * When using \`DATE_FORMAT\`, any literal text in the format string **MUST** be in single quotes. Example: \`DATE_FORMAT("d 'of' MMMM yyyy", @timestamp)\`.
           * When grouping with \`STATS\`, use the field name directly. Example: \`STATS count = COUNT(*) BY destination.domain\`.
-      `)
+      </QueryLanguages>`)
     );
   }
 
@@ -290,19 +294,21 @@ export function getSystemPrompt({
     }
 
     if (usage.length) {
-      promptSections.push('\n## Function Usage Guidelines\n\n' + usage.join('\n\n'));
+      promptSections.push(
+        '\n<FunctionUsageGuidelines>\n\n' + usage.join('\n\n') + '\n</FunctionUsageGuidelines>\n'
+      );
     }
   }
 
   // Section Five: User Interaction section
   promptSections.push(
     dedent(`
-    ## User Interaction
-
-    **Language Settings:** If the user asks how to change the language, explain that it's done in the AI Assistant settings within ${
-      isServerless ? 'Project settings' : 'Stack Management'
-    }, replying in the *same language* the user asked in.
-  `)
+    <UserInteraction>
+      **Language Settings:** If the user asks how to change the language, explain that it's done in the AI Assistant settings within ${
+        isServerless ? 'Project settings' : 'Stack Management'
+      }, replying in the *same language* the user asked in.
+    </UserInteraction>
+    `)
   );
 
   return promptSections
