@@ -6,14 +6,14 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { getPrivilegedMonitorUsersJoin } from '../../../queries/helpers';
+import { getPrivilegeMonitrUsersJoinNoTimestamp } from '../../../queries/helpers';
 
 export const getActivePrivilegedUsersEsqlCount = (
   namespace: string,
   sourcerDataView: DataViewSpec
 ) => {
   const indexPattern = sourcerDataView?.title ?? '';
-  return `FROM ${indexPattern} METADATA _id, _index
-      ${getPrivilegedMonitorUsersJoin(namespace)}
-      | STATS \`COUNT(*)\` = COUNT_DISTINCT(user.name)`;
+  return `FROM ${indexPattern}
+      ${getPrivilegeMonitrUsersJoinNoTimestamp(namespace)}
+      | STATS count = COUNT_DISTINCT(user.name)`;
 };
