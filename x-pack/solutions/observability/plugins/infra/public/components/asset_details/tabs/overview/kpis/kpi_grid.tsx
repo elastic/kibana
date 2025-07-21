@@ -20,27 +20,27 @@ import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_req
 
 interface Props {
   dataView?: DataView;
-  assetId: string;
-  assetType: InventoryItemType;
+  entityId: string;
+  entityType: InventoryItemType;
   dateRange: TimeRange;
 }
 
-export const KPIGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
+export const KPIGrid = ({ entityId, entityType, dataView, dateRange }: Props) => {
   const { reloadRequestTime } = useReloadRequestTimeContext();
 
   const filters = useMemo(() => {
     return [
       buildCombinedAssetFilter({
-        field: findInventoryFields(assetType).id,
-        values: [assetId],
+        field: findInventoryFields(entityType).id,
+        values: [entityId],
         dataView,
       }),
     ];
-  }, [dataView, assetId, assetType]);
+  }, [dataView, entityId, entityType]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" data-test-subj="infraAssetDetailsKPIGrid">
-      {assetType === 'host' ? (
+      {entityType === 'host' ? (
         <HostKpiCharts
           dataView={dataView}
           filters={filters}
