@@ -2873,7 +2873,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 # Logstash
 /x-pack/test/functional/es_archives/logstash/example_pipelines @elastic/logstash
 /x-pack/test/functional/services/pipeline_* @elastic/logstash
-/x-pack/test/functional/page_objects/logstash_page.ts @elastic/logstash
+/x-pack/platform/test/functional/page_objects/logstash_page.ts @elastic/logstash
 /x-pack/platform/test/functional/apps/logstash @elastic/logstash
 /x-pack/platform/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/platform/plugins/private/logstash/ @elastic/logstash
