@@ -23,7 +23,7 @@ export const registerApp = ({
   core.application.register({
     id: ONECHAT_APP_ID,
     appRoute: ONECHAT_PATH,
-    category: DEFAULT_APP_CATEGORIES.chat,
+    category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
     title: ONECHAT_TITLE,
     euiIconType: 'logoElasticsearch',
     visibleIn: ['sideNav', 'globalSearch'],

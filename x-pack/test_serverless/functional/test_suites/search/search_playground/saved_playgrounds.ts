@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { createPlayground, deletePlayground } from './utils/create_playground';
 
-const archivedBooksIndex = 'x-pack/test/functional_search/fixtures/search-books';
+const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([

@@ -169,6 +169,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
           error={[fieldError]}
         >
           <EuiFieldText
+            isInvalid={fieldError !== undefined}
             placeholder={i18n.translate(
               'xpack.dataVisualizer.file.semanticTextForm.copyFieldLabel.placeholder',
               {
