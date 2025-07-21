@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useFormContext, useFieldArray, FieldArrayWithId } from 'react-hook-form';
 import {
   DragDropContextProps,
@@ -25,7 +25,7 @@ import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
 import { Expression } from '@kbn/grok-ui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { css } from '@emotion/react';
-import { debounce, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
@@ -77,15 +77,11 @@ export const GrokPatternsEditor = () => {
 
   const getRemovePatternHandler = (id: number) => (fields.length > 1 ? () => remove(id) : null);
 
-  const handlePatternChange = useMemo(
-    () =>
-      debounce((expression: DraftGrokExpression, idx: number) => {
-        setValue(`patterns.${idx}`, expression, {
-          shouldValidate: true,
-        });
-      }, 300),
-    [setValue]
-  );
+  const handlePatternChange = (expression: DraftGrokExpression, idx: number) => {
+    setValue(`patterns.${idx}`, expression, {
+      shouldValidate: true,
+    });
+  };
 
   return (
     <>

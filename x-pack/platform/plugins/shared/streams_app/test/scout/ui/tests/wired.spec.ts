@@ -55,12 +55,12 @@ test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     });
 
     await pageObjects.streams.gotoProcessingTab('logs.nginx');
-    await page.getByText('Add a processor').click();
+    await page.getByText('Add processor').click();
 
     await page.locator('input[name="field"]').fill('body.text');
     await page.getByTestId('streamsAppPatternExpression').click();
     await page.keyboard.type('%{WORD:attributes.method}', { delay: 150 }); // Simulate real typing
-    await page.getByRole('button', { name: 'Add processor' }).click();
+    await page.getByRole('button', { name: 'Create processor' }).click();
     await page.getByRole('button', { name: 'Save changes' }).click();
     await expect(page.getByText("Stream's processors updated")).toBeVisible();
     await page.getByTestId('toastCloseButton').click();
