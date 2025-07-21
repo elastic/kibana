@@ -11,7 +11,7 @@
         "label": "useAssetDetailsRedirect",
         "description": [],
         "signature": [
-          "() => { getAssetDetailUrl: ({ assetType, assetId, search, }: { assetType: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\"; assetId: string; search: QueryParams; }) => ",
+          "() => { getAssetDetailUrl: ({ entityType, entityId, search, }: { entityType: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\"; entityId: string; search: QueryParams; }) => ",
           "RouterLinkProps",
           "; }"
         ],

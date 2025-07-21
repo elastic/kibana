@@ -91,7 +91,7 @@ export const allowedExperimentalValues = Object.freeze({
    * and Fleet must set it runtime mode to spaces by calling the following API:
    * - `POST /internal/fleet/enable_space_awareness`
    */
-  endpointManagementSpaceAwarenessEnabled: false,
+  endpointManagementSpaceAwarenessEnabled: true,
 
   /**
    * Disables new notes
@@ -102,11 +102,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
-
-  /**
-   * Enables advanced ESQL generation for the Assistant.
-   */
-  advancedEsqlGeneration: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.

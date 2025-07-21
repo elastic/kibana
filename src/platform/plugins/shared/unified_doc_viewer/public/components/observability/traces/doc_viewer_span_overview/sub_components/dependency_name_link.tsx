@@ -11,16 +11,21 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { DEPENDENCY_OVERVIEW_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
+import { SpanIcon } from '@kbn/apm-ui-shared';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 interface DependencyNameLinkProps {
   dependencyName: string;
+  spanType?: string;
+  spanSubtype?: string;
   environment: string;
   formattedDependencyName?: React.ReactNode;
 }
 
 export function DependencyNameLink({
   dependencyName,
+  spanType,
+  spanSubtype,
   environment,
   formattedDependencyName,
 }: DependencyNameLinkProps) {
@@ -64,6 +69,9 @@ export function DependencyNameLink({
 
   const content = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexItem>
+        <SpanIcon type={spanType} subtype={spanSubtype} size="m" />
+      </EuiFlexItem>
       <EuiFlexItem>{formattedDependencyName}</EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -73,6 +81,6 @@ export function DependencyNameLink({
       {content}
     </EuiLink>
   ) : (
-    dependencyName
+    content
   );
 }

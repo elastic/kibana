@@ -5695,9 +5695,16 @@
           "\nValidate index pattern strings"
         ],
         "signature": [
-          "(indexPattern: string) => { ILLEGAL_CHARACTERS?: string[] | undefined; CONTAINS_SPACES?: boolean | undefined; }"
+          "(indexPattern: string) => ",
+          {
+            "pluginId": "@kbn/data-view-validation",
+            "scope": "common",
+            "docId": "kibKbnDataViewValidationPluginApi",
+            "section": "def-common.ValidationErrors",
+            "text": "ValidationErrors"
+          }
         ],
-        "path": "src/platform/plugins/shared/data_views/common/lib/validate_data_view.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5713,7 +5720,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/data_views/common/lib/validate_data_view.ts",
+            "path": "src/platform/packages/shared/kbn-data-view-validation/src/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -7544,7 +7551,7 @@
         "signature": [
           "\"CONTAINS_SPACES\""
         ],
-        "path": "src/platform/plugins/shared/data_views/common/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7695,7 +7702,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/platform/plugins/shared/data_views/common/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7712,7 +7719,7 @@
         "signature": [
           "\"ILLEGAL_CHARACTERS\""
         ],
-        "path": "src/platform/plugins/shared/data_views/common/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7729,7 +7736,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/platform/plugins/shared/data_views/common/lib/types.ts",
+        "path": "src/platform/packages/shared/kbn-data-view-validation/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13636,15 +13643,15 @@
               },
               {
                 "plugin": "@kbn/unified-field-list",
+                "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
+                "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
                 "path": "src/platform/packages/shared/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
-              },
-              {
-                "plugin": "@kbn/unified-field-list",
-                "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "@kbn/unified-field-list",
-                "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
                 "plugin": "controls",
@@ -13831,6 +13838,14 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+              },
+              {
                 "plugin": "exploratoryView",
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/observability_data_views/observability_data_views.ts"
               },
@@ -13877,6 +13892,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-observability",
+                "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/data_view/static.spec.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -14049,6 +14068,30 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/platform/plugins/shared/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/detection_engine_filters/detection_engine_filters.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/detection_engine_filters/detection_engine_filters.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/risk_score_management/risk_score_preview_section.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/query_bar/eql/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/explore/network/pages/details/index.tsx"
               }
             ]
           },

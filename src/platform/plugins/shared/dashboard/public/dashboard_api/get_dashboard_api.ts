@@ -171,6 +171,10 @@ export function getDashboardApi({
         ...getState(),
       });
 
+      if (!saveResult || saveResult.error) {
+        return;
+      }
+
       if (saveResult) {
         unsavedChangesManager.internalApi.onSave(
           saveResult.savedState,
@@ -205,6 +209,7 @@ export function getDashboardApi({
         lastSavedId: savedObjectId$.value,
       });
 
+      if (saveResult?.error) return;
       unsavedChangesManager.internalApi.onSave(dashboardState, searchSourceReferences);
       references$.next(saveResult.references);
 

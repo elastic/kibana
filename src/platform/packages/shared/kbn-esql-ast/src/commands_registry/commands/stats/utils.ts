@@ -8,50 +8,24 @@
  */
 import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSingleAstItem } from '../../../types';
 import {
-  isColumn,
   isFunctionExpression,
-  isIdentifier,
-  isSource,
   isFieldExpression,
   isWhereExpression,
   isParamLiteral,
   isOptionNode,
   isLiteral,
+  isAssignment,
 } from '../../../ast/is';
 import { Walker } from '../../../walker';
 import {
   findPreviousWord,
   getLastNonWhitespaceChar,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { ISuggestionItem } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { EDITOR_MARKER } from '../../../parser/constants';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../../definitions/types';
-
-export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
-  if (Array.isArray(node)) {
-    return false;
-  }
-
-  return Boolean(
-    node &&
-      (isColumn(node) || isIdentifier(node) || isSource(node)) &&
-      node.name.endsWith(EDITOR_MARKER)
-  );
-}
-
-function isNotMarkerNodeOrArray(arg: ESQLAstItem) {
-  return Array.isArray(arg) || !isMarkerNode(arg);
-}
-
-function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
-  return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
-}
-
-export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
-  return isFunctionExpression(arg) && arg.name === '=';
-}
+import { mapToNonMarkerNode, isNotMarkerNodeOrArray } from '../../../definitions/utils/ast';
 
 function isAssignmentComplete(node: ESQLFunction | undefined) {
   const assignExpression = removeMarkerArgFromArgsList(node)?.args?.[1];
@@ -207,10 +181,15 @@ export function checkFunctionContent(arg: ESQLFunction) {
   if (isAggregation(arg) || isFunctionOperatorParam(arg)) {
     return true;
   }
-  return (arg as ESQLFunction).args.every(
-    (subArg): boolean =>
+  return (arg as ESQLFunction).args.every((subArg): boolean => {
+    // Differentiate between array and non-array arguments
+    if (Array.isArray(subArg)) {
+      return subArg.every((item) => checkFunctionContent(item as ESQLFunction));
+    }
+    return (
       isLiteral(subArg) ||
       isAggregation(subArg) ||
       (isNotAnAggregation(subArg) ? checkFunctionContent(subArg) : false)
-  );
+    );
+  });
 }

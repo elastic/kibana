@@ -8,22 +8,35 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem } from '../../complete_items';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    innerText,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (functionsSpecificSuggestions) {
+    return functionsSpecificSuggestions;
+  }
+
   // GROK field /
-  if (commandArgs.length === 1 && /\s$/.test(query)) {
+  if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(
       ['"%{WORD:firstWord}"'],
       i18n.translate('kbn-esql-ast.esql.autocomplete.aPatternString', {

@@ -57,7 +57,8 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/ebt-tools",
     "@kbn/core-security-server",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/shared-ux-error-boundary"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

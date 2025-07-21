@@ -9,11 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
-import {
-  MessageChunkEvent,
-  MessageCompleteEvent,
-  ReasoningEvent,
-} from '@kbn/onechat-common/agents';
+import { MessageChunkEvent, MessageCompleteEvent, ReasoningEvent } from '@kbn/onechat-common';
 import {
   matchGraphName,
   matchEvent,

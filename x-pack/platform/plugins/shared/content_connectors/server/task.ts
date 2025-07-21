@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, CoreStart, SavedObjectsClient } from '@kbn/core/server';
+import { Logger, CoreSetup, StartServicesAccessor } from '@kbn/core/server';
 
 import type {
   ConcreteTaskInstance,
@@ -13,18 +13,14 @@ import type {
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
 
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   SearchConnectorsPluginStartDependencies,
   SearchConnectorsPluginSetupDependencies,
 } from './types';
-import {
-  AgentlessConnectorsInfraService,
-  getConnectorsToDeploy,
-  getPoliciesToDelete,
-} from './services';
+import { getConnectorsToDeploy, getPoliciesToDelete } from './services';
 
 import { SearchConnectorsConfig } from './config';
+import { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
 
 const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID = 'search:agentless-connectors-manager-task';
 const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE = 'search:agentless-connectors-manager';
@@ -33,13 +29,23 @@ const SCHEDULE = { interval: '1m' };
 
 export function infraSyncTaskRunner(
   logger: Logger,
-  service: AgentlessConnectorsInfraService,
-  licensingPluginStart: LicensingPluginStart
+  getStartServices: StartServicesAccessor<SearchConnectorsPluginStartDependencies, unknown>,
+  agentlessConnectorsInfraServiceFactory: AgentlessConnectorsInfraServiceFactory
 ) {
   return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     return {
       run: async () => {
         try {
+          const service =
+            agentlessConnectorsInfraServiceFactory.getAgentlessConnectorsInfraService();
+
+          if (!service) {
+            logger.warn('Agentless connectors infra service not initialized');
+            return {
+              state: {},
+              schedule: SCHEDULE,
+            };
+          }
           // We fetch some info even if license does not permit actual operations.
           // This is done so that we could give a warning to the user only
           // if they are actually using the feature.
@@ -52,7 +58,9 @@ export function infraSyncTaskRunner(
 
           // Check license if any native connectors or agentless policies found
           if (nativeConnectors.length > 0 || policiesMetadata.length > 0) {
-            const license = await licensingPluginStart.getLicense();
+            const [_core, start] = await getStartServices();
+
+            const license = await start.licensing.getLicense();
 
             if (license.check('fleet', 'platinum').state !== 'valid') {
               logger.warn(
@@ -121,31 +129,11 @@ export class AgentlessConnectorDeploymentsSyncService {
     this.logger = logger;
   }
   public registerInfraSyncTask(
+    core: CoreSetup<SearchConnectorsPluginStartDependencies>,
     plugins: SearchConnectorsPluginSetupDependencies,
-    coreStart: CoreStart,
-    searchConnectorsPluginStartDependencies: SearchConnectorsPluginStartDependencies
+    agentlessConnectorsInfraServiceFactory: AgentlessConnectorsInfraServiceFactory
   ) {
-    const taskManager = plugins.taskManager;
-
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const savedObjects = coreStart.savedObjects;
-
-    const agentPolicyService = searchConnectorsPluginStartDependencies.fleet.agentPolicyService;
-    const packagePolicyService = searchConnectorsPluginStartDependencies.fleet.packagePolicyService;
-    const agentService = searchConnectorsPluginStartDependencies.fleet.agentService;
-
-    const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
-
-    const service = new AgentlessConnectorsInfraService(
-      soClient,
-      esClient,
-      packagePolicyService,
-      agentPolicyService,
-      agentService,
-      this.logger
-    );
-
-    taskManager.registerTaskDefinitions({
+    plugins.taskManager.registerTaskDefinitions({
       [AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE]: {
         title: 'Agentless Connector Deployment Manager',
         description:
@@ -154,8 +142,8 @@ export class AgentlessConnectorDeploymentsSyncService {
         maxAttempts: 3,
         createTaskRunner: infraSyncTaskRunner(
           this.logger,
-          service,
-          searchConnectorsPluginStartDependencies.licensing
+          core.getStartServices,
+          agentlessConnectorsInfraServiceFactory
         ),
       },
     });

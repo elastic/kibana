@@ -12,43 +12,37 @@ import { getCurrentConsoleMaxSize } from './console_resize_button';
 
 describe('Console Resizing Tests', () => {
   describe('getCurrentConsoleMaxSize', () => {
-    let windowSpy: jest.SpyInstance;
-    let mockHeaderOffset: string;
-    const mockBodyStyle = {
-      getPropertyValue: jest.fn().mockImplementation(() => mockHeaderOffset),
-    };
+    let getElementByIdSpy: jest.SpyInstance;
+    let mockBase: number;
+    let mockAppRect: { height: number };
     let mockTheme: EuiThemeComputed<{}>;
+
     beforeEach(() => {
-      mockTheme = {
-        size: {
-          base: '16px',
-        },
-      } as unknown as EuiThemeComputed<{}>;
-      mockHeaderOffset = '48px';
-      windowSpy = jest.spyOn(window, 'window', 'get');
-      windowSpy.mockImplementation(() => ({
-        getComputedStyle: jest.fn().mockReturnValue(mockBodyStyle),
-        innerHeight: 1000,
-      }));
-    });
-    afterEach(() => {
-      windowSpy.mockRestore();
+      mockBase = 16;
+      mockAppRect = { height: 1000 };
+      mockTheme = { base: mockBase } as unknown as EuiThemeComputed<{}>;
+      getElementByIdSpy = jest.spyOn(document, 'getElementById');
+      getElementByIdSpy.mockImplementation((id: string) => {
+        if (id === 'app-fixed-viewport') {
+          return {
+            getBoundingClientRect: () => mockAppRect,
+          } as any;
+        }
+        return null;
+      });
     });
 
-    it('computes max size with base size offset', () => {
-      expect(getCurrentConsoleMaxSize(mockTheme)).toBe(936);
+    afterEach(() => {
+      getElementByIdSpy.mockRestore();
     });
-    it('can handle failing to parse base size', () => {
-      mockTheme = {
-        size: {
-          base: undefined,
-        },
-      } as unknown as EuiThemeComputed<{}>;
-      expect(getCurrentConsoleMaxSize(mockTheme)).toBe(936);
-    });
-    it('can handle failing to parse header offset', () => {
-      mockHeaderOffset = 'calc(32px + 48px)';
+
+    it('computes max size as app height minus base', () => {
       expect(getCurrentConsoleMaxSize(mockTheme)).toBe(984);
+    });
+
+    it('returns min height if app-fixed-viewport is missing', () => {
+      getElementByIdSpy.mockImplementation(() => null);
+      expect(getCurrentConsoleMaxSize(mockTheme)).toBe(200); // CONSOLE_MIN_HEIGHT
     });
   });
 });

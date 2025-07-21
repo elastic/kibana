@@ -5,21 +5,26 @@
  * 2.0.
  */
 
+import zodToJsonSchema, { JsonSchema7ObjectType } from 'zod-to-json-schema';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import type { Runner, ExecutableTool } from '@kbn/onechat-server';
-import type { RegisteredToolWithMeta } from '../types';
+import { InternalToolDefinition } from '../tool_provider';
 
-export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
+export const toExecutableTool = <
+  TConfig extends object = {},
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  RunOutput = unknown
+>({
   tool,
   runner,
   request,
 }: {
-  tool: RegisteredToolWithMeta<RunInput, RunOutput>;
+  tool: InternalToolDefinition<TConfig, RunInput, RunOutput>;
   runner: Runner;
   request: KibanaRequest;
-}): ExecutableTool<RunInput, RunOutput> => {
+}): ExecutableTool<TConfig, RunInput, RunOutput> => {
   const { handler, ...toolParts } = tool;
 
   return {
@@ -35,7 +40,8 @@ export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
  *
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
-export const toolToDescriptor = <T extends ToolDescriptor>(tool: T): ToolDescriptor => {
-  const { id, description, meta } = tool;
-  return { id, description, meta };
+export const toDescriptorWithSchema = (tool: InternalToolDefinition): ToolDefinitionWithSchema => {
+  const { id, type, description, tags, configuration, schema } = tool;
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
+  return { id, type, description, tags, configuration, schema: jsonSchema };
 };
