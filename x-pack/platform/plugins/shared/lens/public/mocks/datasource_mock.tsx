@@ -39,7 +39,7 @@ export function createMockDatasource(
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state, _indexPatterns) => []),
     getPersistableState: jest.fn((x) => ({
       state: x,
-      savedObjectReferences: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
+      references: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
     })),
     getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),

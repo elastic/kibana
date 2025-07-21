@@ -20,6 +20,7 @@ import { RulesServiceProvider } from './rules';
 import { CanvasElementProvider } from './canvas_element';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
+import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -43,4 +44,5 @@ export const services = {
   searchSessions: SearchSessionsService,
   ml: MachineLearningProvider,
   transform: TransformProvider,
+  reporting: ReportingFunctionalProvider,
 };
