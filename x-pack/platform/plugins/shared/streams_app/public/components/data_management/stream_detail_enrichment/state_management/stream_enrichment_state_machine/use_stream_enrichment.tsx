@@ -170,9 +170,5 @@ export const useSimulatorRef = () => {
 export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {
   const simulationRef = useSimulatorRef();
 
-  if (!simulationRef) {
-    throw new Error('useSimulatorSelector must be used within a StreamEnrichmentContextProvider');
-  }
-
   return useSelector(simulationRef, selector);
 };

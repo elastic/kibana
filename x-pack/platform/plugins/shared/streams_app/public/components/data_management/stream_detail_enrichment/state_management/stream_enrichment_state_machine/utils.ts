@@ -90,8 +90,10 @@ export function getDataSourcesSamples(
  * - If no processor is being edited: returns all new processors
  * - If a processor is being edited: returns new processors up to and including the one being edited
  */
-export function getProcessorsForSimulation(context: StreamEnrichmentContextType) {
-  let newProcessorsSnapshots = context.processorsRefs
+export function getProcessorsForSimulation({
+  processorsRefs,
+}: Pick<StreamEnrichmentContextType, 'processorsRefs'>) {
+  let newProcessorsSnapshots = processorsRefs
     .map((procRef) => procRef.getSnapshot())
     .filter((snapshot) => snapshot.context.isNew);
 
@@ -117,7 +119,7 @@ export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
 export function getUpsertWiredFields(
   context: StreamEnrichmentContextType
 ): FieldDefinition | undefined {
-  if (!Streams.WiredStream.GetResponse.is(context.definition) || !context.simulatorRef) {
+  if (!Streams.WiredStream.GetResponse.is(context.definition)) {
     return undefined;
   }
 
@@ -144,7 +146,7 @@ export const spawnProcessor = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
   processor: ProcessorDefinition,
-  assignArgs: TAssignArgs,
+  assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
   options?: { isNew: boolean }
 ) => {
   const { spawn, self } = assignArgs;

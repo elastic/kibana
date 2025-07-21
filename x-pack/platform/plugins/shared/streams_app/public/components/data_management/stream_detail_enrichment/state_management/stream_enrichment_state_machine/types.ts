@@ -39,7 +39,7 @@ export interface StreamEnrichmentContextType {
   dataSourcesRefs: DataSourceActorRef[];
   processorsRefs: ProcessorActorRef[];
   grokCollection: GrokCollection;
-  simulatorRef?: SimulationActorRef;
+  simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
 }
 

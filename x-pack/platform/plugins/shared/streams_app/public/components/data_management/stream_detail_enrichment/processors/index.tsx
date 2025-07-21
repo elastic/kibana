@@ -171,7 +171,7 @@ const ProcessorConfigurationEditor = ({
 
   const [defaultValues] = useState(() =>
     getFormStateFrom(
-      selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+      selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
       { grokCollection },
       processor
     )
