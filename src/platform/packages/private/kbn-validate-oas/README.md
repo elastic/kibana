@@ -1,3 +1,5 @@
 # @kbn/validate-oas
 
-See CLI help.
+```bash
+node ./scripts/validate_oas_docs.js --help
+```
