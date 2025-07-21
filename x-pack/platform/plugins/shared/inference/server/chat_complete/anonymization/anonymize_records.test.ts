@@ -86,9 +86,9 @@ describe('anonymizeRecords', () => {
   });
 
   it('splits text > MAX_TOKENS_PER_DOC into multiple docs', async () => {
-    const longText = 'b'.repeat(1500); // > 1000 chars => should be split into 2 docs (1000 + 500)
+    const longText = 'b'.repeat(1500); // > 512 chars => should be split into 3 docs (512 + 512 + 476)
 
-    setupMockResponse(Array(2).fill({ entities: [] } as any));
+    setupMockResponse(Array(3).fill({ entities: [] } as any));
 
     const { records } = await anonymizeRecords({
       input: [{ content: longText }],
@@ -99,9 +99,10 @@ describe('anonymizeRecords', () => {
 
     expect(mockEsClient.ml.inferTrainedModel).toHaveBeenCalledTimes(1);
     const callArgs = mockEsClient.ml.inferTrainedModel.mock.calls[0][0];
-    expect(callArgs.docs).toHaveLength(2);
-    expect(callArgs.docs[0].text_field).toBe(longText.slice(0, 1000));
-    expect(callArgs.docs[1].text_field).toBe(longText.slice(1000));
+    expect(callArgs.docs).toHaveLength(3);
+    expect(callArgs.docs[0].text_field).toBe(longText.slice(0, 512));
+    expect(callArgs.docs[1].text_field).toBe(longText.slice(512, 1024));
+    expect(callArgs.docs[2].text_field).toBe(longText.slice(1024));
 
     // reconstructed value should match original and appear only once
     expect(records[0].content).toBe(longText);

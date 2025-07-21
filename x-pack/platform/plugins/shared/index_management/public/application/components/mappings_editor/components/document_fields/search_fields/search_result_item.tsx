@@ -67,7 +67,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
     return (
       <EuiFlexGroup gutterSize="s" css={styles.actions} data-test-subj="fieldActions">
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={editButtonLabel}>
+          <EuiToolTip content={editButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="pencil"
               onClick={editField}
@@ -80,7 +80,7 @@ export const SearchResultItem = React.memo(function FieldListItemFlatComponent({
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
             {(deleteField) => (
-              <EuiToolTip content={deleteButtonLabel}>
+              <EuiToolTip content={deleteButtonLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="trash"
                   color="danger"

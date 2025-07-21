@@ -14,10 +14,6 @@ import { CreateAgent } from '../components/agents/edit/create_agent';
 export const OnechatAgentsCreate = () => {
   useBreadcrumb([
     {
-      text: labels.chat.title,
-      path: appPaths.root,
-    },
-    {
       text: labels.agents.title,
       path: appPaths.agents.list,
     },
