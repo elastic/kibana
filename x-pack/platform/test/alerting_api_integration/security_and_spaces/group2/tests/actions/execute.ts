@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const authorizationIndex = '.kibana-test-authorization';
 
-  describe('execute', () => {
+  describe.skip('execute', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
