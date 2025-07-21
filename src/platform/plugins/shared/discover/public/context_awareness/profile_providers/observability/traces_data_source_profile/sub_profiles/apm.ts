@@ -42,22 +42,24 @@ export const createTracesAPMDataSourceProfileProvider = (
         };
       },
     },
-    resolve,
+    resolve: async (params) => {
+      const baseResult = await tracesDataSourceProfileProvider.resolve(params);
+      if (!baseResult.isMatch) {
+        return baseResult;
+      }
+      const indexPattern = extractIndexPatternFrom(params);
+
+      const isOtelIndexPattern = reContainsTracesOtel.test(indexPattern || '');
+      const isApmIndexPattern = reContainsTracesApm.test(indexPattern || '');
+
+      // Avoid mixing APM and OTEL columns in the same profile
+      if (isApmIndexPattern && !isOtelIndexPattern) {
+        return {
+          isMatch: true,
+          context: { category: DataSourceCategory.Traces },
+        };
+      }
+
+      return { isMatch: false };
+    },
   });
-
-const resolve: DataSourceProfileProvider['resolve'] = (params) => {
-  const indexPattern = extractIndexPatternFrom(params);
-
-  const isOtelIndexPattern = reContainsTracesOtel.test(indexPattern || '');
-  const isApmIndexPattern = reContainsTracesApm.test(indexPattern || '');
-
-  // Avoid mixing APM and OTEL columns in the same profile
-  if (isApmIndexPattern && !isOtelIndexPattern) {
-    return {
-      isMatch: true,
-      context: { category: DataSourceCategory.Traces },
-    };
-  }
-
-  return { isMatch: false };
-};
