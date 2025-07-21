@@ -37,9 +37,9 @@ export const privilegeMonitoringRouteHelpersFactory = (
       ).send(source);
 
       if (response.status !== 200) {
-        console.error('❌ registerIndexSource failed with status:', response.status);
-        console.error('👉 Response body:', JSON.stringify(response.body, null, 2));
-        console.error('📦 Sent payload:', JSON.stringify(source, null, 2));
+        console.error('registerIndexSource failed with status:', response.status);
+        console.error('Response body:', JSON.stringify(response.body, null, 2));
+        console.error('Sent payload:', JSON.stringify(source, null, 2));
       }
 
       // expect(response.status).to.be.equal(200);
