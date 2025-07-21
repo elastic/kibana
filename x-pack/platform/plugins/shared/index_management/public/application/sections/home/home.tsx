@@ -72,7 +72,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         clearTimeout(timeoutId);
       };
     }
-  }, [location.state]);
+  }, [history, section, location.state]);
 
   const tabs = [
     {
