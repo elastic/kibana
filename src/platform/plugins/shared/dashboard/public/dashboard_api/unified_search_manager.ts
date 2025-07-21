@@ -301,8 +301,8 @@ export function initializeUnifiedSearchManager(
     const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
 
     return {
-      filters: serializableFilters ?? DEFAULT_DASHBOARD_STATE.filters,
-      query: query$.value ?? DEFAULT_DASHBOARD_STATE.query,
+      filters: serializableFilters,
+      query: query$.value,
       refreshInterval: refreshInterval$.value,
       timeRange: timeRange$.value,
       timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
@@ -332,8 +332,8 @@ export function initializeUnifiedSearchManager(
         return combineLatest([unifiedSearchFilters$, query$, refreshInterval$, timeRange$]).pipe(
           debounceTime(100),
           map(([filters, query, refreshInterval, timeRange]) => ({
-            filters: filters ?? DEFAULT_DASHBOARD_STATE.filters,
-            query: query ?? DEFAULT_DASHBOARD_STATE.query,
+            filters,
+            query,
             refreshInterval,
             timeRange,
           })),
@@ -349,7 +349,9 @@ export function initializeUnifiedSearchManager(
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
           ...(lastSavedState.filters ?? []),
         ]);
-        setQuery(lastSavedState.query ?? queryString.getDefaultQuery());
+        if (lastSavedState.query) {
+          setQuery(lastSavedState.query);
+        }
         if (lastSavedState.timeRestore) {
           setAndSyncRefreshInterval(lastSavedState.refreshInterval);
           setAndSyncTimeRange(lastSavedState.timeRange);
