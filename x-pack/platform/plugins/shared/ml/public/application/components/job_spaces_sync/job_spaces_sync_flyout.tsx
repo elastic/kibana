@@ -36,7 +36,7 @@ export interface Props {
 }
 
 export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
-  const modalTitleId = useGeneratedHtmlId();
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
   const [loading, setLoading] = useState(false);
@@ -111,11 +111,11 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
         maxWidth={600}
         onClose={onClose}
         data-test-subj="mlJobMgmtSyncFlyout"
-        aria-labelledby={modalTitleId}
+        aria-labelledby={flyoutTitleId}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={modalTitleId}>
+            <h2 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.ml.management.syncSavedObjectsFlyout.headerLabel"
                 defaultMessage="Synchronize saved objects"

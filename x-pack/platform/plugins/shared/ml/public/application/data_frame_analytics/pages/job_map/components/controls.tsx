@@ -243,7 +243,7 @@ export const Controls: FC<Props> = React.memo(
       [isModalVisible, deleteItem, didUntag]
     );
 
-    const modalTitleId = useGeneratedHtmlId();
+    const flyoutTitleId = useGeneratedHtmlId();
 
     if (showFlyout === false) {
       return null;
@@ -360,7 +360,7 @@ export const Controls: FC<Props> = React.memo(
     return (
       <EuiPortal>
         <EuiFlyout
-          aria-labelledby={modalTitleId}
+          aria-labelledby={flyoutTitleId}
           ownFocus
           size="m"
           onClose={deselect}
@@ -370,7 +370,7 @@ export const Controls: FC<Props> = React.memo(
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
-                  <h3 id={modalTitleId} data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
+                  <h3 id={flyoutTitleId} data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
                     <FormattedMessage
                       id="xpack.ml.dataframe.analyticsMap.flyoutHeaderTitle"
                       defaultMessage="Details for {type} {id}"

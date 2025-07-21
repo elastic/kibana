@@ -64,7 +64,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
   closeFlyout,
   refresh,
 }) => {
-  const modalTitleId = useGeneratedHtmlId();
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const mlApi = useMlApi();
   const { toasts } = useNotifications();
@@ -176,10 +176,10 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
 
   return (
     <>
-      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m" aria-labelledby={modalTitleId}>
+      <EuiFlyout onClose={closeFlyout} hideCloseButton size="m" aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h5 id={modalTitleId}>
+            <h5 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.title"
                 defaultMessage="Revert to model snapshot {ssId}"
