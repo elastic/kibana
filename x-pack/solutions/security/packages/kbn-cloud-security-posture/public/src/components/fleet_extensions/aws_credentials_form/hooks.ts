@@ -7,20 +7,17 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { cspIntegrationDocsNavigation, CLOUDBEAT_AWS, AWS_CREDENTIALS_TYPE } from '../constants';
-import {
-  getAwsCredentialsType,
-  getCspmCloudFormationDefaultValue,
-  getPosturePolicy,
-  NewPackagePolicyPostureInput,
-} from '../utils';
+import { cspIntegrationDocsNavigation } from '../constants';
+import { getPosturePolicy } from '../utils';
 import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
-import { AwsCredentialsType } from '../types';
-import { AWS_SETUP_FORMAT, SetupFormat } from './aws_credentials_form';
+import { NewPackagePolicyPostureInput } from '../types';
+import { AWS_CREDENTIALS_TYPE, AWS_SETUP_FORMAT, CLOUDBEAT_AWS } from './aws_constants';
+import { AwsCredentialsType, SetupFormat } from './aws_types';
+import { getAwsCredentialsType, getCspmCloudFormationDefaultValue } from './aws_utils';
 /**
  * Update CloudFormation template and stack name in the Agent Policy
  * based on the selected policy template
@@ -46,14 +43,12 @@ export const useAwsCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
-  onChange,
   setIsValid,
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   packageInfo: PackageInfo;
-  onChange: (opts: any) => void;
   setIsValid: (isValid: boolean) => void;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
@@ -79,29 +74,26 @@ export const useAwsCredentialsForm = ({
   useEffect(() => {
     // This should ony set the credentials after the initial render
     if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
-      onChange({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+      updatePolicy(
+        getPosturePolicy(newPolicy, input.type, {
           'aws.credentials.type': {
             value: awsCredentialsType,
             type: 'text',
           },
-        }),
-      });
+        })
+      );
     }
-  }, [awsCredentialsType, input, newPolicy, onChange]);
+  }, [awsCredentialsType, input, newPolicy, updatePolicy]);
 
-  useEffect(() => {
-    const isInvalid =
-      setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && !hasCloudFormationTemplate;
+  // useEffect(() => {
+  //   const isInvalid =
+  //     setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && !hasCloudFormationTemplate;
 
-    setIsValid(!isInvalid);
+  //   setIsValid(!isInvalid);
 
-    onChange({
-      isValid: !isInvalid,
-      updatedPolicy: newPolicy,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setupFormat, input.type]);
+  //   updatePolicy(newPolicy);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [setupFormat, input.type]);
 
   const elasticDocLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
 
@@ -199,7 +191,7 @@ const useCloudFormationTemplate = ({
     const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy);
 
     if (setupFormat === AWS_SETUP_FORMAT.MANUAL) {
-      if (!!policyInputCloudFormationTemplate) {
+      if (policyInputCloudFormationTemplate) {
         updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, undefined);
       }
       return;

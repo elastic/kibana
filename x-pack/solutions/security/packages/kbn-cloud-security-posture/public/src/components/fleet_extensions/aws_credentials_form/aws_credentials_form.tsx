@@ -4,67 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
-import {
-  EuiCallOut,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import type { NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
+import React from 'react';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  AwsCredentialsTypeOptions,
-  getAwsCredentialsFormManualOptions,
-} from './get_aws_credentials_form_options';
+import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
+import { getPosturePolicy } from '../utils';
 import { useAwsCredentialsForm } from './hooks';
-import { AWS_ORGANIZATION_ACCOUNT } from '../constants';
-import { AwsCredentialsType } from '../types';
+import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from './aws_constants';
 import { AwsInputVarFields } from './aws_input_var_fields';
-import {
-  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-} from '../test_subjects';
-
-interface AWSSetupInfoContentProps {
-  info: ReactNode;
-}
-
-export type SetupFormat = typeof AWS_SETUP_FORMAT.CLOUD_FORMATION | typeof AWS_SETUP_FORMAT.MANUAL;
-
-export const AWS_SETUP_FORMAT = {
-  CLOUD_FORMATION: 'cloud_formation',
-  MANUAL: 'manual',
-} as const;
-
-export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
-  return (
-    <>
-      <EuiHorizontalRule margin="xl" />
-      <EuiTitle size="xs">
-        <h2>
-          <FormattedMessage
-            id="xpack.csp.awsIntegration.setupInfoContentTitle"
-            defaultMessage="Setup Access"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiText color="subdued" size="s">
-        {info}
-      </EuiText>
-    </>
-  );
-};
+import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
+import { ReadDocumentation } from '../common';
+import { AWSSetupInfoContent } from './aws_setup_info';
+import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
+import { SetupFormat } from './aws_types';
+import { NewPackagePolicyPostureInput } from '../types';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -81,19 +39,14 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   },
 ];
 
-export interface AwsFormProps {
+interface AwsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
-  isEditPage?: boolean;
-  setupTechnology?: SetupTechnology;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  onChange: any;
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
-  showCloudConnectors: boolean;
-  cloud: CloudSetup | undefined;
 }
 
 const CloudFormationSetup = ({
@@ -168,43 +121,11 @@ const CloudFormationSetup = ({
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
 
-const Link = ({ children, url }: { children: React.ReactNode; url: string }) => (
-  <EuiLink
-    href={url}
-    target="_blank"
-    rel="noopener nofollow noreferrer"
-    data-test-subj="externalLink"
-  >
-    {children}
-  </EuiLink>
-);
-
-export const ReadDocumentation = ({ url }: { url: string }) => {
-  return (
-    <EuiText color="subdued" size="s">
-      <FormattedMessage
-        id="xpack.csp.awsIntegration.cloudFormationSetupNote"
-        defaultMessage="Read the {documentation} for more details"
-        values={{
-          documentation: (
-            <Link url={url}>
-              {i18n.translate('xpack.csp.awsIntegration.documentationLinkText', {
-                defaultMessage: 'documentation',
-              })}
-            </Link>
-          ),
-        }}
-      />
-    </EuiText>
-  );
-};
-
 export const AwsCredentialsForm = ({
   input,
   newPolicy,
   updatePolicy,
   packageInfo,
-  onChange,
   setIsValid,
   disabled = false,
   hasInvalidRequiredVars,
@@ -221,7 +142,6 @@ export const AwsCredentialsForm = ({
     newPolicy,
     input,
     packageInfo,
-    onChange,
     setIsValid,
     updatePolicy,
   });
@@ -296,29 +216,3 @@ export const AwsCredentialsForm = ({
     </>
   );
 };
-export const AwsCredentialTypeSelector = ({
-  type,
-  onChange,
-  label,
-  options,
-  disabled = false,
-}: {
-  onChange(type: AwsCredentialsType): void;
-  type: AwsCredentialsType;
-  label: string;
-  options: AwsCredentialsTypeOptions;
-  disabled: boolean;
-}) => (
-  <EuiFormRow fullWidth label={label}>
-    <EuiSelect
-      fullWidth
-      options={options}
-      value={type}
-      disabled={disabled}
-      onChange={(optionElem) => {
-        onChange(optionElem.target.value as AwsCredentialsType);
-      }}
-      data-test-subj={AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ}
-    />
-  </EuiFormRow>
-);

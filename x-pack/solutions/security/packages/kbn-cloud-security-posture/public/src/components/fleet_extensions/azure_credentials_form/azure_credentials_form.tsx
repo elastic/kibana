@@ -4,19 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Suspense, useEffect } from 'react';
-import {
-  EuiCallOut,
-  EuiFieldText,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiCallOut, EuiFormRow, EuiLink, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,66 +14,19 @@ import { i18n } from '@kbn/i18n';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
-import {
-  AzureOptions,
-  getAzureCredentialsFormManualOptions,
-} from './get_azure_credentials_form_options';
-import { AzureCredentialsType } from '../../../../common/types_old';
+import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
+import { AzureCredentialsType, SetupFormat } from './azure_types';
 import { useAzureCredentialsForm } from './hooks';
-import {
-  fieldIsInvalid,
-  findVariableDef,
-  getPosturePolicy,
-  NewPackagePolicyPostureInput,
-} from '../utils';
+import { getPosturePolicy } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS } from '../../test_subjects';
-import { AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '../../test_subjects';
-
-interface AzureSetupInfoContentProps {
-  documentationLink: string;
-}
-
-export type SetupFormat = typeof AZURE_SETUP_FORMAT.ARM_TEMPLATE | typeof AZURE_SETUP_FORMAT.MANUAL;
-
-export const AZURE_SETUP_FORMAT = {
-  ARM_TEMPLATE: 'arm_template',
-  MANUAL: 'manual',
-} as const;
-
-export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoContentProps) => {
-  return (
-    <>
-      <EuiHorizontalRule margin="xl" />
-      <EuiTitle size="xs">
-        <h2>
-          <FormattedMessage
-            id="xpack.csp.azureIntegration.setupInfoContentTitle"
-            defaultMessage="Setup Access"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.csp.azureIntegration.gettingStarted.setupInfoContent"
-          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy CSPM for assessing your Azure environment's security posture. Refer to our {gettingStartedLink} guide for details."
-          values={{
-            gettingStartedLink: (
-              <EuiLink href={documentationLink} target="_blank">
-                <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
-                  defaultMessage="Getting Started"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
-    </>
-  );
-};
+import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from './azure_constants';
+import {
+  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+} from './azure_test_subjects';
+import { AzureSetupInfoContent } from './azure_setup_info';
+import { AzureInputVarFields } from './azure_input_var_fields';
+import { NewPackagePolicyPostureInput } from '../types';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -101,19 +43,16 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   },
 ];
 
-export interface AzureCredentialsFormProps {
+interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  onChange: any;
+  // onChange: any;
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
 }
-
-export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
-  'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 
 const ArmTemplateSetup = ({
   hasArmTemplateUrl,
@@ -264,99 +203,12 @@ const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
 const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
-export const AzureInputVarFields = ({
-  fields,
-  packageInfo,
-  onChange,
-  hasInvalidRequiredVars,
-}: {
-  fields: Array<AzureOptions[keyof AzureOptions]['fields'][number] & { value: string; id: string }>;
-  packageInfo: PackageInfo;
-  onChange: (key: string, value: string) => void;
-  hasInvalidRequiredVars: boolean;
-}) => {
-  return (
-    <div>
-      {fields.map((field, index) => {
-        const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
-        const invalidError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
-          defaultMessage: '{field} is required',
-          values: {
-            field: field.label,
-          },
-        });
-        return (
-          <div key={index}>
-            {field.type === 'password' && field.isSecret === true && (
-              <>
-                <EuiSpacer size="m" />
-                <div
-                  css={css`
-                    width: 100%;
-                    .euiFormControlLayout,
-                    .euiFormControlLayout__childrenWrapper,
-                    .euiFormRow,
-                    input {
-                      max-width: 100%;
-                      width: 100%;
-                    }
-                  `}
-                >
-                  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-                    <LazyPackagePolicyInputVarField
-                      varDef={{
-                        ...findVariableDef(packageInfo, field.id)!,
-                        required: true,
-                        type: 'password',
-                      }}
-                      value={field.value || ''}
-                      onChange={(value) => {
-                        onChange(field.id, value);
-                      }}
-                      errors={invalid ? [invalidError] : []}
-                      forceShowErrors={invalid}
-                      isEditPage={true}
-                    />
-                  </Suspense>
-                </div>
-              </>
-            )}
-            {field.type === 'text' && (
-              <>
-                <EuiFormRow
-                  key={field.id}
-                  label={field.label}
-                  fullWidth
-                  hasChildLabel={true}
-                  id={field.id}
-                  isInvalid={invalid}
-                  error={invalid ? invalidError : undefined}
-                >
-                  <EuiFieldText
-                    id={field.id}
-                    fullWidth
-                    value={field.value || ''}
-                    onChange={(event) => onChange(field.id, event.target.value)}
-                    data-test-subj={field.testSubj}
-                    isInvalid={invalid}
-                  />
-                </EuiFormRow>
-                <EuiSpacer size="s" />
-              </>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
 export const AzureCredentialsForm = ({
   input,
   newPolicy,
   updatePolicy,
   packageInfo,
-  onChange,
+  // onChange,
   setIsValid,
   disabled,
   hasInvalidRequiredVars,
@@ -373,7 +225,7 @@ export const AzureCredentialsForm = ({
     newPolicy,
     input,
     packageInfo,
-    onChange,
+    // onChange,
     setIsValid,
     updatePolicy,
   });
@@ -395,15 +247,15 @@ export const AzureCredentialsForm = ({
     AZURE_MANUAL_FIELDS_PACKAGE_VERSION
   );
 
-  useEffect(() => {
-    setIsValid(isPackageVersionValidForAzure);
+  // useEffect(() => {
+  //   setIsValid(isPackageVersionValidForAzure);
 
-    onChange({
-      isValid: isPackageVersionValidForAzure,
-      updatedPolicy: newPolicy,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, packageInfo, setupFormat]);
+  //   onChange({
+  //     isValid: isPackageVersionValidForAzure,
+  //     updatedPolicy: newPolicy,
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [input, packageInfo, setupFormat]);
 
   if (!isPackageVersionValidForAzure) {
     return (

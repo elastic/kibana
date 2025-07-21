@@ -20,15 +20,7 @@ import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
-  AWS_CREDENTIALS_TYPE,
-  AWS_SINGLE_ACCOUNT,
-  AZURE_CREDENTIALS_TYPE,
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_GCP,
-  GCP_CREDENTIALS_TYPE,
   SUPPORTED_CLOUDBEAT_INPUTS,
   SUPPORTED_POLICY_TEMPLATES,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -37,48 +29,23 @@ import {
   CLOUD_SECURITY_POSTURE_INTEGRATIONS,
 } from './constants';
 import type {
-  AwsCredentialsType,
   PostureInput,
   CloudSecurityPolicyTemplate,
   CredentialsType,
+  NewPackagePolicyPostureInput,
+  GetAwsCredentialTypeConfigParams,
+  GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
+import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/azure_constants';
+import { getCloudDefaultAwsCredentialConfig } from './aws_credentials_form/aws_utils';
+import { getDefaultAzureCredentialsType } from './azure_credentials_form/azure_utils';
 import {
-  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
-  DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE,
-  DEFAULT_AWS_CREDENTIALS_TYPE,
-  DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
-} from './aws_credentials_form/get_aws_credentials_form_options';
-
-type PosturePolicyInput =
-  | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }
-  | { type: typeof CLOUDBEAT_GCP; policy_template: typeof CSPM_POLICY_TEMPLATE }
-  | { type: typeof CLOUDBEAT_AWS; policy_template: typeof CSPM_POLICY_TEMPLATE };
-
-export type CloudSetupAccessInputType = 'cloudbeat/cis_aws' | 'cloudbeat/cloud_connectors_aws'; // we need to add more types depending integrations such Asset Inventory
-
-export interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyPostureInput;
-  cloud: Pick<
-    CloudSetup,
-    | 'isCloudEnabled'
-    | 'cloudId'
-    | 'cloudHost'
-    | 'deploymentUrl'
-    | 'serverless'
-    | 'isServerlessEnabled'
-  >;
-  packageInfo: PackageInfo;
-}
-
-export interface GetAwsCredentialTypeConfigParams {
-  setupTechnology: SetupTechnology | undefined;
-  optionId: string;
-  showCloudConnectors: boolean;
-  inputType: CloudSetupAccessInputType;
-}
-
-// Extend NewPackagePolicyInput with known string literals for input type and policy template
-export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicyInput;
+  AWS_CREDENTIALS_TYPE,
+  AWS_SINGLE_ACCOUNT,
+  CLOUDBEAT_AWS,
+} from './aws_credentials_form/aws_constants';
+import { CLOUDBEAT_GCP, GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_constants';
+import { getDefaultGcpHiddenVars } from './gcp_credentials_form/gcp_utils';
 
 export const isPostureInput = (
   input: NewPackagePolicyInput
@@ -210,149 +177,6 @@ export const getDefaultCloudCredentialsType = (
   return credentialsTypes[inputType];
 };
 
-export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
-  if (!packageInfo.policy_templates) return '';
-
-  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
-  if (!policyTemplate) return '';
-
-  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-
-  if (!policyTemplateInputs) return '';
-
-  const cloudFormationTemplate = policyTemplateInputs.reduce((acc, input): string => {
-    if (!input.vars) return acc;
-    const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
-    return template ? String(template) : acc;
-  }, '');
-
-  return cloudFormationTemplate;
-};
-
-export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): string => {
-  if (!packageInfo.policy_templates) return '';
-
-  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
-  if (!policyTemplate) return '';
-
-  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-  if (!policyTemplateInputs) return '';
-
-  const armTemplateUrl = policyTemplateInputs.reduce((acc, input): string => {
-    if (!input.vars) return acc;
-    const template = input.vars.find((v) => v.name === 'arm_template_url')?.default;
-    return template ? String(template) : acc;
-  }, '');
-
-  return armTemplateUrl;
-};
-
-export const getDefaultAwsCredentialsType = (
-  packageInfo: PackageInfo,
-  showCloudConnectors: boolean,
-  setupTechnology?: SetupTechnology
-): AwsCredentialsType => {
-  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return showCloudConnectors
-      ? AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS
-      : AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
-  }
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
-
-  if (hasCloudFormationTemplate) {
-    return AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
-  }
-
-  return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
-};
-
-export const getCloudDefaultAwsCredentialConfig = ({
-  isAgentless,
-  showCloudConnectors,
-  packageInfo,
-}: {
-  isAgentless: boolean;
-  packageInfo: PackageInfo;
-  showCloudConnectors: boolean;
-}) => {
-  let credentialsType;
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
-  if (!showCloudConnectors && isAgentless) {
-    credentialsType = DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
-  } else if (showCloudConnectors && isAgentless) {
-    credentialsType = DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE;
-  } else if (hasCloudFormationTemplate && !isAgentless) {
-    credentialsType = DEFAULT_AWS_CREDENTIALS_TYPE;
-  } else {
-    credentialsType = DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
-  }
-  const config: {
-    [key: string]: {
-      value: string | boolean;
-      type: 'text' | 'bool';
-    };
-  } = {
-    'aws.credentials.type': {
-      value: credentialsType,
-      type: 'text',
-    },
-    ...(showCloudConnectors && {
-      'aws.supports_cloud_connectors': {
-        value: showCloudConnectors,
-        type: 'bool',
-      },
-    }),
-  };
-
-  return config;
-};
-export const getDefaultAzureCredentialsType = (
-  packageInfo: PackageInfo,
-  setupTechnology?: SetupTechnology
-): string => {
-  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
-  }
-
-  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
-  if (hasArmTemplateUrl) {
-    return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
-  }
-
-  return AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
-};
-
-export const getDefaultGcpHiddenVars = (
-  packageInfo: PackageInfo,
-  setupTechnology?: SetupTechnology
-): Record<string, PackagePolicyConfigRecordEntry> => {
-  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return {
-      'gcp.credentials.type': {
-        value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
-        type: 'text',
-      },
-    };
-  }
-
-  const hasCloudShellUrl = !!getCspmCloudShellDefaultValue(packageInfo);
-  if (hasCloudShellUrl) {
-    return {
-      'gcp.credentials.type': {
-        value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
-        type: 'text',
-      },
-    };
-  }
-
-  return {
-    'gcp.credentials.type': {
-      value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
-      type: 'text',
-    },
-  };
-};
-
 /**
  * Input vars that are hidden from the user
  */
@@ -430,10 +254,6 @@ export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string 
 
   return cloudShellUrl;
 };
-
-export const getAwsCredentialsType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
-): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
 
 export const isBelowMinVersion = (version: string, minVersion: string) => {
   const semanticVersion = semverValid(version);

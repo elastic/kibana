@@ -5,16 +5,49 @@
  * 2.0.
  */
 
+import { CloudSetup } from '@kbn/cloud-plugin/public/types';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { CLOUDBEAT_AZURE } from './azure_credentials_form/azure_constants';
 import {
-  AWS_ORGANIZATION_ACCOUNT,
-  AWS_SINGLE_ACCOUNT,
-  AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SINGLE_ACCOUNT,
-  GCP_ORGANIZATION_ACCOUNT,
-  GCP_SINGLE_ACCOUNT,
+  CSPM_POLICY_TEMPLATE,
   SUPPORTED_CLOUDBEAT_INPUTS,
   SUPPORTED_POLICY_TEMPLATES,
 } from './constants';
+import { AwsCredentialsType } from './aws_credentials_form/aws_types';
+import { CLOUDBEAT_AWS } from './aws_credentials_form/aws_constants';
+import { CLOUDBEAT_GCP } from './gcp_credentials_form/gcp_constants';
+
+type PosturePolicyInput =
+  | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_GCP; policy_template: typeof CSPM_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_AWS; policy_template: typeof CSPM_POLICY_TEMPLATE };
+
+export type CloudSetupAccessInputType = 'cloudbeat/cis_aws' | 'cloudbeat/cloud_connectors_aws'; // we need to add more types depending integrations such Asset Inventory
+
+export interface GetCloudConnectorRemoteRoleTemplateParams {
+  input: NewPackagePolicyPostureInput;
+  cloud: Pick<
+    CloudSetup,
+    | 'isCloudEnabled'
+    | 'cloudId'
+    | 'cloudHost'
+    | 'deploymentUrl'
+    | 'serverless'
+    | 'isServerlessEnabled'
+  >;
+  packageInfo: PackageInfo;
+}
+
+export interface GetAwsCredentialTypeConfigParams {
+  setupTechnology: SetupTechnology | undefined;
+  optionId: string;
+  showCloudConnectors: boolean;
+  inputType: CloudSetupAccessInputType;
+}
+
+// Extend NewPackagePolicyInput with known string literals for input type and policy template
+export type NewPackagePolicyPostureInput = NewPackagePolicyInput & PosturePolicyInput;
 
 // Fleet Integration types
 export type PostureInput = (typeof SUPPORTED_CLOUDBEAT_INPUTS)[number];
@@ -36,7 +69,7 @@ export interface CloudPostureIntegrationProps {
   }>;
 }
 
-type CloudConnectorType = 'cloud_connectors';
+export type CloudConnectorType = 'cloud_connectors';
 
 export type CredentialsType = Extract<
   AwsCredentialsType,
@@ -47,23 +80,3 @@ export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
   CloudPostureIntegrationProps
 >;
-
-export type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
-export type AwsCredentialsType =
-  | CloudConnectorType
-  | 'assume_role'
-  | 'direct_access_keys'
-  | 'temporary_keys'
-  | 'shared_credentials'
-  | 'cloud_formation';
-
-export type AzureAccountType = typeof AZURE_SINGLE_ACCOUNT | typeof AZURE_ORGANIZATION_ACCOUNT;
-
-export type GcpAccountType = typeof GCP_SINGLE_ACCOUNT | typeof GCP_ORGANIZATION_ACCOUNT;
-export type GcpFields = Record<
-  string,
-  { label: string; type?: 'password' | 'text'; value?: string; isSecret?: boolean }
->;
-export interface GcpInputFields {
-  fields: GcpFields;
-}

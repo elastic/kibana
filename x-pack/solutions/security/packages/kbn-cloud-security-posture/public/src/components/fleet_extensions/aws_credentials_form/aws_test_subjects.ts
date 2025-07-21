@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 export const AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ =
   'launchAwsCloudFormationAccordianInstructions';
 

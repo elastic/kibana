@@ -13,11 +13,11 @@ import { PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NewPackagePolicyPostureInput, getPosturePolicy } from '../utils';
-import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
+import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { GcpAccountType } from '../types';
 import { gcpField, getInputVarsFields } from './gcp_utils';
+import { NewPackagePolicyPostureInput } from '../types';
+import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from './gcp_constants';
 
 const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -41,6 +41,8 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
     testId: 'gcpSingleAccountTestId',
   },
 ];
+
+type GcpAccountType = typeof GCP_SINGLE_ACCOUNT | typeof GCP_ORGANIZATION_ACCOUNT;
 
 const getGcpAccountType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>

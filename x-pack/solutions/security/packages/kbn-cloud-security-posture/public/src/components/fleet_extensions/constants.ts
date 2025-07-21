@@ -7,51 +7,19 @@
 import { i18n } from '@kbn/i18n';
 import type { CloudPostureIntegrations } from './types';
 import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
+import { CLOUDBEAT_AZURE } from './azure_credentials_form/azure_constants';
+import { CLOUDBEAT_AWS } from './aws_credentials_form/aws_constants';
+import { CLOUDBEAT_GCP } from './gcp_credentials_form/gcp_constants';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 export const SINGLE_ACCOUNT = 'single-account';
 
-const CSPM_POLICY_TEMPLATE = 'cspm';
+export const CSPM_POLICY_TEMPLATE = 'cspm';
 
 // Cloud Credentials Template url was implemented in 1.10.0-preview01. See PR - https://github.com/elastic/integrations/pull/9828
 export const CLOUD_CREDENTIALS_PACKAGE_VERSION = '1.11.0-preview13';
-
-export const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
-export const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';
-export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
-
-export const AWS_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const AWS_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
-export const AWS_CREDENTIALS_TYPE = {
-  CLOUD_CONNECTORS: 'cloud_connectors',
-  ASSUME_ROLE: 'assume_role',
-  DIRECT_ACCESS_KEYS: 'direct_access_keys',
-  TEMPORARY_KEYS: 'temporary_keys',
-  SHARED_CREDENTIALS: 'shared_credentials',
-  CLOUD_FORMATION: 'cloud_formation',
-} as const;
-
-export const GCP_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const GCP_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
-export const GCP_CREDENTIALS_TYPE = {
-  CREDENTIALS_FILE: 'credentials-file',
-  CREDENTIALS_JSON: 'credentials-json',
-  CREDENTIALS_NONE: 'credentials-none',
-} as const;
-
-export const AZURE_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const AZURE_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
-export const AZURE_CREDENTIALS_TYPE = {
-  ARM_TEMPLATE: 'arm_template',
-  MANUAL: 'manual',
-  SERVICE_PRINCIPAL_WITH_CLIENT_SECRET: 'service_principal_with_client_secret',
-  SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE: 'service_principal_with_client_certificate',
-  SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD:
-    'service_principal_with_client_username_and_password',
-  MANAGED_IDENTITY: 'managed_identity',
-} as const;
 
 export const SUPPORTED_POLICY_TEMPLATES = [CSPM_POLICY_TEMPLATE] as const;
 export const SUPPORTED_CLOUDBEAT_INPUTS = [CLOUDBEAT_AWS, CLOUDBEAT_GCP, CLOUDBEAT_AZURE] as const;

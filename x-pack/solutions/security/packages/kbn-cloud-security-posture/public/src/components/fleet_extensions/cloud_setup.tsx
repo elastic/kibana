@@ -30,7 +30,7 @@ import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 // import { assert } from '../../../common/utils/helpers';
 import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
-import { CLOUDBEAT_AWS, SUPPORTED_POLICY_TEMPLATES } from './constants';
+import { SUPPORTED_POLICY_TEMPLATES } from './constants';
 import {
   getMaxPackageName,
   getPostureInputHiddenVars,
@@ -41,20 +41,21 @@ import {
   getCloudConnectorRemoteRoleTemplate,
   getDefaultCloudCredentialsType,
 } from './utils';
-import { PolicyTemplateInputSelector, PolicyTemplateVarsForm } from './policy_template_selectors';
+import { PolicyTemplateInputSelector } from './policy_template_selectors';
 import { usePackagePolicyList } from './hooks/use_package_policy_list';
-// import {
-//   GCP_CREDENTIALS_TYPE,
-//   gcpField,
-//   getInputVarsFields,
-// } from './gcp_credentials_form/gcp_credential_form';
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
-import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_select';
-import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_select';
-import { AzureAccountTypeSelect } from './azure_credentials_form/azure_account_type_select';
+import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_selector';
+import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_selector';
+import { AzureAccountTypeSelect } from './azure_credentials_form/azure_account_type_selector';
 import { IntegrationSettings } from './integration_settings';
-// import { useKibana } from '../../common/hooks/use_kibana';
+import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
+import { AwsCredentialsFormAgentless } from './aws_credentials_form/aws_credentials_form_agentless';
+import { GcpCredentialsFormAgentless } from './gcp_credentials_form/gcp_credentials_form_agentless';
+import { GcpCredentialsForm } from './gcp_credentials_form/gcp_credential_form';
+import { CLOUDBEAT_AWS } from './aws_credentials_form/aws_constants';
+import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
+import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 
 const DEFAULT_INPUT_TYPE = {
   cspm: CLOUDBEAT_AWS,
@@ -184,6 +185,7 @@ type CloudSetupProps = PackagePolicyReplaceDefineStepExtensionComponentProps & {
 };
 
 export const CloudSetup = memo<CloudSetupProps>(
+  // eslint-disable-next-line complexity
   ({
     newPolicy,
     onChange,
@@ -474,21 +476,74 @@ export const CloudSetup = memo<CloudSetupProps>(
           />
         )}
 
-        {/* Defines the vars of the enabled input of the active policy template */}
-        <PolicyTemplateVarsForm
-          input={input}
-          newPolicy={newPolicy}
-          updatePolicy={updatePolicy}
-          packageInfo={packageInfo}
-          onChange={onChange}
-          setIsValid={setIsValid}
-          disabled={isEditPage}
-          setupTechnology={setupTechnology}
-          isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          showCloudConnectors={showCloudConnectors}
-          cloud={cloud}
-        />
+        {input.type === 'cloudbeat/cis_aws' && setupTechnology === SetupTechnology.AGENTLESS && (
+          <AwsCredentialsFormAgentless
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
+            setupTechnology={setupTechnology}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            showCloudConnectors={showCloudConnectors}
+            cloud={cloud}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_aws' && setupTechnology !== SetupTechnology.AGENTLESS && (
+          <AwsCredentialsForm
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            setIsValid={setIsValid}
+            disabled={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_gcp' && setupTechnology === SetupTechnology.AGENTLESS && (
+          <GcpCredentialsFormAgentless
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
+            setupTechnology={setupTechnology}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_gcp' && setupTechnology !== SetupTechnology.AGENTLESS && (
+          <GcpCredentialsForm
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            setIsValid={setIsValid}
+            disabled={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_azure' && setupTechnology === SetupTechnology.AGENTLESS && (
+          <AzureCredentialsFormAgentless
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
+            setupTechnology={setupTechnology}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
+        )}
+        {input.type === 'cloudbeat/cis_azure' && setupTechnology !== SetupTechnology.AGENTLESS && (
+          <AzureCredentialsForm
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            setIsValid={setIsValid}
+            disabled={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+          />
+        )}
         <EuiSpacer />
       </>
     );

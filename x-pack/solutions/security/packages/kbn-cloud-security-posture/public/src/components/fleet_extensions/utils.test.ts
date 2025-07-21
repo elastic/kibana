@@ -13,12 +13,10 @@ import {
   getPosturePolicy,
   getCspmCloudShellDefaultValue,
   isBelowMinVersion,
-  getDefaultAwsCredentialsType,
-  getDefaultAzureCredentialsType,
-  getDefaultGcpHiddenVars,
   findVariableDef,
 } from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS, getPackageInfoMock } from './mocks';
+import { getDefaultAwsCredentialsType } from './aws_credentials_form/aws_utils';
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [

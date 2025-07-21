@@ -20,7 +20,8 @@ import {
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
-import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../test_subjects';
+
+export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 
 export const SetupTechnologySelector = ({
   disabled,

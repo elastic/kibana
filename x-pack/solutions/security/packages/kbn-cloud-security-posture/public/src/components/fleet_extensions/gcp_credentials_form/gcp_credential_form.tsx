@@ -4,105 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Suspense, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
 import semverValid from 'semver/functions/valid';
 import { css } from '@emotion/react';
-import {
-  EuiCallOut,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { LazyPackagePolicyInputVarField, type NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { type NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { GcpCredentialsType } from '../../../../common/types_old';
-import { CLOUDBEAT_GCP } from '../../../../common/constants';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import {
-  fieldIsInvalid,
-  findVariableDef,
-  getCspmCloudShellDefaultValue,
-  getPosturePolicy,
-  NewPackagePolicyPostureInput,
-} from '../utils';
-import { MIN_VERSION_GCP_CIS } from '../../../common/constants';
-import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
-import { GCP_ORGANIZATION_ACCOUNT } from '../policy_template_form';
+  CLOUDBEAT_GCP,
+  GCP_CREDENTIALS_TYPE,
+  GCP_ORGANIZATION_ACCOUNT,
+  GCP_SETUP_ACCESS,
+  MIN_VERSION_GCP_CIS,
+} from './gcp_constants';
+import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { fieldIsInvalid, getCspmCloudShellDefaultValue, getPosturePolicy } from '../utils';
+import { cspIntegrationDocsNavigation } from '../constants';
+import { ReadDocumentation } from '../common';
 import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-} from '../../test_subjects';
-
-export const GCP_SETUP_ACCESS = {
-  CLOUD_SHELL: 'google_cloud_shell',
-  MANUAL: 'manual',
-} as const;
+} from './gcp_test_subjects';
+import { NewPackagePolicyPostureInput } from '../types';
+import { gcpField, getGcpCredentialsType, getInputVarsFields } from './gcp_utils';
+import { GcpInputVarFields } from './gcp_input_var_fields';
+import { GCPSetupInfoContent } from './gcp_setup_info';
+import { GcpFields, GcpInputFields } from './gcp_types';
 
 type SetupFormatGCP = typeof GCP_SETUP_ACCESS.CLOUD_SHELL | typeof GCP_SETUP_ACCESS.MANUAL;
-
-export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) => (
-  <>
-    <EuiHorizontalRule margin="xl" />
-    <EuiTitle size="xs">
-      <h2>
-        <FormattedMessage
-          id="xpack.csp.gcpIntegration.setupInfoContentTitle"
-          defaultMessage="Setup Access"
-        />
-      </h2>
-    </EuiTitle>
-    <EuiSpacer size="l" />
-    <EuiText color={'subdued'} size="s">
-      {isAgentless ? (
-        <FormattedMessage
-          id="xpack.csp.gcpIntegration.agentlessSetupInfoContent"
-          defaultMessage="The integration will need elevated access to run some CIS benchmark rules.You can follow these
-    step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
-          values={{
-            gettingStartedLink: (
-              <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
-                <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
-                  defaultMessage="Getting Started"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.csp.gcpIntegration.setupInfoContent"
-          defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
-method of providing the GCP credentials this integration will use. You can follow these
-step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
-          values={{
-            gettingStartedLink: (
-              <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
-                <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
-                  defaultMessage="Getting Started"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      )}
-    </EuiText>
-  </>
-);
 
 const GoogleCloudShellSetup = ({
   fields,
@@ -223,23 +157,6 @@ const GoogleCloudShellSetup = ({
   );
 };
 
-const credentialOptionsList = [
-  {
-    text: i18n.translate('xpack.csp.gcpIntegration.credentialsFileOption', {
-      defaultMessage: 'Credentials File',
-    }),
-    value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
-    'data-test-subj': 'credentials_file_option_test_id',
-  },
-  {
-    text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
-      defaultMessage: 'Credentials JSON',
-    }),
-    value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
-    'data-test-subj': 'credentials_json_option_test_id',
-  },
-];
-
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: GCP_SETUP_ACCESS.CLOUD_SHELL,
@@ -259,13 +176,13 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   },
 ];
 
-export interface GcpFormProps {
+interface GcpFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  setIsValid: (isValid: boolean) => void;
-  onChange: any;
+  // setIsValid: (isValid: boolean) => void;
+  // onChange: any;
   disabled: boolean;
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
@@ -329,7 +246,7 @@ const useCloudShellUrl = ({
     const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy);
 
     if (setupFormat === GCP_SETUP_ACCESS.MANUAL) {
-      if (!!policyInputCloudShellUrl) {
+      if (policyInputCloudShellUrl) {
         updateCloudShellUrl(newPolicy, updatePolicy, undefined);
       }
       return;
@@ -347,17 +264,11 @@ const useCloudShellUrl = ({
   }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat]);
 };
 
-export const getGcpCredentialsType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
-): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
-
 export const GcpCredentialsForm = ({
   input,
   newPolicy,
   updatePolicy,
   packageInfo,
-  setIsValid,
-  onChange,
   disabled,
   isEditPage,
   hasInvalidRequiredVars,
@@ -377,18 +288,18 @@ export const GcpCredentialsForm = ({
   const setupFormat = getSetupFormatFromInput(input);
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === 'organization-account';
-  // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
-  useEffect(() => {
-    const isInvalidPolicy = isInvalid;
+  // // Integration is Invalid IF Version is not at least 1.5.0 OR Setup Access is manual but Project ID is empty
+  // useEffect(() => {
+  //   const isInvalidPolicy = isInvalid;
 
-    setIsValid(!isInvalidPolicy);
+  //   setIsValid(!isInvalidPolicy);
 
-    onChange({
-      isValid: !isInvalidPolicy,
-      updatedPolicy: newPolicy,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setupFormat, input.type]);
+  //   onChange({
+  //     isValid: !isInvalidPolicy,
+  //     updatedPolicy: newPolicy,
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [setupFormat, input.type]);
 
   useCloudShellUrl({
     packageInfo,
@@ -486,173 +397,5 @@ export const GcpCredentialsForm = ({
       <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />
       <EuiSpacer />
     </>
-  );
-};
-
-export const GcpInputVarFields = ({
-  fields,
-  onChange,
-  isOrganization,
-  disabled,
-  packageInfo,
-  isEditPage,
-  hasInvalidRequiredVars,
-}: {
-  fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
-  onChange: (key: string, value: string) => void;
-  isOrganization: boolean;
-  disabled: boolean;
-  packageInfo: PackageInfo;
-  isEditPage?: boolean;
-  hasInvalidRequiredVars: boolean;
-}) => {
-  const getFieldById = (id: keyof GcpInputFields['fields']) => {
-    return fields.find((element) => element.id === id);
-  };
-
-  const organizationIdFields = getFieldById('gcp.organization_id');
-
-  const projectIdFields = getFieldById('gcp.project_id');
-
-  const credentialsTypeFields = getFieldById('gcp.credentials.type');
-
-  const credentialFilesFields = getFieldById('gcp.credentials.file');
-  const credentialFilesFieldsInvalid = fieldIsInvalid(
-    credentialFilesFields?.value,
-    hasInvalidRequiredVars
-  );
-  const credentialFilesError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
-    {
-      defaultMessage: '{field} is required',
-      values: {
-        field: credentialFilesFields?.label,
-      },
-    }
-  );
-
-  const credentialJSONFields = getFieldById('gcp.credentials.json');
-  const credentialJSONFieldsInvalid = fieldIsInvalid(
-    credentialJSONFields?.value,
-    hasInvalidRequiredVars
-  );
-  const credentialJSONError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
-    {
-      defaultMessage: '{field} is required',
-      values: {
-        field: credentialJSONFields?.label,
-      },
-    }
-  );
-
-  const credentialFieldValue = credentialOptionsList[0].value;
-  const credentialJSONValue = credentialOptionsList[1].value;
-
-  const credentialsTypeValue =
-    credentialsTypeFields?.value ||
-    (credentialFilesFields && credentialFieldValue) ||
-    (credentialJSONFields && credentialJSONValue);
-
-  return (
-    <div>
-      <EuiForm component="form">
-        {organizationIdFields && isOrganization && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
-            <EuiFieldText
-              disabled={disabled}
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
-              id={organizationIdFields.id}
-              fullWidth
-              value={organizationIdFields.value || ''}
-              onChange={(event) => onChange(organizationIdFields.id, event.target.value)}
-            />
-          </EuiFormRow>
-        )}
-        {projectIdFields && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
-            <EuiFieldText
-              disabled={disabled}
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
-              id={projectIdFields.id}
-              fullWidth
-              value={projectIdFields.value || ''}
-              onChange={(event) => onChange(projectIdFields.id, event.target.value)}
-            />
-          </EuiFormRow>
-        )}
-        {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
-            <EuiSelect
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
-              fullWidth
-              options={credentialOptionsList}
-              value={credentialsTypeFields?.value || credentialOptionsList[0].value}
-              onChange={(optionElem) => {
-                onChange(credentialsTypeFields?.id, optionElem.target.value);
-              }}
-            />
-          </EuiFormRow>
-        )}
-        {credentialsTypeValue === credentialFieldValue && credentialFilesFields && (
-          <EuiFormRow
-            fullWidth
-            label={gcpField.fields['gcp.credentials.file'].label}
-            isInvalid={credentialFilesFieldsInvalid}
-            error={credentialFilesFieldsInvalid ? credentialFilesError : undefined}
-          >
-            <EuiFieldText
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
-              id={credentialFilesFields.id}
-              fullWidth
-              value={credentialFilesFields.value || ''}
-              onChange={(event) => onChange(credentialFilesFields.id, event.target.value)}
-              isInvalid={credentialFilesFieldsInvalid}
-            />
-          </EuiFormRow>
-        )}
-        {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
-          <div
-            css={css`
-              width: 100%;
-              .euiFormControlLayout,
-              .euiFormControlLayout__childrenWrapper,
-              .euiFormRow,
-              input {
-                max-width: 100%;
-                width: 100%;
-              }
-            `}
-          >
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              label={gcpField.fields['gcp.credentials.json'].label}
-              isInvalid={credentialJSONFieldsInvalid}
-              error={credentialJSONFieldsInvalid ? credentialJSONError : undefined}
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL}
-            >
-              <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-                <LazyPackagePolicyInputVarField
-                  data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
-                  varDef={{
-                    ...findVariableDef(packageInfo, credentialJSONFields.id)!,
-                    required: true,
-                    type: 'textarea',
-                    secret: true,
-                    full_width: true,
-                  }}
-                  value={credentialJSONFields.value || ''}
-                  onChange={(value) => {
-                    onChange(credentialJSONFields.id, value);
-                  }}
-                  isEditPage={isEditPage}
-                />
-              </Suspense>
-            </EuiFormRow>
-          </div>
-        )}
-      </EuiForm>
-    </div>
   );
 };

@@ -7,19 +7,16 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { AZURE_CREDENTIALS_TYPE, AZURE_SETUP_FORMAT, SetupFormat } from './azure_credentials_form';
-import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import {
-  getArmTemplateUrlFromCspmPackage,
-  getPosturePolicy,
-  NewPackagePolicyPostureInput,
-} from '../utils';
+import { getPosturePolicy } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
-import { CLOUDBEAT_AZURE } from '../../../../common/constants';
-import { AzureCredentialsType } from '../../../../common/types_old';
+import { cspIntegrationDocsNavigation } from '../constants';
+import { NewPackagePolicyPostureInput } from '../types';
+import { AZURE_SETUP_FORMAT, AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_constants';
+import { SetupFormat, AzureCredentialsType } from './azure_types';
+import { getArmTemplateUrlFromCspmPackage } from './azure_utils';
 
 const getSetupFormatFromInput = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>,
@@ -81,7 +78,7 @@ const useUpdateAzureArmTemplate = ({
     const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy);
 
     if (setupFormat === AZURE_SETUP_FORMAT.MANUAL) {
-      if (!!azureArmTemplateUrl) {
+      if (azureArmTemplateUrl) {
         updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined);
       }
       return;
@@ -101,14 +98,14 @@ export const useAzureCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
-  onChange,
+  // onChange,
   setIsValid,
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   packageInfo: PackageInfo;
-  onChange: (opts: any) => void;
+  // onChange: (opts: any) => void;
   setIsValid: (isValid: boolean) => void;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
@@ -126,16 +123,16 @@ export const useAzureCredentialsForm = ({
   const fieldsSnapshot = useRef({});
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
-  useEffect(() => {
-    const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
-    setIsValid(!isInvalid);
+  // useEffect(() => {
+  //   const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
+  //   setIsValid(!isInvalid);
 
-    onChange({
-      isValid: !isInvalid,
-      updatedPolicy: newPolicy,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setupFormat, input.type]);
+  //   onChange({
+  //     isValid: !isInvalid,
+  //     updatedPolicy: newPolicy,
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [setupFormat, input.type]);
 
   const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
 

@@ -13,10 +13,11 @@ import { PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NewPackagePolicyPostureInput, getPosturePolicy } from '../utils';
-import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
+import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { AwsAccountType } from '../types';
+import { NewPackagePolicyPostureInput } from '../types';
+import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from './aws_constants';
+import { AwsAccountType } from './aws_types';
 
 const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
 const getAwsAccountType = (
