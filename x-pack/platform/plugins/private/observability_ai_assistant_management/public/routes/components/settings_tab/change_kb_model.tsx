@@ -186,7 +186,12 @@ export function ChangeKbModel({ knowledgeBase }: { knowledgeBase: UseKnowledgeBa
     dropdownDisplay: (
       <div>
         <strong>{option.label}</strong>
-        <EuiText size="xs" color="subdued" css={{ marginTop: 4 }}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={{ marginTop: 4 }}
+          data-test-subj={`observabilityAiAssistantKnowledgeBaseModelDropdownOption-${option.label}`}
+        >
           {option.description}
         </EuiText>
       </div>
