@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -128,6 +128,12 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
           path="config.scope"
           config={{
             label: i18n.SCOPE,
+            helpText: i18n.SCOPE_HELP_TEXT,
+            labelAppend: (
+              <EuiText size="xs" color="subdued">
+                {i18n.OPTIONAL_LABEL}
+              </EuiText>
+            ),
           }}
           component={Field}
           componentProps={{

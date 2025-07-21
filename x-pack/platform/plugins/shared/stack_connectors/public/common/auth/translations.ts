@@ -204,6 +204,14 @@ export const SCOPE = i18n.translate(
     description: 'The scope to use for for AOuth2 authentication',
   }
 );
+
+export const SCOPE_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.auth.scopeHelpText',
+  {
+    defaultMessage: "Space-separated list of scopes (e.g., 'email profile').",
+  }
+);
+
 export const AUTHENTICATION_OAUTH2 = i18n.translate(
   'xpack.stackConnectors.components.auth.authenticationMethodOAuth2Label',
   {
@@ -231,5 +239,12 @@ export const ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT = i18n.translate(
   {
     defaultMessage:
       'Additional fields in JSON format. Your token provider may require more that just the default fields.',
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.auth.optionalLabel',
+  {
+    defaultMessage: 'Optional',
   }
 );
