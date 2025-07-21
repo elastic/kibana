@@ -32,6 +32,7 @@ import { GrokDebuggerPageObject } from '@kbn/test-suites-xpack-platform/function
 import { LicenseManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/license_management_page';
 import { ApiKeysPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/api_keys_page';
 import { IndexManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_management_page';
+import { IngestPipelinesPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/ingest_pipelines_page';
 import { IndexLifecycleManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_lifecycle_management_page';
 import { LogstashPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/logstash_page';
 import { AssetDetailsProvider } from './asset_details';
@@ -40,7 +41,6 @@ import { EmbeddedConsoleProvider } from './embedded_console';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
-import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
 import { RemoteClustersPageProvider } from './remote_clusters_page';

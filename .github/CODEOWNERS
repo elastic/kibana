@@ -1804,7 +1804,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional_basic/ftr_provider_context.d.ts @elastic/appex-qa
 x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/test/functional/services/remote_es/remote_es.ts @elastic/appex-qa
-/x-pack/test/functional/services/random.js @elastic/appex-qa
+/x-pack/platform/test/functional/services/random.ts @elastic/appex-qa
 /x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/test/functional/page_objects/index.ts @elastic/appex-qa
@@ -1954,6 +1954,7 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @elastic/appex-qa
 /x-pack/platform/test/.gitignore @elastic/appex-qa
 /x-pack/solutions/**/test/.gitignore @elastic/appex-qa
+/x-pack/platform/test/functional/services/pipeline_list.ts @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
@@ -2288,12 +2289,12 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/ccs @elastic/kibana-management
-/x-pack/test/functional/services/data_stream.ts @elastic/kibana-management
+/x-pack/platform/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/grok_debugger_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/test/functional/fixtures/ingest_pipeline_example_mapping.csv @elastic/kibana-management

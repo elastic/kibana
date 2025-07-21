@@ -21,6 +21,9 @@ import { CanvasElementProvider } from './canvas_element';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
 import { ReportingFunctionalProvider } from '../../reporting_functional/services';
+import { RandomProvider } from './random';
+import { PipelineListProvider } from './pipeline_list';
+import { DataStreamProvider } from './data_stream';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -45,4 +48,7 @@ export const services = {
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
+  random: RandomProvider,
+  pipelineList: PipelineListProvider,
+  dataStream: DataStreamProvider,
 };

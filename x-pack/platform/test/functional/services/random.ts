@@ -6,8 +6,9 @@
  */
 
 import Chance from 'chance';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function RandomProvider({ getService }) {
+export function RandomProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   const seed = Date.now();
@@ -35,7 +36,7 @@ export function RandomProvider({ getService }) {
       return chance.paragraph();
     }
 
-    pickOne(list) {
+    pickOne(list: string[]) {
       return chance.pickone(list);
     }
   })();
