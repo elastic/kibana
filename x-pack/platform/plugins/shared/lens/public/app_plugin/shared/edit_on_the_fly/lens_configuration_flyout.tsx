@@ -282,7 +282,6 @@ export function LensEditConfigurationFlyout({
           onCancel={onCancel}
           navigateToLensEditor={navigateToLensEditor}
           onApply={onApply}
-          isScrollable
           isNewPanel={isNewPanel}
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
@@ -322,7 +321,6 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         isSaveable={isSaveable}
-        isScrollable={false}
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}

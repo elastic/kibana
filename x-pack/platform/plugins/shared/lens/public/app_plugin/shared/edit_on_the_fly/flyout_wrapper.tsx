@@ -30,7 +30,6 @@ import type { FlyoutWrapperProps } from './types';
 export const FlyoutWrapper = ({
   children,
   isInlineFlyoutVisible,
-  isScrollable,
   displayFlyoutHeader,
   language,
   isNewPanel,

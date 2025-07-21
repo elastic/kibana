@@ -20,7 +20,6 @@ import type { LensDocument } from '../../../persistence';
 export interface FlyoutWrapperProps {
   children: JSX.Element;
   isInlineFlyoutVisible: boolean;
-  isScrollable: boolean;
   displayFlyoutHeader?: boolean;
   language?: string;
   isNewPanel?: boolean;
