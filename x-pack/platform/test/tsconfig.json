@@ -142,6 +142,8 @@
     "@kbn/rule-registry-plugin",
     "@kbn/controls-plugin",
     "@kbn/upgrade-assistant-pkg-common",
-    "@kbn/upgrade-assistant-pkg-server"
+    "@kbn/upgrade-assistant-pkg-server",
+    "@kbn/global-search-plugin",
+    "@kbn/global-search-test-plugin"
   ]
 }
