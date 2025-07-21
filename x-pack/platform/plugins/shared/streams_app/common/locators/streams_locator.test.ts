@@ -55,21 +55,7 @@ describe('StreamsAppLocatorDefinition', () => {
     });
 
     describe('management tab navigation', () => {
-      it('should generate correct path for enrichment management tab', async () => {
-        const params = {
-          name: 'test-stream',
-          managementTab: 'enrichment',
-        };
-        const result = await locator.getLocation(params);
-
-        expect(result).toEqual({
-          app: 'streams',
-          path: '/test-stream/management/enrichment',
-          state: {},
-        });
-      });
-
-      it('should generate correct path for other management tabs', async () => {
+      it('should generate correct path for management tabs', async () => {
         const params = {
           name: 'test-stream',
           managementTab: 'lifecycle',
@@ -99,7 +85,7 @@ describe('StreamsAppLocatorDefinition', () => {
         };
         const params = {
           name: 'test-stream',
-          managementTab: 'enrichment' as const,
+          managementTab: 'enrichment',
           pageState,
         };
 

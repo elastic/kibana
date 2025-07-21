@@ -9,11 +9,11 @@ import { DataTableRecord } from '@kbn/discover-utils';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiFlexGroup, EuiTitle, EuiBetaBadge, EuiLoadingSpinner, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { StreamsAppLocator } from '../app_locator';
+import { StreamsAppLocator } from '../../common/locators';
 
 export interface DiscoverStreamsLinkProps {
   doc: DataTableRecord;
@@ -98,8 +98,7 @@ function DiscoverStreamsLinkContent({
     },
     [streamsRepositoryClient, index, fallbackStreamName]
   );
-  const params = useMemo(() => ({ name: value }), [value]);
-  const redirectUrl = useMemo(() => locator.getRedirectUrl(params), [locator, params]);
+
   const empty = <span>-</span>;
   if (!index && !value) {
     return empty;
@@ -111,5 +110,5 @@ function DiscoverStreamsLinkContent({
     return empty;
   }
 
-  return <EuiLink href={redirectUrl}>{value}</EuiLink>;
+  return <EuiLink href={locator.getRedirectUrl({ name: value })}>{value}</EuiLink>;
 }
