@@ -40,11 +40,6 @@ export const createIndexWithMappings = async ({
     await esClient.indices.create({
       index: indexName,
       mappings,
-      settings: {
-        number_of_shards: 1,
-        auto_expand_replicas: '0-1',
-        'index.refresh_interval': '1s',
-      },
     });
 
     logger.info(`Successfully created index ${indexName}`);
