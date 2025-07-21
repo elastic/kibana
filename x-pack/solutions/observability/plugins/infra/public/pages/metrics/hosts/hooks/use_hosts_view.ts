@@ -21,11 +21,11 @@ import { useUnifiedSearchContext } from './use_unified_search';
 import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
-  InfraAssetMetricType,
+  InfraEntityMetricType,
 } from '../../../../../common/http_api';
 import type { StringDateRange } from './use_unified_search_url_state';
 
-const HOST_TABLE_METRICS: InfraAssetMetricType[] = [
+const HOST_TABLE_METRICS: InfraEntityMetricType[] = [
   'cpuV2',
   'diskSpaceUsage',
   'memory',
