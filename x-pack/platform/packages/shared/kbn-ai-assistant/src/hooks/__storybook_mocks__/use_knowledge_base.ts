@@ -23,6 +23,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
         concreteWriteIndex: undefined,
         currentInferenceId: undefined,
         isReIndexing: false,
+        productDocStatus: 'uninstalled',
       },
     },
     warmupModel: async () => {},
