@@ -1314,7 +1314,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 
 ### Reporting
 /x-pack/platform/test/functional/apps/dashboard/reporting/ @elastic/response-ops
-/x-pack/test/functional/apps/reporting/ @elastic/response-ops
+/x-pack/platform/test/functional/apps/reporting/ @elastic/response-ops
 /x-pack/platform/test/functional/apps/reporting_management/ @elastic/response-ops
 /x-pack/platform/test/examples/screenshotting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/lens/reporting/ @elastic/response-ops
@@ -1955,6 +1955,7 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/.gitignore @elastic/appex-qa
 /x-pack/solutions/**/test/.gitignore @elastic/appex-qa
 /x-pack/platform/test/functional/services/pipeline_list.ts @elastic/appex-qa
+/x-pack/platform/test/functional/services/pipeline_editor.ts @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery

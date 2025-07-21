@@ -6,15 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function PipelineEditorProvider({ getService }) {
+export function PipelineEditorProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
 
   // test subject selectors
   const SUBJ_CONTAINER = '~pipelineEdit';
-  const getContainerSubjForId = (id) => `~pipelineEdit-${id}`;
+  const getContainerSubjForId = (id: string): string => `~pipelineEdit-${id}`;
   const SUBJ_INPUT_ID = '~pipelineEdit > inputId';
   const SUBJ_INPUT_DESCRIPTION = '~pipelineEdit > inputDescription';
 
@@ -43,44 +44,44 @@ export function PipelineEditorProvider({ getService }) {
   };
 
   return new (class PipelineEditor {
-    async clickSave() {
+    async clickSave(): Promise<void> {
       await testSubjects.click(SUBJ_BTN_SAVE);
     }
-    async clickCancel() {
+    async clickCancel(): Promise<void> {
       await testSubjects.click(SUBJ_BTN_CANCEL);
     }
-    async clickDelete() {
+    async clickDelete(): Promise<void> {
       await testSubjects.click(SUBJ_BTN_DELETE);
     }
-    async clickManagementBreadcrumb() {
+    async clickManagementBreadcrumb(): Promise<void> {
       await testSubjects.click(SUBJ_LNK_BREADCRUMB_MANAGEMENT);
     }
 
-    async setId(value) {
+    async setId(value: string): Promise<void> {
       await testSubjects.setValue(SUBJ_INPUT_ID, value);
     }
-    async setDescription(value) {
+    async setDescription(value: string): Promise<void> {
       await testSubjects.setValue(SUBJ_INPUT_DESCRIPTION, value);
     }
-    async setPipeline(value) {
+    async setPipeline(value: string): Promise<void> {
       await monacoEditor.setCodeEditorValue(value, 0);
     }
-    async setWorkers(value) {
+    async setWorkers(value: string): Promise<void> {
       await testSubjects.setValue(SUBJ_INPUT_WORKERS, value);
     }
-    async setBatchSize(value) {
+    async setBatchSize(value: string): Promise<void> {
       await testSubjects.setValue(SUBJ_INPUT_BATCH_SIZE, value);
     }
-    async setQueueType(value) {
+    async setQueueType(value: string): Promise<void> {
       await testSubjects.click(`${SUBJ_SELECT_QUEUE_TYPE}-${value}`);
     }
-    async setQueueMaxBytesNumber(value) {
+    async setQueueMaxBytesNumber(value: string): Promise<void> {
       await testSubjects.setValue(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, value);
     }
-    async setQueueMaxBytesUnits(value) {
+    async setQueueMaxBytesUnits(value: string): Promise<void> {
       await testSubjects.click(`${SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS}-${value}`);
     }
-    async setQueueCheckpointWrites(value) {
+    async setQueueCheckpointWrites(value: string): Promise<void> {
       await testSubjects.setValue(SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES, value);
     }
 
@@ -89,7 +90,7 @@ export function PipelineEditorProvider({ getService }) {
      *  throw a meaningful error if not
      *  @return {Promise<undefined>}
      */
-    async assertExists() {
+    async assertExists(): Promise<void> {
       await retry.waitFor(
         'pipeline editor visible',
         async () => await testSubjects.exists(SUBJ_CONTAINER)
@@ -102,7 +103,7 @@ export function PipelineEditorProvider({ getService }) {
      *  @param  {string} id
      *  @return {Promise<undefined>}
      */
-    async assertEditorId(id) {
+    async assertEditorId(id: string): Promise<void> {
       await retry.waitFor(
         `editor id to be "${id}"`,
         async () => await testSubjects.exists(getContainerSubjForId(id))
@@ -113,7 +114,7 @@ export function PipelineEditorProvider({ getService }) {
      *  Assert that the editors fields match the defaults
      *  @return {Promise<undefined>}
      */
-    async assertDefaultInputs() {
+    async assertDefaultInputs(): Promise<void> {
       await this.assertInputs(DEFAULT_INPUT_VALUES);
     }
 
@@ -122,7 +123,17 @@ export function PipelineEditorProvider({ getService }) {
      *  @param  {Object} expectedValues - must have id, description, and pipeline keys
      *  @return {Promise<undefined>}
      */
-    async assertInputs(expectedValues) {
+    async assertInputs(expectedValues: {
+      id: string;
+      description: string;
+      pipeline: string;
+      workers: string;
+      batchSize: string;
+      queueType: string;
+      queueMaxBytesNumber: string;
+      queueMaxBytesUnits: string;
+      queueCheckpointWrites: string;
+    }): Promise<void> {
       const values = await Promise.all([
         testSubjects.getAttribute(SUBJ_INPUT_ID, 'value'),
         testSubjects.getAttribute(SUBJ_INPUT_DESCRIPTION, 'value'),
@@ -131,24 +142,24 @@ export function PipelineEditorProvider({ getService }) {
         testSubjects.getAttribute(SUBJ_INPUT_BATCH_SIZE, 'value'),
         testSubjects.getAttribute(SUBJ_SELECT_QUEUE_TYPE, 'value'),
         testSubjects.getAttribute(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
-        testSubjects.getAttribute(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
+        testSubjects.getAttribute(SUBJ_INPUT_QUEUE_MAX_BYTES_UNITS, 'value'),
         testSubjects.getAttribute(SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES, 'value'),
-      ]).then((values) => ({
-        id: values[0],
-        description: values[1],
-        pipeline: values[2],
-        workers: values[3],
-        batchSize: values[4],
-        queueType: values[5],
-        queueMaxBytesNumber: values[6],
-        queueMaxBytesUnits: values[7],
-        queueCheckpointWrites: values[8],
+      ]).then((val) => ({
+        id: val[0],
+        description: val[1],
+        pipeline: val[2],
+        workers: val[3],
+        batchSize: val[4],
+        queueType: val[5],
+        queueMaxBytesNumber: val[6],
+        queueMaxBytesUnits: val[7],
+        queueCheckpointWrites: val[8],
       }));
 
       expect(values).to.eql(expectedValues);
     }
 
-    async assertNoDeleteButton() {
+    async assertNoDeleteButton(): Promise<void> {
       await retry.waitFor(
         `delete button to be hidden`,
         async () => !(await testSubjects.exists(SUBJ_BTN_DELETE))
