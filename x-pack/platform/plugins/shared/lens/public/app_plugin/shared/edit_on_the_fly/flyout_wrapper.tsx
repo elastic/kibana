@@ -126,17 +126,12 @@ export const FlyoutWrapper = ({
             -webkit-mask-image: none;
             padding-left: inherit;
             margin-left: inherit;
-            ${!isScrollable &&
-            `
-                overflow-y: hidden;
-              `}
             > * {
               pointer-events: auto;
             }
           }
           .euiFlyoutBody__overflowContent {
             padding: 0;
-            block-size: 100%;
           }
         `}
       >
