@@ -15,5 +15,3 @@ export {
   type ParseOptions,
   type ParseResult,
 } from './parser';
-
-export { ESQLErrorListener } from './esql_error_listener';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CharStreams, type Token } from 'antlr4';
+import { CharStreams, type Token, ErrorListener } from 'antlr4';
 import { CommonTokenStream, type CharStream } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
 import { attachDecorations, collectDecorations } from './decorations';
@@ -279,7 +279,7 @@ export class Parser {
     const parser = (this.parser = new ESQLParser(tokens));
 
     lexer.removeErrorListeners();
-    lexer.addErrorListener(this.errors);
+    lexer.addErrorListener(this.errors as {} as ErrorListener<number>);
 
     parser.removeErrorListeners();
     parser.addErrorListener(this.errors);

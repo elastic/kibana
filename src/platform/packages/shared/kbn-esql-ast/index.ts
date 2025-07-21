@@ -42,7 +42,6 @@ export {
   parseErrors,
   type ParseOptions,
   type ParseResult,
-  ESQLErrorListener,
 } from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';

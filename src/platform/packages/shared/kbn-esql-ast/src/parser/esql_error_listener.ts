@@ -14,12 +14,12 @@ import type { EditorError } from '../types';
 // These will need to be manually updated whenever the relevant grammar changes.
 const SYNTAX_ERRORS_TO_IGNORE = [`mismatched input '<EOF>' expecting {'row', 'from', 'show'}`];
 
-export class ESQLErrorListener extends antlr.ErrorListener<antlr.Token> {
+export class ESQLErrorListener extends antlr.ErrorListener<antlr.Token | null> {
   protected errors: EditorError[] = [];
 
   syntaxError(
     recognizer: antlr.Recognizer<any>,
-    offendingSymbol: antlr.Token,
+    offendingSymbol: antlr.Token | null,
     line: number,
     column: number,
     message: string,
