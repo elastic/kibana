@@ -76,6 +76,8 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
+import type { MonitoringSyncIntervalConfig } from '../types';
+
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -86,6 +88,7 @@ interface PrivilegeMonitoringClientOpts {
   kibanaVersion: string;
   telemetry?: AnalyticsServiceSetup;
   apiKeyManager?: ApiKeyManager;
+  config: MonitoringSyncIntervalConfig;
 }
 
 export class PrivilegeMonitoringDataClient {
@@ -150,6 +153,10 @@ export class PrivilegeMonitoringDataClient {
         await this.apiKeyGenerator.generate();
       }
 
+      this.log(
+        'info',
+        'Starting privilege monitoring task with interval ${JSON.stringify(this.configInterval)}'
+      );
       await startPrivilegeMonitoringTask({
         logger: this.opts.logger,
         namespace: this.opts.namespace,

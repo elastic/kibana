@@ -6,11 +6,12 @@
  */
 
 import { EXCLUDE_ELASTIC_CLOUD_INDICES, INCLUDE_INDEX_PATTERN } from '../../../../common/constants';
+
 export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_analytics:monitoring:privileges:engine';
 export const VERSION = '1.0.0';
 export const TIMEOUT = '10m';
-export const INTERVAL = '10m';
+export const INTERVAL = this.opts.config.privileges.developer.syncInterval; // 10 minutes in seconds (default)
 
 export const PRIVILEGE_MONITORING_ENGINE_STATUS = {
   // TODO Make the engine initialization async before uncommenting these lines
