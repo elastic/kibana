@@ -53,10 +53,6 @@ const sorting = {
   },
 };
 
-const title = i18n.translate('indexPatternManagement.dataViewTable.title', {
-  defaultMessage: 'Data Views',
-});
-
 const securityDataView = i18n.translate(
   'indexPatternManagement.indexPatternTable.badge.securityDataViewTitle',
   {
@@ -68,7 +64,8 @@ const securitySolution = 'security-solution';
 
 interface Props extends RouteComponentProps {
   canSave: boolean;
-  showCreateDialog?: boolean;
+  setShowCreateDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  title: string
 }
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
@@ -76,7 +73,8 @@ const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) =
 export const IndexPatternTable = ({
   history,
   canSave,
-  showCreateDialog: showCreateDialogProp = false,
+  setShowCreateDialog,
+  title,
 }: Props) => {
   const {
     setBreadcrumbs,
@@ -94,7 +92,6 @@ export const IndexPatternTable = ({
     ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
-  const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
   const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);
   const [dataViewController] = useState(
     () =>
@@ -116,7 +113,7 @@ export const IndexPatternTable = ({
   const hasDataView = useObservable(dataViewController.hasDataView$, defaults.hasDataView);
   const hasESData = useObservable(dataViewController.hasESData$, defaults.hasEsData);
 
-  const useOnTryESQLParams = {
+    const useOnTryESQLParams = {
     locatorClient: share?.url.locators,
     navigateToApp: application.navigateToApp,
   };
@@ -329,18 +326,6 @@ export const IndexPatternTable = ({
     return <></>;
   }
 
-  const displayIndexPatternEditor = showCreateDialog ? (
-    <IndexPatternEditor
-      onSave={(indexPattern) => {
-        history.push(`patterns/${indexPattern.id}`);
-      }}
-      onCancel={() => setShowCreateDialog(false)}
-      defaultTypeIsRollup={isRollup}
-    />
-  ) : (
-    <></>
-  );
-
   const selection = {
     onSelectionChange: setSelectedItems,
   };
@@ -409,7 +394,7 @@ export const IndexPatternTable = ({
     );
 
   return (
-    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+    <>
       {isLoadingDataState ? (
         <div css={{ display: 'flex', justifyContent: 'center' }}>
           <EuiLoadingSpinner size="xxl" />
@@ -417,8 +402,7 @@ export const IndexPatternTable = ({
       ) : (
         displayIndexPatternSection
       )}
-      {displayIndexPatternEditor}
-    </div>
+    </>
   );
 };
 
