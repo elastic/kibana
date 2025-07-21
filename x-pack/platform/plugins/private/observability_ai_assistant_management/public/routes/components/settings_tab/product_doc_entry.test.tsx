@@ -33,6 +33,7 @@ const createMockStatus = (
       service: 'my-service',
       service_settings: {},
     },
+    productDocStatus: 'uninstalled',
     ...overrides,
   },
   loading: false,
