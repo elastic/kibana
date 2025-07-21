@@ -122,6 +122,8 @@ const AIValueComponent = () => {
               <EuiFlexItem>
                 {data && (
                   <AIValueMetrics
+                    from={from}
+                    to={to}
                     totalAlerts={alertCount}
                     attackDiscoveryCount={data.total}
                     alertsInAttacks={data.unique_alert_ids_count}

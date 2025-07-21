@@ -6,57 +6,30 @@
  */
 
 import React from 'react';
-import { useEuiTheme } from '@elastic/eui';
-import type { ChartSeriesData } from '../../../common/components/charts/common';
-import { useThemes } from '../../../common/components/charts/common';
-import { AreaChartBaseComponent } from '../../../common/components/charts/areachart';
-const customHeight = '120px';
-const customWidth = '95%';
 
-export const CostSavingsTrend = () => {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
-  const mockAreaChartData: ChartSeriesData[] = [
-    {
-      key: 'uniqueSourceIpsHistogram',
-      value: [
-        { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 580213 },
-        { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 1096175 },
-        { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 12382 },
-      ],
-      color: colors.accentSecondary,
-    },
-    {
-      key: 'uniqueDestinationIpsHistogram',
-      value: [
-        { x: new Date('2019-05-03T13:00:00.000Z').valueOf(), y: 5975 },
-        { x: new Date('2019-05-04T01:00:00.000Z').valueOf(), y: 84366 },
-        { x: new Date('2019-05-04T13:00:00.000Z').valueOf(), y: 2280 },
-      ],
-      color: colors.danger,
-    },
-  ];
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { ChartHeight } from '../../../explore/components/stat_items/utils';
+import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { getCostSavingsTrendAreaLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_trend_area';
 
-  const themes = useThemes();
-  const configs = {
-    settings: {
-      ...themes,
-      baseTheme: {
-        ...themes.baseTheme,
-        background: {
-          color: `${colors.backgroundBaseSubdued}00`,
-          fallbackColor: colors.backgroundBaseSubdued,
-        },
-      },
-    },
-  };
+interface Props {
+  from: string;
+  to: string;
+}
+const ID = 'CostSavingsTrendQuery';
+const CostSavingsTrendComponent: React.FC<Props> = ({ from, to }) => {
+  // const { euiTheme } = useEuiTheme();
   return (
-    <AreaChartBaseComponent
-      height={customHeight}
-      width={customWidth}
-      data={mockAreaChartData}
-      configs={configs}
+    <VisualizationEmbeddable
+      data-test-subj="embeddable-area-chart"
+      getLensAttributes={getCostSavingsTrendAreaLensAttributes}
+      timerange={{ from, to }}
+      id={`${ID}-area-embeddable`}
+      height={ChartHeight}
+      inspectTitle={'Trend'}
+      scopeId={SourcererScopeName.detections}
     />
   );
 };
+
+export const CostSavingsTrend = React.memo(CostSavingsTrendComponent);

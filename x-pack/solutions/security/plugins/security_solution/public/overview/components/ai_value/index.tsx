@@ -40,12 +40,16 @@ interface Props {
   alertsInAttacks: number;
   attackDiscoveryCount: number;
   totalAlerts: number;
+  from: string;
+  to: string;
 }
 
 export const AIValueMetrics: React.FC<Props> = ({
   alertsInAttacks,
   attackDiscoveryCount,
   totalAlerts,
+  from,
+  to,
 }) => {
   const data = {
     totalAlerts,
@@ -171,7 +175,7 @@ export const AIValueMetrics: React.FC<Props> = ({
                 <EuiText size="s" color="subdued">
                   <p>{'Cumulative savings from AI-driven SOC operations'}</p>
                 </EuiText>
-                <CostSavingsTrend />
+                <CostSavingsTrend from={from} to={to} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

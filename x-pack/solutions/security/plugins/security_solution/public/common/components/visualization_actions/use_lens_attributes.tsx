@@ -51,6 +51,16 @@ export const useLensAttributes = ({
   const { dataView: experimentalDataView } = useDataView(scopeId);
   const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 
+  console.log('data view?', {
+    dataView: experimentalDataView,
+    selectedPatterns: experimentalSelectedPatterns,
+    newDataViewPickerEnabled,
+    oldDataViewId,
+    oldIndicesExist,
+    scopeId,
+    oldSelectedPatterns,
+  });
+
   const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
   const indicesExist = newDataViewPickerEnabled
     ? !!experimentalDataView.matchedIndices?.length
@@ -169,6 +179,12 @@ export const useLensAttributes = ({
     filters,
     dataViewId,
   ]);
+  console.log('lensAttrsWithInjectedData', {
+    hasAdHocDataViews,
+    indicesExist,
+    condition: hasAdHocDataViews || (!hasAdHocDataViews && indicesExist),
+    lensAttrsWithInjectedData,
+  });
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
     ? lensAttrsWithInjectedData
     : null;
