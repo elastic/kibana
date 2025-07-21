@@ -234,6 +234,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
               isInvalid={jobIdValidationError !== ''}
             >
               <EuiFieldText
+                isInvalid={jobIdValidationError !== ''}
                 data-test-subj={`mlLensLayerJobIdInput_${layerIndex}`}
                 value={jobId}
                 onChange={(e) => {
@@ -266,6 +267,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
                 isInvalid={bucketSpanValidationError !== ''}
               >
                 <EuiFieldText
+                  isInvalid={bucketSpanValidationError !== ''}
                   data-test-subj={`mlLensLayerBucketSpanInput_${layerIndex}`}
                   value={bucketSpan}
                   onChange={(e) => {
