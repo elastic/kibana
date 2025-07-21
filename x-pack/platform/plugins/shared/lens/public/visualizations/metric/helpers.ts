@@ -104,13 +104,8 @@ export function getSecondaryDynamicTrendBaselineValue(
   isPrimaryMetricNumeric: boolean,
   baselineValue: number | 'primary'
 ) {
-  if (isPrimaryMetricNumeric) {
-    return baselineValue ?? 0;
-  }
   // If primary is not numeric, reset baseline value to 0
-  if (baselineValue === 'primary') {
-    return 0;
-  }
+  if (!isPrimaryMetricNumeric && baselineValue === 'primary') return 0;
   return baselineValue;
 }
 
