@@ -17,7 +17,7 @@ import {
   getCommandAutocompleteDefinitions,
   ESQL_VARIABLES_PREFIX,
 } from '@kbn/esql-ast';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
 import {
   getControlSuggestionIfSupported,
@@ -215,6 +215,10 @@ async function getSuggestionsWithinCommandExpression(
     return [];
   }
 
+  // resolve the license promise
+  const license = await callbacks?.getLicense?.();
+  const hasMinimumLicenseRequired = license?.hasAtLeast;
+
   // collect all fields + userDefinedColumns to suggest
   const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
@@ -257,6 +261,7 @@ async function getSuggestionsWithinCommandExpression(
             return await callbacks.getColumnsFor!({ query });
           }
         : undefined,
+      hasMinimumLicenseRequired,
     },
     context,
     offset
