@@ -235,6 +235,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
               }
             >
               <EuiFieldText
+                isInvalid={!validClusterURL && formContent.uri !== ''}
                 placeholder={i18n.translate(
                   'xpack.fleet.agentList.migrateAgentFlyout.clusterUrlPlaceholder',
                   {
