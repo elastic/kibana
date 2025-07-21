@@ -8,7 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { logLevelSynonyms } from '../../..';
 
 export enum LogLevelCoalescedValue {
   trace = 'trace',
@@ -22,6 +21,34 @@ export enum LogLevelCoalescedValue {
   emergency = 'emergency',
   fatal = 'fatal',
 }
+
+// Severity ranking: lower index => higher severity
+// The order is based on RFC 5424 (“The Syslog Protocol”, section 6.2.1)
+export const severityOrder: LogLevelCoalescedValue[] = [
+  LogLevelCoalescedValue.emergency,
+  LogLevelCoalescedValue.alert,
+  LogLevelCoalescedValue.fatal,
+  LogLevelCoalescedValue.critical,
+  LogLevelCoalescedValue.error,
+  LogLevelCoalescedValue.warning,
+  LogLevelCoalescedValue.notice,
+  LogLevelCoalescedValue.info,
+  LogLevelCoalescedValue.debug,
+  LogLevelCoalescedValue.trace,
+];
+
+export const logLevelSynonyms: Record<string, LogLevelCoalescedValue> = {
+  emerg: LogLevelCoalescedValue.emergency,
+  crit: LogLevelCoalescedValue.critical,
+  err: LogLevelCoalescedValue.error,
+  eror: LogLevelCoalescedValue.error,
+  warn: LogLevelCoalescedValue.warning,
+  information: LogLevelCoalescedValue.info,
+  informational: LogLevelCoalescedValue.info,
+  dbg: LogLevelCoalescedValue.debug,
+  dbug: LogLevelCoalescedValue.debug,
+  panic: LogLevelCoalescedValue.emergency,
+};
 
 export const getLogLevelCoalescedValue = (
   logLevel: string | string[] | unknown
