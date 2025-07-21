@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import { omit } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
-import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
-import { isDashboardSection } from '@kbn/dashboard-plugin/common';
+import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
+import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type {
   FieldBasedIndexPatternColumn,
@@ -34,7 +34,8 @@ export class RelatedDashboardsClient {
     private logger: Logger,
     private dashboardClient: IContentClient<Dashboard>,
     private alertsClient: InvestigateAlertsClient,
-    private alertId: string
+    private alertId: string,
+    private soClient: SavedObjectsClientContract
   ) {}
 
   public async fetchRelatedDashboards(): Promise<{
@@ -111,6 +112,43 @@ export class RelatedDashboardsClient {
     return sortedDashboards;
   }
 
+  private async fetchReferencedPanel({
+    dashboard,
+    panel,
+  }: {
+    dashboard: Dashboard;
+    panel: DashboardPanel;
+  }): Promise<DashboardPanel> {
+    const panelReference = dashboard.references.find(
+      (r) => panel.panelIndex && r.name.includes(panel.panelIndex) && r.type === panel.type
+    );
+
+    // A reference of the panel was not found
+    if (!panelReference) {
+      this.logger.error(
+        `Reference for panel of type ${panel.type} and panelIndex ${panel.panelIndex} was not found in dashboard with id ${dashboard.id}`
+      );
+      return panel;
+    }
+
+    try {
+      const so = await this.soClient.get(panel.type, panelReference.id);
+      return {
+        ...panel,
+        panelConfig: {
+          ...panel.panelConfig,
+          attributes: so.attributes,
+        },
+      };
+    } catch (error) {
+      // There was an error fetching the referenced saved object
+      this.logger.error(
+        `Error fetching panel with type ${panel.type} and id ${panelReference.id}: ${error.message}`
+      );
+      return panel;
+    }
+  }
+
   private async fetchDashboards({
     page,
     perPage = 20,
@@ -124,9 +162,23 @@ export class RelatedDashboardsClient {
     const {
       result: { hits },
     } = dashboards;
-    hits.forEach((dashboard: Dashboard) => {
-      this.dashboardsById.set(dashboard.id, dashboard);
-    });
+    for (const dashboard of hits) {
+      const panels: DashboardAttributes['panels'] = await Promise.all(
+        dashboard.attributes.panels.map(async (panel) =>
+          isDashboardPanel(panel) && isEmpty(panel.panelConfig)
+            ? await this.fetchReferencedPanel({
+                dashboard,
+                panel,
+              })
+            : panel
+        )
+      );
+      this.dashboardsById.set(dashboard.id, {
+        ...dashboard,
+        attributes: { ...dashboard.attributes, panels },
+      });
+    }
+
     const fetchedUntil = (page - 1) * perPage + dashboards.result.hits.length;
 
     if (dashboards.result.pagination.total <= fetchedUntil) {
@@ -147,7 +199,7 @@ export class RelatedDashboardsClient {
   } {
     const relevantDashboards: SuggestedDashboard[] = [];
     this.dashboardsById.forEach((d) => {
-      const panels = d.attributes.panels;
+      const panels = d.attributes.panels.filter(isDashboardPanel);
       const matchingPanels = this.getPanelsByIndex(index, panels);
       if (matchingPanels.length > 0) {
         this.logger.debug(
@@ -192,7 +244,7 @@ export class RelatedDashboardsClient {
   } {
     const relevantDashboards: SuggestedDashboard[] = [];
     this.dashboardsById.forEach((d) => {
-      const panels = d.attributes.panels;
+      const panels = d.attributes.panels.filter(isDashboardPanel);
       const matchingPanels = this.getPanelsByField(fields, panels);
       const allMatchingFields = new Set(
         matchingPanels.map((p) => Array.from(p.matchingFields)).flat()
@@ -227,23 +279,17 @@ export class RelatedDashboardsClient {
     return { dashboards: relevantDashboards };
   }
 
-  private getPanelsByIndex(index: string, panels: DashboardAttributes['panels']): DashboardPanel[] {
-    const panelsByIndex = panels.filter((p) => {
-      if (isDashboardSection(p)) return false; // filter out sections
-      const panelIndices = this.getPanelIndices(p);
-      return panelIndices.has(index);
-    }) as DashboardPanel[]; // filtering with type guard doesn't actually limit type, so need to cast
+  private getPanelsByIndex(index: string, panels: DashboardPanel[]): DashboardPanel[] {
+    const panelsByIndex = panels.filter((p) => this.getPanelIndices(p).has(index));
     return panelsByIndex;
   }
 
   private getPanelsByField(
     fields: string[],
-    panels: DashboardAttributes['panels']
+    panels: DashboardPanel[]
   ): Array<{ matchingFields: Set<string>; panel: DashboardPanel }> {
     const panelsByField = panels.reduce((acc, p) => {
-      if (isDashboardSection(p)) return acc; // filter out sections
-      const panelFields = this.getPanelFields(p);
-      const matchingFields = fields.filter((f) => panelFields.has(f));
+      const matchingFields = fields.filter((f) => this.getPanelFields(p).has(f));
       if (matchingFields.length) {
         acc.push({ matchingFields: new Set(matchingFields), panel: p });
       }

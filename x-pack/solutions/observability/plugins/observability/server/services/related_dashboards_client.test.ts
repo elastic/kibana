@@ -6,11 +6,12 @@
  */
 import Boom from '@hapi/boom';
 import { RelatedDashboardsClient } from './related_dashboards_client';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
 import { InvestigateAlertsClient } from './investigate_alerts_client';
 import { AlertData } from './alert_data';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('RelatedDashboardsClient', () => {
   let logger: jest.Mocked<Logger>;
@@ -18,6 +19,7 @@ describe('RelatedDashboardsClient', () => {
   let alertsClient: jest.Mocked<InvestigateAlertsClient>;
   let alertId: string;
   let client: RelatedDashboardsClient;
+  let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   const baseMockAlert = {
     getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
     getRuleQueryIndex: jest.fn().mockReturnValue('index1'),
@@ -60,7 +62,15 @@ describe('RelatedDashboardsClient', () => {
 
     alertId = 'test-alert-id';
 
-    client = new RelatedDashboardsClient(logger, dashboardClient, alertsClient, alertId);
+    soClientMock = savedObjectsClientMock.create();
+
+    client = new RelatedDashboardsClient(
+      logger,
+      dashboardClient,
+      alertsClient,
+      alertId,
+      soClientMock
+    );
 
     jest.clearAllMocks();
   });
@@ -416,6 +426,46 @@ describe('RelatedDashboardsClient', () => {
 
       expect(dashboardClient.search).toHaveBeenCalledWith({ limit: 2, cursor: '1' });
       expect(client.dashboardsById.size).toBe(2);
+    });
+
+    it('should fetch referenced panels when fetching dashboards', async () => {
+      const PANEL_SO_ID = 'panelSOId';
+      const PANEL_TYPE = 'lens';
+      const PANEL_INDEX = 'panelIndex';
+      const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
+      dashboardClient.search.mockResolvedValue({
+        contentTypeId: 'dashboard',
+        result: {
+          hits: [
+            {
+              id: 'dashboard1',
+              attributes: {
+                title: 'Dashboard 1',
+                panels: [{ panelConfig: {}, panelIndex: PANEL_INDEX, type: PANEL_TYPE }],
+              },
+              references: [{ name: PANEL_INDEX, type: PANEL_TYPE, id: PANEL_SO_ID }],
+            },
+          ],
+          pagination: { total: 1 },
+        },
+      });
+
+      soClientMock.get.mockResolvedValueOnce({
+        attributes: PANEL_SO_ATTRIBUTES,
+        type: PANEL_TYPE,
+        id: PANEL_SO_ID,
+        references: [],
+      });
+
+      // @ts-ignore next-line
+      await client.fetchDashboards({ page: 1 });
+
+      expect(soClientMock.get).toHaveBeenCalledWith(PANEL_TYPE, PANEL_SO_ID);
+      expect(client.dashboardsById.get('dashboard1')?.attributes.panels[0]).toStrictEqual({
+        panelConfig: { attributes: PANEL_SO_ATTRIBUTES },
+        panelIndex: PANEL_INDEX,
+        type: PANEL_TYPE,
+      });
     });
   });
 
