@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { PipelineStructureTree } from './src';
-export { PipelineTreeNode } from './src/components/pipeline_structure_tree/types';
+export { PipelineStructureTree, MAX_TREE_LEVEL } from './src';
+export type { PipelineTreeNode } from './src';
