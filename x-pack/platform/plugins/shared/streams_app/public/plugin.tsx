@@ -20,8 +20,8 @@ import type {
 } from './types';
 import { StreamsAppServices } from './services/types';
 import { createDiscoverStreamsLink } from './discover_streams_link';
-import { StreamsAppLocatorDefinition } from './app_locator';
 import { StreamsTelemetryService } from './telemetry/service';
+import { StreamsAppLocatorDefinition } from '../common/locators';
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
