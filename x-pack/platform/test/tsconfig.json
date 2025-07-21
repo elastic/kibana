@@ -139,6 +139,7 @@
     "@kbn/gen-ai-functional-testing",
     "@kbn/sse-utils-server",
     "@kbn/inference-common",
-    "@kbn/rule-registry-plugin"
+    "@kbn/rule-registry-plugin",
+    "@kbn/controls-plugin"
   ]
 }
