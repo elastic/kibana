@@ -18,6 +18,8 @@ import { NoDataPageProvider } from './services';
 import mdx from '../README.mdx';
 
 const mock = new NoDataPageStorybookMock();
+const argTypes = mock.getArgumentTypes();
+const args = mock.getArguments();
 
 export default {
   parameters: {
@@ -25,6 +27,8 @@ export default {
       page: mdx,
     },
   },
+  args,
+  argTypes,
 };
 
 export const NoDataPage = {
@@ -35,6 +39,4 @@ export const NoDataPage = {
       </NoDataPageProvider>
     );
   },
-
-  argTypes: mock.getArgumentTypes(),
 };

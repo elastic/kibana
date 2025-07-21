@@ -122,6 +122,14 @@ export abstract class AbstractStorybookMock<
     };
   }
 
+  getArguments() {
+    const args = this.getArgumentTypes();
+    return (Object.keys(args) as Array<keyof typeof args>).reduce((acc, key) => {
+      acc[key] = this.getArgumentValue(key, {} as ArgumentParams<PropArguments, ServiceArguments>);
+      return acc;
+    }, {} as Record<keyof typeof args, any>);
+  }
+
   /**
    * Given a collection of parameters, return either the value provided by the story,
    * or the default value for the argument definition.
