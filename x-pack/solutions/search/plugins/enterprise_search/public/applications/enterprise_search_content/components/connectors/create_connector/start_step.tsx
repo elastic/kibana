@@ -127,6 +127,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   }
                 >
                   <EuiFieldText
+                    isInvalid={!!error}
                     data-test-subj="enterpriseSearchStartStepFieldText"
                     fullWidth
                     name="connectorName"

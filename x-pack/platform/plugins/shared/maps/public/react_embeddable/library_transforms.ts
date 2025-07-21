@@ -8,7 +8,6 @@
 import { HasLibraryTransforms, SerializedPanelState } from '@kbn/presentation-publishing';
 import { getCore, getCoreOverlays } from '../kibana_services';
 import type { MapAttributes } from '../../common/content_management';
-import { SavedMap } from '../routes/map_page';
 import { checkForDuplicateTitle, getMapClient } from '../content_management';
 import { MAP_EMBEDDABLE_NAME } from '../../common/constants';
 import { MapSerializedState } from './types';
@@ -30,16 +29,20 @@ export function getByValueState(state: MapSerializedState | undefined, attribute
 }
 
 export function initializeLibraryTransforms(
-  savedMap: SavedMap,
-  serializeState: () => SerializedPanelState<MapSerializedState>
+  isByReference: boolean,
+  serializeByReference: (libraryId: string) => SerializedPanelState<MapSerializedState>,
+  serializeByValue: () => SerializedPanelState<MapSerializedState>
 ): HasLibraryTransforms<MapSerializedState, MapSerializedState> {
   return {
     canLinkToLibrary: async () => {
       const { maps_v2: maps } = getCore().application.capabilities;
-      return maps.save && savedMap.getSavedObjectId() === undefined;
+      return maps.save && !isByReference;
+    },
+    canUnlinkFromLibrary: async () => {
+      return isByReference;
     },
     saveToLibrary: async (title: string) => {
-      const state = serializeState();
+      const state = serializeByValue();
       const {
         item: { id: savedObjectId },
       } = await getMapClient().create({
@@ -51,11 +54,8 @@ export function initializeLibraryTransforms(
       });
       return savedObjectId;
     },
-    getSerializedStateByReference: (libraryId: string) => {
-      const { rawState: initialRawState, references } = serializeState();
-      const rawState = getByReferenceState(initialRawState, libraryId);
-      return { rawState, references };
-    },
+    getSerializedStateByReference: serializeByReference,
+    getSerializedStateByValue: serializeByValue,
     checkForDuplicateTitle: async (
       newTitle: string,
       isTitleDuplicateConfirmed: boolean,
@@ -74,14 +74,6 @@ export function initializeLibraryTransforms(
           overlays: getCoreOverlays(),
         }
       );
-    },
-    canUnlinkFromLibrary: async () => {
-      return savedMap.getSavedObjectId() !== undefined;
-    },
-    getSerializedStateByValue: () => {
-      const { rawState: initialRawState, references } = serializeState();
-      const rawState = getByValueState(initialRawState, savedMap.getAttributes());
-      return { rawState, references };
     },
   };
 }
