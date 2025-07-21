@@ -229,6 +229,7 @@ export const ADDITIONAL_FIELDS = i18n.translate(
 export const ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT = i18n.translate(
   'xpack.stackConnectors.components.webhhok.additionalFieldsHelpTooltipText',
   {
-    defaultMessage: 'Additional fields in JSON format as defined by access token provider',
+    defaultMessage:
+      'Additional fields in JSON format. Your token provider may require more that just the default fields.',
   }
 );

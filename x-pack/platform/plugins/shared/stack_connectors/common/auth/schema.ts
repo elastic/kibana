@@ -12,20 +12,11 @@ import { AuthType, SSLCertType } from './constants';
 
 export const authTypeSchema = schema.maybe(
   schema.oneOf(
-    [schema.literal(AuthType.Basic), schema.literal(AuthType.SSL), schema.literal(null)],
-    {
-      defaultValue: AuthType.Basic,
-    }
-  )
-);
-
-export const webhookAuthTypeSchema = schema.maybe(
-  schema.oneOf(
     [
       schema.literal(AuthType.Basic),
       schema.literal(AuthType.SSL),
-      schema.literal(AuthType.OAuth2),
       schema.literal(null),
+      schema.literal(AuthType.OAuth2),
     ],
     {
       defaultValue: AuthType.Basic,
@@ -45,22 +36,14 @@ export const AuthConfiguration = {
   verificationMode: schema.maybe(
     schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
   ),
-};
-
-export const WebhookAuthConfiguration = {
-  hasAuth: hasAuthSchema,
-  authType: webhookAuthTypeSchema,
-  certType: schema.maybe(
-    schema.oneOf([schema.literal(SSLCertType.CRT), schema.literal(SSLCertType.PFX)])
+  oauth2: schema.maybe(
+    schema.object({
+      accessTokenUrl: schema.maybe(schema.string()),
+      clientId: schema.maybe(schema.string()),
+      scope: schema.maybe(schema.string()),
+      additionalFields: schema.maybe(schema.string()),
+    })
   ),
-  ca: schema.maybe(schema.string()),
-  verificationMode: schema.maybe(
-    schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
-  ),
-  accessTokenUrl: schema.maybe(schema.string()),
-  clientId: schema.maybe(schema.string()),
-  scope: schema.maybe(schema.string()),
-  additionalFields: schema.maybe(schema.string()),
 };
 
 export const SecretConfiguration = {

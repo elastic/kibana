@@ -167,11 +167,8 @@ export async function executor(
     hasAuth,
     authType,
     ca,
-    accessTokenUrl,
-    clientId,
-    scope,
     verificationMode,
-    additionalFields,
+    oauth2: { accessTokenUrl, clientId, scope, additionalFields } = {},
   } = config;
 
   let parsedAdditionalFields: Record<string, unknown> | undefined;

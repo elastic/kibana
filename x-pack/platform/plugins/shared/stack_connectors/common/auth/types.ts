@@ -9,13 +9,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import type {
   AuthConfiguration,
   authTypeSchema,
-  webhookAuthTypeSchema,
   hasAuthSchema,
   SecretConfigurationSchema,
 } from './schema';
 
 export type HasAuth = TypeOf<typeof hasAuthSchema>;
-export type AuthTypeName = TypeOf<typeof authTypeSchema> | TypeOf<typeof webhookAuthTypeSchema>;
+export type AuthTypeName = TypeOf<typeof authTypeSchema>;
 export type SecretsConfigurationType = TypeOf<typeof SecretConfigurationSchema>;
 export type CAType = TypeOf<typeof AuthConfiguration.ca>;
 export type VerificationModeType = TypeOf<typeof AuthConfiguration.verificationMode>;
