@@ -115,6 +115,9 @@ export const FieldSelector: FC<Props> = ({
           disabled={fields.length === 0}
           valueOfSelected={selectedField ?? undefined}
           onChange={setSelectedField}
+          css={{
+            minWidth: 250,
+          }}
         />
       </EuiFormRow>
     </>
