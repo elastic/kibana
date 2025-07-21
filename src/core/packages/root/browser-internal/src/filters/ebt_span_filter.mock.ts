@@ -10,57 +10,60 @@
 export const mockedKibanaBrowserPayload = {
   transactions: [
     {
-      id: '07802582a3c3947f',
-      trace_id: '7a90cbb59e214f74d8d29a079df75f87',
-      name: 'POST /v3/send/kibana-browser',
-      type: 'http-request',
-      duration: 479,
-      context: {
-        page: {
-          referer: '',
-          url: 'http://localhost:5601/kibana/app/observability/alerts?_a=(filters:!(),groupings:!(none),kuery:%27%27,rangeFrom:now-24h,rangeTo:now)',
-        },
-      },
-      marks: {
-        agent: {},
-      },
+      id: 'c48b65fe2f21ccfc',
+      trace_id: '4520717268bdeabfe47b2faf3515f907',
+      name: 'Click - div',
+      type: 'user-interaction',
+      duration: 32,
       spans: [
         {
-          id: '194e11ac7ff04d99',
-          transaction_id: '823dc836c3dd7112',
-          parent_id: '823dc836c3dd7112',
-          trace_id: '116dc5a94d9a330aea6119ad30b2660c',
-          name: 'POST https://telemetry-staging.elastic.co/v3/send/kibana-browser',
+          id: '32983da6ddaf9d2c',
+          transaction_id: 'c48b65fe2f21ccfc',
+          parent_id: 'c48b65fe2f21ccfc',
+          trace_id: '4520717268bdeabfe47b2faf3515f907',
+          name: 'POST http://localhost:5601//v3/send/kibana-browser',
           type: 'external',
           subtype: 'http',
-          start: 0,
-          duration: 494,
+          start: 1,
+          duration: 31,
           context: {
             http: {
               method: 'POST',
-              url: 'https://telemetry-staging.elastic.co/v3/send/kibana-browser',
+              url: 'http://localhost:5601//v3/send/kibana-browser',
               status_code: 200,
             },
             destination: {
               service: {
-                resource: 'telemetry-staging.elastic.co:443',
+                resource: 'localhost:5601',
                 name: 'N/A',
                 type: 'N/A',
               },
-              address: 'telemetry-staging.elastic.co',
-              port: 443,
+              address: 'localhost',
+              port: 5601,
             },
           },
           outcome: 'success',
           sample_rate: 1,
         },
       ],
+      context: {
+        custom: {
+          classes:
+            'euiFlexGroup euiPageHeaderContent__top css-zk9s4c-euiFlexGroup-responsive-wrap-l-flexStart-stretch-row-euiPageHeaderContent__top',
+        },
+        page: {
+          referer: '',
+          url: 'http://localhost:5601/kibana/app/observability/alerts',
+        },
+      },
+      marks: {
+        agent: {},
+      },
       span_count: {
         started: 1,
       },
       sampled: true,
       sample_rate: 1,
-      outcome: 'success',
     },
   ],
   errors: [],

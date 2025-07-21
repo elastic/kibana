@@ -12,32 +12,19 @@ import { ebtSpanFilter, type Payload } from './ebt_span_filter';
 import { mockedKibanaBrowserPayload, mockedRandomTransactionPayload } from './ebt_span_filter.mock';
 
 describe('ebtSpanFilter', () => {
-  it('filters ebt kibana browser spans out', () => {
+  it('filters out transactions that only have ebt spans', () => {
     const payload: Payload = _.cloneDeep(mockedKibanaBrowserPayload);
     const result = ebtSpanFilter(payload);
     expect(result).toEqual({
-      ...mockedKibanaBrowserPayload,
-      transactions: [
-        {
-          ...payload.transactions[0],
-          spans: [],
-        },
-      ],
+      errors: [],
+      transactions: [],
     });
   });
 
-  it('does not modify payloads without ebt spans', () => {
+  it('does not modify non-user-interaction type transactions', () => {
     const payload: Payload = _.cloneDeep(mockedRandomTransactionPayload);
     const result = ebtSpanFilter(payload);
-    expect(result).toEqual({
-      ...mockedRandomTransactionPayload,
-      transactions: [
-        {
-          ...payload.transactions[0],
-          spans: [],
-        },
-      ],
-    });
+    expect(result).toEqual(mockedRandomTransactionPayload);
   });
 
   it('does not throw if payload is empty', () => {

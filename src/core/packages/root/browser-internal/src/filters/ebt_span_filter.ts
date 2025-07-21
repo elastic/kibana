@@ -15,18 +15,26 @@ export interface Payload {
   [key: string]: any;
 }
 
+const hasTrackedSpan = (spans: any): boolean => {
+  // Check if there is any span with a URL other than ignorePaths
+  return !spans.every((span: any) => {
+    const url = span?.context?.http?.url;
+    return typeof url === 'string' ? ignorePaths.some((p) => url.includes(p)) : false;
+  });
+};
+
+// Related to https://github.com/elastic/observability-dev/issues/4529
+// This filter is only applied on the 'user-interaction' type transactions
+// If the 'user-interaction' transactions only have EBT spans, they will be filtered out.
 export const ebtSpanFilter: FilterFn = (payload: Payload) => {
   try {
     if (payload.transactions) {
-      payload.transactions.forEach((tr: any) => {
-        tr.spans = tr.spans.filter((span: any) => {
-          if (
-            span.context?.http?.url &&
-            ignorePaths.some((p) => span.context.http.url.includes(p))
-          ) {
-            return false;
-          }
-        });
+      payload.transactions = payload.transactions.filter((tr: any) => {
+        if (tr.type === 'user-interaction') {
+          return hasTrackedSpan(tr.spans);
+        }
+        // Keep all non-user-interaction transactions
+        return true;
       });
     }
   } catch (error) {
