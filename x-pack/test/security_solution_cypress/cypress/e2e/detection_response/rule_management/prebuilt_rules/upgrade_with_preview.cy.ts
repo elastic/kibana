@@ -22,9 +22,6 @@ import {
   PER_FIELD_DIFF_WRAPPER,
   PER_FIELD_DIFF_DEFINITION_SECTION,
   RULES_MANAGEMENT_TABLE,
-  PER_FIELD_EDIT_BUTTON,
-  PER_FIELD_SAVE_BUTTON,
-  PER_FIELD_CANCEL_BUTTON,
 } from '../../../../screens/alerts_detection_rules';
 import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
@@ -68,6 +65,14 @@ import {
 } from '../../../../tasks/api_calls/common';
 import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
 import { expectRulesInTable, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
+import {
+  acceptFieldValue,
+  cancelFieldValue,
+  saveFieldValue,
+  switchFieldToEditMode,
+  toggleFieldAccordion,
+  typeRuleName,
+} from '../../../../tasks/prebuilt_rules/prebuilt_rules_upgrade_flyout';
 
 const PREVIEW_TABS = {
   OVERVIEW: 'Overview',
@@ -90,7 +95,7 @@ describe(
       login();
     });
 
-    describe('basic functionality', () => {
+    describe('preview prebuilt rule upgrade', () => {
       const PREBUILT_RULE_ID = 'test-prebuilt-rule-a';
       const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
         rule_id: PREBUILT_RULE_ID,
@@ -124,30 +129,6 @@ describe(
         cy.contains(UPDATE_PREBUILT_RULE_PREVIEW, newRuleName).should('not.exist');
       });
 
-      it('upgrades a prebuilt rule after preview', () => {
-        setUpRuleUpgrades({
-          currentRuleAssets: [PREBUILT_RULE_ASSET],
-          rulePatches: [{ rule_id: PREBUILT_RULE_ID, tags: ['customized'] }],
-          newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
-        });
-
-        const currentRuleName = PREBUILT_RULE_ASSET['security-rule'].name;
-        const newRuleName = NEW_PREBUILT_RULE_ASSET['security-rule'].name;
-
-        visitRulesUpgradeTable();
-
-        openPrebuiltRuleUpgradeFlyoutFor(currentRuleName);
-
-        // Upgrade the prebuilt rule
-        cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
-
-        assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
-        assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
-
-        visitRulesManagementTable();
-        expectRulesInTable(RULES_MANAGEMENT_TABLE, [newRuleName]);
-      });
-
       it('hides tabs and sections without content', () => {
         const PREBUILT_RULE_WITHOUT_INVESTIGATION_AND_SETUP_GUIDES = createRuleAssetSavedObject({
           rule_id: 'test-prebuilt_rule_without_investigation_and_setup_guides',
@@ -178,9 +159,7 @@ describe(
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Investigation guide').should('not.exist');
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Setup guide').should('not.exist');
       });
-    });
 
-    describe('preview prebuilt rule upgrade', () => {
       it('shows custom query prebuilt rule properties', () => {
         setUpRuleUpgrades({
           currentRuleAssets: [CUSTOM_QUERY_PREBUILT_RULE_ASSET],
@@ -680,6 +659,365 @@ describe(
       });
     });
 
+    describe('rule upgrade after preview', () => {
+      const PREBUILT_RULE_ID = 'test-prebuilt-rule-a';
+      const PREBUILT_RULE_PARAMS: Partial<PrebuiltRuleAsset> = {
+        rule_id: PREBUILT_RULE_ID,
+        version: 1,
+        type: 'query',
+        index: ['test-index-*'],
+        query: '*:*',
+        language: 'kuery',
+        name: 'Prebuilt rule A',
+        description: 'Non-customized prebuilt rule A',
+        risk_score: 30,
+        severity: 'low',
+        rule_name_override: 'event.name',
+        timestamp_override: 'event.timestamp',
+        timestamp_override_fallback_disabled: true,
+        timeline_id: 'test-timeline-1',
+        timeline_title: 'Test timeline',
+        license: 'Test license',
+        note: 'Test note',
+        building_block_type: 'default',
+        investigation_fields: {
+          field_names: ['fieldA', 'fieldB'],
+        },
+        tags: ['tag-a', 'tag-b'],
+        enabled: false,
+        risk_score_mapping: [
+          {
+            field: 'fieldB',
+            operator: 'equals',
+            value: 'low',
+            risk_score: 30,
+          },
+        ],
+        severity_mapping: [
+          {
+            field: 'fieldC',
+            operator: 'equals',
+            severity: 'low',
+            value: 'low',
+          },
+        ],
+        interval: '10m',
+        from: 'now-20m',
+        to: 'now',
+        exceptions_list: [
+          {
+            id: 'test-exception-list',
+
+            list_id: 'test-list-id',
+            type: 'detection',
+            namespace_type: 'agnostic',
+          },
+        ],
+        author: ['Test'],
+        false_positives: ['false-positive-1', 'false-positive-2'],
+        references: ['http://reference-1', 'http://reference-2'],
+        max_signals: 50,
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0001',
+              name: 'Initial Access',
+              reference: 'https://attack.mitre.org/tactics/TA0001/',
+            },
+            technique: [
+              {
+                id: 'T1078',
+                name: 'Valid Accounts',
+                reference: 'https://attack.mitre.org/techniques/T1078/',
+                subtechnique: [
+                  {
+                    id: 'T1078.004',
+                    name: 'Cloud Accounts',
+                    reference: 'https://attack.mitre.org/techniques/T1078/004/',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        setup: 'Test investigation guide',
+        related_integrations: [
+          {
+            package: 'google_workspace',
+            version: '^2.31.0',
+          },
+        ],
+        alert_suppression: {
+          group_by: ['fieldA', 'fieldB'],
+          duration: { value: 2, unit: 'h' },
+          missing_fields_strategy: 'doNotSuppress',
+        },
+      };
+
+      describe('AAB diff case', () => {
+        const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 2,
+          name: 'Prebuilt rule',
+        });
+        const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 3,
+          name: 'New Prebuilt rule',
+        });
+
+        it('upgrades a non-customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, [
+            NEW_PREBUILT_RULE_ASSET['security-rule'].name,
+          ]);
+        });
+
+        it('customizes via flyout and upgrades a non-customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          // Enter a new rule name
+          toggleFieldAccordion('name');
+          switchFieldToEditMode('name');
+          typeRuleName('Custom rule name');
+          saveFieldValue('name');
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, ['Custom rule name']);
+        });
+      });
+
+      describe('ABA diff case', () => {
+        const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 2,
+          name: 'Prebuilt rule',
+          tags: ['tag-a', 'tag-b'],
+        });
+        const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 3,
+          name: 'New Prebuilt rule',
+          tags: ['tag-a', 'tag-b'],
+        });
+
+        it('upgrades a customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [{ rule_id: PREBUILT_RULE_ID, tags: ['custom-tag'] }],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, [
+            NEW_PREBUILT_RULE_ASSET['security-rule'].name,
+          ]);
+        });
+
+        it('customizes via flyout and upgrades a customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [{ rule_id: PREBUILT_RULE_ID, tags: ['custom-tag'] }],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          // Enter a new rule name
+          toggleFieldAccordion('name');
+          switchFieldToEditMode('name');
+          typeRuleName('Custom rule name');
+          saveFieldValue('name');
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, ['Custom rule name']);
+        });
+      });
+
+      describe('ABC diff case (solvable conflict)', () => {
+        const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 2,
+          name: 'Prebuilt rule',
+          tags: ['tag-a', 'tag-b'],
+        });
+        const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 3,
+          name: 'New Prebuilt rule',
+          tags: ['tag-c', 'tag-d'],
+        });
+
+        it('upgrades a customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [{ rule_id: PREBUILT_RULE_ID, tags: ['custom-tag'] }],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          acceptFieldValue('tags');
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, [
+            NEW_PREBUILT_RULE_ASSET['security-rule'].name,
+          ]);
+        });
+
+        it('customizes via flyout and upgrades a customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [{ rule_id: PREBUILT_RULE_ID, tags: ['custom-tag'] }],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          acceptFieldValue('tags');
+
+          // Enter a new rule name
+          toggleFieldAccordion('name');
+          switchFieldToEditMode('name');
+          typeRuleName('Custom rule name');
+          saveFieldValue('name');
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, ['Custom rule name']);
+        });
+      });
+
+      describe('ABC diff case (non-solvable conflict)', () => {
+        const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 2,
+          name: 'Prebuilt rule',
+          query: 'fieldA : someValue',
+          index: ['test-index-*'],
+        });
+        const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          ...PREBUILT_RULE_PARAMS,
+          rule_id: PREBUILT_RULE_ID,
+          version: 3,
+          name: 'New Prebuilt rule',
+          query: 'fieldB : someValue AND fieldC : anotherValue',
+          index: ['another-test-index-*', 'test-index-*'],
+        });
+
+        it('upgrades a customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [{ rule_id: PREBUILT_RULE_ID, query: '*:*', index: ['my-index'] }],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          saveFieldValue('kql_query');
+          acceptFieldValue('data_source');
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, [
+            NEW_PREBUILT_RULE_ASSET['security-rule'].name,
+          ]);
+        });
+
+        it('customizes via flyout and upgrades a customized prebuilt rule', () => {
+          setUpRuleUpgrades({
+            currentRuleAssets: [PREBUILT_RULE_ASSET],
+            rulePatches: [{ rule_id: PREBUILT_RULE_ID, query: '*:*', index: ['my-index'] }],
+            newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
+          });
+          visitRulesUpgradeTable();
+          openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
+
+          saveFieldValue('kql_query');
+          acceptFieldValue('data_source');
+
+          // Enter a new rule name
+          toggleFieldAccordion('name');
+          switchFieldToEditMode('name');
+          typeRuleName('Custom rule name');
+          saveFieldValue('name');
+
+          // Upgrade the prebuilt rule
+          cy.get(UPDATE_PREBUILT_RULE_BUTTON).click();
+
+          assertRuleUpgradeSuccessToastShown([NEW_PREBUILT_RULE_ASSET]);
+          assertRulesNotPresentInRuleUpdatesTable([NEW_PREBUILT_RULE_ASSET]);
+
+          visitRulesManagementTable();
+          expectRulesInTable(RULES_MANAGEMENT_TABLE, ['Custom rule name']);
+        });
+      });
+    });
+
     describe('type change upgrade', () => {
       const PREBUILT_RULE_ID = 'test-prebuilt-rule';
       const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
@@ -772,7 +1110,7 @@ describe(
 
         cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.disabled');
 
-        cy.get(`${FIELD_UPGRADE_WRAPPER('name')} ${PER_FIELD_SAVE_BUTTON}`).click();
+        saveFieldValue('name');
 
         cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.enabled');
       });
@@ -798,12 +1136,12 @@ describe(
         visitRulesUpgradeTable();
         openPrebuiltRuleUpgradeFlyoutFor(PREBUILT_RULE_ASSET['security-rule'].name);
 
-        cy.get(`${FIELD_UPGRADE_WRAPPER('name')} .euiAccordion__arrow`).click();
-        cy.get(`${FIELD_UPGRADE_WRAPPER('name')} ${PER_FIELD_EDIT_BUTTON}`).click();
+        toggleFieldAccordion('name');
+        switchFieldToEditMode('name');
 
         cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.disabled');
 
-        cy.get(`${FIELD_UPGRADE_WRAPPER('name')} ${PER_FIELD_SAVE_BUTTON}`).click();
+        saveFieldValue('name');
 
         cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.enabled');
       });
@@ -831,20 +1169,19 @@ describe(
         visitRulesUpgradeTable();
         openPrebuiltRuleUpgradeFlyoutFor('Customized prebuilt rule');
 
-        // Switch tags field to edit mode
-        cy.get(`${FIELD_UPGRADE_WRAPPER('tags')} .euiAccordion__arrow`).click();
-        cy.get(`${FIELD_UPGRADE_WRAPPER('tags')} ${PER_FIELD_EDIT_BUTTON}`).click();
+        toggleFieldAccordion('tags');
+        switchFieldToEditMode('tags');
 
         cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.disabled');
 
         // Resolve name field conflicts
-        cy.get(`${FIELD_UPGRADE_WRAPPER('name')} ${PER_FIELD_SAVE_BUTTON}`).click();
+        saveFieldValue('name');
 
         // Make sure the "Update rule" button is still disabled
         cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.disabled');
 
         // Cancel tags field value unchanged
-        cy.get(`${FIELD_UPGRADE_WRAPPER('tags')} ${PER_FIELD_CANCEL_BUTTON}`).click();
+        cancelFieldValue('tags');
 
         cy.get(UPDATE_PREBUILT_RULE_BUTTON).should('be.enabled');
       });

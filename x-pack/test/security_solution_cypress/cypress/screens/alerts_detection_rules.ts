@@ -381,6 +381,9 @@ export const PER_FIELD_EDIT_BUTTON = '[data-test-subj="prebuilt-rule-upgrade-fly
 export const PER_FIELD_CANCEL_BUTTON =
   '[data-test-subj="prebuilt-rule-upgrade-flyout-field-cancel"]';
 
+export const PER_FIELD_ACCEPT_BUTTON =
+  '[data-test-subj="prebuilt-rule-upgrade-flyout-field-accept"]';
+
 export const PER_FIELD_SAVE_BUTTON = '[data-test-subj="prebuilt-rule-upgrade-flyout-field-save"]';
 
 export const MODIFIED_RULE_BADGE = '[data-test-subj="upgradeRulesTableModifiedColumnBadge"]';
