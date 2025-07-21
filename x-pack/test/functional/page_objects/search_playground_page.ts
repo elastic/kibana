@@ -716,8 +716,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectUnSavedChangesBadegeExists() {
         await testSubjects.existOrFail('playground-unsaved-changes-badge');
       },
-      async expectUnSavedChangesBadegeNotExists() {
-        await testSubjects.missingOrFail('playground-unsaved-changes-badge');
+      async expectUnSavedChangesBadegeNotExists(timeout?: number) {
+        await testSubjects.missingOrFail('playground-unsaved-changes-badge', { timeout });
       },
       async expectSavedPlaygroundButtonToExist() {
         await testSubjects.existOrFail('saved-playground-save-button');

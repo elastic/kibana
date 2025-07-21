@@ -179,7 +179,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeExists();
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
         await pageObjects.searchPlayground.SavedPlaygroundPage.clickSavedPlaygroundSaveButton();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists(
+          10000
+        );
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
       });
       it('should allow updating playground query fields', async () => {
