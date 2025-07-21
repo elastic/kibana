@@ -14,6 +14,7 @@ export type ObservabilityApp =
   | 'synthetics'
   | 'alerts'
   | 'observability-overview'
+  | 'observabilityManageRules'
   | 'ux'
   | 'fleet'
   | 'profiling'

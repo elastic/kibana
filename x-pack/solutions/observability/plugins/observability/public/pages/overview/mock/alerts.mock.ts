@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// TODO: test needed here?
 export const alertsFetchData = async () => {
   return Promise.resolve({
     data: [

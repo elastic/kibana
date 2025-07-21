@@ -8,7 +8,7 @@
 import type { HttpSetup } from '@kbn/core/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 
-const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts'];
+const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts', 'observability'];
 
 export async function getObservabilityAlerts({ http }: { http: HttpSetup }) {
   try {

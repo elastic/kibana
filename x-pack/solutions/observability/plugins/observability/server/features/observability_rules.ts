@@ -81,7 +81,7 @@ export const getManageRulesFeature = (): KibanaFeatureConfig => ({
   category: DEFAULT_APP_CATEGORIES.observability,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: ['kibana'],
-  catalogue: [],
+  catalogue: ['observability'],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -89,7 +89,7 @@ export const getManageRulesFeature = (): KibanaFeatureConfig => ({
   privileges: {
     all: {
       app: ['kibana'],
-      catalogue: [],
+      catalogue: ['observability'],
       api: ['rac'],
       savedObject: {
         all: [],
@@ -106,7 +106,7 @@ export const getManageRulesFeature = (): KibanaFeatureConfig => ({
     },
     read: {
       app: ['kibana'],
-      catalogue: [],
+      catalogue: ['observability'],
       api: ['rac'],
       savedObject: {
         all: [],
