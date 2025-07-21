@@ -36,6 +36,7 @@ import { IngestPipelinesPageProvider } from '@kbn/test-suites-xpack-platform/fun
 import { IndexLifecycleManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_lifecycle_management_page';
 import { LogstashPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/logstash_page';
 import { RollupPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/rollup_page';
+import { RemoteClustersPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/remote_clusters_page';
 import { AssetDetailsProvider } from './asset_details';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
@@ -44,7 +45,6 @@ import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
-import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';

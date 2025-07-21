@@ -2287,7 +2287,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json @elastic/kibana-management
 /x-pack/test/functional/es_archives/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/ccs @elastic/kibana-management
 /x-pack/platform/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
@@ -2312,7 +2312,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/license_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/apps/management @elastic/kibana-management
-/x-pack/test/functional/apps/remote_clusters @elastic/kibana-management
+/x-pack/platform/test/functional/apps/remote_clusters @elastic/kibana-management
 /x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
 /src/platform/test/plugin_functional/test_suites/management @elastic/kibana-management
