@@ -29,20 +29,21 @@
 
 export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooterHeight) {
   var scrollContainerId = 'app-main-scroll';
-  var rootScroller;
+  var rootScroller = document.scrollingElement || document.documentElement;
   var isContainerScroll = false;
 
   // Check if a specific container is provided for scrolling
   if (scrollContainerId && document.getElementById(scrollContainerId)) {
-    rootScroller = document.getElementById(scrollContainerId);
-    isContainerScroll = true;
-  } else {
-    // Fall back to document root scroller
-    rootScroller = document.scrollingElement || document.documentElement;
-  }
+    var containerElement = document.getElementById(scrollContainerId);
 
-  if (!rootScroller) {
-    throw new Error('Unable to find scroller element');
+    // Check if target is inside the container using the contains method
+    var isTargetInContainer = containerElement.contains(target);
+
+    // Only use container scrolling if target is inside the container
+    if (isTargetInContainer) {
+      rootScroller = containerElement;
+      isContainerScroll = true;
+    }
   }
 
   var rootRect = rootScroller.getBoundingClientRect();
@@ -81,16 +82,16 @@ export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooter
     target.scrollIntoView();
   }
 
-  var boundingRect = target.getBoundingClientRect();
+  targetRect = target.getBoundingClientRect();
 
   // Calculate the additional scroll needed based on whether we're in container or document scrolling
   var additionalScrollNecessary;
   if (isContainerScroll) {
     // For container scrolling, we need to calculate the offset relative to the container's top
-    additionalScrollNecessary = fixedHeaderHeight - (boundingRect.top - rootRect.top);
+    additionalScrollNecessary = fixedHeaderHeight - (targetRect.top - rootRect.top);
   } else {
     // For document scrolling, use the original calculation
-    additionalScrollNecessary = fixedHeaderHeight - boundingRect.top;
+    additionalScrollNecessary = fixedHeaderHeight - targetRect.top;
   }
 
   if (additionalScrollNecessary > 0) {
@@ -102,9 +103,7 @@ export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooter
       ? rootRect.height - fixedFooterHeight
       : viewportHeight - fixedFooterHeight;
 
-    var elementBottom = isContainerScroll
-      ? boundingRect.bottom - rootRect.top
-      : boundingRect.bottom;
+    var elementBottom = isContainerScroll ? targetRect.bottom - rootRect.top : targetRect.bottom;
 
     if (bottomOfVisibility < elementBottom) {
       rootScroller.scrollTop = rootScroller.scrollTop + (elementBottom - bottomOfVisibility);
