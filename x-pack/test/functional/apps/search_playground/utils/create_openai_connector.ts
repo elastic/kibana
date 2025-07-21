@@ -6,7 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
-import { LlmProxy } from '../../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+import { LlmProxy } from './create_llm_proxy';
 
 export async function createOpenAIConnector({
   supertest,

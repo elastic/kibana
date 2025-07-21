@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
@@ -54,7 +53,6 @@ export interface ObservabilitySharedSetup {
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
 }
@@ -116,7 +114,6 @@ export class ObservabilitySharedPlugin implements Plugin {
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
-      guidedOnboardingApi: plugins.guidedOnboarding?.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart: core }),
       isSidebarEnabled$: this.isSidebarEnabled$,
     });
