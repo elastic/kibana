@@ -12,7 +12,6 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -228,18 +227,6 @@ export const DiscoverTopNav = ({
     [dispatch, setSearchDraftUiState]
   );
 
-  const draft = useMemo(() => {
-    if (
-      searchDraftUiState?.query &&
-      isOfAggregateQueryType(searchDraftUiState.query) !== isOfAggregateQueryType(query)
-    ) {
-      // safeguard against query type mismatch
-      return undefined;
-    }
-
-    return searchDraftUiState;
-  }, [searchDraftUiState, query]);
-
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
@@ -277,7 +264,7 @@ export const DiscoverTopNav = ({
           ) : undefined
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
-        draft={draft}
+        draft={searchDraftUiState}
         onDraftChange={TABS_ENABLED ? onDraftChange : undefined}
       />
       {isESQLToDataViewTransitionModalVisible && (

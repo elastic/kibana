@@ -254,6 +254,30 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     return nextState;
   }
 
+  private prefillWithInitialDraftState = (state: SearchBarState<QT>): SearchBarState<QT> => {
+    const { draft, query } = this.props;
+
+    if (!draft) {
+      return state;
+    }
+
+    if (
+      query &&
+      draft.query &&
+      isOfAggregateQueryType(query) !== isOfAggregateQueryType(draft.query)
+    ) {
+      // safeguard against query type mismatch
+      return state;
+    }
+
+    return {
+      ...state,
+      query: draft.query ? ({ ...draft.query } as SearchBarState<QT>['query']) : state.query,
+      dateRangeFrom: draft.dateRangeFrom || state.dateRangeFrom,
+      dateRangeTo: draft.dateRangeTo || state.dateRangeTo,
+    };
+  };
+
   /*
    Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
 
@@ -261,19 +285,15 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
    until the user manually submits their changes. Some apps have watches on the query value in app state so we don't
    want to trigger those on every keypress.
   */
-  public state = {
+  public state = this.prefillWithInitialDraftState({
     isFiltersVisible: true,
     openQueryBarMenu: false,
     showSavedQueryPopover: false,
     currentProps: this.props,
-    query: this.props.draft?.query
-      ? { ...this.props.draft.query }
-      : this.props.query
-      ? { ...this.props.query }
-      : undefined,
-    dateRangeFrom: this.props.draft?.dateRangeFrom || get(this.props, 'dateRangeFrom', 'now-15m'),
-    dateRangeTo: this.props.draft?.dateRangeTo || get(this.props, 'dateRangeTo', 'now'),
-  } as SearchBarState<QT>;
+    query: this.props.query ? { ...this.props.query } : undefined,
+    dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
+    dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
+  } as SearchBarState<QT>);
 
   public isDirty = () => {
     if (!this.props.showDatePicker && this.state.query && this.props.query) {
