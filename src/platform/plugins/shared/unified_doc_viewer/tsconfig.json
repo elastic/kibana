@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [".storybook/*", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
@@ -46,7 +46,7 @@
     "@kbn/apm-types-shared",
     "@kbn/object-utils",
     "@kbn/es-query",
-    "@kbn/css-utils",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }
