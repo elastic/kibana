@@ -50,18 +50,10 @@ export function DashboardTile({
         <EuiFlexItem key={dashboard.id}>
           <EuiText size="s">
             <a
-              href="#"
-              onClick={async (e) => {
-                e.preventDefault();
-                if (dashboardLocator) {
-                  const url = await dashboardLocator.getUrl({
-                    dashboardId: dashboard.id,
-                  });
-                  window.open(url, '_blank');
-                } else {
-                  console.error('Dashboard locator is not available');
-                }
-              }}
+              href={dashboardLocator?.getRedirectUrl({
+                dashboardId: dashboard.id,
+              })}
+              target="_blank"
             >
               {dashboard.title}
             </a>
