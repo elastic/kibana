@@ -276,11 +276,14 @@ const getEvidenceList = (finding: CspFinding) =>
     },
   ].filter(truthy);
 
-const getEvaluationEvidence = ({ result, resource }: CspFinding) => {
+const getEvaluationEvidence = ({
+  result,
+  resource,
+}: CspFinding): Record<string, unknown> | undefined => {
   return (
-    result.evidence || // for all CIS benchmarks except CIS_GCP
-    (resource.raw as { resource?: unknown })?.resource || // for CIS_GCP benchmarks, prefer the specific resource
-    resource.raw // fallback to the raw resource
+    result?.evidence || // for all CIS benchmarks except CIS_GCP
+    (resource?.raw as { resource?: unknown })?.resource || // for CIS_GCP benchmarks, prefer the specific resource
+    resource?.raw // fallback to the raw resource
   );
 };
 
