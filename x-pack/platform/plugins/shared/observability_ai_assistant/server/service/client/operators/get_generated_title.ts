@@ -13,8 +13,10 @@ import type { ObservabilityAIAssistantClient } from '..';
 import { Message, MessageRole } from '../../../../common';
 
 export const TITLE_CONVERSATION_FUNCTION_NAME = 'title_conversation';
-export const TITLE_SYSTEM_MESSAGE =
-  'You are a helpful assistant for {scope}. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.';
+export const getTitleSystemMessage = (scope: AssistantScope[]) =>
+  `You are a helpful assistant for ${
+    scope.includes('observability') ? 'Elastic Observability' : 'Elasticsearch'
+  }. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`;
 
 type ChatFunctionWithoutConnectorAndTokenCount = (
   name: string,
@@ -37,9 +39,7 @@ export function getGeneratedTitle({
 }): Observable<string> {
   return from(
     chat('generate_title', {
-      systemMessage: scopes.includes('observability')
-        ? TITLE_SYSTEM_MESSAGE.replace(/\{scope\}/, 'Elastic Observability')
-        : TITLE_SYSTEM_MESSAGE.replace(/\{scope\}/, 'Elasticsearch'),
+      systemMessage: getTitleSystemMessage(scopes),
       messages: [
         {
           '@timestamp': new Date().toISOString(),

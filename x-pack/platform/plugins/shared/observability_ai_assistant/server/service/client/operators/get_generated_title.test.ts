@@ -9,7 +9,7 @@ import { ChatCompleteResponse } from '@kbn/inference-common';
 import { Message, MessageRole } from '../../../../common';
 import {
   TITLE_CONVERSATION_FUNCTION_NAME,
-  TITLE_SYSTEM_MESSAGE,
+  getTitleSystemMessage,
   getGeneratedTitle,
 } from './get_generated_title';
 import { AssistantScope } from '@kbn/ai-assistant-common';
@@ -180,7 +180,7 @@ describe('getGeneratedTitle', () => {
     expect(chatSpy).toHaveBeenCalledWith(
       'generate_title',
       expect.objectContaining({
-        systemMessage: TITLE_SYSTEM_MESSAGE.replace(/\{scope\}/, 'Elastic Observability'),
+        systemMessage: getTitleSystemMessage(scopes),
       })
     );
   });
@@ -209,7 +209,7 @@ describe('getGeneratedTitle', () => {
     expect(chatSpy).toHaveBeenCalledWith(
       'generate_title',
       expect.objectContaining({
-        systemMessage: TITLE_SYSTEM_MESSAGE.replace(/\{scope\}/, 'Elasticsearch'),
+        systemMessage: getTitleSystemMessage(scopes),
       })
     );
   });

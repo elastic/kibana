@@ -9,12 +9,13 @@ import expect from '@kbn/expect';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import {
   TITLE_CONVERSATION_FUNCTION_NAME,
-  TITLE_SYSTEM_MESSAGE,
+  getTitleSystemMessage,
 } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete, clearConversations } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -76,7 +77,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('sends the correct system message to the LLM for the title', () => {
-        const systemMessage = TITLE_SYSTEM_MESSAGE.replace(/\{scope\}/, 'Elastic Observability');
+        const systemMessage = getTitleSystemMessage(['observability'] as AssistantScope[]);
         expect(
           titleRequestBody.messages.find((message) => message.role === MessageRole.System)?.content
         ).to.be(systemMessage);
