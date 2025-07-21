@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { AssignArgs } from 'xstate5';
 import { StreamEnrichmentContextType } from './types';
 import {
+  SampleDocumentWithUIAttributes,
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
@@ -68,12 +69,19 @@ export function getDataSourcesUrlState(context: StreamEnrichmentContextType) {
     .map(dataSourceConverter.toUrlSchema);
 }
 
-export function getDataSourcesSamples(context: StreamEnrichmentContextType) {
+export function getDataSourcesSamples(
+  context: StreamEnrichmentContextType
+): SampleDocumentWithUIAttributes[] {
   const dataSourcesSnapshots = context.dataSourcesRefs
     .map((dataSourceRef) => dataSourceRef.getSnapshot())
     .filter((snapshot) => snapshot.matches('enabled'));
 
-  return dataSourcesSnapshots.flatMap((snapshot) => snapshot.context.data);
+  return dataSourcesSnapshots.flatMap((snapshot) => {
+    return snapshot.context.data.map((doc) => ({
+      dataSourceId: snapshot.context.dataSource.id,
+      document: doc,
+    }));
+  });
 }
 
 export function getStagedProcessors(context: StreamEnrichmentContextType) {
@@ -116,7 +124,9 @@ export function getUpsertWiredFields(
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
 
-export const spawnDataSource = <TAssignArgs extends AssignArgs<any, any, any, any>>(
+export const spawnDataSource = <
+  TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
+>(
   dataSource: EnrichmentDataSource,
   assignArgs: TAssignArgs
 ) => {

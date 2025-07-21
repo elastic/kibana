@@ -8,13 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
-  SEMANTIC_SEARCH_PLUGIN,
-  VECTOR_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 /**
@@ -49,14 +46,6 @@ export const elasticsearchTitle = (page: Title = []) =>
 
 export const searchExperiencesTitle = (page: Title = []) =>
   generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);
-
-export const aiSearchTitle = (page: Title = []) => generateTitle([...page, AI_SEARCH_PLUGIN.NAME]);
-
-export const vectorSearchTitle = (page: Title = []) =>
-  generateTitle([...page, VECTOR_SEARCH_PLUGIN.NAME]);
-
-export const semanticSearchTitle = (page: Title = []) =>
-  generateTitle([...page, SEMANTIC_SEARCH_PLUGIN.NAME]);
 
 export const enterpriseSearchContentTitle = (page: Title = []) =>
   generateTitle([...page, ENTERPRISE_SEARCH_DATA_PLUGIN.NAME]);

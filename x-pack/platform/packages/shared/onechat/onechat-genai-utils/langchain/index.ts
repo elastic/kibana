@@ -15,12 +15,15 @@ export {
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
+  createToolCallEvent,
+  createToolResultEvent,
 } from './graph_events';
-export { extractTextContent, extractToolCalls, type ToolCall } from './messages';
+export { extractTextContent, extractToolCalls, extractToolReturn, type ToolCall } from './messages';
 export {
   toolsToLangchain,
   toolToLangchain,
   toolIdentifierFromToolCall,
+  sanitizeToolId,
   type ToolIdMapping,
   type ToolsAndMappings,
 } from './tools';

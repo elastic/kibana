@@ -6,20 +6,15 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  RunToolFn,
-  ScopedRunToolFn,
-  RunAgentFn,
-  ToolProvider,
-  AgentRegistry,
-} from '@kbn/onechat-server';
+import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ToolsServiceSetup, ScopedPublicToolRegistry } from './services/tools';
+import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { AgentClient } from './services/agents';
 
 export interface OnechatSetupDependencies {
   actions: ActionsPluginSetup;
@@ -40,10 +35,6 @@ export interface ToolsSetup {
    * Register a built-in tool to be available in onechat.
    */
   register: ToolsServiceSetup['register'];
-  /**
-   * Register a tool provider to be available in onechat.
-   */
-  registerProvider: ToolsServiceSetup['registerProvider'];
 }
 
 /**
@@ -51,38 +42,20 @@ export interface ToolsSetup {
  */
 export interface ToolsStart {
   /**
-   * Access the tool registry's APIs.
-   */
-  registry: ToolProvider;
-  /**
    * Execute a tool.
    */
   execute: RunToolFn;
   /**
-   * Return a version of the tool APIs scoped to the provided request.
+   * Return the global tool registry scoped to the current user.
    */
-  asScoped: (opts: { request: KibanaRequest }) => ScopedToolsStart;
-}
-
-/**
- * Scoped tools APIs.
- */
-export interface ScopedToolsStart {
-  /**
-   * scoped tools registry
-   */
-  registry: ScopedPublicToolRegistry;
-  /**
-   * Scoped tool runner
-   */
-  execute: ScopedRunToolFn;
+  getRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
 }
 
 export interface AgentsStart {
   /**
-   * Agents registry
+   * Returns a scoped agent client
    */
-  registry: AgentRegistry;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<AgentClient>;
   /**
    * Execute an agent.
    */

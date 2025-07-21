@@ -21,9 +21,9 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
 
   return (
     <AssetDetails
-      assetId={name}
-      assetName={name}
-      assetType="host"
+      entityId={name}
+      entityName={name}
+      entityType="host"
       dateRange={parsedDateRange}
       overrides={{
         metadata: {

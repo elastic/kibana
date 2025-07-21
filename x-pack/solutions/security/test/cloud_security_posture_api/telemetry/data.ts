@@ -16,6 +16,7 @@ export interface MockTelemetryFindings {
   cluster_id?: string;
   cloud?: { account?: { id: string } };
   cloudbeat?: { kubernetes: { version: string } };
+  data_stream?: { namespace: string };
 }
 
 export interface MockTelemetryData {
@@ -42,6 +43,7 @@ export const data: MockTelemetryData = {
       result: { evaluation: 'failed' },
       cloud: { account: { id: 'my-aws-12345' } },
       host: { name: 'docker-fleet-agent' },
+      data_stream: { namespace: 'default' },
     },
     {
       rule: {
@@ -61,6 +63,7 @@ export const data: MockTelemetryData = {
       result: { evaluation: 'passed' },
       cloud: { account: { id: 'my-aws-12345' } },
       host: { name: 'docker-fleet-agent' },
+      data_stream: { namespace: 'default' },
     },
   ],
   kspmFindings: [
@@ -83,6 +86,7 @@ export const data: MockTelemetryData = {
       result: { evaluation: 'passed' },
       host: { name: 'docker-fleet-agent' },
       cloudbeat: { kubernetes: { version: 'v1.23.0' } },
+      data_stream: { namespace: 'default' },
     },
     {
       cluster_id: 'my-k8s-cluster-5555',
@@ -103,6 +107,7 @@ export const data: MockTelemetryData = {
       result: { evaluation: 'passed' },
       host: { name: 'control-plane' },
       cloudbeat: { kubernetes: { version: 'v1.23.0' } },
+      data_stream: { namespace: 'default' },
     },
   ],
   kspmFindingsNoPostureType: [

@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 
 enum IndexMode {
@@ -78,10 +77,13 @@ export const CreateIndexModal = ({
     setError(null);
     const trimmedName = indexName.trim();
 
-    await createPrivMonImportIndex({
-      name: trimmedName,
-      mode: indexMode,
-    }).catch((err: SecurityAppError) => {
+    try {
+      await createPrivMonImportIndex({
+        name: trimmedName,
+        mode: indexMode,
+      });
+      onCreate(trimmedName);
+    } catch (err) {
       setError(
         i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.error',
@@ -91,8 +93,7 @@ export const CreateIndexModal = ({
           }
         )
       );
-    });
-    onCreate(trimmedName);
+    }
   }, [indexName, createPrivMonImportIndex, indexMode, onCreate]);
 
   return (

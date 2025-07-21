@@ -110,6 +110,24 @@ export class UnifiedTabsPageObject extends FtrService {
     });
   }
 
+  public async duplicateTab(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    await this.openTabMenu(index);
+    const duplicateButton = await this.testSubjects.find('unifiedTabs_tabMenuItem_duplicate');
+    await duplicateButton.click();
+    await this.retry.waitFor('the new tab to appear after duplication', async () => {
+      const newNumberOfTabs = await this.getNumberOfTabs();
+      return newNumberOfTabs === tabElements.length + 1;
+    });
+    await this.retry.waitFor('the duplicated tab to be selected', async () => {
+      const selectedTab = await this.getSelectedTab();
+      return selectedTab?.index === index + 1;
+    });
+  }
+
   public async enterNewTabLabel(newLabel: string) {
     await this.retry.waitFor('the tab label to be editable', async () => {
       return Boolean(
