@@ -2156,24 +2156,6 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-public.useObservabilityTourContext",
-        "type": "Function",
-        "tags": [],
-        "label": "useObservabilityTourContext",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ObservabilityTourContextValue"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tour/tour.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
         "id": "def-public.useQuickTimeRanges",
         "type": "Function",
         "tags": [],
@@ -3959,21 +3941,6 @@
           "; }) => void; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-public.observTourStepStorageKey",
-        "type": "string",
-        "tags": [],
-        "label": "observTourStepStorageKey",
-        "description": [],
-        "signature": [
-          "\"guidedOnboarding.observability.tourStep\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tour/tour.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

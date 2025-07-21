@@ -28,7 +28,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }, t);
   };
 
-  describe('GlobalSearch providers', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/228679
+  // Failing: See https://github.com/elastic/kibana/issues/228679
+  describe.skip('GlobalSearch providers', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
