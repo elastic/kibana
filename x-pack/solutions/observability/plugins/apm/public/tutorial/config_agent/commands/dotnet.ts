@@ -11,7 +11,6 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
-  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const dotnetVariables = {
@@ -44,7 +43,7 @@ export const dotnetLineNumbers = {
 export const dotnet = `{
   "ElasticApm": {
     "${dotnetVariables.apmServiceName}": "{{{apmServiceName}}}",
-    "${dotnetVariables.secretToken}": "${SECRET_TOKEN_COMMAND_PLACEHOLDER}",
+    "${dotnetVariables.secretToken}": "{{{secretToken}}}",
     "${dotnetVariables.apmServerUrl}": "{{{apmServerUrl}}}",
     "${dotnetVariables.apmEnvironment}": "{{{apmEnvironment}}}",
   }

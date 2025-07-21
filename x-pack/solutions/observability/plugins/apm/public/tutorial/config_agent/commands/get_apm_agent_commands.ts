@@ -93,6 +93,7 @@ export function getApmAgentCommands({
   };
 }) {
   const commands = apmAgentCommandsMap[variantId];
+
   if (!commands) {
     return '';
   }

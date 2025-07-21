@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { API_KEY_COMMAND_PLACEHOLDER, SECRET_TOKEN_COMMAND_PLACEHOLDER } from './shared_hints';
 
 export const djangoVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'SECRET_TOKEN' }),
@@ -35,11 +34,11 @@ ELASTIC_APM = {
 
   {{^secretToken}}
   # {{apiKeyHint}}
-  'API_KEY': '${API_KEY_COMMAND_PLACEHOLDER}',
+  'API_KEY': '{{{apiKey}}}',
   {{/secretToken}}
   {{#secretToken}}
   # {{secretTokenHint}}
-  'SECRET_TOKEN': '${SECRET_TOKEN_COMMAND_PLACEHOLDER}',
+  'SECRET_TOKEN': '{{{secretToken}}}',
   {{/secretToken}}
 
   # {{{serverUrlHint}}}

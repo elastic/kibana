@@ -45,6 +45,3 @@ export const serviceEnvironmentHint = i18n.translate(
     defaultMessage: `The name of the environment this service is deployed in, e.g., "production" or "staging". Environments allow you to easily filter data on a global level in the APM UI. It's important to be consistent when naming environments across agents.`,
   }
 );
-
-export const API_KEY_COMMAND_PLACEHOLDER = '<API_KEY>';
-export const SECRET_TOKEN_COMMAND_PLACEHOLDER = '<SECRET_TOKEN>';

@@ -11,7 +11,6 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
-  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const goVariables = {
@@ -49,7 +48,7 @@ export const go = `# ${i18n.translate(
 )}
 export ${goVariables.apmServiceName}={{{apmServiceName}}}
 
-export ${goVariables.secretToken}=${SECRET_TOKEN_COMMAND_PLACEHOLDER}
+export ${goVariables.secretToken}={{secretToken}}}
 
 export ${goVariables.apmServerUrl}={{{apmServerUrl}}}
 

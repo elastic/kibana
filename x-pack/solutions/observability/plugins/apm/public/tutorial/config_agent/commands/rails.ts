@@ -11,7 +11,6 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
-  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const railsVariables = {
@@ -45,7 +44,7 @@ export const rails = `# config/elastic_apm.yml:
 
 ${railsVariables.apmServiceName}: '{{{apmServiceName}}}'
 
-${railsVariables.secretToken}: '${SECRET_TOKEN_COMMAND_PLACEHOLDER}'
+${railsVariables.secretToken}: '{{{secretToken}}}'
 
 ${railsVariables.apmServerUrl}: '{{{apmServerUrl}}}'
 

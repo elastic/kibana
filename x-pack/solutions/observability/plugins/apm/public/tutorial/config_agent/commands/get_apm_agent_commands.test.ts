@@ -35,7 +35,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
-        -Delastic.apm.secret_token=<SECRET_TOKEN>\\\\
+        -Delastic.apm.secret_token=\\\\
         -Delastic.apm.server_url= \\\\
         -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -55,7 +55,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
-        -Delastic.apm.secret_token=<SECRET_TOKEN>\\\\
+        -Delastic.apm.secret_token=foobar\\\\
         -Delastic.apm.server_url=localhost:8220 \\\\
         -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
@@ -121,7 +121,7 @@ describe('getCommands', () => {
         var apm = require('elastic-apm-node').start({
           serviceName: 'my-service-name',
 
-          secretToken: '<SECRET_TOKEN>',
+          secretToken: '',
 
           serverUrl: '',
 
@@ -144,7 +144,7 @@ describe('getCommands', () => {
         var apm = require('elastic-apm-node').start({
           serviceName: 'my-service-name',
 
-          secretToken: '<SECRET_TOKEN>',
+          secretToken: 'foobar',
 
           serverUrl: 'localhost:8220',
 
@@ -170,7 +170,7 @@ describe('getCommands', () => {
         ELASTIC_APM = {
           'SERVICE_NAME': 'my-service-name',
 
-          'SECRET_TOKEN': '<SECRET_TOKEN>',
+          'SECRET_TOKEN': '',
 
           'SERVER_URL': '',
 
@@ -202,7 +202,7 @@ describe('getCommands', () => {
         ELASTIC_APM = {
           'SERVICE_NAME': 'my-service-name',
 
-          'SECRET_TOKEN': '<SECRET_TOKEN>',
+          'SECRET_TOKEN': 'foobar',
 
           'SERVER_URL': 'localhost:8220',
 
@@ -235,7 +235,7 @@ describe('getCommands', () => {
         app.config['ELASTIC_APM'] = {
           'SERVICE_NAME': 'my-service-name',
 
-          'SECRET_TOKEN': '<SECRET_TOKEN>',
+          'SECRET_TOKEN': '',
 
           'SERVER_URL': '',
 
@@ -266,7 +266,7 @@ describe('getCommands', () => {
         app.config['ELASTIC_APM'] = {
           'SERVICE_NAME': 'my-service-name',
 
-          'SECRET_TOKEN': '<SECRET_TOKEN>',
+          'SECRET_TOKEN': 'foobar',
 
           'SERVER_URL': 'localhost:8220',
 
@@ -290,7 +290,7 @@ describe('getCommands', () => {
 
         service_name: 'my-service-name'
 
-        secret_token: '<SECRET_TOKEN>'
+        secret_token: ''
 
         server_url: ''
 
@@ -312,7 +312,7 @@ describe('getCommands', () => {
 
         service_name: 'my-service-name'
 
-        secret_token: '<SECRET_TOKEN>'
+        secret_token: 'foobar'
 
         server_url: 'localhost:8220'
 
@@ -333,7 +333,7 @@ describe('getCommands', () => {
 
         service_name: 'my-service-name'
 
-        secret_token: '<SECRET_TOKEN>'
+        secret_token: ''
 
         server_url: '',
 
@@ -355,7 +355,7 @@ describe('getCommands', () => {
 
         service_name: 'my-service-name'
 
-        secret_token: '<SECRET_TOKEN>'
+        secret_token: 'foobar'
 
         server_url: 'localhost:8220',
 
@@ -375,7 +375,7 @@ describe('getCommands', () => {
         "# Initialize using environment variables:
         export ELASTIC_APM_SERVICE_NAME=my-service-name
 
-        export ELASTIC_APM_SECRET_TOKEN=<SECRET_TOKEN>
+        export ELASTIC_APM_SECRET_TOKEN=}
 
         export ELASTIC_APM_SERVER_URL=
 
@@ -397,7 +397,7 @@ describe('getCommands', () => {
         "# Initialize using environment variables:
         export ELASTIC_APM_SERVICE_NAME=my-service-name
 
-        export ELASTIC_APM_SECRET_TOKEN=<SECRET_TOKEN>
+        export ELASTIC_APM_SECRET_TOKEN=foobar}
 
         export ELASTIC_APM_SERVER_URL=localhost:8220
 
@@ -418,7 +418,7 @@ describe('getCommands', () => {
         "{
           \\"ElasticApm\\": {
             \\"ServiceName\\": \\"my-service-name\\",
-            \\"SecretToken\\": \\"<SECRET_TOKEN>\\",
+            \\"SecretToken\\": \\"\\",
             \\"ServerUrl\\": \\"\\",
             \\"Environment\\": \\"my-environment\\",
           }
@@ -439,7 +439,7 @@ describe('getCommands', () => {
         "{
           \\"ElasticApm\\": {
             \\"ServiceName\\": \\"my-service-name\\",
-            \\"SecretToken\\": \\"<SECRET_TOKEN>\\",
+            \\"SecretToken\\": \\"foobar\\",
             \\"ServerUrl\\": \\"localhost:8220\\",
             \\"Environment\\": \\"my-environment\\",
           }
@@ -458,7 +458,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "elastic_apm.service_name=\\"my-service-name\\"
 
-        elastic_apm.secret_token=\\"<SECRET_TOKEN>\\"
+        elastic_apm.secret_token=\\"\\"
 
         elastic_apm.server_url=\\"\\"
 
@@ -478,7 +478,7 @@ describe('getCommands', () => {
       expect(commands).toMatchInlineSnapshot(`
         "elastic_apm.service_name=\\"my-service-name\\"
 
-        elastic_apm.secret_token=\\"<SECRET_TOKEN>\\"
+        elastic_apm.secret_token=\\"foobar\\"
 
         elastic_apm.server_url=\\"localhost:8220\\"
 

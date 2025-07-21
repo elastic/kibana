@@ -11,7 +11,6 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
-  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const flaskVariables = {
@@ -51,7 +50,7 @@ from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {
   '${flaskVariables.apmServiceName}': '{{{apmServiceName}}}',
 
-  '${flaskVariables.secretToken}': '${SECRET_TOKEN_COMMAND_PLACEHOLDER}',
+  '${flaskVariables.secretToken}': '{{{secretToken}}}',
 
   '${flaskVariables.apmServerUrl}': '{{{apmServerUrl}}}',
 

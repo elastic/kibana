@@ -7,7 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  copyToClipboard,
+} from '@elastic/eui';
 import {
   getApmAgentCommands,
   getApmAgentVariables,
@@ -15,6 +23,9 @@ import {
   getApmAgentHighlightLang,
 } from './commands/get_apm_agent_commands';
 import { AgentConfigurationTable } from './agent_config_table';
+
+const API_KEY_COMMAND_PLACEHOLDER = '<API_KEY>';
+const SECRET_TOKEN_COMMAND_PLACEHOLDER = '<SECRET_TOKEN>';
 
 export function AgentConfigInstructions({
   variantId,
@@ -32,6 +43,12 @@ export function AgentConfigInstructions({
   createApiKeyLoading?: boolean;
 }) {
   const commands = getApmAgentCommands({
+    variantId,
+    apmServerUrl,
+    secretToken: `${SECRET_TOKEN_COMMAND_PLACEHOLDER}`,
+    apiKey: ` ${API_KEY_COMMAND_PLACEHOLDER}`,
+  });
+  const commandsWithSecrets = getApmAgentCommands({
     variantId,
     apmServerUrl,
     secretToken,
@@ -52,23 +69,39 @@ export function AgentConfigInstructions({
         createApiKeyLoading={createApiKeyLoading}
       />
       <EuiSpacer />
-
-      <EuiCodeBlock
-        isCopyable
-        copyAriaLabel={i18n.translate(
-          'xpack.apm.onboarding.agentConfigInstructions.euiCodeBlock.copyAriaLabel',
-          {
-            defaultMessage: 'Copy {variantId} agent configuration code',
-            values: { variantId },
-          }
-        )}
-        language={highlightLang || 'bash'}
-        data-test-subj="commands"
-        lineNumbers={lineNumbers}
-        whiteSpace="pre"
-      >
-        {commands}
-      </EuiCodeBlock>
+      <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem>
+            <EuiCodeBlock
+              copyAriaLabel={i18n.translate(
+                'xpack.apm.onboarding.agentConfigInstructions.euiCodeBlock.copyAriaLabel',
+                {
+                  defaultMessage: 'Copy {variantId} agent configuration code',
+                  values: { variantId },
+                }
+              )}
+              language={highlightLang || 'bash'}
+              data-test-subj="commands"
+              lineNumbers={lineNumbers}
+              whiteSpace="pre"
+            >
+              {commands}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="apmAgentConfigInstructionsButton"
+              aria-label={i18n.translate('xpack.apm.agentConfigInstructions.button.ariaLabel', {
+                defaultMessage: 'Copy commands',
+              })}
+              iconType="copyClipboard"
+              onClick={() => {
+                copyToClipboard(commandsWithSecrets);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </>
   );
 }

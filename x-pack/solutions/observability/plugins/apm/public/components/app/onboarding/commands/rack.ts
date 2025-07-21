@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { API_KEY_COMMAND_PLACEHOLDER } from './shared_hints';
 
 export const rackVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'secret_token' }),
@@ -32,7 +31,7 @@ service_name: '<your-service-name>'
 
 {{^secretToken}}
 # {{apiKeyHint}}
-api_key: '${API_KEY_COMMAND_PLACEHOLDER}'
+api_key: '{{{apiKey}}}'
 {{/secretToken}}
 {{#secretToken}}
 # {{secretTokenHint}}

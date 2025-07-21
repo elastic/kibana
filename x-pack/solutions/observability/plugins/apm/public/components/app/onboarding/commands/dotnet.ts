@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { API_KEY_COMMAND_PLACEHOLDER, SECRET_TOKEN_COMMAND_PLACEHOLDER } from './shared_hints';
 
 export const dotnetVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'SecretToken' }),
@@ -31,11 +30,11 @@ export const dotnet = `{
     "ServiceName": "<your-service-name>",
     {{^secretToken}}
     /// {{apiKeyHint}}
-    "ApiKey": "${API_KEY_COMMAND_PLACEHOLDER}",
+    "ApiKey": "{{{apiKey}}}",
     {{/secretToken}}
     {{#secretToken}}
     /// {{secretTokenHint}}
-    "SecretToken": "${SECRET_TOKEN_COMMAND_PLACEHOLDER}",
+    "SecretToken": "{{{secretToken}}}",
     {{/secretToken}}
     /// {{{serverUrlHint}}}
     "ServerUrl": "{{{apmServerUrl}}}",

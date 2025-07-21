@@ -11,7 +11,6 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
-  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const rackVariables = {
@@ -45,7 +44,7 @@ export const rack = `# config/elastic_apm.yml:
 
 ${rackVariables.apmServiceName}: '{{{apmServiceName}}}'
 
-${rackVariables.secretToken}: '${SECRET_TOKEN_COMMAND_PLACEHOLDER}'
+${rackVariables.secretToken}: '{{{secretToken}}}'
 
 ${rackVariables.apmServerUrl}: '{{{apmServerUrl}}}',
 

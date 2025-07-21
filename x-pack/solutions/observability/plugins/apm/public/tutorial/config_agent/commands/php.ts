@@ -9,7 +9,6 @@ import {
   secretTokenHint,
   serverUrlHint,
   serviceEnvironmentHint,
-  SECRET_TOKEN_COMMAND_PLACEHOLDER,
 } from './shared_hints';
 
 export const phpVariables = {
@@ -34,7 +33,7 @@ export const phpLineNumbers = {
 
 export const php = `${phpVariables.apmServiceName}="{{{apmServiceName}}}"
 
-${phpVariables.secretToken}="${SECRET_TOKEN_COMMAND_PLACEHOLDER}"
+${phpVariables.secretToken}="{{{secretToken}}}"
 
 ${phpVariables.apmServerUrl}="{{{apmServerUrl}}}"
 

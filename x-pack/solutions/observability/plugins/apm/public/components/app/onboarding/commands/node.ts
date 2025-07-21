@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { API_KEY_COMMAND_PLACEHOLDER } from './shared_hints';
 
 export const nodeVariables = (secretToken?: string) => ({
   ...(secretToken && { secretToken: 'secretToken' }),
@@ -37,7 +36,7 @@ var apm = require('elastic-apm-node').start({
 
   {{^secretToken}}
   // {{apiKeyHint}}
-  apiKey: '${API_KEY_COMMAND_PLACEHOLDER}',
+  apiKey: '{{{apiKey}}}',
   {{/secretToken}}
   {{#secretToken}}
   // {{secretTokenHint}}
