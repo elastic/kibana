@@ -113,7 +113,7 @@ export async function loadAction({
       isArchiveInExceptionList,
       log,
     }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate, performance),
+    createIndexDocRecordsStream(client, stats, progress, log, useCreate, performance),
   ]);
 
   progress.deactivate();

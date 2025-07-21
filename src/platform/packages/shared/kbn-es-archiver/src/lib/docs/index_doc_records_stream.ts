@@ -10,6 +10,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -23,13 +24,20 @@ export function createIndexDocRecordsStream(
   client: Client,
   stats: Stats,
   progress: Progress,
+  log: ToolingLog,
   useCreate: boolean = false,
   performance?: LoadActionPerfOptions
 ) {
   async function indexDocs(docs: any[]) {
+    log.info('indexDocs - docs', docs);
     const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
+
+    const searchResponseBefore = await client.search({
+      index: 'myfakeindex-3',
+    });
+    log.info('esArchiver.indexDocs before bulk - hits.total', searchResponseBefore.hits.total);
 
     await client.helpers.bulk(
       {
@@ -60,6 +68,11 @@ export function createIndexDocRecordsStream(
         headers: ES_CLIENT_HEADERS,
       }
     );
+
+    const searchResponseAfter = await client.search({
+      index: 'myfakeindex-3',
+    });
+    log.info('esArchiver.indexDocs after bulk - hits.total', searchResponseAfter.hits.total);
 
     if (errors.length) {
       throw new AggregateError(errors);
