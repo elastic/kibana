@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { PipelineStructureTree, MAX_TREE_LEVEL } from './pipeline_structure_tree';
-export type { PipelineTreeNode } from './pipeline_structure_tree';
+export { fetchPipelineStructureTree } from './fetch_pipeline_structure_tree';
