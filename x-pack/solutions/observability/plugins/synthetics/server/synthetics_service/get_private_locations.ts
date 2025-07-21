@@ -30,13 +30,7 @@ export const getPrivateLocations = async (
       getLegacyPrivateLocations(client),
     ]);
 
-    return uniqBy(
-      [
-        ...results.map((r) => ({ ...r.attributes, spaces: r.namespaces, id: r.id })),
-        ...legacyLocations,
-      ],
-      'id'
-    );
+    return uniqBy([...results, ...legacyLocations], 'id');
   } catch (getErr) {
     if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
       return [];
@@ -51,10 +45,17 @@ const getNewPrivateLocations = async (client: SavedObjectsClientContract) => {
     perPage: 1000,
   });
 
-  const results: Array<SavedObject<PrivateLocationAttributes>> = [];
+  const results: Array<
+    SavedObject<PrivateLocationAttributes>['attributes'] & {
+      spaces: SavedObject<PrivateLocationAttributes>['namespaces'];
+      id: SavedObject<PrivateLocationAttributes>['id'];
+    }
+  > = [];
 
   for await (const response of finder.find()) {
-    results.push(...response.saved_objects);
+    results.push(
+      ...response.saved_objects.map((r) => ({ ...r.attributes, id: r.id, spaces: r.namespaces }))
+    );
   }
 
   finder.close().catch((e) => {});

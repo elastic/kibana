@@ -21,8 +21,8 @@ import type {
   ThreatMatchedFields,
   ThreatTermNamedQuery,
   DecodedThreatNamedQuery,
-  SignalValuesMap,
-  GetSignalValuesMap,
+  FieldAndValueToDocIdsMap,
+  GetFieldAndValueToDocIdsMap,
   ThreatMatchNamedQuery,
 } from './types';
 import { checkErrorDetails } from '../../utils/check_error_details';
@@ -230,11 +230,11 @@ export const getMatchedFields = (threatMapping: ThreatMapping): ThreatMatchedFie
     { source: [], threat: [] }
   );
 
-export const getSignalValueMap = ({
+export const getFieldAndValueToDocIdsMap = ({
   eventList,
   threatMatchedFields,
-}: GetSignalValuesMap): SignalValuesMap =>
-  eventList.reduce<SignalValuesMap>((acc, event) => {
+}: GetFieldAndValueToDocIdsMap): FieldAndValueToDocIdsMap =>
+  eventList.reduce<FieldAndValueToDocIdsMap>((acc, event) => {
     threatMatchedFields.source.forEach((field) => {
       const fieldValue = get(event.fields, field)?.[0];
       if (!fieldValue) return;
