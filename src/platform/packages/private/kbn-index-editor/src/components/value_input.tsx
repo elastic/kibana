@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
@@ -24,7 +24,7 @@ interface ValueInputProps {
   className?: string;
 }
 
-export const ValueInput = ({
+export const ValueInput: React.FC<ValueInputProps> = ({
   value = '',
   columnName = '',
   columns,
@@ -33,7 +33,7 @@ export const ValueInput = ({
   onChange,
   autoFocus = false,
   className = '',
-}: ValueInputProps) => {
+}) => {
   const [editValue, setEditValue] = useState(value);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +44,6 @@ export const ValueInput = ({
   }, [columns, columnName]);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    event.stopPropagation();
     if (event.key === 'Enter') {
       if (error) {
         return;
@@ -59,6 +58,12 @@ export const ValueInput = ({
     }
   };
 
+  const inputRef = useRef<HTMLInputElement>(null);
+  useLayoutEffect(() => {
+    // On mount, focus the input
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }, []);
+
   const InputComponent = useMemo(() => {
     return getInputComponentForType(columnType);
   }, [columnType]);
@@ -66,6 +71,7 @@ export const ValueInput = ({
   return (
     <EuiToolTip position="top" content={error}>
       <InputComponent
+        ref={inputRef}
         autoFocus={autoFocus}
         placeholder={columnName}
         label={columnName}
@@ -86,3 +92,5 @@ export const ValueInput = ({
     </EuiToolTip>
   );
 };
+
+ValueInput.displayName = 'ValueInput';
