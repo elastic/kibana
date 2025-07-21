@@ -562,19 +562,28 @@ export const getMetricVisualization = ({
     }
 
     // this should clean up the secondary trend state if in conflict
-    const { isNumeric: isMetricNumeric } = getAccessorType(datasourceLayer, state.metricAccessor);
-    const colorMode = getColorMode(state.secondaryTrend, isMetricNumeric);
-    // if there are no conflicts, it's all persistable as is
-    if (colorMode === state.secondaryTrend?.type) {
-      return { state, savedObjectReferences: [] };
+    const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(
+      datasourceLayer,
+      state.metricAccessor
+    );
+    const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
+      datasourceLayer,
+      state.secondaryMetricAccessor
+    );
+    const colorMode = getColorMode(state.secondaryTrend, isSecondaryMetricNumeric);
+
+    if (isSecondaryTrendConfigInvalid(state.secondaryTrend, colorMode, isPrimaryMetricNumeric)) {
+      return {
+        state: {
+          ...state,
+          secondaryPrefix: undefined,
+          secondaryTrend: getDefaultConfigForMode(colorMode),
+        },
+        savedObjectReferences: [],
+      };
     }
-    return {
-      state: {
-        ...state,
-        secondaryTrend: getDefaultConfigForMode(colorMode),
-      },
-      savedObjectReferences: [],
-    };
+    // if there are no conflicts, it's all persistable as is
+    return { state, savedObjectReferences: [] };
   },
 
   setDimension({ prevState, columnId, groupId }) {
