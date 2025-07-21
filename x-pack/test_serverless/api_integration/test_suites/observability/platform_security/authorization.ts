@@ -11,9 +11,6 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
   describe('security/authorization', function () {
-    // Custom roles not yet supported in MKI
-    this.tags(['failsOnMKI']);
-
     describe('available features', () => {
       const svlUserManager = getService('svlUserManager');
       const supertestWithoutAuth = getService('supertestWithoutAuth');
