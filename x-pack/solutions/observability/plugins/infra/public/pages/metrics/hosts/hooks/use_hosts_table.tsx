@@ -29,9 +29,9 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
 import type {
-  InfraAssetMetadataType,
-  InfraAssetMetricsItem,
-  InfraAssetMetricType,
+  InfraEntityMetadataType,
+  InfraEntityMetricsItem,
+  InfraEntityMetricType,
 } from '../../../../../common/http_api';
 import type { Sorting } from './use_hosts_table_url_state';
 import { useHostsTableUrlState } from './use_hosts_table_url_state';
@@ -46,7 +46,7 @@ import { AddDataTroubleshootingPopover } from '../components/table/add_data_trou
 /**
  * Columns and items types
  */
-type HostMetrics = Record<InfraAssetMetricType, number | null>;
+type HostMetrics = Record<InfraEntityMetricType, number | null>;
 
 interface HostMetadata {
   os?: string | null;
@@ -65,14 +65,14 @@ export type HostNodeRow = HostMetadata &
 /**
  * Helper functions
  */
-const formatMetric = (type: InfraAssetMetricType, value: number | undefined | null) => {
+const formatMetric = (type: InfraEntityMetricType, value: number | undefined | null) => {
   const defaultValue = value ?? 0;
   return createInventoryMetricFormatter({ type })(defaultValue);
 };
 
 const buildMetricCell = (
   value: number | null,
-  formatType: InfraAssetMetricType,
+  formatType: InfraEntityMetricType,
   hasSystemMetrics?: boolean
 ) => {
   if (!hasSystemMetrics && value === null) {
@@ -82,14 +82,14 @@ const buildMetricCell = (
   return formatMetric(formatType, value);
 };
 
-const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
+const buildItemsList = (nodes: InfraEntityMetricsItem[]): HostNodeRow[] => {
   return nodes.map(({ metrics, metadata, name, alertsCount, hasSystemMetrics }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
         ...acc,
         [curr.name]: curr.value,
       }),
-      {} as Record<InfraAssetMetadataType, string | null>
+      {} as Record<InfraEntityMetadataType, string | null>
     );
 
     return {

@@ -52,6 +52,8 @@ export const ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS =
   'asset-inventory-expand-flyout-success' as const;
 export const ASSET_INVENTORY_EXPAND_FLYOUT_ERROR = 'asset-inventory-expand-flyout-error' as const;
 export const GENERIC_ENTITY_FLYOUT_OPENED = 'generic-entity-flyout-opened' as const;
+export const KSPM_NAMESPACE_SELECTOR = 'kspm-dashboard-namespace-selector-dropdown' as const;
+export const CSPM_NAMESPACE_SELECTOR = 'cspm-dashboard-namespace-selector-dropdown' as const;
 
 export type CloudSecurityUiCounters =
   | typeof ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT
@@ -76,7 +78,9 @@ export type CloudSecurityUiCounters =
   | typeof GRAPH_INVESTIGATION
   | typeof ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS
   | typeof ASSET_INVENTORY_EXPAND_FLYOUT_ERROR
-  | typeof GENERIC_ENTITY_FLYOUT_OPENED;
+  | typeof GENERIC_ENTITY_FLYOUT_OPENED
+  | typeof KSPM_NAMESPACE_SELECTOR
+  | typeof CSPM_NAMESPACE_SELECTOR;
 
 export class UiMetricService {
   private usageCollection: UsageCollectionSetup | undefined;

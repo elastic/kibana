@@ -17,18 +17,19 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { Sample } from '@kbn/grok-ui';
-import { GrokProcessorDefinition, SampleDocument } from '@kbn/streams-schema';
+import { GrokProcessorDefinition } from '@kbn/streams-schema';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { getPercentageFormatter } from '../../../util/formatters';
 import { useKibana } from '../../../hooks/use_kibana';
-import { PreviewTable } from '../preview_table';
 import {
   PreviewDocsFilterOption,
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import {
+  selectHasSimulatedRecords,
   selectOriginalPreviewRecords,
   selectPreviewRecords,
 } from './state_management/simulation_state_machine/selectors';
@@ -44,6 +45,7 @@ import { AssetImage } from '../../asset_image';
 import { docViewJson } from './doc_viewer_json';
 import { DOC_VIEW_DIFF_ID, DocViewerContext, docViewDiff } from './doc_viewer_diff';
 import { DataTableRecordWithIndex, PreviewFlyout } from './preview_flyout';
+import { ProcessingPreviewTable } from './processing_preview_table';
 
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
 
@@ -114,10 +116,7 @@ export const ProcessorOutcomePreview = () => {
   );
 };
 
-const formatter = new Intl.NumberFormat('en-US', {
-  style: 'percent',
-  maximumFractionDigits: 1,
-});
+const formatter = getPercentageFormatter();
 
 const formatRateToPercentage = (rate?: number) =>
   (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
@@ -216,6 +215,11 @@ const OutcomePreviewTable = () => {
   const originalSamples = useSimulatorSelector((snapshot) =>
     selectOriginalPreviewRecords(snapshot.context)
   );
+  const hasSimulatedRecords = useSimulatorSelector((snapshot) =>
+    selectHasSimulatedRecords(snapshot.context)
+  );
+
+  const dataSourceRefs = useStreamEnrichmentSelector((state) => state.context.dataSourcesRefs);
 
   const { dependencies } = useKibana();
   const { unifiedDocViewer } = dependencies.start;
@@ -371,19 +375,20 @@ const OutcomePreviewTable = () => {
 
   const docViewerContext = useMemo(
     () => ({
-      originalSample: originalSamples && currentDoc ? originalSamples[currentDoc.index] : undefined,
+      originalSample:
+        originalSamples && currentDoc ? originalSamples[currentDoc.index].document : undefined,
     }),
     [currentDoc, originalSamples]
   );
 
   useEffect(() => {
-    if (docViewerContext.originalSample) {
+    if (docViewerContext.originalSample && hasSimulatedRecords) {
       // If the original sample is available, enable the diff tab - otherwise disable it
       docViewsRegistry.enableById(DOC_VIEW_DIFF_ID);
     } else {
       docViewsRegistry.disableById(DOC_VIEW_DIFF_ID);
     }
-  }, [docViewerContext, docViewsRegistry]);
+  }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
 
   if (isEmpty(previewDocuments)) {
     return (
@@ -414,9 +419,10 @@ const OutcomePreviewTable = () => {
 
   return (
     <>
-      <PreviewTable
-        documents={previewDocuments as SampleDocument[]}
-        selectableRow
+      <ProcessingPreviewTable
+        documents={previewDocuments}
+        originalSamples={originalSamples}
+        showRowSourceAvatars={dataSourceRefs.length >= 2}
         onRowSelected={onRowSelected}
         selectedRowIndex={hits.findIndex((hit) => hit === currentDoc)}
         displayColumns={previewColumns}
@@ -446,7 +452,12 @@ const OutcomePreviewTable = () => {
         }
       />
       <DocViewerContext.Provider value={docViewerContext}>
-        <PreviewFlyout currentDoc={currentDoc} hits={hits} setExpandedDoc={setExpandedDoc} />
+        <PreviewFlyout
+          currentDoc={currentDoc}
+          hits={hits}
+          setExpandedDoc={setExpandedDoc}
+          docViewsRegistry={docViewsRegistry}
+        />
       </DocViewerContext.Provider>
     </>
   );

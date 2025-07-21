@@ -10,7 +10,7 @@
 import { isEmpty } from 'lodash';
 import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { GetBrowserFieldsResponse } from '@kbn/alerting-types';
 import { BASE_RAC_ALERTS_API_PATH, EMPTY_AAD_FIELDS } from '../../constants';
 
 export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) => {
@@ -27,11 +27,14 @@ export const fetchRuleTypeAlertFields = async ({
 }: {
   http: HttpStart;
   ruleTypeId?: string;
-}): Promise<DataViewField[]> => {
+}): Promise<GetBrowserFieldsResponse['fields']> => {
   if (!ruleTypeId) return EMPTY_AAD_FIELDS;
-  const fields = await http.get<DataViewField[]>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
-    query: { ruleTypeIds: [ruleTypeId] },
-  });
+  const response = await http.get<GetBrowserFieldsResponse>(
+    `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
+    {
+      query: { ruleTypeIds: [ruleTypeId] },
+    }
+  );
 
-  return fields;
+  return response.fields;
 };

@@ -191,7 +191,7 @@ export const BenchmarkDetailsBox = ({
           <EuiText size="xs">{benchmarkInfo.assetType}</EuiText>
         </EuiLink>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ justifyContent: 'flex-end' }}>
+      <EuiFlexItem grow={false} css={{ justifyContent: 'flex-end' }}>
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <CISBenchmarkIcon type={benchmarkId} name={`${benchmarkName}`} />
           <EuiToolTip content={cisTooltip}>
