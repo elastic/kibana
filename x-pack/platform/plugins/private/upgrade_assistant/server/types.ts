@@ -9,14 +9,12 @@ import { IRouter, Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import SemVer from 'semver/classes/semver';
-// import { CredentialStore } from './lib/reindexing/credential_store';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 import { handleEsError } from './shared_imports';
 import type { DataSourceExclusions, FeatureSet } from '../common/types';
 
 export interface RouteDependencies {
   router: IRouter;
-  // credentialStore: CredentialStore;
   log: Logger;
   getSavedObjectsService: () => SavedObjectsServiceStart;
   getSecurityPlugin: () => SecurityPluginStart | undefined;

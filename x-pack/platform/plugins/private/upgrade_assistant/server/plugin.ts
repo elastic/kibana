@@ -24,7 +24,6 @@ import { mlSavedObjectType } from '@kbn/upgrade-assistant-pkg-server';
 import type { DataSourceExclusions, FeatureSet } from '../common/types';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
-// import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { registerRoutes } from './routes/register_routes';
@@ -47,7 +46,6 @@ interface PluginsStart {
 
 export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
-  // private readonly credentialStore: CredentialStore;
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;
   private readonly initialDataSourceExclusions: DataSourceExclusions;
@@ -58,8 +56,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   constructor({ logger, env, config }: PluginInitializerContext<UpgradeAssistantConfig>) {
     this.logger = logger.get();
-    // used by worker and passed to routes
-    // this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
 
     const { featureSet, dataSourceExclusions } = config.get();
@@ -71,13 +67,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     const { http, getStartServices, savedObjects } = coreSetup;
     const { usageCollection, features, licensing, logsShared, security } = pluginSetup;
 
-    // todo where should this live
-    // eslint-disable-next-line no-console
-    console.log('################# REGISTERING TYPES');
-
     savedObjects.registerType(mlSavedObjectType);
-    // eslint-disable-next-line no-console
-    console.log('################# TYPES REGISTERED');
 
     features.registerElasticsearchFeature({
       id: 'upgrade_assistant',
@@ -113,7 +103,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     const dependencies: RouteDependencies = {
       router,
-      // credentialStore: this.credentialStore,
       log: this.logger,
       licensing,
       getSavedObjectsService: () => {
@@ -148,20 +137,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     }
   }
 
-  start({ savedObjects, elasticsearch }: CoreStart, { security }: PluginsStart) {
+  start({ savedObjects }: CoreStart, { security }: PluginsStart) {
     this.savedObjectsServiceStart = savedObjects;
     this.securityPluginStart = security;
-
-    // todo move
-    // The ReindexWorker uses a map of request headers that contain the authentication credentials
-    // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
-    // want to expose these credentials to any unauthenticated users. We also want to avoid any need
-    // to add a user for a special index just for upgrading. This in-memory cache allows us to
-    // process jobs without the browser staying on the page, but will require that jobs go into
-    // a paused state if no Kibana nodes have the required credentials.
-
-    // The ReindexWorker will use the credentials stored in the cache to reindex the data
-    // this.reindexingService?.start({ savedObjects, elasticsearch }, { security });
   }
 
   stop(): void {}
