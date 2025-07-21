@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,6 +31,7 @@ import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import { Timestamp } from '@kbn/apm-ui-shared';
+import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -38,7 +40,7 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { callApmApi, type APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
@@ -353,19 +355,70 @@ export function ErrorSampleDetailTabContent({
   const logStackframes = error?.error.log?.stacktrace;
   const isPlaintextException =
     !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
+  const onClickDeobfuscate = () => {
+    if (error.error.stack_trace && error.error.stack_trace.length > 0) {
+      const stacktrace = [error.error.stack_trace!];
+      callApmApi('POST /internal/apm/mobile-services/{serviceName}/deobfuscate/{buildId}', {
+        signal: null,
+        params: {
+          path: {
+            serviceName: service.name,
+            buildId: '',
+          },
+          body: {
+            stacktrace,
+          },
+        },
+      }).then((response) => {
+        // set deobfucstated stacktrace state;
+      });
+    }
+  };
+
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
-      return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
+      return (
+        <div>
+          <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
+        </div>
+      );
     case ErrorTabKey.ExceptionStacktrace:
-      return isPlaintextException ? (
-        <PlaintextStacktrace
-          message={exceptions[0].message}
-          type={exceptions[0]?.type}
-          stacktrace={error?.error.stack_trace}
-          codeLanguage={codeLanguage}
-        />
-      ) : (
-        <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
+      return (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+              <EuiSpacer />
+              <EuiButtonEmpty
+                aria-label={i18n.translate(
+                  'xpack.apm.errorSampleDetailTabContent.deobfuscateAndroidStackTraceLabel',
+                  { defaultMessage: 'Deobfuscate Android stack trace' }
+                )}
+                onClick={onClickDeobfuscate}
+                size={'s'}
+                data-test-subj="android-deobfuscate-button"
+              >
+                {i18n.translate(
+                  'xpack.apm.errorSampleDetailTabContent.androidDeobfuscateButtonLabel',
+                  {
+                    defaultMessage: 'deobfuscate',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isPlaintextException ? (
+              <PlaintextStacktrace
+                message={exceptions[0].message}
+                type={exceptions[0]?.type}
+                stacktrace={error?.error.stack_trace}
+                codeLanguage={codeLanguage}
+              />
+            ) : (
+              <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     default:
       return <ErrorMetadata error={error} />;

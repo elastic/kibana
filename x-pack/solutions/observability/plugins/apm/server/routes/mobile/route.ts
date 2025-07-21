@@ -32,6 +32,7 @@ import type { MobileMostUsedChartResponse } from './get_mobile_most_used_charts'
 import { getMobileMostUsedCharts } from './get_mobile_most_used_charts';
 import { mobileErrorRoutes } from './errors/route';
 import { mobileCrashRoutes } from './crashes/route';
+import { getAndroidCrashDeobfuscated } from './get_android_crash_deobfuscated';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -69,6 +70,33 @@ const mobileFiltersRoute = createApmServerRoute({
       apmEventClient,
     });
     return { mobileFilters: filters };
+  },
+});
+
+const androidCrashDeobfuscationRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/mobile-services/{serviceName}/deobfuscate/{buildId}',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      buildId: t.string,
+    }),
+    body: t.type({
+      stacktrace: t.array(t.string),
+    }),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ deobfuscatedStacktrace: string }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName, buildId } = params.path;
+    const { stacktrace } = params.body;
+    const deobfuscatedStacktrace = await getAndroidCrashDeobfuscated({
+      serviceName,
+      buildId,
+      stacktrace,
+      apmEventClient,
+    });
+    return { deobfuscatedStacktrace };
   },
 });
 
@@ -382,6 +410,7 @@ const mobileDetailedStatisticsByField = createApmServerRoute({
 });
 
 export const mobileRouteRepository = {
+  ...androidCrashDeobfuscationRoute,
   ...mobileErrorRoutes,
   ...mobileCrashRoutes,
   ...mobileFiltersRoute,
