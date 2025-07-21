@@ -30,12 +30,17 @@ const IGNORED_EXTENSIONS = [
 ];
 
 async function getChangedFiles(): Promise<string[]> {
-  const { stdout } = await execAsync('git diff --name-only --diff-filter=AM HEAD');
-  const files = stdout.split('\n').filter(Boolean);
-  return files.filter((file) => {
-    const ext = path.extname(file).toLowerCase();
-    return !IGNORED_EXTENSIONS.includes(ext);
-  });
+  const [{ stdout: modifiedFiles }, { stdout: untrackedFiles }] = await Promise.all([
+    execAsync('git diff --name-only --diff-filter=AM HEAD'),
+    execAsync('git ls-files --others --exclude-standard'),
+  ]);
+
+  return [...modifiedFiles.split('\n'), ...untrackedFiles.split('\n')]
+    .filter(Boolean)
+    .filter((file) => {
+      const ext = path.extname(file).toLowerCase();
+      return !IGNORED_EXTENSIONS.includes(ext);
+    });
 }
 
 function findPackageDir(filePath: string): string | null {
@@ -54,13 +59,15 @@ interface TestResult {
   package: string;
   status: 'passed' | 'failed';
   failedFiles?: string[];
-  errorMessage?: string;
 }
 
-async function runJestAndCollectFailures(pkgDir: string): Promise<string[]> {
+async function runJestAndCollectFailures(pkgDir: string, files: string[]): Promise<string[]> {
   try {
     await execa.command(
-      `node scripts/jest --config ${path.relative(process.cwd(), pkgDir)}/jest.config.js --json`,
+      `node scripts/jest --config ${path.relative(
+        process.cwd(),
+        pkgDir
+      )}/jest.config.js --findRelatedTests ${files.join(' ')} --json`,
       { cwd: REPO_ROOT }
     );
     return [];
@@ -79,23 +86,27 @@ async function runJestAndCollectFailures(pkgDir: string): Promise<string[]> {
 
 export async function runUnitTests() {
   const changedFiles = await getChangedFiles();
-  const pkgs = new Set<string>();
+  const changedFilesGroupedByPkg: Record<string, string[]> = {};
   for (const file of changedFiles) {
     const pkgDir = findPackageDir(file);
     if (pkgDir) {
-      pkgs.add(pkgDir);
+      changedFilesGroupedByPkg[pkgDir] = changedFilesGroupedByPkg[pkgDir] || [];
+      changedFilesGroupedByPkg[pkgDir].push(file);
     }
   }
-  if (pkgs.size === 0) {
+
+  // Could not find any changed files
+  if (Object.keys(changedFilesGroupedByPkg).length === 0) {
     return { success: true, results: [] };
   }
 
   const results: TestResult[] = [];
 
-  for (const pkgDir of pkgs) {
-    const failedFiles = await runJestAndCollectFailures(pkgDir);
+  for (const pkg of Object.keys(changedFilesGroupedByPkg)) {
+    const pkgChangedFiles = changedFilesGroupedByPkg[pkg];
+    const failedFiles = await runJestAndCollectFailures(pkg, pkgChangedFiles);
     results.push({
-      package: pkgDir,
+      package: pkg,
       status: failedFiles.length > 0 ? 'failed' : 'passed',
       failedFiles,
     });
