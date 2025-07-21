@@ -291,7 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           expect(response.status).to.eql(400);
           expect(response.body.message).to.match(
-            /Sort field "notPresent" must be present in all types/
+            /Sort field "notPresent" is not available for all specified types. Each type must have the field defined either at the type level or root level./
           );
         });
 

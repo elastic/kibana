@@ -332,19 +332,10 @@ describe('getSortingParams', () => {
 
   describe('multi-type sorting', () => {
     describe('root fields', () => {
-      it('sorts by shared root text field', () => {
-        expect(
+      it('throws error for shared root text field', () => {
+        expect(() =>
           getSortingParams(MAPPINGS, ['primary_type', 'secondary_type'], 'root_field')
-        ).toEqual({
-          sort: [
-            {
-              root_field: {
-                order: undefined,
-                unmapped_type: 'text',
-              },
-            },
-          ],
-        });
+        ).toThrow('Sort field "root_field" is of type "text" which is not sortable');
       });
 
       it('sorts by shared root keyword subfield', () => {
@@ -371,7 +362,7 @@ describe('getSortingParams', () => {
               'merged_title.raw': {
                 script: {
                   source:
-                    "if (doc.containsKey('primary_type.title.raw') && doc['primary_type.title.raw'].size() != 0) { emit(doc['primary_type.title.raw'].value); } else if (doc.containsKey('secondary_type.title.raw') && doc['secondary_type.title.raw'].size() != 0) { emit(doc['secondary_type.title.raw'].value); } else { emit(\"\"); }",
+                    "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'primary_type') { if (doc.containsKey('primary_type.title.raw') && doc['primary_type.title.raw'].size() != 0) { emit(doc['primary_type.title.raw'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'secondary_type') { if (doc.containsKey('secondary_type.title.raw') && doc['secondary_type.title.raw'].size() != 0) { emit(doc['secondary_type.title.raw'].value); } } else { emit(\"\"); }",
                 },
                 type: 'keyword',
               },
@@ -388,7 +379,7 @@ describe('getSortingParams', () => {
               'merged_title.raw': {
                 script: {
                   source:
-                    "if (doc.containsKey('secondary_type.title.raw') && doc['secondary_type.title.raw'].size() != 0) { emit(doc['secondary_type.title.raw'].value); } else if (doc.containsKey('primary_type.title.raw') && doc['primary_type.title.raw'].size() != 0) { emit(doc['primary_type.title.raw'].value); } else { emit(\"\"); }",
+                    "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'secondary_type') { if (doc.containsKey('secondary_type.title.raw') && doc['secondary_type.title.raw'].size() != 0) { emit(doc['secondary_type.title.raw'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'primary_type') { if (doc.containsKey('primary_type.title.raw') && doc['primary_type.title.raw'].size() != 0) { emit(doc['primary_type.title.raw'].value); } } else { emit(\"\"); }",
                 },
                 type: 'keyword',
               },
@@ -408,7 +399,7 @@ describe('getSortingParams', () => {
 
       it('throws error for fields not present in all types', () => {
         expect(() => getSortingParams(MAPPINGS, ['primary_type', 'numeric'], 'title')).toThrow(
-          'Sort field "title" must be present in all types to use in sorting when multiple types are specified.'
+          'Sort field "title" is not available for all specified types. Each type must have the field defined either at the type level or root level.'
         );
       });
     });
@@ -420,7 +411,7 @@ describe('getSortingParams', () => {
             merged_count: {
               script: {
                 source:
-                  "if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } else if (doc.containsKey('numeric_compatable.count') && doc['numeric_compatable.count'].size() != 0) { emit(doc['numeric_compatable.count'].value); }",
+                  "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric') { if (doc.containsKey('numeric.count') && doc['numeric.count'].size() != 0) { emit(doc['numeric.count'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric_compatable') { if (doc.containsKey('numeric_compatable.count') && doc['numeric_compatable.count'].size() != 0) { emit(doc['numeric_compatable.count'].value); } }",
               },
               type: 'double',
             },
@@ -435,7 +426,7 @@ describe('getSortingParams', () => {
             merged_price: {
               script: {
                 source:
-                  "if (doc.containsKey('numeric.price') && doc['numeric.price'].size() != 0) { emit(doc['numeric.price'].value); } else if (doc.containsKey('numeric_compatable.price') && doc['numeric_compatable.price'].size() != 0) { emit(doc['numeric_compatable.price'].value); }",
+                  "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric') { if (doc.containsKey('numeric.price') && doc['numeric.price'].size() != 0) { emit(doc['numeric.price'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric_compatable') { if (doc.containsKey('numeric_compatable.price') && doc['numeric_compatable.price'].size() != 0) { emit(doc['numeric_compatable.price'].value); } }",
               },
               type: 'double',
             },
@@ -452,7 +443,7 @@ describe('getSortingParams', () => {
             merged_integer_field: {
               script: {
                 source:
-                  "if (doc.containsKey('numeric.integer_field') && doc['numeric.integer_field'].size() != 0) { emit(doc['numeric.integer_field'].value); } else if (doc.containsKey('numeric_compatable.integer_field') && doc['numeric_compatable.integer_field'].size() != 0) { emit(doc['numeric_compatable.integer_field'].value); }",
+                  "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric') { if (doc.containsKey('numeric.integer_field') && doc['numeric.integer_field'].size() != 0) { emit(doc['numeric.integer_field'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric_compatable') { if (doc.containsKey('numeric_compatable.integer_field') && doc['numeric_compatable.integer_field'].size() != 0) { emit(doc['numeric_compatable.integer_field'].value); } }",
               },
               type: 'double',
             },
@@ -469,7 +460,7 @@ describe('getSortingParams', () => {
             merged_short_field: {
               script: {
                 source:
-                  "if (doc.containsKey('numeric.short_field') && doc['numeric.short_field'].size() != 0) { emit(doc['numeric.short_field'].value); } else if (doc.containsKey('numeric_compatable.short_field') && doc['numeric_compatable.short_field'].size() != 0) { emit(doc['numeric_compatable.short_field'].value); }",
+                  "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric') { if (doc.containsKey('numeric.short_field') && doc['numeric.short_field'].size() != 0) { emit(doc['numeric.short_field'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric_compatable') { if (doc.containsKey('numeric_compatable.short_field') && doc['numeric_compatable.short_field'].size() != 0) { emit(doc['numeric_compatable.short_field'].value); } }",
               },
               type: 'double',
             },
@@ -485,7 +476,7 @@ describe('getSortingParams', () => {
               merged_byte_field: {
                 script: {
                   source:
-                    "if (doc.containsKey('numeric.byte_field') && doc['numeric.byte_field'].size() != 0) { emit(doc['numeric.byte_field'].value); } else if (doc.containsKey('numeric_compatable.byte_field') && doc['numeric_compatable.byte_field'].size() != 0) { emit(doc['numeric_compatable.byte_field'].value); }",
+                    "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric') { if (doc.containsKey('numeric.byte_field') && doc['numeric.byte_field'].size() != 0) { emit(doc['numeric.byte_field'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric_compatable') { if (doc.containsKey('numeric_compatable.byte_field') && doc['numeric_compatable.byte_field'].size() != 0) { emit(doc['numeric_compatable.byte_field'].value); } }",
                 },
                 type: 'double',
               },
@@ -503,7 +494,7 @@ describe('getSortingParams', () => {
             merged_double_field: {
               script: {
                 source:
-                  "if (doc.containsKey('numeric.double_field') && doc['numeric.double_field'].size() != 0) { emit(doc['numeric.double_field'].value); } else if (doc.containsKey('numeric_compatable.double_field') && doc['numeric_compatable.double_field'].size() != 0) { emit(doc['numeric_compatable.double_field'].value); }",
+                  "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric') { if (doc.containsKey('numeric.double_field') && doc['numeric.double_field'].size() != 0) { emit(doc['numeric.double_field'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric_compatable') { if (doc.containsKey('numeric_compatable.double_field') && doc['numeric_compatable.double_field'].size() != 0) { emit(doc['numeric_compatable.double_field'].value); } }",
               },
               type: 'double',
             },
@@ -518,7 +509,7 @@ describe('getSortingParams', () => {
             merged_created: {
               script: {
                 source:
-                  "if (doc.containsKey('numeric.created') && doc['numeric.created'].size() != 0) { emit(doc['numeric.created'].value); } else if (doc.containsKey('numeric_compatable.created') && doc['numeric_compatable.created'].size() != 0) { emit(doc['numeric_compatable.created'].value); }",
+                  "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric') { if (doc.containsKey('numeric.created') && doc['numeric.created'].size() != 0) { emit(doc['numeric.created'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'numeric_compatable') { if (doc.containsKey('numeric_compatable.created') && doc['numeric_compatable.created'].size() != 0) { emit(doc['numeric_compatable.created'].value); } }",
               },
               type: 'date',
             },
@@ -534,7 +525,7 @@ describe('getSortingParams', () => {
               'merged_title.raw': {
                 script: {
                   source:
-                    "if (doc.containsKey('primary_type.title.raw') && doc['primary_type.title.raw'].size() != 0) { emit(doc['primary_type.title.raw'].value); } else if (doc.containsKey('secondary_type.title.raw') && doc['secondary_type.title.raw'].size() != 0) { emit(doc['secondary_type.title.raw'].value); } else { emit(\"\"); }",
+                    "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'primary_type') { if (doc.containsKey('primary_type.title.raw') && doc['primary_type.title.raw'].size() != 0) { emit(doc['primary_type.title.raw'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'secondary_type') { if (doc.containsKey('secondary_type.title.raw') && doc['secondary_type.title.raw'].size() != 0) { emit(doc['secondary_type.title.raw'].value); } } else { emit(\"\"); }",
                 },
                 type: 'keyword',
               },
@@ -550,7 +541,7 @@ describe('getSortingParams', () => {
             merged_status: {
               script: {
                 source:
-                  "if (doc.containsKey('primary_type.status') && doc['primary_type.status'].size() != 0) { emit(doc['primary_type.status'].value); } else if (doc.containsKey('secondary_type.status') && doc['secondary_type.status'].size() != 0) { emit(doc['secondary_type.status'].value); }",
+                  "if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'primary_type') { if (doc.containsKey('primary_type.status') && doc['primary_type.status'].size() != 0) { emit(doc['primary_type.status'].value); } } else if (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == 'secondary_type') { if (doc.containsKey('secondary_type.status') && doc['secondary_type.status'].size() != 0) { emit(doc['secondary_type.status'].value); } }",
               },
               type: 'boolean',
             },

@@ -16,7 +16,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObjectsFieldMapping } from '@kbn/core-saved-objects-server';
 import {
   isValidSortingField,
   normalizeNumericTypes,
@@ -55,99 +54,108 @@ export function getSortingParams(
   }
 
   if (types.length > 1) {
+    // For multi-type queries, use runtime field to merge type and root fields with consistent precedence:
+    // Prefer type-level field if it exists, otherwise fallback to root-level field
     const rootField = getProperty(mappings, sortField);
-    if (rootField) {
+
+    // Check that ALL types have the field available (either at type level or root level)
+    const allTypesHaveField = types.every((t) => {
+      const typeField = getProperty(mappings, `${t}.${sortField}`);
+      return !!typeField || !!rootField;
+    });
+
+    // Validation: If field is not available for ALL types (either at type or root level), throw an error
+    if (!allTypesHaveField) {
+      throw Boom.badRequest(
+        `Sort field "${sortField}" is not available for all specified types. Each type must have the field defined either at the type level or root level.`
+      );
+    }
+
+    // Use consistent precedence for multi-type queries:
+    // For multi-type: prefer root-level field if it exists, otherwise use type-level field
+    // This maintains existing Kibana behavior for multi-type queries
+    const typeFieldChoices = types.map((t) => {
+      const typeField = getProperty(mappings, `${t}.${sortField}`);
+      if (rootField) {
+        return { fieldPath: sortField, mapping: rootField }; // Use root-level field if available
+      } else {
+        return { fieldPath: `${t}.${sortField}`, mapping: typeField! }; // Use type-level field
+      }
+    });
+
+    // Validate that all chosen fields are sortable (fail fast before optimization decisions)
+    const invalidField = typeFieldChoices.find((choice) => !isValidSortingField(choice.mapping));
+    if (invalidField) {
+      const fieldType = invalidField.mapping.type;
+      throw Boom.badRequest(
+        `Sort field "${invalidField.fieldPath}" is of type "${fieldType}" which is not sortable. If the field has a sortable subfield e.g "keyword" subfield, use "field.keyword" for sorting.`
+      );
+    }
+
+    // Check if all types are using the root field (no type-specific fields)
+    const allUsingRootField = typeFieldChoices.every((choice) => choice.fieldPath === sortField);
+
+    if (allUsingRootField) {
+      // All types use the root field - sort directly on root field without runtime mapping
       return {
         sort: [
           {
             [sortField]: {
               order: sortOrder,
-              unmapped_type: rootField.type,
+              unmapped_type: rootField!.type,
             },
           },
         ],
       };
-    } else {
-      // Only create a runtime field if the sort field is present in all types
-      const allTypesHaveField = types.every((t) => !!getProperty(mappings, `${t}.${sortField}`));
-      if (allTypesHaveField) {
-        // Validate that all fields are sortable to prevent dangerous inconsistencies.
-        //
-        // NOTE: While it would be technically possible to make text fields without
-        // keyword subfields work in multi-type scenarios using runtime fields, this
-        // would create inconsistent behavior where the same field is sortable when
-        // querying multiple types but fails when querying a single type.
-        //
-        // This inconsistency would be confusing and error-prone for users, so we
-        // explicitly require keyword subfields for all text field sorting.
-        for (const t of types) {
-          const fieldMapping = getProperty(mappings, `${t}.${sortField}`);
-          if (!isValidSortingField(fieldMapping) && fieldMapping) {
-            const fieldType = fieldMapping.type;
-            throw Boom.badRequest(
-              `Sort field "${t}.${sortField}" is of type "${fieldType}" which is not sortable. If the field has a sortable subfield e.g "keyword" subfield, use "field.keyword" for sorting.`
-            );
-          }
-        }
-        // Collect field mappings for type detection
-        const fieldMappings = types
-          .map((t) => getProperty(mappings, `${t}.${sortField}`))
-          .filter(Boolean) as SavedObjectsFieldMapping[];
-
-        // First normalize all field types, then validate compatibility
-        const normalizedTypes = fieldMappings.map(normalizeNumericTypes);
-        const validationResult = validateFieldTypeCompatibility(normalizedTypes);
-        if (!validationResult.isValid) {
-          throw Boom.badRequest(
-            `Sort field "${sortField}" has incompatible types across saved object types: [${validationResult.conflictingTypes.join(
-              ', '
-            )}]. All field types must be compatible for sorting (numeric types are considered equivalent).`
-          );
-        }
-
-        const mergedFieldName = `merged_${sortField}`;
-        const mergedFieldType = (normalizedTypes[0] ?? 'keyword') as MappingRuntimeFieldType;
-
-        // Instead of emitting only the first found value, emit all possible values for the field across types
-        // This ensures that sorting is done across all types as a single field
-        // Use if/else if/else to ensure only one emit is called
-        const scriptLines = types.map((t, idx) => {
-          const fieldName = `${t}.${sortField}`;
-          const prefix = idx === 0 ? 'if' : 'else if';
-          return `${prefix} (doc.containsKey('${fieldName}') && doc['${fieldName}'].size() != 0) { emit(doc['${fieldName}'].value); }`;
-        });
-        // Only emit empty string for keyword type for proper sorting on other field types
-        if (mergedFieldType === 'keyword') {
-          scriptLines.push('else { emit(""); }');
-        }
-        const scriptSource = scriptLines.join(' ');
-
-        return {
-          runtime_mappings: {
-            [mergedFieldName]: {
-              type: mergedFieldType,
-              script: {
-                source: scriptSource,
-              },
-            },
-          },
-          sort: [
-            {
-              [mergedFieldName]: {
-                order: sortOrder,
-              },
-            },
-          ],
-        };
-      } else {
-        // If not present in all types, throw an error
-        // this ensures that we do not attempt to sort by a field that is not available in all types
-        // but this can be relaxed if needed since ES allows sorting by fields that are not present in all documents
-        throw Boom.badRequest(
-          `Sort field "${sortField}" must be present in all types to use in sorting when multiple types are specified.`
-        );
-      }
     }
+
+    // Mixed case: some types use type fields, some use root field - need runtime mapping
+    // Collect the actual field mappings we'll use for type detection
+    const fieldMappings = typeFieldChoices.map((choice) => choice.mapping);
+
+    // First normalize all field types, then validate compatibility
+    const normalizedTypes = fieldMappings.map(normalizeNumericTypes);
+    const validationResult = validateFieldTypeCompatibility(normalizedTypes);
+    if (!validationResult.isValid) {
+      throw Boom.badRequest(
+        `Sort field "${sortField}" has incompatible types across saved object types: [${validationResult.conflictingTypes.join(
+          ', '
+        )}]. All field types must be compatible for sorting (numeric types are considered equivalent).`
+      );
+    }
+
+    const mergedFieldName = `merged_${sortField}`;
+    const mergedFieldType = (normalizedTypes[0] ?? 'keyword') as MappingRuntimeFieldType;
+
+    const scriptLines = types.map((t, idx) => {
+      const chosenField = typeFieldChoices[idx].fieldPath;
+      const prefix = idx === 0 ? 'if' : 'else if';
+      return `${prefix} (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == '${t}') { if (doc.containsKey('${chosenField}') && doc['${chosenField}'].size() != 0) { emit(doc['${chosenField}'].value); } }`;
+    });
+
+    // Only emit empty string for keyword type for proper sorting on other field types
+    if (mergedFieldType === 'keyword') {
+      scriptLines.push('else { emit(""); }');
+    }
+    const scriptSource = scriptLines.join(' ');
+
+    return {
+      runtime_mappings: {
+        [mergedFieldName]: {
+          type: mergedFieldType,
+          script: {
+            source: scriptSource,
+          },
+        },
+      },
+      sort: [
+        {
+          [mergedFieldName]: {
+            order: sortOrder,
+          },
+        },
+      ],
+    };
   }
 
   const [typeField] = types;
