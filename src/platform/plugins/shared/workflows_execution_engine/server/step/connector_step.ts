@@ -30,17 +30,17 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
   public async _run(): Promise<RunStepResult> {
     const step = this.step;
 
-    this.contextManager.logInfo(`Starting connector step: ${step.type}`, {
-      event: { action: 'connector-step-start' },
-      tags: ['connector', step.type],
-    });
+    // this.contextManager.logInfo(`Starting connector step: ${step.type}`, {
+    //   event: { action: 'connector-step-start' },
+    //   tags: ['connector', step.type],
+    // });
 
     // Evaluate optional 'if' condition
     const shouldRun = await this.evaluateCondition(step.if);
     if (!shouldRun) {
-      this.contextManager.logInfo('Step skipped due to condition evaluation', {
-        event: { action: 'step-skipped', outcome: 'success' },
-      });
+      // this.contextManager.logInfo('Step skipped due to condition evaluation', {
+      //   event: { action: 'step-skipped', outcome: 'success' },
+      // });
       return { output: undefined, error: undefined };
     }
 
@@ -48,7 +48,7 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
     const context = this.contextManager.getContext();
 
     // Render inputs from 'with'
-    this.contextManager.logDebug('Rendering step inputs');
+    // this.contextManager.logDebug('Rendering step inputs');
     const renderedInputs = Object.entries(step.with ?? {}).reduce(
       (acc: Record<string, any>, [key, value]) => {
         if (typeof value === 'string') {
@@ -63,18 +63,18 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
 
     // Execute the connector
     try {
-      this.contextManager.logInfo(`Executing connector: ${step.type}`, {
-        event: { action: 'connector-execution' },
-        tags: ['connector', 'execution'],
-      });
+      // this.contextManager.logInfo(`Executing connector: ${step.type}`, {
+      //   event: { action: 'connector-execution' },
+      //   tags: ['connector', 'execution'],
+      // });
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console.log' || step.type === 'console') {
-        this.contextManager.logDebug(`Console output: ${step.with?.message}`);
+        // this.contextManager.logDebug(`Console output: ${step.with?.message}`);
         return { output: step.with?.message, error: undefined };
       } else if (step.type === 'console.sleep') {
         const sleepTime = step.with?.sleepTime ?? 1000;
-        this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
+        // this.contextManager.logDebug(`Sleeping for ${sleepTime}ms`);
         await new Promise((resolve) => setTimeout(resolve, sleepTime));
         return { output: step.with?.message, error: undefined };
       }
@@ -85,17 +85,17 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         renderedInputs
       );
 
-      this.contextManager.logInfo(`Connector execution completed successfully`, {
-        event: { action: 'connector-success', outcome: 'success' },
-        tags: ['connector', 'success'],
-      });
+      // this.contextManager.logInfo(`Connector execution completed successfully`, {
+      //   event: { action: 'connector-success', outcome: 'success' },
+      //   tags: ['connector', 'success'],
+      // });
 
       return { output, error: undefined };
     } catch (error) {
-      this.contextManager.logError(`Connector execution failed: ${step.type}`, error as Error, {
-        event: { action: 'connector-failed', outcome: 'failure' },
-        tags: ['connector', 'error'],
-      });
+      // this.contextManager.logError(`Connector execution failed: ${step.type}`, error as Error, {
+      //   event: { action: 'connector-failed', outcome: 'failure' },
+      //   tags: ['connector', 'error'],
+      // });
       return await this.handleFailure(error);
     }
   }

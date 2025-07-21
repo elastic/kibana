@@ -60,22 +60,22 @@ export abstract class StepBase<TStep extends BaseStep> {
     // Log step start
     this.contextManager.logStepStart(stepName);
 
-    const stepEvent = {
-      event: { action: 'step-execution' },
-      message: `Executing step: ${stepName}`,
-    };
+    // const stepEvent = {
+    //   event: { action: 'step-execution' },
+    //   message: `Executing step: ${stepName}`,
+    // };
 
     // Start timing
-    this.contextManager.startTiming(stepEvent);
+    // this.contextManager.startTiming(stepEvent);
 
     try {
       const result = await this._run();
 
       // Log success
-      this.contextManager.stopTiming({
-        ...stepEvent,
-        event: { ...stepEvent.event, outcome: 'success' },
-      });
+      // this.contextManager.stopTiming({
+      //   ...stepEvent,
+      //   event: { ...stepEvent.event, outcome: 'success' },
+      // });
 
       this.contextManager.logStepComplete(stepName, stepName, true);
       this.contextManager.appendStepResult(stepName, result);
@@ -83,14 +83,14 @@ export abstract class StepBase<TStep extends BaseStep> {
       return result;
     } catch (error) {
       // Log failure
-      this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
-        event: { action: 'step-failed' },
-      });
+      // this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
+      //   event: { action: 'step-failed' },
+      // });
 
-      this.contextManager.stopTiming({
-        ...stepEvent,
-        event: { ...stepEvent.event, outcome: 'failure' },
-      });
+      // this.contextManager.stopTiming({
+      //   ...stepEvent,
+      //   event: { ...stepEvent.event, outcome: 'failure' },
+      // });
 
       this.contextManager.logStepComplete(stepName, stepName, false);
 
@@ -113,8 +113,8 @@ export abstract class StepBase<TStep extends BaseStep> {
     // Use templating engine to evaluate condition with context
     // For now, placeholder: assume it's true if condition exists
     // Integrate with TemplatingEngine in actual implementation
-    const context = this.contextManager.getContext();
-    const parsedCondition = this.templatingEngine.render(condition, context);
+    // const context = this.contextManager.getContext();
+    // const parsedCondition = this.templatingEngine.render(condition, context);
     // return evaluate(parsedCondition, context);
     return true;
   }

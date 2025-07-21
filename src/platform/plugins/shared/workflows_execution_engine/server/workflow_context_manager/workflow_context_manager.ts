@@ -30,11 +30,11 @@ export class WorkflowContextManager {
   private context: Record<string, any>; // Make it strongly typed
   private esClient: IScopedClusterClient;
   // private workflowLogger: IWorkflowEventLogger | null = null;
-  private currentStepId: string | null = null;
-  // Store original parameters for recreating logger
-  private originalEsClient: ElasticsearchClient | null = null;
-  private originalLogger: Logger | null = null;
-  private originalIndexName: string | null = null;
+  // private currentStepId: string | null = null;
+  // // Store original parameters for recreating logger
+  // private originalEsClient: ElasticsearchClient | null = null;
+  // private originalLogger: Logger | null = null;
+  // private originalIndexName: string | null = null;
 
   constructor(init: ContextManagerInit) {
     this.context = {
@@ -49,9 +49,9 @@ export class WorkflowContextManager {
     this.esClient = this.createEsClient(init.esApiKey);
 
     // Store original parameters for recreating logger
-    this.originalEsClient = init.esClient || null;
-    this.originalLogger = init.logger || null;
-    this.originalIndexName = init.workflowEventLoggerIndex || null;
+    // this.originalEsClient = init.esClient || null;
+    // this.originalLogger = init.logger || null;
+    // this.originalIndexName = init.workflowEventLoggerIndex || null;
 
     // Initialize workflow event logger if provided
     // if (init.logger && init.workflowEventLoggerIndex && init.esClient) {
@@ -112,8 +112,7 @@ export class WorkflowContextManager {
    * Call this when entering a step to get step-specific logging
    */
   public setCurrentStep(stepId: string, stepName?: string, stepType?: string): void {
-    this.currentStepId = stepId;
-
+    // this.currentStepId = stepId;
     // if (this.workflowLogger) {
     //   // Create a new step-specific logger
     //   this.workflowLogger = this.workflowLogger.createStepLogger(stepId, stepName, stepType);
@@ -124,8 +123,7 @@ export class WorkflowContextManager {
    * Clear the current step context (back to execution-level logging)
    */
   public clearCurrentStep(): void {
-    this.currentStepId = null;
-
+    // this.currentStepId = null;
     // if (
     //   this.workflowLogger &&
     //   this.originalEsClient &&
