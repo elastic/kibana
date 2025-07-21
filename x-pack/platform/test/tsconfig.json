@@ -138,5 +138,11 @@
     "@kbn/data-visualizer-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/ci-stats-reporter",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-deprecations-common",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/sse-utils-server",
+    "@kbn/inference-common",
+    "@kbn/rule-registry-plugin"
   ]
 }
