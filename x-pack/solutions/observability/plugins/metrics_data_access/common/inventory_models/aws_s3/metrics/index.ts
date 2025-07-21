@@ -22,6 +22,13 @@ export const metrics: InventoryMetricsConfig<S3Aggregations> = {
     awsS3DownloadBytes,
     awsS3UploadBytes,
   },
+  requiredTsvb: [
+    'awsS3BucketSize',
+    'awsS3NumberOfObjects',
+    'awsS3TotalRequests',
+    'awsS3DownloadBytes',
+    'awsS3UploadBytes',
+  ],
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema);

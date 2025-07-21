@@ -8,6 +8,7 @@
 import { createLiteralValueFromUndefinedRT, inRangeRt, isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { EntityTypeRT } from '../shared/entity_type';
+import { SchemaTypesRT } from '../shared/schema_type';
 
 export const InfraMetricTypeRT = rt.keyof({
   cpu: null,
@@ -42,6 +43,7 @@ export const InfraEntityMetadataRT = rt.type({
 export const GetInfraMetricsRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     query: rt.UnknownRecord,
+    schema: SchemaTypesRT,
   }),
   rt.type({
     limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),

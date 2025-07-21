@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   InfraTimerangeInput,
@@ -23,10 +24,19 @@ export interface UseSnapshotRequest
 }
 
 export function useSnapshot(
-  props: UseSnapshotRequest,
+  props: Omit<UseSnapshotRequest, 'schema'>,
   { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
-  const payload = useMemo(() => JSON.stringify(buildPayload(props)), [props]);
+  const config = usePluginConfig();
+
+  const payload = useMemo(
+    () =>
+      // TODO: Replace this with the schema selector value
+      JSON.stringify(
+        buildPayload({ ...props, schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs' })
+      ),
+    [props, config.featureFlags.hostOtelEnabled]
+  );
 
   const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
@@ -66,6 +76,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     region = '',
     sourceId,
     timerange,
+    schema,
   } = args;
 
   return {
@@ -79,6 +90,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     sourceId,
     overrideCompositeSize,
     region,
+    schema,
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,

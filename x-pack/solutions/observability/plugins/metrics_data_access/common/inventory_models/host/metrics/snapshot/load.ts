@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import type { MetricsUIAggregation } from '../../../types';
+import type { AggregationSchemaVariant } from '../../../shared/metrics/types';
 
-export const load: MetricsUIAggregation = { load: { avg: { field: 'system.load.5' } } };
+export const load: AggregationSchemaVariant = {
+  ecs: { load: { avg: { field: 'system.load.5' } } },
+  semconv: { load: { avg: { field: 'system.cpu.load_average.5m' } } },
+};

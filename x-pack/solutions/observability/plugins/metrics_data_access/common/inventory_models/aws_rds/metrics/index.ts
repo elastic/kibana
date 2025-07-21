@@ -22,6 +22,13 @@ export const metrics: InventoryMetricsConfig<RDSAggregations> = {
     awsRDSQueriesExecuted,
     awsRDSActiveTransactions,
   },
+  requiredTsvb: [
+    'awsRDSCpuTotal',
+    'awsRDSConnections',
+    'awsRDSQueriesExecuted',
+    'awsRDSActiveTransactions',
+    'awsRDSLatency',
+  ],
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema);

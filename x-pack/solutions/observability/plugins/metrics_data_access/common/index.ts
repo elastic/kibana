@@ -18,7 +18,7 @@ export {
 } from './inventory_models';
 
 export {
-  InventoryMetricRT,
+  InventoryTsvbTypeKeysRT,
   InventoryFormatterTypeRT,
   InventoryVisTypeRT,
   ItemTypeRT,
@@ -28,7 +28,7 @@ export {
 
 export type {
   InventoryItemType,
-  InventoryMetric,
+  InventoryTsvbType,
   InventoryFormatterType,
   InventoryVisType,
   MetricsUIAggregation,

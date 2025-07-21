@@ -94,11 +94,12 @@ export const getDocumentsFilter = async ({
 };
 
 export const getInventoryModelAggregations = async (
-  entityType: 'host',
-  metrics: InfraEntityMetricType[]
+  assetType: 'host',
+  metrics: InfraEntityMetricType[],
+  schema?: SchemaTypes
 ) => {
-  const inventoryModel = findInventoryModel(entityType);
-  const aggregations = await inventoryModel.metrics.getAggregations();
+  const inventoryModel = findInventoryModel(assetType);
+  const aggregations = await inventoryModel.metrics.getAggregations({ schema });
 
   return metrics.reduce<Partial<Record<InfraEntityMetricType, MetricsUIAggregation>>>(
     (acc, metric) => {

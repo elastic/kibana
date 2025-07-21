@@ -22,6 +22,13 @@ export const metrics: InventoryMetricsConfig<SQSAggregations> = {
     awsSQSMessagesEmpty,
     awsSQSOldestMessage,
   },
+  requiredTsvb: [
+    'awsSQSMessagesVisible',
+    'awsSQSMessagesDelayed',
+    'awsSQSMessagesSent',
+    'awsSQSMessagesEmpty',
+    'awsSQSOldestMessage',
+  ],
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema);

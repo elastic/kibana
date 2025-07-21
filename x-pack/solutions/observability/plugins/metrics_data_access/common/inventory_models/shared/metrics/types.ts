@@ -7,6 +7,7 @@
 
 import type { ChartType, LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import type {
+  InventoryTsvbType,
   LensConfigWithId,
   MetricsUIAggregation,
   SnapshotMetricType,
@@ -74,12 +75,16 @@ export type LensMetricChartConfig = Record<
 
 /** inventory types */
 export interface BaseInventoryMetricsConfig<TAggregations extends AggregationConfigMap> {
-  tsvb?: Record<string, TSVBMetricModelCreator>;
   defaultSnapshot: SnapshotMetricType;
   defaultTimeRangeInSeconds: number;
+  legacyMetrics?: Array<keyof TAggregations>;
   getAggregations: (args?: { schema?: SchemaTypes }) => Promise<AggregationsCatalog<TAggregations>>;
 }
 
+export interface InventoryTsvbMetrics {
+  tsvb: Record<string, TSVBMetricModelCreator>;
+  requiredTsvb: InventoryTsvbType[];
+}
 export interface InventoryMetricsConfigWithLens<
   TFormulas extends FormulasConfigMap,
   TCharts extends LensMetricChartConfig
@@ -94,7 +99,9 @@ export type InventoryMetricsConfig<
   TCharts extends LensMetricChartConfig | undefined = undefined
 > = BaseInventoryMetricsConfig<TAggregations> &
   (TFormulas extends undefined
-    ? {}
+    ? TCharts extends undefined
+      ? InventoryTsvbMetrics
+      : never
     : TCharts extends undefined
-    ? {}
+    ? never
     : InventoryMetricsConfigWithLens<NonNullable<TFormulas>, NonNullable<TCharts>>);
