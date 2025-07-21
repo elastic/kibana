@@ -109,13 +109,21 @@ export const createRestorableStateProvider = <TState extends object>() => {
       RestorableStateProviderApi,
       TProps & Pick<RestorableStateProviderProps<TState>, 'initialState' | 'onInitialStateChange'>
     >(function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
+      const restorableStateProviderRef = useRef<RestorableStateProviderApi>(null);
+      const componentRef = useRef<any>(null);
+
+      useImperativeHandle(ref, () => ({
+        ...(componentRef.current || {}),
+        ...(restorableStateProviderRef.current || {}),
+      }));
+
       return (
         <RestorableStateProvider
-          ref={ref}
+          ref={restorableStateProviderRef}
           initialState={initialState}
           onInitialStateChange={onInitialStateChange}
         >
-          <ComponentMemoized {...(props as TProps)} />
+          <ComponentMemoized {...(props as TProps)} ref={componentRef} />
         </RestorableStateProvider>
       );
     });
