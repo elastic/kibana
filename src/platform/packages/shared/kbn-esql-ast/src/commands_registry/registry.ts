@@ -13,8 +13,6 @@ import type { ISuggestionItem, ESQLFieldWithMetadata, ICommandCallbacks } from '
  * Interface defining the methods that each ES|QL command should register.
  * These methods provide functionality specific to the command's behavior.
  *
- * @template TAST The type of the Abstract Syntax Tree (AST) that might be passed
- * to these methods for detailed analysis.
  * @template TContext The type of any additional context required by the methods.
  */
 export interface ICommandMethods<TContext = any> {
@@ -48,7 +46,6 @@ export interface ICommandMethods<TContext = any> {
   /**
    * Determines the columns available or expected after this command in a query pipeline.
    * This is crucial for chaining commands and ensuring type compatibility.
-   * @param query The ESQL query string.
    * @param command The parsed Abstract Syntax Tree.
    * @param previousColumns An array of columns inherited from the preceding command.
    * @param context Additional context (e.g., schema information).

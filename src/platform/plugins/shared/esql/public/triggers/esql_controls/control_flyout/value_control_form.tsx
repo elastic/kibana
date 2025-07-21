@@ -259,32 +259,28 @@ export function ValueControlForm({
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
         <>
-          <EuiFormRow
-            label={i18n.translate('esql.flyout.valuesQueryEditor.label', {
+          <ESQLLangEditor
+            query={{ esql: valuesQuery }}
+            onTextLangQueryChange={(q) => {
+              setValuesQuery(q.esql);
+            }}
+            hideTimeFilterInfo={true}
+            disableAutoFocus={true}
+            errors={esqlQueryErrors}
+            editorIsInline
+            hideRunQueryText
+            onTextLangQuerySubmit={async (q, a) => {
+              if (q) {
+                await onValuesQuerySubmit(q.esql);
+              }
+            }}
+            isDisabled={false}
+            isLoading={false}
+            hasOutline
+            formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
               defaultMessage: 'Values query',
             })}
-            fullWidth
-          >
-            <ESQLLangEditor
-              query={{ esql: valuesQuery }}
-              onTextLangQueryChange={(q) => {
-                setValuesQuery(q.esql);
-              }}
-              hideTimeFilterInfo={true}
-              disableAutoFocus={true}
-              errors={esqlQueryErrors}
-              editorIsInline
-              hideRunQueryText
-              onTextLangQuerySubmit={async (q, a) => {
-                if (q) {
-                  await onValuesQuerySubmit(q.esql);
-                }
-              }}
-              isDisabled={false}
-              isLoading={false}
-              hasOutline
-            />
-          </EuiFormRow>
+          />
           {queryColumns.length > 0 && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {

@@ -118,8 +118,8 @@ describe('The metric threshold rule type', () => {
     jest.resetAllMocks();
 
     mockAssetDetailsLocator.getRedirectUrl.mockImplementation(
-      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
-        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+      ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     );
 
     mockMetricsExplorerLocator.getRedirectUrl.mockImplementation(
@@ -2473,6 +2473,7 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
     // to be removed in https://github.com/elastic/kibana/issues/221904
     profilingEnabled: false,
     ruleFormV2Enabled: false,
+    hostOtelEnabled: false,
   },
   enabled: true,
   sources,
