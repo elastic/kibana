@@ -106,6 +106,7 @@ export class CasePlugin
       taskManager: plugins.taskManager,
       logger: this.logger,
       core,
+      analyticsConfig: this.caseConfig.analytics,
     });
 
     this.securityPluginSetup = plugins.security;
