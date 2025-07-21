@@ -17,16 +17,13 @@ import { pageObjects } from './page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   return {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     // list paths to the files that contain your plugins tests
-    testFiles: [
-      resolve(__dirname, './test_suites/resolver'),
-      resolve(__dirname, './test_suites/global_search'),
-    ],
+    testFiles: [resolve(__dirname, './test_suites/global_search')],
 
     services,
     pageObjects,

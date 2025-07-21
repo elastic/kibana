@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import Url from 'url';
-import type { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../api_integration/ftr_provider_context';
 import { loadProfilingData } from './load_profiling_data';
 import { setupProfilingResources } from './setup_profiling_resources';
 
