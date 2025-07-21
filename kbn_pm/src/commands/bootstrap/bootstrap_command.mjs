@@ -83,14 +83,22 @@ export const command = {
       }),
     ]);
 
-    if (shouldInstall) {
-      await time('install dependencies', async () => {
+    /**
+     * shouldInstall = node_modules missing || forceInstall || yarn integrity check failed
+     * Final install scenarios:
+     * node_modules missing: full reinstall irrespective of flags.
+     * node_modules present, with --force-install: the yarn integrity file will be removed, that triggers a reinstall, but it's faster than a full reinstall with some modules present
+     * node_modules present, with an out-of-date yarn integrity file: yarn will do a quick install, only fixing whatever is broken, probably
+     * node_modules present, with an up-to-date yarn integrity file: only an integrity check is done, and module installs are skipped
+     */
+    await time('install dependencies', async () => {
+      if (shouldInstall) {
         if (forceInstall) {
           await removeYarnIntegrityFileIfExists();
         }
         await yarnInstallDeps(log, { offline, quiet });
-      });
-    }
+      }
+    });
 
     await time('pre-build webpack bundles for packages', async () => {
       log.info('pre-build webpack bundles for packages');
