@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless observability UI - feature flags', function () {
-    loadTestFile(require.resolve('./infra'));
-    loadTestFile(require.resolve('./streams'));
+  describe('Observability Streams', function () {
+    loadTestFile(require.resolve('./read_privilege'));
   });
 }
