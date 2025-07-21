@@ -47,11 +47,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
-    });
-
     const exportActions = [
       {
         name: '_export API',
