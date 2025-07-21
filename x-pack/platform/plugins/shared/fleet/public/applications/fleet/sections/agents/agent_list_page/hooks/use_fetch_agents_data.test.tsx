@@ -17,6 +17,31 @@ import { useFetchAgentsData } from './use_fetch_agents_data';
 jest.mock('../../../../../../services/experimental_features');
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
+jest.mock('./use_session_agent_list_state', () => ({
+  useSessionAgentListState: jest.fn().mockReturnValue({
+    search: '',
+    selectedAgentPolicies: [],
+    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+    selectedTags: [],
+    showUpgradeable: false,
+    sort: { field: 'enrolled_at', direction: 'desc' },
+    page: { index: 0, size: 20 },
+    updateTableState: jest.fn(),
+    onTableChange: jest.fn(),
+    clearFilters: jest.fn(),
+    resetToDefaults: jest.fn(),
+  }),
+  getDefaultAgentListState: jest.fn(() => ({
+    search: '',
+    selectedAgentPolicies: [],
+    selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+    selectedTags: [],
+    showUpgradeable: false,
+    sort: { field: 'enrolled_at', direction: 'desc' },
+    page: { index: 0, size: 20 },
+  })),
+}));
+
 jest.mock('../../../../hooks', () => ({
   ...jest.requireActual('../../../../hooks'),
   sendGetAgents: jest.fn().mockResolvedValue({
@@ -91,14 +116,6 @@ jest.mock('../../../../hooks', () => ({
     cloud: {},
     data: { dataViews: { getFieldsForWildcard: jest.fn() } },
   }),
-  usePagination: jest.fn().mockReturnValue({
-    pagination: {
-      currentPage: 1,
-      pageSize: 5,
-    },
-    pageSizeOptions: [5, 20, 50],
-    setPagination: jest.fn(),
-  }),
 }));
 
 describe('useFetchAgentsData', () => {
@@ -151,7 +168,7 @@ describe('useFetchAgentsData', () => {
       'status:online or (status:error or status:degraded) or status:orphaned or (status:updating or status:unenrolling or status:enrolling) or status:offline'
     );
     expect(result?.current.currentRequestRef).toEqual({ current: 2 });
-    expect(result?.current.pagination).toEqual({ currentPage: 1, pageSize: 5 });
+    expect(result?.current.page).toEqual({ index: 0, size: 20 });
     expect(result?.current.pageSizeOptions).toEqual([5, 20, 50]);
   });
 
