@@ -9,18 +9,19 @@
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import { EDITOR_MARKER } from '../../../definitions/constants';
 import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
 import {
   pipeCompleteItem,
   getNewUserDefinedColumnSuggestion,
   assignCompletionItem,
-} from '../../utils/complete_items';
+} from '../../complete_items';
 import {
   getFieldsOrFunctionsSuggestions,
   findFinalWord,
   handleFragment,
   columnExists,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import {
   type ISuggestionItem,
   Location,
@@ -28,9 +29,9 @@ import {
   type ICommandCallbacks,
 } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
-import { EDITOR_MARKER } from '../../../parser/constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -123,14 +124,25 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
   }
+  const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
+  const position = getPosition(innerText, command, context);
 
-  const position = getPosition(query, command, context);
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    innerText,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (functionsSpecificSuggestions) {
+    return functionsSpecificSuggestions;
+  }
 
   switch (position) {
     case CompletionPosition.AFTER_COMPLETION:
@@ -150,7 +162,7 @@ export async function autocomplete(
       );
 
       const suggestions = await handleFragment(
-        query,
+        innerText,
         (fragment) => Boolean(columnExists(fragment, context) || getFunctionDefinition(fragment)),
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return fieldsAndFunctionsSuggestions.map((suggestion) => {
@@ -165,7 +177,7 @@ export async function autocomplete(
         () => []
       );
 
-      const lastWord = findFinalWord(query);
+      const lastWord = findFinalWord(innerText);
 
       if (!lastWord) {
         suggestions.push(defaultPrompt);

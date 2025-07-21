@@ -1162,9 +1162,16 @@ describe('BedrockConnector', () => {
         );
       });
 
-      it('responds with a readable stream', async () => {
-        const response = await connector.converseStream(aiAssistantBody, connectorUsageCollector);
-        expect(response instanceof PassThrough).toEqual(true);
+      it('should handle and split streaming response', async () => {
+        const result = (await connector.converseStream(
+          aiAssistantBody,
+          connectorUsageCollector
+        )) as unknown as {
+          stream?: unknown;
+          tokenStream?: unknown;
+        };
+        expect(result.stream instanceof PassThrough).toEqual(true);
+        expect(result.tokenStream instanceof PassThrough).toEqual(true);
       });
 
       it('errors during API calls are properly handled', async () => {

@@ -6,7 +6,6 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
 import {
@@ -50,17 +49,19 @@ const executionContext = executionContextServiceMock.createSetupContract();
 const minutesFromNow = (mins: number): Date => secondsFromNow(mins * 60);
 const getNextRunAtSpy = jest.spyOn(nextRunAtUtils, 'getNextRunAt');
 
-let fakeTimer: sinon.SinonFakeTimers;
-
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
 beforeAll(() => {
-  fakeTimer = sinon.useFakeTimers();
+  jest.useFakeTimers();
 });
 
-afterAll(() => fakeTimer.restore());
+beforeEach(() => {
+  jest.setSystemTime(new Date('1970-01-01T00:00:00.000Z'));
+});
+
+afterAll(() => jest.useRealTimers());
 
 describe('TaskManagerRunner', () => {
   const pendingStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.PENDING, opts);
@@ -93,6 +94,7 @@ describe('TaskManagerRunner', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockImplementation(() => mockApmTrans as any);
     });
+
     test('makes calls to APM as expected when task markedAsRunning is success', async () => {
       const { runner } = await pendingStageSetup({
         instance: {
@@ -116,6 +118,7 @@ describe('TaskManagerRunner', () => {
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
     });
+
     test('makes calls to APM as expected when task markedAsRunning fails', async () => {
       const { runner, store } = await pendingStageSetup({
         instance: {
@@ -145,6 +148,7 @@ describe('TaskManagerRunner', () => {
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
     });
+
     test('provides execution context on run', async () => {
       const { runner } = await readyToRunStageSetup({
         definitions: {
@@ -170,6 +174,7 @@ describe('TaskManagerRunner', () => {
         expect.any(Function)
       );
     });
+
     test('provides details about the task that is running', async () => {
       const { runner } = await pendingStageSetup({
         instance: {
@@ -366,7 +371,7 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('test sets retryAt to task instance timeout override when defined when claiming an ad hoc task', async () => {
+    test('sets retryAt to task instance timeout override when defined when claiming an ad hoc task', async () => {
       const timeoutSeconds = 60;
       const timeoutOverrideSeconds = 90;
       const id = _.random(1, 20).toString();
@@ -759,7 +764,6 @@ describe('TaskManagerRunner', () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(false);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -782,7 +786,6 @@ describe('TaskManagerRunner', () => {
       await runner.markTaskAsRunning();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.notCalled(getRetryStub);
       const instance = store.update.mock.calls[0][0];
 
       const timeoutDelay = timeoutMinutes * 60 * 1000;
@@ -1367,7 +1370,7 @@ describe('TaskManagerRunner', () => {
             createTaskRunner: () => ({
               async run() {
                 const promise = new Promise((r) => setTimeout(r, 1000));
-                fakeTimer.tick(1000);
+                jest.advanceTimersByTime(1000);
                 await promise;
               },
               async cancel() {
@@ -1521,7 +1524,6 @@ describe('TaskManagerRunner', () => {
     test('bypasses getRetry function (returning false) on error of a recurring task', async () => {
       const initialAttempts = _.random(1, 3);
       const id = Date.now().toString();
-      const getRetryStub = sinon.stub().returns(false);
       const error = new Error('Dangit!');
       const {
         instance: taskInstance,
@@ -1555,7 +1557,6 @@ describe('TaskManagerRunner', () => {
         doc: taskInstance,
       });
 
-      sinon.assert.notCalled(getRetryStub);
       const instance = store.partialUpdate.mock.calls[0][0];
 
       const nextIntervalDelay = 60000; // 1m
@@ -1811,7 +1812,7 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a task is run successfully but completes after timeout', async () => {
-        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const onTaskEvent = jest.fn();
         const { runner, instance } = await readyToRunStageSetup({
@@ -1832,7 +1833,7 @@ describe('TaskManagerRunner', () => {
           },
         });
 
-        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
@@ -1893,7 +1894,7 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a recurring task is run successfully but completes after timeout', async () => {
-        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
         const onTaskEvent = jest.fn();
@@ -1916,7 +1917,7 @@ describe('TaskManagerRunner', () => {
           },
         });
 
-        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
@@ -1982,7 +1983,7 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a recurring task returns a success result with taskRunError but completes after timeout', async () => {
-        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const runAt = minutesFromNow(_.random(5));
         const onTaskEvent = jest.fn();
@@ -2009,7 +2010,7 @@ describe('TaskManagerRunner', () => {
           },
         });
 
-        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
@@ -2068,7 +2069,7 @@ describe('TaskManagerRunner', () => {
       });
 
       test('emits TaskEvent when a task run throws an error and has timed out', async () => {
-        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 0, 0, 0).valueOf());
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 0, 0, 0));
         const id = _.random(1, 20).toString();
         const error = new Error('Dangit!');
         const onTaskEvent = jest.fn();
@@ -2089,7 +2090,7 @@ describe('TaskManagerRunner', () => {
             },
           },
         });
-        fakeTimer = sinon.useFakeTimers(new Date(2023, 1, 1, 0, 10, 0, 0).valueOf());
+        jest.setSystemTime(new Date(2023, 1, 1, 0, 10, 0, 0));
         await runner.run();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
@@ -2567,8 +2568,6 @@ describe('TaskManagerRunner', () => {
   }
 
   async function testOpts(stage: TaskRunningStage, opts: TestOpts) {
-    const callCluster = sinon.stub();
-    const createTaskRunner = sinon.stub();
     const logger = mockLogger();
 
     const instance = mockInstance(opts.instance);
@@ -2583,7 +2582,7 @@ describe('TaskManagerRunner', () => {
     definitions.registerTaskDefinitions({
       testbar: {
         title: 'Bar!',
-        createTaskRunner,
+        createTaskRunner: jest.fn(),
       },
     });
     if (opts.definitions) {
@@ -2623,8 +2622,6 @@ describe('TaskManagerRunner', () => {
     }
 
     return {
-      callCluster,
-      createTaskRunner,
       runner,
       logger,
       store,

@@ -6,7 +6,6 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import type { SerializedToolIdentifier } from '../tools';
 
 /**
  * Code to identify onechat errors
@@ -96,7 +95,7 @@ export const createToolNotFoundError = ({
   customMessage,
   meta = {},
 }: {
-  toolId: SerializedToolIdentifier;
+  toolId: string;
   customMessage?: string;
   meta?: Record<string, any>;
 }): OnechatToolNotFoundError => {

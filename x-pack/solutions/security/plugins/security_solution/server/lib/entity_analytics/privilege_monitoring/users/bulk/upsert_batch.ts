@@ -21,12 +21,21 @@ export const bulkUpsertBatch =
         const timestamp = new Date().toISOString();
 
         if (!id) {
+          const labelField = !u.label
+            ? {}
+            : {
+                entity_analytics_monitoring: {
+                  labels: [u.label],
+                },
+              };
+
           return [
             { create: {} },
             {
               '@timestamp': timestamp,
               user: { name: u.username, is_privileged: true },
               labels: { sources: ['csv'] },
+              ...labelField,
             },
             /* eslint-disable @typescript-eslint/no-explicit-any */
           ] as any;
@@ -47,6 +56,18 @@ export const bulkUpsertBatch =
                   ctx._source.labels.sources.add(params.source);
                 }
 
+                if (params.ea_label != null) {
+                  if (ctx._source.entity_analytics_monitoring == null) {
+                    ctx._source.entity_analytics_monitoring = new HashMap();
+                  }
+                  if (ctx._source.entity_analytics_monitoring.labels == null) {
+                    ctx._source.entity_analytics_monitoring.labels = new ArrayList();
+                  }
+                  if (!ctx._source.entity_analytics_monitoring.labels.contains(params.ea_label)) {
+                    ctx._source.entity_analytics_monitoring.labels.add(params.ea_label);
+                  }
+                }
+
                 if (ctx._source.user.is_privileged == false) {
                   ctx._source.user.is_privileged = true;
                 }
@@ -54,6 +75,7 @@ export const bulkUpsertBatch =
               lang: 'painless',
               params: {
                 source: 'csv',
+                ea_label: u.label,
               },
             },
           },

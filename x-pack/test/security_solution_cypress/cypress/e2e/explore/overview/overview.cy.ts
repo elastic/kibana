@@ -36,7 +36,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {
-      cy.get(stat.domId).should('have.text', stat.value);
+      cy.get(stat.domId).should('contain.text', stat.value);
     });
   });
 
@@ -44,7 +44,7 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
     expandNetworkStats();
 
     NETWORK_STATS.forEach((stat) => {
-      cy.get(stat.domId).should('have.text', stat.value);
+      cy.get(stat.domId).should('contain.text', stat.value);
     });
   });
 

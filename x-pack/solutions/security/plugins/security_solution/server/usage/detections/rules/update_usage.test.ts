@@ -90,6 +90,10 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: true,
         hasAlertSuppressionPerTimePeriod: false,
         alertSuppressionFieldsCount: 3,
+        hasExceptions: true,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
       const usage = updateRuleUsage(stubRule, getInitialRulesUsage());
 
@@ -118,6 +122,81 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 1,
           },
+          has_exceptions: 1,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
+        },
+        elastic_customized_total: {
+          alerts: 0,
+          cases: 0,
+          disabled: 0,
+          enabled: 0,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 0,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 0,
+            suppressed_fields_count: {
+              one: 0,
+              three: 0,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 0,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 0,
+          },
+          has_exceptions: 0,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
+        },
+        elastic_noncustomized_total: {
+          alerts: 1,
+          cases: 1,
+          disabled: 0,
+          enabled: 1,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 0,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 1,
+            suppressed_fields_count: {
+              one: 0,
+              three: 1,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 1,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 1,
+          },
+          has_exceptions: 1,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
         },
         eql: {
           alerts: 1,
@@ -142,11 +221,20 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 1,
           },
+          has_exceptions: 1,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
         },
       });
     });
 
-    it('Should update elastic_total, and eql rule metric total', async () => {
+    it('Should update elastic_total, elastic_customized_total, elastic_noncustomized_total and eql rule metric total', async () => {
       const stubRule = createStubRule({
         ruleType: 'eql',
         enabled: true,
@@ -194,6 +282,72 @@ describe('Detections Usage and Metrics', () => {
             suppresses_missing_fields: 1,
           },
           has_exceptions: 1,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
+        },
+        elastic_customized_total: {
+          alerts: 1,
+          cases: 1,
+          disabled: 0,
+          enabled: 1,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 0,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 1,
+            suppressed_fields_count: {
+              one: 0,
+              three: 1,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 1,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 1,
+          },
+          has_exceptions: 1,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
+        },
+        elastic_noncustomized_total: {
+          alerts: 0,
+          cases: 0,
+          disabled: 0,
+          enabled: 0,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 0,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 0,
+            suppressed_fields_count: {
+              one: 0,
+              three: 0,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 0,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 0,
+          },
+          has_exceptions: 0,
           response_actions: {
             enabled: 0,
             disabled: 0,
@@ -254,6 +408,10 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: false,
         hasAlertSuppressionPerTimePeriod: false,
         alertSuppressionFieldsCount: 0,
+        hasExceptions: true,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
       const stubEqlRuleTwo = createStubRule({
         ruleType: 'eql',
@@ -364,6 +522,10 @@ describe('Detections Usage and Metrics', () => {
         hasAlertSuppressionPerRuleExecution: false,
         hasAlertSuppressionPerTimePeriod: false,
         alertSuppressionFieldsCount: 0,
+        hasExceptions: false,
+        hasResponseActions: false,
+        hasResponseActionsEndpoint: false,
+        hasResponseActionsOsquery: false,
       });
 
       let usage = updateRuleUsage(stubEqlRuleOne, getInitialRulesUsage());
@@ -432,6 +594,72 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 0,
           },
+          has_exceptions: 4,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
+        },
+        elastic_customized_total: {
+          alerts: 2,
+          cases: 2,
+          disabled: 1,
+          enabled: 1,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 0,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 0,
+            suppressed_fields_count: {
+              one: 0,
+              three: 0,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 0,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 0,
+          },
+          has_exceptions: 1,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
+        },
+        elastic_noncustomized_total: {
+          alerts: 28,
+          cases: 47,
+          disabled: 0,
+          enabled: 3,
+          legacy_notifications_enabled: 0,
+          legacy_notifications_disabled: 0,
+          notifications_enabled: 0,
+          notifications_disabled: 0,
+          legacy_investigation_fields: 1,
+          alert_suppression: {
+            disabled: 0,
+            does_not_suppress_missing_fields: 0,
+            enabled: 0,
+            suppressed_fields_count: {
+              one: 0,
+              three: 0,
+              two: 0,
+            },
+            suppressed_per_rule_execution: 0,
+            suppressed_per_time_period: 0,
+            suppresses_missing_fields: 0,
+          },
           has_exceptions: 3,
           response_actions: {
             enabled: 0,
@@ -465,7 +693,7 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 0,
           },
-          has_exceptions: 1,
+          has_exceptions: 2,
           response_actions: {
             enabled: 0,
             disabled: 0,
@@ -629,6 +857,15 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_rule_execution: 0,
             suppressed_per_time_period: 0,
             suppresses_missing_fields: 0,
+          },
+          has_exceptions: 0,
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
           },
         },
       });

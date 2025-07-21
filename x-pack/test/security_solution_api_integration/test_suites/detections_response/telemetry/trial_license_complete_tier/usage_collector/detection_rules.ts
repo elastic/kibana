@@ -47,6 +47,10 @@ import {
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  checkRuleTypeUsageCustomizationInvariant,
+  checkRuleTypeUsageFields,
+} from '../../../utils/telemetry';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',
@@ -1495,18 +1499,7 @@ export default ({ getService }: FtrProviderContext) => {
           const stats = await getStats(supertest, log);
           expect(stats.detection_rules.detection_rule_usage.elastic_total.enabled).above(0);
           expect(stats.detection_rules.detection_rule_usage.elastic_total.disabled).above(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_enabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
-          ).to.eql(0);
+          checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
           expect(stats.detection_rules.detection_rule_detail.length).above(0);
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql({
             enabled: 0,
@@ -1624,18 +1617,45 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
           });
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
-          ).to.eql(1);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_enabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
-          ).to.eql(0);
+
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_disabled',
+            {
+              total: 1,
+              customized: 1,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'legacy_notifications_enabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'legacy_notifications_disabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_enabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
+
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
             getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
           );
@@ -1686,18 +1706,25 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
           });
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_enabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
-          ).to.eql(1);
+          checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_disabled',
+            {
+              total: 0,
+              customized: 0,
+              noncustomized: 0,
+            }
+          );
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'notifications_enabled',
+            {
+              total: 1,
+              customized: 1,
+              noncustomized: 0,
+            }
+          );
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
             getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
           );
@@ -1748,18 +1775,16 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
           });
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_enabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_disabled
-          ).to.eql(1);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
-          ).to.eql(0);
+          checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'legacy_notifications_disabled',
+            {
+              total: 1,
+              customized: 1,
+              noncustomized: 0,
+            }
+          );
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
             getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
           );
@@ -1813,18 +1838,16 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
           });
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_enabled
-          ).to.eql(1);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.legacy_notifications_disabled
-          ).to.eql(0);
-          expect(
-            stats.detection_rules.detection_rule_usage.elastic_total.notifications_enabled
-          ).to.eql(0);
+          checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
+          checkRuleTypeUsageFields(
+            stats.detection_rules.detection_rule_usage,
+            'legacy_notifications_enabled',
+            {
+              total: 1,
+              customized: 1,
+              noncustomized: 0,
+            }
+          );
           expect(stats.detection_rules.detection_rule_usage.custom_total).to.eql(
             getInitialDetectionMetrics().detection_rules.detection_rule_usage.custom_total
           );
@@ -1850,6 +1873,10 @@ export default ({ getService }: FtrProviderContext) => {
           expect(
             stats.detection_rules.detection_rule_usage.elastic_total.has_exceptions
           ).to.be.greaterThan(0);
+          expect(
+            stats.detection_rules.detection_rule_usage.elastic_noncustomized_total.has_exceptions
+          ).to.be.greaterThan(0);
+          checkRuleTypeUsageCustomizationInvariant(stats.detection_rules.detection_rule_usage);
         });
       });
     });
