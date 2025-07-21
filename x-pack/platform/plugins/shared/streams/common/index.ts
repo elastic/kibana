@@ -13,3 +13,5 @@ export {
   STREAMS_TIERED_AI_FEATURE,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 } from './constants';
+
+export { getKqlAsCommandArg } from './query';
