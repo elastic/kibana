@@ -7220,25 +7220,25 @@
                     "total": {
                       "type": "long",
                       "_meta": {
-                        "description": "Total number of upgradeable rules"
+                        "description": "The number of total upgradeable elastic rules"
                       }
                     },
                     "customized": {
                       "type": "long",
                       "_meta": {
-                        "description": "Number of customized upgradeable rules"
+                        "description": "The number of customized upgradeable elastic rules"
                       }
                     },
                     "enabled": {
                       "type": "long",
                       "_meta": {
-                        "description": "Number of enabled upgradeable rules"
+                        "description": "The number of enabled upgradeable elastic rules"
                       }
                     },
                     "disabled": {
                       "type": "long",
                       "_meta": {
-                        "description": "Number of disabled upgradeable rules"
+                        "description": "The number of disabled upgradeable elastic rules"
                       }
                     }
                   }

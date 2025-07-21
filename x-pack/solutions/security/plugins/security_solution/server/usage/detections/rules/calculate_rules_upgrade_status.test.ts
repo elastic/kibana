@@ -28,6 +28,10 @@ function prepareRuleMetric(isCustomized: boolean, enabled: boolean): RuleMetric 
     has_alert_suppression_per_time_period: false,
     has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
     alert_suppression_fields_count: 0,
+    has_exceptions: false,
+    has_response_actions: false,
+    has_response_actions_endpoint: false,
+    has_response_actions_osquery: false,
   };
 }
 
