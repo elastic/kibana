@@ -8,7 +8,7 @@
 import { ModelFamily, ModelProvider } from '../model_provider';
 
 export interface ModelDefinition {
-  model: string;
+  id: string;
   provider: ModelProvider;
   family: ModelFamily;
   contextWindow: number;
@@ -20,8 +20,7 @@ export interface ModelDefinition {
 export const getModelDefinition = (fullModelName: string): ModelDefinition | undefined => {
   return knownModels.find(
     (model) =>
-      fullModelName.includes(model.model) ||
-      fullModelName.includes(model.model.replaceAll('.', '-'))
+      fullModelName.includes(model.id) || fullModelName.includes(model.id.replaceAll('.', '-'))
   );
 };
 
@@ -30,122 +29,122 @@ export const getModelDefinition = (fullModelName: string): ModelDefinition | und
  */
 export const knownModels: ModelDefinition[] = [
   {
-    model: 'gpt-4o-mini',
+    id: 'gpt-4o-mini',
     provider: ModelProvider.OpenAI,
     family: ModelFamily.GPT,
     contextWindow: 128000,
   },
   {
-    model: 'gpt-4o',
+    id: 'gpt-4o',
     provider: ModelProvider.OpenAI,
     family: ModelFamily.GPT,
     contextWindow: 128000,
   },
   {
-    model: 'gpt-4.1-mini',
+    id: 'gpt-4.1-mini',
     provider: ModelProvider.OpenAI,
     family: ModelFamily.GPT,
     contextWindow: 1000000,
   },
   {
-    model: 'gpt-4.1-nano',
+    id: 'gpt-4.1-nano',
     provider: ModelProvider.OpenAI,
     family: ModelFamily.GPT,
     contextWindow: 1000000,
   },
   {
-    model: 'gpt-4.1',
+    id: 'gpt-4.1',
     provider: ModelProvider.OpenAI,
     family: ModelFamily.GPT,
     contextWindow: 1000000,
   },
   {
-    model: 'gemini-1.5-pro',
+    id: 'gemini-1.5-pro',
     provider: ModelProvider.Google,
     family: ModelFamily.Gemini,
     contextWindow: 1000000,
   },
   {
-    model: 'gemini-1.5-flash',
+    id: 'gemini-1.5-flash',
     provider: ModelProvider.Google,
     family: ModelFamily.Gemini,
     contextWindow: 1000000,
   },
   {
-    model: 'gemini-2.0-flash',
+    id: 'gemini-2.0-flash',
     provider: ModelProvider.Google,
     family: ModelFamily.Gemini,
     contextWindow: 1000000,
   },
   {
-    model: 'gemini-2.0-pro',
+    id: 'gemini-2.0-pro',
     provider: ModelProvider.Google,
     family: ModelFamily.Gemini,
     contextWindow: 2000000,
   },
   {
-    model: 'gemini-2.0-flash-lite',
+    id: 'gemini-2.0-flash-lite',
     provider: ModelProvider.Google,
     family: ModelFamily.Gemini,
     contextWindow: 1000000,
   },
   {
-    model: 'gemini-2.5-pro',
+    id: 'gemini-2.5-pro',
     provider: ModelProvider.Google,
     family: ModelFamily.Gemini,
     contextWindow: 1000000,
   },
   {
-    model: 'gemini-2.5-flash',
+    id: 'gemini-2.5-flash',
     provider: ModelProvider.Google,
     family: ModelFamily.Gemini,
     contextWindow: 128000, // or 1000000 in MAX mode...
   },
   // Claude models
   {
-    model: 'claude-3-sonnet',
+    id: 'claude-3-sonnet',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
-    model: 'claude-3-haiku',
+    id: 'claude-3-haiku',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
-    model: 'claude-3-opus',
+    id: 'claude-3-opus',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
-    model: 'claude-3.5-sonnet',
+    id: 'claude-3.5-sonnet',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
-    model: 'claude-3.5-haiku',
+    id: 'claude-3.5-haiku',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
-    model: 'claude-3.7-sonnet',
+    id: 'claude-3.7-sonnet',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
-    model: 'claude-4-sonnet',
+    id: 'claude-4-sonnet',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
   },
   {
-    model: 'claude-4-opus',
+    id: 'claude-4-opus',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
