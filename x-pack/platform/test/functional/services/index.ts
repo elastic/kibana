@@ -52,5 +52,5 @@ export const services = {
   random: RandomProvider,
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
-  dataStream: DataStreamProvider,
+  dataStreams: DataStreamProvider,
 };
