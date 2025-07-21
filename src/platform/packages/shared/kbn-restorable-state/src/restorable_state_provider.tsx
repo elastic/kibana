@@ -117,13 +117,20 @@ export const createRestorableStateProvider = <TState extends object>() => {
         ...(restorableStateProviderRef.current || {}),
       }));
 
+      // Function components cannot forward refs and show a warning if you try to do so.
+      const canForwardRef =
+        typeof Component !== 'function' || Component.prototype?.isReactComponent;
+
       return (
         <RestorableStateProvider
           ref={restorableStateProviderRef}
           initialState={initialState}
           onInitialStateChange={onInitialStateChange}
         >
-          <ComponentMemoized {...(props as TProps)} ref={componentRef} />
+          <ComponentMemoized
+            {...(props as TProps)}
+            ref={canForwardRef ? componentRef : undefined}
+          />
         </RestorableStateProvider>
       );
     });
