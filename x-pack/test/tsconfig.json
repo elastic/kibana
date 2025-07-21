@@ -75,7 +75,6 @@
     "@kbn/inference-common",
     "@kbn/test-suites-xpack-platform",
     "@kbn/response-ops-rule-params",
-    "@kbn/controls-constants",
     "@kbn/ml-string-hash",
     "@kbn/uptime-plugin",
   ]
