@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findObjectByTitle } from './find_object_by_title';
-import { SimpleSavedObject } from '@kbn/core/public';
+import { findVisualizationByTitle } from './find_visualization_by_title';
 
 const mockFindContent = jest.fn(async () => ({
   pagination: { total: 0 },
@@ -65,20 +64,20 @@ describe('findObjectByTitle', () => {
   });
 
   it('returns undefined if title is not provided', async () => {
-    const match = await findObjectByTitle('');
+    const match = await findVisualizationByTitle('');
     expect(match).toBeUndefined();
   });
 
   it('matches any case', async () => {
     const indexPattern = {
       attributes: { title: 'foo' },
-    } as SimpleSavedObject;
+    };
 
     mockFindContent.mockImplementation(async () => ({
       hits: [indexPattern],
       pagination: { total: 1 },
     }));
-    const match = await findObjectByTitle('FOO');
+    const match = await findVisualizationByTitle('FOO');
     expect(match).toEqual(indexPattern);
   });
 });

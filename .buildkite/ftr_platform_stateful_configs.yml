@@ -18,9 +18,10 @@ disabled:
   - x-pack/platform/test/functional_basic/apps/transform/config.base.ts
   - x-pack/platform/test/api_integration_basic/config.basic_license.ts
   - x-pack/platform/test/ui_capabilities/common/config.ts
+  - x-pack/platform/test/functional/config.ccs.ts
 
   # QA suites that are run out-of-band
-  - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
+  - x-pack/platform/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
   - x-pack/platform/test/upgrade/config.ts
   - src/platform/test/functional/config.edge.js
   - x-pack/platform/test/functional/config.edge.ts
