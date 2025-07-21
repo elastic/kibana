@@ -30,10 +30,10 @@ export interface BuildAggregationOpts {
   loggerCb?: (message: string) => void;
 }
 
-export const BUCKET_SELECTOR_PATH_NAME = 'compareValue';
+const BUCKET_SELECTOR_PATH_NAME = 'compareValue';
 export const BUCKET_SELECTOR_FIELD = `params.${BUCKET_SELECTOR_PATH_NAME}`;
 export const DEFAULT_GROUPS = 100;
-export const MAX_SOURCE_FIELDS_TO_COPY = 10;
+const MAX_SOURCE_FIELDS_TO_COPY = 10;
 
 const MAX_TOP_HITS_SIZE = 100;
 

@@ -31,7 +31,8 @@ const getUnableToModifyCase = () => {
   });
 };
 
-describe('Indices', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/228238
+describe.skip('Indices', () => {
   describe('when logged in as a viewer', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
