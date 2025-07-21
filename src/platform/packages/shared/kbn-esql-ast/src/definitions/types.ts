@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLSignatureLicenseType } from '@kbn/esql-types';
 import type { ESQLFunction, ESQLMessage, ESQLNumericLiteralType } from '../types';
 import { Location } from '../commands_registry/types';
 
@@ -124,7 +125,10 @@ export enum FunctionDefinitionTypes {
   SCALAR = 'scalar',
   OPERATOR = 'operator',
   GROUPING = 'grouping',
+  TIME_SERIES_AGG = 'time_series_agg',
 }
+
+export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 /**
  * This is the type of a parameter in a function definition.
@@ -194,8 +198,7 @@ export interface Signature {
   params: FunctionParameter[];
   minParams?: number;
   returnType: FunctionReturnType;
-  // Not used yet, but we will in the future.
-  license?: string;
+  license?: ESQLSignatureLicenseType;
 }
 
 export interface FunctionDefinition {
@@ -211,8 +214,7 @@ export interface FunctionDefinition {
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
   customParametersSnippet?: string;
-  // Not used yet, but we will in the future.
-  license?: string;
+  license?: ESQLSignatureLicenseType;
 }
 
 export interface FunctionFilterPredicates {

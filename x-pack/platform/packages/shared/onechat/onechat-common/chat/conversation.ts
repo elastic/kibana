@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import type { PlainIdToolIdentifier } from '../tools/tools';
-import {
-  oneChatDefaultAgentId,
-  toSerializedAgentIdentifier,
-  type SerializedAgentIdentifier,
-  oneChatAgentProviderIds,
-} from '../agents';
 import type { UserIdAndName } from '../base/users';
 
 /**
@@ -56,11 +49,7 @@ export interface ToolCallWithResult {
   /**
    * Identifier of the tool.
    */
-  tool_id: PlainIdToolIdentifier;
-  /**
-   * Type of the tool.
-   */
-  tool_type: string;
+  tool_id: string;
   /**
    * Arguments the tool was called with.
    */
@@ -119,30 +108,18 @@ export interface ConversationRound {
   steps: ConversationRoundStep[];
   /** The final response from the assistant */
   response: AssistantResponse;
+  /** when tracing is enabled, contains the traceId associated with this round */
+  trace_id?: string;
 }
 
 export interface Conversation {
   id: string;
-  agentId: SerializedAgentIdentifier;
+  agent_id: string;
   user: UserIdAndName;
   title: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   rounds: ConversationRound[];
 }
 
-export const createEmptyConversation = (): Conversation => {
-  const now = new Date().toISOString();
-  return {
-    id: 'new',
-    agentId: toSerializedAgentIdentifier({
-      agentId: oneChatDefaultAgentId,
-      providerId: oneChatAgentProviderIds.default,
-    }),
-    user: { id: '', username: '' },
-    title: '',
-    createdAt: now,
-    updatedAt: now,
-    rounds: [],
-  };
-};
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

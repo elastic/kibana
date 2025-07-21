@@ -1464,20 +1464,6 @@
           },
           {
             "parentPluginId": "unifiedSearch",
-            "id": "def-public.IUnifiedSearchPluginServices.savedObjects",
-            "type": "Object",
-            "tags": [],
-            "label": "savedObjects",
-            "description": [],
-            "signature": [
-              "SavedObjectsStart"
-            ],
-            "path": "src/platform/plugins/shared/unified_search/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedSearch",
             "id": "def-public.IUnifiedSearchPluginServices.notifications",
             "type": "Object",
             "tags": [],

@@ -23,7 +23,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     super(definition, dependencies);
   }
 
-  clone(): StreamActiveRecord<Streams.GroupStream.Definition> {
+  protected doClone(): StreamActiveRecord<Streams.GroupStream.Definition> {
     return new GroupStream(cloneDeep(this._definition), this.dependencies);
   }
 

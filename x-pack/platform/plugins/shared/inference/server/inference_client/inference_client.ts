@@ -15,18 +15,21 @@ import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createPromptApi } from '../prompt';
+import { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 
 export function createInferenceClient({
   request,
   actions,
   logger,
   anonymizationRulesPromise,
+  regexWorker,
   esClient,
 }: {
   request: KibanaRequest;
   logger: Logger;
   actions: ActionsPluginStart;
   anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
   esClient: ElasticsearchClient;
 }): InferenceClient {
   const chatComplete = createChatCompleteApi({
@@ -34,11 +37,19 @@ export function createInferenceClient({
     actions,
     logger,
     anonymizationRulesPromise,
+    regexWorker,
     esClient,
   });
   return {
     chatComplete,
-    prompt: createPromptApi({ request, actions, logger, anonymizationRulesPromise, esClient }),
+    prompt: createPromptApi({
+      request,
+      actions,
+      logger,
+      anonymizationRulesPromise,
+      regexWorker,
+      esClient,
+    }),
     output: createOutputApi(chatComplete),
     getConnectorById: async (connectorId: string) => {
       const actionsClient = await actions.getActionsClientWithRequest(request);

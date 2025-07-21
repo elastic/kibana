@@ -18,17 +18,19 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getDateHistogramCompletionItem,
-} from '../../utils/complete_items';
+} from '../../complete_items';
 import {
   pushItUpInTheList,
   columnExists,
   handleFragment,
   getControlSuggestionIfSupported,
   suggestForExpression,
-} from '../../../definitions/utils/autocomplete';
+} from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
 import { TRIGGER_SUGGESTION_COMMAND, ESQL_VARIABLES_PREFIX } from '../../constants';
-import { getPosition, isMarkerNode } from './utils';
+import { getPosition } from './utils';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { isMarkerNode } from '../../../definitions/utils/ast';
 
 function alreadyUsedColumns(command: ESQLCommand) {
   const byOption = command.args.find((arg) => !Array.isArray(arg) && arg.name === 'by') as
@@ -85,14 +87,16 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
   }
-  const pos = getPosition(query, command);
+  const innerText = query.substring(0, cursorPosition);
+  const pos = getPosition(innerText, command);
 
-  const lastCharacterTyped = query[query.length - 1];
+  const lastCharacterTyped = innerText[innerText.length - 1];
   const controlSuggestions = getControlSuggestionIfSupported(
     Boolean(context?.supportsControls),
     ESQLVariableType.FUNCTIONS,
@@ -100,16 +104,35 @@ export async function autocomplete(
     lastCharacterTyped !== ESQL_VARIABLES_PREFIX
   );
 
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    query,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (functionsSpecificSuggestions) {
+    return functionsSpecificSuggestions;
+  }
+
   switch (pos) {
     case 'expression_without_assignment':
       return [
         ...controlSuggestions,
-        ...getFunctionSuggestions({ location: Location.STATS }),
+        ...getFunctionSuggestions(
+          { location: Location.STATS },
+          callbacks?.hasMinimumLicenseRequired
+        ),
         getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
       ];
 
     case 'expression_after_assignment':
-      return [...controlSuggestions, ...getFunctionSuggestions({ location: Location.STATS })];
+      return [
+        ...controlSuggestions,
+        ...getFunctionSuggestions(
+          { location: Location.STATS },
+          callbacks?.hasMinimumLicenseRequired
+        ),
+      ];
 
     case 'expression_complete':
       return [
@@ -128,12 +151,13 @@ export async function autocomplete(
       }
 
       const suggestions = await suggestForExpression({
-        innerText: query,
+        innerText,
         getColumnsByType: callbacks?.getByType,
         expressionRoot,
         location: Location.STATS_WHERE,
         preferredExpressionType: 'boolean',
         context,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
       });
 
       // Is this a complete boolean expression?
@@ -143,7 +167,7 @@ export async function autocomplete(
         context?.fields,
         context?.userDefinedColumns
       );
-      if (expressionType === 'boolean' && isExpressionComplete(expressionType, query)) {
+      if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
         suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
       }
 
@@ -161,10 +185,13 @@ export async function autocomplete(
       return suggestColumns(
         columnSuggestions,
         [
-          ...getFunctionSuggestions({ location: Location.STATS_BY }),
+          ...getFunctionSuggestions(
+            { location: Location.STATS_BY },
+            callbacks?.hasMinimumLicenseRequired
+          ),
           getDateHistogramCompletionItem(histogramBarTarget),
         ],
-        query,
+        innerText,
         context
       );
     }
@@ -182,10 +209,13 @@ export async function autocomplete(
       const suggestions = await suggestColumns(
         columnSuggestions,
         [
-          ...getFunctionSuggestions({ location: Location.STATS_BY }),
+          ...getFunctionSuggestions(
+            { location: Location.STATS_BY },
+            callbacks?.hasMinimumLicenseRequired
+          ),
           getDateHistogramCompletionItem(histogramBarTarget),
         ],
-        query,
+        innerText,
         context
       );
 
