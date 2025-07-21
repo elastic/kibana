@@ -213,9 +213,9 @@ enabled:
   - x-pack/platform/test/functional/apps/graph/config.ts
   - x-pack/platform/test/functional/apps/grok_debugger/config.ts
   - x-pack/platform/test/functional/apps/home/config.ts
-  - x-pack/test/functional/apps/index_lifecycle_management/config.ts
-  - x-pack/test/functional/apps/index_management/config.ts
-  - x-pack/test/functional/apps/ingest_pipelines/config.ts
+  - x-pack/platform/test/functional/apps/index_lifecycle_management/config.ts
+  - x-pack/platform/test/functional/apps/index_management/config.ts
+  - x-pack/platform/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group3/config.ts
@@ -227,7 +227,7 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
   - x-pack/platform/test/functional/apps/license_management/config.ts
-  - x-pack/test/functional/apps/logstash/config.ts
+  - x-pack/platform/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
   - x-pack/platform/test/functional/apps/management/config.ts
   - x-pack/platform/test/functional/apps/maps/group1/config.ts

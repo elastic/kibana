@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { testEmbeddedConsole } from '@kbn/test-suites-xpack-platform/functional/apps/dev_tools/embedded_console';
+import { testEmbeddedConsole } from '../../dev_tools/embedded_console';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

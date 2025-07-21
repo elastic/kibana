@@ -2259,7 +2259,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/apps/search_playground @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_ingest_pipelines.ts @elastic/search-kibana
 /x-pack/platform/test/functional/apps/dev_tools/embedded_console.ts @elastic/search-kibana
-/x-pack/test/functional/apps/ingest_pipelines/feature_controls/ingest_pipelines_security.ts @elastic/search-kibana
+/x-pack/platform/test/functional/apps/ingest_pipelines/feature_controls/ingest_pipelines_security.ts @elastic/search-kibana
 /x-pack/test/functional/page_objects/embedded_console.ts @elastic/search-kibana
 /x-pack/test/functional_enterprise_search/ @elastic/search-kibana
 /x-pack/solutions/search/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
@@ -2306,7 +2306,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/functional/services/management @elastic/kibana-management
 /src/platform/test/functional/services/synthtrace/sythtrace.ts  @elastic/kibana-management
 /x-pack/platform/test/functional/apps/cross_cluster_replication @elastic/kibana-management
-/x-pack/test/functional/apps/ingest_pipelines @elastic/kibana-management
+/x-pack/platform/test/functional/apps/ingest_pipelines @elastic/kibana-management
 /x-pack/platform/test/functional/apps/home @elastic/kibana-management
 /x-pack/platform/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/license_management_page.ts @elastic/kibana-management
@@ -2332,8 +2332,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/functional/page_objects/index_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/services/grok_debugger.ts @elastic/kibana-management
 /x-pack/platform/test/functional/apps/grok_debugger @elastic/kibana-management
-/x-pack/test/functional/apps/index_lifecycle_management @elastic/kibana-management
-/x-pack/test/functional/apps/index_management @elastic/kibana-management
+/x-pack/platform/test/functional/apps/index_lifecycle_management @elastic/kibana-management
+/x-pack/platform/test/functional/apps/index_management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/watcher @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/watcher @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/upgrade_assistant @elastic/kibana-management
@@ -2874,7 +2874,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/test/functional/es_archives/logstash/example_pipelines @elastic/logstash
 /x-pack/test/functional/services/pipeline_* @elastic/logstash
 /x-pack/test/functional/page_objects/logstash_page.ts @elastic/logstash
-/x-pack/test/functional/apps/logstash @elastic/logstash
+/x-pack/platform/test/functional/apps/logstash @elastic/logstash
 /x-pack/platform/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/platform/plugins/private/logstash/ @elastic/logstash
 
