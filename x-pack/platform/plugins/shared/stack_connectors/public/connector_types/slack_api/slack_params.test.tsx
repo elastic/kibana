@@ -47,7 +47,7 @@ const testBlock = {
 };
 const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(mockUseValidChanelId);
 
-const mockToasts = { danger: jest.fn(), warning: jest.fn() };
+const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
 jest.mock(triggersActionsPath, () => {
   const original = jest.requireActual(triggersActionsPath);
   return {
@@ -55,7 +55,9 @@ jest.mock(triggersActionsPath, () => {
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
     useKibana: () => ({
       ...original.useKibana(),
-      notifications: { toasts: mockToasts },
+      services: {
+        notifications: { toasts: mockToasts },
+      },
     }),
   };
 });

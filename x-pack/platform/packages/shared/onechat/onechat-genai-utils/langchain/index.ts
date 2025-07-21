@@ -23,6 +23,7 @@ export {
   toolsToLangchain,
   toolToLangchain,
   toolIdentifierFromToolCall,
+  sanitizeToolId,
   type ToolIdMapping,
   type ToolsAndMappings,
 } from './tools';

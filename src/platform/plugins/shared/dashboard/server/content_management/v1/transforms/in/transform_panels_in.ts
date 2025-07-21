@@ -9,13 +9,15 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { isDashboardSection } from '../../../../../common';
+import { SavedObjectReference } from '@kbn/core/server';
+import { isDashboardSection, prefixReferencesFromPanel } from '../../../../../common';
 import {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
+import { embeddableService, logger } from '../../../../kibana_services';
 
 export function transformPanelsIn(
   widgets: DashboardAttributes['panels'] | undefined,
@@ -23,9 +25,11 @@ export function transformPanelsIn(
 ): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
+  references: SavedObjectReference[];
 } {
   const panels: SavedDashboardPanel[] = [];
   const sections: SavedDashboardSection[] = [];
+  const panelReferences: SavedObjectReference[] = [];
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
@@ -33,30 +37,56 @@ export function transformPanelsIn(
       const idx = gridData.i ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...gridData, i: idx } });
       (sectionPanels as DashboardPanel[]).forEach((panel) => {
-        const transformed = transformPanel(panel);
+        const { storedPanel, references } = transformPanelIn(panel);
         panels.push({
-          ...transformed,
-          gridData: { ...transformed.gridData, ...(!dropSections && { sectionId: idx }) },
+          ...storedPanel,
+          gridData: { ...storedPanel.gridData, ...(!dropSections && { sectionId: idx }) },
         });
+        panelReferences.push(...references);
       });
     } else {
       // widget is a panel
-      panels.push(transformPanel(widget));
+      const { storedPanel, references } = transformPanelIn(widget);
+      panels.push(storedPanel);
+      panelReferences.push(...references);
     }
   });
-  return { panelsJSON: JSON.stringify(panels), sections };
+  return { panelsJSON: JSON.stringify(panels), sections, references: panelReferences };
 }
 
-function transformPanel(panel: DashboardPanel): SavedDashboardPanel {
+function transformPanelIn(panel: DashboardPanel): {
+  storedPanel: SavedDashboardPanel;
+  references: SavedObjectReference[];
+} {
   const { panelIndex, gridData, panelConfig, ...restPanel } = panel as DashboardPanel;
   const idx = panelIndex ?? uuidv4();
+
+  const transforms = embeddableService?.getTransforms(panel.type);
+  let transformedPanelConfig = panelConfig;
+  let references: undefined | SavedObjectReference[];
+  try {
+    if (transforms?.transformIn) {
+      const transformed = transforms.transformIn(panelConfig);
+      transformedPanelConfig = transformed.state;
+      references = transformed.references;
+    }
+  } catch (transformInError) {
+    // do not prevent save if transformIn throws
+    logger.warn(
+      `Unable to transform "${panel.type}" embeddable state on save. Error: ${transformInError.message}`
+    );
+  }
+
   return {
-    ...restPanel,
-    embeddableConfig: panelConfig,
-    panelIndex: idx,
-    gridData: {
-      ...gridData,
-      i: idx,
+    storedPanel: {
+      ...restPanel,
+      embeddableConfig: transformedPanelConfig as SavedDashboardPanel['embeddableConfig'],
+      panelIndex: idx,
+      gridData: {
+        ...gridData,
+        i: idx,
+      },
     },
+    references: prefixReferencesFromPanel(idx, references ?? []),
   };
 }
