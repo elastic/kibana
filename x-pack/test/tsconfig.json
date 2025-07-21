@@ -29,7 +29,6 @@
   "kbn_references": [
     "@kbn/test-suites-src",
     "@kbn/telemetry-collection-manager-plugin",
-    "@kbn/alerting-plugin",
     "@kbn/apm-plugin",
     "@kbn/fleet-plugin",
     "@kbn/global-search-plugin",
@@ -40,7 +39,6 @@
     "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/spaces-plugin",
-    "@kbn/task-manager-plugin",
     "@kbn/remote-clusters-plugin",
     "@kbn/global-search-test-plugin",
     "@kbn/test",
