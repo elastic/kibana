@@ -36,11 +36,9 @@ import {
   waitForAlertsToBePresent,
   waitForRulePartialFailure,
   deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
-import {
   createUserAndRole,
   deleteUserAndRole,
-} from '../../../../../../common/services/security_solution';
+} from '../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

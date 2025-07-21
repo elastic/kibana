@@ -17,11 +17,11 @@ import {
   combineToNdJson,
   getCustomQueryRuleParams,
 } from '../../../utils';
-import { deleteAllRules, createRule } from '../../../../../../common/utils/security_solution';
+import { deleteAllRules, createRule } from '../../../../../config/services/detections_response';
 import {
   createUserAndRole,
   deleteUserAndRole,
-} from '../../../../../../common/services/security_solution';
+} from '../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createConnector } from '../../../utils/connectors';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
