@@ -57,6 +57,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     operator: ESFunctionDefinition.operator,
+    license: ESFunctionDefinition.license,
     locationsAvailable,
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
