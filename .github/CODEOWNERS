@@ -2293,7 +2293,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
-/x-pack/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
+/x-pack/platform/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/grok_debugger_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
@@ -2356,7 +2356,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/platform/test/api_integration/apis/management/ @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/management/ @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/painless_lab/ @elastic/kibana-management
-/x-pack/test/functional/apps/rollup_job/ @elastic/kibana-management
+/x-pack/platform/test/functional/apps/rollup_job/ @elastic/kibana-management
 /x-pack/platform/test/api_integration/apis/grok_debugger @elastic/kibana-management
 /x-pack/test/accessibility/apps/group1/advanced_settings.ts @elastic/kibana-management
 /x-pack/test/accessibility/apps/**/grok_debugger.ts @elastic/kibana-management

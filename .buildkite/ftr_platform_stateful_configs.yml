@@ -247,7 +247,7 @@ enabled:
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
-  - x-pack/test/functional/apps/rollup_job/config.ts
+  - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/saved_objects_management/config.ts
   - x-pack/platform/test/functional/apps/saved_query_management/config.ts
   - x-pack/platform/test/functional/apps/saved_query_management/config.v2.ts

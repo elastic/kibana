@@ -38,6 +38,7 @@ import { GeoFileUploadPageObject } from './geo_file_upload';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { LogstashPageObject } from './logstash_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
+import { RollupPageObject } from './rollup_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -75,4 +76,5 @@ export const pageObjects = {
   ingestPipelines: IngestPipelinesPageProvider,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   logstash: LogstashPageObject,
+  rollup: RollupPageObject,
 };
