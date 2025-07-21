@@ -18,8 +18,9 @@ export const focusFirstFocusable = (elId: Element | null) => {
   if (!elId) return;
   const focusable = getFirstFocusable(elId as HTMLElement);
   setTimeout(() => {
-    if (!elId.contains(document.activeElement)) { // only focus if it's not already within the flyout (set somewhere by the content)
-      focusable?.focus()
+    if (!elId.contains(document.activeElement)) {
+      // only focus on the first element of the flyout if the currently focused element is not a descendant of the flyout (ie. the focus was not set by the content)
+      focusable?.focus();
     }
   });
 };
