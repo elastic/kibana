@@ -17,6 +17,7 @@ import {
   isFunctionExpression,
 } from '@kbn/esql-ast';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
+import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
@@ -49,6 +50,13 @@ export interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
   is_partial?: boolean;
+  _clusters?: {
+    details?: {
+      [key: string]: {
+        failures?: EsqlEsqlShardFailure[];
+      };
+    };
+  };
 }
 
 export const ALERT_ID_COLUMN = 'Alert ID';

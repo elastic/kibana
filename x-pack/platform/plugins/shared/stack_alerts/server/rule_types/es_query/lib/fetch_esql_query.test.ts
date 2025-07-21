@@ -16,6 +16,7 @@ import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitor
 import { getEsqlQueryHits } from '../../../../common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -106,11 +107,24 @@ describe('fetchEsqlQuery', () => {
     });
 
     it('should add a warning when is_partial is true', async () => {
+      const shardFailure: EsqlEsqlShardFailure = {
+        reason: { type: 'test_failure', reason: 'too big data' },
+        shard: 0,
+        index: 'test-index',
+      };
+
       const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
       scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
         columns: [],
         values: [],
         is_partial: true, // is_partial is true
+        _clusters: {
+          details: {
+            'cluster-1': {
+              failures: [shardFailure],
+            },
+          },
+        },
       });
 
       (getEsqlQueryHits as jest.Mock).mockReturnValue({
@@ -152,7 +166,7 @@ describe('fetchEsqlQuery', () => {
       });
 
       const warning =
-        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.';
+        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues. Failures: [{"reason":{"type":"test_failure","reason":"too big data"},"shard":0,"index":"test-index"}]';
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
       expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
     });
