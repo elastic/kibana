@@ -16,7 +16,7 @@ import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitor
 import { getEsqlQueryHits } from '../../../../common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
 
 const getTimeRange = () => {
   const date = Date.now();
