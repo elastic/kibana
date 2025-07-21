@@ -58,6 +58,8 @@ export async function setupMocha({
     rootHooks: {
       beforeAll:
         rootHooks?.beforeAll && !skipRootHooks ? () => rootHooks.beforeAll(providers) : undefined,
+      afterAll:
+        rootHooks?.afterAll && !skipRootHooks ? () => rootHooks.afterAll(providers) : undefined,
     },
     reporter:
       reporter || (await providers.loadExternalService('mocha reporter', MochaReporterProvider)),
