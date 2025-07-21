@@ -12,6 +12,7 @@ import {
   ConversationRoundStepType,
   ConversationRound,
 } from '@kbn/onechat-common';
+import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
 
 describe('conversationLangchainMessages', () => {
@@ -138,5 +139,25 @@ describe('conversationLangchainMessages', () => {
     expect(secondAssistantMessage.content).toBe('done with bar');
     expect(isHumanMessage(lastHumanMessage)).toBe(true);
     expect(lastHumanMessage.content).toBe('bye');
+  });
+
+  it('escapes tool ids', () => {
+    const toolCall = makeToolCallWithResult('call-1', '.search', { query: 'foo' }, 'result!');
+    const previousRounds: ConversationRound[] = [
+      {
+        input: makeRoundInput('find foo'),
+        steps: [makeToolCallStep(toolCall)],
+        response: makeAssistantResponse('done!'),
+      },
+    ];
+    const nextInput = makeRoundInput('next');
+    const result = conversationToLangchainMessages({ previousRounds, nextInput });
+    // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
+    expect(result).toHaveLength(5);
+    const [_human, toolCallAIMessage] = result;
+
+    expect(isAIMessage(toolCallAIMessage)).toBe(true);
+    expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
+    expect((toolCallAIMessage as AIMessage).tool_calls![0].name).toBe(sanitizeToolId('.search'));
   });
 });
