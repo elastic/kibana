@@ -1,10 +1,16 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
-    "resolveJsonModule": true
+    "outDir": "target/types"
   },
-  "include": [".storybook/*", "common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    ".storybook/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "public/**/*.json"
+  ],
   "kbn_references": [
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
