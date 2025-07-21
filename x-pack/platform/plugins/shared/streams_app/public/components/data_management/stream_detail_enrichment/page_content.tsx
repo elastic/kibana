@@ -228,7 +228,7 @@ const ProcessorsEditor = React.memo(() => {
                   'xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitleTooltip',
                   {
                     defaultMessage:
-                      'Changing the order can affect how your data is parsed and which processor gets applied.',
+                      'The simulation runs only on new processors. If none are being edited, it includes all new ones. If a processor is under edit, it runs only up to that point, any new processors after it are excluded. If there’s a mix of persisted and new processors, the simulation is skipped entirely.',
                   }
                 )}
                 position="right"
