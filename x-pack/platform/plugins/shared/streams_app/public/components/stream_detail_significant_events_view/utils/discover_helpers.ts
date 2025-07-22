@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { v4 } from 'uuid';
-import { Streams, getIndexPatternsForStream } from '@kbn/streams-schema';
-import { getKqlAsCommandArg } from '@kbn/streams-plugin/common';
 import { TimeState } from '@kbn/es-query';
+import { Builder } from '@kbn/esql-ast';
+import { Streams, getIndexPatternsForStream } from '@kbn/streams-schema';
+import { v4 } from 'uuid';
 import { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 
 export function buildDiscoverParams(
@@ -16,15 +16,15 @@ export function buildDiscoverParams(
   definition: Streams.all.Definition,
   timeState: TimeState
 ) {
+  const node = Builder.expression.literal.string(significantEvent.query.kql.query);
+
   return {
     timeRange: {
       from: timeState.timeRange.from,
       to: timeState.timeRange.to,
     },
     query: {
-      esql: `FROM ${getIndexPatternsForStream(definition).join(
-        ','
-      )} | WHERE KQL(\"${getKqlAsCommandArg(significantEvent.query.kql.query)}\")`,
+      esql: `FROM ${getIndexPatternsForStream(definition).join(',')} | WHERE KQL(${node.value})`,
     },
     dataViewSpec: {
       id: v4(),
