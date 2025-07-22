@@ -15,9 +15,11 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -109,6 +111,7 @@ function DiscoverDocumentsComponent({
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
+  const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
@@ -382,7 +385,7 @@ function DiscoverDocumentsComponent({
           css={styles.progress}
         />
       ) : null,
-    [isDataLoading]
+    [isDataLoading, styles.progress]
   );
 
   const renderCustomToolbarWithElements = useMemo(
@@ -428,7 +431,7 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
-      <div className="unifiedDataTable">
+      <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGridMemoized
             ariaLabelledBy="documentsAriaLabel"
@@ -496,7 +499,7 @@ function DiscoverDocumentsComponent({
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
 
-const styles = {
+const componentStyles = {
   container: css({
     position: 'relative',
     minHeight: 0,
@@ -512,4 +515,17 @@ const styles = {
     height: '100%',
     width: '100%',
   }),
+  dataTable: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      maxWidth: '100%',
+      height: '100%',
+      overflow: 'hidden',
+
+      '.unifiedDataTable__cellValue': {
+        fontFamily: euiTheme.font.familyCode,
+        display: 'inline-block',
+        textAlign: 'left',
+      },
+    }),
 };

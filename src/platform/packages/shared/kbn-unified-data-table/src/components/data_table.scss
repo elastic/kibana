@@ -1,22 +1,3 @@
-.unifiedDataTable {
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.unifiedDataTable__cellValue {
-  font-family: $euiCodeFontFamily;
-  display: inline-block;
-  text-align: left;
-}
-
-.unifiedDataTable__cellPopoverValue {
-  font-family: $euiCodeFontFamily;
-  font-size: $euiFontSizeS;
-}
-
-
 // Custom styles for data grid header cell.
 // It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
 .unifiedDataTable__headerCell {
