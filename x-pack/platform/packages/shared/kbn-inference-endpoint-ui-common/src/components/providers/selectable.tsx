@@ -96,7 +96,7 @@ export const SelectableProvider: React.FC<SelectableProviderProps> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonGroup
                 buttonSize="s"
-                legend="Solution filter"
+                legend={i18n.SOLUTION_FILTER}
                 idSelected={solutionFilter ?? ''}
                 onChange={(solution) => onSolutionFilterChange(solution as SolutionView)}
                 options={Object.keys(solutionKeys).map((solution) => ({

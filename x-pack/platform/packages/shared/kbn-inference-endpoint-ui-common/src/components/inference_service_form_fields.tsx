@@ -49,6 +49,19 @@ import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidde
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
 
+export function isProviderForSolutions(
+  filterBySolution: SolutionView,
+  provider: InferenceProvider
+) {
+  const providerSolutions =
+    SERVICE_PROVIDERS[provider.service as ServiceProviderKeys]?.solutions ?? [];
+  return (
+    !solutionKeys[filterBySolution] ||
+    (solutionKeys[filterBySolution] !== undefined &&
+      providerSolutions.includes(solutionKeys[filterBySolution] as ProviderSolution))
+  );
+}
+
 interface InferenceServicesProps {
   http: HttpSetup;
   toasts: IToasts;
@@ -323,15 +336,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     (filterBySolution?: SolutionView) => {
       if (providers) {
         const filteredProviders = filterBySolution
-          ? providers.filter((provider) => {
-              const providerSolutions =
-                SERVICE_PROVIDERS[provider.service as ServiceProviderKeys]?.solutions ?? [];
-              return (
-                !solutionKeys[filterBySolution] ||
-                (solutionKeys[filterBySolution] !== undefined &&
-                  providerSolutions.includes(solutionKeys[filterBySolution] as ProviderSolution))
-              );
-            })
+          ? providers.filter(isProviderForSolutions.bind(this, filterBySolution))
           : providers;
 
         // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
@@ -470,7 +475,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               <>
                 <EuiSpacer size="s" />
                 <EuiInputPopover
-                  id={'popoverId'}
+                  id={'providerInputPopoverId'}
                   fullWidth
                   input={selectInput}
                   isOpen={isProviderPopoverOpen}
