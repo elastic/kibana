@@ -23,7 +23,11 @@ import type {
 import type { SavedObjectsType } from './saved_objects_type';
 import type { ISavedObjectTypeRegistry } from './type_registry';
 import type { ISavedObjectsExporter, SavedObjectsExportTransform } from './export';
-import type { ISavedObjectsImporter, SavedObjectsImporterOptions } from './import';
+import type {
+  AccessControlImportTransformsFactory,
+  ISavedObjectsImporter,
+  SavedObjectsImporterOptions,
+} from './import';
 import type { SavedObjectsExtensions } from './extensions/extensions';
 
 export interface SavedObjectsAccessControlTransforms {

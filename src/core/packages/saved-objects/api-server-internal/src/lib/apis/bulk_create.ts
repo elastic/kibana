@@ -21,6 +21,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
+  SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
@@ -49,7 +50,10 @@ type ExpectedResult = Either<
   { type: string; id?: string; error: Payload },
   {
     method: 'index' | 'create';
-    object: SavedObjectsBulkCreateObject & { id: string };
+    object: Omit<SavedObjectsBulkCreateObject, 'accessControl'> & {
+      id: string;
+      accessControl?: SavedObjectAccessControl;
+    };
     preflightCheckIndex?: number;
   }
 >;
@@ -179,6 +183,7 @@ export const performBulkCreate = async <T>(
       initialNamespaces: object.initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
       name: SavedObjectsUtils.getName(registry.getNameAttribute(object.type), object),
+      ...(object.accessControl && { accessControl: object.accessControl }),
     };
   });
 
@@ -257,7 +262,7 @@ export const performBulkCreate = async <T>(
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
-        accessControl: object.accessControl,
+        ...(object.accessControl && { accessControl: object.accessControl }),
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),

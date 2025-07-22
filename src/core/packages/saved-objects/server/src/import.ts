@@ -110,6 +110,8 @@ export interface SavedObjectsResolveImportErrorsOptions {
    * make their edits to the copy.
    */
   managed?: boolean;
+  /** The request originating the resolve import errors operation */
+  request: KibanaRequest;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
@@ -144,7 +146,6 @@ export type SavedObjectsImportHook<T = unknown> = (
 
 export interface AccessControlImportTransforms {
   filterStream: Transform;
-  // mapStream: Transform;
 }
 
 export type AccessControlImportTransformsFactory = (

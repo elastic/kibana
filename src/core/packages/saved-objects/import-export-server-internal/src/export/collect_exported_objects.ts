@@ -32,7 +32,7 @@ interface CollectExportedObjectOptions {
   /** logger to use to log potential errors */
   logger: Logger;
   /** the export transform to apply to exported objects that support access control */
-  accessCOntrolExportTransform?: SavedObjectsExportTransform;
+  accessControlExportTransform?: SavedObjectsExportTransform;
 }
 
 interface CollectExportedObjectResult {
@@ -123,7 +123,7 @@ export const collectExportedObjects = async ({
 
   return {
     objects: accessControlExportTransform
-      ? accessControlExportTransform({ request }, collectedObjects)
+      ? await accessControlExportTransform({ request }, collectedObjects)
       : collectedObjects,
     excludedObjects: collectedNonExportableObjects,
     missingRefs: collectedMissingRefs,

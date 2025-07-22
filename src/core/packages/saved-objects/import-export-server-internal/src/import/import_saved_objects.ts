@@ -14,10 +14,12 @@ import type {
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
+  AccessControlImportTransformsFactory,
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
+import { KibanaRequest } from '@kbn/core-http-server';
 import {
   checkReferenceOrigins,
   validateReferences,

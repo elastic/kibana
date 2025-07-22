@@ -22,6 +22,7 @@ import type {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
   SavedObject,
+  SavedObjectsExportTransform,
 } from '@kbn/core-saved-objects-server';
 import { sortObjects } from './sort_objects';
 import { SavedObjectsExportError } from './errors';

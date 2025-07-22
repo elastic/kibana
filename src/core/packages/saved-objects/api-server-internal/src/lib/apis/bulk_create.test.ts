@@ -19,7 +19,10 @@ import {
 
 import type { Payload } from '@hapi/boom';
 
-import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectAccessControl,
+  SavedObjectsBulkCreateObject,
+} from '@kbn/core-saved-objects-api-server';
 import {
   type SavedObjectsRawDoc,
   type SavedObjectUnsanitizedDoc,
@@ -58,6 +61,7 @@ import {
 } from '../../test_helpers/repository.test.common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
@@ -1085,6 +1089,145 @@ describe('#bulkCreate', () => {
             ]),
           })
         );
+      });
+
+      describe('access control', () => {
+        const CURRENT_USER_PROFILE_ID = 'current_user_profile_id';
+        const READ_ONLY_TYPE = 'read-only-type';
+
+        beforeEach(() => {
+          securityExtension.getCurrentUser.mockReturnValue({
+            authentication_realm: {
+              name: 'authentication_realm',
+              type: 'authentication_realm_type',
+            },
+            lookup_realm: {
+              name: 'lookup_realm',
+              type: 'lookup_realm_type',
+            },
+            authentication_provider: {
+              name: 'authentication_provider',
+              type: 'authentication_provider_type',
+            },
+            authentication_type: 'realm',
+            elastic_cloud_user: false,
+            profile_uid: CURRENT_USER_PROFILE_ID,
+          } as AuthenticatedUser);
+        });
+
+        registry.registerType({
+          name: READ_ONLY_TYPE,
+          hidden: false,
+          namespaceType: 'multiple-isolated',
+          supportsAccessControl: true,
+          mappings: {
+            dynamic: false,
+            properties: {
+              description: { type: 'text' },
+            },
+          },
+          management: {
+            importableAndExportable: true,
+          },
+        });
+
+        afterEach(() => {
+          securityExtension.getCurrentUser.mockClear();
+        });
+
+        it('applies access control options only to applicable types', async () => {
+          const obj1NoAccessControl = {
+            type: 'config',
+            id: '6.0.0-alpha1',
+            attributes: { title: 'Test One' },
+            references: [{ name: 'ref_0', type: 'test', id: '1' }],
+          };
+          const obj2AccessControl = {
+            type: READ_ONLY_TYPE,
+            id: 'has-read-only-metadata',
+            attributes: { title: 'Test Two' },
+            references: [{ name: 'ref_0', type: 'test', id: '2' }],
+          };
+          await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl], {
+            accessControl: { accessMode: 'read_only' },
+          });
+
+          expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              objects: expect.arrayContaining([
+                {
+                  type: 'config',
+                  id: '6.0.0-alpha1',
+                  name: 'Test One',
+                  existingNamespaces: [],
+                  initialNamespace: undefined,
+                  // explicitly confirm there is no accessControl for non-supporting type
+                },
+                {
+                  type: READ_ONLY_TYPE,
+                  id: 'has-read-only-metadata',
+                  name: 'Test Two',
+                  existingNamespaces: [],
+                  initialNamespace: undefined,
+                  accessControl: {
+                    owner: CURRENT_USER_PROFILE_ID,
+                    accessMode: 'read_only',
+                  },
+                },
+              ]),
+            })
+          );
+        });
+
+        it('overrides access control options with incoming object property only for applicable types', async () => {
+          const obj1NoAccessControl = {
+            type: 'config',
+            id: '6.0.0-alpha1',
+            attributes: { title: 'Test One' },
+            references: [{ name: 'ref_0', type: 'test', id: '1' }],
+            accessControl: {
+              accessMode: 'read_only',
+            } as Pick<SavedObjectAccessControl, 'accessMode'>,
+          };
+          const obj2AccessControl = {
+            type: READ_ONLY_TYPE,
+            id: 'has-read-only-metadata',
+            attributes: { title: 'Test Two' },
+            references: [{ name: 'ref_0', type: 'test', id: '2' }],
+            accessControl: {
+              accessMode: 'read_only',
+            } as Pick<SavedObjectAccessControl, 'accessMode'>,
+          };
+          await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl], {
+            accessControl: { accessMode: undefined }, // we only have one mode, so this is the only way to test the order
+          });
+
+          expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
+            expect.objectContaining({
+              objects: expect.arrayContaining([
+                {
+                  type: 'config',
+                  id: '6.0.0-alpha1',
+                  name: 'Test One',
+                  existingNamespaces: [],
+                  initialNamespace: undefined,
+                  // explicitly confirm there is no accessControl for non-supporting type
+                },
+                {
+                  type: READ_ONLY_TYPE,
+                  id: 'has-read-only-metadata',
+                  name: 'Test Two',
+                  existingNamespaces: [],
+                  initialNamespace: undefined,
+                  accessControl: {
+                    owner: CURRENT_USER_PROFILE_ID,
+                    accessMode: 'read_only',
+                  },
+                },
+              ]),
+            })
+          );
+        });
       });
     });
   });
