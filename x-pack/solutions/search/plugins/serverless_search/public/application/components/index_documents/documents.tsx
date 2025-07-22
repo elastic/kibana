@@ -66,7 +66,7 @@ export const IndexDocuments: React.FC<IndexDocumentsProps> = ({ indexName }) => 
               mappings={mappingData ? { [indexName]: mappingData } : undefined}
               meta={documentsMeta ?? DEFAULT_PAGINATION}
               onPaginate={(pageIndex) => setPagination({ ...pagination, pageIndex })}
-              setDocsPerPage={(pageSize) => setPagination({ ...pagination, pageSize })}
+              setDocsPerPage={(pageSize) => setPagination({ ...DEFAULT_PAGINATION, pageSize })}
             />
           )}
         </>

@@ -55,7 +55,7 @@ export const useESQLVariables = ({
           id: uuidv4(),
         },
       });
-      if (panel && updatedQuery) {
+      if (panel && updatedQuery && attributes) {
         panel.updateAttributes({
           ...attributes,
           state: {

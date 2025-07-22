@@ -239,6 +239,7 @@ describe('Alerting Plugin', () => {
               ...sampleRuleType,
               minimumLicenseRequired: 'basic',
               cancelAlertsOnRuleTimeout: false,
+              autoRecoverAlerts: false,
             } as RuleType<never, never, {}, never, never, 'default', never, {}>;
             setup.registerType(ruleType);
             expect(ruleType.cancelAlertsOnRuleTimeout).toBe(false);

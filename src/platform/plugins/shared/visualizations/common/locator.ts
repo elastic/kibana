@@ -11,6 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics/constants';
 import type { SavedVisState } from './types';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -69,8 +70,6 @@ export type VisualizeLocatorParams = {
 };
 
 export type VisualizeAppLocator = LocatorPublic<VisualizeLocatorParams>;
-
-export const VISUALIZE_APP_LOCATOR = 'VISUALIZE_APP_LOCATOR';
 
 export class VisualizeLocatorDefinition implements LocatorDefinition<VisualizeLocatorParams> {
   id = VISUALIZE_APP_LOCATOR;

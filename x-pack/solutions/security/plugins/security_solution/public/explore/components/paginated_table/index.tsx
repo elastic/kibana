@@ -346,9 +346,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                   )}
                 </PaginationWrapper>
               </FooterAction>
-              {(isInspect || myLoading) && (
-                <Loader data-test-subj="loadingPanelPaginatedTable" overlay size="xl" />
-              )}
+              {(isInspect || myLoading) && <Loader overlay size="xl" />}
             </>
           ))}
       </Panel>

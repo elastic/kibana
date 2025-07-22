@@ -165,7 +165,7 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
 
     const { id, text, public: isPublic } = resources.params.body;
     return client.addUserInstruction({
-      entry: { id, text, public: isPublic },
+      entry: { id, text, public: isPublic, title: `User instruction` },
     });
   },
 });

@@ -12,7 +12,6 @@ import {
   combineLatest,
   debounceTime,
   Observable,
-  of,
   startWith,
   switchMap,
   tap,
@@ -20,7 +19,6 @@ import {
 } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
-import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
@@ -32,10 +30,10 @@ import { OptionsListComponentApi, OptionsListComponentState, OptionsListControlA
 export function fetchAndValidate$({
   api,
   stateManager,
+  controlFetch$,
 }: {
   api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
-      controlFetch$: Observable<ControlFetchContext>;
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
@@ -44,6 +42,7 @@ export function fetchAndValidate$({
   > & {
     selectedOptions: PublishingSubject<OptionsListSelection[] | undefined>;
   };
+  controlFetch$: (onReload: () => void) => Observable<ControlFetchContext>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
@@ -51,7 +50,7 @@ export function fetchAndValidate$({
   return combineLatest([
     api.dataViews$,
     api.field$,
-    api.controlFetch$,
+    controlFetch$(requestCache.clearCache),
     api.parentApi.allowExpensiveQueries$,
     api.parentApi.ignoreParentSettings$,
     api.debouncedSearchString,
@@ -62,12 +61,6 @@ export function fetchAndValidate$({
       startWith(null), // start with null so that `combineLatest` subscription fires
       debounceTime(100) // debounce load more so "loading" state briefly shows
     ),
-    apiPublishesReload(api.parentApi)
-      ? api.parentApi.reload$.pipe(
-          tap(() => requestCache.clearCache()),
-          startWith(undefined)
-        )
-      : of(undefined),
   ]).pipe(
     tap(() => {
       // abort any in progress requests

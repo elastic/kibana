@@ -1,10 +1,41 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkTopNFlow Select direction rendering it renders the basic switch to include PTR in table 1`] = `
-<EuiSwitch
-  checked={true}
-  label="Include PTR records"
-  name="switch-ptr-included"
-  onChange={[MockFunction]}
-/>
+<div
+  class="euiSwitch emotion-euiSwitch"
+>
+  <button
+    aria-checked="true"
+    aria-labelledby="generated-id"
+    class="euiSwitch__button emotion-euiSwitch__button"
+    id="generated-id"
+    name="switch-ptr-included"
+    role="switch"
+    type="button"
+  >
+    <span
+      class="euiSwitch__body emotion-euiSwitch__body-on"
+    >
+      <span
+        class="euiSwitch__icons emotion-euiSwitch__icons-on-enabled"
+      >
+        <span
+          data-euiicon-type="check"
+        />
+        <span
+          data-euiicon-type="cross"
+        />
+      </span>
+    </span>
+    <span
+      class="euiSwitch__thumb emotion-euiSwitch__thumb-on"
+    />
+  </button>
+  <span
+    class="euiSwitch__label emotion-euiSwitch__label"
+    id="generated-id"
+  >
+    Include PTR records
+  </span>
+</div>
 `;

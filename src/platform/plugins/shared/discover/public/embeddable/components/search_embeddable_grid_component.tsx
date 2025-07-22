@@ -16,6 +16,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
   isLegacyTableEnabled,
+  getSortArray,
 } from '@kbn/discover-utils';
 import {
   FetchContext,
@@ -30,7 +31,6 @@ import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getSortForEmbeddable } from '../../utils';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
@@ -114,9 +114,10 @@ export function SearchEmbeddableGridComponent({
     [discoverServices, isEsql]
   );
 
-  const sort = useMemo(() => {
-    return getSortForEmbeddable(savedSearch.sort, dataView, discoverServices.uiSettings, isEsql);
-  }, [savedSearch.sort, dataView, isEsql, discoverServices.uiSettings]);
+  const sort = useMemo(
+    () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
+    [dataView, isEsql, savedSearch.sort]
+  );
 
   const originalColumns = useMemo(() => savedSearch.columns ?? [], [savedSearch.columns]);
   const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);

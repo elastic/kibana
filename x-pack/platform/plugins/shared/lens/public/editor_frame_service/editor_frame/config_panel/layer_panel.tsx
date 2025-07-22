@@ -22,6 +22,8 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
+import { BehaviorSubject } from 'rxjs';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
@@ -40,6 +42,7 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -73,7 +76,14 @@ export function LayerPanel(props: LayerPanelProps) {
     onDropToDimension,
     setIsInlineFlyoutVisible,
     onlyAllowSwitchToSubtypes,
+    parentApi,
   } = props;
+
+  const esqlVariables = useStateFromPublishingSubject(
+    isApiESQLVariablesCompatible(parentApi)
+      ? parentApi?.esqlVariables$
+      : new BehaviorSubject(undefined)
+  );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
@@ -753,6 +763,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 layerType: activeVisualization.getLayerType(layerId, visualizationState),
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
+                esqlVariables,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (

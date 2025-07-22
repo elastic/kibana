@@ -117,7 +117,6 @@ const OverviewComponent = () => {
                       indexPattern={indexPattern}
                       query={query}
                       queryType="overview"
-                      setQuery={setQuery}
                       to={to}
                     />
                   </EuiFlexItem>

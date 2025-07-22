@@ -14,13 +14,13 @@ import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   spanLinksCount: SpanLinksCount;
-  traceId: string;
-  spanId: string;
+  traceId: string | undefined;
+  spanId: string | undefined;
   processorEvent: ProcessorEvent;
 }
 
 export function getSpanLinksTabContent({ spanLinksCount, traceId, spanId, processorEvent }: Props) {
-  if (!spanLinksCount.linkedChildren && !spanLinksCount.linkedParents) {
+  if ((!spanLinksCount.linkedChildren && !spanLinksCount.linkedParents) || !traceId || !spanId) {
     return undefined;
   }
 

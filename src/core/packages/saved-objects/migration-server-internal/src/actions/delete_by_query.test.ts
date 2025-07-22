@@ -102,6 +102,9 @@ describe('deleteByQuery', () => {
     const result = await task();
 
     expect(Either.isRight(result)).toBe(true);
-    expect((result as Either.Right<any>).right).toEqual({ taskId: '1234' });
+    expect((result as Either.Right<any>).right).toEqual({
+      type: 'delete_by_query_response',
+      taskId: '1234',
+    });
   });
 });

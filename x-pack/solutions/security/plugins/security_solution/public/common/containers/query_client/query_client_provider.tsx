@@ -25,7 +25,11 @@ export class SecuritySolutionQueryClient extends QueryClient {
           refetchOnWindowFocus: false,
           refetchOnMount: true,
           keepPreviousData: true,
-          ...(options?.defaultOptions?.queries ?? {}),
+          ...(options?.defaultOptions?.queries ?? { networkMode: 'always' }),
+        },
+        mutations: {
+          networkMode: 'always',
+          ...(options?.defaultOptions?.mutations ?? { networkMode: 'always' }),
         },
       },
     };

@@ -5,10 +5,12 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
+import { useKibana } from '../../hooks/use_kibana';
+import { navigateToConnectorsManagementApp } from '../../utils/navigate_to_connectors';
 
 export function ActionsMenu({
   connectors,
@@ -17,6 +19,7 @@ export function ActionsMenu({
   connectors: UseGenAIConnectorsResult;
   onEditPrompt: () => void;
 }) {
+  const { application } = useKibana().services;
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -66,6 +69,18 @@ export function ActionsMenu({
       content: (
         <EuiPanel>
           <ConnectorSelectorBase {...connectors} />
+          <EuiButtonEmpty
+            flush="left"
+            size="xs"
+            onClick={() => navigateToConnectorsManagementApp(application!)}
+          >
+            {i18n.translate(
+              'xpack.observabilityAiAssistant.insight.actions.connector.manageConnectors',
+              {
+                defaultMessage: 'Manage connectors',
+              }
+            )}
+          </EuiButtonEmpty>
         </EuiPanel>
       ),
     },

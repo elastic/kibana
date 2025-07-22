@@ -31,7 +31,9 @@ export async function unenrollForAgentPolicyId(
       hasMore = false;
     }
     for (const agent of agents) {
-      await unenrollAgent(soClient, esClient, agent.id);
+      await unenrollAgent(soClient, esClient, agent.id, {
+        skipAgentlessValidation: true,
+      });
     }
   }
 }

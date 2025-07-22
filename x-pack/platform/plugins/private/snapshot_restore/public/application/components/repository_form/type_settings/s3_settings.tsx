@@ -15,6 +15,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { Repository, S3Repository } from '../../../../../common/types';
@@ -54,6 +55,9 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       readonly,
     },
   } = repository;
+  const clientId = useGeneratedHtmlId({ prefix: 's3ClientInput' });
+  const bucketId = useGeneratedHtmlId({ prefix: 's3BucketInput' });
+  const basePathId = useGeneratedHtmlId({ prefix: 's3BasePathInput' });
 
   const cannedAclOptions = [
     'private',
@@ -109,10 +113,12 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.clientLabel"
-              defaultMessage="Client"
-            />
+            <span id={clientId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.clientLabel"
+                defaultMessage="Client"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.client)}
@@ -132,6 +138,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="clientInput"
                 disabled={isManagedRepository}
+                aria-labelledby={clientId}
               />
             }
           />
@@ -160,10 +167,12 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.bucketLabel"
-              defaultMessage="Bucket (required)"
-            />
+            <span id={bucketId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.bucketLabel"
+                defaultMessage="Bucket (required)"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.bucket)}
@@ -183,6 +192,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="bucketInput"
                 disabled={isManagedRepository}
+                aria-labelledby={bucketId}
               />
             }
           />
@@ -211,10 +221,12 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       >
         <EuiFormRow
           label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.basePathLabel"
-              defaultMessage="Base path"
-            />
+            <span id={basePathId}>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.basePathLabel"
+                defaultMessage="Base path"
+              />
+            </span>
           }
           fullWidth
           isInvalid={Boolean(hasErrors && settingErrors.basePath)}
@@ -234,6 +246,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
                 }}
                 data-test-subj="basePathInput"
                 disabled={isManagedRepository}
+                aria-labelledby={basePathId}
               />
             }
           />

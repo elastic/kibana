@@ -257,7 +257,8 @@ export class AnomalyTimelineService {
     fromPage: number,
     bucketInterval: TimeBucketsInterval,
     selectionInfluencers: MlEntityField[],
-    influencersFilterQuery: InfluencersFilterQuery
+    influencersFilterQuery: InfluencersFilterQuery,
+    swimlaneSeverity: number
   ) {
     const selectedJobIds = selectedJobs.map((d) => d.id);
 
@@ -296,7 +297,7 @@ export class AnomalyTimelineService {
         bucketInterval.asMilliseconds(),
         perPage,
         fromPage,
-        swimlaneLimit
+        swimlaneSeverity
       );
       return Object.keys(resp.results);
     }

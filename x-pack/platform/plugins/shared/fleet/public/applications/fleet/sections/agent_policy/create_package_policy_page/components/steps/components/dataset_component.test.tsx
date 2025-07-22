@@ -13,7 +13,7 @@ import { createFleetTestRendererMock } from '../../../../../../../../mock';
 import { DatasetComponent } from './dataset_component';
 
 describe('DatasetComponent', () => {
-  function render(value = 'generic', datastreams: any = []) {
+  function render(value = 'generic', datastreams: any = [], props?: any) {
     const renderer = createFleetTestRendererMock();
     const mockOnChange = jest.fn();
     const fieldLabel = 'Dataset name';
@@ -29,6 +29,7 @@ describe('DatasetComponent', () => {
         onChange={mockOnChange}
         isDisabled={false}
         fieldLabel={fieldLabel}
+        {...props}
       />
     );
 
@@ -36,21 +37,22 @@ describe('DatasetComponent', () => {
   }
 
   it('should show validation error if dataset is invalid', () => {
-    const { utils } = render();
-
-    const inputEl = utils.getByTestId('comboBoxSearchInput');
-    fireEvent.change(inputEl, { target: { value: 'generic*' } });
-    fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
+    const { utils } = render('generic', [], {
+      errors: ['Dataset contains invalid characters'],
+      isInvalid: true,
+    });
 
     utils.getByText('Dataset contains invalid characters');
   });
 
   it('should not show validation error if dataset is valid', () => {
-    const { utils } = render();
+    const { utils, mockOnChange } = render();
 
     const inputEl = utils.getByTestId('comboBoxSearchInput');
     fireEvent.change(inputEl, { target: { value: 'test' } });
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
+
+    expect(mockOnChange).toBeCalled();
 
     expect(utils.queryByText('Dataset contains invalid characters')).toBeNull();
   });

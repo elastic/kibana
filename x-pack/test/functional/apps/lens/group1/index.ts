@@ -78,6 +78,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       loadTestFile(require.resolve('./smokescreen')); // 12m 12s
       loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
       loadTestFile(require.resolve('./multiple_data_views'));
+      loadTestFile(require.resolve('./inspector'));
     }
   });
 };

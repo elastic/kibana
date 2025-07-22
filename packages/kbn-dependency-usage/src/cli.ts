@@ -47,8 +47,8 @@ export const configureYargs = () => {
           })
           .option('group-by', {
             alias: 'g',
-            describe: chalk.magenta('Group results by either owner or source (package/plugin)'),
-            choices: ['owner', 'source'],
+            describe: chalk.magenta('Group results by owner, source, or package'),
+            choices: ['owner', 'source', 'package'],
           })
           .option('summary', {
             alias: 's',

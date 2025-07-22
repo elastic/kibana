@@ -62,7 +62,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>(getInitialDetectionMetrics());
     });
 
-    it('returns information with rule, alerts and cases', async () => {
+    it('returns information with rule, alerts and cases for elastic non-customized rule', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -93,6 +93,7 @@ describe('Detections Usage and Metrics', () => {
               cases_count_total: 1,
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
+              is_customized: false,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -134,12 +135,138 @@ describe('Detections Usage and Metrics', () => {
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
             },
+            elastic_customized_total: {
+              alerts: 0,
+              cases: 0,
+              disabled: 0,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+            elastic_noncustomized_total: {
+              alerts: 3400,
+              cases: 1,
+              disabled: 1,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
           },
         },
       });
     });
 
-    it('returns information with on non elastic prebuilt rule', async () => {
+    it('returns information with rule, alerts and cases for elastic customized rule', async () => {
+      esClient.search.mockResponseOnce(getEventLogAllRules());
+      esClient.search.mockResponseOnce(getEventLogElasticRules());
+      esClient.search.mockResponseOnce(getElasticLogCustomRules());
+      esClient.search.mockResponseOnce(getMockRuleAlertsResponse(3400));
+      savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse(true, true));
+      savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+      // Get empty saved object for legacy notification system.
+      savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+
+      const logger = loggingSystemMock.createLogger();
+      const result = await getDetectionsMetrics({
+        eventLogIndex: '',
+        signalsIndex: '',
+        esClient,
+        savedObjectsClient,
+        logger,
+        mlClient,
+        legacySignalsIndex: '',
+      });
+
+      expect(result).toEqual<DetectionMetrics>({
+        ...getInitialDetectionMetrics(),
+        detection_rules: {
+          detection_rule_status: getAllEventLogTransform(),
+          detection_rule_detail: [
+            {
+              alert_count_daily: 3400,
+              cases_count_total: 1,
+              created_on: '2021-03-23T17:15:59.634Z',
+              elastic_rule: true,
+              is_customized: true,
+              enabled: false,
+              rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
+              rule_name: 'Azure Diagnostic Settings Deletion',
+              rule_type: 'query',
+              rule_version: 4,
+              updated_on: '2021-03-23T17:15:59.634Z',
+              has_legacy_notification: false,
+              has_notification: false,
+              has_legacy_investigation_field: false,
+              has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
+              has_alert_suppression_per_rule_execution: false,
+              has_alert_suppression_per_time_period: false,
+              alert_suppression_fields_count: 0,
+            },
+          ],
+          detection_rule_usage: {
+            ...getInitialRulesUsage(),
+            query: {
+              enabled: 0,
+              disabled: 1,
+              alerts: 3400,
+              cases: 1,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+            elastic_total: {
+              alerts: 3400,
+              cases: 1,
+              disabled: 1,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+            elastic_customized_total: {
+              alerts: 3400,
+              cases: 1,
+              disabled: 1,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+            elastic_noncustomized_total: {
+              alerts: 0,
+              cases: 0,
+              disabled: 0,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+          },
+        },
+      });
+    });
+
+    it('returns information on non elastic rule', async () => {
       esClient.search.mockResponseOnce(getEventLogAllRules());
       esClient.search.mockResponseOnce(getEventLogElasticRules());
       esClient.search.mockResponseOnce(getElasticLogCustomRules());
@@ -228,6 +355,7 @@ describe('Detections Usage and Metrics', () => {
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
               enabled: false,
+              is_customized: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
               rule_type: 'query',
@@ -244,6 +372,30 @@ describe('Detections Usage and Metrics', () => {
           detection_rule_usage: {
             ...getInitialRulesUsage(),
             elastic_total: {
+              alerts: 0,
+              cases: 1,
+              disabled: 1,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+            elastic_customized_total: {
+              alerts: 0,
+              cases: 0,
+              disabled: 0,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+            },
+            elastic_noncustomized_total: {
               alerts: 0,
               cases: 1,
               disabled: 1,

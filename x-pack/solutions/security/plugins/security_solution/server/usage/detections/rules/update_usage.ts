@@ -13,91 +13,60 @@ export const updateRuleUsage = (
   detectionRuleMetric: RuleMetric,
   usage: RulesTypeUsage
 ): RulesTypeUsage => {
-  let updatedUsage = usage;
-  if (detectionRuleMetric.rule_type === 'query') {
-    updatedUsage = {
-      ...usage,
-      query: updateQueryUsage({
-        ruleType: detectionRuleMetric.rule_type,
-        usage,
-        detectionRuleMetric,
-      }),
-    };
-  } else if (detectionRuleMetric.rule_type === 'threshold') {
-    updatedUsage = {
-      ...usage,
-      threshold: updateQueryUsage({
-        ruleType: detectionRuleMetric.rule_type,
-        usage,
-        detectionRuleMetric,
-      }),
-    };
-  } else if (detectionRuleMetric.rule_type === 'eql') {
-    updatedUsage = {
-      ...usage,
-      eql: updateQueryUsage({
-        ruleType: detectionRuleMetric.rule_type,
-        usage,
-        detectionRuleMetric,
-      }),
-    };
-  } else if (detectionRuleMetric.rule_type === 'machine_learning') {
-    updatedUsage = {
-      ...usage,
-      machine_learning: updateQueryUsage({
-        ruleType: detectionRuleMetric.rule_type,
-        usage,
-        detectionRuleMetric,
-      }),
-    };
-  } else if (detectionRuleMetric.rule_type === 'threat_match') {
-    updatedUsage = {
-      ...usage,
-      threat_match: updateQueryUsage({
-        ruleType: detectionRuleMetric.rule_type,
-        usage,
-        detectionRuleMetric,
-      }),
-    };
-  } else if (detectionRuleMetric.rule_type === 'new_terms') {
-    updatedUsage = {
-      ...usage,
-      new_terms: updateQueryUsage({
-        ruleType: detectionRuleMetric.rule_type,
-        usage,
-        detectionRuleMetric,
-      }),
-    };
-  } else if (detectionRuleMetric.rule_type === 'esql') {
-    updatedUsage = {
-      ...usage,
-      esql: updateQueryUsage({
-        ruleType: detectionRuleMetric.rule_type,
-        usage,
-        detectionRuleMetric,
-      }),
+  const {
+    rule_type: ruleType,
+    elastic_rule: elasticRule,
+    is_customized: isCustomized,
+  } = detectionRuleMetric;
+
+  const ruleMap: Record<RuleMetric['rule_type'], keyof RulesTypeUsage> = {
+    query: 'query',
+    threshold: 'threshold',
+    eql: 'eql',
+    machine_learning: 'machine_learning',
+    threat_match: 'threat_match',
+    new_terms: 'new_terms',
+    esql: 'esql',
+  };
+
+  let updated: RulesTypeUsage = {
+    ...usage,
+  };
+
+  if (ruleType in ruleMap) {
+    const baseKey = ruleMap[ruleType];
+    updated = {
+      ...updated,
+      [baseKey]: updateQueryUsage({ ruleType: baseKey, usage, detectionRuleMetric }),
     };
   }
 
-  if (detectionRuleMetric.elastic_rule) {
-    updatedUsage = {
-      ...updatedUsage,
+  if (elasticRule) {
+    updated = {
+      ...updated,
       elastic_total: updateTotalUsage({
         detectionRuleMetric,
-        updatedUsage,
+        updatedUsage: usage,
         totalType: 'elastic_total',
       }),
+      [isCustomized ? 'elastic_customized_total' : 'elastic_noncustomized_total']: updateTotalUsage(
+        {
+          detectionRuleMetric,
+          updatedUsage: usage,
+          totalType: isCustomized ? 'elastic_customized_total' : 'elastic_noncustomized_total',
+        }
+      ),
     };
   } else {
-    updatedUsage = {
-      ...updatedUsage,
+    updated = {
+      ...updated,
       custom_total: updateTotalUsage({
         detectionRuleMetric,
-        updatedUsage,
+        updatedUsage: usage,
         totalType: 'custom_total',
       }),
     };
   }
 
-  return updatedUsage;
+  return updated;
 };

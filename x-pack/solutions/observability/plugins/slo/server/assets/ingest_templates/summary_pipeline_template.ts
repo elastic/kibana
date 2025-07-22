@@ -238,14 +238,14 @@ export const getSummaryPipelineTemplate = (
       {
         set: {
           field: 'slo.updatedBy',
-          value: slo.updatedBy,
+          value: slo.updatedBy ?? '',
           ignore_failure: true,
         },
       },
       {
         set: {
           field: 'slo.createdBy',
-          value: slo.createdBy,
+          value: slo.createdBy ?? '',
           ignore_failure: true,
         },
       },

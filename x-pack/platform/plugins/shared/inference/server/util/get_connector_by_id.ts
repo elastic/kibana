@@ -29,7 +29,10 @@ export const getConnectorById = async ({
       throwIfSystemAction: true,
     });
   } catch (error) {
-    throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 400);
+    throw createInferenceRequestError(
+      `No connector found for id '${connectorId}'\n${error.message}`,
+      400
+    );
   }
 
   if (!isSupportedConnector(connector)) {

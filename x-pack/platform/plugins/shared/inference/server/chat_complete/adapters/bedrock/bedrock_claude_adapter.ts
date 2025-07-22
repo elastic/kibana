@@ -38,10 +38,12 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
+    const bedRockTools = toolsToBedrock(tools, messages);
+
     const subActionParams = {
       system: noToolUsage ? addNoToolUsageDirective(system) : system,
       messages: messagesToBedrock(messages),
-      tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
+      tools: bedRockTools?.length ? bedRockTools : undefined,
       toolChoice: toolChoiceToBedrock(toolChoice),
       temperature,
       model: modelName,

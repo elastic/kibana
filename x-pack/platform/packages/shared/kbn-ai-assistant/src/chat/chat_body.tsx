@@ -27,6 +27,7 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -38,6 +39,7 @@ import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE 
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
@@ -272,75 +274,105 @@ export function ChatBody({
     navigator.clipboard?.writeText(content || '');
   };
 
-  const handleActionClick = ({
-    message,
-    payload,
-  }: {
-    message: Message;
-    payload: ChatActionClickPayload;
-  }) => {
-    setStickToBottom(true);
-    switch (payload.type) {
-      case ChatActionClickType.executeEsqlQuery:
-        next(
-          messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'execute_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                }),
-                trigger: MessageRole.User,
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+
+  const showElasticLlmCalloutInChat =
+    elasticManagedLlm &&
+    connectors.selectedConnector === elasticManagedLlm.id &&
+    !conversationCalloutDismissed &&
+    tourCalloutDismissed;
+
+  const handleActionClick = useCallback(
+    ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
+      setStickToBottom(true);
+      switch (payload.type) {
+        case ChatActionClickType.executeEsqlQuery: {
+          const now = new Date().toISOString();
+          next(
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Display results for the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
+                },
               },
-            },
-          })
-        );
-        break;
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'execute_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
+          );
+          break;
+        }
 
-      case ChatActionClickType.updateVisualization:
-        const visualizeQueryResponse = message;
+        case ChatActionClickType.updateVisualization:
+          const visualizeQueryResponse = message;
 
-        const visualizeQueryResponseData = JSON.parse(visualizeQueryResponse.message.data ?? '{}');
+          const visualizeQueryResponseData = JSON.parse(
+            visualizeQueryResponse.message.data ?? '{}'
+          );
 
-        next(
-          messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              name: 'visualize_query',
-              content: visualizeQueryResponse.message.content,
-              data: JSON.stringify({
-                ...visualizeQueryResponseData,
-                userOverrides: payload.userOverrides,
-              }),
-              role: MessageRole.User,
-            },
-          })
-        );
-        break;
-      case ChatActionClickType.visualizeEsqlQuery:
-        next(
-          messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
+          next(
+            messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
                 name: 'visualize_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                  intention: VisualizeESQLUserIntention.visualizeAuto,
+                content: visualizeQueryResponse.message.content,
+                data: JSON.stringify({
+                  ...visualizeQueryResponseData,
+                  userOverrides: payload.userOverrides,
                 }),
-                trigger: MessageRole.User,
+                role: MessageRole.User,
               },
-            },
-          })
-        );
-        break;
-    }
-  };
+            })
+          );
+          break;
+        case ChatActionClickType.visualizeEsqlQuery: {
+          const now = new Date().toISOString();
+          next(
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Visualize the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
+                },
+              },
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'visualize_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                      intention: VisualizeESQLUserIntention.visualizeAuto,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
+          );
+          break;
+        }
+      }
+    },
+    [messages, next]
+  );
 
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
@@ -398,6 +430,7 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               ) : (
                 <ChatTimeline
@@ -421,6 +454,7 @@ export function ChatBody({
                   }
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               )}
             </EuiPanel>
@@ -541,6 +575,7 @@ export function ChatBody({
           navigateToConversation={
             initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
           }
+          isConversationApp={!showLinkToConversationsApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

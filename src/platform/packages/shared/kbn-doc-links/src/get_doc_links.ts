@@ -492,7 +492,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
-      ruleApiOverview: `${SECURITY_SOLUTION_DOCS}rule-api-overview.html`,
+      ruleApiOverview: isServerless
+        ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`
+        : `${KIBANA_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${SECURITY_SOLUTION_DOCS}alert-suppression.html#_configure_alert_suppression`,
     },
     logging: {
@@ -508,6 +510,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       threatIntelInt: `${SECURITY_SOLUTION_DOCS}es-threat-intel-integrations.html`,
       endpointArtifacts: `${SECURITY_SOLUTION_DOCS}endpoint-artifacts.html`,
       eventMerging: `${SECURITY_SOLUTION_DOCS}endpoint-data-volume.html`,
+      elasticAiFeatures: `${DOCS_WEBSITE_URL}solutions/security/ai`,
       policyResponseTroubleshooting: {
         full_disk_access: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#enable-fda-endpoint`,
         macos_system_ext: `${SECURITY_SOLUTION_DOCS}deploy-elastic-endpoint.html#system-extension-endpoint`,
@@ -528,6 +531,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}security-prebuilt-rules-management.html#update-prebuilt-rules`
         : `${SECURITY_SOLUTION_DOCS}prebuilt-rules-management.html#update-prebuilt-rules`,
       prebuiltRuleCustomizationPromoBlog: `${ELASTIC_WEBSITE_URL}blog/security-prebuilt-rules-editing`,
+      resolvePrebuiltRuleConflicts: `${SECURITY_SOLUTION_DOCS}prebuilt-rules-update-modified-unmodified.html#resolve-reduce-rule-conflicts`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
@@ -538,7 +542,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       },
       detectionEngineOverview: `${SECURITY_SOLUTION_DOCS}detection-engine-overview.html`,
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
-      signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
+      signalsMigrationApi: isServerless
+        ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`
+        : `${KIBANA_APIS}group/endpoint-security-detections-api`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
       legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
       siemMigrations: `${SECURITY_SOLUTION_DOCS}siem-migration.html`,
@@ -616,7 +622,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       nlpElser: `${MACHINE_LEARNING_DOCS}ml-nlp-elser.html`,
       nlpE5: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       nlpImportModel: `${MACHINE_LEARNING_DOCS}ml-nlp-import-model.html`,
-      anomalyMigrationGuide: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/9.0/upgrading-elastic-stack.html#anomaly-detection-results-migration`,
+      anomalyMigrationGuide: `${ELASTIC_WEBSITE_URL}docs/deploy-manage/upgrade/prepare-to-upgrade#anomaly-migration`,
     },
     transforms: {
       guide: isServerless
@@ -678,6 +684,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}observability-create-slo-burn-rate-alert-rule.html`
         : `${OBSERVABILITY_DOCS}slo-burn-rate-alert.html`,
       aiAssistant: `${OBSERVABILITY_DOCS}obs-ai-assistant.html`,
+      elasticManagedLlm: `${ELASTIC_WEBSITE_URL}docs/reference/kibana/connectors-kibana/elastic-managed-llm`,
+      elasticManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing`,
     },
     alerting: {
       guide: isServerless

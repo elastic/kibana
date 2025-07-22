@@ -327,6 +327,7 @@ export function LayerPanels(
               }}
               toggleFullscreen={toggleFullscreen}
               indexPatternService={indexPatternService}
+              parentApi={props.parentApi}
             />
           )
         );

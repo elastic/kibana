@@ -31,7 +31,6 @@ export const AuthenticationsQueryTabBody = ({
         endDate={endDate}
         filterQuery={filterQuery}
         id={HISTOGRAM_QUERY_ID}
-        setQuery={setQuery}
         startDate={startDate}
         {...histogramConfigs}
       />

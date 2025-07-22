@@ -9,7 +9,7 @@ import type { RetrievalQAChain } from 'langchain/chains';
 import type { DynamicStructuredTool, DynamicTool } from '@langchain/core/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { loggerMock } from '@kbn/logging-mocks';
 import { PRODUCT_DOCUMENTATION_TOOL } from './product_documentation_tool';
 import type {

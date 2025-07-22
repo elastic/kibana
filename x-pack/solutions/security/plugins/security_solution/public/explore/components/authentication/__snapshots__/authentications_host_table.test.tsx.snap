@@ -129,6 +129,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
       >
         <div
           class="c1 siemSubtitle"
+          data-test-subj="header-section-subtitle"
         >
           <p
             class="siemSubtitle__item siemSubtitle__item--text"

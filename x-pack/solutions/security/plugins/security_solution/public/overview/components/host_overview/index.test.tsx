@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -50,13 +49,13 @@ describe('Host Summary Component', () => {
   });
 
   test('it renders the default Host Summary', () => {
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <HostOverview {...mockProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('HostOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders the panel view Host Summary', () => {
@@ -65,13 +64,13 @@ describe('Host Summary Component', () => {
       isInDetailsSidePanel: true,
     };
 
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <HostOverview {...panelViewProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('HostOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders host risk score and level', () => {

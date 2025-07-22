@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import { ApplicationStart, ChromeStart, UserProfileService } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { updatePromptContexts } from './helpers';
@@ -59,6 +59,9 @@ type ShowAssistantOverlay = ({
   promptContextId,
   conversationTitle,
 }: ShowAssistantOverlayProps) => void;
+
+type GetUrlForApp = ApplicationStart['getUrlForApp'];
+
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern?: string;
@@ -70,14 +73,15 @@ export interface AssistantProviderProps {
   ) => CodeBlockDetails[][];
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
-  docLinks: Omit<DocLinksStart, 'links'>;
+  docLinks: DocLinksStart;
   children: React.ReactNode;
+  getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
   http: HttpSetup;
   inferenceEnabled?: boolean;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  navigateToApp: ApplicationStart['navigateToApp'];
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
@@ -103,17 +107,18 @@ export interface UseAssistantContext {
     currentConversation: Conversation,
     showAnonymizedValues: boolean
   ) => CodeBlockDetails[][];
-  docLinks: Omit<DocLinksStart, 'links'>;
+  docLinks: DocLinksStart;
   basePath: string;
   baseConversations: Record<string, Conversation>;
   currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;
+  getUrlForApp: GetUrlForApp;
   http: HttpSetup;
   inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  navigateToApp: ApplicationStart['navigateToApp'];
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs | null;
@@ -157,6 +162,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   basePromptContexts = [],
   children,
   getComments,
+  getUrlForApp,
   http,
   inferenceEnabled = false,
   baseConversations,
@@ -310,6 +316,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       currentUserAvatar,
       docLinks,
       getComments,
+      getUrlForApp,
       http,
       inferenceEnabled,
       knowledgeBase: {
@@ -362,6 +369,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       currentUserAvatar,
       docLinks,
       getComments,
+      getUrlForApp,
       http,
       inferenceEnabled,
       localStorageKnowledgeBase,

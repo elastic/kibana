@@ -123,7 +123,7 @@ export const addAPMCalloutDefinitions = (
         }),
         content: i18n.translate('xpack.apm.serviceTabEmptyState.transactionsContent', {
           defaultMessage:
-            "Troubleshoot your service's performance by analysing latency, throughput and errors down to the specific transaction.",
+            "Troubleshoot your service's performance by analyzing latency, throughput and errors down to the specific transaction.",
         }),
         img: {
           name: 'service_tab_empty_state_transactions.png',
@@ -157,7 +157,7 @@ export const addAPMCalloutDefinitions = (
         }),
         content: i18n.translate('xpack.apm.serviceTabEmptyState.errorGroupOverviewContent', {
           defaultMessage:
-            'Analyse errors down to the specific transaction to pin-point specific errors within your service.',
+            'Analyze errors down to the specific transaction to pin-point specific errors within your service.',
         }),
         img: {
           name: 'service_tab_empty_state_errors.png',

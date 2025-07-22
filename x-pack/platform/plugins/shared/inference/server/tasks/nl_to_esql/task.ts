@@ -62,8 +62,8 @@ export function naturalLanguageToEsql<TToolOptions extends ToolOptions>({
         switchMap((documentationEvent) => {
           return askLlmToRespond({
             documentationRequest: {
-              commands: documentationEvent.output.commands,
-              functions: documentationEvent.output.functions,
+              commands: documentationEvent.output?.commands,
+              functions: documentationEvent.output?.functions,
             },
           });
         })

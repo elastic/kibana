@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
-import { mockIndexPattern, TestProviders, createMockStore } from '../../../../common/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { mockIndexPattern, createMockStore, TestProviders } from '../../../../common/mock';
 import { networkModel } from '../../store';
 
 import { NetworkTopCountriesTable } from '.';
@@ -22,7 +20,6 @@ jest.mock('../../../../common/lib/kibana');
 
 describe('NetworkTopCountries Table Component', () => {
   const loadPage = jest.fn();
-  const mount = useMountAppended();
   const defaultProps = {
     data: mockData.NetworkTopCountries.edges,
     fakeTotalCount: getOr(50, 'fakeTotalCount', mockData.NetworkTopCountries.pageInfo),
@@ -50,48 +47,22 @@ describe('NetworkTopCountries Table Component', () => {
 
   describe('rendering', () => {
     test('it renders the default NetworkTopCountries table', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <NetworkTopCountriesTable {...defaultProps} />
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('Memo(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
-    });
-    test('it renders the IP Details NetworkTopCountries table', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <NetworkTopCountriesTable {...defaultProps} type={networkModel.NetworkType.details} />
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('Memo(NetworkTopCountriesTableComponent)')).toMatchSnapshot();
-    });
-  });
-
-  describe('Sorting on Table', () => {
-    test('when you click on the column header, you should show the sorting icon', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders store={store}>
           <NetworkTopCountriesTable {...defaultProps} />
         </TestProviders>
       );
-      expect(store.getState().network.page.queries.topCountriesSource.sort).toEqual({
-        direction: 'desc',
-        field: 'bytes_out',
-      });
 
-      wrapper.find('.euiTable thead tr th button').at(1).simulate('click');
+      expect(container.children[0]).toMatchSnapshot();
+    });
+    test('it renders the IP Details NetworkTopCountries table', () => {
+      const { container } = render(
+        <TestProviders store={store}>
+          <NetworkTopCountriesTable {...defaultProps} type={networkModel.NetworkType.details} />
+        </TestProviders>
+      );
 
-      wrapper.update();
-
-      expect(store.getState().network.page.queries.topCountriesSource.sort).toEqual({
-        direction: 'asc',
-        field: 'bytes_out',
-      });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Bytes in');
-      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Bytes out');
-      expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 });

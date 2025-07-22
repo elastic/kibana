@@ -112,7 +112,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "3": Object {
           "meta": Object {
-            "activeCount": 0,
+            "activeCount": 1,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -137,7 +137,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "3": Object {
           "meta": Object {
-            "activeCount": 0,
+            "activeCount": 1,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -440,7 +440,7 @@ describe('getAlertsForNotification', () => {
       getAlertsForNotification(
         DEFAULT_FLAPPING_SETTINGS,
         'default',
-        0,
+        1,
         {},
         {},
         {
@@ -554,7 +554,7 @@ describe('getAlertsForNotification', () => {
     expect(delayedAlertsCount).toBe(2);
   });
 
-  test('should remove the alert from recoveredAlerts and should not return the alert in currentRecoveredAlerts if the activeCount is less than the rule alertDelay', () => {
+  test('should remove the alert from recoveredAlerts and should not return the alert in currentRecoveredAlerts if the activeCount is less than the rule alertDelay and greater than 0', () => {
     const alert1 = new Alert('1', {
       meta: { activeCount: 1, uuid: 'uuid-1' },
     });
@@ -578,8 +578,32 @@ describe('getAlertsForNotification', () => {
           '2': alert2,
         }
       );
-    expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
-    expect(currentRecoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+    expect(recoveredAlerts).toMatchInlineSnapshot(`
+      Object {
+        "2": Object {
+          "meta": Object {
+            "activeCount": 0,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "uuid": "uuid-2",
+          },
+          "state": Object {},
+        },
+      }
+    `);
+    expect(currentRecoveredAlerts).toMatchInlineSnapshot(`
+      Object {
+        "2": Object {
+          "meta": Object {
+            "activeCount": 0,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "uuid": "uuid-2",
+          },
+          "state": Object {},
+        },
+      }
+    `);
     expect(delayedAlertsCount).toBe(0);
   });
 

@@ -9,7 +9,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/core/server';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';

@@ -10,8 +10,16 @@
 /** @typedef {import('webpack').Compiler} WebpackCompiler */
 
 /* eslint-disable import/no-extraneous-dependencies */
-// @ts-expect-error
-const nodeLibsBrowser = require('node-libs-browser');
+const nodeStdlibBrowser = require('node-stdlib-browser');
+
+/**
+ * @param {string} pkgName
+ * @returns {string}
+ */
+const getStdLibBrowserPackage = (pkgName) => {
+  // @ts-expect-error
+  return require.resolve(nodeStdlibBrowser[pkgName]);
+};
 
 const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
   /**
@@ -20,51 +28,51 @@ const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
   apply(compiler) {
     compiler.options.plugins.push(
       new compiler.webpack.ProvidePlugin({
-        Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
-        console: nodeLibsBrowser.console,
-        process: nodeLibsBrowser.process,
+        Buffer: [getStdLibBrowserPackage('buffer'), 'Buffer'],
+        console: getStdLibBrowserPackage('console'),
+        process: getStdLibBrowserPackage('process'),
       })
     );
 
     compiler.options.resolve.fallback = {
-      assert: nodeLibsBrowser.assert,
-      buffer: nodeLibsBrowser.buffer,
+      assert: getStdLibBrowserPackage('assert'),
+      buffer: getStdLibBrowserPackage('buffer'),
       child_process: false,
       cluster: false,
       console: false,
-      constants: nodeLibsBrowser.constants,
-      crypto: nodeLibsBrowser.crypto,
+      constants: getStdLibBrowserPackage('constants'),
+      crypto: getStdLibBrowserPackage('crypto'),
       dgram: false,
       dns: false,
-      domain: nodeLibsBrowser.domain,
-      events: nodeLibsBrowser.events,
+      domain: getStdLibBrowserPackage('domain'),
+      events: getStdLibBrowserPackage('events'),
       fs: false,
-      http: nodeLibsBrowser.http,
-      https: nodeLibsBrowser.https,
+      http: getStdLibBrowserPackage('http'),
+      https: getStdLibBrowserPackage('https'),
       module: false,
       net: false,
-      os: nodeLibsBrowser.os,
-      path: nodeLibsBrowser.path,
-      punycode: nodeLibsBrowser.punycode,
-      process: nodeLibsBrowser.process,
-      querystring: nodeLibsBrowser.querystring,
+      os: getStdLibBrowserPackage('os'),
+      path: getStdLibBrowserPackage('path'),
+      punycode: getStdLibBrowserPackage('punycode'),
+      process: getStdLibBrowserPackage('process'),
+      querystring: getStdLibBrowserPackage('querystring'),
       readline: false,
       repl: false,
-      stream: nodeLibsBrowser.stream,
-      _stream_duplex: nodeLibsBrowser._stream_duplex,
-      _stream_passthrough: nodeLibsBrowser._stream_passthrough,
-      _stream_readable: nodeLibsBrowser._stream_readable,
-      _stream_transform: nodeLibsBrowser._stream_transform,
-      _stream_writable: nodeLibsBrowser._stream_writable,
-      string_decoder: nodeLibsBrowser.string_decoder,
-      sys: nodeLibsBrowser.sys,
-      timers: nodeLibsBrowser.timers,
+      stream: getStdLibBrowserPackage('stream'),
+      _stream_duplex: getStdLibBrowserPackage('_stream_duplex'),
+      _stream_passthrough: getStdLibBrowserPackage('_stream_passthrough'),
+      _stream_readable: getStdLibBrowserPackage('_stream_readable'),
+      _stream_transform: getStdLibBrowserPackage('_stream_transform'),
+      _stream_writable: getStdLibBrowserPackage('_stream_writable'),
+      string_decoder: getStdLibBrowserPackage('string_decoder'),
+      sys: getStdLibBrowserPackage('sys'),
+      timers: getStdLibBrowserPackage('timers'),
       tls: false,
-      tty: nodeLibsBrowser.tty,
-      url: nodeLibsBrowser.url,
-      util: nodeLibsBrowser.util,
-      vm: nodeLibsBrowser.vm,
-      zlib: nodeLibsBrowser.zlib,
+      tty: getStdLibBrowserPackage('tty'),
+      url: getStdLibBrowserPackage('url'),
+      util: getStdLibBrowserPackage('util'),
+      vm: getStdLibBrowserPackage('vm'),
+      zlib: getStdLibBrowserPackage('zlib'),
       ...compiler.options.resolve.fallback,
     };
   }

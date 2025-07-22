@@ -135,7 +135,7 @@ export const getControlGroupEmbeddableFactory = () => {
         disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
-        controlFetch$: (controlUuid: string) =>
+        controlFetch$: (controlUuid: string, onReload?: () => void) =>
           controlFetch$(
             chaining$(
               controlUuid,
@@ -143,7 +143,7 @@ export const getControlGroupEmbeddableFactory = () => {
               controlsManager.controlsInOrder$,
               controlsManager.api.children$
             ),
-            controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {})
+            controlGroupFetch$(ignoreParentSettings$, parentApi ? parentApi : {}, onReload)
           ),
         ignoreParentSettings$,
         autoApplySelections$,

@@ -16,28 +16,37 @@ paths:
         - name: 'fields'
           in: query
           required: false
+          description: Fields to return
           schema:
             type: array
             items:
               type: string
+          example:
+            - id
+            - field
+            - anonymized
+            - allowed
         - name: 'filter'
           in: query
           description: Search query
           required: false
           schema:
             type: string
+          example: 'field: "user.name"'
         - name: 'sort_field'
           in: query
           description: Field to sort by
           required: false
           schema:
             $ref: '#/components/schemas/FindAnonymizationFieldsSortField'
+          example: 'created_at'
         - name: 'sort_order'
           in: query
           description: Sort order
           required: false
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/SortOrder'
+          example: 'asc'
         - name: 'page'
           in: query
           description: Page number
@@ -46,6 +55,7 @@ paths:
             type: integer
             minimum: 1
             default: 1
+          example: 1
         - name: 'per_page'
           in: query
           description: AnonymizationFields per page
@@ -54,6 +64,7 @@ paths:
             type: integer
             minimum: 0
             default: 20
+          example: 20
 
       responses:
         200:
@@ -78,6 +89,21 @@ paths:
                   - perPage
                   - total
                   - data
+              example:
+                page: 1
+                perPage: 20
+                total: 100
+                data:
+                  - id: '1'
+                    field: 'user.name'
+                    anonymized: true
+                    allowed: true
+                    timestamp: '2023-10-31T12:00:00Z'
+                    createdAt: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    createdBy: 'user1'
+                    updatedBy: 'user1'
+                    namespace: 'default'
         400:
           description: Generic Error
           content:
@@ -91,6 +117,10 @@ paths:
                     type: string
                   message:
                     type: string
+              example:
+                statusCode: 400
+                error: Bad Request
+                message: Invalid request parameters
 
 components:
   schemas:

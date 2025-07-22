@@ -181,7 +181,7 @@ export const PresentationPanelTitle = ({
           {!hideTitle ? (
             <h2>
               {ariaLabelElement}
-              {panelTitleElement}&nbsp;
+              {panelTitleElement}
             </h2>
           ) : null}
           <EuiIcon

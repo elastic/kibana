@@ -17,15 +17,23 @@ import { PanelHeader } from '../right/header';
 import { PanelContent } from '../right/content';
 import { PreviewPanelFooter } from './footer';
 import type { RightPanelTabType } from '../right/tabs';
-import { ALERT_PREVIEW_BANNER } from './constants';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from './constants';
+import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 
 /**
  * Panel to be displayed in the document details expandable flyout on top of right section
  */
 export const PreviewPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, getFieldsData, dataAsNestedObject } =
-    useDocumentDetailsContext();
+  const {
+    eventId,
+    indexName,
+    scopeId,
+    getFieldsData,
+    dataAsNestedObject,
+    dataFormattedForFieldBrowser,
+  } = useDocumentDetailsContext();
+  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const flyoutIsExpandable = useFlyoutIsExpandable({ getFieldsData, dataAsNestedObject });
 
   const { tabsDisplayed, selectedTabId } = useTabs({ flyoutIsExpandable, path });
@@ -41,7 +49,7 @@ export const PreviewPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) =
         indexName,
         scopeId,
         isPreviewMode: true,
-        banner: ALERT_PREVIEW_BANNER,
+        banner: isAlert ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
       },
     });
   };

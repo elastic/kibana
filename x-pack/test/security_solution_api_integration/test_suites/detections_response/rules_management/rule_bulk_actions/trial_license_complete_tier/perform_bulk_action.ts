@@ -1484,67 +1484,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(updatedRule.version).toBe(rule.version + 1);
       });
 
-      describe('prebuilt rules', () => {
-        const cases = [
-          {
-            type: BulkActionEditTypeEnum.add_tags,
-            value: ['new-tag'],
-          },
-          {
-            type: BulkActionEditTypeEnum.set_tags,
-            value: ['new-tag'],
-          },
-          {
-            type: BulkActionEditTypeEnum.delete_tags,
-            value: ['new-tag'],
-          },
-          {
-            type: BulkActionEditTypeEnum.add_index_patterns,
-            value: ['test-*'],
-          },
-          {
-            type: BulkActionEditTypeEnum.set_index_patterns,
-            value: ['test-*'],
-          },
-          {
-            type: BulkActionEditTypeEnum.delete_index_patterns,
-            value: ['test-*'],
-          },
-          {
-            type: BulkActionEditTypeEnum.set_timeline,
-            value: { timeline_id: 'mock-id', timeline_title: 'mock-title' },
-          },
-          {
-            type: BulkActionEditTypeEnum.set_schedule,
-            value: { interval: '1m', lookback: '1m' },
-          },
-        ];
-        cases.forEach(({ type, value }) => {
-          it(`should NOT return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
-            await installMockPrebuiltRules(supertest, es);
-            const prebuiltRule = await fetchPrebuiltRule();
-
-            const { body } = await postBulkAction()
-              .send({
-                ids: [prebuiltRule.id],
-                action: BulkActionTypeEnum.edit,
-                [BulkActionTypeEnum.edit]: [
-                  {
-                    type,
-                    value,
-                  },
-                ],
-              })
-              .expect(200);
-
-            expect(body).toMatchObject({
-              success: true,
-              rules_count: 1,
-            });
-          });
-        });
-      });
-
       describe('rule actions', () => {
         const webHookActionMock = {
           group: 'default',

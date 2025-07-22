@@ -10,6 +10,10 @@ import { StructuredTool } from '@langchain/core/tools';
 import { ToolExecutor } from '@langchain/langgraph/prebuilt';
 import { castArray } from 'lodash';
 import { AgentAction } from 'langchain/agents';
+import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { getActionTypeId } from '../../../../../routes/utils';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../../telemetry/event_based_telemetry';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 
@@ -17,6 +21,8 @@ export interface ExecuteToolsParams extends NodeParamsBase {
   state: AgentState;
   tools: StructuredTool[];
   config?: RunnableConfig;
+  telemetryParams?: TelemetryParams;
+  telemetry: AnalyticsServiceSetup;
 }
 
 /**
@@ -35,6 +41,8 @@ export async function executeTools({
   state,
   tools,
   config,
+  telemetryParams,
+  telemetry,
 }: ExecuteToolsParams): Promise<Partial<AgentState>> {
   logger.debug(() => `${NodeType.TOOLS}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
@@ -46,6 +54,14 @@ export async function executeTools({
       try {
         out = await toolExecutor.invoke(action, config);
       } catch (err) {
+        telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+          actionTypeId: telemetryParams?.actionTypeId ?? getActionTypeId(state.llmType),
+          model: telemetryParams?.model,
+          errorMessage: err.message ?? err.toString(),
+          assistantStreamingEnabled: telemetryParams?.assistantStreamingEnabled ?? state.isStream,
+          isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
+          errorLocation: `executeTools-${action.tool}`,
+        });
         return {
           action,
           observation: JSON.stringify(`Error: ${err}`, null, 2),

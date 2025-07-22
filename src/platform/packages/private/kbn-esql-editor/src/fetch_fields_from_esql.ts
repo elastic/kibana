@@ -10,6 +10,7 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
@@ -26,7 +27,8 @@ export function fetchFieldsFromESQL(
   expressions: ExpressionsStart,
   time?: TimeRange,
   abortController?: AbortController,
-  timeFieldName?: string
+  timeFieldName?: string,
+  esqlVariables?: ESQLControlVariable[]
 ) {
   return textBasedQueryStateToAstWithValidation({
     query,
@@ -38,6 +40,7 @@ export function fetchFieldsFromESQL(
         const executionContract = expressions.execute(ast, null, {
           searchContext: {
             timeRange: time,
+            esqlVariables,
           },
         });
 

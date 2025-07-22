@@ -802,7 +802,7 @@ export function alertingServiceProvider(
     }
 
     const lookBackTimeInterval: string =
-      params.lookbackInterval ?? resolveLookbackInterval(jobsResponse, datafeeds ?? []);
+      params.lookbackInterval || resolveLookbackInterval(jobsResponse, datafeeds ?? []);
 
     const topNBuckets: number = params.topNBuckets ?? getTopNBuckets(jobsResponse[0]);
 

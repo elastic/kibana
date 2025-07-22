@@ -1,21 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Select Flow Direction rendering it renders the basic group button for uni-direction and bi-direction 1`] = `
-<EuiFilterGroup>
-  <EuiFilterButton
+<div
+  class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+>
+  <button
+    class="euiButtonEmpty euiFilterButton euiFilterButton-hasActiveFilters emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-withNext-hasActiveFilters"
     data-test-subj="uniDirectional"
-    hasActiveFilters={true}
-    onClick={[Function]}
-    withNext={true}
+    type="button"
   >
-    Unidirectional
-  </EuiFilterButton>
-  <EuiFilterButton
+    <span
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
+    >
+      <span
+        class="euiFilterButton__text emotion-euiFilterButton__text"
+        data-text="Unidirectional"
+        title="Unidirectional"
+      >
+        Unidirectional
+      </span>
+    </span>
+  </button>
+  <button
+    class="euiButtonEmpty euiFilterButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton"
     data-test-subj="biDirectional"
-    hasActiveFilters={false}
-    onClick={[Function]}
+    type="button"
   >
-    Bidirectional
-  </EuiFilterButton>
-</EuiFilterGroup>
+    <span
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
+    >
+      <span
+        class="euiFilterButton__text emotion-euiFilterButton__text"
+        data-text="Bidirectional"
+        title="Bidirectional"
+      >
+        Bidirectional
+      </span>
+    </span>
+  </button>
+</div>
 `;

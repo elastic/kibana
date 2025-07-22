@@ -35,3 +35,10 @@ export const REQUIRED_PRIVILEGES_CONNECTORS_ALL = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.requiredPrivileges.connectorsAll',
   { defaultMessage: 'Management > Actions & Connectors: All' }
 );
+
+export const PRECONFIGURED_CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.preconfiguredConnectorLabel',
+  {
+    defaultMessage: 'Pre-configured',
+  }
+);

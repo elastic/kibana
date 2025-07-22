@@ -6,11 +6,9 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import pLimit from 'p-limit';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
-import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
 import { getElserModelStatus } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
@@ -154,61 +152,30 @@ async function populateSemanticTextFieldRecursively({
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
 }) {
-  logger.debug('Populating semantic_text field for entries without it');
+  logger.debug('Initalizing semantic text migration for knowledge base entries...');
 
-  const response = await esClient.asInternalUser.search<KnowledgeBaseEntry>({
-    size: 100,
-    track_total_hits: true,
-    index: [resourceNames.aliases.kb],
-    query: {
-      bool: {
-        must_not: {
-          exists: {
-            field: 'semantic_text',
-          },
+  await pRetry(
+    async () => {
+      await waitForModel({ esClient, logger, config });
+      await esClient.asInternalUser.updateByQuery({
+        index: [resourceNames.aliases.kb],
+        requests_per_second: 100,
+        refresh: true,
+        script: {
+          source: `ctx._source.semantic_text = ctx._source.text`,
+          lang: 'painless',
         },
-      },
-    },
-    _source: {
-      excludes: ['ml.tokens'],
-    },
-  });
-
-  if (response.hits.hits.length === 0) {
-    logger.debug('No remaining entries to migrate');
-    return;
-  }
-
-  logger.debug(`Found ${response.hits.hits.length} entries to migrate`);
-
-  await waitForModel({ esClient, logger, config });
-
-  // Limit the number of concurrent requests to avoid overloading the cluster
-  const limiter = pLimit(10);
-  const promises = response.hits.hits.map((hit) => {
-    return limiter(() => {
-      if (!hit._source || !hit._id) {
-        return;
-      }
-
-      return esClient.asInternalUser.update({
-        refresh: 'wait_for',
-        index: resourceNames.aliases.kb,
-        id: hit._id,
-        body: {
-          doc: {
-            ...hit._source,
-            semantic_text: hit._source.text,
+        query: {
+          bool: {
+            filter: { exists: { field: 'text' } },
+            must_not: { exists: { field: 'semantic_text' } },
           },
         },
       });
-    });
-  });
-
-  await Promise.all(promises);
-
-  logger.debug(`Populated ${promises.length} entries`);
-  await populateSemanticTextFieldRecursively({ esClient, logger, config });
+    },
+    { retries: 10, minTimeout: 10_000 }
+  );
+  logger.debug('Semantic text migration completed successfully.');
 }
 
 async function waitForModel({
