@@ -18,14 +18,9 @@ import type {
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import {
-  getLogger,
-  createScoutConfig,
-  measurePerformanceAsync,
-  getEsClient,
-  ScoutLogger,
-  EsClient,
-} from '../../common';
+import { createScoutConfig, measurePerformanceAsync, getEsClient } from '../../common';
+import type { EsClient } from '../../common';
+import { ScoutLogger } from '../../common/services/logger';
 import { ScoutTestOptions } from '../types';
 import {
   getApmSynthtraceEsClient,
@@ -69,7 +64,7 @@ const getSynthtraceClient = (
  * @deprecated Use `globalSetupHook` and synthtrace fixtures instead
  */
 export async function ingestSynthtraceDataHook(config: FullConfig, data: SynthtraceIngestionData) {
-  const log = getLogger();
+  const log = new ScoutLogger('scout: global hook');
 
   const { apm, infra, otel } = data;
   const hasApmData = apm.length > 0;
