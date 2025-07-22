@@ -407,7 +407,7 @@ const DEPRECATED_IMPORTS = [
 module.exports = {
   root: true,
 
-  extends: ['@kbn/eslint-config'],
+  extends: ['@kbn/eslint-config', 'plugin:storybook/recommended'],
 
   overrides: [
     /**
