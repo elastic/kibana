@@ -11,13 +11,11 @@ import {
   ChatCompletionErrorEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { KibanaClient } from './kibana_client';
-import { SynthtraceEsClients } from './setup_synthtrace';
 
 export interface ScenarioOptions {
   esClient: Client;
   kibanaClient: KibanaClient;
   chatClient: ReturnType<KibanaClient['createChatClient']>;
-  synthtraceClients: SynthtraceEsClients;
 }
 
 export interface EvaluationResult {

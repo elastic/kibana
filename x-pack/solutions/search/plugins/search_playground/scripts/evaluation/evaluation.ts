@@ -21,7 +21,6 @@ import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from './get_service_urls';
 import { KibanaClient } from './kibana_client';
 import { initServices } from './services';
-import { setupSynthtrace } from './setup_synthtrace';
 import { EvaluationResult } from './types';
 import { selectConnector } from './select_connector';
 
@@ -80,14 +79,6 @@ function runEvaluations() {
           if (!scenarios.length) {
             throw new Error('No scenarios to run');
           }
-
-          log.info('Setting up Synthtrace clients');
-
-          const synthtraceEsClients = await setupSynthtrace({
-            target: serviceUrls.kibanaUrl,
-            client: esClient,
-            log,
-          });
 
           const mocha = new Mocha({
             grep: argv.grep,
@@ -208,7 +199,6 @@ function runEvaluations() {
             kibanaClient,
             esClient,
             chatClient,
-            synthtraceEsClients,
             logger: log,
             selectedConnector: connector,
           });

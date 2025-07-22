@@ -8,7 +8,6 @@
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ChatClient, KibanaClient } from '../kibana_client';
-import type { SynthtraceEsClients } from '../setup_synthtrace';
 
 function createErrorThrowingProxy(name: string): any {
   return new Proxy(
@@ -30,21 +29,16 @@ export let kibanaClient: KibanaClient = createErrorThrowingProxy('kibanaClient')
 export let logger: ToolingLog = createErrorThrowingProxy('logger');
 export let selectedConnector: any = createErrorThrowingProxy('selectedConnector');
 
-export let synthtraceEsClients: SynthtraceEsClients =
-  createErrorThrowingProxy('synthtraceEsClients');
-
 export const initServices = (services: {
   chatClient: ChatClient;
   esClient: Client;
   kibanaClient: KibanaClient;
-  synthtraceEsClients: SynthtraceEsClients;
   logger: ToolingLog;
   selectedConnector: any;
 }) => {
   chatClient = services.chatClient;
   esClient = services.esClient;
   kibanaClient = services.kibanaClient;
-  synthtraceEsClients = services.synthtraceEsClients;
   logger = services.logger;
   selectedConnector = services.selectedConnector;
 };
