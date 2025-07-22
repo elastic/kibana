@@ -61,7 +61,7 @@ describe('Playground APIs', function () {
           citations: true,
           elasticsearch_query:
             '{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["content"]}}}}}',
-          summarization_model: 'anthropic.claude-3-haiku-20240307-v1:0',
+          summarization_model: selectedConnector.config?.defaultModel,
           doc_size: 1,
           source_fields: '{"work-from-home-policies":["content"]}',
         },
@@ -104,7 +104,7 @@ describe('Playground APIs', function () {
           citations: true,
           elasticsearch_query:
             '{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["content"]}}}}}',
-          summarization_model: 'anthropic.claude-3-haiku-20240307-v1:0',
+          summarization_model: selectedConnector.config?.defaultModel,
           doc_size: 1,
           source_fields: '{"work-from-home-policies":["content"]}',
         },
