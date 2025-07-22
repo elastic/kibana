@@ -89,9 +89,11 @@ export const useTopNavLinks = ({
       dataView,
       adHocDataViews,
       authorizedRuleTypeIds: getAuthorizedWriteConsumerIds(authorizedRuleTypes),
-      onUpdateAdHocDataViews: async (adHocDataViewList) => {
-        await dispatch(internalStateActions.loadDataViewList());
-        dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
+      actions: {
+        updateAdHocDataViews: async (adHocDataViewList) => {
+          await dispatch(internalStateActions.loadDataViewList());
+          dispatch(internalStateActions.setAdHocDataViews(adHocDataViewList));
+        },
       },
     }),
     [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]

@@ -18,7 +18,7 @@ export const createConversationCreatedEvent = (
   return {
     type: ChatEventType.conversationCreated,
     data: {
-      conversationId: conversation.id,
+      conversation_id: conversation.id,
       title: conversation.title,
     },
   };
@@ -30,7 +30,7 @@ export const createConversationUpdatedEvent = (
   return {
     type: ChatEventType.conversationUpdated,
     data: {
-      conversationId: conversation.id,
+      conversation_id: conversation.id,
       title: conversation.title,
     },
   };

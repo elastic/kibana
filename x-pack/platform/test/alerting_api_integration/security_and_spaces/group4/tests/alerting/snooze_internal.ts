@@ -28,7 +28,6 @@ const SNOOZE_SCHEDULE = {
   },
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function createSnoozeRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

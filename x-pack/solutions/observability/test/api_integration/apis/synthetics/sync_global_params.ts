@@ -33,9 +33,7 @@ export const LOCAL_LOCATION = {
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  // FLAKY: https://github.com/elastic/kibana/issues/221290
-  // Failing: See https://github.com/elastic/kibana/issues/221290
-  describe.skip('SyncGlobalParams', function () {
+  describe('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
     const kServer = getService('kibanaServer');
@@ -138,6 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           locations: [LOCAL_LOCATION, pvtLoc],
+          spaces: ['default'],
         })
       );
       newMonitorId = apiResponse.rawBody.id;
@@ -173,6 +172,13 @@ export default function ({ getService }: FtrProviderContext) {
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
         .send({ key: 'test', value: 'http://proxy.com' });
+
+      /*
+       * Creating a global parameter kicks off an asynchronous background task.
+       * We pause for 5 seconds to let that task finish before creating monitors that reference the param;
+       * if it’s still running when the monitor is added, Kibana would not schedule a second sync task.
+       */
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       expect(apiResponse.status).eql(200);
     });
@@ -237,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
           [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           locations: [LOCAL_LOCATION, pvtLoc],
+          spaces: ['default'],
         })
       );
       newHttpMonitorId = apiResponse.rawBody.id;

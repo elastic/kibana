@@ -105,7 +105,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
-    plugins.cases.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+    plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
     return {
       createActionService: this.createActionService,

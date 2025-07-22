@@ -39,7 +39,12 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
-export type { DashboardAttributes, DashboardPanel, DashboardSection } from './content_management';
-export type { DashboardSavedObjectAttributes } from './dashboard_saved_object';
+export type {
+  DashboardAttributes,
+  DashboardPanel,
+  DashboardSection,
+  DashboardSearchOut,
+} from './content_management';
+export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
 
 export { PUBLIC_API_PATH } from './api/constants';

@@ -23,12 +23,10 @@ import Papa from 'papaparse';
 import { Readable } from 'stream';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { defaultMonitoringUsersIndex } from '../../../../common/constants';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
-import {
-  defaultMonitoringUsersIndex,
-  getPrivilegedMonitorUsersIndex,
-} from '../../../../common/entity_analytics/privilege_monitoring/constants';
+import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/utils';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -42,12 +40,15 @@ import {
   type EngineComponentResource,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { ApiKeyManager } from './auth/api_key';
-import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
+import {
+  startPrivilegeMonitoringTask,
+  removePrivilegeMonitoringTask,
+} from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import {
   PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING,
   generateUserIndexMappings,
-} from './indices';
+} from './elasticsearch/indices';
 import {
   POST_EXCLUDE_INDICES,
   PRE_EXCLUDE_INDICES,
@@ -69,12 +70,14 @@ import { privilegedUserParserTransform } from './users/privileged_user_parse_tra
 import type { Accumulator } from './users/bulk/utils';
 import { accumulateUpsertResults } from './users/bulk/utils';
 import type { PrivMonBulkUser, PrivMonUserSource } from './types';
-import type { MonitoringEntitySourceDescriptor } from './saved_objects';
 import {
   PrivilegeMonitoringEngineDescriptorClient,
   MonitoringEntitySourceDescriptorClient,
 } from './saved_objects';
-
+import {
+  PRIVMON_EVENT_INGEST_PIPELINE_ID,
+  eventIngestPipeline,
+} from './elasticsearch/pipelines/event_ingested';
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -122,18 +125,34 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
-    // create default index source for privilege monitoring
-    const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
-      type: 'index',
-      managed: true,
-      indexPattern: defaultMonitoringUsersIndex,
-      name: 'default-monitoring-index',
-    });
-    this.log(
-      'debug',
-      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-    );
+    // create default index source for privilege monitoring for each namespace
     try {
+      const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
+        type: 'index',
+        managed: true,
+        indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
+        name: `default-monitoring-index-${this.opts.namespace}`,
+      });
+      this.log(
+        'debug',
+        `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+      );
+    } catch (e) {
+      this.log(
+        'error',
+        `Failed to create default index source for privilege monitoring: ${e.message}`
+      );
+      this.audit(
+        PrivilegeMonitoringEngineActions.INIT,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to create default index source for privilege monitoring',
+        e
+      );
+    }
+    try {
+      this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
+      await this.createIngestPipelineIfDoesNotExist();
+
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
           this.opts.logger.info('Privilege monitoring index already exists');
@@ -157,8 +176,6 @@ export class PrivilegeMonitoringDataClient {
       this.opts.telemetry?.reportEvent(PRIVMON_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
       });
-      // sync all index users from monitoring sources
-      await this.plainIndexSync();
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -195,6 +212,7 @@ export class PrivilegeMonitoringDataClient {
   }
 
   public async createOrUpdateIndex() {
+    this.log('info', `Creating or updating index: ${this.getIndex()}`);
     await createOrUpdateIndex({
       esClient: this.internalUserClient,
       logger: this.opts.logger,
@@ -204,6 +222,7 @@ export class PrivilegeMonitoringDataClient {
         settings: {
           hidden: true,
           mode: 'lookup',
+          default_pipeline: PRIVMON_EVENT_INGEST_PIPELINE_ID,
         },
       },
     });
@@ -219,8 +238,21 @@ export class PrivilegeMonitoringDataClient {
     }
   }
 
+  public async createIngestPipelineIfDoesNotExist() {
+    const pipelinesResponse = await this.internalUserClient.ingest.getPipeline(
+      { id: PRIVMON_EVENT_INGEST_PIPELINE_ID },
+      { ignore: [404] }
+    );
+    if (!pipelinesResponse[PRIVMON_EVENT_INGEST_PIPELINE_ID]) {
+      this.log('info', 'Privileged user monitoring ingest pipeline does not exist, creating.');
+      await this.internalUserClient.ingest.putPipeline(eventIngestPipeline);
+    } else {
+      this.log('info', 'Privileged user monitoring ingest pipeline already exists.');
+    }
+  }
+
   /**
-   * This create a index for user to populate privileged users.
+   * This creates an index for the user to populate privileged users.
    * It already defines the mappings and settings for the index.
    */
   public createPrivilegesImportIndex(indexName: string, mode: 'lookup' | 'standard') {
@@ -428,8 +460,7 @@ export class PrivilegeMonitoringDataClient {
    */
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
-    const indexSources: MonitoringEntitySourceDescriptor[] =
-      await this.monitoringIndexSourceClient.findByIndex();
+    const indexSources = await this.monitoringIndexSourceClient.findByIndex();
     if (indexSources.length === 0) {
       this.log('debug', 'No monitoring index sources found. Skipping sync.');
       return;
@@ -529,6 +560,8 @@ export class PrivilegeMonitoringDataClient {
         indexName,
         existingUserId: existingUserMap.get(username),
       }));
+
+      if (usersToWrite.length === 0) return batchUsernames;
 
       const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
       this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
@@ -715,5 +748,67 @@ export class PrivilegeMonitoringDataClient {
       search_after: searchAfter,
       query,
     });
+  }
+
+  public async disable() {
+    this.log('info', 'Disabling Privileged Monitoring Engine');
+    const errors: string[] = [];
+    // Check the current status of the engine
+    const currentEngineStatus = await this.getEngineStatus();
+    if (currentEngineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      this.log(
+        'info',
+        'Privilege Monitoring Engine is not in STARTED state, skipping disable operation'
+      );
+      return {
+        status: currentEngineStatus.status,
+        error: null,
+      };
+    }
+    try {
+      // 1. Remove the privileged user monitoring task
+      if (!this.opts.taskManager) {
+        throw new Error('Task Manager is not available');
+      }
+      this.log('debug', 'Disabling Privileged Monitoring Engine: removing task');
+      await removePrivilegeMonitoringTask({
+        logger: this.opts.logger,
+        namespace: this.opts.namespace,
+        taskManager: this.opts.taskManager,
+      });
+
+      // 2. Update status in Saved Objects
+      this.log(
+        'debug',
+        'Disabling Privileged Monitoring Engine: Updating status to DISABLED in Saved Objects'
+      );
+      await this.engineClient.updateStatus(PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED);
+
+      this.audit(
+        PrivilegeMonitoringEngineActions.DISABLE,
+        EngineComponentResourceEnum.privmon_engine,
+        'Privilege Monitoring Engine disabled'
+      );
+      this.log('info', 'Privileged Monitoring Engine disabled successfully');
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED,
+        error: null,
+      };
+    } catch (e) {
+      const msg = `Failed to disable Privileged Monitoring Engine: ${e.message}`;
+      this.log('error', msg);
+      errors.push(msg);
+
+      this.audit(
+        PrivilegeMonitoringEngineActions.DISABLE,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to disable Privileged Monitoring Engine',
+        e
+      );
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED,
+        error: errors,
+      };
+    }
   }
 }

@@ -8,28 +8,27 @@
 import { highlightContent } from './chat_timeline';
 
 describe('highlightContent', () => {
-  const entity = 'John Doe';
+  const entityValue = 'John Doe';
+  const entityObj = { class_name: 'PER', value: entityValue, mask: 'PERSON_1' };
 
   it('highlights anonymized entities', () => {
-    const content = `Hi, my name is ${entity}.`;
-    const startPos = content.indexOf(entity);
-    const endPos = startPos + entity.length;
+    const content = `Hi, my name is ${entityValue}.`;
+    const startPos = content.indexOf(entityValue);
+    const endPos = startPos + entityValue.length;
 
-    const result = highlightContent(content, [
-      { start_pos: startPos, end_pos: endPos, entity, class_name: 'PER' },
-    ]);
+    const result = highlightContent(content, [{ start: startPos, end: endPos, entity: entityObj }]);
 
-    expect(result).toBe(`Hi, my name is !{anonymized{"entityClass":"PER","content":"${entity}"}}.`);
+    expect(result).toBe(
+      `Hi, my name is !{anonymized{"entityClass":"PER","content":"${entityValue}"}}.`
+    );
   });
 
   it('does not highlight entities that are inside inlined code', () => {
-    const content = `Here is my full name, inlined in code \`${entity}\`.`;
-    const startPos = content.indexOf(entity);
-    const endPos = startPos + entity.length;
+    const content = `Here is my full name, inlined in code \`${entityValue}\`.`;
+    const startPos = content.indexOf(entityValue);
+    const endPos = startPos + entityValue.length;
 
-    const result = highlightContent(content, [
-      { start_pos: startPos, end_pos: endPos, entity, class_name: 'PER' },
-    ]);
+    const result = highlightContent(content, [{ start: startPos, end: endPos, entity: entityObj }]);
 
     // The content should remain unchanged because the entity is inside inline code.
     expect(result).toBe(content);
@@ -38,15 +37,13 @@ describe('highlightContent', () => {
   it('does not highlight entities that are inside fenced code blocks', () => {
     const content = `Here is code block:
         \`\`\`
-        ${entity}
+        ${entityValue}
         \`\`\`
         End.`;
-    const startPos = content.indexOf(entity);
-    const endPos = startPos + entity.length;
+    const startPos = content.indexOf(entityValue);
+    const endPos = startPos + entityValue.length;
 
-    const result = highlightContent(content, [
-      { start_pos: startPos, end_pos: endPos, entity, class_name: 'PER' },
-    ]);
+    const result = highlightContent(content, [{ start: startPos, end: endPos, entity: entityObj }]);
 
     // The content should remain unchanged because the entity is inside a fenced code block.
     expect(result).toBe(content);

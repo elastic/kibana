@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { AgentMode, ConversationRound, RoundInput } from '@kbn/onechat-common';
-import type { ExecutableTool, ToolProvider } from '@kbn/onechat-server';
+import { AgentMode, ConversationRound, RoundInput, ToolSelection } from '@kbn/onechat-common';
 import { AgentHandlerContext } from '@kbn/onechat-server';
 import { runChatAgent } from './chat';
 import { runReasoningAgent } from './reasoning';
@@ -24,18 +23,22 @@ export interface RunAgentParams {
    */
   conversation?: ConversationRound[];
   /**
-   * Optional system prompt to extend the default one.
+   * Optional custom instructions to add to the prompts.
    */
-  systemPrompt?: string;
+  customInstructions?: string;
   /**
-   * List of tools that will be exposed to the agent.
-   * Either a list of tools or a tool provider.
+   * Selection of tools which will be exposed to the agent.
+   * Defaults to exposing all available tools.
    */
-  tools: ToolProvider | ExecutableTool[];
+  toolSelection?: ToolSelection[];
   /**
    * In case of nested calls (e.g calling from a tool), allows to define the runId.
    */
   runId?: string;
+  /**
+   * The agent this run is for. Used for tracing.
+   */
+  agentId?: string;
 }
 
 export interface RunAgentResponse {
