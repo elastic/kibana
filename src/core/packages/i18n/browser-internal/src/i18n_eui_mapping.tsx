@@ -787,6 +787,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
       }
     ),
+    'euiFlyout.screenReaderFocusTrapShards': i18n.translate(
+      'core.euiFlyout.screenReaderFocusTrapShards',
+      {
+        defaultMessage: 'You can still continue tabbing through other global page landmarks.',
+      }
+    ),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),
