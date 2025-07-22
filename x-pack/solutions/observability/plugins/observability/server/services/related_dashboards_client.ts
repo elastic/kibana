@@ -23,6 +23,12 @@ import type {
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
 import { isSuggestedDashboardsValidRuleTypeId } from './helpers';
+import {
+  DashboardScorer,
+  RankablePanel,
+  RankSourceAlert,
+  RankableDashboard,
+} from './dashboard_scorer';
 
 type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
 export class RelatedDashboardsClient {
@@ -70,9 +76,110 @@ export class RelatedDashboardsClient {
     return this.alert;
   }
 
+  private async newFetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
+    const alert = this.checkAlert();
+    // make sure it is an o11y alert
+    if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
+
+    const ruleName = this.alert?.getRuleName();
+
+    const ruleQueryFields = Object.keys(extractKQLFieldsAndValues(alert.getRuleParameters()));
+
+    console.log('!!!ALERT IS', alert);
+
+    console.log('RRF', ruleName, ruleQueryFields);
+    const alertRuleIndex = this.getRuleQueryIndex();
+
+    const rsa: RankSourceAlert = {
+      name: ruleName || '',
+      description: '',
+      queriedFields: ruleQueryFields,
+      indexPattern: alertRuleIndex || '',
+    };
+
+    let rankableDashboards: RankableDashboard[] = [];
+    // append all rankable dashboards
+    const dashboardIndices = new Set<string>();
+    this.dashboardsById.forEach((dashboard) => {
+      let rankablePanels: RankablePanel[] = [];
+      // append all rankable panelsnd
+      dashboard.attributes.panels.forEach((panel) => {
+        if (isDashboardSection(panel)) return; // skip sections
+        const panelIndices = this.getPanelIndices(panel);
+
+        panelIndices.forEach((d) => dashboardIndices.add(d));
+
+        const panelFields = this.getPanelFields(panel);
+        if (panelIndices.size > 0 || panelFields.size > 0) {
+          rankablePanels.push({
+            title: panel.panelConfig?.attributes?.title || 'Untitled Panel',
+            queriedFields: Array.from(panelFields),
+          });
+        }
+      });
+
+      // Parse the date string for last modified from either dashboard.updated_at or dashboard.created_at
+      const lastModifiedDate = new Date(
+        dashboard.updated_at || dashboard.created_at || new Date().toISOString()
+      );
+
+      const rankableDashboard: RankableDashboard = {
+        id: dashboard.id,
+        title: dashboard.attributes.title,
+        description: dashboard.attributes.description,
+        panels: rankablePanels,
+        indexPatterns: Array.from(dashboardIndices),
+        lastModifiedDate,
+        isManaged: dashboard.managed || false,
+      };
+      rankableDashboards.push(rankableDashboard);
+    });
+
+    console.log('Rankable dashboards:', JSON.stringify(rankableDashboards, null, 2));
+
+    /*
+    const allSuggestedDashboards = new Set<SuggestedDashboard>();
+    const relevantDashboardsById = new Map<string, SuggestedDashboard>();
+    const alertRelevantFields = alert.getAllRelevantFields();
+
+    if (alertRuleIndex) {
+      const { dashboards } = this.getDashboardsByIndex(alertRuleIndex);
+      dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
+    }
+    if (alertRelevantFields.length > 0) {
+      const { dashboards } = this.getDashboardsByField(alertRelevantFields);
+      dashboards.forEach((dashboard) => allSuggestedDashboards.add(dashboard));
+    }
+    // Deduplicate dashboards and calculate scores
+    allSuggestedDashboards.forEach((dashboard) => {
+      const dedupedPanels = this.dedupePanels([
+        ...(relevantDashboardsById.get(dashboard.id)?.relevantPanels || []),
+        ...dashboard.relevantPanels,
+      ]);
+      const relevantPanelCount = dedupedPanels.length;
+      relevantDashboardsById.set(dashboard.id, {
+        ...dashboard,
+        matchedBy: {
+          ...relevantDashboardsById.get(dashboard.id)?.matchedBy,
+          ...dashboard.matchedBy,
+        },
+        relevantPanelCount,
+        relevantPanels: dedupedPanels,
+        score: this.getScore(dashboard),
+      });
+    });
+    const sortedDashboards = Array.from(relevantDashboardsById.values()).sort((a, b) => {
+      return b.score - a.score;
+    });
+     return sortedDashboards;
+  */
+  }
+
   private async fetchSuggestedDashboards(): Promise<SuggestedDashboard[]> {
     const alert = this.checkAlert();
     if (!isSuggestedDashboardsValidRuleTypeId(alert.getRuleTypeId())) return [];
+
+    this.newFetchSuggestedDashboards();
 
     const allSuggestedDashboards = new Set<SuggestedDashboard>();
     const relevantDashboardsById = new Map<string, SuggestedDashboard>();
@@ -395,4 +502,31 @@ export class RelatedDashboardsClient {
 
     return intersection.size / union.size;
   }
+}
+
+// TODO: We probably have a KQL utility that does this already,
+function extractKQLFieldsAndValues(ruleParams: any): Record<string, string> {
+  const extractedFields: Record<string, string> = {};
+
+  // Check if searchConfiguration exists and has a query
+  if (
+    ruleParams?.searchConfiguration?.query?.query &&
+    ruleParams.searchConfiguration.query.language === 'kuery'
+  ) {
+    const kqlQuery = ruleParams.searchConfiguration.query.query as string;
+
+    // Simple regex to extract field:value pairs
+    // This handles basic cases like 'field: "value"' or 'field: value'
+    const fieldValueRegex = /(\w+)\s*:\s*(?:"([^"]+)"|'([^']+)'|([^\s]+))/g;
+
+    let match;
+    while ((match = fieldValueRegex.exec(kqlQuery)) !== null) {
+      const fieldName = match[1];
+      // The value could be in any of the capture groups depending on whether it was quoted or not
+      const fieldValue = match[2] || match[3] || match[4];
+      extractedFields[fieldName] = fieldValue;
+    }
+  }
+
+  return extractedFields;
 }
