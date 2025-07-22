@@ -156,6 +156,7 @@ export class RelatedDashboardsClient {
           id: d.id,
           title: d.attributes.title,
           description: d.attributes.description,
+          tags: d.attributes.tags,
           matchedBy: { index: [index] },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
@@ -206,6 +207,7 @@ export class RelatedDashboardsClient {
           id: d.id,
           title: d.attributes.title,
           description: d.attributes.description,
+          tags: d.attributes.tags,
           matchedBy: { fields: Array.from(allMatchingFields) },
           relevantPanelCount: matchingPanels.length,
           relevantPanels: matchingPanels.map((p) => ({
@@ -362,6 +364,7 @@ export class RelatedDashboardsClient {
         title: dashboardResponse.result.item.attributes.title,
         matchedBy: { linked: true },
         description: dashboardResponse.result.item.attributes.description,
+        tags: dashboardResponse.result.item.attributes.tags,
       };
     } catch (error) {
       if (error.output.statusCode === 404) {

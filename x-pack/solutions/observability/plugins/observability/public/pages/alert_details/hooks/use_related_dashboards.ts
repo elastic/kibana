@@ -24,10 +24,16 @@ export const fetchRelatedDashboards = async ({
   });
 };
 
-const getDashboardMetadata = <T extends DashboardMetadata>({ description, id, title }: T) => ({
+const getDashboardMetadata = <T extends DashboardMetadata>({
   description,
   id,
   title,
+  tags,
+}: T) => ({
+  description,
+  id,
+  title,
+  tags,
 });
 
 export const getRelatedDashboardsQueryKey = (alertId: string) => ['relatedDashboards', alertId];

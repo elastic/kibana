@@ -43,7 +43,8 @@
       "licensing",
       "navigation",
       "fieldsMetadata",
-      "esql"
+      "esql",
+      "savedObjectsTagging",
     ],
     "optionalPlugins": [
       "aiops",

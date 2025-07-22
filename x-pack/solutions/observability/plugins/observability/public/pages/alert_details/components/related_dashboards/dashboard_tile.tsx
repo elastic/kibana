@@ -16,11 +16,13 @@ import {
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
+import { SavedObjectsReference } from '@kbn/content-management-content-editor';
 import { useKibana } from '../../../../utils/kibana_react';
 export interface DashboardMetadata {
   id: string;
   title: string;
   description: string;
+  tags?: string[];
 }
 
 export interface ActionButtonProps {
@@ -41,14 +43,22 @@ export function DashboardTile({
   const {
     services: {
       share: { url: urlService },
+      savedObjectsTagging: { ui: savedObjectsTaggingUi },
     },
   } = useKibana();
   const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
 
+  const tagsReferences: SavedObjectsReference[] = dashboard.tags?.length
+    ? dashboard.tags.reduce((acc, value) => {
+        const reference = savedObjectsTaggingUi.convertNameToReference(value);
+        return reference ? [...acc, { ...reference, name: value }] : acc;
+      }, [] as SavedObjectsReference[])
+    : [];
+
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id}>
-        <EuiFlexItem key={dashboard.id}>
+      <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id} alignItems="center">
+        <EuiFlexGroup key={dashboard.id} gutterSize="s" direction="column">
           <EuiLink
             data-test-subj="o11yDashboardTileLink"
             href={dashboardLocator?.getRedirectUrl({
@@ -61,7 +71,14 @@ export function DashboardTile({
           <EuiText color={'subdued'} size="s">
             {dashboard.description}
           </EuiText>
-        </EuiFlexItem>
+          {tagsReferences.length ? (
+            <savedObjectsTaggingUi.components.TagList
+              object={{
+                references: tagsReferences,
+              }}
+            />
+          ) : null}
+        </EuiFlexGroup>
         {actionButtonProps ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
