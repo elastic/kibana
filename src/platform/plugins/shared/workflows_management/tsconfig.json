@@ -1,0 +1,37 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../../typings/**/*",
+    ".storybook/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
+    "@kbn/core-application-browser",
+    "@kbn/navigation-plugin",
+    "@kbn/config-schema",
+    "@kbn/workflows",
+    "@kbn/zod",
+    "@kbn/code-editor",
+    "@kbn/security-plugin-types-common",
+    "@kbn/monaco",
+    "@kbn/actions-plugin",
+    "@kbn/features-plugin",
+    "@kbn/workflows-execution-engine",
+    "@kbn/task-manager-plugin",
+    "@kbn/kibana-utils-plugin",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}
