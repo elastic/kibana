@@ -8,6 +8,14 @@
 import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 export async function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
+  // Skip actions if the combobox has been opened already
+  if (
+    document.querySelector('[role="listbox"]') ||
+    document.querySelector('.euiComboBoxOptionsList__empty')
+  ) {
+    return;
+  }
+
   await act(() => {
     fireEvent.click(comboBoxToggleButton);
   });
