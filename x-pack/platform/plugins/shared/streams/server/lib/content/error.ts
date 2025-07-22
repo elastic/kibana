@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { StatusError } from '../streams/errors/status_error';
 
 export class InvalidContentPackError extends StatusError {
