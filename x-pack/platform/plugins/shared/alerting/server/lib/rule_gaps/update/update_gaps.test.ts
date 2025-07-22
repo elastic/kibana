@@ -73,7 +73,7 @@ describe('updateGaps', () => {
       expect(processAllRuleGapsMock).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
-        ruleId: 'test-rule-id',
+        ruleIds: ['test-rule-id'],
         start: '2024-01-01T00:00:00.000Z',
         end: '2024-01-01T01:00:00.000Z',
         processGapsBatch: expect.any(Function),

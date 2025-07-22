@@ -44,7 +44,7 @@ describe('softDeleteGaps', () => {
   describe('softDeleteGaps', () => {
     it('should orchestrate the gap disable process', async () => {
       await softDeleteGaps({
-        ruleId,
+        ruleIds: [ruleId],
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
@@ -53,7 +53,7 @@ describe('softDeleteGaps', () => {
       expect(processAllRuleGapsMock).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
-        ruleId: 'test-rule-id',
+        ruleId: ['test-rule-id'],
         processGapsBatch: expect.any(Function),
         statuses: Object.values(gapStatus),
       });
@@ -61,7 +61,7 @@ describe('softDeleteGaps', () => {
 
     it('should pass a function that calls softDeleteGapsBatch when gaps are fetched', async () => {
       await softDeleteGaps({
-        ruleId,
+        ruleIds: [ruleId],
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
@@ -78,7 +78,7 @@ describe('softDeleteGaps', () => {
     it('should log an error when disable gaps is not successful', async () => {
       softDeleteGapsBatchMock.mockResolvedValue(false);
       await softDeleteGaps({
-        ruleId,
+        ruleIds: [ruleId],
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
         logger: mockLogger,

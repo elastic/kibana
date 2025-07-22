@@ -36,16 +36,20 @@ export const batchBackfillRuleGaps = async (
   const eventLogClient = await context.getEventLogClient();
 
   try {
-    const processingResults = await processAllRuleGaps({
-      ruleId: rule.id,
+    await processAllRuleGaps({
+      ruleIds: [rule.id],
       start,
       end,
       eventLogClient,
       logger,
-      processGapsBatch: (gapsBatch: Gap[]) => processGapsBatch(context, { rule, range, gapsBatch }),
+      processGapsBatch: async (gapsBatch: Gap[]) => {
+        const result = await processGapsBatch(context, { rule, range, gapsBatch });
+        if (result) {
+          hasBeenBackfilled = true;
+        }
+      },
       options: { maxFetchedGaps: maxGapCountPerRule },
     });
-    hasBeenBackfilled = processingResults.some((result) => result);
   } catch (error) {
     logProcessedAsAuditEvent(context, rule, error);
     resultError = toBulkGapFillError(rule, BulkGapsFillStep.SCHEDULING, error);

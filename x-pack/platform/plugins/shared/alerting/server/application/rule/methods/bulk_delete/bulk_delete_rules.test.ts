@@ -212,14 +212,11 @@ describe('bulkDelete', () => {
       unsecuredSavedObjectsClient,
     });
 
-    ruleIds.forEach((ruleId, idx) => {
-      const callOrder = idx + 1;
-      expect(softDeleteGapsMock).toHaveBeenNthCalledWith(callOrder, {
-        ruleId,
-        eventLogClient,
-        logger,
-        eventLogger,
-      });
+    expect(softDeleteGapsMock).toHaveBeenCalledWith({
+      ruleIds,
+      eventLogClient,
+      logger,
+      eventLogger,
     });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
@@ -355,7 +352,7 @@ describe('bulkDelete', () => {
     });
 
     expect(softDeleteGapsMock).toHaveBeenCalledWith({
-      ruleId: 'id1',
+      ruleIds: ['id1', 'id2'],
       eventLogClient,
       logger,
       eventLogger,

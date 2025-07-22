@@ -14,7 +14,7 @@ import { softDeleteGapsBatch } from './soft_delete_gaps_batch';
 import { gapStatus } from '../../../../common/constants';
 
 interface SoftDeleteGapsParams {
-  ruleId: string;
+  ruleIds: string[];
   eventLogger?: IEventLogger;
   eventLogClient: IEventLogClient;
   logger: Logger;
@@ -25,7 +25,7 @@ interface SoftDeleteGapsParams {
  * It orchestrates the process of searching and marking all the rule gaps as deleted
  */
 export const softDeleteGaps = async (params: SoftDeleteGapsParams) => {
-  const { ruleId, logger, eventLogClient, eventLogger } = params;
+  const { ruleIds, logger, eventLogClient, eventLogger } = params;
 
   try {
     if (!eventLogger) {
@@ -51,7 +51,7 @@ export const softDeleteGaps = async (params: SoftDeleteGapsParams) => {
     };
 
     await processAllRuleGaps({
-      ruleId,
+      ruleIds,
       logger,
       eventLogClient,
       processGapsBatch,
@@ -62,6 +62,6 @@ export const softDeleteGaps = async (params: SoftDeleteGapsParams) => {
       throw new Error('Some gaps failed to soft delete');
     }
   } catch (e) {
-    logger.error(`Failed to soft delete gaps for rule ${ruleId}: ${e.message}`);
+    logger.error(`Failed to soft delete gaps for rules ${ruleIds.join(', ')}: ${e.message}`);
   }
 };

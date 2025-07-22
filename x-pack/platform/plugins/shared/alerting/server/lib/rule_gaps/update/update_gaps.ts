@@ -91,7 +91,7 @@ export const updateGaps = async (params: UpdateGapsParams) => {
     } else {
       // Otherwise fetch and update them
       await processAllRuleGaps({
-        ruleId,
+        ruleIds: [ruleId],
         start: start.toISOString(),
         end: end.toISOString(),
         logger,

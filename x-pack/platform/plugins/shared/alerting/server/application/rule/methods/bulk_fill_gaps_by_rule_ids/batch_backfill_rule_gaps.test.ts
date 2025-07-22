@@ -98,7 +98,7 @@ describe('batchBackfillRuleGaps', () => {
           maxFetchedGaps: 1000,
         },
         processGapsBatch: expect.any(Function),
-        ruleId: rule.id,
+        ruleIds: [rule.id],
         ...backfillingDateRange,
       });
     });
