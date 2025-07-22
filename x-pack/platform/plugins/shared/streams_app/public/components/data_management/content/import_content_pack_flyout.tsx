@@ -34,7 +34,7 @@ export function ImportContentPackFlyout({
   onImport,
   onClose,
 }: {
-  definition: Streams.WiredStreams.GetResponse;
+  definition: Streams.WiredStream.GetResponse;
   onClose: () => void;
   onImport: () => void;
 }) {
