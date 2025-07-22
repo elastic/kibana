@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { type QueryClient, useQueryClient } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { FormProvider as ReactHookFormProvider, UseFormReturn, useForm } from 'react-hook-form';
@@ -21,9 +21,12 @@ import {
   PlaygroundResponse,
   PlaygroundForm,
   LLMModel,
+  SavedPlaygroundLoadErrors,
 } from '../types';
 import { savedPlaygroundFormResolver } from '../utils/playground_form_resolver';
 import { fetchSavedPlaygroundError, parseSavedPlayground } from '../utils/saved_playgrounds';
+import { SavedPlaygroundInvalidStateModal } from '../components/saved_playground/invalid_state_modal';
+import { IndicesQuery } from '../hooks/use_query_indices';
 
 export interface SavedPlaygroundFormProviderProps {
   playgroundId: string;
@@ -32,10 +35,11 @@ export interface SavedPlaygroundFormProviderProps {
 interface FetchSavedPlaygroundOptions {
   client: QueryClient;
   http: HttpSetup;
+  setLoadErrors: (errors: SavedPlaygroundLoadErrors | null) => void;
 }
 
 const fetchSavedPlayground =
-  (playgroundId: string, { http, client }: FetchSavedPlaygroundOptions) =>
+  (playgroundId: string, { http, client, setLoadErrors }: FetchSavedPlaygroundOptions) =>
   async (): Promise<SavedPlaygroundForm> => {
     let playgroundResp: PlaygroundResponse;
     try {
@@ -48,14 +52,53 @@ const fetchSavedPlayground =
     } catch (e) {
       return fetchSavedPlaygroundError(e);
     }
-    let models: LLMModel[];
-    try {
-      models = await client.fetchQuery(
-        [SearchPlaygroundQueryKeys.LLMsQuery],
-        LLMsQuery(http, client)
+    let models: LLMModel[] = [];
+    let indices: string[] = [];
+    const indicesQuery = playgroundResp.data.indices.join(',');
+    [models, indices] = await Promise.all([
+      client
+        .fetchQuery([SearchPlaygroundQueryKeys.LLMsQuery], LLMsQuery(http, client))
+        .catch(() => []),
+      client
+        .fetchQuery(
+          [SearchPlaygroundQueryKeys.QueryIndices, indicesQuery],
+          IndicesQuery(http, indicesQuery, true)
+        )
+        .catch(() => []),
+    ]);
+    // validate indices
+    const validIndices: string[] = [];
+    const missingIndices: string[] = [];
+    let missingModel: string | undefined;
+    for (const index of playgroundResp.data.indices) {
+      if (indices.includes(index)) {
+        validIndices.push(index);
+      } else {
+        missingIndices.push(index);
+      }
+    }
+    playgroundResp.data.indices = validIndices;
+    const summarizationModel = playgroundResp.data.summarizationModel;
+    if (summarizationModel && summarizationModel.modelId) {
+      const model = models.find(
+        (llm) =>
+          llm.connectorId === summarizationModel.connectorId &&
+          llm.value === summarizationModel.modelId
       );
-    } catch (e) {
-      models = [];
+      if (model === undefined) {
+        missingModel = summarizationModel.modelId;
+      }
+    } else if (summarizationModel) {
+      const model = models.find((llm) => llm.connectorId === summarizationModel.connectorId);
+      if (model === undefined) {
+        missingModel = summarizationModel.connectorId;
+      }
+    }
+    if (missingModel || missingIndices.length > 0) {
+      setLoadErrors({
+        missingIndices,
+        missingModel,
+      });
     }
 
     const result = parseSavedPlayground(playgroundResp, models);
@@ -66,10 +109,11 @@ export const SavedPlaygroundFormProvider = ({
   children,
   playgroundId,
 }: React.PropsWithChildren<SavedPlaygroundFormProviderProps>) => {
+  const [loadErrors, setLoadErrors] = useState<SavedPlaygroundLoadErrors | null>(null);
   const client = useQueryClient();
   const { http } = useKibana().services;
   const form = useForm<SavedPlaygroundForm>({
-    defaultValues: fetchSavedPlayground(playgroundId, { http, client }),
+    defaultValues: fetchSavedPlayground(playgroundId, { http, client, setLoadErrors }),
     resolver: savedPlaygroundFormResolver,
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -86,5 +130,17 @@ export const SavedPlaygroundFormProvider = ({
     // Trigger validation of existing values after initial loading.
     form.trigger();
   }, [form, form.formState.isLoading]);
-  return <ReactHookFormProvider {...form}>{children}</ReactHookFormProvider>;
+  return (
+    <ReactHookFormProvider {...form}>
+      <>
+        {children}
+        {loadErrors !== null && (
+          <SavedPlaygroundInvalidStateModal
+            errors={loadErrors}
+            onClose={() => setLoadErrors(null)}
+          />
+        )}
+      </>
+    </ReactHookFormProvider>
+  );
 };
