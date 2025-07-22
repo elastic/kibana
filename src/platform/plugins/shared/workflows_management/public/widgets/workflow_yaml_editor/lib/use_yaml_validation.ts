@@ -45,49 +45,49 @@ export function useYamlValidation({
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
 
   // Function to find the current step in the workflow based on the path
-  const findStepFromPath = useCallback((path: Array<string | number>) => {
-    if (!path || path.length < 3) {
-      return null;
-    }
+  // const findStepFromPath = useCallback((path: Array<string | number>) => {
+  //   if (!path || path.length < 3) {
+  //     return null;
+  //   }
 
-    // Look for 'steps' in the path
-    const stepsIdx = path.findIndex((p) => p === 'steps');
-    if (stepsIdx === -1) {
-      return null;
-    }
+  //   // Look for 'steps' in the path
+  //   const stepsIdx = path.findIndex((p) => p === 'steps');
+  //   if (stepsIdx === -1) {
+  //     return null;
+  //   }
 
-    // Check if there's an index after 'steps'
-    if (stepsIdx + 1 >= path.length || typeof path[stepsIdx + 1] !== 'number') {
-      return null;
-    }
+  //   // Check if there's an index after 'steps'
+  //   if (stepsIdx + 1 >= path.length || typeof path[stepsIdx + 1] !== 'number') {
+  //     return null;
+  //   }
 
-    return {
-      stepIndex: path[stepsIdx + 1] as number,
-      isInStep: true,
-    };
-  }, []);
+  //   return {
+  //     stepIndex: path[stepsIdx + 1] as number,
+  //     isInStep: true,
+  //   };
+  // }, []);
 
-  const findActionFromPath = useCallback((path: Array<string | number>) => {
-    if (!path || path.length < 3) {
-      return null;
-    }
+  // const findActionFromPath = useCallback((path: Array<string | number>) => {
+  //   if (!path || path.length < 3) {
+  //     return null;
+  //   }
 
-    // Look for 'actions' in the path
-    const actionsIdx = path.findIndex((p) => p === 'actions');
-    if (actionsIdx === -1) {
-      return null;
-    }
+  //   // Look for 'actions' in the path
+  //   const actionsIdx = path.findIndex((p) => p === 'actions');
+  //   if (actionsIdx === -1) {
+  //     return null;
+  //   }
 
-    // Check if there's an index after 'actions'
-    if (actionsIdx + 1 >= path.length || typeof path[actionsIdx + 1] !== 'number') {
-      return null;
-    }
+  //   // Check if there's an index after 'actions'
+  //   if (actionsIdx + 1 >= path.length || typeof path[actionsIdx + 1] !== 'number') {
+  //     return null;
+  //   }
 
-    return {
-      actionIndex: path[actionsIdx + 1] as number,
-      isInAction: true,
-    };
-  }, []);
+  //   return {
+  //     actionIndex: path[actionsIdx + 1] as number,
+  //     isInAction: true,
+  //   };
+  // }, []);
 
   // Function to validate mustache expressions and apply decorations
   const validateMustacheExpressions = useCallback(
