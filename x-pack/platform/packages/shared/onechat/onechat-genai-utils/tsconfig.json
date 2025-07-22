@@ -22,5 +22,6 @@
     "@kbn/inference-plugin",
     "@kbn/zod",
     "@kbn/logging",
+    "@kbn/logging-mocks",
   ]
 }

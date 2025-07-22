@@ -36,7 +36,12 @@ const ImageEditor = (props: Partial<ImageEditorFlyoutProps>) => {
             validateUrl,
           }}
         >
-          <ImageEditorFlyout onCancel={() => {}} onSave={() => {}} {...props} />
+          <ImageEditorFlyout
+            onCancel={() => {}}
+            onSave={() => {}}
+            {...props}
+            ariaLabelledBy="imageEditorFlyout"
+          />
         </ImageViewerContext.Provider>
       </FilesContext>
     </I18nProvider>
