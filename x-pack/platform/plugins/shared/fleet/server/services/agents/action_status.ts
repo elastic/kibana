@@ -7,6 +7,8 @@
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+
 import { SO_SEARCH_LIMIT } from '../../constants';
 
 import type {
@@ -23,7 +25,10 @@ import {
   AGENT_POLICY_INDEX,
 } from '../../../common';
 import { appContextService } from '..';
-import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+import {
+  addNamespaceFilteringToQuery,
+  namespaceFilterEsql,
+} from '../spaces/query_namespaces_filtering';
 
 /**
  * Return current bulk actions.
@@ -53,29 +58,21 @@ async function getActionResults(
   namespace?: string
 ): Promise<ActionStatus[]> {
   const actions = await getActions(esClient, options, namespace);
+  if (actions.length === 0) {
+    return [];
+  }
   const cancelledActions = await getCancelledActions(esClient);
-  let acks: any;
+  let acks: EsqlQueryResponse | undefined;
 
   try {
-    acks = await esClient.search({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      ignore_unavailable: true,
-      query: {
-        bool: {
-          // There's some perf/caching advantages to using filter over must
-          // See https://www.elastic.co/guide/en/elasticsearch/reference/current/query-filter-context.html#filter-context
-          filter: [{ terms: { action_id: actions.map((a) => a.actionId) } }],
-        },
-      },
-      size: 0,
-      aggs: {
-        ack_counts: {
-          terms: { field: 'action_id', size: actions.length || 10 },
-          aggs: {
-            max_timestamp: { max: { field: '@timestamp' } },
-          },
-        },
-      },
+    const esqlQuery = `FROM ${AGENT_ACTIONS_RESULTS_INDEX} 
+    | WHERE action_id IN (${actions.map((a) => `"${a.actionId}"`).join(', ')}) 
+    | KEEP @timestamp, action_id 
+    | STATS ack_counts = COUNT(*), max_timestamp = MAX(@timestamp) BY action_id 
+    | LIMIT ${actions.length || 10}`;
+
+    acks = await esClient.esql.query({
+      query: esqlQuery,
     });
   } catch (err) {
     if (err.statusCode === 404) {
@@ -89,65 +86,33 @@ async function getActionResults(
   const results = [];
 
   for (const action of actions) {
-    const matchingBucket = (acks?.aggregations?.ack_counts as any)?.buckets?.find(
-      (bucket: any) => bucket.key === action.actionId
-    );
+    const matchingBucket = acks?.values.find((value) => value[2] === action.actionId);
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
-    const docCount = matchingBucket?.doc_count ?? 0;
+    const docCount = (matchingBucket?.[0] ?? 0) as number;
     const nbAgentsAck = Math.min(docCount, nbAgentsActioned);
-    const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
+    const completionTime = matchingBucket?.[1] as string;
     const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 
     let errorCount = 0;
     let latestErrors: ActionErrorResult[] = [];
     try {
-      // query to find errors in action results, cannot do aggregation on text type
-      const errorResults = await esClient.search({
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        ignore_unavailable: true,
-        track_total_hits: true,
-        rest_total_hits_as_int: true,
-        query: {
-          bool: {
-            must: [{ term: { action_id: action.actionId } }],
-            should: [
-              {
-                exists: {
-                  field: 'error',
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        size: 0,
-        aggs: {
-          top_error_hits: {
-            top_hits: {
-              sort: [
-                {
-                  '@timestamp': {
-                    order: 'desc',
-                  },
-                },
-              ],
-              _source: {
-                includes: ['@timestamp', 'agent_id', 'error'],
-              },
-              size: options.errorSize,
-            },
-          },
-        },
+      const esqlQuery = `FROM ${AGENT_ACTIONS_RESULTS_INDEX} 
+      | WHERE action_id == \"${action.actionId}\" AND error IS NOT NULL 
+      | KEEP @timestamp, agent_id, error 
+      | SORT @timestamp DESC 
+      | LIMIT ${options.errorSize}`;
+
+      const errorResults = await esClient.esql.query({
+        query: esqlQuery,
       });
-      errorCount = (errorResults.hits.total as number) ?? 0;
-      latestErrors = ((errorResults.aggregations?.top_error_hits as any)?.hits.hits ?? []).map(
-        (hit: any) => ({
-          agentId: hit._source.agent_id,
-          error: hit._source.error,
-          timestamp: hit._source['@timestamp'],
-        })
-      );
+
+      errorCount = ((errorResults as any).documents_found as number) ?? 0;
+      latestErrors = ((errorResults.values as any) ?? []).map((value: any) => ({
+        agentId: value[1],
+        error: value[2],
+        timestamp: value[0],
+      }));
       if (latestErrors.length > 0) {
         const hostNames = await getHostNames(
           esClient,
@@ -207,6 +172,8 @@ async function getActions(
   options: ActionStatusOptions,
   namespace?: string
 ): Promise<ActionStatus[]> {
+  // can't use ES|QL because unmapped fields are not supported, e.g. data.version
+  // https://github.com/elastic/elasticsearch/issues/120072
   const query = {
     bool: {
       must_not: [
@@ -312,23 +279,20 @@ export async function getCancelledActions(
 }
 
 async function getHostNames(esClient: ElasticsearchClient, agentIds: string[]) {
-  const agentsRes = await esClient.search({
-    index: AGENTS_INDEX,
-    query: {
-      bool: {
-        filter: {
-          terms: {
-            'agent.id': agentIds,
-          },
-        },
-      },
-    },
-    size: agentIds.length,
-    _source: ['local_metadata.host.name'],
+  const esqlQuery = `FROM ${AGENTS_INDEX} 
+    | WHERE \`agent.id\` IN (${agentIds.map((a) => `"${a}"`).join(', ')}) 
+    | KEEP \`agent.id\`, \`local_metadata.host.name\`
+    | LIMIT ${agentIds.length}`;
+
+  const agentsRes = await esClient.esql.query({
+    query: esqlQuery,
   });
-  const hostNames = agentsRes.hits.hits.reduce((acc: { [key: string]: string }, curr) => {
-    if ((curr._source as any).local_metadata?.host?.name) {
-      acc[curr._id!] = (curr._source as any).local_metadata.host.name;
+
+  const hostNames = agentsRes.values.reduce((acc: { [key: string]: string }, curr) => {
+    if (curr[1]) {
+      const agentId = curr[0] as string;
+      const hostName = curr[1] as string;
+      acc[agentId] = hostName;
     }
     return acc;
   }, {});
@@ -354,52 +318,22 @@ async function getPolicyChangeActions(
     return [];
   }
 
-  const query = {
-    bool: {
-      filter: [
-        {
-          range: {
-            revision_idx: {
-              gt: 1,
-            },
-          },
-        },
-        // This filter is for retrieving docs created by Kibana, as opposed to Fleet Server (coordinator_idx: 1).
-        // Note: the coordinator will be removed from Fleet Server (https://github.com/elastic/fleet-server/pull/3131),
-        // so this filter will eventually not be needed.
-        {
-          term: {
-            coordinator_idx: 0,
-          },
-        },
-        ...(options.date
-          ? [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: options.date,
-                    lte: moment(options.date).add(1, 'days').toISOString(),
-                  },
-                },
-              },
-            ]
-          : []),
-      ],
-    },
-  };
-  const agentPoliciesRes = await esClient.search({
-    index: AGENT_POLICY_INDEX,
-    ignore_unavailable: true,
-    size: getPerPage(options),
-    query: await addNamespaceFilteringToQuery(query, namespace),
-    sort: [
-      {
-        '@timestamp': {
-          order: 'desc',
-        },
-      },
-    ],
-    _source: ['revision_idx', '@timestamp', 'policy_id'],
+  const dateFilter = options.date
+    ? `AND @timestamp >= "${options.date}" AND @timestamp <= "${moment(options.date)
+        .add(1, 'days')
+        .toISOString()}"`
+    : '';
+
+  const esqlQuery = `FROM ${AGENT_POLICY_INDEX} 
+    | WHERE revision_idx > 1 AND coordinator_idx == 0 ${dateFilter} ${await namespaceFilterEsql(
+    namespace
+  )}
+  | SORT @timestamp DESC 
+  | KEEP revision_idx, @timestamp, policy_id
+  | LIMIT ${getPerPage(options)}`;
+
+  const agentPoliciesRes = await esClient.esql.query({
+    query: esqlQuery,
   });
 
   interface AgentPolicyRevision {
@@ -410,13 +344,15 @@ async function getPolicyChangeActions(
     agentsOnAtLeastThisRevision: number;
   }
 
-  const agentPolicies: { [key: string]: AgentPolicyRevision } = agentPoliciesRes.hits.hits.reduce(
+  const agentPolicies: { [key: string]: AgentPolicyRevision } = agentPoliciesRes.values.reduce(
     (acc, curr) => {
-      const hit = curr._source! as any;
-      acc[`${hit.policy_id}:${hit.revision_idx}`] = {
-        policyId: hit.policy_id,
-        revision: hit.revision_idx,
-        timestamp: hit['@timestamp'],
+      const revision = curr[0] as number;
+      const timestamp = curr[1] as string;
+      const policyId = curr[2] as string;
+      acc[`${policyId}:${revision}`] = {
+        policyId,
+        revision,
+        timestamp,
         agentsAssignedToPolicy: 0,
         agentsOnAtLeastThisRevision: 0,
       };
@@ -429,6 +365,7 @@ async function getPolicyChangeActions(
   let agentPolicyUpdateActions: ActionStatus[];
 
   try {
+    // can't use ES|QL to replace a child aggregation
     agentsPerPolicyRevisionRes = await esClient.search({
       index: AGENTS_INDEX,
       size: 0,
