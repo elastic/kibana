@@ -213,6 +213,8 @@ export const CaseViewActivity = ({
         `}
       >
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
+        <CaseSummary caseData={caseData} markdown={false} />
+        <EuiSpacer size="m" />
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}
@@ -267,7 +269,7 @@ export const CaseViewActivity = ({
           <h2>{i18n.CASE_SETTINGS}</h2>
         </EuiScreenReaderOnly>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
-          <CaseSummary caseData={caseData} />
+          <CaseSummary caseData={caseData} markdown={true} />
           {caseAssignmentAuthorized ? (
             <>
               <AssignUsers

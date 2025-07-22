@@ -6,17 +6,19 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiCallOut, EuiFlexItem, EuiLoadingSpinner, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiMarkdownFormat, EuiProgress } from '@elastic/eui';
 import type { CaseUI } from '../../../../common';
 import { useCaseSummary } from '../hooks/use_case_summary';
 
 interface CaseSummaryProps {
   caseData: CaseUI;
+  markdown?: boolean;
 }
 
-export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseData }) => {
+export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseData, markdown }) => {
   const { summary, isLoading, generateSummary } = useCaseSummary({
     caseData,
+    markdown,
   });
 
   useEffect(() => {
@@ -25,12 +27,14 @@ export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseData }) => {
 
   return (
     <EuiFlexItem grow={false} data-test-subj="case-view-assignees">
-      <EuiCallOut iconType="">
-        {isLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : (
-          <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
-        )}
+      <EuiCallOut
+        css={{
+          maxHeight: '300px',
+          overflowY: 'auto',
+        }}
+      >
+        {isLoading && <EuiProgress size="xs" color="primary" />}
+        <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
       </EuiCallOut>
     </EuiFlexItem>
   );
