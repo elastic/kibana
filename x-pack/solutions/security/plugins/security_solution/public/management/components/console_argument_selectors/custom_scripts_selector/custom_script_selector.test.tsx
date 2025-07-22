@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import type {
-  KibanaReactContextValue,
-  KibanaReactNotifications,
-} from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+
 import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
 import { useConsoleStateDispatch } from '../../console/hooks/state_selectors/use_console_state_dispatch';
@@ -71,16 +69,17 @@ describe('CustomScriptSelector', () => {
 
     // Mock useKibana
     mockUseKibana.mockReturnValue({
-      services: {},
-      notifications: {
-        toasts: {
-          show: jest.fn(),
-          success: jest.fn(),
-          warning: jest.fn(),
-          danger: jest.fn(),
+      services: {
+        notifications: {
+          toasts: {
+            add: jest.fn(),
+            addSuccess: jest.fn(),
+            addWarning: jest.fn(),
+            addDanger: jest.fn(),
+          },
         },
-      } as KibanaReactNotifications,
-    } as KibanaReactContextValue<never>);
+      },
+    } as unknown as KibanaReactContextValue<never>);
   });
 
   afterEach(() => {

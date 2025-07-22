@@ -63,7 +63,9 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
   >(({ value, valueText, onChange, store: _store }) => {
     const dispatch = useConsoleStateDispatch();
-    const { notifications } = useKibana();
+    const {
+      services: { notifications },
+    } = useKibana();
 
     const state = useMemo<CustomScriptSelectorState>(() => {
       return _store ?? { isPopoverOpen: true };
@@ -170,6 +172,8 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
       [onChange, state]
     );
 
+    // notifications comes from useKibana() and is of type NotificationsStart
+    // which is compatible with our updated useCustomScriptsErrorToast function
     useCustomScriptsErrorToast(scriptsError, notifications);
 
     if (isAwaitingRenderDelay || (isLoadingScripts && !scriptsError)) {

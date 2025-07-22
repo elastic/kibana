@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { KibanaReactNotifications } from '@kbn/kibana-react-plugin/public';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
@@ -16,12 +16,12 @@ describe('useCustomScriptsErrorToast', () => {
   const mockToastDanger = jest.fn();
   const mockNotifications = {
     toasts: {
-      danger: mockToastDanger,
-      success: jest.fn(),
-      warning: jest.fn(),
-      show: jest.fn(),
+      addDanger: mockToastDanger,
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      add: jest.fn(),
     },
-  } as KibanaReactNotifications;
+  } as unknown as NotificationsStart;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -49,8 +49,8 @@ describe('useCustomScriptsErrorToast', () => {
     renderHook(() => useCustomScriptsErrorToast(mockError, mockNotifications));
 
     expect(mockToastDanger).toHaveBeenCalledWith({
-      title: '403',
-      body: expect.any(Object),
+      title: 'Error: 403',
+      text: expect.any(String),
     });
   });
 
@@ -70,8 +70,8 @@ describe('useCustomScriptsErrorToast', () => {
     renderHook(() => useCustomScriptsErrorToast(mockError, mockNotifications));
 
     expect(mockToastDanger).toHaveBeenCalledWith({
-      title: '500',
-      body: expect.any(Object),
+      title: 'Error: 500',
+      text: expect.any(String),
     });
   });
 
@@ -87,8 +87,8 @@ describe('useCustomScriptsErrorToast', () => {
     renderHook(() => useCustomScriptsErrorToast(mockError, mockNotifications));
 
     expect(mockToastDanger).toHaveBeenCalledWith({
-      title: 'Error',
-      body: expect.any(Object),
+      title: 'Error: Error',
+      text: expect.any(String),
     });
   });
 

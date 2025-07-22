@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiText } from '@elastic/eui';
-import type { KibanaReactNotifications } from '@kbn/kibana-react-plugin/public';
+import { useEffect } from 'react';
 import type { IHttpFetchError } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { CustomScriptsErrorType } from '../../../hooks/custom_scripts/use_get_custom_scripts';
 
 /**
@@ -18,7 +17,7 @@ import type { CustomScriptsErrorType } from '../../../hooks/custom_scripts/use_g
  */
 export const useCustomScriptsErrorToast = (
   scriptsError: IHttpFetchError<CustomScriptsErrorType> | null,
-  notifications: KibanaReactNotifications
+  notifications: NotificationsStart
 ) => {
   useEffect(() => {
     if (scriptsError) {
@@ -34,13 +33,9 @@ export const useCustomScriptsErrorToast = (
       }
 
       if (message) {
-        notifications.toasts.danger({
-          title: code,
-          body: (
-            <EuiText size="s">
-              <p>{message}</p>
-            </EuiText>
-          ),
+        notifications.toasts.addDanger({
+          title: `Error: ${code}`,
+          text: message,
         });
       }
     }
