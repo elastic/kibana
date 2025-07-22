@@ -21,7 +21,7 @@ describe('getIndicesForProductNames', () => {
     ]);
   });
   it('returns individual index names when ELSER EIS is specified', () => {
-    expect(getIndicesForProductNames(['kibana', 'elasticsearch'], '.elser-v2-elastic')).toEqual([
+    expect(getIndicesForProductNames(['kibana', 'elasticsearch'], '.elser-2-elastic')).toEqual([
       getProductDocIndexName('kibana'),
       getProductDocIndexName('elasticsearch'),
     ]);

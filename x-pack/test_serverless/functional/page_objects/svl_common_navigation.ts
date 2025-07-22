@@ -7,7 +7,7 @@
 
 import { SolutionNavigationProvider } from '@kbn/test-suites-src/functional/page_objects';
 
-import { NavigationalSearchPageObject } from '@kbn/test-suites-xpack/functional/page_objects/navigational_search';
+import { NavigationalSearchPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/navigational_search';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {

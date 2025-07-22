@@ -12,23 +12,23 @@ import { useMetadataStateContext } from './use_metadata_state';
 
 export type UseAssetDetailsRenderProps = Pick<
   AssetDetailsProps,
-  'assetId' | 'assetName' | 'assetType' | 'overrides' | 'renderMode'
+  'entityId' | 'entityName' | 'entityType' | 'overrides' | 'renderMode'
 >;
 
 export function useAssetDetailsRenderProps(props: UseAssetDetailsRenderProps) {
   const [urlState] = useAssetDetailsUrlState();
   const { metadata } = useMetadataStateContext();
-  const { assetId, assetName, assetType, ...rest } = props;
+  const { entityId, entityName, entityType, ...rest } = props;
 
-  // When the asset asset.name is known we can load the page faster
+  // When the asset entity.name is known we can load the page faster
   // Otherwise we need to use metadata response.
-  const loading = !assetName && !urlState?.name && !metadata?.name;
+  const loading = !entityName && !urlState?.name && !metadata?.name;
   return {
     ...rest,
-    asset: {
-      id: assetId,
-      name: assetName || urlState?.name || metadata?.name || '',
-      type: assetType,
+    entity: {
+      id: entityId,
+      name: entityName || urlState?.name || metadata?.name || '',
+      type: entityType,
     },
     loading,
   };

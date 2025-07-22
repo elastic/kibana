@@ -8,6 +8,7 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
+  deletePrebuiltRulesFleetPackage,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../../utils';
@@ -17,16 +18,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const retryService = getService('retry');
 
   describe('@ess @serverless @skipInServerlessMKI Install large bundled package', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-    });
-
-    afterEach(async () => {
-      await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es, log);
+      await deletePrebuiltRulesFleetPackage({ supertest, retryService, log, es });
     });
 
     it('should install a package containing 15000 prebuilt rules without crashing', async () => {
