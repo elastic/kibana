@@ -25,6 +25,7 @@ import {
 jest.mock('./tasks/privilege_monitoring_task', () => {
   return {
     startPrivilegeMonitoringTask: jest.fn().mockResolvedValue(undefined),
+    removePrivilegeMonitoringTask: jest.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -319,6 +320,30 @@ describe('Privilege Monitoring Data Client', () => {
       expect(esClientMock.bulk).toHaveBeenCalled();
       expect(dataClient.getMonitoredUsers).toHaveBeenCalledWith(['frodo', 'samwise']);
       expect(dataClient.buildBulkOperationsForUsers).toHaveBeenCalled();
+    });
+  });
+
+  describe('disable', () => {
+    it('should not disable the privilege monitoring engine if it is not started', async () => {
+      const mockGetEngineStatus = jest.fn().mockResolvedValue({
+        status: 'error',
+        error: null,
+      });
+      Object.defineProperty(dataClient, 'getEngineStatus', {
+        value: mockGetEngineStatus,
+      });
+      const result = await dataClient.disable();
+      expect(result.status).toBe('error');
+      expect(result.error).toBeNull();
+    });
+
+    it('should disable the privilege monitoring engine', async () => {
+      dataClient.disable = jest.fn().mockResolvedValue({
+        status: 'disabled',
+        error: null,
+      });
+      const result = await dataClient.disable();
+      expect(result.status).toBe('disabled');
     });
   });
 });
