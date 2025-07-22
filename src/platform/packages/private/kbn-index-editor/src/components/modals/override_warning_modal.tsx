@@ -52,7 +52,7 @@ export const OverrideWarningModal: React.FC<OverrideWarningModalProps> = ({
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="indexEditor.overrideWarningModal.title"
-            defaultMessage="This action will override the unsaved changes in your table."
+            defaultMessage="This action will override your data"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
