@@ -20,6 +20,7 @@ import type {
   SavedObjectsImportHook,
   SavedObject,
 } from '@kbn/core-saved-objects-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import {
   collectSavedObjects,
   createObjectsFilter,
@@ -65,6 +66,8 @@ export interface ResolveSavedObjectsImportErrorsOptions {
    * This property allows plugin authors to implement read-only UI's
    */
   managed?: boolean;
+  /** The request originating the resolve import errors operation */
+  request: KibanaRequest;
 }
 
 /**
@@ -84,6 +87,7 @@ export async function resolveSavedObjectsImportErrors({
   createNewCopies,
   compatibilityMode,
   managed,
+  request,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -100,6 +104,8 @@ export async function resolveSavedObjectsImportErrors({
     filter,
     supportedTypes,
     managed,
+    typeRegistry,
+    request,
   });
   // Map of all IDs for objects that we are attempting to import, and any references that are not included in the read stream;
   // each value is empty by default

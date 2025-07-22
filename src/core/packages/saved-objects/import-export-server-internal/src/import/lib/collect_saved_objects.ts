@@ -15,8 +15,9 @@ import {
   createPromiseFromStreams,
 } from '@kbn/utils';
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistry, SavedObject } from '@kbn/core-saved-objects-server';
 import { AccessControlImportTransformsFactory } from '@kbn/core-saved-objects-server/src/import';
+import { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { createLimitStream } from './create_limit_stream';

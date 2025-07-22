@@ -86,7 +86,7 @@ export interface SavedObjectsImportUnexpectedAccessControlMetadataError {
  * The profile ID is required only for objects that support access control.
  * @public
  */
-export interface SavedObjectsImportRequiresProjectIdError {
+export interface SavedObjectsImportRequiresProfileIdError {
   type: 'requires_profile_id';
 }
 
@@ -129,7 +129,7 @@ export interface SavedObjectsImportFailure {
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError
     | SavedObjectsImportMissingAccessControlMetadataError
-    | SavedObjectsImportRequiresProjectIdError
+    | SavedObjectsImportRequiresProfileIdError
     | SavedObjectsImportUnexpectedAccessControlMetadataError;
 }
 

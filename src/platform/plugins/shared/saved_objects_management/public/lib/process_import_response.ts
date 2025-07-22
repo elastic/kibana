@@ -18,7 +18,7 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
   SavedObjectsImportMissingAccessControlMetadataError,
-  SavedObjectsImportRequiresProjectIdError,
+  SavedObjectsImportRequiresProfileIdError,
   SavedObjectsImportUnexpectedAccessControlMetadataError,
 } from '@kbn/core/public';
 
@@ -31,7 +31,7 @@ export interface FailedImport {
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError
     | SavedObjectsImportMissingAccessControlMetadataError
-    | SavedObjectsImportRequiresProjectIdError
+    | SavedObjectsImportRequiresProfileIdError
     | SavedObjectsImportUnexpectedAccessControlMetadataError;
 }
 

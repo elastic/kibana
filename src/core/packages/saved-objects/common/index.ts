@@ -33,7 +33,7 @@ export type {
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportConflictError,
   SavedObjectsImportMissingAccessControlMetadataError,
-  SavedObjectsImportRequiresProjectIdError,
+  SavedObjectsImportRequiresProfileIdError,
   SavedObjectsImportUnexpectedAccessControlMetadataError,
 } from './src/saved_objects_imports';
 

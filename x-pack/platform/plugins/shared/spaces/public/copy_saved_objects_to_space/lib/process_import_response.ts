@@ -11,7 +11,7 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportMissingAccessControlMetadataError,
   SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportRequiresProjectIdError,
+  SavedObjectsImportRequiresProfileIdError,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportUnexpectedAccessControlMetadataError,
@@ -28,7 +28,7 @@ export interface FailedImport {
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError
     | SavedObjectsImportMissingAccessControlMetadataError
-    | SavedObjectsImportRequiresProjectIdError
+    | SavedObjectsImportRequiresProfileIdError
     | SavedObjectsImportUnexpectedAccessControlMetadataError;
 }
 
