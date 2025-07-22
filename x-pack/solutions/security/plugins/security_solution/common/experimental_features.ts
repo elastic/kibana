@@ -179,6 +179,12 @@ export const allowedExperimentalValues = Object.freeze({
   unifiedManifestEnabled: true,
 
   /**
+   * Enables Trusted Devices artifact management for device control protections.
+   * Allows users to manage trusted USB and external devices
+   */
+  trustedDevicesEnabled: false,
+
+  /**
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,

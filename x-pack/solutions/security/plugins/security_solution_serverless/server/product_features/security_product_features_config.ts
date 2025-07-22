@@ -55,6 +55,7 @@ const securityProductFeaturesConfig: Record<
     subFeatureIds: [
       SecuritySubFeatureId.hostIsolationExceptionsBasic,
       SecuritySubFeatureId.trustedApplications,
+      SecuritySubFeatureId.trustedDevices,
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
       SecuritySubFeatureId.globalArtifactManagement,
