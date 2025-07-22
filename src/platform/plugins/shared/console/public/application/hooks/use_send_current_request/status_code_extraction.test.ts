@@ -59,9 +59,7 @@ describe('Status Code Extraction in sendRequest', () => {
         response: {
           status: 400,
           statusText: 'Bad Request',
-          headers: new Map([
-            ['Content-Type', 'application/json'],
-          ]),
+          headers: new Map([['Content-Type', 'application/json']]),
         },
         body: JSON.stringify({
           statusCode: 400,
