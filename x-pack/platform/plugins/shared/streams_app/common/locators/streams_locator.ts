@@ -8,7 +8,8 @@
 import { STREAMS_APP_LOCATOR_ID, StreamsAppLocatorParams } from '@kbn/deeplinks-observability';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { ENRICHMENT_URL_STATE_KEY, EnrichmentUrlState } from '../url_schema';
+import { ENRICHMENT_URL_STATE_KEY } from '../url_schema/common';
+import type { EnrichmentUrlState } from '../url_schema/enrichment_url_schema';
 
 export type StreamsAppLocator = LocatorPublic<StreamsAppLocatorParams<EnrichmentUrlState>>;
 
