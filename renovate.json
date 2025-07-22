@@ -4051,6 +4051,7 @@
         "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
+        "@langchain/langgraph-checkpoint",
         "@langchain/openai",
         "@google/generative-ai",
         "@smithy/eventstream-codec",

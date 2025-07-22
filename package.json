@@ -1104,6 +1104,7 @@
     "@langchain/google-genai": "^0.1.8",
     "@langchain/google-vertexai": "^0.1.8",
     "@langchain/langgraph": "^0.2.45",
+    "@langchain/langgraph-checkpoint": "~0.0.17",
     "@langchain/openai": "^0.4.4",
     "@langtrase/trace-attributes": "^7.5.0",
     "@launchdarkly/node-server-sdk": "^9.10.0",
