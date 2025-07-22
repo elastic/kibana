@@ -7,22 +7,27 @@
 
 import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { getPercChange } from '../detection_response/soc_trends/helpers';
 
 interface Props {
   currentCount: number;
+  description?: string;
   previousCount: number;
   stat: string;
   statType: string;
   timeRange: string;
+  positionForLens?: boolean; // Optional prop for positioning in Lens Metric
 }
 export const ComparePercentage = ({
   currentCount,
+  description,
   previousCount,
   stat,
   statType,
   timeRange,
+  positionForLens = false,
 }: Props) => {
   const percentageChange = getPercChange(currentCount, previousCount) ?? '0.0%';
 
@@ -42,13 +47,42 @@ export const ComparePercentage = ({
         }),
   };
   return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 8, zIndex: 9999 }}>
-      <EuiToolTip content={percentInfo.note}>
-        <EuiBadge color={percentInfo.color}>{percentInfo.percent}</EuiBadge>
-      </EuiToolTip>
-      <EuiText size="xs" color="subdued">
-        <p>{i18n.TIME_RANGE(timeRange)}</p>
-      </EuiText>
+    <span
+      css={css`
+        display: flex;
+        flex-direction: column;
+        z-index: 9999;
+        position: relative;
+        // positioning hack for Lens Metric
+        top: ${positionForLens ? '-55px' : 'initial'};
+        left: ${positionForLens ? '20px' : 'initial'};
+      `}
+    >
+      <span
+        css={css`
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        `}
+      >
+        <EuiToolTip content={percentInfo.note}>
+          <EuiBadge color={percentInfo.color}>{percentInfo.percent}</EuiBadge>
+        </EuiToolTip>
+        <EuiText size="xs" color="subdued">
+          <p>{i18n.TIME_RANGE(timeRange)}</p>
+        </EuiText>
+      </span>
+      {description && (
+        <span
+          css={css`
+            margin-top: 5px;
+          `}
+        >
+          <EuiText size="xs" color="subdued">
+            <p>{description}</p>
+          </EuiText>
+        </span>
+      )}
     </span>
   );
 };

@@ -16,6 +16,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { ThreatsDetectedTrend } from './threats_detected_trend';
 import { formatThousands } from './metrics';
 import { ComparePercentage } from './compare_percentage';
 import { getTimeRangeAsDays } from './utils';
@@ -37,8 +38,8 @@ export const ThreatsDetected: React.FC<Props> = ({
   const {
     euiTheme: { colors },
   } = useEuiTheme();
-  return (
-    <EuiPanel paddingSize="l">
+  const rest = () => (
+    <>
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
@@ -58,6 +59,21 @@ export const ThreatsDetected: React.FC<Props> = ({
       <EuiSpacer size="s" />
       <ComparePercentage
         currentCount={attackDiscoveryCount}
+        previousCount={attackDiscoveryCountCompare}
+        stat={`${attackDiscoveryCountCompare}`}
+        statType={i18n.ATTACK_DISCOVERY_COUNT}
+        timeRange={getTimeRangeAsDays({ from, to })}
+      />
+    </>
+  );
+  return (
+    <EuiPanel paddingSize="none">
+      <ThreatsDetectedTrend from={from} to={to} />
+
+      <ComparePercentage
+        currentCount={attackDiscoveryCount}
+        description={i18n.THREATS_DETECTED_DESC}
+        positionForLens
         previousCount={attackDiscoveryCountCompare}
         stat={`${attackDiscoveryCountCompare}`}
         statType={i18n.ATTACK_DISCOVERY_COUNT}
