@@ -1,5 +1,6 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { WorkflowsExamplePluginStartDeps } from '../types';
 
 export function defineRoutes(
@@ -32,7 +33,14 @@ export function defineRoutes(
         const { workflow, inputs } = request.body;
         const workflowsManagement = await getWorkflowManager();
 
-        const workflowExecutionId = await workflowsManagement.runWorkflow(workflow, inputs);
+        const workflowExecutionId = await workflowsManagement.runWorkflow(
+          {
+            definition: {
+              workflow,
+            },
+          } as WorkflowExecutionEngineModel,
+          inputs
+        );
 
         return response.ok({
           body: {
