@@ -23,23 +23,21 @@ export const getAgentIdsForAgentPolicies = async (
     return [];
   }
 
-  const res = await esClient.search({
-    index: AGENTS_INDEX,
-    ignore_unavailable: true,
-    size: 100, // TODO: check if reasonable value
-    _source: false,
-    query: {
-      bool: {
-        filter: [
-          {
-            terms: {
-              policy_id: agentPolicyIds,
-            },
-          },
-        ],
-      },
-    },
-  });
+  try {
+    const esqlQuery = `FROM ${AGENTS_INDEX} METADATA _id
+  | WHERE policy_id IN (${agentPolicyIds.map((a) => `"${a}"`).join(', ')})
+  | KEEP _id
+  | LIMIT 100`;
 
-  return res.hits.hits.map((hit) => hit._id!);
+    const res = await esClient.esql.query({
+      query: esqlQuery,
+    });
+    return res.values.map((value) => value[0] as string);
+  } catch (err) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+      return [];
+    } else {
+      throw err;
+    }
+  }
 };

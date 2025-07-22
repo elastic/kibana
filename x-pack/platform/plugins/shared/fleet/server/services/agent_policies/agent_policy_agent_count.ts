@@ -23,39 +23,6 @@ export const getAgentCountForAgentPolicies = async (
     return {};
   }
 
-  const searchPromise = esClient.search<
-    unknown,
-    Record<'agent_counts', { buckets: Array<{ key: string; doc_count: number }> }>
-  >({
-    index: AGENTS_INDEX,
-    ignore_unavailable: true,
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              active: 'true',
-            },
-          },
-          {
-            terms: {
-              policy_id: agentPolicyIds,
-            },
-          },
-        ],
-      },
-    },
-    aggs: {
-      agent_counts: {
-        terms: {
-          field: 'policy_id',
-          size: agentPolicyIds.length,
-        },
-      },
-    },
-    size: 0,
-  });
-
   const response: Record<string, number> = agentPolicyIds.reduce<Record<string, number>>(
     (acc, agentPolicyId) => {
       acc[agentPolicyId] = 0;
@@ -64,13 +31,24 @@ export const getAgentCountForAgentPolicies = async (
     {}
   );
 
-  const searchResponse = await searchPromise;
+  try {
+    const esqlQuery = `FROM ${AGENTS_INDEX}
+  | WHERE policy_id IN (${agentPolicyIds.map((a) => `"${a}"`).join(', ')}) AND active: \"true\"
+  | STATS agent_counts = COUNT(*) BY policy_id
+  | LIMIT ${agentPolicyIds.length}`;
 
-  if (searchResponse.aggregations?.agent_counts.buckets) {
-    const buckets = searchResponse.aggregations?.agent_counts.buckets;
+    const searchResponse = await esClient.esql.query({
+      query: esqlQuery,
+    });
 
-    for (const { key: agentPolicyId, doc_count: count } of buckets) {
-      response[agentPolicyId] = count;
+    for (const [count, policyId] of searchResponse.values) {
+      response[policyId as string] = count as number;
+    }
+  } catch (err) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+      return response;
+    } else {
+      throw err;
     }
   }
 
