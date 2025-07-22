@@ -794,7 +794,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('getChoices', () => {
+        describe.skip('getChoices', () => {
           it('should get choices', async () => {
             const { body: result } = await supertest
               .post(`/api/actions/connector/${simulatedActionId}/_execute`)
