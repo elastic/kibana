@@ -47,9 +47,8 @@ The `--kibana` and `--es` flags override the default credentials. Only basic aut
 
 - `--connectorId` - Specify a generative AI connector to use. If none are given, it will prompt you to select a connector based on the ones that are available. If only a single supported connector is found, it will be used without prompting.
 - `--evaluateWith`: The connector ID to evaluate with. Leave empty to use the same connector, use "other" to get a selection menu.
-- `--spaceId` - Specify the space ID if you want to use a specific space.
 - `--persist` - By default, completed conversations are not persisted. If you want to persist them, for instance for reviewing purposes, include this flag when running the evaluation script. This will also generate a clickable link in the output of the evaluation that takes you to the conversation in Kibana.
-- `--clear` - If you want to clear conversations on startup, include this command when running the evaluation script. This only works when `--persist` is enabled. If `--spaceId` is set, only conversations for the current space will be cleared
+- `--clear` - If you want to clear conversations on startup, include this command when running the evaluation script. This only works when `--persist` is enabled.
 - `--autoTitle`: When storing conversations, the name of the scenario is used as a title. Set this flag to have the LLM generate a title for you. This only works when `--persist` is enabled.
 - `--files`: A file or list of files containing the scenarios to evaluate. Defaults to all.
 - `--grep`: A string or regex to filter scenarios by.
