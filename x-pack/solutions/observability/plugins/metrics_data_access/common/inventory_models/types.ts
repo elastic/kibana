@@ -275,7 +275,7 @@ type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
 
 export interface InventoryModel<
   TEntityType extends InventoryItemType,
-  TAggeggations extends AggregationConfigMap,
+  TAggregations extends AggregationConfigMap,
   TFormulas extends FormulasConfigMap | undefined = undefined,
   TCharts extends LensMetricChartConfig | undefined = undefined
 > {
@@ -296,7 +296,7 @@ export interface InventoryModel<
     apm: boolean;
     uptime: boolean;
   };
-  metrics: InventoryMetricsConfig<TAggeggations, TFormulas, TCharts>;
+  metrics: InventoryMetricsConfig<TAggregations, TFormulas, TCharts>;
   requiredMetrics: InventoryMetric[];
   legacyMetrics?: SnapshotMetricType[];
   tooltipMetrics: SnapshotMetricType[];
