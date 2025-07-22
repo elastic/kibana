@@ -19,6 +19,7 @@ import type {
   IndicesGetMappingResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { ConfigType } from '../../../config';
 import { isRetryableEsClientError } from '../../utils';
 import { SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
 
@@ -26,6 +27,7 @@ interface SynchronizationTaskRunnerFactoryConstructorParams {
   taskInstance: ConcreteTaskInstance;
   getESClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
+  analyticsConfig: ConfigType['analytics'];
 }
 
 interface SynchronizationTaskState {
@@ -50,6 +52,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
   private readonly logger: Logger;
   private readonly errorSource = TaskErrorSource.FRAMEWORK;
   private readonly esReindexTaskId: TaskId | undefined;
+  private readonly analyticsConfig: ConfigType['analytics'];
   private lastSyncSuccess: Date | undefined;
   private lastSyncAttempt: Date | undefined;
 
@@ -57,6 +60,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
     taskInstance,
     getESClient,
     logger,
+    analyticsConfig,
   }: SynchronizationTaskRunnerFactoryConstructorParams) {
     if (taskInstance.state.lastSyncSuccess)
       this.lastSyncSuccess = new Date(taskInstance.state.lastSyncSuccess);
@@ -67,9 +71,15 @@ export class SynchronizationTaskRunner implements CancellableTask {
     this.destIndex = taskInstance.params.destIndex;
     this.getESClient = getESClient;
     this.logger = logger;
+    this.analyticsConfig = analyticsConfig;
   }
 
   public async run() {
+    if (!this.analyticsConfig.index.enabled) {
+      this.logDebug('Analytics index is disabled, skipping synchronization task.');
+      return;
+    }
+
     const esClient = await this.getESClient();
 
     try {
