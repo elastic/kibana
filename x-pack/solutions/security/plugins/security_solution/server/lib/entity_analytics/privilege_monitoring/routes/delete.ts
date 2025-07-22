@@ -29,6 +29,12 @@ export const deletePrivilegeMonitoringEngineRoute = (
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
         },
       },
+      options: {
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
+      },
     })
     .addVersion(
       {
