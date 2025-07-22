@@ -49,6 +49,7 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
-    "@kbn/test-suites-xpack/security_solution_api_integration"
+    "@kbn/test-suites-xpack/security_solution_api_integration",
+    "@kbn/task-manager-plugin"
   ]
 }
