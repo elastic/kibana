@@ -145,15 +145,22 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         //  className="embPanel__hoverActions"
 
         return viewMode === 'edit' && isEditing$.getValue() ? (
-          <>
+          <div css={css({width: '100%'})}>
             <EuiMarkdownEditor
               // ref={markdownRef}
               css={css`
                 width: 100%;
+                block-size: calc(100% - 40px);
                 [data-test-subj='markdown_editor_preview_button'] {
                   display: none;
                 };
+                .euiMarkdownEditorFooter {
+                  display: none;
+                };
               `}
+              toolbarProps={{
+                right: <div>TODO</div>
+              }}
               value={value}
               onChange={(v) => onChange(v)}
               aria-label={i18n.translate(
@@ -165,17 +172,21 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
               processingPluginList={processingPlugins}
               height="full"
               uiPlugins={uiPlugins}
+              showFooter="false"
             />
 
             <EuiFlexGroup
+              responsive={false}
               gutterSize="xs"
+              justifyContent='flexEnd'
               css={css`
-                position: absolute;
-                right: 0;
-                padding: 4px;
+                padding: 8px;
+                border-radius-bottom: 8px;
+                width: 100%;
+                border-top: ${euiTheme.colors.borderBasePlain} 1px solid;
               `}
             >
-               <EuiFlexItem>
+               <EuiFlexItem grow={false}>
              
                   <EuiButtonEmpty
                     color="primary"
@@ -192,7 +203,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                   >Discard
                   </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem  grow={false}>
              
                   <EuiButton
                   size="xs"
@@ -210,7 +221,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
                   </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </>
+          </div>
         ) : (
           <EuiMarkdownFormat
             css={css`
@@ -227,12 +238,4 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       },
     };
   },
-};
-
-const CustomEditingActions = () => {
-  return (
-    <div>
-      <button>Save</button>
-    </div>
-  );
 };
