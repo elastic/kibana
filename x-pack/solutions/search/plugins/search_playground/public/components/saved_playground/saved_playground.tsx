@@ -55,7 +55,7 @@ export const SavedPlayground = () => {
   const [shownModal, setShownModal] = useState<SavedPlaygroundModals>(SavedPlaygroundModals.None);
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { playgroundId, pageMode, viewMode } = useSavedPlaygroundParameters();
-  const { application } = useKibana().services;
+  const { application, history } = useKibana().services;
   const { data: connectors } = useLoadConnectors();
   const { formState, watch } = useFormContext<SavedPlaygroundForm>();
   const playgroundName = watch(SavedPlaygroundFormFields.name);
@@ -66,6 +66,19 @@ export const SavedPlayground = () => {
     hasSelectedIndices: !formState.isLoading && playgroundIndices.length > 0,
     hasConnectors: Boolean(connectors?.length),
   });
+  const navigateToNewPlayground = useCallback(
+    (id: string, page: PlaygroundPageMode, view?: PlaygroundViewMode, searchParams?: string) => {
+      let path = `/p/${id}/${page}`;
+      if (view && view !== PlaygroundViewMode.preview) {
+        path += `/${view}`;
+      }
+      if (searchParams) {
+        path += searchParams;
+      }
+      history.push(path);
+    },
+    [history]
+  );
   const navigateToView = useCallback(
     (id: string, page: PlaygroundPageMode, view?: PlaygroundViewMode, searchParams?: string) => {
       let path = `/p/${id}/${page}`;
@@ -186,7 +199,12 @@ export const SavedPlayground = () => {
           playgroundName={playgroundName}
           onClose={onCloseModal}
           onNavigateToNewPlayground={(id: string) => {
-            navigateToView(id, pageMode ?? PlaygroundPageMode.Chat, viewMode, location.search);
+            navigateToNewPlayground(
+              id,
+              pageMode ?? PlaygroundPageMode.Chat,
+              viewMode,
+              location.search
+            );
           }}
         />
       )}
