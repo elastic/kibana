@@ -181,7 +181,7 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
         },
         validate: {
           body: schema.object({
-            newOwner: schema.string(),
+            newOwnerProfileUid: schema.string(),
             objects: schema.arrayOf(
               schema.object({
                 type: schema.oneOf([
@@ -196,10 +196,52 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
       },
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
+
         try {
           const result = await soClient.changeOwnership(request.body.objects, {
-            newOwnerProfileUid: request.body.newOwner,
+            newOwnerProfileUid: request.body.newOwnerProfileUid,
           });
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          return response.forbidden({
+            body: error.message,
+          });
+        }
+      }
+    );
+    router.put(
+      {
+        path: '/read_only_objects/change_access_mode',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          body: schema.object({
+            objects: schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                type: schema.oneOf([
+                  schema.literal(READ_ONLY_TYPE),
+                  schema.literal(NON_READ_ONLY_TYPE),
+                ]),
+              })
+            ),
+            newAccessMode: schema.maybe(schema.literal('read_only')),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        try {
+          const result = await soClient.changeAccessMode(request.body.objects, {
+            accessMode: request.body.newAccessMode,
+          });
+          console.log({ result });
           return response.ok({
             body: result,
           });

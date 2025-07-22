@@ -649,7 +649,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
 
     if (unauthorizedTypes.size > 0 || inaccessibleTypes.size > 0) {
-      const targetTypes = [...unauthorizedTypes, ...inaccessibleTypes].sort().join(',');
+      const uniqueTypes = new Set([...unauthorizedTypes, ...inaccessibleTypes]);
+      const targetTypes = [...uniqueTypes].sort().join(',');
       const msg = `Unable to ${authzAction} ${targetTypes}`;
       const error = this.errors.decorateForbiddenError(new Error(msg));
       if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
