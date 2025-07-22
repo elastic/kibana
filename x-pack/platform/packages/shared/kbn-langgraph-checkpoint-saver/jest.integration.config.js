@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_integration_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-langgraph-checkpointer'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver'],
 };
