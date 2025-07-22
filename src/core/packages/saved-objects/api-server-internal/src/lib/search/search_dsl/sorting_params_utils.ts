@@ -75,7 +75,7 @@ export function validateFieldTypeCompatibility(
  */
 export function normalizeNumericTypes(fieldMapping: SavedObjectsFieldMapping): string {
   if (!fieldMapping.type) {
-    throw new Error('Field mapping is missing required type property');
+    throw new Error('Field mapping is missing required "type" property');
   }
 
   if (NUMERIC_TYPES_SET.has(fieldMapping.type as (typeof NUMERIC_TYPES)[number])) {
