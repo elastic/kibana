@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       await createSimpleUser();
     });
     after(async () => {
-      // await security.testUser.restoreDefaults();
+      await security.testUser.restoreDefaults();
     });
     describe('create and access read only objects', () => {
       it('should create a read only object', async () => {
