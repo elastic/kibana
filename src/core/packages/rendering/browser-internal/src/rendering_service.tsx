@@ -120,36 +120,38 @@ export class RenderingService implements IRenderingService {
     );
   }
 
+  // Memoized context wrapper component to prevent recreation on each addContext call
+  private readonly ContextWrapper = React.memo<{ children: React.ReactNode }>(({ children }) => {
+    /**
+     * The dependencies are captured using BehaviorSubject, because we assume that Kibana plugins' start
+     * methods could be called before the CoreStart services are completely settled internally. If this
+     * assumption is wrong, the available dependencies are given as the initial value to `useObservable`, and
+     * there is no unnecessary re-render.
+     */
+    const deps = useObservable(this.contextDeps, this.contextDeps.getValue());
+
+    if (!deps) {
+      return <EuiLoadingSpinner size="s" />;
+    }
+
+    return (
+      <KibanaRenderContextProvider
+        analytics={deps.analytics}
+        executionContext={deps.executionContext}
+        i18n={deps.i18n}
+        theme={deps.theme}
+        userProfile={deps.userProfile}
+      >
+        {children}
+      </KibanaRenderContextProvider>
+    );
+  });
+
   /**
    * @public
    */
   public addContext(element: React.ReactNode): React.ReactElement<string> {
-    const Component: React.FC = () => {
-      /**
-       * The dependencies are captured using BehaviorSubject, because we assume that Kibana plugins' start
-       * methods could be called before the CoreStart services are completely settled internally. If this
-       * assumption is wrong, the available dependencies are given as the initial value to `useObservable`, and
-       * there is no unnecessary re-render.
-       */
-      const deps = useObservable(this.contextDeps, this.contextDeps.getValue());
-
-      if (!deps) {
-        return <EuiLoadingSpinner size="s" />;
-      }
-
-      return (
-        <KibanaRenderContextProvider
-          analytics={deps.analytics}
-          executionContext={deps.executionContext}
-          i18n={deps.i18n}
-          theme={deps.theme}
-          userProfile={deps.userProfile}
-        >
-          {element}
-        </KibanaRenderContextProvider>
-      );
-    };
-
-    return <Component />;
+    const { ContextWrapper } = this;
+    return <ContextWrapper>{element}</ContextWrapper>;
   }
 }
