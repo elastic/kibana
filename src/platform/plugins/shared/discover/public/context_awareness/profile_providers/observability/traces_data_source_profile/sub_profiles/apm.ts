@@ -23,8 +23,29 @@ import { reContainsTracesApm, reContainsTracesOtel } from './reg_exps';
 
 export const createTracesAPMDataSourceProfileProvider = (
   tracesDataSourceProfileProvider: DataSourceProfileProvider
-): DataSourceProfileProvider =>
-  extendProfileProvider(tracesDataSourceProfileProvider, {
+): DataSourceProfileProvider => {
+  const resolve: DataSourceProfileProvider['resolve'] = async (params) => {
+    const baseResult = await tracesDataSourceProfileProvider.resolve(params);
+    if (!baseResult.isMatch) {
+      return baseResult;
+    }
+    const indexPattern = extractIndexPatternFrom(params);
+
+    const isOtelIndexPattern = reContainsTracesOtel.test(indexPattern || '');
+    const isApmIndexPattern = reContainsTracesApm.test(indexPattern || '');
+
+    // Avoid mixing APM and OTEL columns in the same profile
+    if (isApmIndexPattern && !isOtelIndexPattern) {
+      return {
+        isMatch: true,
+        context: { category: DataSourceCategory.Traces },
+      };
+    }
+
+    return { isMatch: false };
+  };
+
+  return extendProfileProvider(tracesDataSourceProfileProvider, {
     profileId: 'observability-traces-apm-data-source-profile',
     profile: {
       getDefaultAppState: () => () => {
@@ -42,24 +63,6 @@ export const createTracesAPMDataSourceProfileProvider = (
         };
       },
     },
-    resolve: async (params) => {
-      const baseResult = await tracesDataSourceProfileProvider.resolve(params);
-      if (!baseResult.isMatch) {
-        return baseResult;
-      }
-      const indexPattern = extractIndexPatternFrom(params);
-
-      const isOtelIndexPattern = reContainsTracesOtel.test(indexPattern || '');
-      const isApmIndexPattern = reContainsTracesApm.test(indexPattern || '');
-
-      // Avoid mixing APM and OTEL columns in the same profile
-      if (isApmIndexPattern && !isOtelIndexPattern) {
-        return {
-          isMatch: true,
-          context: { category: DataSourceCategory.Traces },
-        };
-      }
-
-      return { isMatch: false };
-    },
+    resolve,
   });
+};
