@@ -74,7 +74,7 @@ export class ApiService {
   }
 
   public useLoadPipelineTree(name: string) {
-    return this.useRequest<PipelineTreeNode>({
+    return this.useRequest<{ pipelineStructureTree: PipelineTreeNode }>({
       path: `${API_BASE_PATH}/structure_tree/${encodeURIComponent(name)}`,
       method: 'get',
     });

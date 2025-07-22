@@ -44,7 +44,7 @@ export interface Props {
   pipeline: Pipeline;
   pipelineTree: PipelineTreeNode | undefined;
   setSelectedPipeline: (name: string) => void;
-  hasExtenstionTree: boolean;
+  hasExtensionTree: boolean;
   addToTreeStack: (name: string) => void;
   popTreeStack: () => void;
   onEditClick: (pipelineName: string) => void;
@@ -57,7 +57,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
   pipeline,
   pipelineTree,
   setSelectedPipeline,
-  hasExtentionTree,
+  hasExtensionTree,
   addToTreeStack,
   popTreeStack,
   onClose,
@@ -193,7 +193,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                 pipelineTree={pipelineTree}
                 selectedPipeline={pipeline.name}
                 setSelectedPipeline={setSelectedPipeline}
-                isExtension={hasExtentionTree}
+                isExtension={hasExtensionTree}
                 clickMorePipelines={(name: string) => addToTreeStack(name)}
                 goBack={popTreeStack}
               />

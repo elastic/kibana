@@ -29,7 +29,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { Pipeline } from '../../../../common/types';
@@ -42,7 +41,7 @@ export interface Props {
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: Pipeline[]) => void;
-  openFlyout: () => void;
+  openFlyout: (pipelineName: string) => void;
 }
 
 export const deprecatedPipelineBadge = {
@@ -317,22 +316,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
         }),
         sortable: true,
         render: (name: string) => {
-          const currentSearch = history.location.search;
-          const prependSearch = isEmpty(currentSearch) ? '?' : `${currentSearch}&`;
-          const { href, onClick: navigate } = reactRouterNavigate(history, {
-            pathname: '',
-            search: `${prependSearch}pipeline=${encodeURIComponent(name)}`,
-          });
-
           return (
-            <EuiLink
-              data-test-subj="pipelineDetailsLink"
-              href={href}
-              onClick={() => {
-                openFlyout();
-                navigate();
-              }}
-            >
+            <EuiLink data-test-subj="pipelineDetailsLink" onClick={() => openFlyout(name)}>
               {name}
             </EuiLink>
           );

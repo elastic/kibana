@@ -238,15 +238,21 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         onDeletePipelineClick={setPipelinesToDelete}
         onClonePipelineClick={goToClonePipeline}
         pipelines={data as Pipeline[]}
-        openFlyout={() => setShowFlyout(true)}
+        openFlyout={(name) => {
+          const params = new URLSearchParams(history.location.search);
+          params.set('pipeline', name);
+          history.push({
+            pathname: '',
+            search: params.toString(),
+          });
+          setShowFlyout(true);
+        }}
       />
 
       {showFlyout && (
         <PipelineFlyout
           location={location}
-          onClose={() => {
-            goHome();
-          }}
+          onClose={goHome}
           onEditClick={goToEditPipeline}
           onCloneClick={goToClonePipeline}
           onDeleteClick={setPipelinesToDelete}

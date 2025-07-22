@@ -9,8 +9,6 @@ import React, { FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyout } from '@elastic/eui';
 import { Location } from 'history';
-import { parse } from 'query-string';
-import { isEmpty } from 'lodash';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 import { PipelineDetailsFlyout } from './details_flyout';
@@ -25,8 +23,8 @@ export interface Props {
 }
 
 const getPipelineNameFromLocation = (location: Location) => {
-  const { pipeline } = parse(location.search.substring(1));
-  return pipeline;
+  const params = new URLSearchParams(location.search);
+  return params.get('pipeline');
 };
 
 export const PipelineFlyout: FunctionComponent<Props> = ({
@@ -36,32 +34,42 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
   onDeleteClick,
   embedded,
 }) => {
-  const { history } = useKibana().services;
+  const {
+    services: { history, api },
+  } = useKibana();
 
   const pipelineNameFromLocation = getPipelineNameFromLocation(history.location);
-  const pipelineNameNormalized =
-    pipelineNameFromLocation && typeof pipelineNameFromLocation === 'string'
-      ? pipelineNameFromLocation
-      : '';
 
-  const [pipelineName, setPipelineName] = useState(pipelineNameNormalized);
-  const [treeRootStack, setTreeRootStack] = useState([pipelineName]);
+  const [pipelineName, setPipelineName] = useState(pipelineNameFromLocation ?? '');
+  const [treeRootStack, setTreeRootStack] = useState([pipelineNameFromLocation ?? '']);
 
-  const { data, isLoading, error } = services.api.useLoadPipeline(pipelineName);
-  const { data: treeData } = services.api.useLoadPipelineTree(pipeline.name);
+  const { data, isLoading, error } = api.useLoadPipeline(pipelineName);
+  const { data: treeData } = api.useLoadPipelineTree(treeRootStack.at(-1));
 
   const pushTreeStack = (name: string) => {
-    setTreeRootStack([...treeRootStack, name]);
-    const currentSearch = history.location.search;
-    const prependSearch = isEmpty(currentSearch) ? '?' : `${currentSearch}&`;
+    const params = new URLSearchParams(history.location.search);
+    params.set('pipeline', name);
     history.push({
       pathname: '',
-      search: `${prependSearch}pipeline=${encodeURIComponent(name)}`,
+      search: params.toString(),
     });
+    setPipelineName(name);
+    setTreeRootStack([...treeRootStack, name]);
   };
 
   const popTreeStack = () => {
-    setTreeRootStack(treeRootStack.slice(1));
+    treeRootStack.pop();
+    const prevPipeline = treeRootStack.at(-1);
+    if (prevPipeline) {
+      const params = new URLSearchParams(history.location.search);
+      params.set('pipeline', prevPipeline);
+      history.push({
+        pathname: '',
+        search: params.toString(),
+      });
+      setPipelineName(prevPipeline);
+    }
+    setTreeRootStack(treeRootStack);
   };
 
   return (
@@ -93,9 +101,11 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
       {data && (
         <PipelineDetailsFlyout
           pipeline={data}
-          pipelineTree={treeData && treeData.children.length > 0 ? treeData : undefined}
+          pipelineTree={
+            treeData?.pipelineStructureTree?.children ? treeData.pipelineStructureTree : undefined
+          }
           setSelectedPipeline={(name: string) => setPipelineName(name)}
-          hasExtenstionTree={treeRootStack.length > 1}
+          hasExtensionTree={treeRootStack.length > 1}
           addToTreeStack={(name: string) => pushTreeStack(name)}
           popTreeStack={popTreeStack}
           onClose={onClose}
