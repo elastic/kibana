@@ -51,7 +51,7 @@ import {
   getAlertsByIds,
   createRule,
   getQueryAlertIds,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
+} from '@kbn/test-suites-xpack/security_solution_api_integration/config/services/detections_response';
 import {
   globalRead,
   noKibanaPrivileges,
