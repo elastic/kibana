@@ -11,6 +11,14 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const random = getService('random');
 
+  interface Row {
+    selected: boolean;
+    id: string;
+    description: string;
+    lastModified: string;
+    username: string;
+  }
+
   // test subject selectors
   const SUBJ_CONTAINER = `pipelineList`;
   const SUBJ_BTN_ADD = `pipelineList > btnAdd`;
@@ -43,19 +51,17 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
     /**
      *  Get the total row count as well as the count of rows that
      *  are selected/unselected
-     *  @return {Promise<Object>}
      */
     async getRowCounts(): Promise<{ total: number; isSelected: number; isUnselected: number }> {
-      const rows = await this.readRows();
+      const rows: Row[] = await this.readRows();
       const total = rows.length;
-      const isSelected = rows.reduce((acc: number, row: any) => acc + (row.selected ? 1 : 0), 0);
+      const isSelected = rows.reduce((acc: number, row: Row) => acc + (row.selected ? 1 : 0), 0);
       const isUnselected = total - isSelected;
       return { total, isSelected, isUnselected };
     }
 
     /**
      *  Click the selectAll checkbox until all rows are selected
-     *  @return {Promise<undefined>}
      */
     async selectAllRows(): Promise<void> {
       await retry.try(async () => {
@@ -69,7 +75,6 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
 
     /**
      *  Click the selectAll checkbox until all rows are unselected
-     *  @return {Promise<undefined>}
      */
     async deselectAllRows(): Promise<void> {
       await retry.try(async () => {
@@ -98,9 +103,13 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
       }
 
       // pick an unselected selectbox and select it
-      const rows = await this.readRows();
-      const rowToClick = await random.pickOne(rows.filter((r: any) => !r.selected));
-      await testSubjects.click(getSelectCheckbox(rowToClick.id));
+      const rows: Row[] = await this.readRows();
+      const unselected = rows.filter((r: Row) => !r.selected);
+      if (unselected.length === 0) {
+        throw new Error('pipelineList.selectRandomRow() requires at least one unselected row');
+      }
+      const rowIdToClick = random.pickOne(unselected.map((r: Row) => r.id));
+      await testSubjects.click(getSelectCheckbox(rowIdToClick));
 
       await retry.waitFor(
         'selected count to grow',
@@ -113,15 +122,7 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
      *  in an array of objects
      *  @return {Promise<Array<Object>>}
      */
-    async readRows(): Promise<
-      Array<{
-        selected: boolean;
-        id: string;
-        description: string;
-        lastModified: string;
-        username: string;
-      }>
-    > {
+    async readRows(): Promise<Row[]> {
       const pipelineTable = await testSubjects.find('pipelineTable');
       const $ = await pipelineTable.parseDomContent();
       return $.findTestSubjects(INNER_SUBJ_ROW)
@@ -139,7 +140,6 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
 
     /**
      *  Click the add button, does not wait for navigation to complete
-     *  @return {Promise<undefined>}
      */
     async clickAdd(): Promise<void> {
       await testSubjects.click(SUBJ_BTN_ADD);
@@ -147,7 +147,6 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
 
     /**
      *  Click the selectAll checkbox
-     *  @return {Promise<undefined>}
      */
     async clickSelectAll(): Promise<void> {
       await testSubjects.click(SUBJ_SELECT_ALL);
@@ -155,7 +154,6 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
 
     /**
      *  Click the id of the first row
-     *  @return {Promise<undefined>}
      */
     async clickFirstRowId(): Promise<void> {
       await testSubjects.click(SUBJ_CELL_ID);
@@ -163,7 +161,6 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
 
     /**
      *  Click the clone link for the given pipeline id
-     *  @return {Promise<undefined>}
      */
     async clickCloneLink(id: string): Promise<void> {
       await testSubjects.click(getCloneLinkSubjForId(id));
@@ -171,7 +168,6 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
 
     /**
      *  Assert that the pipeline list is visible on screen
-     *  @return {Promise<undefined>}
      */
     async assertExists(): Promise<void> {
       await retry.waitFor('pipline list visible on screen', async () => {
@@ -185,8 +181,6 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
     /**
      *  Check if the delete button is enabled or disabled and
      *  throw the appropriate error if it is not
-     *  @param  {boolean} expected
-     *  @return {Promise}
      */
     async assertDeleteButton({ enabled }: { enabled: boolean }): Promise<void> {
       if (typeof enabled !== 'boolean') {
@@ -221,8 +215,6 @@ export function PipelineListProvider({ getService }: FtrProviderContext) {
     /**
      *  Check if the next page button is enabled or disabled and
      *  throw the appropriate error if it is not
-     *  @param  {boolean} expected
-     *  @return {Promise}
      */
     async assertNextPageButton({ enabled }: { enabled: boolean }): Promise<void> {
       if (typeof enabled !== 'boolean') {

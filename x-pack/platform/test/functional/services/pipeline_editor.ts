@@ -142,7 +142,7 @@ export function PipelineEditorProvider({ getService }: FtrProviderContext) {
         testSubjects.getAttribute(SUBJ_INPUT_BATCH_SIZE, 'value'),
         testSubjects.getAttribute(SUBJ_SELECT_QUEUE_TYPE, 'value'),
         testSubjects.getAttribute(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
-        testSubjects.getAttribute(SUBJ_INPUT_QUEUE_MAX_BYTES_UNITS, 'value'),
+        testSubjects.getAttribute(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
         testSubjects.getAttribute(SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES, 'value'),
       ]).then((val) => ({
         id: val[0],
