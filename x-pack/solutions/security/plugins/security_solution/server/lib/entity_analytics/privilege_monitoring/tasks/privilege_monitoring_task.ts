@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  type Logger,
-  type AnalyticsServiceSetup,
-  type AuditLogger,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { type Logger, type AnalyticsServiceSetup, type AuditLogger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
