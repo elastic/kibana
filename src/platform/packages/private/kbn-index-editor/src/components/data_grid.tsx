@@ -18,7 +18,9 @@ import {
   UnifiedDataTable,
   type SortOrder,
   CustomGridColumnsConfiguration,
+  type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
+import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, times } from 'lodash';
@@ -26,6 +28,8 @@ import { getCellValueRenderer } from './grid_custom_renderers/value_input_contro
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
 import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
 import { KibanaContextExtra } from '../types';
+import { getCellValueRenderer, getValueInputPopover } from './value_input_control';
+import { AddColumnHeader } from './add_column_header';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -78,12 +82,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     props.initialRowHeight ?? DEFAULT_INITIAL_ROW_HEIGHT
   );
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
-
-  // Track which cell is being edited
-  const [editingCell, setEditingCell] = useState<{ row: number | null; col: string | null }>({
-    row: null,
-    col: null,
-  });
 
   const onSetColumns = useCallback(
     (columns: string[]) => {
@@ -148,26 +146,28 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const onValueChange = useCallback(
     (docId: string, update: any) => {
-      // reset editing cell
-      setEditingCell({ row: null, col: null });
       // make a call to update the doc with the new value
       indexUpdateService.updateDoc(docId, update);
       // update rows to reflect the change
     },
-    [setEditingCell, indexUpdateService]
+    [indexUpdateService]
   );
 
+  const dataTableRef = useRef<EuiDataGridRefProps & RestorableStateProviderApi>(null);
+  const renderCellPopover = useMemo(
+    () =>
+      getValueInputPopover({
+        rows,
+        columns: props.columns,
+        onValueChange,
+        dataTableRef,
+        isIndexCreated,
+      }),
+    [rows, props.columns, onValueChange, dataTableRef, isIndexCreated]
+  );
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(
-      rows,
-      props.columns,
-      editingCell,
-      savingDocs,
-      setEditingCell,
-      onValueChange,
-      isIndexCreated
-    );
-  }, [rows, props.columns, editingCell, setEditingCell, onValueChange, savingDocs, isIndexCreated]);
+    return getCellValueRenderer(rows, savingDocs, isIndexCreated, dataTableRef);
+  }, [rows, savingDocs, isIndexCreated]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {
@@ -189,6 +189,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   return (
     <>
       <UnifiedDataTable
+        ref={dataTableRef}
         customGridColumnsConfiguration={customGridColumnsConfiguration}
         columns={renderedColumns}
         rows={rows}
@@ -196,6 +197,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         services={services}
         enableInTableSearch
         externalCustomRenderers={externalCustomRenderers}
+        renderCellPopover={renderCellPopover}
         isPlainRecord
         isSortEnabled
         showMultiFields={false}
@@ -222,8 +224,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         rowHeightState={rowHeight}
         onUpdateRowHeight={setRowHeight}
         controlColumnIds={props.controlColumnIds}
-        disableCellActions
-        disableCellPopover
         css={css`
           .euiDataGridRowCell__content > div,
           .unifiedDataTable__cellValue {

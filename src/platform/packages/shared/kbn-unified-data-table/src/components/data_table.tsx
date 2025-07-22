@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './data_table.scss';
@@ -451,431 +459,440 @@ interface InternalUnifiedDataTableProps {
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
-const InternalUnifiedDataTable = ({
-  ariaLabelledBy,
-  columns,
-  columnsMeta,
-  showColumnTokens,
-  canDragAndDropColumns,
-  configHeaderRowHeight,
-  headerRowHeightState,
-  onUpdateHeaderRowHeight,
-  controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
-  rowAdditionalLeadingControls,
-  dataView,
-  loadingState,
-  onFilter,
-  onResize,
-  onSetColumns,
-  onSort,
-  rows,
-  searchDescription,
-  searchTitle,
-  settings,
-  showTimeCol,
-  showKeyboardShortcuts = true,
-  showFullScreenButton = true,
-  sort,
-  isSortEnabled = true,
-  isPaginationEnabled = true,
-  paginationMode = DEFAULT_PAGINATION_MODE,
-  cellActionsTriggerId,
-  cellActionsMetadata,
-  cellActionsHandling = 'replace',
-  visibleCellActions,
-  className,
-  rowHeightState,
-  onUpdateRowHeight,
-  maxAllowedSampleSize,
-  sampleSizeState,
-  onUpdateSampleSize,
-  isPlainRecord = false,
-  rowsPerPageState,
-  onUpdateRowsPerPage,
-  onFieldEdited,
-  services,
-  renderCustomGridBody,
-  renderCustomToolbar,
-  externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
-  trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
-  totalHits,
-  onFetchMoreRecords,
-  renderDocumentView,
-  setExpandedDoc,
-  expandedDoc,
-  configRowHeight,
-  showMultiFields = true,
-  maxDocFieldsDisplayed = 50,
-  externalAdditionalControls,
-  rowsPerPageOptions,
-  externalCustomRenderers,
-  consumer = 'discover',
-  componentsTourSteps,
-  gridStyleOverride,
-  rowLineHeightOverride,
-  customGridColumnsConfiguration,
-  enableComparisonMode,
-  enableInTableSearch = false,
-  cellContext,
-  renderCellPopover,
-  getRowIndicator,
-  dataGridDensityState,
-  onUpdateDataGridDensity,
-  onUpdatePageIndex,
-  disableCellActions = false,
-  disableCellPopover = false,
-}: InternalUnifiedDataTableProps) => {
-  const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
-    services;
-  const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
-  const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-  const displayedColumns = getDisplayedColumns(columns, dataView);
-  const defaultColumns = displayedColumns.includes('_source');
-  const docMap = useMemo(
-    () =>
-      new Map<string, { doc: DataTableRecord; docIndex: number }>(
-        rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
-      ),
-    [rows]
-  );
-  const getDocById = useCallback((id: string) => docMap.get(id)?.doc, [docMap]);
-  const selectedDocsState = useSelectedDocs(docMap);
-  const {
-    isDocSelected,
-    hasSelectedDocs,
-    selectedDocsCount,
-    replaceSelectedDocs,
-    docIdsInSelectionOrder,
-  } = selectedDocsState;
-
-  const [currentPageIndex, setCurrentPageIndex] = useRestorableState('pageIndex', 0);
-  const currentPageIndexRef = useRef<number>(currentPageIndex);
-  currentPageIndexRef.current = currentPageIndex;
-
-  const changeCurrentPageIndex = useCallback(
-    (value: number) => {
-      setCurrentPageIndex(value);
-      onUpdatePageIndex?.(value);
-    },
-    [setCurrentPageIndex, onUpdatePageIndex]
-  );
-
-  useEffect(() => {
-    if (!hasSelectedDocs && isFilterActive) {
-      setIsFilterActive(false);
-    }
-  }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
-
-  const timeFieldName = dataView.timeFieldName;
-  const shouldPrependTimeFieldColumn = useCallback(
-    (activeColumns: string[]) =>
-      canPrependTimeFieldColumn(
-        activeColumns,
-        timeFieldName,
-        columnsMeta,
-        showTimeCol,
-        isPlainRecord
-      ),
-    [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
-  );
-
-  const visibleColumns = useMemo(() => {
-    return getVisibleColumns(
-      displayedColumns,
+const InternalUnifiedDataTable = React.forwardRef<
+  EuiDataGridRefProps,
+  InternalUnifiedDataTableProps
+>(
+  (
+    {
+      ariaLabelledBy,
+      columns,
+      columnsMeta,
+      showColumnTokens,
+      canDragAndDropColumns,
+      configHeaderRowHeight,
+      headerRowHeightState,
+      onUpdateHeaderRowHeight,
+      controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
+      rowAdditionalLeadingControls,
       dataView,
-      shouldPrependTimeFieldColumn(displayedColumns)
-    );
-  }, [dataView, displayedColumns, shouldPrependTimeFieldColumn]);
-
-  const { sortedRows, sorting } = useSorting({
-    rows,
-    visibleColumns,
-    columnsMeta,
-    sort,
-    dataView,
-    isPlainRecord,
-    isSortEnabled,
-    defaultColumns,
-    onSort,
-  });
-
-  const { columns: sortedColumns } = sorting ?? {};
-
-  const displayedRows = useMemo(() => {
-    if (!sortedRows) {
-      return [];
-    }
-
-    if (!isFilterActive || !hasSelectedDocs) {
-      return sortedRows;
-    }
-
-    const rowsFiltered = sortedRows.filter((row) => isDocSelected(row.id));
-
-    return rowsFiltered.length
-      ? rowsFiltered
-      : // in case the selected docs are no longer part of the sample of 500, show all docs
-        sortedRows;
-  }, [sortedRows, isFilterActive, hasSelectedDocs, isDocSelected]);
-
-  const valueToStringConverter: ValueToStringConverter = useCallback(
-    (rowIndex, columnId, options) => {
-      return convertValueToString({
-        rowIndex,
-        rows: displayedRows,
-        dataView,
-        columnId,
-        fieldFormats,
-        columnsMeta,
-        options,
-      });
-    },
-    [displayedRows, dataView, fieldFormats, columnsMeta]
-  );
-
-  /**
-   * Pagination
-   */
-  const currentPageSize =
-    typeof rowsPerPageState === 'number' && rowsPerPageState > 0
-      ? rowsPerPageState
-      : DEFAULT_ROWS_PER_PAGE;
-
-  const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
-  const pageCount = useMemo(
-    () => Math.ceil(rowCount / currentPageSize),
-    [rowCount, currentPageSize]
-  );
-
-  useEffect(() => {
-    /**
-     * Syncs any changes in pageIndex because of changes in pageCount
-     * to the consumer.
-     *
-     */
-    const previousPageIndex = currentPageIndexRef.current;
-    const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
-    if (calculatedPageIndex !== previousPageIndex) {
-      changeCurrentPageIndex(calculatedPageIndex);
-    }
-  }, [pageCount, changeCurrentPageIndex]);
-
-  const paginationObj = useMemo(() => {
-    const onChangeItemsPerPage = (pageSize: number) => {
-      onUpdateRowsPerPage?.(pageSize);
-    };
-
-    return isPaginationEnabled
-      ? {
-          onChangeItemsPerPage,
-          onChangePage: changeCurrentPageIndex,
-          pageIndex: currentPageIndex,
-          pageSize: currentPageSize,
-          pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize),
-        }
-      : undefined;
-  }, [
-    isPaginationEnabled,
-    rowsPerPageOptions,
-    onUpdateRowsPerPage,
-    currentPageSize,
-    currentPageIndex,
-    changeCurrentPageIndex,
-  ]);
-
-  const unifiedDataTableContextValue = useMemo<DataTableContext>(
-    () => ({
-      expanded: expandedDoc,
-      setExpanded: setExpandedDoc,
-      getRowByIndex: (index: number) => displayedRows[index],
+      loadingState,
       onFilter,
-      dataView,
-      selectedDocsState,
-      valueToStringConverter,
-      componentsTourSteps,
-      isPlainRecord,
-      pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
-      pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
-    }),
-    [
-      componentsTourSteps,
-      dataView,
-      isPlainRecord,
-      isPaginationEnabled,
-      displayedRows,
-      expandedDoc,
-      onFilter,
+      onResize,
+      onSetColumns,
+      onSort,
+      rows,
+      searchDescription,
+      searchTitle,
+      settings,
+      showTimeCol,
+      showKeyboardShortcuts = true,
+      showFullScreenButton = true,
+      sort,
+      isSortEnabled = true,
+      isPaginationEnabled = true,
+      paginationMode = DEFAULT_PAGINATION_MODE,
+      cellActionsTriggerId,
+      cellActionsMetadata,
+      cellActionsHandling = 'replace',
+      visibleCellActions,
+      className,
+      rowHeightState,
+      onUpdateRowHeight,
+      maxAllowedSampleSize,
+      sampleSizeState,
+      onUpdateSampleSize,
+      isPlainRecord = false,
+      rowsPerPageState,
+      onUpdateRowsPerPage,
+      onFieldEdited,
+      services,
+      renderCustomGridBody,
+      renderCustomToolbar,
+      externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
+      trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
+      totalHits,
+      onFetchMoreRecords,
+      renderDocumentView,
       setExpandedDoc,
-      selectedDocsState,
-      paginationObj,
-      valueToStringConverter,
-    ]
-  );
+      expandedDoc,
+      configRowHeight,
+      showMultiFields = true,
+      maxDocFieldsDisplayed = 50,
+      externalAdditionalControls,
+      rowsPerPageOptions,
+      externalCustomRenderers,
+      consumer = 'discover',
+      componentsTourSteps,
+      gridStyleOverride,
+      rowLineHeightOverride,
+      customGridColumnsConfiguration,
+      enableComparisonMode,
+      enableInTableSearch = false,
+      cellContext,
+      renderCellPopover,
+      getRowIndicator,
+      dataGridDensityState,
+      onUpdateDataGridDensity,
+      onUpdatePageIndex,
+      disableCellActions = false,
+      disableCellPopover = false,
+    }: InternalUnifiedDataTableProps,
+    ref
+  ) => {
+    const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
+      services;
+    const dataGridRef = useRef<EuiDataGridRefProps>(null);
+    useImperativeHandle(ref, () => dataGridRef.current!);
 
-  const shouldShowFieldHandler = useMemo(() => {
-    const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
-    return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
-  }, [dataView, showMultiFields]);
+    const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
+    const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
+    const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+    const displayedColumns = getDisplayedColumns(columns, dataView);
+    const defaultColumns = displayedColumns.includes('_source');
+    const docMap = useMemo(
+      () =>
+        new Map<string, { doc: DataTableRecord; docIndex: number }>(
+          rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
+        ),
+      [rows]
+    );
+    const getDocById = useCallback((id: string) => docMap.get(id)?.doc, [docMap]);
+    const selectedDocsState = useSelectedDocs(docMap);
+    const {
+      isDocSelected,
+      hasSelectedDocs,
+      selectedDocsCount,
+      replaceSelectedDocs,
+      docIdsInSelectionOrder,
+    } = selectedDocsState;
 
-  const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
-    storage,
-    consumer,
-    dataGridDensityState,
-    onUpdateDataGridDensity,
-  });
+    const [currentPageIndex, setCurrentPageIndex] = useRestorableState('pageIndex', 0);
+    const currentPageIndexRef = useRef<number>(currentPageIndex);
+    currentPageIndexRef.current = currentPageIndex;
 
-  const gridStyle = useMemo<EuiDataGridStyle>(
-    () => ({
-      ...DATA_GRID_STYLE_DEFAULT,
-      ...DATA_GRID_DENSITY_STYLE_MAP[dataGridDensity],
-      onChange: onChangeDataGridDensity,
-      ...gridStyleOverride,
-    }),
-    [dataGridDensity, onChangeDataGridDensity, gridStyleOverride]
-  );
+    const changeCurrentPageIndex = useCallback(
+      (value: number) => {
+        setCurrentPageIndex(value);
+        onUpdatePageIndex?.(value);
+      },
+      [setCurrentPageIndex, onUpdatePageIndex]
+    );
 
-  /**
-   * Cell rendering
-   */
-  const renderCellValue = useMemo(
-    () =>
-      getRenderCellValueFn({
+    useEffect(() => {
+      if (!hasSelectedDocs && isFilterActive) {
+        setIsFilterActive(false);
+      }
+    }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
+
+    const timeFieldName = dataView.timeFieldName;
+    const shouldPrependTimeFieldColumn = useCallback(
+      (activeColumns: string[]) =>
+        canPrependTimeFieldColumn(
+          activeColumns,
+          timeFieldName,
+          columnsMeta,
+          showTimeCol,
+          isPlainRecord
+        ),
+      [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
+    );
+
+    const visibleColumns = useMemo(() => {
+      return getVisibleColumns(
+        displayedColumns,
         dataView,
-        rows: displayedRows,
+        shouldPrependTimeFieldColumn(displayedColumns)
+      );
+    }, [dataView, displayedColumns, shouldPrependTimeFieldColumn]);
+
+    const { sortedRows, sorting } = useSorting({
+      rows,
+      visibleColumns,
+      columnsMeta,
+      sort,
+      dataView,
+      isPlainRecord,
+      isSortEnabled,
+      defaultColumns,
+      onSort,
+    });
+
+    const { columns: sortedColumns } = sorting ?? {};
+
+    const displayedRows = useMemo(() => {
+      if (!sortedRows) {
+        return [];
+      }
+
+      if (!isFilterActive || !hasSelectedDocs) {
+        return sortedRows;
+      }
+
+      const rowsFiltered = sortedRows.filter((row) => isDocSelected(row.id));
+
+      return rowsFiltered.length
+        ? rowsFiltered
+        : // in case the selected docs are no longer part of the sample of 500, show all docs
+          sortedRows;
+    }, [sortedRows, isFilterActive, hasSelectedDocs, isDocSelected]);
+
+    const valueToStringConverter: ValueToStringConverter = useCallback(
+      (rowIndex, columnId, options) => {
+        return convertValueToString({
+          rowIndex,
+          rows: displayedRows,
+          dataView,
+          columnId,
+          fieldFormats,
+          columnsMeta,
+          options,
+        });
+      },
+      [displayedRows, dataView, fieldFormats, columnsMeta]
+    );
+
+    /**
+     * Pagination
+     */
+    const currentPageSize =
+      typeof rowsPerPageState === 'number' && rowsPerPageState > 0
+        ? rowsPerPageState
+        : DEFAULT_ROWS_PER_PAGE;
+
+    const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
+    const pageCount = useMemo(
+      () => Math.ceil(rowCount / currentPageSize),
+      [rowCount, currentPageSize]
+    );
+
+    useEffect(() => {
+      /**
+       * Syncs any changes in pageIndex because of changes in pageCount
+       * to the consumer.
+       *
+       */
+      const previousPageIndex = currentPageIndexRef.current;
+      const calculatedPageIndex = previousPageIndex > pageCount - 1 ? 0 : previousPageIndex;
+      if (calculatedPageIndex !== previousPageIndex) {
+        changeCurrentPageIndex(calculatedPageIndex);
+      }
+    }, [pageCount, changeCurrentPageIndex]);
+
+    const paginationObj = useMemo(() => {
+      const onChangeItemsPerPage = (pageSize: number) => {
+        onUpdateRowsPerPage?.(pageSize);
+      };
+
+      return isPaginationEnabled
+        ? {
+            onChangeItemsPerPage,
+            onChangePage: changeCurrentPageIndex,
+            pageIndex: currentPageIndex,
+            pageSize: currentPageSize,
+            pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize),
+          }
+        : undefined;
+    }, [
+      isPaginationEnabled,
+      rowsPerPageOptions,
+      onUpdateRowsPerPage,
+      currentPageSize,
+      currentPageIndex,
+      changeCurrentPageIndex,
+    ]);
+
+    const unifiedDataTableContextValue = useMemo<DataTableContext>(
+      () => ({
+        expanded: expandedDoc,
+        setExpanded: setExpandedDoc,
+        getRowByIndex: (index: number) => displayedRows[index],
+        onFilter,
+        dataView,
+        selectedDocsState,
+        valueToStringConverter,
+        componentsTourSteps,
+        isPlainRecord,
+        pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
+        pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
+      }),
+      [
+        componentsTourSteps,
+        dataView,
+        isPlainRecord,
+        isPaginationEnabled,
+        displayedRows,
+        expandedDoc,
+        onFilter,
+        setExpandedDoc,
+        selectedDocsState,
+        paginationObj,
+        valueToStringConverter,
+      ]
+    );
+
+    const shouldShowFieldHandler = useMemo(() => {
+      const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+      return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
+    }, [dataView, showMultiFields]);
+
+    const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
+      storage,
+      consumer,
+      dataGridDensityState,
+      onUpdateDataGridDensity,
+    });
+
+    const gridStyle = useMemo<EuiDataGridStyle>(
+      () => ({
+        ...DATA_GRID_STYLE_DEFAULT,
+        ...DATA_GRID_DENSITY_STYLE_MAP[dataGridDensity],
+        onChange: onChangeDataGridDensity,
+        ...gridStyleOverride,
+      }),
+      [dataGridDensity, onChangeDataGridDensity, gridStyleOverride]
+    );
+
+    /**
+     * Cell rendering
+     */
+    const renderCellValue = useMemo(
+      () =>
+        getRenderCellValueFn({
+          dataView,
+          rows: displayedRows,
+          shouldShowFieldHandler,
+          closePopover: () => dataGridRef.current?.closeCellPopover(),
+          fieldFormats,
+          maxEntries: maxDocFieldsDisplayed,
+          externalCustomRenderers,
+          isPlainRecord,
+          isCompressed: dataGridDensity === DataGridDensity.COMPACT,
+          columnsMeta,
+        }),
+      [
+        dataView,
+        displayedRows,
         shouldShowFieldHandler,
-        closePopover: () => dataGridRef.current?.closeCellPopover(),
+        maxDocFieldsDisplayed,
         fieldFormats,
-        maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
         isPlainRecord,
-        isCompressed: dataGridDensity === DataGridDensity.COMPACT,
+        dataGridDensity,
         columnsMeta,
-      }),
-    [
-      dataView,
-      displayedRows,
-      shouldShowFieldHandler,
-      maxDocFieldsDisplayed,
-      fieldFormats,
-      externalCustomRenderers,
-      isPlainRecord,
-      dataGridDensity,
-      columnsMeta,
-    ]
-  );
+      ]
+    );
 
-  const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
+    const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
-  const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);
-  const onInTableSearchInitialStateChange = useCallback(
-    (newState: InTableSearchRestorableState) => {
-      inTableSearchLatestStateRef.current = newState;
-    },
-    [inTableSearchLatestStateRef]
-  );
+    const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);
+    const onInTableSearchInitialStateChange = useCallback(
+      (newState: InTableSearchRestorableState) => {
+        inTableSearchLatestStateRef.current = newState;
+      },
+      [inTableSearchLatestStateRef]
+    );
 
-  const {
-    inTableSearchTermCss,
-    inTableSearchControl,
-    cellContextWithInTableSearchSupport,
-    renderCellValueWithInTableSearchSupport,
-  } = useDataGridInTableSearch({
-    enableInTableSearch,
-    dataGridWrapper,
-    dataGridRef,
-    visibleColumns,
-    rows: displayedRows,
-    renderCellValue,
-    cellContext,
-    pagination: paginationObj,
-    initialState: inTableSearchLatestStateRef.current,
-    onInitialStateChange: onInTableSearchInitialStateChange,
-  });
-
-  const renderCustomPopover = useMemo(() => {
-    if (disableCellPopover) {
-      return;
-    }
-    return renderCellPopover ?? getCustomCellPopoverRenderer();
-  }, [renderCellPopover, disableCellPopover]);
-
-  /**
-   * Render variables
-   */
-  const randomId = useMemo(() => htmlIdGenerator()(), []);
-  const closeFieldEditor = useRef<() => void | undefined>();
-
-  useEffect(() => {
-    return () => {
-      if (closeFieldEditor?.current) {
-        closeFieldEditor?.current();
-      }
-    };
-  }, []);
-
-  const editField = useMemo(
-    () =>
-      onFieldEdited
-        ? async (fieldName: string) => {
-            closeFieldEditor.current =
-              onFieldEdited &&
-              (await services?.dataViewFieldEditor?.openEditor({
-                ctx: {
-                  dataView,
-                },
-                fieldName,
-                onSave: async () => {
-                  await onFieldEdited();
-                },
-              }));
-          }
-        : undefined,
-    [dataView, onFieldEdited, services?.dataViewFieldEditor]
-  );
-
-  const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
-    (fieldName, rowIndex) =>
-      displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
-    [displayedRows]
-  );
-
-  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(() => {
-    if (!cellActionsTriggerId) {
-      return undefined;
-    }
-
-    return visibleColumns.map((columnName) => {
-      const field = getDataViewFieldOrCreateFromColumnMeta({
-        dataView,
-        fieldName: columnName,
-        columnMeta: columnsMeta?.[columnName],
-      });
-      return (
-        field?.toSpec() ?? {
-          name: '',
-          type: '',
-          aggregatable: false,
-          searchable: false,
-        }
-      );
+    const {
+      inTableSearchTermCss,
+      inTableSearchControl,
+      cellContextWithInTableSearchSupport,
+      renderCellValueWithInTableSearchSupport,
+    } = useDataGridInTableSearch({
+      enableInTableSearch,
+      dataGridWrapper,
+      dataGridRef,
+      visibleColumns,
+      rows: displayedRows,
+      renderCellValue,
+      cellContext,
+      pagination: paginationObj,
+      initialState: inTableSearchLatestStateRef.current,
+      onInitialStateChange: onInTableSearchInitialStateChange,
     });
-  }, [cellActionsTriggerId, visibleColumns, dataView, columnsMeta]);
 
-  const allCellActionsMetadata = useMemo(
-    () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
-    [dataView, cellActionsMetadata]
-  );
+    const renderCustomPopover = useMemo(() => {
+      if (disableCellPopover) {
+        return;
+      }
+      return renderCellPopover ?? getCustomCellPopoverRenderer();
+    }, [renderCellPopover, disableCellPopover]);
 
-  const columnsCellActions = useDataGridColumnsCellActions({
-    fields: cellActionsFields,
-    getCellValue,
-    triggerId: cellActionsTriggerId,
-    dataGridRef,
-    metadata: allCellActionsMetadata,
-    disableCellActions,
-  });
+    /**
+     * Render variables
+     */
+    const randomId = useMemo(() => htmlIdGenerator()(), []);
+    const closeFieldEditor = useRef<() => void | undefined>();
+
+    useEffect(() => {
+      return () => {
+        if (closeFieldEditor?.current) {
+          closeFieldEditor?.current();
+        }
+      };
+    }, []);
+
+    const editField = useMemo(
+      () =>
+        onFieldEdited
+          ? async (fieldName: string) => {
+              closeFieldEditor.current =
+                onFieldEdited &&
+                (await services?.dataViewFieldEditor?.openEditor({
+                  ctx: {
+                    dataView,
+                  },
+                  fieldName,
+                  onSave: async () => {
+                    await onFieldEdited();
+                  },
+                }));
+            }
+          : undefined,
+      [dataView, onFieldEdited, services?.dataViewFieldEditor]
+    );
+
+    const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
+      (fieldName, rowIndex) =>
+        displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as Serializable,
+      [displayedRows]
+    );
+
+    const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(() => {
+      if (!cellActionsTriggerId) {
+        return undefined;
+      }
+
+      return visibleColumns.map((columnName) => {
+        const field = getDataViewFieldOrCreateFromColumnMeta({
+          dataView,
+          fieldName: columnName,
+          columnMeta: columnsMeta?.[columnName],
+        });
+        return (
+          field?.toSpec() ?? {
+            name: '',
+            type: '',
+            aggregatable: false,
+            searchable: false,
+          }
+        );
+      });
+    }, [cellActionsTriggerId, visibleColumns, dataView, columnsMeta]);
+
+    const allCellActionsMetadata = useMemo(
+      () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
+      [dataView, cellActionsMetadata]
+    );
+
+    const columnsCellActions = useDataGridColumnsCellActions({
+      fields: cellActionsFields,
+      getCellValue,
+      triggerId: cellActionsTriggerId,
+      dataGridRef,
+      metadata: allCellActionsMetadata,
+      disableCellActions,
+    });
 
   const {
     rowHeight: headerRowHeight,
@@ -904,366 +921,369 @@ const InternalUnifiedDataTable = ({
       onUpdateRowHeight,
     });
 
-  const euiGridColumns = useMemo(
-    () =>
-      getEuiGridColumns({
-        columns: visibleColumns,
-        columnsCellActions,
+    const euiGridColumns = useMemo(
+      () =>
+        getEuiGridColumns({
+          columns: visibleColumns,
+          columnsCellActions,
+          cellActionsHandling,
+          rowsCount: displayedRows.length,
+          settings,
+          dataView,
+          defaultColumns,
+          isSortEnabled,
+          isPlainRecord,
+          services: {
+            uiSettings,
+            toastNotifications,
+          },
+          hasEditDataViewPermission: () =>
+            Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
+          valueToStringConverter,
+          onFilter,
+          editField,
+          visibleCellActions,
+          columnsMeta,
+          showColumnTokens,
+          headerRowHeightLines,
+          customGridColumnsConfiguration,
+          onResize,
+          sortedColumns,
+          disableCellActions,
+        }),
+      [
         cellActionsHandling,
-        rowsCount: displayedRows.length,
-        settings,
-        dataView,
-        defaultColumns,
-        isSortEnabled,
-        isPlainRecord,
-        services: {
-          uiSettings,
-          toastNotifications,
-        },
-        hasEditDataViewPermission: () =>
-          Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
-        valueToStringConverter,
-        onFilter,
-        editField,
-        visibleCellActions,
         columnsMeta,
-        showColumnTokens,
-        headerRowHeightLines,
+        columnsCellActions,
         customGridColumnsConfiguration,
+        dataView,
+        dataViewFieldEditor,
+        defaultColumns,
+        displayedRows.length,
+        editField,
+        headerRowHeightLines,
+        isPlainRecord,
+        isSortEnabled,
+        onFilter,
         onResize,
+        settings,
+        showColumnTokens,
+        toastNotifications,
+        uiSettings,
+        valueToStringConverter,
+        visibleCellActions,
+        visibleColumns,
         sortedColumns,
         disableCellActions,
+      ]
+    );
+
+    const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
+    const columnsVisibility = useMemo(
+      () => ({
+        canDragAndDropColumns: defaultColumns ? false : canDragAndDropColumns,
+        visibleColumns,
+        setVisibleColumns: (newColumns: string[]) => {
+          const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
+          onSetColumns(newColumns, dontModifyColumns);
+        },
       }),
-    [
-      cellActionsHandling,
-      columnsMeta,
-      columnsCellActions,
-      customGridColumnsConfiguration,
-      dataView,
-      dataViewFieldEditor,
-      defaultColumns,
-      displayedRows.length,
-      editField,
-      headerRowHeightLines,
-      isPlainRecord,
-      isSortEnabled,
-      onFilter,
-      onResize,
-      settings,
-      showColumnTokens,
-      toastNotifications,
-      uiSettings,
-      valueToStringConverter,
-      visibleCellActions,
-      visibleColumns,
-      sortedColumns,
-      disableCellActions,
-    ]
-  );
+      [
+        visibleColumns,
+        onSetColumns,
+        shouldPrependTimeFieldColumn,
+        canDragAndDropColumns,
+        defaultColumns,
+      ]
+    );
 
-  const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
-  const columnsVisibility = useMemo(
-    () => ({
-      canDragAndDropColumns: defaultColumns ? false : canDragAndDropColumns,
-      visibleColumns,
-      setVisibleColumns: (newColumns: string[]) => {
-        const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
-        onSetColumns(newColumns, dontModifyColumns);
-      },
-    }),
-    [
-      visibleColumns,
-      onSetColumns,
-      shouldPrependTimeFieldColumn,
-      canDragAndDropColumns,
-      defaultColumns,
-    ]
-  );
+    const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
-  const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
+    const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+      const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
+        rows: displayedRows,
+        canSetExpandedDoc,
+      });
 
-  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
-      rows: displayedRows,
+      const filteredLeadColumns = leadColumns.filter((column) =>
+        controlColumnIds.includes(column.id)
+      );
+
+      if (getRowIndicator) {
+        const colorIndicatorControlColumn = getColorIndicatorControlColumn({
+          getRowIndicator,
+        });
+        filteredLeadColumns.unshift(colorIndicatorControlColumn);
+      }
+
+      const actionsColumn = getActionsColumn({
+        baseColumns: leadColumnsExtraContent,
+        rowAdditionalLeadingControls,
+        externalControlColumns,
+      });
+      if (actionsColumn) {
+        filteredLeadColumns.push(actionsColumn);
+      }
+
+      return filteredLeadColumns;
+    }, [
       canSetExpandedDoc,
-    });
-
-    const filteredLeadColumns = leadColumns.filter((column) =>
-      controlColumnIds.includes(column.id)
-    );
-
-    if (getRowIndicator) {
-      const colorIndicatorControlColumn = getColorIndicatorControlColumn({
-        getRowIndicator,
-      });
-      filteredLeadColumns.unshift(colorIndicatorControlColumn);
-    }
-
-    const actionsColumn = getActionsColumn({
-      baseColumns: leadColumnsExtraContent,
-      rowAdditionalLeadingControls,
+      controlColumnIds,
+      displayedRows,
       externalControlColumns,
-    });
-    if (actionsColumn) {
-      filteredLeadColumns.push(actionsColumn);
-    }
+      getRowIndicator,
+      rowAdditionalLeadingControls,
+    ]);
 
-    return filteredLeadColumns;
-  }, [
-    canSetExpandedDoc,
-    controlColumnIds,
-    displayedRows,
-    externalControlColumns,
-    getRowIndicator,
-    rowAdditionalLeadingControls,
-  ]);
+    const additionalControls = useMemo(() => {
+      if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
+        return null;
+      }
 
-  const additionalControls = useMemo(() => {
-    if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
-      return null;
-    }
-
-    const leftControls = (
-      <>
-        {Boolean(selectedDocsCount) && (
-          <DataTableDocumentToolbarBtn
-            isPlainRecord={isPlainRecord}
-            isFilterActive={isFilterActive}
-            rows={rows!}
-            setIsFilterActive={setIsFilterActive}
-            selectedDocsState={selectedDocsState}
-            enableComparisonMode={enableComparisonMode}
-            setIsCompareActive={setIsCompareActive}
-            fieldFormats={fieldFormats}
-            pageIndex={unifiedDataTableContextValue.pageIndex}
-            pageSize={unifiedDataTableContextValue.pageSize}
-            toastNotifications={toastNotifications}
-            columns={visibleColumns}
-          />
-        )}
-        {externalAdditionalControls}
-      </>
-    );
-
-    if (!renderCustomToolbar && inTableSearchControl) {
-      return {
-        left: leftControls,
-        right: inTableSearchControl,
-      };
-    }
-
-    return leftControls;
-  }, [
-    externalAdditionalControls,
-    selectedDocsCount,
-    inTableSearchControl,
-    isPlainRecord,
-    isFilterActive,
-    rows,
-    selectedDocsState,
-    enableComparisonMode,
-    setIsFilterActive,
-    setIsCompareActive,
-    fieldFormats,
-    unifiedDataTableContextValue.pageIndex,
-    unifiedDataTableContextValue.pageSize,
-    toastNotifications,
-    visibleColumns,
-    renderCustomToolbar,
-  ]);
-
-  const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
-    () =>
-      renderCustomToolbar
-        ? (toolbarProps) =>
-            renderCustomToolbar({
-              toolbarProps,
-              gridProps: {
-                additionalControls:
-                  additionalControls && 'left' in additionalControls
-                    ? additionalControls.left
-                    : additionalControls,
-                inTableSearchControl,
-              },
-            })
-        : undefined,
-    [renderCustomToolbar, additionalControls, inTableSearchControl]
-  );
-
-  const showDisplaySelector = useMemo(():
-    | EuiDataGridToolBarVisibilityDisplaySelectorOptions
-    | undefined => {
-    if (
-      !onUpdateDataGridDensity &&
-      !onUpdateRowHeight &&
-      !onUpdateHeaderRowHeight &&
-      !onUpdateSampleSize
-    ) {
-      return;
-    }
-
-    return {
-      allowDensity: Boolean(onUpdateDataGridDensity),
-      allowRowHeight: Boolean(onChangeRowHeight) || Boolean(onChangeHeaderRowHeight),
-      allowResetButton: false,
-      customRender: ({ densityControl }) => (
+      const leftControls = (
         <>
-          <UnifiedDataTableAdditionalDisplaySettings
-            rowHeight={rowHeight}
-            onChangeRowHeight={onChangeRowHeight}
-            onChangeRowHeightLines={onChangeRowHeightLines}
-            headerRowHeight={headerRowHeight}
-            onChangeHeaderRowHeight={onChangeHeaderRowHeight}
-            onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
-            maxAllowedSampleSize={maxAllowedSampleSize}
-            sampleSize={sampleSizeState}
-            onChangeSampleSize={onUpdateSampleSize}
-            lineCountInput={lineCountInput}
-            headerLineCountInput={headerLineCountInput}
-            densityControl={densityControl}
-          />
+          {Boolean(selectedDocsCount) && (
+            <DataTableDocumentToolbarBtn
+              isPlainRecord={isPlainRecord}
+              isFilterActive={isFilterActive}
+              rows={rows!}
+              setIsFilterActive={setIsFilterActive}
+              selectedDocsState={selectedDocsState}
+              enableComparisonMode={enableComparisonMode}
+              setIsCompareActive={setIsCompareActive}
+              fieldFormats={fieldFormats}
+              pageIndex={unifiedDataTableContextValue.pageIndex}
+              pageSize={unifiedDataTableContextValue.pageSize}
+              toastNotifications={toastNotifications}
+              columns={visibleColumns}
+            />
+          )}
+          {externalAdditionalControls}
         </>
-      ),
-    };
-  }, [
-    headerRowHeight,
-    maxAllowedSampleSize,
-    onChangeHeaderRowHeight,
-    onChangeHeaderRowHeightLines,
-    onChangeRowHeight,
-    onChangeRowHeightLines,
-    onUpdateHeaderRowHeight,
-    onUpdateRowHeight,
-    onUpdateSampleSize,
-    rowHeight,
-    sampleSizeState,
-    onUpdateDataGridDensity,
-    lineCountInput,
-    headerLineCountInput,
-  ]);
+      );
 
-  const toolbarVisibility = useMemo(
-    () =>
-      defaultColumns
-        ? {
-            ...toolbarVisibilityDefaults,
-            showColumnSelector: false,
-            showSortSelector: isSortEnabled,
-            additionalControls,
-            showDisplaySelector,
-            showKeyboardShortcuts,
-            showFullScreenSelector: showFullScreenButton,
+      if (!renderCustomToolbar && inTableSearchControl) {
+        return {
+          left: leftControls,
+          right: inTableSearchControl,
+        };
+      }
+
+      return leftControls;
+    }, [
+      externalAdditionalControls,
+      selectedDocsCount,
+      inTableSearchControl,
+      isPlainRecord,
+      isFilterActive,
+      rows,
+      selectedDocsState,
+      enableComparisonMode,
+      setIsFilterActive,
+      setIsCompareActive,
+      fieldFormats,
+      unifiedDataTableContextValue.pageIndex,
+      unifiedDataTableContextValue.pageSize,
+      toastNotifications,
+      visibleColumns,
+      renderCustomToolbar,
+    ]);
+
+    const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+      () =>
+        renderCustomToolbar
+          ? (toolbarProps) =>
+              renderCustomToolbar({
+                toolbarProps,
+                gridProps: {
+                  additionalControls:
+                    additionalControls && 'left' in additionalControls
+                      ? additionalControls.left
+                      : additionalControls,
+                  inTableSearchControl,
+                },
+              })
+          : undefined,
+      [renderCustomToolbar, additionalControls, inTableSearchControl]
+    );
+
+    const showDisplaySelector = useMemo(():
+      | EuiDataGridToolBarVisibilityDisplaySelectorOptions
+      | undefined => {
+      if (
+        !onUpdateDataGridDensity &&
+        !onUpdateRowHeight &&
+        !onUpdateHeaderRowHeight &&
+        !onUpdateSampleSize
+      ) {
+        return;
+      }
+
+      return {
+        allowDensity: Boolean(onUpdateDataGridDensity),
+        allowRowHeight: Boolean(onChangeRowHeight) || Boolean(onChangeHeaderRowHeight),
+        allowResetButton: false,
+        customRender: ({ densityControl }) => (
+          <>
+            <UnifiedDataTableAdditionalDisplaySettings
+              rowHeight={rowHeight}
+              onChangeRowHeight={onChangeRowHeight}
+              onChangeRowHeightLines={onChangeRowHeightLines}
+              headerRowHeight={headerRowHeight}
+              onChangeHeaderRowHeight={onChangeHeaderRowHeight}
+              onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
+              maxAllowedSampleSize={maxAllowedSampleSize}
+              sampleSize={sampleSizeState}
+              onChangeSampleSize={onUpdateSampleSize}
+              lineCountInput={lineCountInput}
+              headerLineCountInput={headerLineCountInput}
+              densityControl={densityControl}
+            />
+          </>
+        ),
+      };
+    }, [
+      headerRowHeight,
+      maxAllowedSampleSize,
+      onChangeHeaderRowHeight,
+      onChangeHeaderRowHeightLines,
+      onChangeRowHeight,
+      onChangeRowHeightLines,
+      onUpdateHeaderRowHeight,
+      onUpdateRowHeight,
+      onUpdateSampleSize,
+      rowHeight,
+      sampleSizeState,
+      onUpdateDataGridDensity,
+      lineCountInput,
+      headerLineCountInput,
+    ]);
+
+    const toolbarVisibility = useMemo(
+      () =>
+        defaultColumns
+          ? {
+              ...toolbarVisibilityDefaults,
+              showColumnSelector: false,
+              showSortSelector: isSortEnabled,
+              additionalControls,
+              showDisplaySelector,
+              showKeyboardShortcuts,
+              showFullScreenSelector: showFullScreenButton,
+            }
+          : {
+              ...toolbarVisibilityDefaults,
+              showSortSelector: isSortEnabled,
+              additionalControls,
+              showDisplaySelector,
+              showKeyboardShortcuts,
+              showFullScreenSelector: showFullScreenButton,
+            },
+      [
+        defaultColumns,
+        isSortEnabled,
+        additionalControls,
+        showDisplaySelector,
+        showKeyboardShortcuts,
+        showFullScreenButton,
+      ]
+    );
+
+    const rowHeightsOptions = useRowHeightsOptions({
+      rowHeightLines,
+      rowLineHeight: rowLineHeightOverride,
+    });
+
+    const handleOnScroll = useCallback(
+      (event: { scrollTop: number }) => {
+        setHasScrolledToBottom((prevHasScrolledToBottom) => {
+          if (loadingState !== DataLoadingState.loaded) {
+            return prevHasScrolledToBottom;
           }
-        : {
-            ...toolbarVisibilityDefaults,
-            showSortSelector: isSortEnabled,
-            additionalControls,
-            showDisplaySelector,
-            showKeyboardShortcuts,
-            showFullScreenSelector: showFullScreenButton,
-          },
-    [
-      defaultColumns,
-      isSortEnabled,
-      additionalControls,
-      showDisplaySelector,
-      showKeyboardShortcuts,
-      showFullScreenButton,
-    ]
-  );
 
-  const rowHeightsOptions = useRowHeightsOptions({
-    rowHeightLines,
-    rowLineHeight: rowLineHeightOverride,
-  });
+          // We need to manually query the react-window wrapper since EUI doesn't
+          // expose outerRef in virtualizationOptions, but we should request it
+          const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
 
-  const handleOnScroll = useCallback(
-    (event: { scrollTop: number }) => {
-      setHasScrolledToBottom((prevHasScrolledToBottom) => {
-        if (loadingState !== DataLoadingState.loaded) {
-          return prevHasScrolledToBottom;
-        }
+          if (!outerRef) {
+            return prevHasScrolledToBottom;
+          }
 
-        // We need to manually query the react-window wrapper since EUI doesn't
-        // expose outerRef in virtualizationOptions, but we should request it
-        const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+          // Account for footer height when it's visible to avoid flickering
+          const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
+          const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
+          const isScrolledToBottom =
+            event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
 
-        if (!outerRef) {
-          return prevHasScrolledToBottom;
-        }
+          return isScrollable && isScrolledToBottom;
+        });
+      },
+      [dataGridWrapper, loadingState]
+    );
 
-        // Account for footer height when it's visible to avoid flickering
-        const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
-        const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
-        const isScrolledToBottom =
-          event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
+    const { run: throttledHandleOnScroll } = useThrottleFn(handleOnScroll, { wait: 200 });
 
-        return isScrollable && isScrolledToBottom;
-      });
-    },
-    [dataGridWrapper, loadingState]
-  );
+    useEffect(() => {
+      if (loadingState === DataLoadingState.loadingMore) {
+        setHasScrolledToBottom(false);
+      }
+    }, [loadingState]);
 
-  const { run: throttledHandleOnScroll } = useThrottleFn(handleOnScroll, { wait: 200 });
+    const virtualizationOptions = useMemo(() => {
+      const options = {
+        onScroll: paginationMode === 'multiPage' ? undefined : throttledHandleOnScroll,
+      };
 
-  useEffect(() => {
-    if (loadingState === DataLoadingState.loadingMore) {
-      setHasScrolledToBottom(false);
-    }
-  }, [loadingState]);
+      // Don't use row "overscan" when showing Summary column since
+      // rendering so much DOM content in each cell impacts performance
+      if (defaultColumns) {
+        return options;
+      }
 
-  const virtualizationOptions = useMemo(() => {
-    const options = {
-      onScroll: paginationMode === 'multiPage' ? undefined : throttledHandleOnScroll,
-    };
+      return {
+        ...VIRTUALIZATION_OPTIONS,
+        ...options,
+      };
+    }, [defaultColumns, paginationMode, throttledHandleOnScroll]);
 
-    // Don't use row "overscan" when showing Summary column since
-    // rendering so much DOM content in each cell impacts performance
-    if (defaultColumns) {
-      return options;
+    const isRenderComplete = loadingState !== DataLoadingState.loading;
+
+    if (!rowCount && loadingState === DataLoadingState.loading) {
+      return (
+        <div className="euiDataGrid__loading" data-test-subj="unifiedDataTableLoading">
+          <EuiText size="xs" color="subdued">
+            <EuiLoadingSpinner />
+            <EuiSpacer size="s" />
+            <FormattedMessage
+              id="unifiedDataTable.loadingResults"
+              defaultMessage="Loading results"
+            />
+          </EuiText>
+        </div>
+      );
     }
 
-    return {
-      ...VIRTUALIZATION_OPTIONS,
-      ...options,
-    };
-  }, [defaultColumns, paginationMode, throttledHandleOnScroll]);
-
-  const isRenderComplete = loadingState !== DataLoadingState.loading;
-
-  if (!rowCount && loadingState === DataLoadingState.loading) {
-    return (
-      <div className="euiDataGrid__loading" data-test-subj="unifiedDataTableLoading">
-        <EuiText size="xs" color="subdued">
-          <EuiLoadingSpinner />
-          <EuiSpacer size="s" />
-          <FormattedMessage id="unifiedDataTable.loadingResults" defaultMessage="Loading results" />
-        </EuiText>
-      </div>
-    );
-  }
-
-  if (!rowCount) {
-    return (
-      <div
-        className="euiDataGrid__noResults"
-        data-render-complete={isRenderComplete}
-        data-shared-item=""
-        data-title={searchTitle}
-        data-description={searchDescription}
-        data-document-number={0}
-      >
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="discoverApp" size="m" color="subdued" />
-          <EuiSpacer size="s" />
-          <FormattedMessage
-            id="unifiedDataTable.noResultsFound"
-            defaultMessage="No results found"
-          />
-        </EuiText>
-      </div>
-    );
-  }
+    if (!rowCount) {
+      return (
+        <div
+          className="euiDataGrid__noResults"
+          data-render-complete={isRenderComplete}
+          data-shared-item=""
+          data-title={searchTitle}
+          data-description={searchDescription}
+          data-document-number={0}
+        >
+          <EuiText size="xs" color="subdued">
+            <EuiIcon type="discoverApp" size="m" color="subdued" />
+            <EuiSpacer size="s" />
+            <FormattedMessage
+              id="unifiedDataTable.noResultsFound"
+              defaultMessage="No results found"
+            />
+          </EuiText>
+        </div>
+      );
+    }
 
   return (
     <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
