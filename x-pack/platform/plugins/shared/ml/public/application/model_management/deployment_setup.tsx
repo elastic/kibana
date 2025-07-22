@@ -826,7 +826,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           errors={errors}
           isUpdate={isUpdate}
           disableAdaptiveResourcesControl={
-            !showNodeInfo || !nlpSettings.modelDeployment.allowStaticAllocations
+            !showNodeInfo || nlpSettings.modelDeployment?.allowStaticAllocations === false
           }
           deploymentsParams={
             isModelNotDownloaded || !isNLPModelItem(model)
@@ -937,7 +937,6 @@ export const getUserInputModelDeploymentParamsProvider =
     const deploymentParamsMapper = new DeploymentParamsMapper(
       getNewJobLimits(),
       cloudInfo,
-      showNodeInfo,
       nlpSettings
     );
 
