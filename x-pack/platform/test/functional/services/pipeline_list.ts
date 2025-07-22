@@ -6,19 +6,18 @@
  */
 import { FtrProviderContext } from '../ftr_provider_context';
 
+interface Row {
+  selected: boolean;
+  id: string;
+  description: string;
+  lastModified: string;
+  username: string;
+}
+
 export function PipelineListProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const random = getService('random');
-
-  interface Row {
-    selected: boolean;
-    id: string;
-    description: string;
-    lastModified: string;
-    username: string;
-  }
-
   // test subject selectors
   const SUBJ_CONTAINER = `pipelineList`;
   const SUBJ_BTN_ADD = `pipelineList > btnAdd`;
