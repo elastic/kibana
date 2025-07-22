@@ -146,7 +146,8 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
-export const SUCCESS_TOASTER = '[class*="euiToast-success"] [data-test-subj="euiToastHeader"]';
+export const SUCCESS_TOASTER_HEADER =
+  '[class*="euiToast-success"] [data-test-subj="euiToastHeader"]';
 
 export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
 
@@ -359,6 +360,8 @@ export const ESQL_QUERY_TITLE = '[data-test-subj="esqlQueryPropertyTitle"]';
 export const ESQL_QUERY_VALUE = '[data-test-subj="esqlQueryPropertyValue"]';
 
 export const PER_FIELD_DIFF_WRAPPER = '[data-test-subj="ruleUpgradePerFieldDiffWrapper"]';
+export const FIELD_UPGRADE_WRAPPER = (fieldName: string) =>
+  `[data-test-subj="${fieldName}-upgradeWrapper"]`;
 export const PER_FIELD_DIFF_DEFINITION_SECTION = '[data-test-subj="perFieldDiffDefinitionSection"]';
 
 export const MODIFIED_RULE_BADGE = '[data-test-subj="upgradeRulesTableModifiedColumnBadge"]';

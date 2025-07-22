@@ -16,11 +16,12 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
+  getDefaultSort,
+  getSortArray,
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverAppState } from '../discover_app_state_container';
 import { DiscoverServices } from '../../../../build_services';
-import { getDefaultSort, getSortArray } from '../../../../utils/sorting';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 

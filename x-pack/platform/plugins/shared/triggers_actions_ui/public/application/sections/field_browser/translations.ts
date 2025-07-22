@@ -34,6 +34,13 @@ export const FIELDS_BROWSER = i18n.translate(
   }
 );
 
+export const FIELDS_SEARCH = i18n.translate(
+  'xpack.triggersActionsUI.fieldBrowser.fieldBrowserSearch',
+  {
+    defaultMessage: 'Search',
+  }
+);
+
 export const DESCRIPTION = i18n.translate('xpack.triggersActionsUI.fieldBrowser.descriptionLabel', {
   defaultMessage: 'Description',
 });
@@ -82,6 +89,13 @@ export const NO_FIELDS_MATCH = i18n.translate(
   'xpack.triggersActionsUI.fieldBrowser.noFieldsMatchLabel',
   {
     defaultMessage: 'No fields match',
+  }
+);
+
+export const FILTER_OPTIONS_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.fieldBrowser.filterOptionsLabel',
+  {
+    defaultMessage: 'Search field for filtering options',
   }
 );
 

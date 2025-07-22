@@ -379,6 +379,7 @@ export interface DocLinks {
     readonly createDetectionRules: string;
     readonly updatePrebuiltDetectionRules: string;
     readonly prebuiltRuleCustomizationPromoBlog: string;
+    readonly resolvePrebuiltRuleConflicts: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {

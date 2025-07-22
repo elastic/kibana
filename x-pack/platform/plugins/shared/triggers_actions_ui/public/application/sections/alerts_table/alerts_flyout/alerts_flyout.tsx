@@ -15,6 +15,7 @@ import {
   EuiPagination,
   EuiProgress,
 } from '@elastic/eui';
+import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
 import type { Alert, AlertsTableConfigurationRegistry } from '../../../../types';
 
 const AlertsFlyoutHeader = lazy(() => import('./alerts_flyout_header'));
@@ -105,8 +106,27 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     [Header, passedProps]
   );
 
+  const ALERT_FLYOUT_ARIA_LABEL =
+    alert && alert[ALERT_RULE_CATEGORY]
+      ? i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.ariaLabel', {
+          defaultMessage: '{alertCategory}',
+          values: { alertCategory: String(alert[ALERT_RULE_CATEGORY]) },
+        })
+      : i18n.translate(
+          'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.ariaLabelDefault',
+          {
+            defaultMessage: 'Alert details',
+          }
+        );
+
   return (
-    <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={false}>
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      data-test-subj="alertsFlyout"
+      ownFocus={false}
+      aria-label={ALERT_FLYOUT_ARIA_LABEL}
+    >
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <Suspense fallback={null}>
