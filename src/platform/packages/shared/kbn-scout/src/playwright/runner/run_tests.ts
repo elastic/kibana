@@ -144,7 +144,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const globalFlags = getFlags(process.argv.slice(2), {
     allowUnexpected: true,
   });
-  const logsLevel = pickLevelFromFlags(globalFlags, { default: 'info' });
+  // Temporarily use `debug` log level for Playwright tests to better understand test performance issues;
+  // We are going to change it to `info` in the future. Servers are always started in `info` mode by default.
+  const logsLevel = pickLevelFromFlags(globalFlags, { default: 'debug' });
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
