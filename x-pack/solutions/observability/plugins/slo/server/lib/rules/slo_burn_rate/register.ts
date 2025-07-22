@@ -104,7 +104,7 @@ export function sloBurnRateRuleType(
               path_match: 'kibana.alert.grouping.*',
               match_mapping_type: 'string',
               mapping: {
-                type: 'keyword',
+                type: 'keyword' as const,
                 ignore_above: 1024,
               },
             },
