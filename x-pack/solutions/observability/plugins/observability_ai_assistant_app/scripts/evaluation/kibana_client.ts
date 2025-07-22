@@ -574,7 +574,7 @@ export class KibanaClient {
                       properties: {
                         index: {
                           type: 'number',
-                          description: 'The number of the criterion',
+                          description: 'The index number of the criterion',
                         },
                         score: {
                           type: 'number',
@@ -605,28 +605,35 @@ export class KibanaClient {
           }
         ).criteria;
 
-        const scores = scoredCriteria
-          .map(({ index, score, reasoning }) => {
-            return {
-              criterion: criteria[index],
-              score,
-              reasoning,
-            };
-          })
-          .concat({
-            score: errors.length === 0 ? 1 : 0,
-            criterion: 'The conversation did not encounter any errors',
-            reasoning: errors.length
-              ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
-              : 'No errors occurred',
-          });
+        const scoredMap = new Map(scoredCriteria.map((c) => [c.index, c] as const));
+
+        // Although very rare, the LLM judge can sometimes skip evaluation of certain criteria.
+        // The fallback default score is 0, with self-explanatory reasoning.
+        const scores = criteria.map((criterion, idx) => {
+          const criterionScore = scoredMap.get(idx);
+          return {
+            criterion,
+            score: criterionScore?.score ?? 0,
+            reasoning: criterionScore
+              ? criterionScore.reasoning
+              : 'No score returned by LLM judge, defaulting to 0.',
+          };
+        });
+
+        scores.push({
+          score: errors.length === 0 ? 1 : 0,
+          criterion: 'The conversation did not encounter any errors',
+          reasoning: errors.length
+            ? `The following errors occurred: ${errors.map((error) => error.error.message)}`
+            : 'No errors occurred',
+        });
 
         const result: EvaluationResult = {
           name: currentTitle,
           category: firstSuiteName,
           conversationId,
           messages,
-          passed: scoredCriteria.every(({ score }) => score >= 1),
+          passed: scores.every(({ score }) => score === 1),
           scores,
           errors,
         };

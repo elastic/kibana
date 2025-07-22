@@ -1462,6 +1462,8 @@
       "@kbn/osquery-plugin/*": ["x-pack/platform/plugins/shared/osquery/*"],
       "@kbn/paertial-results-example-plugin": ["examples/partial_results_example"],
       "@kbn/paertial-results-example-plugin/*": ["examples/partial_results_example/*"],
+      "@kbn/page-attachment-schema": ["x-pack/platform/packages/shared/kbn-page-attachment-schema"],
+      "@kbn/page-attachment-schema/*": ["x-pack/platform/packages/shared/kbn-page-attachment-schema/*"],
       "@kbn/painless-lab-plugin": ["x-pack/platform/plugins/private/painless_lab"],
       "@kbn/painless-lab-plugin/*": ["x-pack/platform/plugins/private/painless_lab/*"],
       "@kbn/palettes": ["src/platform/packages/shared/kbn-palettes"],
