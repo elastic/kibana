@@ -15,11 +15,11 @@ import { HostsTimeRangeMetadataProvider } from '../hooks/use_hosts_metadata_prov
 export const HostsContainer = () => {
   return (
     <UnifiedSearchProvider>
-      {/* <HostsTimeRangeMetadataProvider> */}
-      <UnifiedSearchBar />
-      <EuiSpacer size="m" />
-      <HostsContent />
-      {/* </HostsTimeRangeMetadataProvider> */}
+      <HostsTimeRangeMetadataProvider>
+        <UnifiedSearchBar />
+        <EuiSpacer size="m" />
+        <HostsContent />
+      </HostsTimeRangeMetadataProvider>
     </UnifiedSearchProvider>
   );
 };

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { useUnifiedSearch } from './use_unified_search';
+import { useUnifiedSearchContext } from './use_unified_search';
 import { TimeRangeMetadataProvider } from '../../../../hooks/use_time_range_metadata';
 
 export function HostsTimeRangeMetadataProvider({ children }: { children: React.ReactNode }) {
-  const { parsedDateRange } = useUnifiedSearch();
+  const { parsedDateRange } = useUnifiedSearchContext();
 
   return (
     <TimeRangeMetadataProvider

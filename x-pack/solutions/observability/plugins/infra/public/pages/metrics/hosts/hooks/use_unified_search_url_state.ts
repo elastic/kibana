@@ -36,7 +36,7 @@ const INITIAL_HOSTS_STATE: HostsState = {
   panelFilters: [],
   dateRange: INITIAL_DATE_RANGE,
   limit: DEFAULT_HOST_LIMIT,
-  preferredSchema: 'semconv',
+  preferredSchema: null,
 };
 
 export type HostsStateAction =
@@ -78,7 +78,6 @@ export const useHostsUrlState = (): [HostsState, Dispatch<HostsStateAction>] => 
       ...INITIAL_HOSTS_STATE,
       dateRange: getTime(),
       limit: localStorageHostLimit ?? INITIAL_HOSTS_STATE.limit,
-      preferredSchema: 'semconv',
     },
     decodeUrlState,
     encodeUrlState,
@@ -87,6 +86,7 @@ export const useHostsUrlState = (): [HostsState, Dispatch<HostsStateAction>] => 
   });
 
   const [search, setSearch] = useReducer(reducer, urlState);
+
   if (!deepEqual(search, urlState)) {
     setUrlState(search);
     if (localStorageHostLimit !== search.limit) {
@@ -146,7 +146,7 @@ const HostsStateRT = rt.type({
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   limit: rt.number,
-  preferredSchema: rt.union([rt.literal('ecs'), rt.literal('semconv')]),
+  preferredSchema: rt.union([rt.literal('ecs'), rt.literal('semconv'), rt.null]),
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;

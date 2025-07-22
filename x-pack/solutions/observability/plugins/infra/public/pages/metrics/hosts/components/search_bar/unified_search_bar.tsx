@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -18,78 +19,35 @@ import { useMetricsDataViewContext } from '../../../../../containers/metrics_sou
 import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
 import { SchemaSelector } from '../../../../../components/schema_selector';
-import { useTimeRangeMetadata } from '../../../../../hooks/use_time_range_metadata';
-import type { HostsState } from '../../hooks/use_unified_search_url_state';
-import { useHostsUrlState } from '../../hooks/use_unified_search_url_state';
+import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 
 export const UnifiedSearchBar = () => {
   const {
     services: { unifiedSearch },
   } = useKibanaContextForPlugin();
+  // const config = usePluginConfig();
   const { metricsView } = useMetricsDataViewContext();
-  const {
-    searchCriteria,
-    onLimitChange,
-    onPanelFiltersChange,
-    onSubmit,
-    onPreferredSchemaChange,
-    parsedDateRange,
-  } = useUnifiedSearchContext();
+  const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit, onPreferredSchemaChange } =
+    useUnifiedSearchContext();
   const { onPageRefreshStart } = usePerformanceContext();
-
-  const { data: timeRangeMetadata } = useTimeRangeMetadata({
-    dataSource: 'host',
-    start: parsedDateRange.from,
-    end: parsedDateRange.to,
-  });
 
   const { SearchBar } = unifiedSearch.ui;
 
-  // const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
-  const [hostsState, setHostsState] = useHostsUrlState();
+  const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
 
   const schemas = useMemo(() => timeRangeMetadata?.schemas || [], [timeRangeMetadata]);
 
-  // Set preferredSchema in URL if not set or not available
+  // Set preferredSchema in URL if not set
   useEffect(() => {
-    if (!schemas.length) return;
-    const current = hostsState.preferredSchema;
-    if (!current || !schemas.includes(current)) {
+    if (!timeRangeMetadata || schemas.length === 0) return;
+    const current = searchCriteria.preferredSchema;
+    // Only set if not set
+    if (current === null) {
       const next = schemas.includes('semconv') ? 'semconv' : schemas[0];
-      setHostsState({
-        ...hostsState,
-        preferredSchema: next,
-        type: 'SET_PREFERRED_SCHEMA',
-      });
+      onPreferredSchemaChange(next);
     }
-  }, [schemas, hostsState, setHostsState]);
+  }, [timeRangeMetadata, searchCriteria.preferredSchema, onPreferredSchemaChange, schemas]);
 
-  console.log('UnifiedSearchBar searchCriteria:', searchCriteria.preferredSchema);
-
-  const handleSchemaChange = useCallback(
-    (selected: HostsState['preferredSchema']) => {
-      setHostsState({
-        ...hostsState,
-        preferredSchema: selected,
-        type: 'SET_PREFERRED_SCHEMA',
-      });
-      console.log('UnifiedSearchBar handleSchemaChange:', selected);
-      if (onPreferredSchemaChange) {
-        onPreferredSchemaChange(selected);
-      }
-    },
-    [hostsState, setHostsState, onPreferredSchemaChange]
-  );
-
-  // Prepare options for SchemaSelector
-  const schemaOptions = useMemo(
-    () =>
-      schemas.map((schema) => ({
-        text: schema,
-        value: schema,
-      })),
-    [schemas]
-  );
   const handleRefresh = useCallback(
     (payload: { dateRange: TimeRange }, isUpdate?: boolean) => {
       // This makes sure `onSubmit` is only called when the submit button is clicked
@@ -106,9 +64,9 @@ export const UnifiedSearchBar = () => {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <SchemaSelector
-            onChange={handleSchemaChange}
-            options={schemaOptions}
-            value={hostsState.preferredSchema}
+            onChange={onPreferredSchemaChange}
+            schemas={schemas}
+            value={searchCriteria.preferredSchema}
           />
         </EuiFlexItem>
         <EuiFlexItem>
