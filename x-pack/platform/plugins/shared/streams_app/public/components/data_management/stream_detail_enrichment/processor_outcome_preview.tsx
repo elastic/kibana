@@ -51,10 +51,6 @@ import { ProcessingPreviewTable } from './processing_preview_table';
 export const FLYOUT_WIDTH_KEY = 'streamsEnrichment:flyoutWidth';
 
 export const ProcessorOutcomePreview = () => {
-  const isLoading = useSimulatorSelector(
-    (snapshot) => snapshot.matches('debouncingChanges') || snapshot.matches('runningSimulation')
-  );
-
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
 
   const areDataSourcesLoading = useStreamEnrichmentSelector((state) =>
@@ -79,6 +75,7 @@ export const ProcessorOutcomePreview = () => {
 
     return (
       <EuiEmptyPrompt
+        aria-live="polite"
         color="warning"
         iconType="warning"
         titleSize="s"
@@ -112,15 +109,13 @@ export const ProcessorOutcomePreview = () => {
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <OutcomePreviewTable />
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </>
   );
 };
 
 const formatter = getPercentageFormatter();
 
-const formatRateToPercentage = (rate?: number) =>
-  (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
+const formatRateToPercentage = (rate?: number) => (rate ? formatter.format(rate) : undefined);
 
 const PreviewDocumentsGroupBy = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
@@ -162,7 +157,6 @@ const PreviewDocumentsGroupBy = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
           badgeColor="success"
-          numFilters={simulationParsedRate}
           numActiveFilters={simulationParsedRate}
         >
           {previewDocsFilterOptions.outcome_filter_parsed.label}
@@ -170,7 +164,6 @@ const PreviewDocumentsGroupBy = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
           badgeColor="accent"
-          numFilters={simulationPartiallyParsedRate}
           numActiveFilters={simulationPartiallyParsedRate}
         >
           {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
@@ -178,7 +171,6 @@ const PreviewDocumentsGroupBy = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
           badgeColor="accent"
-          numFilters={simulationSkippedRate}
           numActiveFilters={simulationSkippedRate}
         >
           {previewDocsFilterOptions.outcome_filter_skipped.label}
@@ -186,7 +178,6 @@ const PreviewDocumentsGroupBy = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
           badgeColor="accent"
-          numFilters={simulationFailedRate}
           numActiveFilters={simulationFailedRate}
         >
           {previewDocsFilterOptions.outcome_filter_failed.label}

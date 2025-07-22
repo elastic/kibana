@@ -13,6 +13,7 @@ import { AssetImage } from '../../asset_image';
 export const RootStreamEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
+      aria-live="polite"
       titleSize="xs"
       icon={<AssetImage type="processorsCannotBeAddedToRootStreams" />}
       title={
@@ -41,6 +42,7 @@ export const RootStreamEmptyPrompt = () => {
 export const NoProcessorsEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
+      aria-live="polite"
       titleSize="xs"
       icon={<AssetImage type="extractFields" />}
       title={
