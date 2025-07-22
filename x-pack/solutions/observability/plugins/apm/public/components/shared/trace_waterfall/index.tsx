@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AutoSizer, WindowScroller } from 'react-virtualized';
@@ -74,10 +74,14 @@ function TraceWaterfallComponent() {
     colorBy,
     showLegend,
     serviceName,
+    warningMessage,
+    dismissWarning,
   } = useTraceWaterfallContext();
 
   if (!rootItem) {
-    return null;
+    return warningMessage ? (
+      <EuiCallOut color="warning" size="s" onDismiss={dismissWarning} title={warningMessage} />
+    ) : null;
   }
 
   return (

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import type { IWaterfallGetRelatedErrorsHref } from '../../../../common/waterfall/typings';
 import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
 import { WaterfallLegendType } from '../../../../common/waterfall/legend';
@@ -14,6 +15,14 @@ import { TOGGLE_BUTTON_WIDTH } from './toggle_accordion_button';
 import { ACCORDION_PADDING_LEFT } from './trace_item_row';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import { useTraceWaterfall } from './use_trace_waterfall';
+
+const FALLBACK_WARNING = i18n.translate(
+  'xpack.apm.traceWaterfallContext.warningMessage.genericFallbackWarning',
+  {
+    defaultMessage:
+      'The waterfall visual may be incomplete or missing until processing finishes. Try refreshing the page or adjusting the time range.',
+  }
+);
 
 interface TraceWaterfallContextProps {
   duration: number;
@@ -32,6 +41,8 @@ interface TraceWaterfallContextProps {
   colorBy: WaterfallLegendType;
   showLegend: boolean;
   serviceName?: string;
+  warningMessage?: string;
+  dismissWarning: () => void;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -46,6 +57,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   colorBy: WaterfallLegendType.ServiceName,
   showLegend: false,
   serviceName: '',
+  dismissWarning: () => {},
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -79,6 +91,11 @@ export function TraceWaterfallContextProvider({
   const { duration, traceWaterfall, maxDepth, rootItem, legends, colorBy } = useTraceWaterfall({
     traceItems,
   });
+  const [warningMessage, setWarningMessage] = useState(() =>
+    !rootItem ? FALLBACK_WARNING : undefined
+  );
+
+  const dismissWarning = () => setWarningMessage(undefined);
 
   const left = TOGGLE_BUTTON_WIDTH + ACCORDION_PADDING_LEFT * maxDepth;
   const right = 40;
@@ -104,6 +121,8 @@ export function TraceWaterfallContextProvider({
         colorBy,
         showLegend,
         serviceName,
+        warningMessage,
+        dismissWarning,
       }}
     >
       {children}
