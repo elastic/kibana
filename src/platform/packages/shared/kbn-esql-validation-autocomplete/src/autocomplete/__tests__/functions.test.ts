@@ -9,7 +9,7 @@
 import { FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { Location, ISuggestionItem } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
-import { getFunctionSignaturesByReturnType, setup } from './helpers';
+import { getFunctionSignaturesByReturnType, setup, createCustomCallbackMocks } from './helpers';
 import { uniq } from 'lodash';
 
 describe('functions arg suggestions', () => {
@@ -206,6 +206,93 @@ describe('functions arg suggestions', () => {
       'FROM index | EVAL FUNC_WITH_CONSTANT_ONLY_PARAM("lolz", /)'
     );
     expect(nonConstantOnlySuggestions.every((s) => !isColumn(s))).toBe(false);
+  });
+
+  it('filters aggregation functions based on basic license', async () => {
+    const { suggest } = await setup();
+    const callbacks = createCustomCallbackMocks();
+
+    const basicLicenseCallbacks = {
+      ...callbacks,
+      getLicense: jest.fn(async () =>
+        Promise.resolve({
+          hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
+        })
+      ),
+    };
+
+    const basicSuggestions = await suggest('FROM index | STATS agg = /', {
+      callbacks: basicLicenseCallbacks,
+    });
+
+    // Should include basic function but not platinum function
+    expect(basicSuggestions.some((s) => s.text.includes('CATEGORIZE'))).toBe(false);
+    expect(basicSuggestions.some((s) => s.text.includes('ST_EXTENT_AGG'))).toBe(true);
+  });
+
+  it('shows all aggregation functions with platinum license', async () => {
+    const { suggest } = await setup();
+    const callbacks = createCustomCallbackMocks();
+
+    const platinumLicenseCallbacks = {
+      ...callbacks,
+      getLicense: jest.fn(async () =>
+        Promise.resolve({
+          hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
+        })
+      ),
+    };
+
+    const platinumSuggestions = await suggest('FROM index | STATS agg = /', {
+      callbacks: platinumLicenseCallbacks,
+    });
+
+    // Should include all functions
+    expect(platinumSuggestions.some((s) => s.text.includes('CATEGORIZE'))).toBe(true);
+    expect(platinumSuggestions.some((s) => s.text.includes('ST_EXTENT_AGG'))).toBe(true);
+  });
+
+  it('filters scalar functions inside ST_EXTENT_AGG with basic license', async () => {
+    const { suggest } = await setup();
+    const callbacks = createCustomCallbackMocks();
+
+    const basicLicenseCallbacks = {
+      ...callbacks,
+      getLicense: jest.fn(async () =>
+        Promise.resolve({
+          hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
+        })
+      ),
+    };
+
+    const partialSuggestions = await suggest('FROM index | STATS agg = ST_EXTENT_AGG( /', {
+      callbacks: basicLicenseCallbacks,
+    });
+
+    // Should include basic function but not platinum function
+    expect(partialSuggestions.some((s) => s.text.includes('TO_CARTESIANPOINT'))).toBe(true);
+    expect(partialSuggestions.some((s) => s.text.includes('TO_CARTESIANSHAPE'))).toBe(false);
+  });
+
+  it('shows all scalar functions inside ST_EXTENT_AGG with platinum license', async () => {
+    const { suggest } = await setup();
+    const callbacks = createCustomCallbackMocks();
+
+    const platinumLicenseCallbacks = {
+      ...callbacks,
+      getLicense: jest.fn(async () =>
+        Promise.resolve({
+          hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
+        })
+      ),
+    };
+
+    const partialPlatinumSuggestions = await suggest('FROM index | STATS agg = ST_EXTENT_AGG( /', {
+      callbacks: platinumLicenseCallbacks,
+    });
+
+    expect(partialPlatinumSuggestions.some((s) => s.text.includes('TO_CARTESIANPOINT'))).toBe(true);
+    expect(partialPlatinumSuggestions.some((s) => s.text.includes('TO_CARTESIANSHAPE'))).toBe(true);
   });
 
   it('treats text and keyword as interchangeable', async () => {
