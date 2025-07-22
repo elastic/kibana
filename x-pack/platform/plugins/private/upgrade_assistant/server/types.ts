@@ -30,4 +30,5 @@ export interface RouteDependencies {
   current: SemVer;
   defaultTarget: number;
   version: Version;
+  cleanupReindexOperations: (indexNames: string[]) => Promise<void>;
 }

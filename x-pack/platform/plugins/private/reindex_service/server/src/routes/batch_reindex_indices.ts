@@ -14,7 +14,7 @@ import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
 import { ReindexWorker } from '../lib';
 import { reindexActionsFactory } from '../lib/reindex_actions';
 import { sortAndOrderReindexOperations } from '../lib/op_utils';
-import { RouteDependencies } from '../types';
+import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 import { reindexHandler } from '../lib/reindex_handler';
 import { GetBatchQueueResponse, PostBatchResponse } from './types';

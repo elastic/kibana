@@ -134,6 +134,10 @@ export class ReindexWorker {
     this.currentWorkerPadding = INITIAL_WORKER_PADDING_MS;
   };
 
+  public cleanupReindexOperations = async (indexNames: string[]) => {
+    await this.reindexService.cleanupReindexOperations(indexNames);
+  };
+
   /**
    * Should be called immediately after this server has started a new reindex operation.
    */

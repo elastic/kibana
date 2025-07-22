@@ -162,23 +162,6 @@ export interface ESUpgradeStatus {
   enrichedHealthIndicators: EnrichedDeprecationInfo[];
 }
 
-/* moved
-export interface ResolveIndexResponseFromES {
-  indices: Array<{
-    name: string;
-    // per https://github.com/elastic/elasticsearch/pull/57626
-    attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;
-    aliases?: string[];
-    data_stream?: string;
-  }>;
-  aliases: Array<{
-    name: string;
-    indices: string[];
-  }>;
-  data_streams: Array<{ name: string; backing_indices: string[]; timestamp_field: string }>;
-}
-  */
-
 export const ML_UPGRADE_OP_TYPE = 'upgrade-assistant-ml-upgrade-operation';
 
 export interface MlOperation {

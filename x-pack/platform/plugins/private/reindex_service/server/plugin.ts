@@ -20,7 +20,7 @@ import {
 } from '@kbn/core/server';
 
 import { reindexOperationSavedObjectType, Version } from '@kbn/upgrade-assistant-pkg-server';
-import { RouteDependencies } from './src/types';
+import { RouteDependencies, ReindexServiceServerPluginStart } from './types';
 
 import { ReindexWorker } from './src/lib';
 import { createReindexWorker } from './src/create_reindex_worker';
@@ -35,7 +35,9 @@ interface PluginsStart {
   security: SecurityPluginStart;
 }
 
-export class ReindexServiceServerPlugin implements Plugin {
+export class ReindexServiceServerPlugin
+  implements Plugin<void, ReindexServiceServerPluginStart, PluginsSetup, PluginsStart>
+{
   private reindexWorker: ReindexWorker | null = null;
 
   // Properties set at setup
@@ -106,6 +108,12 @@ export class ReindexServiceServerPlugin implements Plugin {
     });
 
     this.reindexWorker?.start();
+
+    return {
+      cleanupReindexOperations: this.reindexWorker?.cleanupReindexOperations.bind(
+        this.reindexWorker
+      ),
+    };
   }
 
   public stop() {
