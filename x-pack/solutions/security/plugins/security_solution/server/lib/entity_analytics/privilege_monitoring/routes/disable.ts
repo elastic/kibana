@@ -10,8 +10,13 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { DisableMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/disable.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 
 export const disablePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -47,6 +52,11 @@ export const disablePrivilegeMonitoringEngineRoute = (
       ): Promise<IKibanaResponse<DisableMonitoringEngineResponse>> => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
+
+        await assertAdvancedSettingsEnabled(
+          await context.core,
+          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+        );
 
         try {
           const body = await secSol.getPrivilegeMonitoringDataClient().disable();

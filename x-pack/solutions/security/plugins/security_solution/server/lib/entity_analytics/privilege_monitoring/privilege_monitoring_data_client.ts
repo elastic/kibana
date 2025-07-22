@@ -126,16 +126,29 @@ export class PrivilegeMonitoringDataClient {
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
     // create default index source for privilege monitoring for each namespace
-    const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
-      type: 'index',
-      managed: true,
-      indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
-      name: `default-monitoring-index-${this.opts.namespace}`,
-    });
-    this.log(
-      'debug',
-      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-    );
+    try {
+      const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
+        type: 'index',
+        managed: true,
+        indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
+        name: `default-monitoring-index-${this.opts.namespace}`,
+      });
+      this.log(
+        'debug',
+        `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+      );
+    } catch (e) {
+      this.log(
+        'error',
+        `Failed to create default index source for privilege monitoring: ${e.message}`
+      );
+      this.audit(
+        PrivilegeMonitoringEngineActions.INIT,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to create default index source for privilege monitoring',
+        e
+      );
+    }
     try {
       this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await this.createIngestPipelineIfDoesNotExist();
@@ -740,8 +753,7 @@ export class PrivilegeMonitoringDataClient {
   public async disable() {
     this.log('info', 'Disabling Privileged Monitoring Engine');
     const errors: string[] = [];
-
-    // Check the currenrt status of the engine
+    // Check the current status of the engine
     const currentEngineStatus = await this.getEngineStatus();
     if (currentEngineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
       this.log(
