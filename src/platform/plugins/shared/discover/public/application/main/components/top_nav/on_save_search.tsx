@@ -151,6 +151,7 @@ export async function onSaveSearch({
       isTitleDuplicateConfirmed,
     };
 
+    // TODO: put in redux action
     if (newCopyOnSave) {
       await state.actions.updateAdHocDataViewId();
     }
