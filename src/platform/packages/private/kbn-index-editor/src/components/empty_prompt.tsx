@@ -30,15 +30,13 @@ export const EmptyPrompt: FC = () => {
   return (
     <EuiEmptyPrompt
       body={
-        <p>
-          <EuiText color="subdued" textAlign="center" size="s">
-            <FormattedMessage
-              id="indexEditor.emptyPrompt.description"
-              defaultMessage="Start creating your lookup index by adding cells to the table, by {uploading} or dragging and dropping a file."
-              values={{ uploading }}
-            />
-          </EuiText>
-        </p>
+        <EuiText color="subdued" textAlign="center" size="s">
+          <FormattedMessage
+            id="indexEditor.emptyPrompt.description"
+            defaultMessage="Start creating your lookup index by adding cells to the table, by {uploading} or dragging and dropping a file."
+            values={{ uploading }}
+          />
+        </EuiText>
       }
     />
   );
