@@ -27,7 +27,6 @@ import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/ser
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosInstance, AxiosResponse, isAxiosError, AxiosRequestConfig } from 'axios';
 import { omit, pick, remove } from 'lodash';
-import pRetry from 'p-retry';
 import {
   concatMap,
   defer,
@@ -145,93 +144,6 @@ export class KibanaClient {
       }
       throw error;
     });
-  }
-
-  async installKnowledgeBase() {
-    this.log.info('Checking whether the knowledge base is installed');
-
-    const {
-      data: { ready },
-    } = await this.callKibana<{ ready: boolean }>('GET', {
-      pathname: '/internal/observability_ai_assistant/kb/status',
-    });
-
-    if (ready) {
-      this.log.success('Knowledge base is already installed');
-      return;
-    }
-
-    if (!ready) {
-      this.log.info('Installing knowledge base');
-    }
-
-    await pRetry(
-      async () => {
-        const response = await this.callKibana<{}>('POST', {
-          pathname: '/internal/observability_ai_assistant/kb/setup',
-          query: {
-            inference_id: '.elser-2-elasticsearch',
-          },
-        });
-        this.log.info('Knowledge base is ready');
-        return response.data;
-      },
-      { retries: 10 }
-    );
-
-    this.log.success('Knowledge base installed');
-  }
-
-  async createSpaceIfNeeded() {
-    if (!this.spaceId) {
-      return;
-    }
-
-    this.log.info(`Checking if space ${this.spaceId} exists`);
-
-    const spaceExistsResponse = await this.callKibana<{
-      id?: string;
-    }>('GET', {
-      pathname: `/api/spaces/space/${this.spaceId}`,
-      ignoreSpaceId: true,
-    }).catch((error) => {
-      if (isAxiosError(error) && error.response?.status === 404) {
-        return {
-          status: 404,
-          data: {
-            id: undefined,
-          },
-        };
-      }
-      throw error;
-    });
-
-    if (spaceExistsResponse.data.id) {
-      this.log.success(`Space id ${this.spaceId} found`);
-      return;
-    }
-
-    this.log.info(`Creating space ${this.spaceId}`);
-
-    const spaceCreatedResponse = await this.callKibana<{ id: string }>(
-      'POST',
-      {
-        pathname: '/api/spaces/space',
-        ignoreSpaceId: true,
-      },
-      {
-        id: this.spaceId,
-        name: this.spaceId,
-      }
-    );
-
-    if (spaceCreatedResponse.status === 200) {
-      this.log.success(`Created space ${this.spaceId}`);
-    } else {
-      throw new Error(
-        `Error creating space: ${spaceCreatedResponse.status} - ${spaceCreatedResponse.data}`
-      );
-    }
   }
 
   getMessages(message: string | Array<Message['message']>): Array<Message['message']> {

@@ -45,8 +45,6 @@ function runEvaluations() {
             requestTimeout: 30_000,
           });
 
-          await kibanaClient.createSpaceIfNeeded();
-
           const connectors = await kibanaClient.getConnectors();
 
           if (!connectors.length) {
@@ -73,8 +71,6 @@ function runEvaluations() {
                 });
 
           log.info(`Using connector ${evaluationConnector.id} for evaluation`);
-
-          await kibanaClient.installKnowledgeBase();
 
           const scenarios =
             (argv.files !== undefined &&
