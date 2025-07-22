@@ -323,8 +323,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
-    // for event filters forms
-    // show extra operators for wildcards when field supports matches
+    // Extra operators for wildcards will be removed if the field does not support matches
     const doesFieldSupportMatches = entry.field !== undefined && fieldSupportsMatches(entry.field);
     const isEventFilterList = listType === ExceptionListTypeEnum.ENDPOINT_EVENTS;
     const isTrustedAppsList = listType === ExceptionListTypeEnum.ENDPOINT_TRUSTED_APPS;

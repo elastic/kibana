@@ -96,5 +96,5 @@ export const getAddedFieldsCounts = (formFields: string[]): { [k: string]: numbe
  * @param formFields
  * @returns boolean
  */
-export const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
-  Object.values(formFieldsList).some((e) => e > 1);
+export const computeHasDuplicateFields = (formFieldsMap: Record<string, number>): boolean =>
+  Object.values(formFieldsMap).some((e) => e > 1);
