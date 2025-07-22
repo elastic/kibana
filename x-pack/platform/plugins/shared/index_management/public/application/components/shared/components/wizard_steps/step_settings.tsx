@@ -101,7 +101,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
               flush="right"
               href={documentationService.getSettingsDocumentationLink()}
               target="_blank"
-              iconType="help"
+              iconType="question"
             >
               <FormattedMessage
                 id="xpack.idxMgmt.formWizard.stepSettings.docsButtonLabel"

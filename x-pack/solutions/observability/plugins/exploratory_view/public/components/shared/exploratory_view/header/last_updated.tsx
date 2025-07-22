@@ -54,7 +54,7 @@ export function LastUpdated({ chartTimeRange }: Props) {
         position="top"
         content={<ChartCreationInfo {...chartTimeRange} />}
       >
-        <EuiIcon type="iInCircle" />
+        <EuiIcon type="info" />
       </StyledToolTipWrapper>{' '}
       <FormattedMessage
         id="xpack.exploratoryView.expView.lastUpdated.label"

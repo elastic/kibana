@@ -860,7 +860,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiIconTip
-                      type="iInCircle"
+                      type="info"
                       color="subdued"
                       content={
                         <FormattedMessage

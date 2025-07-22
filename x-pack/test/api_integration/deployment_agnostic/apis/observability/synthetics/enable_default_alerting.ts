@@ -31,8 +31,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const privateLocationTestService = new PrivateLocationTestService(getService);
 
-    const addMonitorAPI = async (monitor: any, statusCode = 200) => {
-      return addMonitorAPIHelper(supertest, monitor, statusCode, editorUser, samlAuth);
+    const addMonitorAPI = async (monitor: any, gettingStarted?: boolean) => {
+      return addMonitorAPIHelper(supertest, monitor, 200, editorUser, samlAuth, gettingStarted);
     };
 
     after(async () => {
@@ -46,7 +46,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({
+        types: ['synthetics-monitor-multi-space'],
+      });
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
       httpMonitorJson = {
         ..._httpMonitorJson,
@@ -96,7 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('enables alert when new monitor is added', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor, true);
 
       expect(apiResponse).eql(omitMonitorKeys({ ...newMonitor, spaceId: 'default' }));
 
@@ -115,7 +117,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('deletes (and recreates) the default rule when settings are updated', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor, true);
 
       expect(apiResponse).eql(omitMonitorKeys(newMonitor));
 
@@ -194,7 +196,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('doesnt throw errors when rule has already been deleted', async () => {
       const newMonitor = httpMonitorJson;
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      const { body: apiResponse } = await addMonitorAPI(newMonitor, true);
 
       expect(apiResponse).eql(omitMonitorKeys(newMonitor));
 

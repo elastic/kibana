@@ -33,7 +33,7 @@ describe('SizeParamEditor', () => {
   });
 
   it('should render an iconTip in the label if it was passed', () => {
-    const iconTip = <EuiIconTip position="right" content={'test'} type="questionInCircle" />;
+    const iconTip = <EuiIconTip position="right" content={'test'} type="question" />;
     const comp = shallowWithIntl(<SizeParamEditor {...defaultProps} iconTip={iconTip} />);
 
     expect(comp.props().label.props.children[1]).toEqual(iconTip);

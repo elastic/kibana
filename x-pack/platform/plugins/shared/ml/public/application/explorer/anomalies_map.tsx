@@ -240,7 +240,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
                       <EuiIconTip
                         content="Map colors indicate the number of anomalies in each area."
                         position="top"
-                        type="iInCircle"
+                        type="info"
                       />
                     ),
                   }}

@@ -48,7 +48,7 @@ export const DraggableList: React.FC<DraggableListProps> = ({
               title="At least one document is required"
               color="warning"
               size="s"
-              iconType="iInCircle"
+              iconType="info"
             />
           )}
           {isIdRule && actionIdsFields

@@ -7,43 +7,54 @@
 
 import { useCallback, useState } from 'react';
 import type { UpdateIndexOperation } from '../../../../../../common/update_index';
-import type { CorrectiveAction } from '../../../../../../common/types';
+import type { UpdateActions } from '../../../../../../common/types';
 import type { ApiService } from '../../../../lib/api';
 
 export interface UpdateIndexState {
   failedBefore: boolean;
   status: 'incomplete' | 'inProgress' | 'complete' | 'failed';
   reason?: string;
+  updateAction?: UpdateActions;
 }
 
 export interface UseUpdateIndexParams {
   indexName: string;
   api: ApiService;
-  correctiveAction?: CorrectiveAction;
 }
 
-export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIndexParams) => {
+export const useUpdateIndex = ({ indexName, api }: UseUpdateIndexParams) => {
   const [failedState, setFailedState] = useState<boolean>(false);
   const [updateIndexState, setUpdateIndexState] = useState<UpdateIndexState>({
     failedBefore: false,
     status: 'incomplete',
   });
 
-  const updateIndex = useCallback(async () => {
-    const operations: UpdateIndexOperation[] =
-      correctiveAction?.type === 'unfreeze' ? ['unfreeze'] : ['blockWrite', 'unfreeze'];
+  const updateIndex = useCallback(
+    async (action: UpdateActions) => {
+      const operations: UpdateIndexOperation[] =
+        action === 'unfreeze' ? ['unfreeze'] : ['blockWrite', 'unfreeze'];
 
-    setUpdateIndexState({ status: 'inProgress', failedBefore: failedState });
-    const res = await api.updateIndex(indexName, operations);
-    const status = res.error ? 'failed' : 'complete';
-    const failedBefore = failedState || status === 'failed';
-    setFailedState(failedBefore);
-    setUpdateIndexState({
-      status,
-      failedBefore,
-      ...(res.error && { reason: res.error.message.toString() }),
-    });
-  }, [api, correctiveAction, failedState, indexName]);
+      setUpdateIndexState({
+        status: 'inProgress',
+        failedBefore: failedState,
+        updateAction: action,
+      });
+      const res =
+        action === 'delete'
+          ? await api.deleteIndex(indexName)
+          : await api.updateIndex(indexName, operations);
+      const status = res.error ? 'failed' : 'complete';
+      const failedBefore = failedState || status === 'failed';
+      setFailedState(failedBefore);
+      setUpdateIndexState({
+        status,
+        failedBefore,
+        ...(res.error && { reason: res.error.message.toString() }),
+        updateAction: action,
+      });
+    },
+    [api, failedState, indexName]
+  );
 
   return {
     updateIndexState,

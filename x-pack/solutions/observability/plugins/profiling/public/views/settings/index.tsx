@@ -235,7 +235,7 @@ export function Settings() {
                   <>
                     <EuiFlexGroup gutterSize="xs">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="iInCircle" />
+                        <EuiIcon type="info" />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiFlexGroup direction="column" gutterSize="xs">

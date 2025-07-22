@@ -32,8 +32,10 @@ info:
 
     This documentation is derived from the `8.x` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+    This documentation contains work-in-progress information for future Elastic Stack releases.
   title: Kibana APIs
-  version: 1.0.2
+  version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/
@@ -19345,11 +19347,37 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
+          in: query
+          name: all_data
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               example:
+                aggregations:
+                  anonymized:
+                    buckets:
+                      allowed:
+                        doc_count: 1
+                      anonymized:
+                        doc_count: 1
+                      denied:
+                        doc_count: 1
+                all:
+                  - allowed: true
+                    anonymized: true
+                    createdAt: '2023-10-31T12:00:00Z'
+                    createdBy: user1
+                    field: user.name
+                    id: '1'
+                    namespace: default
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    updatedBy: user1
                 data:
                   - allowed: true
                     anonymized: true
@@ -19367,6 +19395,37 @@ paths:
               schema:
                 type: object
                 properties:
+                  aggregations:
+                    type: object
+                    properties:
+                      field_status:
+                        type: object
+                        properties:
+                          buckets:
+                            type: object
+                            properties:
+                              allowed:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              anonymized:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              denied:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                  all:
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
+                    type: array
                   data:
                     items:
                       $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
@@ -22869,6 +22928,69 @@ paths:
                 $ref: '#/components/schemas/Synthetics_getPrivateLocation'
           description: A successful response.
       summary: Get a private location
+      tags:
+        - synthetics
+    put:
+      description: |
+        Update an existing private location's label.
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+        When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+      operationId: put-private-location
+      parameters:
+        - description: The unique identifier of the private location to be updated.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putPrivateLocationRequestExample1:
+                description: Update a private location's label.
+                value: |-
+                  {
+                    "label": "Updated Private Location Name"
+                  }
+            schema:
+              type: object
+              properties:
+                label:
+                  description: A new label for the private location. Must be at least 1 character long.
+                  minLength: 1
+                  type: string
+              required:
+                - label
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "label": "Updated Private Location Name",
+                      "id": "test-private-location-id",
+                      "agentPolicyId": "test-private-location-id",
+                      "isServiceManaged": false,
+                      "isInvalid": false,
+                      "tags": ["private", "testing", "updated"],
+                      "geo": {
+                        "lat": 37.7749,
+                        "lon": -122.4194
+                      },
+                      "spaces": ["*"]
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+          description: A successful response.
+        '400':
+          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+        '404':
+          description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
+      summary: Update a private location
       tags:
         - synthetics
   /api/task_manager/_health:
@@ -47786,7 +47908,7 @@ components:
         defaultModel:
           type: string
           description: The generative artificial intelligence model for Google Gemini to use.
-          default: gemini-1.5-pro-002
+          default: gemini-2.5-pro
         gcpRegion:
           type: string
           description: The GCP region where the Vertex AI endpoint enabled.

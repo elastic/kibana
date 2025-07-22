@@ -18,17 +18,16 @@ const structuredOutput = z.object({
     .describe('Whether the index pattern contains the required fields for the query'),
 });
 
-export const getExplorePartialIndexMappingResponder = ({
+export const getExplorePartialIndexMappingResponder = async ({
   createLlmInstance,
 }: {
   createLlmInstance: CreateLlmInstance;
 }) => {
-  const llm = createLlmInstance();
+  const llm = await createLlmInstance();
   return async (state: typeof AnalyzeIndexPatternAnnotation.State) => {
     const { messages } = state;
 
     const lastMessage = messages[messages.length - 1];
-
     const result = await llm
       .withStructuredOutput(structuredOutput, { name: 'indexMappingAnalysis' })
       .invoke([

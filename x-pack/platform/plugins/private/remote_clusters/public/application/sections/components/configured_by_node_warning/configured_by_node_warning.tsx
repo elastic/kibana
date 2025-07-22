@@ -19,7 +19,7 @@ export const ConfiguredByNodeWarning: React.FC = () => {
         />
       }
       color="primary"
-      iconType="iInCircle"
+      iconType="info"
       data-test-subj="remoteClusterConfiguredByNodeWarning"
     />
   );

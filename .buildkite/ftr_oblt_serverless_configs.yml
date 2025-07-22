@@ -11,7 +11,6 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.logs_essentials.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/ai_assistant/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.logs_essentials.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts

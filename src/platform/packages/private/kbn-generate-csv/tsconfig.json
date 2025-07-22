@@ -31,5 +31,6 @@
     "@kbn/data-views-plugin",
     "@kbn/search-types",
     "@kbn/esql-utils",
+    "@kbn/safer-lodash-set",
   ]
 }

@@ -29,6 +29,7 @@ import { createBulkErrorObject } from '../../routes/utils';
 import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../../rule_schema';
 import { hasValidRuleType } from '../../rule_schema';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
+import type { BulkActionError } from '../api/rules/bulk_actions/bulk_actions_response';
 
 type PromiseFromStreams = RuleToImport | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -300,3 +301,20 @@ export const separateActionsAndSystemAction = (
   !isEmpty(actions)
     ? partition((action: RuleActionSchema) => actionsClient.isSystemAction(action.id))(actions)
     : [[], actions];
+
+export const createBulkActionError = ({
+  message,
+  statusCode,
+  id,
+}: {
+  message: string;
+  statusCode: number;
+  id: string;
+}): BulkActionError => {
+  const error: Error & { statusCode?: number } = new Error(message);
+  error.statusCode = statusCode;
+  return {
+    item: id,
+    error,
+  };
+};

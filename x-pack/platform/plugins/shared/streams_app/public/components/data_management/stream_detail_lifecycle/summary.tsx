@@ -12,6 +12,7 @@ import { Streams } from '@kbn/streams-schema';
 import { css } from '@emotion/react';
 import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
+import { formatBytes } from './helpers/format_bytes';
 
 const statCss = css`
   min-width: 200px;
@@ -39,7 +40,7 @@ export function RetentionSummary({
             hasPrivileges={definition.privileges.monitor}
             title="storageSize"
           >
-            {statsError || !stats ? '-' : stats.size}
+            {statsError || !stats || !stats.sizeBytes ? '-' : formatBytes(stats.sizeBytes)}
           </PrivilegesWarningIconWrapper>
         }
         description={i18n.translate('xpack.streams.streamDetailLifecycle.storageSize', {
@@ -55,7 +56,7 @@ export function RetentionSummary({
             hasPrivileges={definition.privileges.monitor}
             title="totalDocCount"
           >
-            {statsError || !stats ? '-' : formatNumber(stats.totalDocs, '0,0')}
+            {statsError || !stats || !stats.totalDocs ? '-' : formatNumber(stats.totalDocs, '0,0')}
           </PrivilegesWarningIconWrapper>
         }
         description={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {

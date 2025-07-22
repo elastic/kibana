@@ -5,28 +5,24 @@
  * 2.0.
  */
 
-import type {
-  BoundChatCompleteOptions,
-  BoundInferenceClient,
-  InferenceClient,
-} from '@kbn/inference-common';
+import type { BoundInferenceClient, BoundOptions, InferenceClient } from '@kbn/inference-common';
 import type { HttpHandler } from '@kbn/core/public';
 import { bindClient } from '../inference_client/bind_client';
 import { createInferenceRestClient } from './inference_client';
 
-interface UnboundOptions {
+interface RestOptions {
   fetch: HttpHandler;
   signal?: AbortSignal;
 }
 
-interface BoundOptions extends UnboundOptions {
-  bindTo: BoundChatCompleteOptions;
+interface BoundRestOptions extends RestOptions {
+  bindTo: BoundOptions;
 }
 
-export function createRestClient(options: UnboundOptions): InferenceClient;
-export function createRestClient(options: BoundOptions): BoundInferenceClient;
+export function createRestClient(options: RestOptions): InferenceClient;
+export function createRestClient(options: BoundRestOptions): BoundInferenceClient;
 export function createRestClient(
-  options: UnboundOptions | BoundOptions
+  options: RestOptions | BoundRestOptions
 ): BoundInferenceClient | InferenceClient {
   const { fetch, signal } = options;
   const client = createInferenceRestClient({ fetch, signal });

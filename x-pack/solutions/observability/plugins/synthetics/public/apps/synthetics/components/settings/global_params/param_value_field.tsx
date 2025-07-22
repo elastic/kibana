@@ -42,7 +42,7 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
             defaultMessage:
               'Assign a new value to update this parameter, or leave blank to keep the current value.',
           })}
-          iconType="iInCircle"
+          iconType="info"
         />
       </>
     );

@@ -156,7 +156,7 @@ export function TimeseriesChart({
                     css={{ fontWeight: 'normal' }}
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="iInCircle" />
+                      <EuiIcon type="info" />
                     </EuiFlexItem>
                     <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                   </EuiFlexGroup>

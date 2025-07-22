@@ -72,7 +72,7 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
-const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
+export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
@@ -564,6 +564,27 @@ const styles = {
     '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
       paddingTop: 0,
       paddingBottom: 0,
+    },
+
+    '.kbnDocViewer__fieldName': {
+      padding: euiThemeVars.euiSizeXS,
+      paddingLeft: 0,
+      lineHeight: euiThemeVars.euiLineHeight,
+
+      '.euiDataGridRowCell__popover &': {
+        fontSize: euiThemeVars.euiFontSizeS,
+      },
+    },
+
+    '.kbnDocViewer__fieldName_icon': {
+      paddingTop: `calc(${euiThemeVars.euiSizeXS} * 1.5)`,
+      lineHeight: euiThemeVars.euiSize,
+    },
+
+    '.kbnDocViewer__fieldName_multiFieldBadge': {
+      margin: `${euiThemeVars.euiSizeXS} 0`,
+      fontWeight: euiThemeVars.euiFontWeightRegular,
+      fontFamily: euiThemeVars.euiFontFamily,
     },
 
     '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {

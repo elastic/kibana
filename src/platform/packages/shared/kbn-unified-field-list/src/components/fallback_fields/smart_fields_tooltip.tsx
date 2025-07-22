@@ -22,7 +22,7 @@ const SmartFieldFallbackTooltip: React.FC<{
         values: { smartFields: associatedSmartFields },
       })}
       position="bottom"
-      type="questionInCircle"
+      type="question"
       size="s"
     />
   );

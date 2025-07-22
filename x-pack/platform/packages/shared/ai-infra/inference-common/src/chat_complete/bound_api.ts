@@ -5,31 +5,17 @@
  * 2.0.
  */
 
-import type { ChatCompleteOptions, ChatCompleteCompositeResponse } from './api';
-import type { ToolOptions } from './tools';
-
-/**
- * Static options used to call the {@link BoundChatCompleteAPI}
- */
-export type BoundChatCompleteOptions<
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
-> = Pick<ChatCompleteOptions<TToolOptions, TStream>, 'connectorId' | 'functionCalling'>;
+import { BoundOptions, UnboundOptions } from '../bind/bind_api';
+import type { ChatCompleteOptions, ChatCompleteAPIResponse } from './api';
 
 /**
  * Options used to call the {@link BoundChatCompleteAPI}
  */
-export type UnboundChatCompleteOptions<
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
-> = Omit<ChatCompleteOptions<TToolOptions, TStream>, 'connectorId' | 'functionCalling'>;
+export type UnboundChatCompleteOptions = UnboundOptions<ChatCompleteOptions>;
 
 /**
  * Version of {@link ChatCompleteAPI} that got pre-bound to a set of static parameters
  */
-export type BoundChatCompleteAPI = <
-  TToolOptions extends ToolOptions = ToolOptions,
-  TStream extends boolean = false
->(
-  options: UnboundChatCompleteOptions<TToolOptions, TStream>
-) => ChatCompleteCompositeResponse<TToolOptions, TStream>;
+export type BoundChatCompleteAPI = <TChatCompleteOptions extends UnboundChatCompleteOptions>(
+  options: TChatCompleteOptions
+) => ChatCompleteAPIResponse<TChatCompleteOptions & BoundOptions>;

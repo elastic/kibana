@@ -30,14 +30,24 @@ export const addMonitorAPIHelper = async (
   monitor: any,
   statusCode = 200,
   roleAuthc: RoleCredentials,
-  samlAuth: SamlAuthProviderType
+  samlAuth: SamlAuthProviderType,
+  gettingStarted?: boolean,
+  savedObjectType?: string
 ) => {
+  let queryParams = savedObjectType ? `savedObjectType=${savedObjectType}` : '';
+  if (gettingStarted) {
+    queryParams = `?gettingStarted=true${queryParams}`;
+  } else if (queryParams) {
+    queryParams = `?${queryParams}`;
+  }
+
   const result = await supertestAPI
-    .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+    .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + queryParams)
     .set(roleAuthc.apiKeyHeader)
     .set(samlAuth.getInternalRequestHeader())
-    .send(monitor)
-    .expect(statusCode);
+    .send(monitor);
+
+  expect(result.statusCode).eql(statusCode, JSON.stringify(result.body));
 
   if (statusCode === 200) {
     const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
@@ -135,7 +145,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .set(editorRoleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
-          .send(monitor)
+          .send({ ...monitor, spaces: [] })
           .expect(200);
         monitorId = apiResponse.body.id;
         expect(apiResponse.body[ConfigKey.NAMESPACE]).eql(EXPECTED_NAMESPACE);

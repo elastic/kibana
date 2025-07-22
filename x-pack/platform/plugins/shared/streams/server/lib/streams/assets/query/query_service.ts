@@ -6,7 +6,6 @@
  */
 
 import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { StreamsPluginStartDependencies } from '../../../../types';
 import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
 import { AssetClient } from '../asset_client';
@@ -25,12 +24,7 @@ export class QueryService {
     request: KibanaRequest;
     assetClient: AssetClient;
   }): Promise<QueryClient> {
-    const [core, pluginStart] = await this.coreSetup.getStartServices();
-
-    const soClient = core.savedObjects.getScopedClient(request);
-    const uiSettings = core.uiSettings.asScopedToClient(soClient);
-    const isSignificantEventsEnabled =
-      (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
+    const [_, pluginStart] = await this.coreSetup.getStartServices();
 
     const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
     const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
@@ -41,7 +35,7 @@ export class QueryService {
         rulesClient,
         logger: this.logger,
       },
-      isSignificantEventsEnabled
+      true
     );
   }
 }

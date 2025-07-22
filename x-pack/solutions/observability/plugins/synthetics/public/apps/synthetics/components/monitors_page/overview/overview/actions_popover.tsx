@@ -116,9 +116,9 @@ export function ActionsPopover({
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
     locationId: locationId ?? monitor.locationId,
-    spaceId: monitor.spaceId,
+    spaces: monitor.spaces,
   });
-  const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaceId: monitor.spaceId });
+  const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });
 
   const canEditSynthetics = useCanEditSynthetics();
 

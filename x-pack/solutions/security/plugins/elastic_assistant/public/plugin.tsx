@@ -13,6 +13,7 @@ import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -93,16 +94,18 @@ export class ElasticAssistantPublicPlugin
           }}
         >
           <KibanaThemeProvider {...coreStart}>
-            <ReactQueryClientProvider>
-              <AssistantSpaceIdProvider>
-                <AssistantProvider>
-                  <Suspense fallback={null}>
-                    <AssistantNavLink />
-                    <AssistantOverlay />
-                  </Suspense>
-                </AssistantProvider>
-              </AssistantSpaceIdProvider>
-            </ReactQueryClientProvider>
+            <NavigationProvider core={services}>
+              <ReactQueryClientProvider>
+                <AssistantSpaceIdProvider>
+                  <AssistantProvider>
+                    <Suspense fallback={null}>
+                      <AssistantNavLink />
+                      <AssistantOverlay />
+                    </Suspense>
+                  </AssistantProvider>
+                </AssistantSpaceIdProvider>
+              </ReactQueryClientProvider>
+            </NavigationProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,

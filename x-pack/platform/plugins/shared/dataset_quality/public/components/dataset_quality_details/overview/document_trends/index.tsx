@@ -94,7 +94,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
         <h5>{overviewPanelDatasetQualityIndicatorDegradedDocs}</h5>
       </EuiTitle>
       <EuiToolTip content={degradedDocsTooltip}>
-        <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        <EuiIcon size="m" color="subdued" type="question" className="eui-alignTop" />
       </EuiToolTip>
     </EuiFlexItem>
   ) : (
@@ -110,7 +110,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
         <h5>{overviewTrendsDocsText}</h5>
       </EuiTitle>
       <EuiToolTip content={trendDocsTooltip}>
-        <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        <EuiIcon size="m" color="subdued" type="question" className="eui-alignTop" />
       </EuiToolTip>
     </EuiFlexItem>
   );

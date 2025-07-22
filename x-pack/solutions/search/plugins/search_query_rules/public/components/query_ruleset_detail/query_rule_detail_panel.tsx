@@ -16,6 +16,8 @@ import { QueryRuleFlyout } from './query_rule_flyout/query_rule_flyout';
 import { useGenerateRuleId } from '../../hooks/use_generate_rule_id';
 import { SearchQueryRulesQueryRule } from '../../types';
 import { RulesetDetailEmptyPrompt } from '../empty_prompt/ruleset_detail_empty_prompt';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface QueryRuleDetailPanelProps {
   rules: SearchQueryRulesQueryRule[];
@@ -45,6 +47,8 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
 }) => {
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
   const [flyoutMode, setFlyoutMode] = React.useState<'create' | 'edit'>('edit');
+
+  const useTracker = useUsageTracker();
 
   const { mutate: generateRuleId } = useGenerateRuleId(rulesetId);
   useEffect(() => {
@@ -94,6 +98,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
                     color="primary"
                     data-test-subj="queryRulesetDetailAddRuleButton"
                     onClick={() => {
+                      useTracker?.click(AnalyticsEvents.addRuleClicked);
                       generateRuleId(undefined, {
                         onSuccess: (newRuleId) => {
                           setFlyoutMode('create');
@@ -139,7 +144,12 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
                 setRuleIdToEdit(ruleId);
               }}
               tourInfo={tourInfo}
-              deleteRule={deleteRule}
+              deleteRule={(ruleId: string) => {
+                if (setIsFormDirty) {
+                  setIsFormDirty(true);
+                }
+                deleteRule?.(ruleId);
+              }}
             />
           )}
         </EuiFlexItem>

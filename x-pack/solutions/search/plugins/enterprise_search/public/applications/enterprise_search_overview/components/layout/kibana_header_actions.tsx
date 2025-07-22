@@ -38,7 +38,7 @@ export const EnterpriseSearchOverviewHeaderActions: React.FC = () => {
       <EuiPopover
         button={
           <EuiButtonEmpty onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-            <EuiIcon type="iInCircle" />
+            <EuiIcon type="info" />
             &nbsp;
             {i18n.translate('xpack.enterpriseSearch.overview.deploymentDetails', {
               defaultMessage: 'Deployment details',

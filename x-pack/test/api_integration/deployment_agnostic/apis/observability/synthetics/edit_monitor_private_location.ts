@@ -47,8 +47,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .post(apiURL + '?internal=true')
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send(monitor)
-        .expect(200);
+        .send(monitor);
+
+      expect(res.status).eql(200, JSON.stringify(res.body));
 
       const { url, created_at: createdAt, updated_at: updatedAt, ...rest } = res.body;
 

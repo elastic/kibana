@@ -6,7 +6,6 @@
  */
 import React, { useState } from 'react';
 import {
-  useEuiTheme,
   EuiFlexItem,
   EuiSpacer,
   EuiTextColor,
@@ -25,10 +24,8 @@ import {
   EuiFlyoutFooter,
   EuiToolTip,
   EuiDescriptionListProps,
-  EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
@@ -37,12 +34,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
-import { isNativeCspFinding } from '@kbn/cloud-security-posture/src/utils/is_native_csp_finding';
-import {
-  CSP_MISCONFIGURATIONS_DATASET,
-  getVendorName,
-} from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import { CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -202,37 +194,6 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
   }
 };
 
-export const MissingFieldsCallout = ({
-  finding,
-}: {
-  finding: CspFinding | CspVulnerabilityFinding;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const vendor = getVendorName(finding);
-
-  return (
-    <EuiCallOut
-      style={{
-        borderRadius: 4,
-        overflow: 'hidden',
-      }}
-      size="s"
-      iconType="iInCircle"
-      title={
-        <span style={{ color: euiTheme.colors.text }}>
-          <FormattedMessage
-            id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields not provided by {vendor}"
-            values={{
-              vendor: vendor || 'the vendor',
-            }}
-          />
-        </span>
-      }
-    />
-  );
-};
-
 export const FindingsRuleFlyout = ({
   onClose,
   finding,
@@ -286,11 +247,6 @@ export const FindingsRuleFlyout = ({
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody key={tab.id}>
-        {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-          <div style={{ marginBottom: euiThemeVars.euiSize }}>
-            <MissingFieldsCallout finding={finding} />
-          </div>
-        )}
         <FindingsTab tab={tab} finding={finding} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

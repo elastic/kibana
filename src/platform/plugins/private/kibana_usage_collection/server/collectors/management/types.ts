@@ -53,6 +53,7 @@ export interface UsageStats {
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
+  'ai:anonymizationSettings': string;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
@@ -171,7 +172,4 @@ export interface UsageStats {
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
-  'cases:incrementalIdDisplay:enabled': boolean;
-  'observability:enableStreamsUI': boolean;
-  'observability:streamsEnableSignificantEvents': boolean;
 }

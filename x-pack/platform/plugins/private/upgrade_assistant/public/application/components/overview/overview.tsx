@@ -33,6 +33,7 @@ import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getLogsStep } from './logs_step';
+import { MachineLearningDisabledCallout } from './ml_callout/ml_callout';
 
 type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
@@ -42,10 +43,19 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     services: {
       breadcrumbs,
       core: { docLinks },
+      api,
     },
     plugins: { cloud },
     kibanaVersionInfo: { currentMajor, currentMinor, currentPatch },
   } = useAppContext();
+
+  const [mlEnabled, setMlEnabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    api.getMLEnabled().then(({ data }) => {
+      setMlEnabled(data.mlEnabled);
+    });
+  }, [api]);
 
   const currentVersion = `${currentMajor}.${currentMinor}.${currentPatch}`;
 
@@ -91,7 +101,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           />
         }
       >
-        <EuiIcon type="iInCircle" size="s" />
+        <EuiIcon type="info" size="s" />
       </EuiToolTip>
     );
   };
@@ -140,6 +150,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               }}
             />
           </EuiText>
+          {!mlEnabled && <MachineLearningDisabledCallout />}
         </EuiPageHeader>
         <EuiSpacer size="l" />
         <EuiSteps

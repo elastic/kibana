@@ -143,7 +143,7 @@ export function ErrorGroupList({
           })}{' '}
           <EuiIconTip
             size="s"
-            type="questionInCircle"
+            type="question"
             color="subdued"
             iconProps={{
               className: 'eui-alignTop',

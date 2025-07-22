@@ -96,6 +96,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...monitor,
           locations: [LOCAL_PUBLIC_LOCATION],
           name: 'https://www.google.com',
+          spaces: ['default'],
         })
       );
     });
@@ -117,6 +118,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           locations: [LOCAL_PUBLIC_LOCATION],
           revision: 2,
           url: 'https://www.google.com',
+          spaces: ['default'],
         })
       );
     });
@@ -144,6 +146,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...monitor,
           locations: [LOCAL_PUBLIC_LOCATION],
           name: 'test name',
+          spaces: ['default'],
         })
       );
 
@@ -182,6 +185,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             LOCAL_PUBLIC_LOCATION,
             { ...LOCAL_PUBLIC_LOCATION, id: 'dev2', label: 'Dev Service 2' },
           ],
+          spaces: ['default'],
         })
       );
     });
@@ -200,6 +204,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           revision: 4,
           url: 'https://www.google.com',
           locations: [{ ...LOCAL_PUBLIC_LOCATION, id: 'dev2', label: 'Dev Service 2' }],
+          spaces: ['default'],
         })
       );
     });

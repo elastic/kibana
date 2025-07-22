@@ -9,7 +9,7 @@ import { AttackDiscovery, Replacements } from '../../schemas';
 import { getTacticLabel, getTacticMetadata } from '../attack_discovery_helpers';
 
 export const getMarkdownFields = (markdown: string): string => {
-  const regex = new RegExp('{{\\s*(\\S+)\\s+(\\S+)\\s*}}', 'gm');
+  const regex = new RegExp('{{\\s*(\\S+)\\s+(.*?)\\s*}}', 'gm');
 
   return markdown.replace(regex, (_, field, value) => `\`${value}\``);
 };
@@ -75,5 +75,37 @@ ${getAttackChainMarkdown(attackDiscovery)}
     return getMarkdownWithOriginalValues({ markdown, replacements });
   } else {
     return markdown;
+  }
+};
+
+export const getAttackDiscoveryMarkdownFields = ({
+  attackDiscovery,
+  replacements,
+}: {
+  attackDiscovery: AttackDiscovery;
+  replacements?: Replacements;
+}): {
+  detailsMarkdown: string;
+  entitySummaryMarkdown: string;
+  title: string;
+  summaryMarkdown: string;
+} => {
+  const title = getMarkdownFields(attackDiscovery.title);
+  const entitySummaryMarkdown = getMarkdownFields(attackDiscovery.entitySummaryMarkdown ?? '');
+  const summaryMarkdown = getMarkdownFields(attackDiscovery.summaryMarkdown);
+  const detailsMarkdown = getMarkdownFields(attackDiscovery.detailsMarkdown);
+
+  if (replacements != null) {
+    return {
+      detailsMarkdown: getMarkdownWithOriginalValues({ markdown: detailsMarkdown, replacements }),
+      entitySummaryMarkdown: getMarkdownWithOriginalValues({
+        markdown: entitySummaryMarkdown,
+        replacements,
+      }),
+      title: getMarkdownWithOriginalValues({ markdown: title, replacements }),
+      summaryMarkdown: getMarkdownWithOriginalValues({ markdown: summaryMarkdown, replacements }),
+    };
+  } else {
+    return { detailsMarkdown, entitySummaryMarkdown, title, summaryMarkdown };
   }
 };

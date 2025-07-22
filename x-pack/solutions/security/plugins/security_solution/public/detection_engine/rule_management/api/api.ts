@@ -15,21 +15,27 @@ import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
+  GetPrebuiltRuleBaseVersionRequest,
+  GetPrebuiltRuleBaseVersionResponseBody,
   GetPrebuiltRulesStatusResponseBody,
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
+  RevertPrebuiltRulesRequest,
+  RevertPrebuiltRulesResponseBody,
   ReviewRuleInstallationResponseBody,
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import {
   BOOTSTRAP_PREBUILT_RULES_URL,
+  GET_PREBUILT_RULES_BASE_VERSION_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
+  REVERT_PREBUILT_RULES_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
@@ -715,4 +721,27 @@ export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesRe
   KibanaServices.get().http.fetch(BOOTSTRAP_PREBUILT_RULES_URL, {
     method: 'POST',
     version: '1',
+  });
+
+export const getPrebuiltRuleBaseVersion = async ({
+  signal,
+  request,
+}: {
+  signal: AbortSignal | undefined;
+  request: GetPrebuiltRuleBaseVersionRequest;
+}): Promise<GetPrebuiltRuleBaseVersionResponseBody> =>
+  KibanaServices.get().http.fetch(GET_PREBUILT_RULES_BASE_VERSION_URL, {
+    method: 'GET',
+    version: '1',
+    signal,
+    query: request,
+  });
+
+export const revertPrebuiltRule = async (
+  body: RevertPrebuiltRulesRequest
+): Promise<RevertPrebuiltRulesResponseBody> =>
+  KibanaServices.get().http.fetch(REVERT_PREBUILT_RULES_URL, {
+    method: 'POST',
+    version: '1',
+    body: JSON.stringify(body),
   });

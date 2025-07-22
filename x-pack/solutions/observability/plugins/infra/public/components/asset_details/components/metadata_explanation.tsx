@@ -99,7 +99,7 @@ export const MetadataExplanationMessage = ({ assetType }: { assetType: Inventory
         <Popover
           iconSize="s"
           iconColor="subdued"
-          icon="iInCircle"
+          icon="info"
           data-test-subj="infraAssetDetailsMetadataPopoverButton"
         >
           <MetadataExplanationTooltipContent docsLink={docsLink} metadataField={metadataField} />

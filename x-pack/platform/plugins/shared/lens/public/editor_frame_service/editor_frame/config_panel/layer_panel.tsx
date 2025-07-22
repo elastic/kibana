@@ -554,7 +554,7 @@ export function LayerPanel(props: LayerPanelProps) {
                             }}
                             position="top"
                             size="s"
-                            type="questionInCircle"
+                            type="question"
                           />
                         </>
                       )}

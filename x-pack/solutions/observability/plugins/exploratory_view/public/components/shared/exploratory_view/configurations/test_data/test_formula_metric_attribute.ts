@@ -71,7 +71,6 @@ export const sampleMetricFormulaAttribute = {
                 params: {
                   emptyAsNull: false,
                 },
-                scale: 'ratio',
                 sourceField: '___records___',
               },
               'layer-0-column-1X1': {
@@ -87,7 +86,6 @@ export const sampleMetricFormulaAttribute = {
                 params: {
                   emptyAsNull: false,
                 },
-                scale: 'ratio',
                 sourceField: '___records___',
               },
               'layer-0-column-1X2': {
@@ -121,7 +119,6 @@ export const sampleMetricFormulaAttribute = {
                   },
                 },
                 references: ['layer-0-column-1X0', 'layer-0-column-1X1'],
-                scale: 'ratio',
               },
             },
             indexPatternId: 'apm-*',

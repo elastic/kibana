@@ -20,7 +20,7 @@ export const FollowerIndexCallout: React.FunctionComponent = () => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
         data-test-subj="followerIndexCallout"
       >
         <p>

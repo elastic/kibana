@@ -13,14 +13,11 @@ import {
   MessageAddEvent,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
-import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/utils/recall/recall_and_score';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import {
-  KnowledgeBaseDocument,
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/recall_and_score';
+import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
+import { KnowledgeBaseDocument, LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { addSampleDocsToInternalKb, clearKnowledgeBase } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';
@@ -72,13 +69,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const log = getService('log');
 
-  describe('context', function () {
+  describe('tool: context', function () {
     // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
     this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
     let messageAddedEvents: MessageAddEvent[];
-    let getDocuments: () => Promise<KnowledgeBaseDocument[]>;
+    let getDocumentsToScore: () => Promise<KnowledgeBaseDocument[]>;
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
@@ -89,7 +86,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 
-      ({ getDocuments } = llmProxy.interceptScoreToolChoice(log));
+      void llmProxy.interceptQueryRewrite('This is a rewritten user prompt.');
+      ({ getDocumentsToScore } = llmProxy.interceptScoreToolChoice(log));
 
       void llmProxy.interceptWithResponse('Your favourite color is blue.');
 
@@ -118,23 +116,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('calling the context function via /chat/complete', () => {
-      let firstRequestBody: ChatCompletionStreamParams;
-      let secondRequestBody: ChatCompletionStreamParams;
+      let firstRequestBody: ChatCompletionStreamParams; // rewrite prompt request
+      let secondRequestBody: ChatCompletionStreamParams; // scoring documents request
+      let thirdRequestBody: ChatCompletionStreamParams; // sending user prompt request
 
       before(async () => {
         firstRequestBody = llmProxy.interceptedRequests[0].requestBody;
         secondRequestBody = llmProxy.interceptedRequests[1].requestBody;
+        thirdRequestBody = llmProxy.interceptedRequests[2].requestBody;
       });
 
-      it('makes 2 requests to the LLM', () => {
-        expect(llmProxy.interceptedRequests.length).to.be(2);
+      it('makes 3 requests to the LLM', () => {
+        expect(llmProxy.interceptedRequests.length).to.be(3);
       });
 
       it('emits 3 messageAdded events', () => {
         expect(messageAddedEvents.length).to.be(3);
       });
 
-      describe('The first request - Scoring documents', () => {
+      describe('The first request - Rewriting the user prompt', () => {
+        function getSystemMessage(requestBody: ChatCompletionStreamParams) {
+          return requestBody.messages.find((message) => message.role === MessageRole.System);
+        }
+
         it('contains the correct number of messages', () => {
           expect(firstRequestBody.messages.length).to.be(2);
         });
@@ -143,63 +147,105 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(first(firstRequestBody.messages)?.role === MessageRole.System);
         });
 
-        it('contains a message with the prompt for scoring', () => {
-          expect(last(firstRequestBody.messages)?.content).to.contain(
-            'score the documents that are relevant to the prompt on a scale from 0 to 7'
+        it('includes instructions to rewrite the user prompt in the system message', () => {
+          const systemMessage = getSystemMessage(firstRequestBody);
+          expect(systemMessage?.content).to.contain(
+            `You are a retrieval query-rewriting assistant`
           );
         });
 
-        it('instructs the LLM with the correct tool_choice and tools for scoring', () => {
-          // @ts-expect-error
-          expect(firstRequestBody.tool_choice?.function?.name).to.be('score');
-          expect(firstRequestBody.tools?.length).to.be(1);
-          expect(first(firstRequestBody.tools)?.function.name).to.be('score');
+        it('includes the conversation history in the system message', () => {
+          const systemMessage = getSystemMessage(firstRequestBody);
+          expect(systemMessage?.content).to.contain('<ConversationHistory>');
         });
 
-        it('sends the correct documents to the LLM', async () => {
-          const extractedDocs = await getDocuments();
-          const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
-          const actualTexts = extractedDocs.map((doc) => doc.text).sort();
-          expect(actualTexts).to.eql(expectedTexts);
+        it('includes the screen context in the system message', () => {
+          const systemMessage = getSystemMessage(firstRequestBody);
+          expect(systemMessage?.content).to.contain('<ScreenDescription>');
+          expect(systemMessage?.content).to.contain(screenContexts[0].screenDescription);
+        });
+
+        it('sends the user prompt to the LLM', () => {
+          const lastUserMessage = firstRequestBody.messages[1];
+          expect(lastUserMessage.role).to.be(MessageRole.User);
+          expect(lastUserMessage.content).to.be(userPrompt);
         });
       });
 
-      describe('The second request - Sending the user prompt', () => {
+      describe('The second request - Scoring documents', () => {
         it('contains the correct number of messages', () => {
-          expect(secondRequestBody.messages.length).to.be(4);
+          expect(secondRequestBody.messages.length).to.be(2);
         });
 
         it('contains the system message as the first message in the request', () => {
           expect(first(secondRequestBody.messages)?.role === MessageRole.System);
         });
 
+        it('includes instructions for scoring in the system message', () => {
+          const systemMessage = secondRequestBody.messages.find(
+            (message) => message.role === MessageRole.System
+          );
+
+          expect(systemMessage?.content).to.contain(
+            'For every document you must assign one integer score from 0 to 7 (inclusive) that answers the question'
+          );
+        });
+
+        it('instructs the LLM with the correct tool_choice and tools for scoring', () => {
+          // @ts-expect-error
+          expect(secondRequestBody.tool_choice?.function?.name).to.be(
+            SCORE_SUGGESTIONS_FUNCTION_NAME
+          );
+          expect(secondRequestBody.tools?.length).to.be(1);
+          expect(first(secondRequestBody.tools)?.function.name).to.be(
+            SCORE_SUGGESTIONS_FUNCTION_NAME
+          );
+        });
+
+        it('sends the correct documents to the LLM', async () => {
+          const extractedDocs = await getDocumentsToScore();
+          const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
+          const actualTexts = extractedDocs.map((doc) => doc.text).sort();
+          expect(actualTexts).to.eql(expectedTexts);
+        });
+      });
+
+      describe('The third request - Sending the user prompt', () => {
+        it('contains the correct number of messages', () => {
+          expect(thirdRequestBody.messages.length).to.be(4);
+        });
+
+        it('contains the system message as the first message in the request', () => {
+          expect(first(thirdRequestBody.messages)?.role === MessageRole.System);
+        });
+
         it('contains the user prompt', () => {
-          expect(secondRequestBody.messages[1].role).to.be(MessageRole.User);
-          expect(secondRequestBody.messages[1].content).to.be(userPrompt);
+          expect(thirdRequestBody.messages[1].role).to.be(MessageRole.User);
+          expect(thirdRequestBody.messages[1].content).to.be(userPrompt);
         });
 
         it('leaves the LLM to choose the correct tool by leave tool_choice as auto and passes tools', () => {
-          expect(secondRequestBody.tool_choice).to.be('auto');
-          expect(secondRequestBody.tools?.length).to.not.be(0);
+          expect(thirdRequestBody.tool_choice).to.be('auto');
+          expect(thirdRequestBody.tools?.length).to.not.be(0);
         });
 
         it('contains the tool call for context and the corresponding response', () => {
-          expect(secondRequestBody.messages[2].role).to.be(MessageRole.Assistant);
+          expect(thirdRequestBody.messages[2].role).to.be(MessageRole.Assistant);
           // @ts-expect-error
-          expect(secondRequestBody.messages[2].tool_calls[0].function.name).to.be(
+          expect(thirdRequestBody.messages[2].tool_calls[0].function.name).to.be(
             CONTEXT_FUNCTION_NAME
           );
 
-          expect(last(secondRequestBody.messages)?.role).to.be('tool');
+          expect(last(thirdRequestBody.messages)?.role).to.be('tool');
           // @ts-expect-error
-          expect(last(secondRequestBody.messages)?.tool_call_id).to.equal(
+          expect(last(thirdRequestBody.messages)?.tool_call_id).to.equal(
             // @ts-expect-error
-            secondRequestBody.messages[2].tool_calls[0].id
+            thirdRequestBody.messages[2].tool_calls[0].id
           );
         });
 
         it('sends the knowledge base entries to the LLM', () => {
-          const content = last(secondRequestBody.messages)?.content as string;
+          const content = last(thirdRequestBody.messages)?.content as string;
           const parsedContent = JSON.parse(content);
           const learnings = parsedContent.learnings;
 

@@ -60,6 +60,7 @@ export const DensitySettings: React.FC<DensitySettingsProps> = ({ dataGridDensit
 
   return (
     <EuiFormRow
+      label={densityLabel}
       aria-label={densityLabel}
       display="columnCompressed"
       data-test-subj="lnsDensitySettings"

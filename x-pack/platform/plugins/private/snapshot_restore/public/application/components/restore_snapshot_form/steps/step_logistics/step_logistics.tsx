@@ -196,7 +196,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             flush="right"
             href={docLinks.links.snapshotRestore.restoreSnapshot}
             target="_blank"
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.restoreForm.stepLogistics.docsButtonLabel"
@@ -703,7 +703,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <EuiSpacer size="m" />
             <EuiCallOut
               size="s"
-              iconType="help"
+              iconType="question"
               color="warning"
               data-test-subj="noFeatureStatesCallout"
               title={i18n.translate(

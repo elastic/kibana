@@ -45,6 +45,8 @@ const buildResponses = (method: Method, calls: MockCall[]): ResponseCall[] => {
       }));
     case 'notFound':
       return calls.map(() => ({ status: 404, body: undefined }));
+    case 'forbidden':
+      return calls.map(([call]) => ({ status: 403, body: call.body }));
     default:
       throw new Error(`Encountered unexpected call to response.${method}`);
   }

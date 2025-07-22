@@ -508,7 +508,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             flush="right"
             href={docLinks.links.apis.putSnapshotLifecyclePolicy}
             target="_blank"
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepLogistics.docsButtonLabel"

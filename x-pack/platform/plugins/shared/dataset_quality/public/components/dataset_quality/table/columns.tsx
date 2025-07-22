@@ -287,7 +287,7 @@ export const getDatasetQualityTableColumns = ({
           <EuiToolTip content={datasetQualityColumnTooltip}>
             <span>
               {`${datasetQualityColumnName} `}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
             </span>
           </EuiToolTip>
         </EuiTableHeader>
@@ -308,7 +308,7 @@ export const getDatasetQualityTableColumns = ({
           <EuiToolTip content={degradedDocsColumnTooltip}>
             <span>
               {`${degradedDocsColumnName} `}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
             </span>
           </EuiToolTip>
         </EuiTableHeader>
@@ -343,12 +343,7 @@ export const getDatasetQualityTableColumns = ({
                 <EuiToolTip content={failedDocsColumnTooltip}>
                   <span>
                     {`${failedDocsColumnName} `}
-                    <EuiIcon
-                      size="s"
-                      color="subdued"
-                      type="questionInCircle"
-                      className="eui-alignTop"
-                    />
+                    <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
                   </span>
                 </EuiToolTip>
               </EuiTableHeader>
@@ -442,7 +437,7 @@ export const getDatasetQualityTableColumns = ({
                   <EuiFlexGroup gutterSize="xs" alignItems="center">
                     <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
                     <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
-                      <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+                      <EuiIcon tabIndex={0} type="info" size="s" />
                     </EuiToolTip>
                   </EuiFlexGroup>
                 ) : (

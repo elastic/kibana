@@ -47,22 +47,22 @@ describe('DEFEND_INSIGHTS_TOOL', () => {
     expect(DEFEND_INSIGHTS_TOOL.sourceRegister).toBe(APP_UI_ID);
   });
 
-  it('should return tool if supported', () => {
+  it('should return tool if supported', async () => {
     (requestHasRequiredAnonymizationParams as jest.Mock).mockReturnValue(true);
-    const tool = DEFEND_INSIGHTS_TOOL.getTool(mockParams);
+    const tool = await DEFEND_INSIGHTS_TOOL.getTool(mockParams);
     expect(tool).toBeInstanceOf(DynamicTool);
   });
 
-  it('should return null if not request missing anonymization params', () => {
+  it('should return null if not request missing anonymization params', async () => {
     (requestHasRequiredAnonymizationParams as jest.Mock).mockReturnValue(false);
-    const tool = DEFEND_INSIGHTS_TOOL.getTool(mockParams);
+    const tool = await DEFEND_INSIGHTS_TOOL.getTool(mockParams);
     expect(tool).toBeNull();
   });
 
-  it('should return null if LLM is not provided', () => {
+  it('should return null if LLM is not provided', async () => {
     (requestHasRequiredAnonymizationParams as jest.Mock).mockReturnValue(true);
     const paramsWithoutLLM = { ...mockParams, llm: undefined };
-    const tool = DEFEND_INSIGHTS_TOOL.getTool(paramsWithoutLLM) as DynamicTool;
+    const tool = (await DEFEND_INSIGHTS_TOOL.getTool(paramsWithoutLLM)) as DynamicTool;
 
     expect(tool).toBeNull();
   });

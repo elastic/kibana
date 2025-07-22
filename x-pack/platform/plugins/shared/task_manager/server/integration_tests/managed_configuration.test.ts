@@ -17,6 +17,7 @@ import { TaskManagerPlugin } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { TaskManagerConfig } from '../config';
 import { BulkUpdateError } from '../lib/bulk_update_error';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 const mockTaskTypeRunFn = jest.fn();
 const mockCreateTaskRunner = jest.fn();
@@ -133,7 +134,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        licensing: licensingMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall
@@ -229,7 +232,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = taskManager.start(coreStart, {});
+      taskManagerStart = taskManager.start(coreStart, {
+        licensing: licensingMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall
@@ -329,7 +334,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        licensing: licensingMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall
@@ -412,7 +419,9 @@ describe('managed configuration', () => {
         esStart.client.asInternalUser as unknown as Client
       );
       coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
-      taskManagerStart = await taskManager.start(coreStart, {});
+      taskManagerStart = await taskManager.start(coreStart, {
+        licensing: licensingMock.createStart(),
+      });
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
       // sinon fake timers cause them to stall

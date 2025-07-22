@@ -65,7 +65,7 @@ export function MetricsChart({ chart, fetchStatus }: Props) {
         </EuiFlexItem>
         {chart.description && (
           <EuiFlexItem grow={false}>
-            <EuiIconTip content={chart.description} position="top" type="questionInCircle" />
+            <EuiIconTip content={chart.description} position="top" type="question" />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

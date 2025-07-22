@@ -75,7 +75,8 @@ export class SyntheticsMonitorClient {
     const newPolicies = this.privateLocationAPI.createPackagePolicies(
       privateConfigs,
       allPrivateLocations,
-      spaceId
+      spaceId,
+      maintenanceWindows
     );
 
     const syncErrors = this.syntheticsService.addConfigs(publicConfigs, maintenanceWindows);
@@ -167,11 +168,7 @@ export class SyntheticsMonitorClient {
 
     return { failedPolicyUpdates, publicSyncErrors };
   }
-  async deleteMonitors(
-    monitors: SyntheticsMonitorWithId[],
-    savedObjectsClient: SavedObjectsClientContract,
-    spaceId: string
-  ) {
+  async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
@@ -229,6 +226,7 @@ export class SyntheticsMonitorClient {
       privateConfig ? [privateConfig] : [],
       allPrivateLocations,
       spaceId,
+      [],
       monitor.testRunId,
       runOnce
     );

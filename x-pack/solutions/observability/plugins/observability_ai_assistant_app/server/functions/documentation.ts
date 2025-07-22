@@ -7,6 +7,8 @@
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
@@ -41,6 +43,7 @@ export async function registerDocumentationFunction({
         properties: {
           query: {
             description: `The query to use to retrieve documentation
+            Always write the query in English, as the documentation is available only in English.
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Lens?"`,
@@ -63,6 +66,11 @@ export async function registerDocumentationFunction({
       } as const,
     },
     async ({ arguments: { query, product }, connectorId, simulateFunctionCalling }) => {
+      const esClient = (await resources.context.core).elasticsearch.client;
+
+      const inferenceId =
+        (await getInferenceIdFromWriteIndex(esClient)) ?? defaultInferenceEndpoints.ELSER;
+
       const response = await llmTasks!.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,
@@ -70,6 +78,7 @@ export async function registerDocumentationFunction({
         connectorId,
         request: resources.request,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        inferenceId,
       });
 
       return {

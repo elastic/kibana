@@ -134,7 +134,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </>

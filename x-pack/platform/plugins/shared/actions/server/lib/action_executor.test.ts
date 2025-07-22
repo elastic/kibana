@@ -1706,6 +1706,7 @@ describe('Event log', () => {
       ...mockUser,
       authentication_type: 'api_key',
       api_key: {
+        managed_by: 'elasticsearch',
         id: '456',
         name: 'test api key',
       },

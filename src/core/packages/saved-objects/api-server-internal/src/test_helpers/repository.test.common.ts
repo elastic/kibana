@@ -716,7 +716,7 @@ export const expectUpdateResult = ({
   attributes,
   references,
   version: mockVersion,
-  namespaces: [],
+  namespaces: ['default'],
   ...mockTimestampFields,
 });
 

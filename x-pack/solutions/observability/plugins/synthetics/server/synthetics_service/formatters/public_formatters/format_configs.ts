@@ -113,7 +113,8 @@ export const formatHeartbeatRequest = (
   const heartbeatIdT = heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID];
 
   const paramsString = params ?? (monitor as BrowserFields)[ConfigKey.PARAMS];
-  const { labels } = monitor;
+  const { labels, spaces } = monitor;
+  const monSpaces = spaces ? Array.from(new Set([...(spaces ?? []), spaceId])) : spaceId;
 
   return {
     ...monitor,
@@ -125,7 +126,7 @@ export const formatHeartbeatRequest = (
       run_once: runOnce,
       test_run_id: testRunId,
       meta: {
-        space_id: spaceId,
+        space_id: monSpaces,
       },
       ...(isEmpty(labels) ? {} : { labels }),
     },

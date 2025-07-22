@@ -44,7 +44,7 @@ import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
 import { ViewButtons } from './view_buttons/view_buttons';
 
-const ITEM_HEIGHT = 172;
+const ITEM_HEIGHT = 182;
 const ROW_COUNT = 4;
 const MAX_LIST_HEIGHT = 800;
 const MIN_BATCH_SIZE = 20;
@@ -166,52 +166,56 @@ export const OverviewGrid = memo(
                         minimumBatchSize={MIN_BATCH_SIZE}
                         threshold={LIST_THRESHOLD}
                       >
-                        {({ onItemsRendered }) => (
-                          <FixedSizeList
-                            // pad computed height to avoid clipping last row's drop shadow
-                            height={listHeight + 16}
-                            width={width}
-                            onItemsRendered={onItemsRendered}
-                            itemSize={ITEM_HEIGHT}
-                            itemCount={listItems.length}
-                            itemData={listItems}
-                            ref={listRef}
-                          >
-                            {({
-                              index: listIndex,
-                              style,
-                              data: listData,
-                            }: React.PropsWithChildren<ListChildComponentProps<ListItem[][]>>) => {
-                              setCurrentIndex(listIndex);
-                              return (
-                                <EuiFlexGroup
-                                  data-test-subj={`overview-grid-row-${listIndex}`}
-                                  gutterSize="m"
-                                  style={{ ...style }}
-                                >
-                                  {listData[listIndex].map((_, idx) => (
-                                    <EuiFlexItem
-                                      data-test-subj="syntheticsOverviewGridItem"
-                                      key={listIndex * ROW_COUNT + idx}
-                                    >
-                                      <MetricItem
-                                        monitor={
-                                          monitorsSortedByStatus[listIndex * ROW_COUNT + idx]
-                                        }
-                                        onClick={setFlyoutConfigCallback}
-                                      />
-                                    </EuiFlexItem>
-                                  ))}
-                                  {listData[listIndex].length % ROW_COUNT !== 0 &&
-                                    // Adds empty items to fill out row
-                                    Array.from({
-                                      length: ROW_COUNT - listData[listIndex].length,
-                                    }).map((_, idx) => <EuiFlexItem key={idx} />)}
-                                </EuiFlexGroup>
-                              );
-                            }}
-                          </FixedSizeList>
-                        )}
+                        {({ onItemsRendered, ref }) => {
+                          return (
+                            <FixedSizeList
+                              // pad computed height to avoid clipping last row's drop shadow
+                              height={listHeight + 16}
+                              width={width}
+                              onItemsRendered={onItemsRendered}
+                              itemSize={ITEM_HEIGHT}
+                              itemCount={listItems.length}
+                              itemData={listItems}
+                              ref={ref}
+                            >
+                              {({
+                                index: listIndex,
+                                style,
+                                data: listData,
+                              }: React.PropsWithChildren<
+                                ListChildComponentProps<ListItem[][]>
+                              >) => {
+                                setCurrentIndex(listIndex);
+                                return (
+                                  <EuiFlexGroup
+                                    data-test-subj={`overview-grid-row-${listIndex}`}
+                                    gutterSize="m"
+                                    css={{ ...style, marginLeft: 5 }}
+                                  >
+                                    {listData[listIndex].map((_, idx) => (
+                                      <EuiFlexItem
+                                        data-test-subj="syntheticsOverviewGridItem"
+                                        key={listIndex * ROW_COUNT + idx}
+                                      >
+                                        <MetricItem
+                                          monitor={
+                                            monitorsSortedByStatus[listIndex * ROW_COUNT + idx]
+                                          }
+                                          onClick={setFlyoutConfigCallback}
+                                        />
+                                      </EuiFlexItem>
+                                    ))}
+                                    {listData[listIndex].length % ROW_COUNT !== 0 &&
+                                      // Adds empty items to fill out row
+                                      Array.from({
+                                        length: ROW_COUNT - listData[listIndex].length,
+                                      }).map((_, idx) => <EuiFlexItem key={idx} />)}
+                                  </EuiFlexGroup>
+                                );
+                              }}
+                            </FixedSizeList>
+                          );
+                        }}
                       </InfiniteLoader>
                     )}
                   </EuiAutoSizer>

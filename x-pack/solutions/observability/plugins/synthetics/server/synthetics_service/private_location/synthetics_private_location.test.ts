@@ -116,7 +116,8 @@ describe('SyntheticsPrivateLocation', () => {
         await syntheticsPrivateLocation.createPackagePolicies(
           [{ config: testConfig, globalParams: {} }],
           [mockPrivateLocation],
-          'test-space'
+          'test-space',
+          []
         );
       } catch (e) {
         expect(e).toEqual(new Error(error));

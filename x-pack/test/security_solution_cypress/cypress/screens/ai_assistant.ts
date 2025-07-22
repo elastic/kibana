@@ -50,3 +50,5 @@ export const SYSTEM_PROMPT_SELECT = (c: string) => `[data-test-subj="systemPromp
 export const UPGRADE_CTA = '[data-test-subj="upgradeLicenseCallToAction"]';
 export const USER_PROMPT = '[data-test-subj="prompt-textarea"]';
 export const WELCOME_SETUP = '[data-test-subj="welcome-setup"]';
+export const OPENAI_CONNECTOR_OPTION = '[data-test-subj="action-option-OpenAI"]';
+export const SECRETS_APIKEY_INPUT = '[data-test-subj="secrets.apiKey-input"]';

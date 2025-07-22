@@ -149,7 +149,7 @@ const RequiredFieldsList = ({
         <EuiCallOut
           title={i18n.REQUIRED_FIELDS_GENERAL_WARNING_TITLE}
           color="warning"
-          iconType="help"
+          iconType="question"
           data-test-subj="requiredFieldsGeneralWarning"
         >
           <p>
@@ -179,6 +179,7 @@ const RequiredFieldsList = ({
         }
         hasChildLabel={false}
         labelType="legend"
+        data-test-subj="requiredFieldsFormRow"
       >
         <>
           {items.map((item) => (

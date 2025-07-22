@@ -6,17 +6,18 @@
  */
 
 import type { UseAssistantAvailability } from '@kbn/elastic-assistant';
-import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../common/constants';
+import { ASSISTANT_FEATURE_ID } from '@kbn/security-solution-features/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
 import { useLicense } from '../licence/use_licence';
+import { useIsNavControlVisible } from '../is_nav_control_visible/use_is_nav_control_visible';
 
-export const STARTER_PROMPTS_FEATURE_FLAG = 'elasticAssistant.starterPromptsEnabled' as const;
 export const useAssistantAvailability = (): UseAssistantAvailability => {
+  const { isVisible } = useIsNavControlVisible();
   const isEnterprise = useLicense().isEnterprise();
   const {
     application: { capabilities },
-    featureFlags,
   } = useKibana().services;
 
   const hasAssistantPrivilege = capabilities[ASSISTANT_FEATURE_ID]?.['ai-assistant'] === true;
@@ -36,15 +37,13 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     capabilities.actions?.delete === true &&
     capabilities.actions?.save === true;
 
-  const isStarterPromptsEnabled = featureFlags.getBooleanValue(STARTER_PROMPTS_FEATURE_FLAG, false);
-
   return {
     hasSearchAILakeConfigurations,
     hasAssistantPrivilege,
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,
-    isStarterPromptsEnabled,
     isAssistantEnabled: isEnterprise,
+    isAssistantVisible: isEnterprise && isVisible,
     hasUpdateAIAssistantAnonymization,
     hasManageGlobalKnowledgeBase,
   };

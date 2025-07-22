@@ -24,6 +24,7 @@ import {
   ESQLIdentifier,
   ESQLMap,
   ESQLMapEntry,
+  ESQLOrderExpression,
 } from '../../types';
 import { walk, Walker } from '../walker';
 
@@ -117,8 +118,9 @@ describe('structurally can walk all nodes', () => {
       });
 
       expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'sample']);
-      expect(literals.length).toBe(1);
-      expect(literals[0].value).toBe(0.25);
+      expect(literals.length).toBe(2);
+      expect(literals[0].value).toBe('index');
+      expect(literals[1].value).toBe(0.25);
     });
 
     test('"visitAny" can capture command nodes', () => {
@@ -137,6 +139,68 @@ describe('structurally can walk all nodes', () => {
         'stats',
         'where',
       ]);
+    });
+
+    describe('SORT command', () => {
+      test('can visit a SORT field', () => {
+        const { ast } = EsqlQuery.fromSrc('FROM index | SORT field');
+        const nodes: ESQLColumn[] = [];
+
+        walk(ast, {
+          visitColumn: (node) => nodes.push(node),
+        });
+
+        expect(nodes).toMatchObject([
+          {
+            type: 'column',
+            name: 'field',
+          },
+        ]);
+      });
+
+      test('can visit a SORT field with DESC order', () => {
+        const { ast } = EsqlQuery.fromSrc('FROM index | SORT field DESC, another_field ASC');
+        const nodes: ESQLColumn[] = [];
+
+        walk(ast, {
+          visitColumn: (node) => nodes.push(node),
+        });
+
+        expect(nodes).toMatchObject([
+          {
+            type: 'column',
+            name: 'field',
+          },
+          {
+            type: 'column',
+            name: 'another_field',
+          },
+        ]);
+      });
+
+      test('can visit a SORT command "order" node', () => {
+        const { ast } = EsqlQuery.fromSrc(
+          'FROM index | SORT field DESC NULLS FIRST, another_field ASC NULLS LAST'
+        );
+        const nodes: ESQLOrderExpression[] = [];
+
+        walk(ast, {
+          visitOrder: (node) => nodes.push(node),
+        });
+
+        expect(nodes).toMatchObject([
+          {
+            type: 'order',
+            order: 'DESC',
+            nulls: 'NULLS FIRST',
+          },
+          {
+            type: 'order',
+            order: 'ASC',
+            nulls: 'NULLS LAST',
+          },
+        ]);
+      });
     });
 
     describe('command options', () => {
@@ -164,635 +228,6 @@ describe('structurally can walk all nodes', () => {
 
         expect(options.length).toBe(1);
         expect(options[0].name).toBe('metadata');
-      });
-    });
-
-    describe('expressions', () => {
-      describe('sources', () => {
-        test('iterates through a single source', () => {
-          const { ast } = parse('FROM index');
-          const sources: ESQLSource[] = [];
-
-          walk(ast, {
-            visitSource: (opt) => sources.push(opt),
-          });
-
-          expect(sources.length).toBe(1);
-          expect(sources[0].name).toBe('index');
-        });
-
-        test('"visitAny" can capture a source node', () => {
-          const { ast } = parse('FROM index');
-          const sources: ESQLSource[] = [];
-
-          walk(ast, {
-            visitAny: (node) => {
-              if (node.type === 'source') sources.push(node);
-            },
-          });
-
-          expect(sources.length).toBe(1);
-          expect(sources[0].name).toBe('index');
-        });
-
-        test('iterates through all sources', () => {
-          const { ast } = parse('TS index, index2, index3, index4');
-          const sources: ESQLSource[] = [];
-
-          walk(ast, {
-            visitSource: (opt) => sources.push(opt),
-          });
-
-          expect(sources.length).toBe(4);
-          expect(sources.map(({ name }) => name).sort()).toEqual([
-            'index',
-            'index2',
-            'index3',
-            'index4',
-          ]);
-        });
-
-        test('can walk through "WHERE" binary expression', () => {
-          const query = 'FROM index | STATS a = 123 WHERE c == d';
-          const { root } = parse(query);
-          const expressions: ESQLFunction[] = [];
-
-          walk(root, {
-            visitFunction: (node) => {
-              if (node.name === 'where') {
-                expressions.push(node);
-              }
-            },
-          });
-
-          expect(expressions.length).toBe(1);
-          expect(expressions[0]).toMatchObject({
-            type: 'function',
-            subtype: 'binary-expression',
-            name: 'where',
-            args: [
-              {
-                type: 'function',
-                name: '=',
-              },
-              {
-                type: 'function',
-                name: '==',
-              },
-            ],
-          });
-        });
-      });
-
-      describe('columns', () => {
-        test('can walk through a single column', () => {
-          const query = 'ROW x = 1';
-          const { ast } = parse(query);
-          const columns: ESQLColumn[] = [];
-
-          walk(ast, {
-            visitColumn: (node) => columns.push(node),
-          });
-
-          expect(columns).toMatchObject([
-            {
-              type: 'column',
-              name: 'x',
-            },
-          ]);
-        });
-
-        test('"visitAny" can capture a column', () => {
-          const query = 'ROW x = 1';
-          const { ast } = parse(query);
-          const columns: ESQLColumn[] = [];
-
-          walk(ast, {
-            visitAny: (node) => {
-              if (node.type === 'column') columns.push(node);
-            },
-          });
-
-          expect(columns).toMatchObject([
-            {
-              type: 'column',
-              name: 'x',
-            },
-          ]);
-        });
-
-        test('can walk through multiple columns', () => {
-          const query = 'FROM index | STATS a = 123, b = 456';
-          const { ast } = parse(query);
-          const columns: ESQLColumn[] = [];
-
-          walk(ast, {
-            visitColumn: (node) => columns.push(node),
-          });
-
-          expect(columns).toMatchObject([
-            {
-              type: 'column',
-              name: 'a',
-            },
-            {
-              type: 'column',
-              name: 'b',
-            },
-          ]);
-        });
-      });
-
-      describe('functions', () => {
-        test('can walk through functions', () => {
-          const query = 'FROM a | STATS fn(1), agg(true)';
-          const { ast } = parse(query);
-          const nodes: ESQLFunction[] = [];
-
-          walk(ast, {
-            visitFunction: (node) => nodes.push(node),
-          });
-
-          expect(nodes).toMatchObject([
-            {
-              type: 'function',
-              name: 'fn',
-            },
-            {
-              type: 'function',
-              name: 'agg',
-            },
-          ]);
-        });
-
-        test('"visitAny" can capture function nodes', () => {
-          const query = 'FROM a | STATS fn(1), agg(true)';
-          const { ast } = parse(query);
-          const nodes: ESQLFunction[] = [];
-
-          walk(ast, {
-            visitAny: (node) => {
-              if (node.type === 'function') nodes.push(node);
-            },
-          });
-
-          expect(nodes).toMatchObject([
-            {
-              type: 'function',
-              name: 'fn',
-            },
-            {
-              type: 'function',
-              name: 'agg',
-            },
-          ]);
-        });
-      });
-
-      describe('literals', () => {
-        test('can walk a single literal', () => {
-          const query = 'ROW x = 1';
-          const { ast } = parse(query);
-          const columns: ESQLLiteral[] = [];
-
-          walk(ast, {
-            visitLiteral: (node) => columns.push(node),
-          });
-
-          expect(columns).toMatchObject([
-            {
-              type: 'literal',
-              name: '1',
-            },
-          ]);
-        });
-
-        test('can walk through all literals', () => {
-          const query = 'FROM index | STATS a = 123, b = "foo", c = true AND false';
-          const { ast } = parse(query);
-          const columns: ESQLLiteral[] = [];
-
-          walk(ast, {
-            visitLiteral: (node) => columns.push(node),
-          });
-
-          expect(columns).toMatchObject([
-            {
-              type: 'literal',
-              literalType: 'integer',
-              name: '123',
-            },
-            {
-              type: 'literal',
-              literalType: 'keyword',
-              name: '"foo"',
-            },
-            {
-              type: 'literal',
-              literalType: 'boolean',
-              name: 'true',
-            },
-            {
-              type: 'literal',
-              literalType: 'boolean',
-              name: 'false',
-            },
-          ]);
-        });
-
-        test('can walk through literals inside functions', () => {
-          const query = 'FROM index | STATS f(1, "2", g(true) + false, h(j(k(3.14))))';
-          const { ast } = parse(query);
-          const columns: ESQLLiteral[] = [];
-
-          walk(ast, {
-            visitLiteral: (node) => columns.push(node),
-          });
-
-          expect(columns).toMatchObject([
-            {
-              type: 'literal',
-              literalType: 'integer',
-              name: '1',
-            },
-            {
-              type: 'literal',
-              literalType: 'keyword',
-              name: '"2"',
-            },
-            {
-              type: 'literal',
-              literalType: 'boolean',
-              name: 'true',
-            },
-            {
-              type: 'literal',
-              literalType: 'boolean',
-              name: 'false',
-            },
-            {
-              type: 'literal',
-              literalType: 'double',
-              name: '3.14',
-            },
-          ]);
-        });
-      });
-
-      describe('list literals', () => {
-        describe('numeric', () => {
-          test('can walk a single numeric list literal', () => {
-            const query = 'ROW x = [1, 2]';
-            const { ast } = parse(query);
-            const lists: ESQLList[] = [];
-
-            walk(ast, {
-              visitListLiteral: (node) => lists.push(node),
-            });
-
-            expect(lists).toMatchObject([
-              {
-                type: 'list',
-                values: [
-                  {
-                    type: 'literal',
-                    literalType: 'integer',
-                    name: '1',
-                  },
-                  {
-                    type: 'literal',
-                    literalType: 'integer',
-                    name: '2',
-                  },
-                ],
-              },
-            ]);
-          });
-
-          test('"visitAny" can capture a list literal', () => {
-            const query = 'ROW x = [1, 2]';
-            const { ast } = parse(query);
-            const lists: ESQLList[] = [];
-
-            walk(ast, {
-              visitAny: (node) => {
-                if (node.type === 'list') lists.push(node);
-              },
-            });
-
-            expect(lists.length).toBe(1);
-          });
-
-          test('can walk plain literals inside list literal', () => {
-            const query = 'ROW x = [1, 2] + [3.3]';
-            const { ast } = parse(query);
-            const lists: ESQLList[] = [];
-            const literals: ESQLLiteral[] = [];
-
-            walk(ast, {
-              visitListLiteral: (node) => lists.push(node),
-              visitLiteral: (node) => literals.push(node),
-            });
-
-            expect(lists).toMatchObject([
-              {
-                type: 'list',
-                values: [
-                  {
-                    type: 'literal',
-                    literalType: 'integer',
-                    name: '1',
-                  },
-                  {
-                    type: 'literal',
-                    literalType: 'integer',
-                    name: '2',
-                  },
-                ],
-              },
-              {
-                type: 'list',
-                values: [
-                  {
-                    type: 'literal',
-                    literalType: 'double',
-                    name: '3.3',
-                  },
-                ],
-              },
-            ]);
-            expect(literals).toMatchObject([
-              {
-                type: 'literal',
-                literalType: 'integer',
-                name: '1',
-              },
-              {
-                type: 'literal',
-                literalType: 'integer',
-                name: '2',
-              },
-              {
-                type: 'literal',
-                literalType: 'double',
-                name: '3.3',
-              },
-            ]);
-          });
-        });
-
-        describe('boolean', () => {
-          test('can walk a single numeric list literal', () => {
-            const query = 'ROW x = [true, false]';
-            const { ast } = parse(query);
-            const lists: ESQLList[] = [];
-
-            walk(ast, {
-              visitListLiteral: (node) => lists.push(node),
-            });
-
-            expect(lists).toMatchObject([
-              {
-                type: 'list',
-                values: [
-                  {
-                    type: 'literal',
-                    literalType: 'boolean',
-                    name: 'true',
-                  },
-                  {
-                    type: 'literal',
-                    literalType: 'boolean',
-                    name: 'false',
-                  },
-                ],
-              },
-            ]);
-          });
-
-          test('can walk plain literals inside list literal', () => {
-            const query = 'ROW x = [false, false], b([true, true, true])';
-            const { ast } = parse(query);
-            const lists: ESQLList[] = [];
-            const literals: ESQLLiteral[] = [];
-
-            walk(ast, {
-              visitListLiteral: (node) => lists.push(node),
-              visitLiteral: (node) => literals.push(node),
-            });
-
-            expect(lists).toMatchObject([
-              {
-                type: 'list',
-              },
-              {
-                type: 'list',
-              },
-            ]);
-            expect(literals).toMatchObject([
-              {
-                type: 'literal',
-                literalType: 'boolean',
-                name: 'false',
-              },
-              {
-                type: 'literal',
-                literalType: 'boolean',
-                name: 'false',
-              },
-              {
-                type: 'literal',
-                literalType: 'boolean',
-                name: 'true',
-              },
-              {
-                type: 'literal',
-                literalType: 'boolean',
-                name: 'true',
-              },
-              {
-                type: 'literal',
-                literalType: 'boolean',
-                name: 'true',
-              },
-            ]);
-          });
-        });
-
-        describe('string', () => {
-          test('can walk string literals', () => {
-            const query = 'ROW x = ["a", "b"], b(["c", "d", "e"])';
-            const { ast } = parse(query);
-            const lists: ESQLList[] = [];
-            const literals: ESQLLiteral[] = [];
-
-            walk(ast, {
-              visitListLiteral: (node) => lists.push(node),
-              visitLiteral: (node) => literals.push(node),
-            });
-
-            expect(lists).toMatchObject([
-              {
-                type: 'list',
-              },
-              {
-                type: 'list',
-              },
-            ]);
-            expect(literals).toMatchObject([
-              {
-                type: 'literal',
-                literalType: 'keyword',
-                name: '"a"',
-              },
-              {
-                type: 'literal',
-                literalType: 'keyword',
-                name: '"b"',
-              },
-              {
-                type: 'literal',
-                literalType: 'keyword',
-                name: '"c"',
-              },
-              {
-                type: 'literal',
-                literalType: 'keyword',
-                name: '"d"',
-              },
-              {
-                type: 'literal',
-                literalType: 'keyword',
-                name: '"e"',
-              },
-            ]);
-          });
-        });
-      });
-
-      describe('time interval', () => {
-        test('can visit time interval nodes', () => {
-          const query = 'FROM index | STATS a = 123 BY 1h';
-          const { ast } = parse(query);
-          const intervals: ESQLTimeInterval[] = [];
-
-          walk(ast, {
-            visitTimeIntervalLiteral: (node) => intervals.push(node),
-          });
-
-          expect(intervals).toMatchObject([
-            {
-              type: 'timeInterval',
-              quantity: 1,
-              unit: 'h',
-            },
-          ]);
-        });
-
-        test('"visitAny" can capture time interval expressions', () => {
-          const query = 'FROM index | STATS a = 123 BY 1h';
-          const { ast } = parse(query);
-          const intervals: ESQLTimeInterval[] = [];
-
-          walk(ast, {
-            visitAny: (node) => {
-              if (node.type === 'timeInterval') intervals.push(node);
-            },
-          });
-
-          expect(intervals).toMatchObject([
-            {
-              type: 'timeInterval',
-              quantity: 1,
-              unit: 'h',
-            },
-          ]);
-        });
-
-        test('"visitAny" does not capture time interval node if type-specific callback provided', () => {
-          const query = 'FROM index | STATS a = 123 BY 1h';
-          const { ast } = parse(query);
-          const intervals1: ESQLTimeInterval[] = [];
-          const intervals2: ESQLTimeInterval[] = [];
-
-          walk(ast, {
-            visitTimeIntervalLiteral: (node) => intervals1.push(node),
-            visitAny: (node) => {
-              if (node.type === 'timeInterval') intervals2.push(node);
-            },
-          });
-
-          expect(intervals1.length).toBe(1);
-          expect(intervals2.length).toBe(0);
-        });
-      });
-
-      describe('cast expression', () => {
-        test('can visit cast expression', () => {
-          const query = 'FROM index | STATS a = 123::integer';
-          const { ast } = parse(query);
-
-          const casts: ESQLInlineCast[] = [];
-
-          walk(ast, {
-            visitInlineCast: (node) => casts.push(node),
-          });
-
-          expect(casts).toMatchObject([
-            {
-              type: 'inlineCast',
-              castType: 'integer',
-              value: {
-                type: 'literal',
-                literalType: 'integer',
-                value: 123,
-              },
-            },
-          ]);
-        });
-
-        test('can visit a column inside a deeply nested inline cast', () => {
-          const query =
-            'FROM index | WHERE 123 == add(1 + fn(NOT -(a.b.c)::INTEGER /* comment */))';
-          const { root } = parse(query);
-
-          const columns: ESQLColumn[] = [];
-
-          walk(root, {
-            visitColumn: (node) => columns.push(node),
-          });
-
-          expect(columns).toMatchObject([
-            {
-              type: 'column',
-              name: 'a.b.c',
-            },
-          ]);
-        });
-
-        test('"visitAny" can capture cast expression', () => {
-          const query = 'FROM index | STATS a = 123::integer';
-          const { ast } = parse(query);
-          const casts: ESQLInlineCast[] = [];
-
-          walk(ast, {
-            visitAny: (node) => {
-              if (node.type === 'inlineCast') casts.push(node);
-            },
-          });
-
-          expect(casts).toMatchObject([
-            {
-              type: 'inlineCast',
-              castType: 'integer',
-              value: {
-                type: 'literal',
-                literalType: 'integer',
-                value: 123,
-              },
-            },
-          ]);
-        });
       });
     });
   });
@@ -836,6 +271,663 @@ describe('structurally can walk all nodes', () => {
       expect(src.slice(nodes[1].location!.min, nodes[1].location!.max + 1)).toBe(
         '"foo" : /* 1 */ "bar"'
       );
+    });
+
+    test('can visit "source" components', () => {
+      const src = 'FROM a:b';
+      const { ast } = parse(src);
+      const nodes: ESQLLiteral[] = [];
+
+      walk(ast, {
+        visitLiteral: (node) => nodes.push(node),
+      });
+
+      expect(nodes).toMatchObject([
+        {
+          type: 'literal',
+          valueUnquoted: 'a',
+        },
+        {
+          type: 'literal',
+          valueUnquoted: 'b',
+        },
+      ]);
+    });
+
+    describe('sources', () => {
+      test('iterates through a single source', () => {
+        const { ast } = parse('FROM index');
+        const sources: ESQLSource[] = [];
+
+        walk(ast, {
+          visitSource: (opt) => sources.push(opt),
+        });
+
+        expect(sources.length).toBe(1);
+        expect(sources[0].name).toBe('index');
+      });
+
+      test('"visitAny" can capture a source node', () => {
+        const { ast } = parse('FROM index');
+        const sources: ESQLSource[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'source') sources.push(node);
+          },
+        });
+
+        expect(sources.length).toBe(1);
+        expect(sources[0].name).toBe('index');
+      });
+
+      test('iterates through all sources', () => {
+        const { ast } = parse('TS index, index2, index3, index4');
+        const sources: ESQLSource[] = [];
+
+        walk(ast, {
+          visitSource: (opt) => sources.push(opt),
+        });
+
+        expect(sources.length).toBe(4);
+        expect(sources.map(({ name }) => name).sort()).toEqual([
+          'index',
+          'index2',
+          'index3',
+          'index4',
+        ]);
+      });
+
+      test('can walk through "WHERE" binary expression', () => {
+        const query = 'FROM index | STATS a = 123 WHERE c == d';
+        const { root } = parse(query);
+        const expressions: ESQLFunction[] = [];
+
+        walk(root, {
+          visitFunction: (node) => {
+            if (node.name === 'where') {
+              expressions.push(node);
+            }
+          },
+        });
+
+        expect(expressions.length).toBe(1);
+        expect(expressions[0]).toMatchObject({
+          type: 'function',
+          subtype: 'binary-expression',
+          name: 'where',
+          args: [
+            {
+              type: 'function',
+              name: '=',
+            },
+            {
+              type: 'function',
+              name: '==',
+            },
+          ],
+        });
+      });
+    });
+
+    describe('columns', () => {
+      test('can walk through a single column', () => {
+        const query = 'ROW x = 1';
+        const { ast } = parse(query);
+        const columns: ESQLColumn[] = [];
+
+        walk(ast, {
+          visitColumn: (node) => columns.push(node),
+        });
+
+        expect(columns).toMatchObject([
+          {
+            type: 'column',
+            name: 'x',
+          },
+        ]);
+      });
+
+      test('"visitAny" can capture a column', () => {
+        const query = 'ROW x = 1';
+        const { ast } = parse(query);
+        const columns: ESQLColumn[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'column') columns.push(node);
+          },
+        });
+
+        expect(columns).toMatchObject([
+          {
+            type: 'column',
+            name: 'x',
+          },
+        ]);
+      });
+
+      test('can walk through multiple columns', () => {
+        const query = 'FROM index | STATS a = 123, b = 456';
+        const { ast } = parse(query);
+        const columns: ESQLColumn[] = [];
+
+        walk(ast, {
+          visitColumn: (node) => columns.push(node),
+        });
+
+        expect(columns).toMatchObject([
+          {
+            type: 'column',
+            name: 'a',
+          },
+          {
+            type: 'column',
+            name: 'b',
+          },
+        ]);
+      });
+    });
+
+    describe('functions', () => {
+      test('can walk through functions', () => {
+        const query = 'FROM a | STATS fn(1), agg(true)';
+        const { ast } = parse(query);
+        const nodes: ESQLFunction[] = [];
+
+        walk(ast, {
+          visitFunction: (node) => nodes.push(node),
+        });
+
+        expect(nodes).toMatchObject([
+          {
+            type: 'function',
+            name: 'fn',
+          },
+          {
+            type: 'function',
+            name: 'agg',
+          },
+        ]);
+      });
+
+      test('"visitAny" can capture function nodes', () => {
+        const query = 'FROM a | STATS fn(1), agg(true)';
+        const { ast } = parse(query);
+        const nodes: ESQLFunction[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'function') nodes.push(node);
+          },
+        });
+
+        expect(nodes).toMatchObject([
+          {
+            type: 'function',
+            name: 'fn',
+          },
+          {
+            type: 'function',
+            name: 'agg',
+          },
+        ]);
+      });
+    });
+
+    describe('literals', () => {
+      test('can walk a single literal', () => {
+        const query = 'ROW x = 1';
+        const { ast } = parse(query);
+        const columns: ESQLLiteral[] = [];
+
+        walk(ast, {
+          visitLiteral: (node) => columns.push(node),
+        });
+
+        expect(columns).toMatchObject([
+          {
+            type: 'literal',
+            name: '1',
+          },
+        ]);
+      });
+
+      test('can walk through all literals', () => {
+        const query = 'FROM index | STATS a = 123, b = "foo", c = true AND false';
+        const { ast } = parse(query);
+        const columns: ESQLLiteral[] = [];
+
+        walk(ast, {
+          visitLiteral: (node) => columns.push(node),
+        });
+
+        expect(columns).toMatchObject([
+          {
+            type: 'literal',
+            literalType: 'keyword',
+            value: 'index',
+          },
+          {
+            type: 'literal',
+            literalType: 'integer',
+            value: 123,
+          },
+          {
+            type: 'literal',
+            literalType: 'keyword',
+            value: '"foo"',
+          },
+          {
+            type: 'literal',
+            literalType: 'boolean',
+            value: 'true',
+          },
+          {
+            type: 'literal',
+            literalType: 'boolean',
+            value: 'false',
+          },
+        ]);
+      });
+
+      test('can walk through literals inside functions', () => {
+        const query = 'FROM index | STATS f(1, "2", g(true) + false, h(j(k(3.14))))';
+        const { ast } = parse(query);
+        const columns: ESQLLiteral[] = [];
+
+        walk(ast, {
+          visitLiteral: (node) => columns.push(node),
+        });
+
+        expect(columns).toMatchObject([
+          {
+            type: 'literal',
+            literalType: 'keyword',
+            value: 'index',
+          },
+          {
+            type: 'literal',
+            literalType: 'integer',
+            name: '1',
+          },
+          {
+            type: 'literal',
+            literalType: 'keyword',
+            name: '"2"',
+          },
+          {
+            type: 'literal',
+            literalType: 'boolean',
+            name: 'true',
+          },
+          {
+            type: 'literal',
+            literalType: 'boolean',
+            name: 'false',
+          },
+          {
+            type: 'literal',
+            literalType: 'double',
+            name: '3.14',
+          },
+        ]);
+      });
+    });
+
+    describe('list literals', () => {
+      describe('numeric', () => {
+        test('can walk a single numeric list literal', () => {
+          const query = 'ROW x = [1, 2]';
+          const { ast } = parse(query);
+          const lists: ESQLList[] = [];
+
+          walk(ast, {
+            visitListLiteral: (node) => lists.push(node),
+          });
+
+          expect(lists).toMatchObject([
+            {
+              type: 'list',
+              values: [
+                {
+                  type: 'literal',
+                  literalType: 'integer',
+                  name: '1',
+                },
+                {
+                  type: 'literal',
+                  literalType: 'integer',
+                  name: '2',
+                },
+              ],
+            },
+          ]);
+        });
+
+        test('"visitAny" can capture a list literal', () => {
+          const query = 'ROW x = [1, 2]';
+          const { ast } = parse(query);
+          const lists: ESQLList[] = [];
+
+          walk(ast, {
+            visitAny: (node) => {
+              if (node.type === 'list') lists.push(node);
+            },
+          });
+
+          expect(lists.length).toBe(1);
+        });
+
+        test('can walk plain literals inside list literal', () => {
+          const query = 'ROW x = [1, 2] + [3.3]';
+          const { ast } = parse(query);
+          const lists: ESQLList[] = [];
+          const literals: ESQLLiteral[] = [];
+
+          walk(ast, {
+            visitListLiteral: (node) => lists.push(node),
+            visitLiteral: (node) => literals.push(node),
+          });
+
+          expect(lists).toMatchObject([
+            {
+              type: 'list',
+              values: [
+                {
+                  type: 'literal',
+                  literalType: 'integer',
+                  name: '1',
+                },
+                {
+                  type: 'literal',
+                  literalType: 'integer',
+                  name: '2',
+                },
+              ],
+            },
+            {
+              type: 'list',
+              values: [
+                {
+                  type: 'literal',
+                  literalType: 'double',
+                  name: '3.3',
+                },
+              ],
+            },
+          ]);
+          expect(literals).toMatchObject([
+            {
+              type: 'literal',
+              literalType: 'integer',
+              name: '1',
+            },
+            {
+              type: 'literal',
+              literalType: 'integer',
+              name: '2',
+            },
+            {
+              type: 'literal',
+              literalType: 'double',
+              name: '3.3',
+            },
+          ]);
+        });
+      });
+
+      describe('boolean', () => {
+        test('can walk a single numeric list literal', () => {
+          const query = 'ROW x = [true, false]';
+          const { ast } = parse(query);
+          const lists: ESQLList[] = [];
+
+          walk(ast, {
+            visitListLiteral: (node) => lists.push(node),
+          });
+
+          expect(lists).toMatchObject([
+            {
+              type: 'list',
+              values: [
+                {
+                  type: 'literal',
+                  literalType: 'boolean',
+                  name: 'true',
+                },
+                {
+                  type: 'literal',
+                  literalType: 'boolean',
+                  name: 'false',
+                },
+              ],
+            },
+          ]);
+        });
+
+        test('can walk plain literals inside list literal', () => {
+          const query = 'ROW x = [false, false], b([true, true, true])';
+          const { ast } = parse(query);
+          const lists: ESQLList[] = [];
+          const literals: ESQLLiteral[] = [];
+
+          walk(ast, {
+            visitListLiteral: (node) => lists.push(node),
+            visitLiteral: (node) => literals.push(node),
+          });
+
+          expect(lists).toMatchObject([
+            {
+              type: 'list',
+            },
+            {
+              type: 'list',
+            },
+          ]);
+          expect(literals).toMatchObject([
+            {
+              type: 'literal',
+              literalType: 'boolean',
+              name: 'false',
+            },
+            {
+              type: 'literal',
+              literalType: 'boolean',
+              name: 'false',
+            },
+            {
+              type: 'literal',
+              literalType: 'boolean',
+              name: 'true',
+            },
+            {
+              type: 'literal',
+              literalType: 'boolean',
+              name: 'true',
+            },
+            {
+              type: 'literal',
+              literalType: 'boolean',
+              name: 'true',
+            },
+          ]);
+        });
+      });
+
+      describe('string', () => {
+        test('can walk string literals', () => {
+          const query = 'ROW x = ["a", "b"], b(["c", "d", "e"])';
+          const { ast } = parse(query);
+          const lists: ESQLList[] = [];
+          const literals: ESQLLiteral[] = [];
+
+          walk(ast, {
+            visitListLiteral: (node) => lists.push(node),
+            visitLiteral: (node) => literals.push(node),
+          });
+
+          expect(lists).toMatchObject([
+            {
+              type: 'list',
+            },
+            {
+              type: 'list',
+            },
+          ]);
+          expect(literals).toMatchObject([
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"a"',
+            },
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"b"',
+            },
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"c"',
+            },
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"d"',
+            },
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              name: '"e"',
+            },
+          ]);
+        });
+      });
+    });
+
+    describe('time interval', () => {
+      test('can visit time interval nodes', () => {
+        const query = 'FROM index | STATS a = 123 BY 1h';
+        const { ast } = parse(query);
+        const intervals: ESQLTimeInterval[] = [];
+
+        walk(ast, {
+          visitTimeIntervalLiteral: (node) => intervals.push(node),
+        });
+
+        expect(intervals).toMatchObject([
+          {
+            type: 'timeInterval',
+            quantity: 1,
+            unit: 'h',
+          },
+        ]);
+      });
+
+      test('"visitAny" can capture time interval expressions', () => {
+        const query = 'FROM index | STATS a = 123 BY 1h';
+        const { ast } = parse(query);
+        const intervals: ESQLTimeInterval[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'timeInterval') intervals.push(node);
+          },
+        });
+
+        expect(intervals).toMatchObject([
+          {
+            type: 'timeInterval',
+            quantity: 1,
+            unit: 'h',
+          },
+        ]);
+      });
+
+      test('"visitAny" does not capture time interval node if type-specific callback provided', () => {
+        const query = 'FROM index | STATS a = 123 BY 1h';
+        const { ast } = parse(query);
+        const intervals1: ESQLTimeInterval[] = [];
+        const intervals2: ESQLTimeInterval[] = [];
+
+        walk(ast, {
+          visitTimeIntervalLiteral: (node) => intervals1.push(node),
+          visitAny: (node) => {
+            if (node.type === 'timeInterval') intervals2.push(node);
+          },
+        });
+
+        expect(intervals1.length).toBe(1);
+        expect(intervals2.length).toBe(0);
+      });
+    });
+
+    describe('cast expression', () => {
+      test('can visit cast expression', () => {
+        const query = 'FROM index | STATS a = 123::integer';
+        const { ast } = parse(query);
+
+        const casts: ESQLInlineCast[] = [];
+
+        walk(ast, {
+          visitInlineCast: (node) => casts.push(node),
+        });
+
+        expect(casts).toMatchObject([
+          {
+            type: 'inlineCast',
+            castType: 'integer',
+            value: {
+              type: 'literal',
+              literalType: 'integer',
+              value: 123,
+            },
+          },
+        ]);
+      });
+
+      test('can visit a column inside a deeply nested inline cast', () => {
+        const query = 'FROM index | WHERE 123 == add(1 + fn(NOT -(a.b.c)::INTEGER /* comment */))';
+        const { root } = parse(query);
+
+        const columns: ESQLColumn[] = [];
+
+        walk(root, {
+          visitColumn: (node) => columns.push(node),
+        });
+
+        expect(columns).toMatchObject([
+          {
+            type: 'column',
+            name: 'a.b.c',
+          },
+        ]);
+      });
+
+      test('"visitAny" can capture cast expression', () => {
+        const query = 'FROM index | STATS a = 123::integer';
+        const { ast } = parse(query);
+        const casts: ESQLInlineCast[] = [];
+
+        walk(ast, {
+          visitAny: (node) => {
+            if (node.type === 'inlineCast') casts.push(node);
+          },
+        });
+
+        expect(casts).toMatchObject([
+          {
+            type: 'inlineCast',
+            castType: 'integer',
+            value: {
+              type: 'literal',
+              literalType: 'integer',
+              value: 123,
+            },
+          },
+        ]);
+      });
     });
   });
 

@@ -2230,7 +2230,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('shard failures', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/224699
+    describe.skip('shard failures', () => {
       const config = getService('config');
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
@@ -2250,6 +2251,7 @@ export default ({ getService }: FtrProviderContext) => {
         const doc1 = { agent: { name: 'test-1' } };
         await indexEnhancedDocuments({
           documents: [doc1],
+          interval: ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'],
           id: uuidv4(),
         });
 

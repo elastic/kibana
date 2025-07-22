@@ -93,6 +93,7 @@ export class AnalyticsIndex {
     this.sourceIndex = sourceIndex;
     this.sourceQuery = sourceQuery;
     this.indexSettings = {
+      hidden: true,
       // settings are not supported on serverless ES
       ...(isServerless
         ? {}
@@ -133,6 +134,11 @@ export class AnalyticsIndex {
         await this.updateIndexMapping();
       }
     } catch (error) {
+      if (error.body?.error?.type === 'resource_already_exists_exception') {
+        this.logDebug('Index already exists. Skipping creation.');
+        return;
+      }
+
       this.handleError('Failed to create the index.', error);
     }
   }

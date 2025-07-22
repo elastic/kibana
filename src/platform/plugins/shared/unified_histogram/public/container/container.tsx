@@ -54,6 +54,7 @@ export type UnifiedHistogramContainerProps = {
     nextVisContext: UnifiedHistogramVisContext | undefined,
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
   ) => void;
+  getModifiedVisAttributes?: UnifiedHistogramLayoutProps['getModifiedVisAttributes'];
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'

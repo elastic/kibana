@@ -57,7 +57,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
           description={
             <>
               {FCP_LABEL}
-              <EuiIconTip content={FCP_TOOLTIP} type="questionInCircle" />
+              <EuiIconTip content={FCP_TOOLTIP} type="question" />
             </>
           }
           isLoading={loading}
@@ -70,7 +70,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
           description={
             <>
               {TBT_LABEL}
-              <EuiIconTip content={TBT_TOOLTIP} type="questionInCircle" />
+              <EuiIconTip content={TBT_TOOLTIP} type="question" />
             </>
           }
           isLoading={loading}
@@ -88,7 +88,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
           description={
             <>
               {NO_OF_LONG_TASK}
-              <EuiIconTip content={NO_OF_LONG_TASK_TOOLTIP} type="questionInCircle" />
+              <EuiIconTip content={NO_OF_LONG_TASK_TOOLTIP} type="question" />
             </>
           }
           isLoading={!!loadingLongTask}
@@ -102,7 +102,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
           description={
             <>
               {LONGEST_LONG_TASK}
-              <EuiIconTip content={LONGEST_LONG_TASK_TOOLTIP} type="questionInCircle" />
+              <EuiIconTip content={LONGEST_LONG_TASK_TOOLTIP} type="question" />
             </>
           }
           isLoading={!!loadingLongTask}
@@ -116,7 +116,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
           description={
             <>
               {SUM_LONG_TASKS}
-              <EuiIconTip content={SUM_LONG_TASKS_TOOLTIP} type="questionInCircle" />
+              <EuiIconTip content={SUM_LONG_TASKS_TOOLTIP} type="question" />
             </>
           }
           isLoading={!!loadingLongTask}

@@ -184,7 +184,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
               <EuiIconTip
                 size="s"
                 color="subdued"
-                type="questionInCircle"
+                type="question"
                 className="eui-alignTop"
                 data-test-subj="otherFieldsHelpTooltip"
                 aria-label={i18n.ADDITIONAL_INFO_HELP}

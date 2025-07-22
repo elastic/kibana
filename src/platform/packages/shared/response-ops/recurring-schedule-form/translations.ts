@@ -105,6 +105,20 @@ export const RECURRING_SCHEDULE_FORM_ENDS = i18n.translate(
   }
 );
 
+export const RECURRING_SCHEDULE_FORM_UNTIL_REQUIRED_MESSAGE = i18n.translate(
+  'responseOpsRecurringScheduleForm.untilRequiredMessage',
+  {
+    defaultMessage: 'End date required',
+  }
+);
+
+export const RECURRING_SCHEDULE_FORM_UNTIL_PLACEHOLDER = i18n.translate(
+  'responseOpsRecurringScheduleForm.untilPlaceholder',
+  {
+    defaultMessage: 'Select an end date',
+  }
+);
+
 export const RECURRING_SCHEDULE_FORM_ENDS_NEVER = i18n.translate(
   'responseOpsRecurringScheduleForm.ends.never',
   {
@@ -261,14 +275,16 @@ export const RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY = (count: number) =>
 export const RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY = (
   frequencySummary: string | null,
   onSummary: string | null,
-  untilSummary: string | null
+  untilSummary: string | null,
+  time: string | null
 ) =>
   i18n.translate('responseOpsRecurringScheduleForm.recurrenceSummary', {
-    defaultMessage: 'every {frequencySummary}{on}{until}',
+    defaultMessage: 'every {frequencySummary}{on}{until}{time}',
     values: {
       frequencySummary: frequencySummary ? `${frequencySummary} ` : '',
       on: onSummary ? `${onSummary} ` : '',
       until: untilSummary ? `${untilSummary}` : '',
+      time: time ? `${time}` : '',
     },
   });
 
@@ -292,4 +308,10 @@ export const RECURRING_SCHEDULE_FORM_YEARLY_BY_MONTH_SUMMARY = (date: string) =>
   i18n.translate('responseOpsRecurringScheduleForm.yearlyBymonthSummary', {
     defaultMessage: 'on {date}',
     values: { date },
+  });
+
+export const RECURRING_SCHEDULE_FORM_TIME_SUMMARY = (time: string) =>
+  i18n.translate('responseOpsRecurringScheduleForm.timeSummary', {
+    defaultMessage: 'at {time}',
+    values: { time },
   });

@@ -7,7 +7,7 @@
 
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { EuiTabs, EuiTab } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getTabs } from './get_tabs';
 
@@ -34,6 +34,12 @@ const TabsComponent: React.FC<Props> = ({
   }, [selectedTabId, tabs]);
 
   const onSelectedTabChanged = useCallback((id: string) => setSelectedTabId(id), []);
+
+  useEffect(() => {
+    // Reset to the first tab if the attack discovery changes,
+    // because (for example) the workflow status of the alerts may have changed:
+    setSelectedTabId(tabs[0].id);
+  }, [attackDiscovery, tabs]);
 
   return (
     <>

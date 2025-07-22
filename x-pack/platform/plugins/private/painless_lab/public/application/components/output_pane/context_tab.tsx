@@ -47,7 +47,7 @@ export const ContextTab: FunctionComponent = () => {
                 id="xpack.painlessLab.contextFieldLabel"
                 defaultMessage="Execution context"
               />{' '}
-              <EuiIcon type="questionInCircle" color="subdued" />
+              <EuiIcon type="question" color="subdued" />
             </span>
           </EuiToolTip>
         }
@@ -86,7 +86,7 @@ export const ContextTab: FunctionComponent = () => {
                   id="xpack.painlessLab.indexFieldLabel"
                   defaultMessage="Index name"
                 />{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }
@@ -125,7 +125,7 @@ export const ContextTab: FunctionComponent = () => {
             >
               <span>
                 <FormattedMessage id="xpack.painlessLab.queryFieldLabel" defaultMessage="Query" />{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }
@@ -171,7 +171,7 @@ export const ContextTab: FunctionComponent = () => {
                   id="xpack.painlessLab.documentFieldLabel"
                   defaultMessage="Sample document (JSON)"
                 />{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }

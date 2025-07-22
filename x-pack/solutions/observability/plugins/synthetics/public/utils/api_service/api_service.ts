@@ -72,7 +72,7 @@ class ApiService {
   }
 
   private parseApiUrl(apiUrl: string, spaceId?: string) {
-    if (spaceId) {
+    if (spaceId && spaceId !== 'default' && spaceId !== '*') {
       const basePath = kibanaService.coreSetup.http.basePath;
       return addSpaceIdToPath(basePath.serverBasePath, spaceId, apiUrl);
     }

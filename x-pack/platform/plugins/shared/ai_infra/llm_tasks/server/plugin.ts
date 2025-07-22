@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { LlmTasksConfig } from './config';
 import type {
   LlmTasksPluginSetup,
@@ -41,7 +42,9 @@ export class LlmTasksPlugin
     const { inference, productDocBase } = startDependencies;
     return {
       retrieveDocumentationAvailable: async () => {
-        const docBaseStatus = await startDependencies.productDocBase.management.getStatus();
+        const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        });
         return docBaseStatus.status === 'installed';
       },
       retrieveDocumentation: (options) => {

@@ -11,6 +11,7 @@ import type { IToasts } from '@kbn/core/public';
 import * as i18n from './translations';
 
 import type { ErrorSchema, ImportRulesResponse } from '../../../../../common/api/detection_engine';
+import { showErrorToast } from '../../../../common/components/utils';
 
 export function getFailedConnectorsCount(actionConnectorsErrors: ErrorSchema[]) {
   const connectorIds = new Set(
@@ -44,25 +45,6 @@ function getUserFriendlyConnectorMessages(actionConnectorsErrors: ErrorSchema[])
   });
 
   return mappedErrors;
-}
-
-function showErrorToast({
-  title,
-  shortMessage,
-  fullMessage,
-  toasts,
-}: {
-  title: string;
-  shortMessage: string;
-  fullMessage: string;
-  toasts: IToasts;
-}) {
-  const error = new Error('Error details');
-  error.stack = fullMessage;
-  toasts.addError(error, {
-    title,
-    toastMessage: shortMessage,
-  });
 }
 
 export function showToast({

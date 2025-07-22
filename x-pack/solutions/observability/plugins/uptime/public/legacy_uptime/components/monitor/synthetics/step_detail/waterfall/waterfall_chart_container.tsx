@@ -93,7 +93,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
             />
           }
           color="warning"
-          iconType="help"
+          iconType="question"
         >
           <FormattedMessage
             id="xpack.uptime.synthetics.stepDetail.waterfallUnsupported.description"

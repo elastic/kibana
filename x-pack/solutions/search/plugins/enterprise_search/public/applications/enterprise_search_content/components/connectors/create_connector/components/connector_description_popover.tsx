@@ -103,11 +103,11 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
       anchorPosition="upCenter"
       button={
         <EuiButtonIcon
-          aria-label={i18n.translate('xpack.enterpriseSearch.createConnector.iInCircle', {
+          aria-label={i18n.translate('xpack.enterpriseSearch.createConnector.info', {
             defaultMessage: 'More information',
           })}
           data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
-          iconType="iInCircle"
+          iconType="info"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
       }

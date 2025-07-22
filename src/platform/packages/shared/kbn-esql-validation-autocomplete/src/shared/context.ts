@@ -122,6 +122,12 @@ function findAstPosition(ast: ESQLAst, offset: number) {
   let node: ESQLSingleAstItem | undefined;
 
   Walker.walk(command, {
+    visitSource: (_node, parent, walker) => {
+      if (_node.location.max >= offset && _node.text !== EDITOR_MARKER) {
+        node = _node as ESQLSingleAstItem;
+        walker.abort();
+      }
+    },
     visitAny: (_node) => {
       if (
         _node.type === 'function' &&

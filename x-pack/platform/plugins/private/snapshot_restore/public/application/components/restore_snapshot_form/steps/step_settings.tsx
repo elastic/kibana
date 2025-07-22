@@ -92,7 +92,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
             flush="right"
             href={docLinks.links.snapshotRestore.changeIndexSettings}
             target="_blank"
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.restoreForm.stepSettings.docsButtonLabel"
@@ -105,7 +105,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
-            iconType="help"
+            iconType="question"
             title={i18n.translate(
               'xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.title',
               { defaultMessage: 'Backing indices' }

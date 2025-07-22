@@ -64,6 +64,6 @@ export type ToolOptionsOfPrompt<TPrompt extends Prompt> = TPrompt['versions'] ex
   infer TPromptVersion
 >
   ? TPromptVersion extends PromptVersion
-    ? Pick<TPromptVersion, 'tools'>
+    ? Pick<TPromptVersion, 'tools' | 'toolChoice'>
     : never
-  : {};
+  : never;

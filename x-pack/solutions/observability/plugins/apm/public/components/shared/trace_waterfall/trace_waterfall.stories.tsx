@@ -34,7 +34,7 @@ export const ManyChildren: StoryFn<{}> = () => {
       traceItems={[
         {
           id: '1',
-          timestamp: '2025-05-21T18:50:00.660Z',
+          timestampUs: new Date('2025-05-21T18:50:00.660Z').getTime() * 1000,
           name: 'Root',
           duration: 5000000,
           serviceName: 'frontend',
@@ -45,7 +45,7 @@ export const ManyChildren: StoryFn<{}> = () => {
           .fill(0)
           .map((_, index) => ({
             id: `child-${index}`,
-            timestamp: `2025-05-21T18:50:00.${660 + index}Z`,
+            timestampUs: new Date(`2025-05-21T18:50:00.${660 + index}Z`).getTime() * 1000,
             name: `Child ${index + 1}`,
             duration: 1000000 + index * 1000,
             parentId: '1',
@@ -65,7 +65,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
       traceItems={[
         {
           id: 'd2efb76164a77608',
-          timestamp: '2025-05-21T18:50:00.660Z',
+          timestampUs: new Date('2025-05-21T18:50:00.660Z').getTime() * 1000,
           name: 'HTTP GET /api',
           duration: 5000000,
           serviceName: 'frontend',
@@ -74,7 +74,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
         },
         {
           id: 'cdd3568d81149715',
-          timestamp: '2025-05-21T18:50:00.652Z', // Starts before its parent
+          timestampUs: new Date('2025-05-21T18:50:00.652Z').getTime() * 1000, // Starts before its parent
           name: 'POST /getquote',
           duration: 3677750,
           parentId: 'd2efb76164a77608',
@@ -83,7 +83,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
         },
         {
           id: 'a111aabbccddeeff',
-          timestamp: '2025-05-21T18:50:00.653Z',
+          timestampUs: new Date('2025-05-21T18:50:00.653Z').getTime() * 1000,
           name: 'DB query',
           duration: 1000000,
           parentId: 'cdd3568d81149715',
@@ -100,7 +100,7 @@ export const Example: StoryFn<{}> = () => {
       traceItems={[
         {
           id: '06b480d1e6e2ac2e',
-          timestamp: '2025-05-27T12:15:04.973Z',
+          timestampUs: new Date('2025-05-27T12:15:04.973Z').getTime() * 1000,
           name: 'POST',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 53170917,
@@ -109,8 +109,7 @@ export const Example: StoryFn<{}> = () => {
         },
         {
           id: '2b18312dfedbf16a',
-          timestamp: '2025-05-27T12:15:04.974Z',
-          // timestamp: '2025-05-27T12:15:04.973Z',
+          timestampUs: new Date('2025-05-27T12:15:04.974Z').getTime() * 1000,
           name: 'executing api route (pages) /api/checkout',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 51298750,
@@ -120,8 +119,7 @@ export const Example: StoryFn<{}> = () => {
         },
         {
           id: '41b39c13ec0166a8',
-          timestamp: '2025-05-27T12:15:06.024Z',
-          // timestamp: '2025-05-27T12:15:04.973Z',
+          timestampUs: new Date('2025-05-27T12:15:06.024Z').getTime() * 1000,
           name: 'grpc.oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 1187042,
@@ -131,8 +129,7 @@ export const Example: StoryFn<{}> = () => {
         },
         {
           id: '255547a7b6b19871',
-          timestamp: '2025-05-27T12:15:06.500Z',
-          // timestamp: '2025-05-27T12:15:04.973Z',
+          timestampUs: new Date('2025-05-27T12:15:06.500Z').getTime() * 1000,
           name: 'oteldemo.ProductCatalogService/GetProduct',
           traceId: 'cc847a76570773d6fc96fac63dfcddd2',
           duration: 90416,
@@ -151,7 +148,7 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
       ({
         id: item._source.span_id,
         name: item._source.name,
-        timestamp: item._source['@timestamp'],
+        timestampUs: new Date(item._source['@timestamp']).getTime() * 1000,
         duration: item._source.duration / 1000,
         traceId: item._source.trace_id,
         parentId: item._source.parent_span_id,
@@ -173,7 +170,7 @@ export const OpenTelemetryExample: StoryFn<{}> = () => {
       ({
         id: item._source.span_id,
         name: item._source.name,
-        timestamp: item._source['@timestamp'],
+        timestampUs: new Date(item._source['@timestamp']).getTime() * 1000,
         duration: item._source.duration / 1000,
         traceId: item._source.trace_id,
         parentId: item._source.parent_span_id,
@@ -189,7 +186,7 @@ export const APMExample: StoryFn<{}> = () => {
       ({
         id: item.span.id || item.transaction?.id,
         name: item.span.name || item.transaction?.name,
-        timestamp: new Date(item.timestamp.us / 1000).toISOString(),
+        timestampUs: item.timestamp.us,
         duration: item.span.duration?.us || item.transaction?.duration?.us,
         traceId: item.trace.id,
         parentId: item.parent?.id,

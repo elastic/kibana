@@ -10,20 +10,19 @@ import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
+
+const DEFAULT_INFERENCE_ID = '.elser-2-elasticsearch';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   // Failing: See https://github.com/elastic/kibana/issues/218819
-  describe.skip('retrieve_elastic_doc', function () {
+  describe.skip('tool: retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
     const supertest = getService('supertest');
@@ -94,7 +93,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
         });
-        await installProductDoc(supertest);
+        await installProductDoc(supertest, DEFAULT_INFERENCE_ID);
 
         void llmProxy.interceptWithFunctionRequest({
           name: 'retrieve_elastic_doc',
@@ -119,7 +118,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        await uninstallProductDoc(supertest);
+        await uninstallProductDoc(supertest, DEFAULT_INFERENCE_ID);
         llmProxy.close();
         await observabilityAIAssistantAPIClient.deleteActionConnector({
           actionId: connectorId,
