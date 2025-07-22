@@ -10,9 +10,9 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { AwsInputVarFields } from '@kbn/cloud-security-posture';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
-import { AwsInputVarFields } from './aws_credentials_form/aws_input_var_fields';
 
 const AWSSetupInfoContent = () => (
   <>
@@ -225,8 +225,8 @@ interface Props {
 const getInputVarsFields = (
   input: NewPackagePolicyInput,
   fields: AwsOptions[keyof AwsOptions]['fields']
-) =>
-  Object.entries(input.streams[0].vars || {})
+) => {
+  return Object.entries(input.streams[0].vars || {})
     .filter(([id]) => id in fields)
     .map(([id, inputVar]) => {
       const field = fields[id];
@@ -239,9 +239,12 @@ const getInputVarsFields = (
         isSecret: field?.isSecret,
       } as const;
     });
+};
 
 const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | undefined =>
-  input.streams[0].vars?.['aws.credentials.type'].value;
+  input.streams[0].vars?.['aws.credentials.type']
+    ? input.streams[0].vars?.['aws.credentials.type'].value
+    : undefined;
 
 export const EksCredentialsForm = ({ input, newPolicy, packageInfo, updatePolicy }: Props) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.

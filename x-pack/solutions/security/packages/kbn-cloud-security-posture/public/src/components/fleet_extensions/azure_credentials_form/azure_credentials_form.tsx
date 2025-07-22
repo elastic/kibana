@@ -49,7 +49,6 @@ interface AzureCredentialsFormProps {
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   // onChange: any;
-  setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
 }
@@ -208,8 +207,6 @@ export const AzureCredentialsForm = ({
   newPolicy,
   updatePolicy,
   packageInfo,
-  // onChange,
-  setIsValid,
   disabled,
   hasInvalidRequiredVars,
 }: AzureCredentialsFormProps) => {
@@ -225,8 +222,6 @@ export const AzureCredentialsForm = ({
     newPolicy,
     input,
     packageInfo,
-    // onChange,
-    setIsValid,
     updatePolicy,
   });
 

@@ -8,7 +8,6 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { VULN_MGMT_POLICY_TEMPLATE, CNVM_POLICY_TEMPLATE } from '../../../common/constants';
@@ -72,7 +71,6 @@ interface PolicyTemplateVarsFormProps {
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   isEditPage?: boolean;
-  hasInvalidRequiredVars: boolean;
   showCloudConnectors: boolean;
 }
 

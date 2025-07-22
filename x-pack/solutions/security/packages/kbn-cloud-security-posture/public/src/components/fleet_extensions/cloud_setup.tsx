@@ -29,8 +29,12 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { i18n } from '@kbn/i18n';
 // import { assert } from '../../../common/utils/helpers';
+import { IUiSettingsClient } from '@kbn/core/public';
 import type { CloudSecurityPolicyTemplate, PostureInput } from './types';
-import { SUPPORTED_POLICY_TEMPLATES } from './constants';
+import {
+  SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING,
+  SUPPORTED_POLICY_TEMPLATES,
+} from './constants';
 import {
   getMaxPackageName,
   getPostureInputHiddenVars,
@@ -136,50 +140,9 @@ const getSelectedOption = (
   return selectedOption;
 };
 
-/**
- * Update CloudFormation template and stack name in the Agent Policy
- * based on the selected policy template
- */
-// const useCloudFormationTemplate = ({
-//   packageInfo,
-//   newPolicy,
-//   updatePolicy,
-// }: {
-//   packageInfo: PackageInfo;
-//   newPolicy: NewPackagePolicy;
-//   updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-// }) => {
-//   useEffect(() => {
-//     const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
-
-//     // If the template is not available, do not update the policy
-//     if (templateUrl === '') return;
-
-//     const checkCurrentTemplate = newPolicy?.inputs?.find(
-//       (i: any) => i.type === CLOUDBEAT_VULN_MGMT_AWS
-//     )?.config?.cloud_formation_template_url?.value;
-
-//     // If the template is already set, do not update the policy
-//     if (checkCurrentTemplate === templateUrl) return;
-
-//     updatePolicy?.({
-//       ...newPolicy,
-//       inputs: newPolicy.inputs.map((input) => {
-//         if (input.type === CLOUDBEAT_VULN_MGMT_AWS) {
-//           return {
-//             ...input,
-//             config: { cloud_formation_template_url: { value: templateUrl } },
-//           };
-//         }
-//         return input;
-//       }),
-//     });
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
-// };
-
 type CloudSetupProps = PackagePolicyReplaceDefineStepExtensionComponentProps & {
   cloud: CloudSetupType;
+  uiSettings: IUiSettingsClient;
   cloudConnectorsEnabled: boolean;
   namespaceSupportEnabled?: boolean;
 };
@@ -197,9 +160,9 @@ export const CloudSetup = memo<CloudSetupProps>(
     defaultSetupTechnology,
     integrationToEnable,
     setIntegrationToEnable,
-    cloud,
-    cloudConnectorsEnabled,
     namespaceSupportEnabled = false,
+    cloud,
+    uiSettings,
   }) => {
     const integration =
       integrationToEnable &&
@@ -207,8 +170,8 @@ export const CloudSetup = memo<CloudSetupProps>(
         ? integrationToEnable
         : undefined;
 
-    // Handling validation state
-    const [isValid, setIsValid] = useState(true);
+    const cloudConnectorsEnabled =
+      uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
     const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
 
     const isServerless = !!cloud.serverless.projectType;
@@ -228,9 +191,9 @@ export const CloudSetup = memo<CloudSetupProps>(
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
-        onChange({ isValid, updatedPolicy, isExtensionLoaded });
+        onChange({ isValid: true, updatedPolicy, isExtensionLoaded });
       },
-      [onChange, isValid]
+      [onChange]
     );
 
     const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
@@ -262,26 +225,9 @@ export const CloudSetup = memo<CloudSetupProps>(
       [packageInfo, newPolicy, setupTechnology, updatePolicy, showCloudConnectors]
     );
 
-    // search for non null fields of the validation?.vars object
-    const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
-      (key) => (validationResults?.vars || {})[key] !== null
-    );
     const hasInvalidRequiredVars = !!hasErrors(validationResults);
 
-    const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
     const [canFetchIntegration, setCanFetchIntegration] = useState(true);
-
-    // delaying component rendering due to a race condition issue from Fleet
-    // TODO: remove this workaround when the following issue is resolved:
-    // https://github.com/elastic/kibana/issues/153246
-    useEffect(() => {
-      // using validation?.vars to know if the newPolicy state was reset due to race condition
-      if (validationResultsNonNullFields.length > 0) {
-        // Forcing rerender to recover from the validation errors state
-        setIsLoading(true);
-      }
-      setTimeout(() => setIsLoading(false), 200);
-    }, [validationResultsNonNullFields]);
 
     const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
       enabled: canFetchIntegration,
@@ -289,7 +235,6 @@ export const CloudSetup = memo<CloudSetupProps>(
 
     useEffect(() => {
       if (isEditPage) return;
-      if (isLoading) return;
       // Pick default input type for policy template.
       // Only 1 enabled input is supported when all inputs are initially enabled.
       // Required for mount only to ensure a single input type is selected
@@ -297,7 +242,7 @@ export const CloudSetup = memo<CloudSetupProps>(
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoading, input.policy_template, isEditPage]);
+    }, [input.policy_template, isEditPage]);
 
     useEffect(() => {
       if (isEditPage) {
@@ -323,16 +268,6 @@ export const CloudSetup = memo<CloudSetupProps>(
       updatePolicy,
       setCanFetchIntegration,
     });
-
-    if (isLoading) {
-      return (
-        <EuiFlexGroup justifyContent="spaceAround" data-test-subj={POLICY_TEMPLATE_FORM_DTS.LOADER}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
 
     return (
       <>
@@ -495,7 +430,6 @@ export const CloudSetup = memo<CloudSetupProps>(
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
-            setIsValid={setIsValid}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
@@ -517,7 +451,6 @@ export const CloudSetup = memo<CloudSetupProps>(
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
-            setIsValid={setIsValid}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
@@ -539,7 +472,6 @@ export const CloudSetup = memo<CloudSetupProps>(
             newPolicy={newPolicy}
             packageInfo={packageInfo}
             updatePolicy={updatePolicy}
-            setIsValid={setIsValid}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />

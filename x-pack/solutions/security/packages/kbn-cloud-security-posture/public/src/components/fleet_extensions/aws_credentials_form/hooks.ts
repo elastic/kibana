@@ -43,13 +43,11 @@ export const useAwsCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
-  setIsValid,
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   packageInfo: PackageInfo;
-  setIsValid: (isValid: boolean) => void;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.

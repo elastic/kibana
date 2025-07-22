@@ -98,15 +98,12 @@ export const useAzureCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
-  // onChange,
-  setIsValid,
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   packageInfo: PackageInfo;
   // onChange: (opts: any) => void;
-  setIsValid: (isValid: boolean) => void;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   const azureCredentialsType: AzureCredentialsType =

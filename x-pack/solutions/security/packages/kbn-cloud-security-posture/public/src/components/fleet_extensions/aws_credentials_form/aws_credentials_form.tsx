@@ -44,7 +44,6 @@ interface AwsFormProps {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
 }
@@ -126,7 +125,6 @@ export const AwsCredentialsForm = ({
   newPolicy,
   updatePolicy,
   packageInfo,
-  setIsValid,
   disabled = false,
   hasInvalidRequiredVars,
 }: AwsFormProps) => {
@@ -142,7 +140,6 @@ export const AwsCredentialsForm = ({
     newPolicy,
     input,
     packageInfo,
-    setIsValid,
     updatePolicy,
   });
 

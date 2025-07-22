@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import semverGte from 'semver/functions/gte';
 import {
   EuiAccordion,
   EuiCallOut,
@@ -20,11 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import {
-  SetupTechnology,
-  NamespaceComboBox,
-  SetupTechnologySelector,
-} from '@kbn/fleet-plugin/public';
+import { NamespaceComboBox } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -34,7 +29,6 @@ import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
 import { CloudSetup } from '@kbn/cloud-security-posture';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
@@ -52,9 +46,7 @@ import {
   getPosturePolicy,
   getVulnMgmtCloudFormationDefaultValue,
   isPostureInput,
-  hasErrors,
   POLICY_TEMPLATE_FORM_DTS,
-  getCloudConnectorRemoteRoleTemplate,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -210,106 +202,41 @@ const useCloudFormationTemplate = ({
   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
 };
 
-export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
+type CnvmEksPolicyTemplateProps = PackagePolicyReplaceDefineStepExtensionComponentProps & {
+  setIsValid: (isValid: boolean) => void;
+  isLoading: boolean;
+  setEnabledPolicyInput: (input: PostureInput) => void;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+};
+
+const CnvmEksPolicyTemplate = memo<CnvmEksPolicyTemplateProps>(
   ({
     newPolicy,
-    onChange,
-    validationResults,
-    isEditPage,
     packageInfo,
-    handleSetupTechnologyChange,
-    isAgentlessEnabled,
-    defaultSetupTechnology,
+    isEditPage,
+    validationResults,
     integrationToEnable,
-    setIntegrationToEnable,
+    onChange,
+    setIsValid,
+    isLoading,
+    setEnabledPolicyInput,
+    updatePolicy,
   }) => {
-    const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration =
       integrationToEnable &&
       SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
         ? integrationToEnable
         : undefined;
-    const isParentSecurityPosture = !integrationParam;
 
-    // Handling validation state
-    const [isValid, setIsValid] = useState(true);
-    const { cloud, uiSettings } = useKibana().services;
-    const cloudConnectorsEnabled =
-      uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
-    const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
-
-    const isServerless = !!cloud.serverless.projectType;
-    const input = getSelectedOption(newPolicy.inputs, integration);
-    const getIsSubscriptionValid = useIsSubscriptionStatusValid();
-    const isSubscriptionValid = !!getIsSubscriptionValid.data;
-
-    const { euiTheme } = useEuiTheme();
-
-    const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
-        onChange({ isValid, updatedPolicy, isExtensionLoaded });
-      },
-      [onChange, isValid]
-    );
-
-    const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
-      input,
-      cloud,
-      packageInfo,
-    });
-
-    const showCloudConnectors =
-      cloudConnectorsEnabled &&
-      !!cloudConnectorRemoteRoleTemplate &&
-      semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
-
-    /**
-     * - Updates policy inputs by user selection
-     * - Updates hidden policy vars
-     */
-    const setEnabledPolicyInput = useCallback(
-      (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType);
-        const policy = getPosturePolicy(newPolicy, inputType, inputVars);
-        updatePolicy(policy);
-      },
-      [newPolicy, updatePolicy]
-    );
-
-    // search for non null fields of the validation?.vars object
-    const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
-      (key) => (validationResults?.vars || {})[key] !== null
-    );
-    const hasInvalidRequiredVars = !!hasErrors(validationResults);
-
-    const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
     const [canFetchIntegration, setCanFetchIntegration] = useState(true);
 
-    // delaying component rendering due to a race condition issue from Fleet
-    // TODO: remove this workaround when the following issue is resolved:
-    // https://github.com/elastic/kibana/issues/153246
-    useEffect(() => {
-      // using validation?.vars to know if the newPolicy state was reset due to race condition
-      if (validationResultsNonNullFields.length > 0) {
-        // Forcing rerender to recover from the validation errors state
-        setIsLoading(true);
-      }
-      setTimeout(() => setIsLoading(false), 200);
-    }, [validationResultsNonNullFields]);
+    const input = getSelectedOption(newPolicy.inputs, integration);
 
-    useEffect(() => {
-      setIsLoading(getIsSubscriptionValid.isLoading);
-    }, [getIsSubscriptionValid.isLoading]);
+    const { euiTheme } = useEuiTheme();
 
     const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
       enabled: canFetchIntegration,
     });
-
-    useEffect(() => {
-      if (!isServerless) {
-        setIsValid(isSubscriptionValid);
-      }
-    }, [isServerless, isSubscriptionValid]);
 
     useEffect(() => {
       if (isEditPage) return;
@@ -323,12 +250,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
 
-    useCloudFormationTemplate({
-      packageInfo,
-      updatePolicy,
-      newPolicy,
-    });
-
     usePolicyTemplateInitialName({
       packagePolicyList: packagePolicyList?.items,
       isEditPage,
@@ -338,15 +259,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setCanFetchIntegration,
     });
 
-    if (isLoading) {
-      return (
-        <EuiFlexGroup justifyContent="spaceAround" data-test-subj={POLICY_TEMPLATE_FORM_DTS.LOADER}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
+    useCloudFormationTemplate({
+      packageInfo,
+      updatePolicy,
+      newPolicy,
+    });
 
     const integrationFields = [
       {
@@ -373,98 +290,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       },
     ];
 
-    if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
-      return <SubscriptionNotAllowed />;
-    }
-
-    if (
-      input.type === 'cloudbeat/cis_aws' ||
-      input.type === 'cloudbeat/cis_azure' ||
-      input.type === 'cloudbeat/cis_gcp'
-    ) {
-      // If the input type is one of the cloud providers, we need to render the account type selector
-      return (
-        <>
-          {isEditPage && <EditScreenStepTitle />}
-          {isParentSecurityPosture && (
-            <>
-              <PolicyTemplateSelector
-                selectedTemplate={input.policy_template}
-                policy={newPolicy}
-                setPolicyTemplate={(template) => {
-                  setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
-                  setIntegrationToEnable?.(template);
-                }}
-                disabled={isEditPage}
-              />
-              <EuiSpacer size="l" />
-            </>
-          )}
-          <CloudSetup
-            input={input}
-            newPolicy={newPolicy}
-            onChange={onChange}
-            packageInfo={packageInfo}
-            isEditPage={isEditPage}
-            setEnabledPolicyInput={setEnabledPolicyInput}
-            setIntegrationToEnable={setIntegrationToEnable}
-            integrationFields={integrationFields}
-            validationResults={validationResults}
-            isServerless={isServerless}
-            defaultSetupTechnology={defaultSetupTechnology}
-            isAgentlessEnabled={isAgentlessEnabled}
-            handleSetupTechnologyChange={handleSetupTechnologyChange}
-            cloud={cloud}
-            cloudConnectorsEnabled={cloudConnectorsEnabled}
-            namespaceSupportEnabled={true}
-          />
-        </>
-      );
-    }
     return (
       <>
-        {isEditPage && <EditScreenStepTitle />}
-        {/* Defines the enabled policy template */}
-        {isParentSecurityPosture && (
-          <>
-            <PolicyTemplateSelector
-              selectedTemplate={input.policy_template}
-              policy={newPolicy}
-              setPolicyTemplate={(template) => {
-                setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
-                setIntegrationToEnable?.(template);
-              }}
-              disabled={isEditPage}
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
-
-        {isEditPage && (
-          <>
-            <EuiCallOut
-              title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
-                defaultMessage: 'Modifying Integration Details',
-              })}
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
-                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="l" />
-          </>
-        )}
-
-        {/* Shows info on the active policy template */}
         <PolicyTemplateInfo postureType={input.policy_template} />
         <EuiSpacer size="l" />
         {/* Defines the single enabled input of the active policy template */}
-        {input.type === 'cloudbeat/cis_eks' || input.type === 'cloudbeat/cis_k8s' ? null : (
+        {input.type !== 'cloudbeat/cis_eks' && input.type !== 'cloudbeat/cis_k8s' ? null : (
           <>
             <PolicyTemplateInputSelector
               input={input}
@@ -526,18 +357,185 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         )}
 
         {/* Defines the vars of the enabled input of the active policy template */}
-        <PolicyTemplateVarsForm
-          input={input}
-          newPolicy={newPolicy}
-          updatePolicy={updatePolicy}
-          packageInfo={packageInfo}
-          onChange={onChange}
-          setIsValid={setIsValid}
-          disabled={isEditPage}
-          isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          showCloudConnectors={showCloudConnectors}
-        />
+        {input.type === 'cloudbeat/cis_eks' && (
+          <PolicyTemplateVarsForm
+            input={input}
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+            onChange={onChange}
+            setIsValid={setIsValid}
+            disabled={isEditPage}
+            isEditPage={isEditPage}
+          />
+        )}
+      </>
+    );
+  }
+);
+
+export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
+  ({
+    newPolicy,
+    onChange,
+    validationResults,
+    isEditPage,
+    packageInfo,
+    handleSetupTechnologyChange,
+    isAgentlessEnabled,
+    defaultSetupTechnology,
+    integrationToEnable,
+    setIntegrationToEnable,
+  }) => {
+    const { cloud, uiSettings } = useKibana().services;
+    const isServerless = !!cloud.serverless.projectType;
+    const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
+    const isParentSecurityPosture = !integrationParam;
+    const getIsSubscriptionValid = useIsSubscriptionStatusValid();
+    const isSubscriptionValid = !!getIsSubscriptionValid.data;
+    const integration =
+      integrationToEnable &&
+      SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
+        ? integrationToEnable
+        : undefined;
+    const input = getSelectedOption(newPolicy.inputs, integration);
+
+    // search for non null fields of the validation?.vars object
+    const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
+      (key) => (validationResults?.vars || {})[key] !== null
+    );
+
+    const [isValid, setIsValid] = useState(true);
+    const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
+
+    const updatePolicy = useCallback(
+      (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
+        onChange({ isValid, updatedPolicy, isExtensionLoaded });
+      },
+      [onChange, isValid]
+    );
+
+    /**
+     * - Updates policy inputs by user selection
+     * - Updates hidden policy vars
+     */
+    const setEnabledPolicyInput = useCallback(
+      (inputType: PostureInput) => {
+        const inputVars = getPostureInputHiddenVars(inputType);
+        const policy = getPosturePolicy(newPolicy, inputType, inputVars);
+        updatePolicy(policy);
+      },
+      [newPolicy, updatePolicy]
+    );
+
+    // delaying component rendering due to a race condition issue from Fleet
+    // TODO: remove this workaround when the following issue is resolved:
+    // https://github.com/elastic/kibana/issues/153246
+    useEffect(() => {
+      // using validation?.vars to know if the newPolicy state was reset due to race condition
+      if (validationResultsNonNullFields.length > 0) {
+        // Forcing rerender to recover from the validation errors state
+        setIsLoading(true);
+      }
+      setTimeout(() => setIsLoading(false), 200);
+    }, [validationResultsNonNullFields]);
+
+    useEffect(() => {
+      setIsLoading(getIsSubscriptionValid.isLoading);
+    }, [getIsSubscriptionValid.isLoading]);
+
+    useEffect(() => {
+      if (!isServerless) {
+        setIsValid(isSubscriptionValid);
+      }
+    }, [isServerless, isSubscriptionValid]);
+
+    if (isLoading) {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround" data-test-subj={POLICY_TEMPLATE_FORM_DTS.LOADER}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
+      return <SubscriptionNotAllowed />;
+    }
+
+    // If the input type is one of the cloud providers, we need to render the account type selector
+    return (
+      <>
+        {isEditPage && <EditScreenStepTitle />}
+        {isParentSecurityPosture && (
+          <>
+            <PolicyTemplateSelector
+              selectedTemplate={input.policy_template}
+              policy={newPolicy}
+              setPolicyTemplate={(template) => {
+                setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
+                setIntegrationToEnable?.(template);
+              }}
+              disabled={isEditPage}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {isEditPage && (
+          <>
+            <EuiCallOut
+              title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
+                defaultMessage: 'Modifying Integration Details',
+              })}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
+                  defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
+                />
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {(input.type === 'cloudbeat/cis_aws' ||
+          input.type === 'cloudbeat/cis_azure' ||
+          input.type === 'cloudbeat/cis_gcp') && (
+          <CloudSetup
+            newPolicy={newPolicy}
+            onChange={onChange}
+            packageInfo={packageInfo}
+            isEditPage={isEditPage}
+            setIntegrationToEnable={setIntegrationToEnable}
+            validationResults={validationResults}
+            defaultSetupTechnology={defaultSetupTechnology}
+            isAgentlessEnabled={isAgentlessEnabled}
+            handleSetupTechnologyChange={handleSetupTechnologyChange}
+            cloud={cloud}
+            uiSettings={uiSettings}
+            namespaceSupportEnabled={true}
+          />
+        )}
+
+        {(input.type === 'cloudbeat/cis_eks' || input.type === 'cloudbeat/cis_k8s') && (
+          <CnvmEksPolicyTemplate
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            isLoading={isLoading}
+            setIsValid={setIsValid}
+            setEnabledPolicyInput={setEnabledPolicyInput}
+            updatePolicy={updatePolicy}
+            validationResults={validationResults}
+            isEditPage={isEditPage}
+            integrationToEnable={integrationToEnable}
+            setIntegrationToEnable={setIntegrationToEnable}
+            onChange={onChange}
+          />
+        )}
+
         <EuiSpacer />
       </>
     );
