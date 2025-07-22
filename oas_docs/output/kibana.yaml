@@ -56313,6 +56313,7 @@ paths:
       summary: Trigger an on-demand test run for a monitor
       tags:
         - synthetics
+      x-state: Generally available; added in 9.2.0
   /api/synthetics/monitors:
     get:
       description: |
