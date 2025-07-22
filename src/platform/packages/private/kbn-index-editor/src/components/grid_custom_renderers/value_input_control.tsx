@@ -32,7 +32,8 @@ export const getCellValueRenderer =
   ({ rowIndex, columnId }) => {
     const row = rows[rowIndex];
     const docId = row.raw._id;
-
+    debugger;
+    console.log('savingDocs', savingDocs);
     const pendingSaveValue = savingDocs?.get(docId)?.[columnId];
 
     let cellValue;
@@ -46,6 +47,8 @@ export const getCellValueRenderer =
       // Otherwise, use the value from the row
       cellValue = row.flattened[columnId]?.toString();
     }
+    console.log('pendingSaveValue', pendingSaveValue);
+    console.log('cellValue', cellValue);
 
     const isEditing = editingCell.row === rowIndex && editingCell.col === columnId;
 
@@ -100,7 +103,7 @@ export const getCellValueRenderer =
                   />
                 </EuiText>
               ) : (
-                cellValue
+                `${cellValue}`
               )
             }
           </div>

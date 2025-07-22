@@ -34,6 +34,7 @@ export function appendIndexToJoinCommand(
   cursorPosition: monaco.Position,
   indexName: string
 ): string {
+  return query; // //HD
   const cursorColumn = cursorPosition?.column ?? 1;
   const cursorLine = cursorPosition?.lineNumber ?? 1;
 
