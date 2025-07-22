@@ -8,9 +8,15 @@
  */
 
 import { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
-import { WorkflowSchema } from '@kbn/workflows';
+import {
+  WorkflowSchema,
+  ExecutionGraph,
+  EsWorkflowStepExecution,
+  ExecutionStatus,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { RunStepResult } from '../step/step_base';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '@kbn/workflows-execution-engine/common';
 
 export interface ContextManagerInit {
   workflowRunId: string;
@@ -24,11 +30,17 @@ export interface ContextManagerInit {
   logger?: Logger;
   workflowEventLoggerIndex?: string;
   esClient?: ElasticsearchClient;
+  workflowExecutionGraph: ExecutionGraph;
 }
 
 export class WorkflowContextManager {
   private context: Record<string, any>; // Make it strongly typed
   private esClient: IScopedClusterClient;
+  private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
+  private contextManagerInit: ContextManagerInit;
+  public executionGraph: ExecutionGraph;
+
+  private currentStepIndex: number = 0;
   // private workflowLogger: IWorkflowEventLogger | null = null;
   // private currentStepId: string | null = null;
   // // Store original parameters for recreating logger
@@ -47,7 +59,8 @@ export class WorkflowContextManager {
     };
 
     this.esClient = this.createEsClient(init.esApiKey);
-
+    this.executionGraph = init.workflowExecutionGraph;
+    this.contextManagerInit = init;
     // Store original parameters for recreating logger
     // this.originalEsClient = init.esClient || null;
     // this.originalLogger = init.logger || null;
@@ -96,6 +109,18 @@ export class WorkflowContextManager {
     return this.context.stepResults;
   }
 
+  public shouldCurrentStepRun(): boolean {
+    const currentStepId = this.getCurrentStepId() as string;
+
+    const stepExecution = this.stepExecutions.get(currentStepId);
+
+    if (stepExecution) {
+      return stepExecution.status !== ExecutionStatus.SKIPPED;
+    }
+
+    return true;
+  }
+
   // ======================
   // Workflow Event Logging Methods
   // ======================
@@ -112,11 +137,38 @@ export class WorkflowContextManager {
    * Call this when entering a step to get step-specific logging
    */
   public setCurrentStep(stepId: string, stepName?: string, stepType?: string): void {
-    // this.currentStepId = stepId;
+    this.currentStepIndex = this.executionGraph.topologicalOrder.findIndex((id) => id === stepId);
     // if (this.workflowLogger) {
     //   // Create a new step-specific logger
     //   this.workflowLogger = this.workflowLogger.createStepLogger(stepId, stepName, stepType);
     // }
+  }
+
+  public isStepSkipped(stepId: string): boolean {
+    const stepExecution = this.stepExecutions.get(stepId);
+
+    return stepExecution ? stepExecution.status === ExecutionStatus.SKIPPED : false;
+  }
+
+  public isFinished(): boolean {
+    return this.currentStepIndex === -1;
+  }
+
+  public goToNextStep(): void {
+    if (this.currentStepIndex < this.executionGraph.topologicalOrder.length - 1) {
+      this.currentStepIndex++;
+      return;
+    }
+
+    this.currentStepIndex = -1;
+  }
+
+  public finishExecution(): void {
+    this.currentStepIndex = -1;
+  }
+
+  public getCurrentStepId(): string | null {
+    return this.executionGraph.topologicalOrder[this.currentStepIndex] || null;
   }
 
   /**
@@ -183,6 +235,86 @@ export class WorkflowContextManager {
     //   event: { action: 'workflow-start', category: ['workflow'] },
     //   tags: ['workflow', 'execution', 'start'],
     // });
+  }
+
+  public async startStep(stepId: string): Promise<void> {
+    const workflowId = 'anything'; // Replace with actual workflow ID
+    const workflowRunId = this.contextManagerInit.workflowRunId;
+    const nodeId = stepId;
+    const workflowStepExecutionId = `${workflowRunId}-${nodeId}`;
+    const stepStartedAt = new Date();
+    const stepExecution = {
+      id: workflowStepExecutionId,
+      workflowId, // Replace with actual workflow ID
+      workflowRunId,
+      stepId: nodeId,
+      topologicalIndex: this.executionGraph.nodes[stepId].topologicalIndex,
+      status: ExecutionStatus.RUNNING,
+      startedAt: stepStartedAt.toISOString(),
+    } as Partial<EsWorkflowStepExecution>;
+
+    await this.contextManagerInit.esClient?.index({
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      id: workflowStepExecutionId,
+      refresh: true,
+      document: stepExecution,
+    });
+    this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
+  }
+
+  public async finishStep(stepId: string, stepResult: RunStepResult): Promise<void> {
+    const startedStepExecution = this.stepExecutions.get(stepId);
+
+    if (!startedStepExecution) {
+      throw new Error(`Step execution not found for step ID: ${stepId}`);
+    }
+
+    const stepStatus = stepResult.error ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED;
+    const completedAt = new Date();
+    const executionTimeMs =
+      completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
+    const stepExecutionUpdate = {
+      status: stepStatus,
+      completedAt: completedAt.toISOString(),
+      executionTimeMs,
+      error: stepResult.error,
+      output: stepResult.output,
+    } as Partial<EsWorkflowStepExecution>;
+    await this.contextManagerInit.esClient?.update({
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      id: startedStepExecution.id,
+      refresh: true,
+      doc: stepExecutionUpdate,
+    });
+    this.stepExecutions.set(stepId, {
+      ...startedStepExecution,
+      ...stepExecutionUpdate,
+    } as EsWorkflowStepExecution);
+  }
+
+  public async skipSteps(stepIds: string[]): Promise<void> {
+    const toSave = stepIds.map((stepId) => {
+      const workflowStepExecutionId = `${this.contextManagerInit.workflowRunId}-${stepId}`;
+      return {
+        id: workflowStepExecutionId,
+        workflowRunId: this.contextManagerInit.workflowRunId,
+        stepId,
+        topologicalIndex: this.executionGraph.nodes[stepId].topologicalIndex,
+        status: ExecutionStatus.SKIPPED,
+      } as Partial<EsWorkflowStepExecution>;
+    });
+
+    await this.contextManagerInit.esClient?.bulk({
+      refresh: true,
+      index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      body: toSave.flatMap((doc) => [{ update: { _id: doc.id } }, { doc }]),
+    });
+    toSave.forEach((workflowExecution) => {
+      this.stepExecutions.set(
+        workflowExecution.stepId as string,
+        workflowExecution as EsWorkflowStepExecution
+      );
+    });
   }
 
   /**

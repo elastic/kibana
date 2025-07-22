@@ -281,8 +281,19 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        await api.getWorkflowExecution(workflowExecutionId);
-        return response.ok({});
+        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId);
+
+        if (!workflowExecution) {
+          return response.notFound({
+            body: {
+              message: `Workflow execution not found`,
+            },
+          });
+        }
+
+        return response.ok({
+          body: workflowExecution,
+        });
       } catch (error) {
         return response.customError({
           statusCode: 500,

@@ -37,7 +37,9 @@ export const searchStepExecutions = async ({
       `Found ${response.hits.hits.length} workflows, ${response.hits.hits.map((hit) => hit._id)}`
     );
 
-    return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+    return response.hits.hits
+      .map((hit) => hit._source as EsWorkflowStepExecution)
+      .sort((fst, scd) => fst.topologicalIndex - scd.topologicalIndex); // TODO: It should be sorted on ES side
   } catch (error) {
     logger.error(`Failed to search workflows: ${error}`);
     throw error;
