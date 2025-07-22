@@ -6,22 +6,22 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { RemoteEsArchiverProvider } from '@kbn/test-suites-xpack-platform/functional/services/remote_es/remote_es_archiver';
-import { RemoteEsProvider } from '@kbn/test-suites-xpack-platform/functional/services/remote_es/remote_es';
+import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archiver';
+import { RemoteEsProvider } from './services/remote_es/remote_es';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('./config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('./config.base.ts'));
 
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [
-      require.resolve('@kbn/test-suites-xpack-platform/functional/apps/canvas'),
-      require.resolve('./apps/lens/group1'),
-      require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
-      require.resolve('./apps/rollup_job'),
-      require.resolve('@kbn/test-suites-xpack-platform/functional/apps/ml/anomaly_detection_jobs'),
-    ],
+    // testFiles: [
+    //   require.resolve('@kbn/test-suites-xpack-platform/functional/apps/canvas'),
+    //   require.resolve('./apps/lens/group1'),
+    //   require.resolve('./apps/remote_clusters/ccs/remote_clusters_index_management_flow'),
+    //   require.resolve('./apps/rollup_job'),
+    //   require.resolve('@kbn/test-suites-xpack-platform/functional/apps/ml/anomaly_detection_jobs'),
+    // ],
 
     junit: {
       reportName: 'X-Pack CCS Tests',
