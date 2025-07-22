@@ -271,8 +271,8 @@ export const getFieldStatsChartEmbeddableFactory = (
             flyoutProps: {
               hideCloseButton: true,
               'data-test-subj': 'fieldStatisticsInitializerFlyout',
+              focusedPanelId: uuid,
             },
-            uuid,
             loadContent: async ({ closeFlyout }) => {
               const { EmbeddableFieldStatsUserInput } = await import(
                 './field_stats_embeddable_input'
