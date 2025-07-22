@@ -34,7 +34,7 @@ export function ImportContentPackFlyout({
   onImport,
   onClose,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  definition: Streams.WiredStreams.GetResponse;
   onClose: () => void;
   onImport: () => void;
 }) {
@@ -112,6 +112,7 @@ export function ImportContentPackFlyout({
             <EuiSpacer />
 
             <ContentPackObjectsList
+              definition={definition}
               objects={contentPackObjects}
               onSelectionChange={setSelectedContentPackObjects}
             />
