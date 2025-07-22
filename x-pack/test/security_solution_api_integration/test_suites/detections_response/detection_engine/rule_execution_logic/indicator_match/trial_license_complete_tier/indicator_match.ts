@@ -1716,7 +1716,112 @@ export default ({ getService }: FtrProviderContext) => {
             ]);
           });
 
-          it('should not create alert when 2 fields matching', async () => {
+          it('should create alerts for OR condition', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                geo: { country_name: `filler-country${i + 1}` },
+                host: { name: `filler-host${i + 1}` },
+                client: { ip: `127.0.0.1` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'France' },
+                host: { name: 'host-1' },
+                client: { ip: '127.0.0.2' },
+              },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+                host: { name: 'host-1' },
+                client: { ip: '127.0.0.100' },
+              },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-2' },
+                geo: { country_name: 'UK' },
+                host: { name: 'host-1' },
+                client: { ip: '127.0.0.1' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                geo: { country_name: `filler-threat-country${i + 1}` },
+                host: { name: `filler-threat-host${i + 1}` },
+                client: { ip: `127.0.0.200` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+                host: { name: 'host-not-matched' },
+                client: { ip: '127.0.0.2' },
+              },
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-2' },
+                geo: { country_name: 'UK' },
+                host: { name: 'host-1' },
+                client: { ip: '127.0.0.1' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: {
+                ...basicThreatMatchRuleWithDoesNotMatch(id),
+                threat_mapping: [
+                  basicThreatMatchRuleWithDoesNotMatch(id).threat_mapping[0],
+                  {
+                    entries: [
+                      {
+                        field: 'host.name',
+                        value: 'host.name',
+                        type: 'mapping',
+                      },
+                      {
+                        field: 'client.ip',
+                        value: 'client.ip',
+                        type: 'mapping',
+                        negate: true,
+                      },
+                    ],
+                  },
+                ],
+              },
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['user.name'],
+            });
+
+            jestExpect(previewAlerts).toHaveLength(2);
+
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
+
+            jestExpect(previewAlerts[1]).toHaveProperty('_source.host.name', 'host-1');
+            jestExpect(previewAlerts[1]).toHaveProperty('_source.client.ip', '127.0.0.100');
+          });
+
+          it('should not create alerts when docouments not matching threats', async () => {
             const id = uuidv4();
 
             // Add filler events to ensure we have more events than threats when threats are first
@@ -1733,6 +1838,12 @@ export default ({ getService }: FtrProviderContext) => {
                 user: { name: 'user-1' },
                 geo: { country_name: 'UK' },
               },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-3' },
+                geo: { country_name: 'UK' },
+              },
             ]);
 
             // Add filler threats to ensure we have more threats than events when events are first
@@ -1746,6 +1857,16 @@ export default ({ getService }: FtrProviderContext) => {
                 ...threatDoc(id, timestamp),
                 user: { name: 'user-1' },
                 geo: { country_name: 'UK' },
+              },
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-2' },
+                geo: { country_name: 'UK' },
+              },
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-2' },
+                geo: { country_name: 'France' },
               },
             ]);
 
