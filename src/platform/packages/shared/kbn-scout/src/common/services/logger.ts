@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogLevel, ToolingLog } from '@kbn/tooling-log';
+import { LogLevel, ToolingLog, LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
 
 export class ScoutLogger extends ToolingLog {
   constructor(workerContext: string, level: LogLevel) {
@@ -28,4 +28,29 @@ export class ScoutLogger extends ToolingLog {
   public serviceMessage(name: string, message: string) {
     this.debug(`[${name}] ${message}`);
   }
+}
+
+/**
+ * Returns the resolved log level for Scout, prioritizing SCOUT_PW_LOG_LEVEL over LOG_LEVEL,
+ * and falling back to DEFAULT_LOG_LEVEL if neither is set or recognized.
+ */
+function resolveLogLevel(envValue: string | undefined): LogLevel | undefined {
+  if (typeof envValue === 'string' && envValue) {
+    let normalized = envValue.toLowerCase();
+    // Normalize common aliases for log levels
+    if (normalized === 'quiet') {
+      normalized = 'error';
+    }
+    const found = LOG_LEVEL_FLAGS.find(({ name }) => name === normalized);
+    if (found) return found.name as LogLevel;
+  }
+  return undefined;
+}
+
+export function getScoutLogLevel(): LogLevel {
+  return (
+    resolveLogLevel(process.env.SCOUT_PW_LOG_LEVEL) ||
+    resolveLogLevel(process.env.LOG_LEVEL) ||
+    DEFAULT_LOG_LEVEL
+  );
 }
