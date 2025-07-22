@@ -47,9 +47,9 @@ export const getValueInputPopover =
 
     const onEnter = useCallback(
       (value: string) => {
-        onValueChange(docId, { [columnId]: value });
+        onValueChange(docId!, { [columnId]: value });
 
-        dataTableRef.current?.closeCellPopover({ rowIndex, colIndex });
+        dataTableRef.current?.closeCellPopover();
         // Cell needs to be focused again after popover close,
         // also focus must be put in another cell first for it to work.
         dataTableRef.current?.setFocusedCell({ rowIndex: 0, colIndex: 0 });

@@ -21,6 +21,7 @@ import {
   CustomGridColumnsConfiguration,
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
+import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, times } from 'lodash';
@@ -152,7 +153,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [indexUpdateService]
   );
 
-  const dataTableRef = useRef<EuiDataGridRefProps>(null);
+  const dataTableRef = useRef<EuiDataGridRefProps & RestorableStateProviderApi>(null);
   const renderCellPopover = useMemo(
     () =>
       getValueInputPopover({
@@ -233,7 +234,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         rowHeightState={rowHeight}
         onUpdateRowHeight={setRowHeight}
         controlColumnIds={props.controlColumnIds}
-        // disableCellActions
         css={css`
           .euiDataGridRowCell__content > div,
           .unifiedDataTable__cellValue {

@@ -127,6 +127,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
           initialState={initialState}
           onInitialStateChange={onInitialStateChange}
         >
+          {/* @ts-ignore */}
           <ComponentMemoized
             {...(props as TProps)}
             ref={canForwardRef ? componentRef : undefined}

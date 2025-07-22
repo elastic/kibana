@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, ForwardRefExoticComponent, RefAttributes } from 'react';
 import { EuiFieldText, EuiFieldNumber } from '@elastic/eui';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -25,19 +25,19 @@ export interface ValueInputProps {
   placeholder?: string;
 }
 
-export const StringInput: React.FC<ValueInputProps> = React.forwardRef(
+export const StringInput = React.forwardRef<HTMLInputElement, ValueInputProps>(
   ({ onError, ...restOfProps }, ref) => (
     <EuiFieldText compressed {...restOfProps} autoFocus inputRef={ref} />
   )
 );
 
-export const NumberInput: React.FC<ValueInputProps> = React.forwardRef(
+export const NumberInput = React.forwardRef<HTMLInputElement, ValueInputProps>(
   ({ onError, ...restOfProps }, ref) => (
     <EuiFieldNumber compressed {...restOfProps} inputRef={ref} />
   )
 );
 
-export const BooleanInput: React.FC<ValueInputProps> = React.forwardRef(
+export const BooleanInput = React.forwardRef<HTMLInputElement, ValueInputProps>(
   ({ onError, onChange, ...restOfProps }, ref) => {
     const [error, setError] = React.useState<string | null>(null);
 
@@ -72,7 +72,7 @@ export const BooleanInput: React.FC<ValueInputProps> = React.forwardRef(
 
 export function getInputComponentForType(
   type: DatatableColumnType | undefined
-): React.FC<ValueInputProps> {
+): ForwardRefExoticComponent<ValueInputProps & RefAttributes<HTMLInputElement>> {
   switch (type) {
     case 'number':
       return NumberInput;
