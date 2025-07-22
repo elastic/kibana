@@ -1,5 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0" and the Server Side Public License, v 1; you may not use this file except
  * in compliance with, at your election, the Elastic License 2.0 or the Server
@@ -9,11 +16,7 @@
 import { createTestServers, TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { Client as ESClient } from '@elastic/elasticsearch';
 import { ElasticSearchSaver } from '..';
-import {
-  Checkpoint,
-  CheckpointTuple,
-  uuid6,
-} from '@langchain/langgraph-checkpoint';
+import { Checkpoint, CheckpointTuple, uuid6 } from '@langchain/langgraph-checkpoint';
 
 // Define test checkpoints
 const checkpoint1: Checkpoint = {
@@ -144,11 +147,12 @@ describe('ElasticSearchSaver', () => {
     });
     expect(undefinedCheckpoint).toBeUndefined();
 
-    const runnableConfig = await saver.put(
-      { configurable: { thread_id: '1' } },
-      checkpoint1,
-      { source: 'update', step: -1, writes: null, parents: {} }
-    );
+    const runnableConfig = await saver.put({ configurable: { thread_id: '1' } }, checkpoint1, {
+      source: 'update',
+      step: -1,
+      writes: null,
+      parents: {},
+    });
     expect(runnableConfig).toEqual({
       configurable: {
         thread_id: '1',
@@ -182,9 +186,7 @@ describe('ElasticSearchSaver', () => {
     });
     expect(firstCheckpointTuple?.checkpoint).toEqual(checkpoint1);
     expect(firstCheckpointTuple?.parentConfig).toBeUndefined();
-    expect(firstCheckpointTuple?.pendingWrites).toEqual([
-      ['test1', 'test2', 'test3'],
-    ]);
+    expect(firstCheckpointTuple?.pendingWrites).toEqual([['test1', 'test2', 'test3']]);
 
     await saver.put(
       {
