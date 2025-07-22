@@ -10,13 +10,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-<<<<<<<< HEAD:x-pack/solutions/search/test/functional_feature_flags/config/config.feature_flags.ts
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
-  );
-========
   const searchFuncationalConfig = await readConfigFile(require.resolve('../config'));
->>>>>>>> upstream/main:x-pack/solutions/search/test/functional_search/config/config.feature_flags.ts
 
   return {
     ...searchFuncationalConfig.getAll(),
