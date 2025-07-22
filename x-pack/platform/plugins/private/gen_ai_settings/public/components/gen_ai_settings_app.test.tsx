@@ -10,7 +10,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { GenAiSettingsApp } from './gen_ai_settings_app';
-import { useEnabledFeatures } from '../contexts/serverless_context';
+import { useEnabledFeatures } from '../contexts/enabled_features_context';
 
 // Mock the context hook
 jest.mock('../contexts/serverless_context');

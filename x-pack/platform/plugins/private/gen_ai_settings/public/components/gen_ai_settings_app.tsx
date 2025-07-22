@@ -25,7 +25,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
-import { useEnabledFeatures } from '../contexts/serverless_context';
+import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { GoToSpacesButton } from './go_to_spaces_button';
 import { getConnectorsManagementHref } from '../utils/connectors';
 
