@@ -9,10 +9,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/create_llm_proxy';
+import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 
 const COMMON_REQUEST_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
