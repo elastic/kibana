@@ -3846,6 +3846,10 @@
               },
               {
                 "plugin": "ingestPipelines",
+                "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/get.ts"
+              },
+              {
+                "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/privileges.ts"
               },
               {
