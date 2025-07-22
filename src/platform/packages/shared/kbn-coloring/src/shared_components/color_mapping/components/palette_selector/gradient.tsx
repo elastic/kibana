@@ -96,7 +96,7 @@ export function Gradient({
         css={css`
           position: absolute;
           left: 0;
-          top: 6px;
+          top: 8px;
         `}
       >
         {startStepColor ? (

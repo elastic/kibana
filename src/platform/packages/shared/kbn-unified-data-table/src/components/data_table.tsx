@@ -55,7 +55,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import {
   type InTableSearchRestorableState,
   useDataGridInTableSearch,
@@ -409,10 +408,6 @@ interface InternalUnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
-   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
-   */
-  additionalFieldGroups?: AdditionalFieldGroups;
-  /**
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -527,7 +522,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalAdditionalControls,
       rowsPerPageOptions,
       externalCustomRenderers,
-      additionalFieldGroups,
       consumer = 'discover',
       componentsTourSteps,
       gridStyleOverride,
@@ -543,7 +537,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdatePageIndex,
       disableCellActions = false,
       disableCellPopover = false,
-    },
+    }: InternalUnifiedDataTableProps,
     ref
   ) => {
     const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
@@ -900,30 +894,32 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellActions,
     });
 
-    const {
-      rowHeight: headerRowHeight,
-      rowHeightLines: headerRowHeightLines,
-      lineCountInput: headerLineCountInput,
-      onChangeRowHeight: onChangeHeaderRowHeight,
-      onChangeRowHeightLines: onChangeHeaderRowHeightLines,
-    } = useRowHeight({
+  const {
+    rowHeight: headerRowHeight,
+    rowHeightLines: headerRowHeightLines,
+    lineCountInput: headerLineCountInput,
+    onChangeRowHeight: onChangeHeaderRowHeight,
+    onChangeRowHeightLines: onChangeHeaderRowHeightLines,
+  } = useRowHeight({
+    storage,
+    consumer,
+    key: 'dataGridHeaderRowHeight',
+    defaultRowHeight: 1,
+    configRowHeight: configHeaderRowHeight,
+    rowHeightState: headerRowHeightState,
+    onUpdateRowHeight: onUpdateHeaderRowHeight,
+  });
+
+  const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
+    useRowHeight({
       storage,
       consumer,
-      key: 'dataGridHeaderRowHeight',
-      configRowHeight: configHeaderRowHeight ?? 1,
-      rowHeightState: headerRowHeightState,
-      onUpdateRowHeight: onUpdateHeaderRowHeight,
+      key: 'dataGridRowHeight',
+      defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
+      configRowHeight,
+      rowHeightState,
+      onUpdateRowHeight,
     });
-
-    const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
-      useRowHeight({
-        storage,
-        consumer,
-        key: 'dataGridRowHeight',
-        configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
-        rowHeightState,
-        onUpdateRowHeight,
-      });
 
     const euiGridColumns = useMemo(
       () =>
@@ -1289,115 +1285,113 @@ const InternalUnifiedDataTable = React.forwardRef<
       );
     }
 
-    return (
-      <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
-        <span className="unifiedDataTable__inner">
-          <div
-            ref={setDataGridWrapper}
-            key={isCompareActive ? 'comparisonTable' : 'docTable'}
-            data-test-subj="discoverDocTable"
-            data-render-complete={isRenderComplete}
-            data-shared-item=""
-            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-            data-title={searchTitle}
-            data-description={searchDescription}
-            data-document-number={displayedRows.length}
-            className={classnames(className, 'unifiedDataTable__table')}
-            css={inTableSearchTermCss}
-          >
-            {isCompareActive ? (
-              <CompareDocuments
-                id={dataGridId}
-                wrapper={dataGridWrapper}
-                consumer={consumer}
-                ariaDescribedBy={randomId}
-                ariaLabelledBy={ariaLabelledBy}
-                dataView={dataView}
-                isPlainRecord={isPlainRecord}
-                selectedFieldNames={visibleColumns}
-                additionalFieldGroups={additionalFieldGroups}
-                selectedDocIds={docIdsInSelectionOrder}
-                schemaDetectors={schemaDetectors}
-                forceShowAllFields={defaultColumns}
-                showFullScreenButton={showFullScreenButton}
-                fieldFormats={fieldFormats}
-                getDocById={getDocById}
-                replaceSelectedDocs={replaceSelectedDocs}
-                setIsCompareActive={setIsCompareActive}
-              />
-            ) : (
-              <EuiDataGridMemoized
-                id={dataGridId}
-                aria-describedby={randomId}
-                aria-labelledby={ariaLabelledBy}
-                columns={euiGridColumns}
-                columnVisibility={columnsVisibility}
-                data-test-subj="docTable"
-                leadingControlColumns={leadingControlColumns}
-                onColumnResize={onResize}
-                pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
-                renderCellValue={renderCellValueWithInTableSearchSupport}
-                ref={dataGridRef}
-                rowCount={rowCount}
-                schemaDetectors={schemaDetectors}
-                sorting={sorting as EuiDataGridSorting}
-                toolbarVisibility={toolbarVisibility}
-                rowHeightsOptions={rowHeightsOptions}
-                gridStyle={gridStyle}
-                renderCustomGridBody={renderCustomGridBody}
-                renderCustomToolbar={renderCustomToolbarFn}
-                trailingControlColumns={trailingControlColumns}
-                cellContext={cellContextWithInTableSearchSupport}
-                renderCellPopover={renderCustomPopover}
-                virtualizationOptions={virtualizationOptions}
-              />
-            )}
-          </div>
-          {loadingState !== DataLoadingState.loading &&
-            isPaginationEnabled && // we hide the footer for Surrounding Documents page
-            !isFilterActive && // hide footer when showing selected documents
-            !isCompareActive && (
-              <UnifiedDataTableFooter
-                isLoadingMore={loadingState === DataLoadingState.loadingMore}
-                rowCount={rowCount}
-                sampleSize={sampleSizeState}
-                pageCount={pageCount}
-                pageIndex={paginationObj?.pageIndex}
-                totalHits={totalHits}
-                onFetchMoreRecords={onFetchMoreRecords}
-                data={data}
-                fieldFormats={fieldFormats}
-                paginationMode={paginationMode}
-                hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
-              />
-            )}
-          {searchTitle && (
-            <EuiScreenReaderOnly>
-              <p id={String(randomId)}>
-                {searchDescription ? (
-                  <FormattedMessage
-                    id="unifiedDataTable.searchGenerationWithDescriptionGrid"
-                    defaultMessage="Table generated by Discover session ''{searchTitle}'' ({searchDescription})"
-                    values={{ searchTitle, searchDescription }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="unifiedDataTable.searchGenerationWithDescription"
-                    defaultMessage="Table generated by Discover session ''{searchTitle}''"
-                    values={{ searchTitle }}
-                  />
-                )}
-              </p>
-            </EuiScreenReaderOnly>
+  return (
+    <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
+      <span className="unifiedDataTable__inner">
+        <div
+          ref={setDataGridWrapper}
+          key={isCompareActive ? 'comparisonTable' : 'docTable'}
+          data-test-subj="discoverDocTable"
+          data-render-complete={isRenderComplete}
+          data-shared-item=""
+          data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
+          data-title={searchTitle}
+          data-description={searchDescription}
+          data-document-number={displayedRows.length}
+          className={classnames(className, 'unifiedDataTable__table')}
+          css={inTableSearchTermCss}
+        >
+          {isCompareActive ? (
+            <CompareDocuments
+              id={dataGridId}
+              wrapper={dataGridWrapper}
+              consumer={consumer}
+              ariaDescribedBy={randomId}
+              ariaLabelledBy={ariaLabelledBy}
+              dataView={dataView}
+              isPlainRecord={isPlainRecord}
+              selectedFieldNames={visibleColumns}
+              selectedDocIds={docIdsInSelectionOrder}
+              schemaDetectors={schemaDetectors}
+              forceShowAllFields={defaultColumns}
+              showFullScreenButton={showFullScreenButton}
+              fieldFormats={fieldFormats}
+              getDocById={getDocById}
+              replaceSelectedDocs={replaceSelectedDocs}
+              setIsCompareActive={setIsCompareActive}
+            />
+          ) : (
+            <EuiDataGridMemoized
+              id={dataGridId}
+              aria-describedby={randomId}
+              aria-labelledby={ariaLabelledBy}
+              columns={euiGridColumns}
+              columnVisibility={columnsVisibility}
+              data-test-subj="docTable"
+              leadingControlColumns={leadingControlColumns}
+              onColumnResize={onResize}
+              pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
+              renderCellValue={renderCellValueWithInTableSearchSupport}
+              ref={dataGridRef}
+              rowCount={rowCount}
+              schemaDetectors={schemaDetectors}
+              sorting={sorting as EuiDataGridSorting}
+              toolbarVisibility={toolbarVisibility}
+              rowHeightsOptions={rowHeightsOptions}
+              gridStyle={gridStyle}
+              renderCustomGridBody={renderCustomGridBody}
+              renderCustomToolbar={renderCustomToolbarFn}
+              trailingControlColumns={trailingControlColumns}
+              cellContext={cellContextWithInTableSearchSupport}
+              renderCellPopover={renderCustomPopover}
+              virtualizationOptions={virtualizationOptions}
+            />
           )}
-          {canSetExpandedDoc &&
-            expandedDoc &&
-            renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
-        </span>
-      </UnifiedDataTableContext.Provider>
-    );
-  }
-);
+        </div>
+        {loadingState !== DataLoadingState.loading &&
+          isPaginationEnabled && // we hide the footer for Surrounding Documents page
+          !isFilterActive && // hide footer when showing selected documents
+          !isCompareActive && (
+            <UnifiedDataTableFooter
+              isLoadingMore={loadingState === DataLoadingState.loadingMore}
+              rowCount={rowCount}
+              sampleSize={sampleSizeState}
+              pageCount={pageCount}
+              pageIndex={paginationObj?.pageIndex}
+              totalHits={totalHits}
+              onFetchMoreRecords={onFetchMoreRecords}
+              data={data}
+              fieldFormats={fieldFormats}
+              paginationMode={paginationMode}
+              hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
+            />
+          )}
+        {searchTitle && (
+          <EuiScreenReaderOnly>
+            <p id={String(randomId)}>
+              {searchDescription ? (
+                <FormattedMessage
+                  id="unifiedDataTable.searchGenerationWithDescriptionGrid"
+                  defaultMessage="Table generated by Discover session ''{searchTitle}'' ({searchDescription})"
+                  values={{ searchTitle, searchDescription }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="unifiedDataTable.searchGenerationWithDescription"
+                  defaultMessage="Table generated by Discover session ''{searchTitle}''"
+                  values={{ searchTitle }}
+                />
+              )}
+            </p>
+          </EuiScreenReaderOnly>
+        )}
+        {canSetExpandedDoc &&
+          expandedDoc &&
+          renderDocumentView!(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+      </span>
+    </UnifiedDataTableContext.Provider>
+  );
+};
 
 export const UnifiedDataTable = withRestorableState(InternalUnifiedDataTable);
 

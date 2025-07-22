@@ -847,46 +847,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.tracksOverlays",
-        "type": "Function",
-        "tags": [],
-        "label": "tracksOverlays",
-        "description": [],
-        "signature": [
-          "(root: unknown) => root is ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.TracksOverlays",
-            "text": "TracksOverlays"
-          }
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.tracksOverlays.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "root",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1458,6 +1418,20 @@
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PanelPackage.maybePanelId",
+            "type": "string",
+            "tags": [],
+            "label": "maybePanelId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
             "id": "def-public.PanelPackage.serializedState",
             "type": "Object",
             "tags": [],
@@ -1907,88 +1881,6 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.TracksOverlays",
-        "type": "Interface",
-        "tags": [],
-        "label": "TracksOverlays",
-        "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksOverlays.openOverlay",
-            "type": "Function",
-            "tags": [],
-            "label": "openOverlay",
-            "description": [],
-            "signature": [
-              "(ref: ",
-              "OverlayRef",
-              ", options?: ",
-              "TracksOverlaysOptions",
-              " | undefined) => void"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-public.TracksOverlays.openOverlay.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "ref",
-                "description": [],
-                "signature": [
-                  "OverlayRef"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-public.TracksOverlays.openOverlay.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "TracksOverlaysOptions",
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksOverlays.clearOverlays",
-            "type": "Function",
-            "tags": [],
-            "label": "clearOverlays",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
