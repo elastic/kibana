@@ -1204,6 +1204,8 @@
       "@kbn/kibana-utils-plugin/*": ["src/platform/plugins/shared/kibana_utils/*"],
       "@kbn/langchain": ["x-pack/platform/packages/shared/kbn-langchain"],
       "@kbn/langchain/*": ["x-pack/platform/packages/shared/kbn-langchain/*"],
+      "@kbn/langgraph-checkpoint-saver": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver"],
+      "@kbn/langgraph-checkpoint-saver/*": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver/*"],
       "@kbn/language-documentation": ["src/platform/packages/private/kbn-language-documentation"],
       "@kbn/language-documentation/*": ["src/platform/packages/private/kbn-language-documentation/*"],
       "@kbn/lens-config-builder-example-plugin": ["x-pack/examples/lens_config_builder_example"],
