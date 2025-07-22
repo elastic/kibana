@@ -29,7 +29,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       <EuiToolTip
         content="Add Y-axis"
         delay="regular"
-        disableScreenReaderOutput={false}
+        disableScreenReaderOutput={true}
         display="inlineBlock"
         position="bottom"
       >
@@ -72,7 +72,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       <EuiToolTip
         content="Remove Y-axis"
         delay="regular"
-        disableScreenReaderOutput={false}
+        disableScreenReaderOutput={true}
         display="inlineBlock"
         position="bottom"
       >
@@ -180,7 +180,7 @@ exports[`ValueAxesPanel component should init with the default set of props 1`] 
       <EuiToolTip
         content="Remove Y-axis"
         delay="regular"
-        disableScreenReaderOutput={false}
+        disableScreenReaderOutput={true}
         display="inlineBlock"
         position="bottom"
       >

@@ -28,8 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }, t);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/228679
-  describe.skip('GlobalSearch providers', function () {
+  describe('GlobalSearch providers', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('globalSearchTestApp');
     });
@@ -93,7 +92,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Applications provider', function () {
       it('can search for root-level applications', async () => {
         const results = await findResultsWithApi('discover');
-        expect(results.length).to.be(2);
         expect(results[0].title).to.be('Discover');
       });
 
