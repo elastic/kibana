@@ -250,8 +250,9 @@ export class WorkflowContextManager {
     this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
   }
 
-  public async finishStep(stepId: string, stepResult: RunStepResult): Promise<void> {
+  public async finishStep(stepId: string): Promise<void> {
     const startedStepExecution = this.stepExecutions.get(stepId);
+    const stepResult: RunStepResult = this.context.stepResults[stepId] || {};
 
     if (!startedStepExecution) {
       throw new Error(`Step execution not found for step ID: ${stepId}`);

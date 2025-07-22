@@ -137,7 +137,7 @@ export class WorkflowsExecutionEnginePlugin
               stepStatus = ExecutionStatus.COMPLETED;
             }
 
-            await contextManager.finishStep(nodeId, stepResult);
+            await contextManager.finishStep(nodeId);
 
             if (stepStatus === ExecutionStatus.FAILED) {
               throw new Error(
