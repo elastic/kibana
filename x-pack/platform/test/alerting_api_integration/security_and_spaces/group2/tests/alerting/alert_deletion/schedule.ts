@@ -50,6 +50,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertest);
   const log = getService('log');
+  let eventLogDocIds: Array<{ id: string; index: string }> = [];
 
   async function indexTestDocs() {
     const testAlertDocs = getTestAlertDocs();
@@ -73,25 +74,32 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
   };
 
   const cleanupEventLog = async () => {
-    log.info(`Cleaning up event log`);
-    const numToDelete = await retry.try(async () => {
-      const results = await es.search<IValidatedEvent>({
-        index: '.kibana-event-log*',
-        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
-      });
-      expect(results.hits.hits.length).to.be.greaterThan(0);
-      return results.hits.hits.length;
-    });
-    log.info(`Found ${numToDelete} event log entries to delete`);
-    await retry.try(async () => {
-      const results = await es.deleteByQuery({
-        index: '.kibana-event-log*',
-        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
-        conflicts: 'proceed',
-      });
-      log.info(`Deleted ${results.deleted} event log entries`);
-      expect((results?.deleted ?? 0) > 0).to.eql(true);
-    });
+    // log.info(`Cleaning up event log`);
+    // const numToDelete = await retry.try(async () => {
+    //   const results = await es.search<IValidatedEvent>({
+    //     index: '.kibana-event-log*',
+    //     query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+    //   });
+    //   expect(results.hits.hits.length).to.be.greaterThan(0);
+    //   return results.hits.hits.length;
+    // });
+    // log.info(`Found ${numToDelete} event log entries to delete`);
+    // await retry.try(async () => {
+    //   const results = await es.deleteByQuery({
+    //     index: '.kibana-event-log*',
+    //     query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+    //     conflicts: 'proceed',
+    //   });
+    //   log.info(`Deleted ${results.deleted} event log entries`);
+    //   expect((results?.deleted ?? 0) > 0).to.eql(true);
+    // });
+
+    if (eventLogDocIds.length > 0) {
+      log.info(`Deleting event log docs: ${JSON.stringify(eventLogDocIds)}`);
+      await Promise.all(eventLogDocIds.map(({ id, index }) => es.delete({ id, index })));
+      eventLogDocIds = [];
+      log.info(`Done deleting event log docs: ${JSON.stringify(eventLogDocIds)}`);
+    }
   };
 
   const doSchedule = async (
@@ -120,7 +128,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     );
     log.info(`testExpectedAlertsAreDeleted deletedAlertIds: ${JSON.stringify(deletedAlertIds)}`);
     // wait for the task to complete
-    await retry.try(async () => {
+    const doc = await retry.try(async () => {
       const results = await es.search<IValidatedEvent>({
         index: '.kibana-event-log*',
         query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
@@ -131,7 +139,10 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
       expect(results.hits.hits[0]._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
         deletedAlertIds.length
       );
+      return results.hits.hits[0];
     });
+
+    eventLogDocIds.push({ id: doc._id!, index: doc._index });
 
     await retry.try(async () => {
       // query for alerts
