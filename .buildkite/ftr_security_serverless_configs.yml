@@ -19,8 +19,6 @@ disabled:
   # MKI only configs files
   - x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts
 
-defaultQueue: 'n2-4-spot'
-enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
@@ -137,3 +135,6 @@ enabled:
   # serverless config files that run deployment-agnostic tests
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.copy_to_space.config.ts
+
+defaultQueue: 'n2-4-spot'
+enabled:
