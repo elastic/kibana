@@ -1539,7 +1539,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 # APM
 /x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
@@ -1592,7 +1592,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/api_integration/test_suites/observability/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
-/x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
