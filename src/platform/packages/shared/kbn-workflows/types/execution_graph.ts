@@ -10,6 +10,8 @@
 export interface ExecutionGraphNode {
   /** Unique identifier for the node */
   id: string;
+  /** Topological index of the node in the graph */
+  topologicalIndex: number;
   /** Type of the node */
   type: string;
   /** Previous nodes in the graph (parents for the current node)*/
@@ -23,6 +25,6 @@ export interface ExecutionGraphNode {
 export interface ExecutionGraph {
   /** Dictionary of all nodes in the graph */
   nodes: Record<string, ExecutionGraphNode>;
-  /** Topologically ordered node IDs */
-  orderedNodeIds: string[];
+  /** Topologically ordered node IDs. Determines the execution order of the nodes. */
+  topologicalOrder: string[];
 }

@@ -14,7 +14,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionGraph, ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 import { Client } from '@elastic/elasticsearch';
 
@@ -26,11 +26,7 @@ import type {
 } from './types';
 
 import { ConnectorExecutor } from './connector_executor';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-  WORKFLOWS_EXECUTION_LOGS_INDEX,
-} from '../common';
+import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 
@@ -107,71 +103,55 @@ export class WorkflowsExecutionEnginePlugin
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
+        workflowExecutionGraph: workflow.executionGraph as ExecutionGraph,
       });
 
       // Log workflow execution start
       contextManager.logWorkflowStart();
 
+      if (workflow.executionGraph?.topologicalOrder) {
+        contextManager.setCurrentStep(workflow.executionGraph.topologicalOrder[0]);
+      }
+
       try {
-        for (const currentStep of workflow.definition.workflow.steps) {
-          const step = new StepFactory().create(
-            currentStep as any,
-            contextManager,
-            connectorExecutor
-          );
-          const workflowExecutionId = `${workflowRunId}-${currentStep.name}`;
-          const stepStartedAt = new Date();
+        do {
+          const nodeId = contextManager.getCurrentStepId() as string;
+          const currentStep = workflow.executionGraph?.nodes[nodeId].data;
 
-          await this.esClient.index({
-            index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-            id: workflowExecutionId,
-            refresh: true,
-            document: {
-              id: workflowExecutionId,
-              workflowId: workflow.id,
-              workflowRunId,
-              stepId: currentStep.name,
-              status: ExecutionStatus.RUNNING,
-              startedAt: stepStartedAt.toISOString(),
-              completedAt: null,
-              executionTimeMs: null,
-              error: null,
-              output: null,
-            } as any, // EsWorkflowStepExecution
-          });
-
-          const stepResult = await step.run();
-
-          let stepStatus: ExecutionStatus;
-
-          if (stepResult.error) {
-            stepStatus = ExecutionStatus.FAILED;
-          } else {
-            stepStatus = ExecutionStatus.COMPLETED;
-          }
-
-          const completedAt = new Date();
-          const executionTimeMs = completedAt.getTime() - stepStartedAt.getTime();
-
-          await this.esClient.update({
-            index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-            id: workflowExecutionId,
-            refresh: true,
-            doc: {
-              status: stepStatus,
-              completedAt: completedAt.toISOString(),
-              executionTimeMs,
-              error: stepResult.error,
-              output: stepResult.output,
-            } as any, // EsWorkflowStepExecution
-          });
-
-          if (stepStatus === ExecutionStatus.FAILED) {
-            throw new Error(
-              `Step "${currentStep.name}" failed with error: ${stepResult.error || 'Unknown error'}`
+          if (!contextManager.isStepSkipped(nodeId)) {
+            const step = new StepFactory().create(
+              currentStep as any,
+              contextManager,
+              connectorExecutor
             );
+
+            await contextManager.startStep(nodeId);
+
+            const stepResult = await step.run();
+
+            let stepStatus: ExecutionStatus;
+
+            if (stepResult.error) {
+              stepStatus = ExecutionStatus.FAILED;
+            } else {
+              stepStatus = ExecutionStatus.COMPLETED;
+            }
+
+            await contextManager.finishStep(nodeId, stepResult);
+
+            if (stepStatus === ExecutionStatus.FAILED) {
+              throw new Error(
+                `Step "${nodeId}" failed with error: ${stepResult.error || 'Unknown error'}`
+              );
+            }
           }
-        }
+
+          const nodeIdFromContextManager = contextManager.getCurrentStepId();
+          if (nodeId === nodeIdFromContextManager) {
+            // Move to next step in the graph
+            contextManager.goToNextStep();
+          }
+        } while (!contextManager.isFinished());
 
         workflowExecutionStatus = ExecutionStatus.COMPLETED;
         // Log workflow success
