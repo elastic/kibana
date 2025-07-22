@@ -16,9 +16,12 @@ jest.mock('../../capabilities/check_capabilities', () => ({
   checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 
-import React from 'react';
+jest.mock('../../contexts/kibana', () => ({
+  useCreateAndNavigateToManagementMlLink: jest.fn().mockReturnValue(jest.fn()),
+}));
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 
 import { ScopeSection } from './scope_section';
@@ -34,8 +37,8 @@ describe('ScopeSection', () => {
     },
   };
 
-  const onEnabledChange = jest.fn(() => {});
-  const updateScope = jest.fn(() => {});
+  const onEnabledChange = jest.fn();
+  const updateScope = jest.fn();
 
   const requiredProps = {
     filterListIds: testFilterListIds,
@@ -50,9 +53,9 @@ describe('ScopeSection', () => {
       isEnabled: false,
     };
 
-    const component = shallowWithIntl(<ScopeSection {...props} />);
+    const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test(`don't render when no partitioning fields`, () => {
@@ -62,9 +65,9 @@ describe('ScopeSection', () => {
       isEnabled: false,
     };
 
-    const component = shallowWithIntl(<ScopeSection {...props} />);
+    const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('show NoFilterListsCallOut when no filter list IDs', () => {
@@ -75,9 +78,9 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(<ScopeSection {...props} />);
+    const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with no scope supplied', () => {
@@ -87,9 +90,9 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(<ScopeSection {...props} />);
+    const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders when enabled with scope supplied', () => {
@@ -100,9 +103,9 @@ describe('ScopeSection', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(<ScopeSection {...props} />);
+    const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });
 
@@ -111,8 +114,8 @@ describe('ScopeSection false canGetFilters privilege', () => {
     jest.resetModules();
   });
 
-  const onEnabledChange = jest.fn(() => {});
-  const updateScope = jest.fn(() => {});
+  const onEnabledChange = jest.fn();
+  const updateScope = jest.fn();
 
   const requiredProps = {
     onEnabledChange,
@@ -131,8 +134,8 @@ describe('ScopeSection false canGetFilters privilege', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(<ScopeSection {...props} />);
+    const { container } = renderWithI18n(<ScopeSection {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

@@ -40,7 +40,7 @@ export const QueryRulesSets = () => {
   const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
 
   const { queryRulesSetsFilteredData, pagination } = useQueryRulesSetsTableData(
-    queryRulesData?.data,
+    queryRulesData,
     searchKey,
     pageIndex,
     pageSize

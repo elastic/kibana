@@ -16,6 +16,9 @@ import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_a
 import { PrivilegedAccessDetectionsPanel } from './components/privileged_access_detection';
 import { PrivilegedUsersTable } from './components/privileged_users_table';
 
+import { MissingPrivilegesCallout } from '../missing_privileges_callout';
+import { usePrivilegedMonitoringPrivileges } from '../../api/hooks/use_privileged_monitoring_privileges';
+
 export interface OnboardingCallout {
   userCount: number;
 }
@@ -38,8 +41,23 @@ export const PrivilegedUserMonitoring = ({
     setDismissCallout(true);
   }, []);
 
+  const { data: privileges } = usePrivilegedMonitoringPrivileges();
+
   return (
     <EuiFlexGroup direction="column">
+      {!privileges || privileges.has_all_required ? null : (
+        <EuiFlexItem>
+          <MissingPrivilegesCallout
+            privileges={privileges}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.missingPrivileges.title"
+                defaultMessage="Insufficient privileges to view the privileged user monitoring panels"
+              />
+            }
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         {error && (
           <EuiCallOut

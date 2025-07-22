@@ -15,6 +15,7 @@ export const genericEntityEngineDescription: EntityDescription = {
   entityType: 'generic',
   version: GENERIC_DEFINITION_VERSION,
   identityField: GENERIC_IDENTITY_FIELD,
+  identityFieldMapping: { type: 'keyword' },
   settings: {
     timestampField: '@timestamp',
   },
@@ -106,6 +107,6 @@ export const genericEntityEngineDescription: EntityDescription = {
     newestValue({ source: 'orchestrator.resource.type' }),
     newestValue({ source: 'orchestrator.type' }),
 
-    ...getCommonFieldDescriptions('generic'),
+    ...getCommonFieldDescriptions('entity'),
   ],
 };

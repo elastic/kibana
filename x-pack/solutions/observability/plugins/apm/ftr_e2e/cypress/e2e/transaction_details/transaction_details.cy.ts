@@ -134,7 +134,7 @@ describe('Transaction details', () => {
 
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
     });
   });
 

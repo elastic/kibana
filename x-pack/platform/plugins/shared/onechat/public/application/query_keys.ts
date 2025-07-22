@@ -14,4 +14,11 @@ export const queryKeys = {
     byAgent: (agentId: string) => ['conversations', 'list', { agentId }],
     byId: (conversationId: string) => ['conversations', conversationId],
   },
+  agentProfiles: {
+    all: ['agentProfiles'] as const,
+    byId: (agentProfileId: string) => ['agentProfiles', agentProfileId],
+  },
+  tools: {
+    all: ['tools', 'list'] as const,
+  },
 };

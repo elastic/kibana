@@ -5,11 +5,24 @@
  * 2.0.
  */
 
+import { newConversationId } from './new_conversation';
+
 export const appPaths = {
+  root: '/',
+  agents: {
+    list: '/agents',
+    new: '/agents/new',
+    edit: ({ agentId }: { agentId: string }) => {
+      return `/agents/${agentId}`;
+    },
+  },
   chat: {
-    new: '/conversations/new',
+    new: `/conversations/${newConversationId}`,
     conversation: ({ conversationId }: { conversationId: string }) => {
       return `/conversations/${conversationId}`;
     },
+  },
+  tools: {
+    list: '/tools',
   },
 };

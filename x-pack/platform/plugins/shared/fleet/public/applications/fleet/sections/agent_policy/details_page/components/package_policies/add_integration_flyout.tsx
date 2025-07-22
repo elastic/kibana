@@ -18,6 +18,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -102,7 +103,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
             <EuiText size="m" color="subdued">
               <FormattedMessage
                 id="xpack.fleet.addIntegrationFlyout.selectIntegrationDescription"
-                defaultMessage="Search our observability integrations collection."
+                defaultMessage="Search our integrations collection."
               />
             </EuiText>
           </EuiFlexItem>
@@ -135,7 +136,13 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   return (
     <Suspense fallback={<Loading />}>
       <EuiErrorBoundary>
-        <EuiFlyout onClose={onClose} data-test-subj="addIntegrationFlyout">
+        <EuiFlyout
+          onClose={onClose}
+          data-test-subj="addIntegrationFlyout"
+          aria-label={i18n.translate('xpack.fleet.addIntegrationFlyout.ariaLabel', {
+            defaultMessage: 'Add integration flyout',
+          })}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
@@ -166,21 +173,28 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <CreatePackagePolicySinglePage
-              from="policy"
-              queryParamsPolicyId={agentPolicy.id}
-              prerelease={prerelease}
-              pkgLabel={selectedOptions[0]?.label}
-              pkgName={selectedOptions[0]?.value}
-              integration={selectedOptions[0]?.integration}
-              addIntegrationFlyoutProps={{
-                selectIntegrationStep,
-                onSubmitCompleted,
-                isSubmitted,
-                agentPolicy,
-                updateHasErrors,
-              }}
-            />
+            <>
+              <CreatePackagePolicySinglePage
+                from="policy"
+                queryParamsPolicyId={agentPolicy.id}
+                prerelease={prerelease}
+                pkgLabel={selectedOptions[0]?.label}
+                pkgName={selectedOptions[0]?.value}
+                integration={selectedOptions[0]?.integration}
+                addIntegrationFlyoutProps={{
+                  selectIntegrationStep,
+                  onSubmitCompleted,
+                  isSubmitted,
+                  agentPolicy,
+                  updateHasErrors,
+                }}
+              />
+              {isSubmitted && (
+                <EuiOverlayMask headerZindexLocation="below">
+                  <Loading />
+                </EuiOverlayMask>
+              )}
+            </>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

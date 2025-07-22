@@ -23,7 +23,7 @@ import type {
   ESQLTimeInterval,
 } from '../../../types';
 import * as generic from '../../generic';
-import { isColumn, isFunctionExpression, isParamLiteral } from '../../../ast/helpers';
+import { isColumn, isFunctionExpression, isParamLiteral } from '../../../ast/is';
 import type { EsqlQuery } from '../../../query';
 
 /**

@@ -258,7 +258,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         ...postInitState,
-        controlState: 'CREATE_REINDEX_TEMP',
+        controlState: 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION',
         sourceIndex: Option.none as Option.None,
         targetIndex: newVersionTarget,
         versionIndexReadyActions: Option.some([
@@ -272,7 +272,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       return {
         ...stateP,
         ...postInitState,
-        controlState: 'CREATE_NEW_TARGET',
+        controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         sourceIndex: Option.none as Option.None,
         targetIndex: newVersionTarget,
         versionIndexReadyActions: Option.some([
@@ -280,6 +280,38 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           { add: { index: newVersionTarget, alias: stateP.versionAlias } },
         ]) as Option.Some<AliasAction[]>,
       };
+    }
+  } else if (stateP.controlState === 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CREATE_NEW_TARGET',
+      };
+    } else {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else {
+        throwBadResponse(stateP, left);
+      }
+    }
+  } else if (stateP.controlState === 'RELOCATE_CHECK_CLUSTER_ROUTING_ALLOCATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CREATE_REINDEX_TEMP',
+      };
+    } else {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else {
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'WAIT_FOR_MIGRATION_COMPLETION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -484,7 +516,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we must reindex and synchronize with other migrators
         return {
           ...stateP,
-          controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+          controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         };
       } else {
         // this migrator is not involved in a relocation, we can proceed with the standard flow
@@ -529,7 +561,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       case MigrationType.Incompatible:
         return {
           ...stateP,
-          controlState: 'CHECK_CLUSTER_ROUTING_ALLOCATION',
+          controlState: 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION',
         };
       case MigrationType.Unnecessary:
         return {
@@ -707,7 +739,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'CHECK_CLUSTER_ROUTING_ALLOCATION') {
+  } else if (stateP.controlState === 'REINDEX_CHECK_CLUSTER_ROUTING_ALLOCATION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {

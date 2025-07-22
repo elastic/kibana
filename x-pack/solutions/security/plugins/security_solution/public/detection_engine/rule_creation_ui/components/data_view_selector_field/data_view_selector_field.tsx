@@ -25,11 +25,12 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
   const fieldAndError = field ? getFieldValidityAndErrorMessage(field) : undefined;
   const isInvalid = fieldAndError?.isInvalid;
   const errorMessage = fieldAndError?.errorMessage;
-  const comboBoxOptions = useMemo(
+  const comboBoxOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       dataViews.map(({ id, title, name }) => ({
         id,
         label: name ?? title,
+        toolTipContent: title,
       })),
     [dataViews]
   );
@@ -79,6 +80,7 @@ export function DataViewSelectorField({ field }: DataViewSelectorProps): JSX.Ele
         data-test-subj="pick-rule-data-source"
       >
         <EuiComboBox
+          isInvalid={isInvalid}
           isDisabled={areDataViewsFetching}
           isClearable
           singleSelection={{ asPlainText: true }}
