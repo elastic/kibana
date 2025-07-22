@@ -19,16 +19,21 @@ import {
 } from 'rxjs';
 
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { ControlInputOption } from '../../../../../common';
 import {
   OptionsListSearchTechnique,
   OptionsListSortingType,
-} from '../../../../common/options_list';
-import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
-import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
+} from '../../../../../common/options_list';
+import {
+  OptionsListRequest,
+  OptionsListSuccessResponse,
+} from '../../../../../common/options_list/types';
+import { isValidSearch } from '../../../../../common/options_list/is_valid_search';
+import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
+import { ControlFetchContext } from '../../../../control_group/control_fetch';
+import { GetESQLSingleColumnValuesParams } from '../../common/get_esql_single_column_values';
+import { OptionsListComponentApi, OptionsListControlApi } from '../types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { OptionsListComponentApi, OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
   api,
@@ -39,7 +44,10 @@ export function fetchAndValidate$({
   sort$,
   controlFetch$,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
+  api: Pick<
+    OptionsListControlApi,
+    'input$' | 'dataViews$' | 'field$' | 'esqlQuery$' | 'setBlockingError' | 'parentApi'
+  > &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
@@ -55,8 +63,10 @@ export function fetchAndValidate$({
   let abortController: AbortController | undefined;
 
   return combineLatest([
+    api.input$,
     api.dataViews$,
     api.field$,
+    api.esqlQuery$,
     controlFetch$(requestCache.clearCache),
     api.parentApi.allowExpensiveQueries$,
     api.parentApi.ignoreParentSettings$,
@@ -80,8 +90,10 @@ export function fetchAndValidate$({
     switchMap(
       async ([
         [
+          input,
           dataViews,
           field,
+          esqlQuery,
           controlFetchContext,
           allowExpensiveQueries,
           ignoreParentSettings,
@@ -93,32 +105,37 @@ export function fetchAndValidate$({
         runPastTimeout,
         selectedOptions,
       ]) => {
-        const dataView = dataViews?.[0];
-        if (
-          !dataView ||
-          !field ||
-          !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
-        ) {
-          return { suggestions: [] };
+        let request: OptionsListRequest | GetESQLSingleColumnValuesParams;
+        if (input === ControlInputOption.ESQL) {
+          if (!esqlQuery) return { suggestions: [] };
+          request = { query: esqlQuery, timeRange: controlFetchContext.timeRange };
+        } else {
+          const dataView = dataViews?.[0];
+          if (
+            !dataView ||
+            !field ||
+            !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
+          ) {
+            return { suggestions: [] };
+          }
+
+          /** Fetch the suggestions list + perform validation */
+          api.loadingSuggestions$.next(true);
+
+          request = {
+            sort,
+            dataView,
+            searchString,
+            runPastTimeout,
+            searchTechnique,
+            selectedOptions,
+            field: field.toSpec(),
+            size: requestSize,
+            allowExpensiveQueries,
+            ignoreValidations: ignoreParentSettings?.ignoreValidations,
+            ...controlFetchContext,
+          };
         }
-
-        /** Fetch the suggestions list + perform validation */
-        api.loadingSuggestions$.next(true);
-
-        const request = {
-          sort,
-          dataView,
-          searchString,
-          runPastTimeout,
-          searchTechnique,
-          selectedOptions,
-          field: field.toSpec(),
-          size: requestSize,
-          allowExpensiveQueries,
-          ignoreValidations: ignoreParentSettings?.ignoreValidations,
-          ...controlFetchContext,
-        };
-
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {

@@ -25,9 +25,10 @@ import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentat
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ControlOutputOption, OPTIONS_LIST_CONTROL } from '../../../../common';
+import { ControlInputOption, ControlOutputOption, OPTIONS_LIST_CONTROL } from '../../../../common';
 import type {
   OptionsListControlState,
+  OptionsListSelection,
   OptionsListSortingType,
   OptionsListSuccessResponse,
 } from '../../../../common/options_list';
@@ -44,7 +45,7 @@ import {
   MIN_OPTIONS_LIST_REQUEST_SIZE,
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
-import { fetchAndValidate$ } from './fetch_and_validate';
+import { fetchAndValidate$ } from './fetch/fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
 import { initializeSelectionsManager, selectionComparators } from './selections_manager';
 import { OptionsListStrings } from './options_list_strings';
@@ -208,6 +209,20 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           const currentSelections = selectionsManager.api.selectedOptions$.getValue() ?? [];
           if (currentSelections.length > 1)
             selectionsManager.api.setSelectedOptions([currentSelections[0]]);
+        });
+
+      /** For ES|QL variable output controls, always force a value to be selected */
+      const requiredSelectionSubscription = combineLatest([
+        dataControlManager.api.output$,
+        selectionsManager.api.selectedOptions$,
+        temporaryStateManager.api.availableOptions$,
+      ])
+        .pipe(debounceTime(0))
+        .subscribe(([output, selectedOptions, availableOptions]) => {
+          if (output !== ControlOutputOption.ESQL || !availableOptions?.length) return;
+          if (!selectedOptions?.length) {
+            selectionsManager.api.setSelectedOptions([availableOptions[0].value]);
+          }
         });
 
       const hasSelections$ = new BehaviorSubject<boolean>(
@@ -383,15 +398,23 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         ...temporaryStateManager.api,
         loadMoreSubject,
         deselectOption: (key: string | undefined) => {
+          const isESQLOutputMode = api.output$.getValue() === ControlOutputOption.ESQL;
+          // ES|QL variable output controls must always have a value selected
+          if (isESQLOutputMode) return;
+
+          const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
           const field = api.field$.getValue();
-          if (!key || !field) {
+          if (!key || (isDSLInputMode && !field)) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
             return;
           }
 
-          const keyAsType = getSelectionAsFieldType(field, key);
+          let keyAsType: OptionsListSelection = key;
+          if (isDSLInputMode) {
+            keyAsType = getSelectionAsFieldType(field!, key);
+          }
 
           // delete from selections
           const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
@@ -411,12 +434,18 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           }
         },
         makeSelection: (key: string | undefined, showOnlySelected: boolean) => {
+          const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
           const field = api.field$.getValue();
-          if (!key || !field) {
+
+          if (!key || (isDSLInputMode && !field)) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
             return;
+          }
+          let keyAsType: OptionsListSelection = key;
+          if (isDSLInputMode) {
+            keyAsType = getSelectionAsFieldType(field!, key);
           }
 
           const existsSelected = Boolean(selectionsManager.api.existsSelected$.getValue());
@@ -426,7 +455,6 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             editorStateManager.api.singleSelect$.getValue();
 
           // the order of these checks matters, so be careful if rearranging them
-          const keyAsType = getSelectionAsFieldType(field, key);
           if (key === 'exists-option') {
             // if selecting exists, then deselect everything else
             selectionsManager.api.setExistsSelected(!existsSelected);
@@ -501,6 +529,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
               errorsSubscription.unsubscribe();
+              requiredSelectionSubscription.unsubscribe();
             };
           }, []);
 
@@ -516,7 +545,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
                   hideActionBar,
                   hideExclude: isESQLOutputMode || hideExclude,
                   hideExists: isESQLOutputMode || hideExists,
-                  hideSort,
+                  hideSort: isESQLOutputMode || hideSort,
                 },
               }}
             >

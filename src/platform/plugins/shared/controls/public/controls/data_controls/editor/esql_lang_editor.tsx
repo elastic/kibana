@@ -8,10 +8,12 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFormRow, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ESQLEditorProps, ESQLEditorDeps } from '@kbn/esql-editor';
+import { css } from '@emotion/react';
+import { EDITOR_INITIAL_HEIGHT_INLINE_EDITING } from '@kbn/esql-editor/src/esql_editor.styles';
 import {
   untilPluginStartServicesReady,
   coreServices,
@@ -22,7 +24,8 @@ import {
   storageService,
   fieldsMetadataService,
   usageCollectionService,
-} from '../../services/kibana_services';
+} from '../../../services/kibana_services';
+import { DataControlEditorStrings } from '../data_control_constants';
 
 export const ESQLLangEditor = (props: ESQLEditorProps) => {
   const { loading, value } = useAsync(() => {
@@ -34,7 +37,22 @@ export const ESQLLangEditor = (props: ESQLEditorProps) => {
   const depsLoaded = value?.[0];
   const ESQLEditor = value?.[1]?.default;
 
-  if (loading || !depsLoaded || !ESQLEditor) return <EuiLoadingSpinner />;
+  if (loading || !depsLoaded || !ESQLEditor)
+    return (
+      <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getEsqlQueryTitle()}>
+        <EuiPanel hasBorder>
+          <EuiFlexGroup
+            css={css`
+              height: ${EDITOR_INITIAL_HEIGHT_INLINE_EDITING}px;
+            `}
+            justifyContent="center"
+            alignItems="center"
+          >
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFormRow>
+    );
 
   // TODO Add indexManagement as optional service if and when circular dependency issue with this plugin is fixed
   const services: ESQLEditorDeps = {

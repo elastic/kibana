@@ -137,13 +137,20 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     dataViews$,
     dataControlManager.api.fieldName$,
     dataControlManager.api.output$,
+    dataControlManager.api.input$,
   ])
     .pipe(
       tap(() => {
         filtersReady$.next(false);
       })
     )
-    .subscribe(([nextDataViews, nextFieldName, nextOutput]) => {
+    .subscribe(([nextDataViews, nextFieldName, nextOutput, nextInput]) => {
+      if (nextInput !== ControlInputOption.DSL) {
+        setBlockingError(undefined);
+        field$.next(undefined);
+        return;
+      }
+
       const dataView = nextDataViews
         ? nextDataViews.find(({ id }) => dataControlManager.api.dataViewId$.value === id)
         : undefined;

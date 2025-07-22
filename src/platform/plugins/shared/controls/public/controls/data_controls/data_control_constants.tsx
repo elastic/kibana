@@ -8,6 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import { RANGE_SLIDER_CONTROL } from '../../../common';
 
 export const DataControlEditorStrings = {
@@ -104,6 +106,52 @@ export const DataControlEditorStrings = {
         i18n.translate('controls.controlGroup.manageControl.dataSource.listOptionsTitle', {
           defaultMessage: 'List options',
         }),
+      valuesPreview: {
+        getTitle: () =>
+          i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.title', {
+            defaultMessage: 'Values preview',
+          }),
+        getRunQueryButton: () =>
+          i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.valuesPreview.runQueryButton',
+            {
+              defaultMessage: 'Run query',
+            }
+          ),
+        getEmptyText: () =>
+          i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.emptyText', {
+            defaultMessage: 'Run the query to get a preview of possible values.',
+          }),
+        getMoreText: (numMore: number) =>
+          i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.more', {
+            defaultMessage: '{numMore} more…',
+            values: { numMore },
+          }),
+        getErrorTitle: () =>
+          i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.valuesPreview.errorTitle',
+            {
+              defaultMessage: 'Error getting values preview',
+            }
+          ),
+        getMultiColumnErrorTitle: () =>
+          i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.valuesPreview.multiColumnErrorTitle',
+            {
+              defaultMessage: 'Query must return a single column',
+            }
+          ),
+        getMultiColumnErrorBody: (totalColumns: number) => (
+          <FormattedMessage
+            id="controls.controlGroup.manageControl.dataSource.valuesPreview.multiColumnErrorBody"
+            defaultMessage="Your query is currently returning {totalColumns} columns. Choose a column, or use {boldStatsBy} to narrow your query down."
+            values={{
+              totalColumns,
+              boldStatsBy: <strong>STATS BY</strong>,
+            }}
+          />
+        ),
+      },
     },
     displaySettings: {
       getTitleInputTitle: () =>
@@ -153,6 +201,34 @@ export const DataControlEditorStrings = {
       i18n.translate('controls.controlGroup.management.delete', {
         defaultMessage: 'Delete control',
       }),
+    fieldOutput: {
+      getFieldOutputDescription: (fieldName?: string) =>
+        fieldName ? (
+          <FormattedMessage
+            id="controls.controlGroup.manageControl.fieldOutput.fieldOutputDescription"
+            defaultMessage="Filter will be created against the field {fieldName}."
+            values={{
+              fieldName: <strong>{fieldName}</strong>,
+            }}
+          />
+        ) : (
+          i18n.translate(
+            'controls.controlGroup.manageControl.fieldOutput.fieldOutputDescriptionNoSelectedField',
+            {
+              defaultMessage:
+                'Run the input query to try to auto-detect a field, or choose one manually.',
+            }
+          )
+        ),
+      getSelectFieldTitle: (hasField: boolean) =>
+        hasField
+          ? i18n.translate('controls.controlGroup.manageControl.fieldOutput.changeFieldTitle', {
+              defaultMessage: 'Change',
+            })
+          : i18n.translate('controls.controlGroup.manageControl.fieldOutput.selectFieldTitle', {
+              defaultMessage: 'Select',
+            }),
+    },
   },
   management: {
     controlWidth: {

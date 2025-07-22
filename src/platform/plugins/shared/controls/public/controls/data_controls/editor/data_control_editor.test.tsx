@@ -20,21 +20,21 @@ import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
   type DefaultDataControlState,
-} from '../../../common';
-import { dataViewsService } from '../../services/kibana_services';
-import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
-import type { ControlGroupApi } from '../../control_group/types';
-import type { ControlFactory } from '../types';
+} from '../../../../common';
+import { dataViewsService } from '../../../services/kibana_services';
+import { getAllControlTypes, getControlFactory } from '../../../control_factory_registry';
+import type { ControlGroupApi } from '../../../control_group/types';
+import type { ControlFactory } from '../../types';
 import { DataControlEditor } from './data_control_editor';
 import {
   getMockedOptionsListControlFactory,
   getMockedRangeSliderControlFactory,
   getMockedSearchControlFactory,
-} from './mocks/factory_mocks';
-import type { DataControlApi, DataControlFactory } from './types';
+} from '../mocks/factory_mocks';
+import type { DataControlApi, DataControlFactory } from '../types';
 
-jest.mock('../../control_factory_registry', () => ({
-  ...jest.requireActual('../../control_factory_registry'),
+jest.mock('../../../control_factory_registry', () => ({
+  ...jest.requireActual('../../../control_factory_registry'),
   getAllControlTypes: jest.fn(),
   getControlFactory: jest.fn(),
 }));

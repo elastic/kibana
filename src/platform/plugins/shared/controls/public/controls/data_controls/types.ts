@@ -17,7 +17,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { PublishesESQLVariable } from '@kbn/esql-types';
-import { ControlOutputOption, DefaultDataControlState } from '../../../common';
+import { ControlInputOption, ControlOutputOption, DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
 import { ControlFactory, DefaultControlApi } from '../types';
 import { PublishesAsyncFilters } from './publishes_async_filters';
@@ -29,13 +29,24 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
+export interface PublishesControlInputOutput {
+  input$: PublishingSubject<ControlInputOption>;
+  output$: PublishingSubject<ControlOutputOption>;
+}
+
+export interface PublishesESQLQuery {
+  esqlQuery$: PublishingSubject<string | undefined>;
+}
+
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesTitle, 'hideTitle$'> & // control titles cannot be hidden
   HasEditCapabilities &
   PublishesDataViews &
   PublishesField &
   PublishesAsyncFilters &
-  PublishesESQLVariable;
+  PublishesESQLVariable &
+  PublishesESQLQuery &
+  PublishesControlInputOutput;
 
 export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
