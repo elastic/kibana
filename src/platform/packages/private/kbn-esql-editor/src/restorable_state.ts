@@ -8,9 +8,13 @@
  */
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
+import { HistoryTabId } from './types';
 
 export interface ESQLEditorRestorableState {
   editorHeight: number;
+  resizableContainerHeight: number;
+  isHistoryOpen: boolean;
+  historySelectedTabId: HistoryTabId;
 }
 
 export const { withRestorableState, useRestorableState } =

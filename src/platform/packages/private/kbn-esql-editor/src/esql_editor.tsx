@@ -164,7 +164,8 @@ const ESQLEditorInternal = memo(function ESQLEditor({
   );
   // the resizable container is the container that holds the history component or the inline docs
   // they are never open simultaneously
-  const [resizableContainerHeight, setResizableContainerHeight] = useState(
+  const [resizableContainerHeight, setResizableContainerHeight] = useRestorableState(
+    'resizableContainerHeight',
     RESIZABLE_CONTAINER_INITIAL_HEIGHT
   );
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
@@ -173,7 +174,7 @@ const ESQLEditorInternal = memo(function ESQLEditor({
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
@@ -265,10 +266,6 @@ const ESQLEditorInternal = memo(function ESQLEditor({
       variablesService?.disableSuggestions();
     }
   }, [variablesService, controlsContext, esqlVariables]);
-
-  const toggleHistory = useCallback((status: boolean) => {
-    setIsHistoryOpen(status);
-  }, []);
 
   const showSuggestionsIfEmptyQuery = useCallback(() => {
     if (editorModel.current?.getValueLength() === 0) {
@@ -995,7 +992,7 @@ const ESQLEditorInternal = memo(function ESQLEditor({
         hideTimeFilterInfo={hideTimeFilterInfo}
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
-        setIsHistoryOpen={toggleHistory}
+        setIsHistoryOpen={setIsHistoryOpen}
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
