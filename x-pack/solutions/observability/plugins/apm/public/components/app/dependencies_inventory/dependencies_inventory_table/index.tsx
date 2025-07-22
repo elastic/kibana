@@ -72,45 +72,45 @@ export function DependenciesInventoryTable() {
     () =>
       data?.dependencies
         ? orderBy(
-          data.dependencies.map((item) => ({
-            name: getNodeName(item.location),
-            impact: item.currentStats.impact,
-            latency: item.currentStats.latency.value,
-            throughput: item.currentStats.throughput.value,
-            failureRate: item.currentStats.errorRate.value,
-          })),
-          sortField,
-          sortDirection
-        )
-          .slice(page * pageSize, (page + 1) * pageSize)
-          .map(({ name }) => name)
-          .sort()
+            data.dependencies.map((item) => ({
+              name: getNodeName(item.location),
+              impact: item.currentStats.impact,
+              latency: item.currentStats.latency.value,
+              throughput: item.currentStats.throughput.value,
+              failureRate: item.currentStats.errorRate.value,
+            })),
+            sortField,
+            sortDirection
+          )
+            .slice(page * pageSize, (page + 1) * pageSize)
+            .map(({ name }) => name)
+            .sort()
         : undefined,
     [data?.dependencies, page, pageSize, sortDirection, sortField]
   );
 
   const { data: timeseriesData, status: timeseriesStatus } = useFetcher(
-  (callApmApi) => {
-    if (data?.requestId && visibleDependenciesNames?.length) {
-      return callApmApi('POST /internal/apm/dependencies/top_dependencies/statistics', {
-        params: {
-          query: {
-            start,
-            end,
-            environment,
-            numBuckets: 8,
-            offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
-            kuery,
+    (callApmApi) => {
+      if (data?.requestId && visibleDependenciesNames?.length) {
+        return callApmApi('POST /internal/apm/dependencies/top_dependencies/statistics', {
+          params: {
+            query: {
+              start,
+              end,
+              environment,
+              numBuckets: 8,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
+              kuery,
+            },
+            body: {
+              dependencyNames: JSON.stringify(visibleDependenciesNames),
+            },
           },
-          body: {
-            dependencyNames: JSON.stringify(visibleDependenciesNames),
-          },
-        },
-      });
-    }
+        });
+      }
 
-    return Promise.resolve();
-  },
+      return Promise.resolve();
+    },
     // Disables exhaustive deps because the statistics api must only be called when the rendered items changed or when comparison is toggled or changed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data?.requestId, visibleDependenciesNames, comparisonEnabled, offset],
@@ -214,7 +214,7 @@ export function DependenciesInventoryTable() {
     ]
   );
   const showRandomSamplerBadge = data?.sampled && status === FETCH_STATUS.SUCCESS;
-const fetchingStatus =
+  const fetchingStatus =
     isPending(status) || isPending(timeseriesStatus) ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS;
   return (
     <>
