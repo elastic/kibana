@@ -408,7 +408,7 @@ src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
 src/platform/packages/shared/deeplinks/ml @elastic/ml-ui
-src/platform/packages/shared/deeplinks/observability @elastic/obs-ux-management-team
+src/platform/packages/shared/deeplinks/observability @elastic/observability-ui
 src/platform/packages/shared/deeplinks/search @elastic/search-kibana
 src/platform/packages/shared/deeplinks/security @elastic/security-solution
 src/platform/packages/shared/deeplinks/shared @elastic/appex-sharedux
@@ -1460,7 +1460,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/kibana.jsonc#L5
 /x-pack/solutions/observability/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-/x-pack/solutions/observability/test/common/utils/server_route_repository @elastic/obs-knowledge-team
+/x-pack/platform/test/common/utils/server_route_repository @elastic/obs-knowledge-team
 /src/platform/test/functional/services/synthtrace/logs_synthtrace_es_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 
 ## Streams parts owned by Logs UX
@@ -1620,9 +1620,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
 
 # Streams
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/streams @elastic/streams-program-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-program-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-program-team
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/streams-program-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-program-team
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-program-team
 /x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team
 
 ### END Observability Plugins
