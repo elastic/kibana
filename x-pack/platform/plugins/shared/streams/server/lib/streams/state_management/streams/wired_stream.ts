@@ -56,6 +56,7 @@ interface WiredStreamChanges extends StreamChanges {
   routing: boolean;
   processing: boolean;
   lifecycle: boolean;
+  capture: boolean;
 }
 
 export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definition> {
@@ -64,6 +65,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     routing: false,
     processing: false,
     lifecycle: false,
+    capture: false,
   };
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
@@ -131,6 +133,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     this._changes.lifecycle =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+
+    this._changes.capture =
+      !startingStateStreamDefinition ||
+      this._definition.ingest.wired.capture_pattern !==
+        startingStateStreamDefinition.ingest.wired.capture_pattern;
 
     const parentId = getParentId(this._definition.name);
     const cascadingChanges: StreamChange[] = [];
@@ -279,6 +286,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       return {
         isValid: false,
         errors: [new Error('Cannot create wired stream due to unsupported root stream')],
+      };
+    }
+
+    if (
+      this._definition.ingest.wired.capture_pattern &&
+      !isRootStreamDefinition(this._definition)
+    ) {
+      return {
+        isValid: false,
+        errors: [new Error(`Capture pattern is only supported for root streams`)],
       };
     }
 
@@ -499,6 +516,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           lifecycle,
         },
       },
+      ...(this._definition.ingest.wired.capture_pattern
+        ? [
+            {
+              type: 'update_capture_pattern' as const,
+              request: {
+                name: this._definition.name,
+                capturePattern: this._definition.ingest.wired.capture_pattern,
+                oldPattern: undefined,
+              },
+            },
+          ]
+        : []),
       {
         type: 'upsert_dot_streams_document',
         request: this._definition,
@@ -556,6 +585,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         }),
       });
     }
+    if (this._changes.capture) {
+      actions.push({
+        type: 'update_capture_pattern',
+        request: {
+          name: this._definition.name,
+          capturePattern: this._definition.ingest.wired.capture_pattern,
+          oldPattern: startingStateStream.definition.ingest.wired.capture_pattern,
+        },
+      });
+    }
     if (this._changes.processing) {
       actions.push({
         type: 'upsert_ingest_pipeline',
@@ -600,7 +639,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return actions;
   }
 
-  protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
+  protected async doDetermineDeleteActions(startingState: State): Promise<ElasticsearchAction[]> {
+    let oldCapturePattern: string | undefined;
+    const startingStateStream = startingState.get(this._definition.name);
+    if (startingStateStream && Streams.WiredStream.Definition.is(startingStateStream.definition)) {
+      oldCapturePattern = startingStateStream.definition.ingest.wired.capture_pattern;
+    }
     return [
       {
         type: 'delete_index_template',
@@ -626,6 +670,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           name: getProcessingPipelineName(this._definition.name),
         },
       },
+      ...(oldCapturePattern
+        ? [
+            {
+              type: 'update_capture_pattern' as const,
+              request: {
+                name: this._definition.name,
+                capturePattern: undefined,
+                oldPattern: oldCapturePattern,
+              },
+            },
+          ]
+        : []),
       {
         type: 'delete_datastream',
         request: {

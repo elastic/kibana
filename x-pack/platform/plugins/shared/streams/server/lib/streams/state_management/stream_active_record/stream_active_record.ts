@@ -154,7 +154,7 @@ export abstract class StreamActiveRecord<
         return this.doDetermineCreateActions();
       }
     } else if (this.changeStatus === 'deleted') {
-      return this.doDetermineDeleteActions();
+      return this.doDetermineDeleteActions(startingState);
     }
 
     throw new Error('Cannot determine Elasticsearch actions for an unchanged stream');
@@ -214,5 +214,5 @@ export abstract class StreamActiveRecord<
     startingState: State,
     startingStateStream: StreamActiveRecord<TDefinition>
   ): Promise<ElasticsearchAction[]>;
-  protected abstract doDetermineDeleteActions(): Promise<ElasticsearchAction[]>;
+  protected abstract doDetermineDeleteActions(startingState: State): Promise<ElasticsearchAction[]>;
 }
