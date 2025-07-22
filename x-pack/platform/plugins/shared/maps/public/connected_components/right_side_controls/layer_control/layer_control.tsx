@@ -128,6 +128,7 @@ export function LayerControl({
                 content={i18n.translate('xpack.maps.layerControl.hideAllLayersButton', {
                   defaultMessage: 'Hide all layers',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   onClick={hideAllLayers}
@@ -145,6 +146,7 @@ export function LayerControl({
                 content={i18n.translate('xpack.maps.layerControl.showAllLayersButton', {
                   defaultMessage: 'Show all layers',
                 })}
+                disableScreenReaderOutput
               >
                 <EuiButtonIcon
                   onClick={showAllLayers}
