@@ -109,3 +109,7 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
     name: 'WorkflowSchema',
   });
 }
+
+export function getStepId(stepName: string): string {
+  return stepName.toLowerCase().replace(/\s+/g, '-');
+}

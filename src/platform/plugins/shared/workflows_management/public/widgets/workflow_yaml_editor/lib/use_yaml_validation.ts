@@ -9,10 +9,14 @@
 
 import type { monaco } from '@kbn/monaco';
 import { useCallback, useState } from 'react';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
+import { parseDocument } from 'yaml';
+import _ from 'lodash';
+import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MUSTACHE_REGEX } from './mustache';
 import { MarkerSeverity, getSeverityString } from './utils';
+import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 
 interface UseYamlValidationProps {
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
@@ -26,10 +30,9 @@ const SEVERITY_MAP = {
 
 export interface UseYamlValidationResult {
   validationErrors: YamlValidationError[] | null;
-  validateMustacheExpressions: (
+  validateVariables: (
     model: monaco.editor.ITextModel | null,
-    monaco: typeof import('monaco-editor') | null,
-    secrets: Record<string, string>
+    monaco: typeof import('monaco-editor') | null
   ) => void;
   handleMarkersChanged: (
     editor: monaco.editor.IStandaloneCodeEditor,
@@ -44,58 +47,9 @@ export function useYamlValidation({
 }: UseYamlValidationProps): UseYamlValidationResult {
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
 
-  // Function to find the current step in the workflow based on the path
-  // const findStepFromPath = useCallback((path: Array<string | number>) => {
-  //   if (!path || path.length < 3) {
-  //     return null;
-  //   }
-
-  //   // Look for 'steps' in the path
-  //   const stepsIdx = path.findIndex((p) => p === 'steps');
-  //   if (stepsIdx === -1) {
-  //     return null;
-  //   }
-
-  //   // Check if there's an index after 'steps'
-  //   if (stepsIdx + 1 >= path.length || typeof path[stepsIdx + 1] !== 'number') {
-  //     return null;
-  //   }
-
-  //   return {
-  //     stepIndex: path[stepsIdx + 1] as number,
-  //     isInStep: true,
-  //   };
-  // }, []);
-
-  // const findActionFromPath = useCallback((path: Array<string | number>) => {
-  //   if (!path || path.length < 3) {
-  //     return null;
-  //   }
-
-  //   // Look for 'actions' in the path
-  //   const actionsIdx = path.findIndex((p) => p === 'actions');
-  //   if (actionsIdx === -1) {
-  //     return null;
-  //   }
-
-  //   // Check if there's an index after 'actions'
-  //   if (actionsIdx + 1 >= path.length || typeof path[actionsIdx + 1] !== 'number') {
-  //     return null;
-  //   }
-
-  //   return {
-  //     actionIndex: path[actionsIdx + 1] as number,
-  //     isInAction: true,
-  //   };
-  // }, []);
-
   // Function to validate mustache expressions and apply decorations
-  const validateMustacheExpressions = useCallback(
-    (
-      model: monaco.editor.ITextModel | null,
-      monaco: typeof import('monaco-editor') | null,
-      secrets: Record<string, string> = {}
-    ) => {
+  const validateVariables = useCallback(
+    (model: monaco.editor.ITextModel | null, monaco: typeof import('monaco-editor') | null) => {
       if (!model || !monaco) {
         return;
       }
@@ -103,13 +57,13 @@ export function useYamlValidation({
       try {
         const text = model.getValue();
 
-        try {
-          // Parse the YAML to JSON to get the workflow definition
-          parseWorkflowYamlToJSON(text);
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error(e);
+        // Parse the YAML to JSON to get the workflow definition
+        const result = parseWorkflowYamlToJSON(text);
+        if (!result.success) {
+          throw new Error('Failed to parse YAML');
         }
+        const yamlDocument = parseDocument(text);
+        const workflowGraph = getWorkflowGraph(result.data);
 
         // Collect markers to add to the model
         const markers: monaco.editor.IMarkerData[] = [];
@@ -124,10 +78,16 @@ export function useYamlValidation({
           const startPos = model.getPositionAt(matchStart);
           const endPos = model.getPositionAt(matchEnd);
 
-          const errorMessage: string | null = null;
+          let errorMessage: string | null = null;
           const severity: YamlValidationErrorSeverity = 'warning';
 
+          const path = getCurrentPath(yamlDocument, matchStart);
+          const context = getContextForPath(result.data, workflowGraph, path);
+
           // TODO: validate mustache variable for YAML step
+          if (!_.get(context, match[1])) {
+            errorMessage = `Variable ${match[1]} is not defined`;
+          }
 
           // Add marker for validation issues
           if (errorMessage) {
@@ -187,7 +147,7 @@ export function useYamlValidation({
 
   return {
     validationErrors,
-    validateMustacheExpressions,
+    validateVariables,
     handleMarkersChanged,
   };
 }

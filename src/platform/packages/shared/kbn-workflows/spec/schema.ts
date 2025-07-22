@@ -75,7 +75,6 @@ export const BaseStepSchema = z.object({
   name: z.string().min(1),
   if: z.string().optional(),
   foreach: z.string().optional(),
-  // next: z.string().optional(),
   'on-failure': WorkflowOnFailureSchema.optional(),
   timeout: z.number().optional(),
 });

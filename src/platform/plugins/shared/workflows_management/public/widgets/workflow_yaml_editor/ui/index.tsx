@@ -22,11 +22,6 @@ const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
 const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
 
-const useWorkflowSecrets = (workflowId: string | null | undefined) => {
-  // TODO: Implement real Kibana workflow secrets hook
-  return { data: {} };
-};
-
 const useWorkflowJsonSchema = () => {
   return jsonSchema;
 };
@@ -45,13 +40,10 @@ export const WorkflowYAMLEditor = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
     null
   );
-  const { data: secrets } = useWorkflowSecrets(workflowId);
 
-  const { validationErrors, validateMustacheExpressions, handleMarkersChanged } = useYamlValidation(
-    {
-      onValidationErrors,
-    }
-  );
+  const { validationErrors, validateVariables, handleMarkersChanged } = useYamlValidation({
+    onValidationErrors,
+  });
 
   const workflowJsonSchema = useWorkflowJsonSchema();
   const schemas = useMemo(() => {
@@ -73,13 +65,13 @@ export const WorkflowYAMLEditor = ({
         return;
       }
       if ('original' in model) {
-        validateMustacheExpressions(model.original, monacoRef.current, secrets ?? {});
-        validateMustacheExpressions(model.modified, monacoRef.current, secrets ?? {});
+        validateVariables(model.original, monacoRef.current);
+        validateVariables(model.modified, monacoRef.current);
       } else {
-        validateMustacheExpressions(model, monacoRef.current, secrets ?? {});
+        validateVariables(model, monacoRef.current);
       }
     }
-  }, [validateMustacheExpressions, secrets]);
+  }, [validateVariables]);
 
   const handleChange = useCallback(
     (value: string | undefined) => {
