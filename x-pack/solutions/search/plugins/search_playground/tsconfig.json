@@ -59,7 +59,14 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/search-queries",
-    "@kbn/monaco"
+    "@kbn/monaco",
+    "@kbn/dev-cli-runner",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/tooling-log",
+    "@kbn/babel-register",
+    "@kbn/ai-assistant-common",
+    "@kbn/expect",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": [
     "target/**/*",
