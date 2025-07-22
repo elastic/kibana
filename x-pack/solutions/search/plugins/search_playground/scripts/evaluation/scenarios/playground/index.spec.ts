@@ -106,7 +106,7 @@ describe('Playground APIs', function () {
           doc_size: 1,
           source_fields: '{"work-from-home-policies":["content"]}',
         },
-        messages: [{ role: 'human', content: 'National Parks' }],
+        messages: [{ role: 'human', content: 'Yelllow stone National Parks' }],
       }
     );
 
