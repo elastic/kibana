@@ -45,6 +45,7 @@ describe('ES deprecations API', () => {
       lib: { handleEsError },
       log: { error: jest.fn() },
       current: { major: 8 },
+      cleanupReindexOperations: jest.fn(),
     };
     registerESDeprecationRoutes(routeDependencies);
   });
