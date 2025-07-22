@@ -11,11 +11,11 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { SaveSavedSearchOptions } from '.';
-import { getNewSavedSearch, getSavedSearch, saveSavedSearch } from '.';
+import type { SaveDiscoverSessionOptions, SaveSavedSearchOptions } from '.';
+import { getNewSavedSearch, getSavedSearch, saveDiscoverSession, saveSavedSearch } from '.';
 import { SavedSearchType } from '../../../common';
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
-import type { SavedSearch, SerializableSavedSearch } from '../../../common/types';
+import type { DiscoverSession, SavedSearch, SerializableSavedSearch } from '../../../common/types';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 import { getDiscoverSession } from '../../../common/service/get_discover_session';
 
@@ -76,6 +76,19 @@ export class SavedSearchesService {
     const { contentManagement, savedObjectsTaggingOss } = this.deps;
     return saveSavedSearch(
       savedSearch,
+      options,
+      contentManagement,
+      savedObjectsTaggingOss?.getTaggingApi()
+    );
+  };
+
+  saveDiscoverSession = (
+    discoverSession: DiscoverSession,
+    options: SaveDiscoverSessionOptions = {}
+  ) => {
+    const { contentManagement, savedObjectsTaggingOss } = this.deps;
+    return saveDiscoverSession(
+      discoverSession,
       options,
       contentManagement,
       savedObjectsTaggingOss?.getTaggingApi()
