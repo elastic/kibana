@@ -60,6 +60,8 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
+  console.log(core, parentApi, triggerId, uuid);
+
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
