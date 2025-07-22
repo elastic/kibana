@@ -597,6 +597,7 @@ export function HistoryAndStarredQueriesTabs({
   return (
     <>
       <EuiFlexGroup
+        data-test-subj="ESQLEditor-history-container"
         responsive={false}
         alignItems="center"
         justifyContent="spaceBetween"
