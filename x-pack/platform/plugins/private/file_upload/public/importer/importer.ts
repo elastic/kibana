@@ -287,7 +287,8 @@ export abstract class Importer implements IImporter {
       method: 'POST',
       version: '1',
       body: JSON.stringify({
-        docs: this._docArray.slice(0, limit),
+        // first doc is the header
+        docs: this._docArray.slice(1, limit + 1),
         pipeline: ingestPipeline,
       }),
     });

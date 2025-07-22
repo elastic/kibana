@@ -90,7 +90,7 @@ export class IndexUpdateService {
     return this._indexCrated$.getValue();
   }
 
-  private readonly actions$ = new Subject<Action>();
+  private readonly _actions$ = new Subject<Action>();
 
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
@@ -114,7 +114,7 @@ export class IndexUpdateService {
   private readonly _subscription = new Subscription();
 
   // Accumulate updates in buffer with undo
-  private bufferState$: Observable<DocUpdate[]> = this.actions$.pipe(
+  private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
     scan((acc: DocUpdate[], action: Action) => {
       if (action.type === 'add') {
         return [...acc, action.payload];
@@ -150,7 +150,7 @@ export class IndexUpdateService {
   );
 
   // Observable to track the number of milliseconds left to allow undo of the last change
-  public readonly undoTimer$: Observable<number> = this.actions$.pipe(
+  public readonly undoTimer$: Observable<number> = this._actions$.pipe(
     skipWhile(() => !this.isIndexCreated()),
     filter((action) => action.type === 'add' || action.type === 'undo'),
     switchMap((action) =>
@@ -159,7 +159,7 @@ export class IndexUpdateService {
             map((elapsed) => {
               return Math.max(BUFFER_TIMEOUT_MS - elapsed * UNDO_EMIT_MS, 0);
             }),
-            takeUntil(this.actions$.pipe(filter((a) => a.type === 'undo'))),
+            takeUntil(this._actions$.pipe(filter((a) => a.type === 'undo'))),
             takeWhile((remaining) => remaining > 0, true)
           )
         : of(0)
@@ -272,7 +272,7 @@ export class IndexUpdateService {
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
             // Clear the buffer after successful update
-            this.actions$.next({ type: 'saved', payload: { response, updates } });
+            this._actions$.next({ type: 'saved', payload: { response, updates } });
 
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 
@@ -375,7 +375,7 @@ export class IndexUpdateService {
 
     // Subscribe to pendingColumnsToBeSaved$ and update _pendingColumnsToBeSaved$
     this._subscription.add(
-      this.actions$
+      this._actions$
         .pipe(
           scan((acc: ColumnAddition[], action) => {
             if (action.type === 'add-column') {
@@ -426,14 +426,14 @@ export class IndexUpdateService {
 
   // Add a new index
   public addDoc(doc: Record<string, any>) {
-    this.actions$.next({ type: 'add', payload: { value: doc } });
+    this._actions$.next({ type: 'add', payload: { value: doc } });
   }
 
   public async addNewRow(newRow: Record<string, any>) {
     const response = await this.bulkUpdate([{ value: newRow }]);
 
     if (!response.errors) {
-      this.actions$.next({ type: 'new-row-added', payload: newRow });
+      this._actions$.next({ type: 'new-row-added', payload: newRow });
     }
     return response;
   }
@@ -451,7 +451,7 @@ export class IndexUpdateService {
       },
       {}
     );
-    this.actions$.next({ type: 'add', payload: { id, value: parsedUpdate } });
+    this._actions$.next({ type: 'add', payload: { id, value: parsedUpdate } });
   }
 
   /**
@@ -498,11 +498,11 @@ export class IndexUpdateService {
    * Cancel the latest update operation.
    */
   public undo() {
-    this.actions$.next({ type: 'undo' });
+    this._actions$.next({ type: 'undo' });
   }
 
   public addNewColumn(filedName: string) {
-    this.actions$.next({ type: 'add-column', payload: { name: filedName } });
+    this._actions$.next({ type: 'add-column', payload: { name: filedName } });
   }
 
   public setExitAttemptWithUnsavedFields(value: boolean) {
@@ -510,15 +510,21 @@ export class IndexUpdateService {
   }
 
   public deleteUnsavedColumns() {
-    this.actions$.next({ type: 'discard-unsaved-columns' });
+    this._actions$.next({ type: 'discard-unsaved-columns' });
   }
 
   public discardUnsavedChanges() {
-    this.actions$.next({ type: 'discard-unsaved-changes' });
+    this._actions$.next({ type: 'discard-unsaved-changes' });
   }
 
   public destroy() {
     this._subscription.unsubscribe();
+    // complete all subjects
+    this._isSaving$.complete();
+    this._isFetching$.complete();
+    this._rows$.complete();
+    this._totalHits$.complete();
+    this._actions$.complete();
   }
 
   public async createIndex() {
@@ -531,7 +537,7 @@ export class IndexUpdateService {
       await this.bulkUpdate(updates);
 
       this.setIndexCreated(true);
-      this.actions$.next({ type: 'discard-unsaved-columns' });
+      this._actions$.next({ type: 'discard-unsaved-columns' });
     } catch (error) {
       throw error;
     } finally {
