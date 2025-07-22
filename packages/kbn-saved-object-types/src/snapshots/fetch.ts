@@ -9,21 +9,22 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { MigrationSnapshot } from '../types';
-import { safeExec } from '../exec';
 import { fetchSnapshotFromGCSBucket } from '../gcs';
 import { getCurrentQARelease } from '../util/serverless';
 
 export async function fetchLatestBaseBranchSnapshot({
   log,
-  baseBranch,
+  gitRev,
 }: {
   log: ToolingLog;
-  baseBranch: string;
-}): Promise<MigrationSnapshot> {
+  gitRev?: string;
+}): Promise<MigrationSnapshot | undefined> {
+  if (!gitRev) {
+    log.warning('Base branch SHA not provided, skipping checks against base branch.');
+    return;
+  }
+
   let attempts = 0;
-  // fetch the most recent common ancestor between current commit and base branch
-  let gitRev = await safeExec(`git merge-base --fork-point ${baseBranch}`, log);
-  log.info(`✅ Determined common parent SHA (base branch '${baseBranch}'): ${gitRev}`);
   do {
     try {
       return await fetchSnapshotFromGCSBucket({ gitRev, log });
@@ -39,9 +40,8 @@ export async function fetchLatestBaseBranchSnapshot({
 
       if (err === 'Not Found') {
         // get parent commit SHA, to see if it has a snapshot
-        log.warning(`Snapshot not found for SHA ${gitRev}`);
-        gitRev = await safeExec(`git log --pretty=%P -n 1 "${gitRev}"`, log);
-        log.info(`✅ Using parent commit ${gitRev}`);
+        log.warning(`Snapshot not found for SHA ${gitRev}, skipping checks against base branch.`);
+        return;
       }
     }
   } while (true);
