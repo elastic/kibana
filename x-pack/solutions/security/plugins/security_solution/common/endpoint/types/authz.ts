@@ -100,6 +100,14 @@ export interface EndpointAuthz {
   canWriteWorkflowInsights: boolean;
   /** if the user has read permissions for workflow insights */
   canReadWorkflowInsights: boolean;
+
+  /**
+   * If user has ability to read/write admin type of data.
+   * Introduced with v9.1 in support of spaces and currently tied to the user having the
+   * `superuser` role.
+   */
+  canReadAdminData: boolean;
+  canWriteAdminData: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

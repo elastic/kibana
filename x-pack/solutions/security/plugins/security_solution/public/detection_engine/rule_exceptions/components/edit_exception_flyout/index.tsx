@@ -403,6 +403,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       aria-labelledby={exceptionFlyoutTitleId}
     >
       <ExceptionFlyoutHeader
+        isEdit
         listType={listType}
         titleId={exceptionFlyoutTitleId}
         dataTestSubjId={'exceptionFlyoutTitle'}
@@ -486,6 +487,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         )}
       </FlyoutBodySection>
       <ExceptionFlyoutFooter
+        isEdit
         listType={listType}
         isSubmitButtonDisabled={isSubmitButtonDisabled}
         cancelButtonDataTestSubjId={'cancelExceptionEditButton'}

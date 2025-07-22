@@ -23,7 +23,7 @@ import type { RuleSignatureId } from '../../../../../../common/api/detection_eng
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
-import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
+import { IntegrationsPopover } from '../../../../common/components/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../common/translations';

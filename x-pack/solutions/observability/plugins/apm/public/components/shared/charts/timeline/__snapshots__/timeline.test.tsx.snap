@@ -1,181 +1,124 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Timeline TimelineAxisContainer should render with data 1`] = `
+exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
 <div
-  style={
-    Object {
-      "height": "100%",
-      "width": "100%",
-    }
-  }
+  data-test-subj="timeline-axis-container"
+  style="width: 100%; height: 100%;"
 >
   <div
-    style={
-      Object {
-        "height": 100,
-        "width": "100%",
-      }
-    }
+    style="height: 100px; width: 100%;"
   >
     <svg
-      height={100}
-      style={
-        Object {
-          "left": 0,
-          "position": "absolute",
-          "top": 0,
-        }
-      }
-      width={0}
+      height="100"
+      style="position: absolute; top: 0px; left: 0px;"
+      width="0"
     >
       <g
         transform="translate(0 80)"
       >
         <text
           fill="#5A6D8C"
-          fontSize={11}
-          textAnchor="middle"
-          x={50}
-          y={0}
+          font-size="11"
+          text-anchor="middle"
+          x="50"
+          y="0"
         >
           0 μs
         </text>
         <text
           fill="#5A6D8C"
-          fontSize={11}
-          textAnchor="middle"
-          x={30}
-          y={0}
+          font-size="11"
+          text-anchor="middle"
+          x="30"
+          y="0"
         >
           200 μs
         </text>
         <text
           fill="#5A6D8C"
-          fontSize={11}
-          textAnchor="middle"
-          x={10}
-          y={0}
+          font-size="11"
+          text-anchor="middle"
+          x="10"
+          y="0"
         >
           400 μs
         </text>
         <text
           fill="#5A6D8C"
-          fontSize={11}
-          textAnchor="middle"
-          x={-10}
-          y={0}
+          font-size="11"
+          text-anchor="middle"
+          x="-10"
+          y="0"
         >
           600 μs
         </text>
         <text
           fill="#5A6D8C"
-          fontSize={11}
-          textAnchor="middle"
-          x={-30}
-          y={0}
+          font-size="11"
+          text-anchor="middle"
+          x="-30"
+          y="0"
         >
           800 μs
         </text>
         <text
           fill="#1D2A3E"
-          textAnchor="middle"
-          x={-50}
-          y={0}
+          text-anchor="middle"
+          x="-50"
+          y="0"
         >
           1,000 μs
         </text>
       </g>
     </svg>
-    
     <div
-      className="css-1oyht0a-MarkerContainer eoof5b20"
-      style={
-        Object {
-          "left": -9955.5,
-        }
-      }
+      class="css-1oyht0a-MarkerContainer eoof5b20"
+      style="left: -9955.5px;"
     >
-      
       <span
-        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-        onKeyDown={[Function]}
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
-        
         <div
-          className="css-1ejn3a9-Container en0jakt1"
-          disabled={false}
-          onBlur={[Function]}
-          onFocus={[Function]}
+          class="css-1ejn3a9-Container en0jakt1"
         >
-          
           <span
-            className="css-xbgcmn-Indicator en0jakt0"
+            class="css-xbgcmn-Indicator en0jakt0"
             color="#8E9FBC"
             shape="circle"
           />
         </div>
       </span>
     </div>
-    
     <div
-      className="css-1oyht0a-MarkerContainer eoof5b20"
-      style={
-        Object {
-          "left": -10955.5,
-        }
-      }
+      class="css-1oyht0a-MarkerContainer eoof5b20"
+      style="left: -10955.5px;"
     >
-      
       <span
-        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-        onKeyDown={[Function]}
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
-        
         <div
-          className="css-1ejn3a9-Container en0jakt1"
-          disabled={false}
-          onBlur={[Function]}
-          onFocus={[Function]}
+          class="css-1ejn3a9-Container en0jakt1"
         >
-          
           <span
-            className="css-xbgcmn-Indicator en0jakt0"
+            class="css-xbgcmn-Indicator en0jakt0"
             color="#8E9FBC"
             shape="circle"
           />
         </div>
       </span>
     </div>
-    
     <div
-      className="css-1oyht0a-MarkerContainer eoof5b20"
-      style={
-        Object {
-          "left": -18955.5,
-        }
-      }
+      class="css-1oyht0a-MarkerContainer eoof5b20"
+      style="left: -18955.5px;"
     >
-      
       <span
-        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-        onKeyDown={[Function]}
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
-        
         <div
-          className="css-1ejn3a9-Container en0jakt1"
-          disabled={false}
-          onBlur={[Function]}
-          onFocus={[Function]}
+          class="css-1ejn3a9-Container en0jakt1"
         >
-          
           <span
-            className="css-xbgcmn-Indicator en0jakt0"
+            class="css-xbgcmn-Indicator en0jakt0"
             color="#8E9FBC"
             shape="circle"
           />
@@ -186,100 +129,86 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
 </div>
 `;
 
-exports[`Timeline VerticalLinesContainer should render with data 1`] = `
-<div
-  style={
-    Object {
-      "height": "100%",
-      "width": "100%",
-    }
-  }
+exports[`Timeline Components renders VerticalLinesContainer with data 1`] = `
+<svg
+  data-test-subj="vertical-lines"
+  height="100%"
+  style="position: absolute; top: 0px; left: 0px;"
+  width="0"
 >
-  <svg
-    height="100%"
-    style={
-      Object {
-        "left": 0,
-        "position": "absolute",
-        "top": 0,
-      }
-    }
-    width={0}
+  <g
+    transform="translate(0 100)"
   >
-    <g
-      transform="translate(0 100)"
-    >
-      <line
-        stroke="#ECF1F9"
-        x1={50}
-        x2={50}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#ECF1F9"
-        x1={30}
-        x2={30}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#ECF1F9"
-        x1={10}
-        x2={10}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#ECF1F9"
-        x1={-10}
-        x2={-10}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#ECF1F9"
-        x1={-30}
-        x2={-30}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#ECF1F9"
-        x1={-50}
-        x2={-50}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#8E9FBC"
-        x1={-9950}
-        x2={-9950}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#8E9FBC"
-        x1={-10950}
-        x2={-10950}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#8E9FBC"
-        x1={-18950}
-        x2={-18950}
-        y1={0}
-        y2="100%"
-      />
-      <line
-        stroke="#8E9FBC"
-        x1={-50}
-        x2={-50}
-        y1={0}
-        y2="100%"
-      />
-    </g>
-  </svg>
-</div>
+    <line
+      stroke="#ECF1F9"
+      x1="50"
+      x2="50"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="30"
+      x2="30"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="10"
+      x2="10"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="-10"
+      x2="-10"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="-30"
+      x2="-30"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#ECF1F9"
+      x1="-50"
+      x2="-50"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#8E9FBC"
+      x1="-9950"
+      x2="-9950"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#8E9FBC"
+      x1="-10950"
+      x2="-10950"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#8E9FBC"
+      x1="-18950"
+      x2="-18950"
+      y1="0"
+      y2="100%"
+    />
+    <line
+      stroke="#8E9FBC"
+      x1="-50"
+      x2="-50"
+      y1="0"
+      y2="100%"
+    />
+  </g>
+</svg>
 `;

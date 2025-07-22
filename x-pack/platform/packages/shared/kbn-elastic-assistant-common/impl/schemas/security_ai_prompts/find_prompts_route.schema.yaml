@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: Get Security AI Prompt endpoint
+  version: '2023-10-31'
+paths:
+  /api/security_ai_assistant/security_ai_prompts/_find:
+    get:
+      x-codegen-enabled: true
+      x-internal: true
+      x-labels: [ess, serverless]
+      operationId: FindSecurityAIPrompts
+      description: Gets Security AI prompts
+      summary: Gets Security AI prompts
+      tags:
+        - Security AI Prompts API
+      parameters:
+        - name: connector_id
+          in: query
+          description: Connector id used for prompt lookup
+          required: false
+          schema:
+            type: string
+        - name: prompt_group_id
+          in: query
+          description: The unique identifier for the prompt group
+          required: true
+          schema:
+            type: string
+        - name: prompt_ids
+          in: query
+          description: Comma-separated list of prompt IDs to retrieve
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prompts:
+                    $ref: './common_attributes.schema.yaml#/components/schemas/PromptItemArray'
+                required:
+                  - prompts
+        '400':
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

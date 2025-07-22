@@ -48,7 +48,7 @@ export const ConfirmPackageInstall = (props: ConfirmPackageInstallProps) => {
       defaultFocusedButton="confirm"
     >
       <EuiCallOut
-        iconType="iInCircle"
+        iconType="info"
         title={
           <FormattedMessage
             id="xpack.fleet.integrations.settings.confirmInstallModal.installCalloutTitle"

@@ -14,8 +14,7 @@
         "none"
       ],
       "ignore_unavailable": "__flag__",
-      "include_defaults": "__flag__",
-      "local": "__flag__"
+      "include_defaults": "__flag__"
     },
     "methods": [
       "GET"
@@ -24,7 +23,7 @@
       "_mapping/field/{fields}",
       "{index}/_mapping/field/{fields}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-get-field-mapping.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-mapping",
     "availability": {
       "stack": true,
       "serverless": false

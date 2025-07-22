@@ -8,6 +8,7 @@
 import { BehaviorSubject, map, merge } from 'rxjs';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import type {
@@ -20,7 +21,7 @@ import type {
 export const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableRuntimeState> = {
   jobIds: 'deepEquality',
   maxSeriesToPlot: 'referenceEquality',
-  severityThreshold: 'referenceEquality',
+  severityThreshold: 'deepEquality',
   selectedEntities: 'deepEquality',
 };
 
@@ -33,7 +34,10 @@ export const initializeAnomalyChartsControls = (
   const maxSeriesToPlot$ = new BehaviorSubject<number>(
     rawState.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
   );
-  const severityThreshold$ = new BehaviorSubject<number | undefined>(rawState.severityThreshold);
+
+  const severityThreshold$ = new BehaviorSubject<SeverityThreshold[] | undefined>(
+    rawState.severityThreshold
+  );
   const selectedEntities$ = new BehaviorSubject<MlEntityField[] | undefined>(
     rawState.selectedEntities
   );
@@ -49,7 +53,7 @@ export const initializeAnomalyChartsControls = (
     }
   };
 
-  const updateSeverityThreshold = (v: number) => severityThreshold$.next(v);
+  const updateSeverityThreshold = (v: SeverityThreshold[]) => severityThreshold$.next(v);
   const updateSelectedEntities = (v: MlEntityField[]) => selectedEntities$.next(v);
   const setInterval = (v: number) => interval$.next(v);
 

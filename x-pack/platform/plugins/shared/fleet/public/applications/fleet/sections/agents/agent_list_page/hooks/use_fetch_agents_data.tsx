@@ -101,6 +101,7 @@ export function useFetchAgentsData() {
 
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
+  const showAgentless = urlParams.showAgentless === 'true';
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
 
@@ -213,6 +214,7 @@ export function useFetchAgentsData() {
               kuery: kuery && kuery !== '' ? kuery : undefined,
               sortField: getSortFieldForAPI(sortField),
               sortOrder,
+              showAgentless,
               showInactive,
               showUpgradeable,
               getStatusSummary: true,
@@ -358,6 +360,7 @@ export function useFetchAgentsData() {
       kuery,
       sortField,
       sortOrder,
+      showAgentless,
       showInactive,
       showUpgradeable,
       fullAgentPolicyFecher,

@@ -13,6 +13,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 export enum RuleAuditAction {
   CREATE = 'rule_create',
   GET = 'rule_get',
+  BULK_GET = 'rule_bulk_get',
   RESOLVE = 'rule_resolve',
   UPDATE = 'rule_update',
   UPDATE_API_KEY = 'rule_update_api_key',
@@ -55,6 +56,7 @@ type VerbsTuple = [string, string, string];
 const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_create: ['create', 'creating', 'created'],
   rule_get: ['access', 'accessing', 'accessed'],
+  rule_bulk_get: ['bulk access', 'bulk accessing', 'bulk accessed'],
   rule_resolve: ['access', 'accessing', 'accessed'],
   rule_update: ['update', 'updating', 'updated'],
   rule_bulk_edit: ['update', 'updating', 'updated'],
@@ -131,6 +133,7 @@ const adHocRunEventVerbs: Record<AdHocRunAuditAction, VerbsTuple> = {
 const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
   rule_create: 'creation',
   rule_get: 'access',
+  rule_bulk_get: 'access',
   rule_resolve: 'access',
   rule_update: 'change',
   rule_bulk_edit: 'change',

@@ -52,6 +52,11 @@ export const openUploadRulesFlyout = () => {
   cy.get(SELECTORS.UPLOAD_RULES_FLYOUT).should('exist');
 };
 
+export const saveDefaultMigrationName = () => {
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).should('exist');
+  cy.get(SELECTORS.MIGRATION_NAME_INPUT).blur();
+};
+
 export const uploadRules = (splunkRulesJSON: object) => {
   cy.get(SELECTORS.UPLOAD_RULES_FILE_PICKER).selectFile({
     contents: Cypress.Buffer.from(JSON.stringify(splunkRulesJSON)),
@@ -89,6 +94,31 @@ export const editTranslatedRuleByRow = (rowNum: number) => {
   cy.get(SELECTORS.TRANSLATED_RULE_DETAILS_FLYOUT).should('be.visible');
 };
 
-export const reprocessFailedRules = () => {
+export const openReprocessDialog = () => {
   cy.get(SELECTORS.REPROCESS_FAILED_RULES_BTN).click();
+};
+
+export const reprocessWithoutPrebuiltRulesMatching = () => {
+  cy.get(SELECTORS.START_MIGRATION_MODAL.MODAL).should('be.visible');
+  cy.get(SELECTORS.START_MIGRATION_MODAL.PREBUILT_RULES_MATCH_SWITCH).should(
+    'have.attr',
+    'aria-checked',
+    'true'
+  );
+  cy.get(SELECTORS.START_MIGRATION_MODAL.PREBUILT_RULES_MATCH_SWITCH).click();
+  cy.get(SELECTORS.START_MIGRATION_MODAL.PREBUILT_RULES_MATCH_SWITCH).should(
+    'have.attr',
+    'aria-checked',
+    'false'
+  );
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
+};
+
+export const renameMigration = (newName: string) => {
+  cy.get(SELECTORS.ONBOARDING_MIGRATION_ACTIONS.OPEN_ACTIONS_MENU).click();
+  cy.get(SELECTORS.ONBOARDING_MIGRATION_ACTIONS.RENAME_BTN).click();
+  cy.get(SELECTORS.ONBOARDING_MIGRATION_ACTIONS.RENAME_INPUT).should('be.visible');
+  cy.get(SELECTORS.ONBOARDING_MIGRATION_ACTIONS.RENAME_INPUT).clear();
+  cy.get(SELECTORS.ONBOARDING_MIGRATION_ACTIONS.RENAME_INPUT).type(newName);
+  cy.get(SELECTORS.ONBOARDING_MIGRATION_ACTIONS.RENAME_CONFIRM).click();
 };

@@ -39,3 +39,5 @@ export { DefaultEditorSize } from './editor_size';
 export const plugin = (context: PluginInitializerContext) => {
   return new VisDefaultEditorPlugin();
 };
+
+export { visEditorSidebarStyles } from './_sidebar.styles';

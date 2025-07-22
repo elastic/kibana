@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
@@ -23,8 +23,12 @@ import {
   useBreadcrumbs,
   useStartServices,
   useIntraAppState,
+  useUrlParams,
+  sendGetAgentTags,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
+
+import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
 import {
@@ -40,6 +44,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const { urlParams } = useUrlParams();
+  const showAgentless = urlParams.showAgentless === 'true';
   const {
     isLoading,
     isInitialRequest,
@@ -60,6 +66,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   const {
     application: { navigateToApp },
+    notifications,
   } = useStartServices();
   const routeState = useIntraAppState<AgentDetailsReassignPolicyAction>();
   const queryParams = new URLSearchParams(useLocation().search);
@@ -71,7 +78,12 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     }
   }, [routeState, navigateToApp]);
 
-  const host = agentData?.item?.local_metadata?.host;
+  const agent =
+    agentData?.item &&
+    (showAgentless || !agentData.item.local_metadata?.host?.hostname?.startsWith('agentless-')) // Hide agentless agents
+      ? agentData.item
+      : null;
+  const host = agent && agent.local_metadata?.host;
 
   const headerLeftContent = useMemo(
     () => (
@@ -108,16 +120,47 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     [host, agentId, getHref, isInitialRequest, isLoading]
   );
 
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
+
+  const [allTags, setAllTags] = useState<string[]>();
+
+  useEffect(() => {
+    // Fetch all tags when the component mounts
+    const fetchTags = async () => {
+      try {
+        const agentTagsResponse = await sendGetAgentTags({
+          showInactive: agent?.status === 'inactive',
+        });
+        if (agentTagsResponse.error) {
+          throw agentTagsResponse.error;
+        }
+        const newAllTags = agentTagsResponse?.data?.items ?? [];
+        setAllTags(newAllTags);
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.agentList.errorFetchingTagsTitle', {
+            defaultMessage: 'Error fetching tags',
+          }),
+        });
+      }
+    };
+
+    if (agent?.active) {
+      fetchTags();
+    }
+  }, [setAllTags, notifications, agent]);
+
   const headerRightContent = useMemo(
     () =>
-      agentData && agentData.item ? (
+      agent ? (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" direction="row">
             {!isAgentPolicyLoading && (
               <EuiFlexItem grow={false}>
                 <AgentDetailsActionMenu
-                  agent={agentData.item}
+                  agent={agent}
                   agentPolicy={agentPolicyData?.item}
                   assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
                   onCancelReassign={
@@ -125,6 +168,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                       ? reassignCancelClickHandler
                       : undefined
                   }
+                  onAddRemoveTagsClick={(button) => {
+                    setTagsPopoverButton(button);
+                    setShowTagsAddRemove(!showTagsAddRemove);
+                  }}
                 />
               </EuiFlexItem>
             )}
@@ -199,8 +246,27 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             }
             error={error}
           />
-        ) : agentData && agentData.item ? (
-          <AgentDetailsPageContent agent={agentData.item} agentPolicy={agentPolicyData?.item} />
+        ) : agent ? (
+          <>
+            <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
+            {showTagsAddRemove && (
+              <TagsAddRemove
+                agentId={agent?.id!}
+                allTags={allTags ?? []}
+                selectedTags={agent?.tags ?? []}
+                button={tagsPopoverButton!}
+                onTagsUpdated={(tagsToAdd: string[]) => {
+                  sendAgentRequest();
+                  if (tagsToAdd.length > 0) {
+                    setAllTags([...new Set([...(allTags ?? []), ...tagsToAdd])].sort());
+                  }
+                }}
+                onClosePopover={() => {
+                  setShowTagsAddRemove(false);
+                }}
+              />
+            )}
+          </>
         ) : (
           <Error
             title={

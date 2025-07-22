@@ -8,12 +8,11 @@
 import assert from 'assert';
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { abortSignalToPromise, AbortError } from '@kbn/kibana-utils-plugin/server';
-import type { RunnableConfig } from '@langchain/core/runnables';
-import type { ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { type ElasticRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type { MigrateRuleState } from './agent/types';
+import type { MigrateRuleGraphConfig, MigrateRuleState } from './agent/types';
 import { getRuleMigrationAgent } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
 import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
@@ -22,6 +21,7 @@ import { generateAssistantComment } from './util/comments';
 import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import { ActionsClientChat } from './util/actions_client_chat';
 import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
+import { nullifyElasticRule } from './util/nullify_missing_properties';
 
 /** Number of concurrent rule translations in the pool */
 const TASK_CONCURRENCY = 10 as const;
@@ -120,7 +120,7 @@ export class RuleMigrationTaskRunner {
     await this.retriever.initialize();
   }
 
-  public async run(invocationConfig: RunnableConfig): Promise<void> {
+  public async run(invocationConfig: MigrateRuleGraphConfig): Promise<void> {
     assert(this.telemetry, 'telemetry is missing please call setup() first');
     const { telemetry, migrationId } = this;
 
@@ -175,8 +175,8 @@ export class RuleMigrationTaskRunner {
               await this.saveRuleCompleted(ruleMigration, migrationResult);
               ruleTranslationTelemetry.success(migrationResult);
             } catch (error) {
-              if (error instanceof AbortError) {
-                throw error;
+              if (this.abortController.signal.aborted) {
+                throw new AbortError();
               }
               ruleTranslationTelemetry.failure(error);
               await this.saveRuleFailed(ruleMigration, error);
@@ -196,11 +196,11 @@ export class RuleMigrationTaskRunner {
     } catch (error) {
       await this.data.rules.releaseProcessing(migrationId);
 
-      migrationTaskTelemetry.failure(error);
       if (error instanceof AbortError) {
+        migrationTaskTelemetry.aborted(error);
         this.logger.info('Abort signal received, stopping migration');
-        return;
       } else {
+        migrationTaskTelemetry.failure(error);
         throw new Error(`Error processing migration: ${error}`);
       }
     } finally {
@@ -208,19 +208,18 @@ export class RuleMigrationTaskRunner {
     }
   }
 
-  protected createMigrateRuleTask(invocationConfig: RunnableConfig) {
+  protected createMigrateRuleTask(invocationConfig?: MigrateRuleGraphConfig) {
     assert(this.agent, 'agent is missing please call setup() first');
     const { agent } = this;
-    const config: RunnableConfig = {
+    const config: MigrateRuleGraphConfig = {
       timeout: AGENT_INVOKE_TIMEOUT_MIN * 60 * 1000, // milliseconds timeout
-      // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
       ...invocationConfig,
+      signal: this.abortController.signal,
     };
 
-    const invoke = async (input: RuleMigrationInput): Promise<MigrateRuleState> => {
-      // using withAbort in the agent invocation is not ideal but is a workaround for the issue with the langGraph signal not working properly
-      return this.withAbort<MigrateRuleState>(agent.invoke(input, config));
-    };
+    // Prepare the invocation with specific config
+    const invoke = async (input: RuleMigrationInput): Promise<MigrateRuleState> =>
+      agent.invoke(input, config);
 
     // Invokes the rule translation with exponential backoff, should be called only when the rate limit has been hit
     const invokeWithBackoff = async (
@@ -339,9 +338,13 @@ export class RuleMigrationTaskRunner {
     migrationResult: MigrateRuleState
   ) {
     this.logger.debug(`Translation of rule "${ruleMigration.id}" succeeded`);
+    const nullifiedElasticRule = nullifyElasticRule(
+      migrationResult.elastic_rule as ElasticRule,
+      this.logger.error
+    );
     const ruleMigrationTranslated = {
       ...ruleMigration,
-      elastic_rule: migrationResult.elastic_rule as ElasticRule,
+      elastic_rule: nullifiedElasticRule as ElasticRule,
       translation_result: migrationResult.translation_result,
       comments: migrationResult.comments,
     };

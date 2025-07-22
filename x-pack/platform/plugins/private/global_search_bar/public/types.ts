@@ -9,7 +9,6 @@ import { UiCounterMetricType } from '@kbn/analytics';
 
 /* @internal */
 export enum CountMetric {
-  UNHANDLED_ERROR = 'unhandled_error',
   SHORTCUT_USED = 'shortcut_used',
   SEARCH_FOCUS = 'search_focus',
   SEARCH_REQUEST = 'search_request',
@@ -26,7 +25,6 @@ export enum EventMetric {
   CLICK_APPLICATION = 'global_search_bar_click_application',
   CLICK_SAVED_OBJECT = 'global_search_bar_click_saved_object',
   SEARCH_BLUR = 'global_search_bar_blur',
-  ERROR = 'global_search_bar_error',
 }
 
 /* @internal */
@@ -36,7 +34,6 @@ export enum FieldType {
   FOCUS_TIME = 'focus_time_ms',
   SELECTED_LABEL = 'selected_label',
   SELECTED_RANK = 'selected_rank',
-  ERROR_MESSAGE = 'error_message',
   TERMS = 'terms',
 }
 
@@ -60,11 +57,6 @@ export interface TrackedSavedObjectClick {
   searchValue: string;
   selectedLabel: string | null;
   selectedRank: number | null;
-}
-/* @internal */
-export interface TrackedError {
-  message: string | Error;
-  searchValue?: string;
 }
 
 export interface GlobalSearchBarConfigType {

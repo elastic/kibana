@@ -231,7 +231,7 @@ export class EncryptedSavedObjectsService {
    * Takes saved object attributes for the specified type and, depending on the type definition,
    * either strips encrypted attributes, replaces with original decrypted value if available, or
    * prepares them for decryption.
-   * @private
+   * @internal
    */
   private prepareAttributesForStripOrDecrypt<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,

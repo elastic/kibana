@@ -9,7 +9,7 @@
 
 import type { DataViewFieldBase, DataViewBase, TimeRange, Filter } from '@kbn/es-query';
 import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { newSession$ } from './new_session';
 
 describe('newSession$', () => {
@@ -47,6 +47,21 @@ describe('newSession$', () => {
 
       let count = 0;
       const subscription = newSession$(api).subscribe(() => {
+        count++;
+      });
+
+      filters$.next([toggleFilterNegated(existsFilter)]);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(count).toBe(1);
+      subscription.unsubscribe();
+    });
+
+    test('should fire on filter change when reload has not yet been called', async () => {
+      const reloadApi = { ...api, reload$: new Observable<void>() };
+      filters$.next([existsFilter]);
+
+      let count = 0;
+      const subscription = newSession$(reloadApi).subscribe(() => {
         count++;
       });
 

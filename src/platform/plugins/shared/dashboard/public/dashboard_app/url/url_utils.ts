@@ -7,72 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { serializeRuntimeState } from '@kbn/controls-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { History } from 'history';
-import _ from 'lodash';
 import { skip } from 'rxjs';
-import semverSatisfies from 'semver/functions/satisfies';
-import type { DashboardPanelMap } from '../../../common/dashboard_container/types';
-import { convertPanelsArrayToPanelMap } from '../../../common/lib/dashboard_panel_converters';
-import type { DashboardState, SharedDashboardState } from '../../../common/types';
-import type { DashboardPanel } from '../../../server/content_management';
-import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
+import type { DashboardState } from '../../../common/types';
 import { DashboardApi } from '../../dashboard_api/types';
-import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
-import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
-import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
-
-const panelIsLegacy = (panel: unknown): panel is SavedDashboardPanel => {
-  return (panel as SavedDashboardPanel).embeddableConfig !== undefined;
-};
-
-/**
- * We no longer support loading panels from a version older than 7.3 in the URL.
- * @returns whether or not there is a panel in the URL state saved with a version before 7.3
- */
-export const isPanelVersionTooOld = (panels: DashboardPanel[] | SavedDashboardPanel[]) => {
-  for (const panel of panels) {
-    if (
-      !panel.gridData ||
-      !((panel as DashboardPanel).panelConfig || (panel as SavedDashboardPanel).embeddableConfig) ||
-      (panel.version && semverSatisfies(panel.version, '<7.3'))
-    )
-      return true;
-  }
-  return false;
-};
-
-function getPanelsMap(panels?: DashboardPanel[]): DashboardPanelMap | undefined {
-  if (!panels) {
-    return undefined;
-  }
-
-  if (panels.length === 0) {
-    return {};
-  }
-
-  if (isPanelVersionTooOld(panels)) {
-    coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
-    return undefined;
-  }
-
-  // convert legacy embeddableConfig keys to panelConfig
-  const standardizedPanels = panels.map((panel) => {
-    if (panelIsLegacy(panel)) {
-      const { embeddableConfig, ...rest } = panel;
-      return {
-        ...rest,
-        panelConfig: embeddableConfig,
-      };
-    }
-    return panel;
-  });
-
-  return convertPanelsArrayToPanelMap(standardizedPanels);
-}
+import { extractDashboardState } from './bwc/extract_dashboard_state';
 
 /**
  * Loads any dashboard state from the URL, and removes the state from the URL.
@@ -80,31 +22,18 @@ function getPanelsMap(panels?: DashboardPanel[]): DashboardPanelMap | undefined 
 export const loadAndRemoveDashboardState = (
   kbnUrlStateStorage: IKbnUrlStateStorage
 ): Partial<DashboardState> => {
-  const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
-    DASHBOARD_STATE_STORAGE_KEY
-  );
+  const rawAppStateInUrl = kbnUrlStateStorage.get<unknown>(DASHBOARD_STATE_STORAGE_KEY);
 
   if (!rawAppStateInUrl) return {};
 
-  const panelsMap = getPanelsMap(rawAppStateInUrl.panels);
-
+  // clear application state from URL
   const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
     return hashQuery;
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
-  const partialState: Partial<DashboardState> = {
-    ..._.omit(rawAppStateInUrl, ['controlGroupState', 'panels', 'query']),
-    ...(rawAppStateInUrl.controlGroupState
-      ? {
-          controlGroupInput: serializeRuntimeState(rawAppStateInUrl.controlGroupState).rawState,
-        }
-      : {}),
-    ...(panelsMap ? { panels: panelsMap } : {}),
-    ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),
-  };
 
-  return partialState;
+  return extractDashboardState(rawAppStateInUrl);
 };
 
 export const startSyncingExpandedPanelState = ({

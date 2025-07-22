@@ -1113,7 +1113,7 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
   prebuiltMatch: boolean;
   eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.TranslationSucess,
+  eventType: SiemMigrationsEventTypes.TranslationSuccess,
   schema: {
     eventName: {
       type: 'keyword',
@@ -1339,6 +1339,70 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
   },
 };
 
+export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
+  model: string;
+  reason: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.MigrationAborted,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    reason: {
+      type: 'keyword',
+      _meta: {
+        description: 'The reason of the migration abort',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
 export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   model: string;
   error: string;
@@ -1415,6 +1479,7 @@ export const events = [
   TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
+  SIEM_MIGRATIONS_MIGRATION_ABORTED,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
   SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
   SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,

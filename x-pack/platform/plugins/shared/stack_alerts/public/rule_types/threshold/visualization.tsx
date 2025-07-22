@@ -289,6 +289,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
                 <LineSeries
                   key={key}
                   id={key}
+                  // Defaults to multi layer time axis as of Elastic Charts v70
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   data={visualizationData[key]}

@@ -13,7 +13,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
@@ -57,7 +56,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
       order: 1000,
       mount: (container) => {
         ReactDOM.render(
-          <KibanaRenderContextProvider {...core}>
+          core.rendering.addContext(
             <SearchBar
               globalSearch={{ ...globalSearch, searchCharLimit: this.config.input_max_limit }}
               navigateToUrl={application.navigateToUrl}
@@ -66,7 +65,7 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
               chromeStyle$={core.chrome.getChromeStyle$()}
               reportEvent={reportEvent}
             />
-          </KibanaRenderContextProvider>,
+          ),
           container
         );
 

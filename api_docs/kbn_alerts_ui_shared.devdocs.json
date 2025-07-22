@@ -817,6 +817,68 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.useFetchActiveMaintenanceWindows",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchActiveMaintenanceWindows",
+        "description": [],
+        "signature": [
+          "({ http, notifications: { toasts } }: ",
+          "KibanaServices",
+          ", { enabled }: Pick<",
+          "UseQueryOptions",
+          "<unknown, unknown, unknown, ",
+          "QueryKey",
+          ">, \"enabled\">) => ",
+          "UseQueryResult",
+          "<",
+          "MaintenanceWindow",
+          "[], Error>"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/maintenance_window_callout/use_fetch_active_maintenance_windows.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.useFetchActiveMaintenanceWindows.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ http, notifications: { toasts } }",
+            "description": [],
+            "signature": [
+              "KibanaServices"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/maintenance_window_callout/use_fetch_active_maintenance_windows.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.useFetchActiveMaintenanceWindows.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ enabled }",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "UseQueryOptions",
+              "<unknown, unknown, unknown, ",
+              "QueryKey",
+              ">, \"enabled\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/maintenance_window_callout/use_fetch_active_maintenance_windows.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.useFetchAlertsIndexNamesQuery",
         "type": "Function",
         "tags": [
@@ -1860,6 +1922,20 @@
             "tags": [],
             "label": "selectMessage",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.ActionTypeModel.selectMessagePreconfigured",
+            "type": "string",
+            "tags": [],
+            "label": "selectMessagePreconfigured",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResolvedSimpleSavedObject, SavedObject } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse, SavedObject } from '@kbn/core-saved-objects-api-server';
 import {
   API_ROUTE_SHAREABLE_ZIP,
   API_ROUTE_TEMPLATES,
@@ -31,9 +31,9 @@ export interface TemplateFindResponse {
 
 export interface ResolveWorkpadResponse {
   workpad: CanvasWorkpad;
-  outcome: ResolvedSimpleSavedObject['outcome'];
-  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 /*

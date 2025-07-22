@@ -131,7 +131,7 @@ describe('<KibanaSectionErrorBoundary>', () => {
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
       new Error('This is an error to show the test user!'),
-      { labels: { errorType: 'SectionFatalReactError' } }
+      { labels: { error_type: 'SectionFatalReactError' } }
     );
   });
 });

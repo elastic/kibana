@@ -1,0 +1,25 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/file-upload-plugin",
+    "@kbn/file-upload-common",
+    "@kbn/index-management-shared-types",
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
+  ]
+}

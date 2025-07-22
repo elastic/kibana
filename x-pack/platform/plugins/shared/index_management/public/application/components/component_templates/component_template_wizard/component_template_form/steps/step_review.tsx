@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { DataStreamOptions } from '../../../../../../../common/types/data_streams';
 import {
   ComponentTemplateDeserialized,
   serializers,
@@ -52,16 +53,18 @@ interface Props {
   componentTemplate: ComponentTemplateDeserialized;
   dataStreams?: string[];
   canRollover?: boolean;
+  dataStreamOptions?: DataStreamOptions;
 }
 
 export const StepReview: React.FunctionComponent<Props> = React.memo(
-  ({ dataStreams, canRollover, componentTemplate }) => {
+  ({ dataStreams, canRollover, componentTemplate, dataStreamOptions }) => {
     const { name } = componentTemplate;
 
     const serializedComponentTemplate = serializeComponentTemplate(
       stripEmptyFields(componentTemplate, {
         types: ['string'],
-      }) as ComponentTemplateDeserialized
+      }) as ComponentTemplateDeserialized,
+      dataStreamOptions
     );
 
     const {

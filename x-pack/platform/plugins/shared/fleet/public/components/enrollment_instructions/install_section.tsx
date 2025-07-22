@@ -7,11 +7,6 @@
 
 import React from 'react';
 
-import type { EuiSwitchProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiIcon, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
-
 import type { CommandsByPlatform } from '../../applications/fleet/components/fleet_server_instructions/utils';
 
 import { InstallationMessage } from '../agent_enrollment_flyout/installation_message';
@@ -32,8 +27,6 @@ interface Props {
   isManaged?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
-  showCompleteAgentInstructions: boolean;
-  onChangeShowCompleteAgentInstructions: EuiSwitchProps['onChange'];
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({
@@ -46,26 +39,12 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   isManaged = true,
   onCopy,
   rootIntegrations,
-  showCompleteAgentInstructions,
-  onChangeShowCompleteAgentInstructions,
 }) => {
   return (
     <>
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
       <RootPrivilegesCallout rootIntegrations={rootIntegrations} />
       <UnprivilegedInfo />
-      <EuiFlexGroup gutterSize="xs">
-        <EuiSwitch
-          label={addElasticAgentCompleteLabel}
-          checked={showCompleteAgentInstructions}
-          onChange={onChangeShowCompleteAgentInstructions}
-          compressed
-        />
-        <EuiToolTip position="top" content={addElasticAgentCompleteTooltipContent}>
-          <EuiIcon tabIndex={0} type="iInCircle" />
-        </EuiToolTip>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
       <PlatformSelector
         fullCopyButton={fullCopyButton}
         onCopy={onCopy}
@@ -80,17 +59,3 @@ export const InstallSection: React.FunctionComponent<Props> = ({
     </>
   );
 };
-
-const addElasticAgentCompleteLabel = i18n.translate(
-  'xpack.fleet.enrollmentInstructions.completeAgent.label',
-  {
-    defaultMessage: 'Use the elastic-agent-complete docker image',
-  }
-);
-
-const addElasticAgentCompleteTooltipContent = i18n.translate(
-  'xpack.fleet.enrollmentInstructions.completeAgent.tooltip',
-  {
-    defaultMessage: 'Required to run Synthetics browser tests',
-  }
-);

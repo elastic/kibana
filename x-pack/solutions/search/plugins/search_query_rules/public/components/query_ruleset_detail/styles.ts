@@ -31,7 +31,7 @@ export const DocumentCountLabelStyle = (theme: EuiThemeComputed<{}>) =>
 
 export const DraggableListHeader = (theme: EuiThemeComputed<{}>) =>
   css({
-    padding: `0 ${theme.base * 2.25}px 0 ${theme.base * 3.5}px`,
+    padding: `0 ${theme.base * 2.25}px 0 ${theme.base * 1.5}px`,
   });
 
 export const ActionHeaderContainer = (theme: EuiThemeComputed<{}>) =>
@@ -43,4 +43,20 @@ export const ActionHeaderContainer = (theme: EuiThemeComputed<{}>) =>
 export const DroppableContainer = (theme: EuiThemeComputed<{}>) =>
   css({
     backgroundColor: theme.colors.backgroundBaseSubdued,
+  });
+
+export const QueryRuleFlyoutBody = css({
+  '.euiFlyoutBody__overflowContent': {
+    height: '100%',
+    padding: 0,
+  },
+});
+
+export const QueryRuleFlyoutPanel = css({
+  height: '100%',
+});
+
+export const QueryRuleFlyoutRightPanel = (theme: EuiThemeComputed<{}>) =>
+  css({
+    borderLeft: `1px solid ${theme.colors.lightShade}`,
   });

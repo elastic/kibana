@@ -16,13 +16,14 @@ import { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
   FindingMisconfigurationFlyoutContentProps,
   FindingMisconfigurationFlyoutFooterProps,
-  FindingVulnerabilityFlyoutProps,
   FindingsVulnerabilityFlyoutContentProps,
   FindingsVulnerabilityFlyoutFooterProps,
   FindingsVulnerabilityFlyoutHeaderProps,
   FindingsMisconfigurationFlyoutContentProps,
   FindingsMisconfigurationFlyoutHeaderProps,
   FindingsMisconfigurationPanelExpandableFlyoutProps,
+  FindingsVulnerabilityPanelExpandableFlyoutProps,
+  FindingVulnerabilityFullFlyoutContentProps,
 } from '@kbn/cloud-security-posture';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
@@ -57,7 +58,11 @@ export interface CspClientPluginStart {
     Footer: React.FC<FindingMisconfigurationFlyoutFooterProps>;
   };
   getCloudSecurityPostureVulnerabilityFlyout: () => {
-    Component: React.FC<FindingVulnerabilityFlyoutProps>;
+    Component: React.FC<
+      FindingsVulnerabilityPanelExpandableFlyoutProps['params'] & {
+        children?: (props: FindingVulnerabilityFullFlyoutContentProps) => ReactNode;
+      }
+    >;
     Header: React.FC<FindingsVulnerabilityFlyoutHeaderProps>;
     Body: React.FC<FindingsVulnerabilityFlyoutContentProps>;
     Footer: React.FC<FindingsVulnerabilityFlyoutFooterProps>;

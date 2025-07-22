@@ -63,10 +63,8 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: query.filter
-              ? `${decodeURIComponent(
-                  query.filter
-                )} and not (prompt_type: "system" and is_default: true)`
-              : 'not (prompt_type: "system" and is_default: true)',
+              ? `${decodeURIComponent(query.filter)} and not (is_default: true)`
+              : 'not (is_default: true)',
             fields: query.fields,
           });
 

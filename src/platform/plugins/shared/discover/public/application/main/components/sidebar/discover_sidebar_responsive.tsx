@@ -21,6 +21,7 @@ import {
   UnifiedFieldListSidebarContainer,
   type UnifiedFieldListSidebarContainerProps,
   type UnifiedFieldListSidebarContainerApi,
+  type UnifiedFieldListRestorableState,
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
@@ -37,9 +38,14 @@ import {
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useDataViewsForPicker } from '../../state_management/redux';
+import {
+  internalStateActions,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useDataViewsForPicker,
+  useInternalStateDispatch,
+} from '../../state_management/redux';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -319,7 +325,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
-  const additionalFieldGroups = useAdditionalFieldGroups();
   const CustomDataViewPicker = searchBarCustomization?.CustomDataViewPicker;
 
   const createField = unifiedFieldListSidebarContainerApi?.createField;
@@ -382,6 +387,20 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     });
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
+  const dispatch = useInternalStateDispatch();
+  const fieldListUiState = useCurrentTabSelector((state) => state.uiState.fieldList);
+  const setFieldListUiState = useCurrentTabAction(internalStateActions.setFieldListUiState);
+  const onInitialStateChange = useCallback(
+    (newFieldListUiState: Partial<UnifiedFieldListRestorableState>) => {
+      dispatch(
+        setFieldListUiState({
+          fieldListUiState: newFieldListUiState,
+        })
+      );
+    },
+    [dispatch, setFieldListUiState]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -394,7 +413,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiFlexItem>
         {selectedDataView ? (
           <UnifiedFieldListSidebarContainer
-            additionalFieldGroups={additionalFieldGroups}
             additionalFilters={additionalFilters}
             allFields={sidebarState.allFields}
             dataView={selectedDataView}
@@ -412,6 +430,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             trackUiMetric={trackUiMetric}
             variant={fieldListVariant}
             workspaceSelectedFieldNames={columns}
+            initialState={fieldListUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         ) : null}
       </EuiFlexItem>

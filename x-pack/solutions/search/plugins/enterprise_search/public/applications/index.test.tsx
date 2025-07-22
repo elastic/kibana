@@ -24,11 +24,11 @@ import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
+import { searchNavigationMock } from '@kbn/search-navigation/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { EnterpriseSearchOverview } from './enterprise_search_overview';
 import { KibanaLogic } from './shared/kibana';
 
 import { renderApp, renderHeaderActions } from '.';
@@ -48,6 +48,7 @@ describe('renderApp', () => {
       lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
       navigation: navigationPluginMock.createStartContract(),
+      searchNavigation: searchNavigationMock.createStart(),
       security: securityMock.createStart(),
       share: sharePluginMock.createStartContract(),
       ml: mlPluginMock.createStartContract(),
@@ -89,21 +90,6 @@ describe('renderApp', () => {
   const mount = (App: React.FC) => {
     unmount = renderApp(App, kibanaDeps, pluginData);
   };
-
-  describe('Enterprise Search apps', () => {
-    afterEach(() => {
-      act(() => {
-        unmount();
-      });
-    });
-
-    it('renders EnterpriseSearchOverview', () => {
-      act(() => {
-        mount(EnterpriseSearchOverview);
-      });
-      expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
-    });
-  });
 
   describe('renderHeaderActions', () => {
     const mockHeaderEl = document.createElement('header');

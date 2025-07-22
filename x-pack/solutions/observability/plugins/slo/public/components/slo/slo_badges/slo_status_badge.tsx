@@ -77,14 +77,11 @@ export function SloStatusBadge({ slo, isLoading }: SloStatusProps) {
 
       {slo.summary.errorBudget.isEstimated && (
         <EuiFlexItem grow={false}>
-          {/* Prevent badges from growing when inside an EuiFlexGroup by wrapping content with div */}
-          <div>
-            <EuiBadge color="default">
-              {i18n.translate('xpack.slo.sloStatusBadge.forecasted', {
-                defaultMessage: 'Forecasted',
-              })}
-            </EuiBadge>
-          </div>
+          <EuiBadge color="default">
+            {i18n.translate('xpack.slo.sloStatusBadge.forecasted', {
+              defaultMessage: 'Forecasted',
+            })}
+          </EuiBadge>
         </EuiFlexItem>
       )}
     </>

@@ -131,7 +131,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       dataType: 'number',
       operationType: COUNT_ID,
       isBucketed: false,
-      scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),
@@ -191,7 +190,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     return field?.format ?? { id: 'number' };
   },
   toESQL: (column, columnId, indexPattern) => {
-    if (column.params?.emptyAsNull === false || column.timeShift || column.filter) return;
+    if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
     let esql = '';

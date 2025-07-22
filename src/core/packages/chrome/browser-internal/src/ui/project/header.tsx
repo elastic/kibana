@@ -39,7 +39,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { debounceTime, Observable } from 'rxjs';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
-import { useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
@@ -114,10 +113,10 @@ const headerStrings = {
 };
 
 export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isServerless'> {
-  headerBanner$: Observable<ChromeUserBanner | undefined>;
+  headerBanner$?: Observable<ChromeUserBanner | undefined> | null;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-  actionMenu$: Observable<MountPoint | undefined>;
+  actionMenu$?: Observable<MountPoint | undefined> | null;
   docLinks: DocLinksStart;
   children: React.ReactNode;
   customBranding$: Observable<CustomBranding>;
@@ -135,6 +134,8 @@ export interface Props extends Pick<ComponentProps<typeof HeaderHelpMenu>, 'isSe
   prependBasePath: (url: string) => string;
   isSideNavCollapsed$: Observable<boolean>;
   toggleSideNav: (isCollapsed: boolean) => void;
+  isFixed?: boolean;
+  as?: 'div' | 'header';
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -232,12 +233,15 @@ export const ProjectHeader = ({
   customBranding$,
   isServerless,
   breadcrumbsAppendExtensions$,
+  isFixed = true,
+  as = 'header',
   ...observables
 }: Props) => {
-  const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
+
+  const HeaderElement = as === 'header' ? 'header' : 'div';
 
   return (
     <>
@@ -248,19 +252,21 @@ export const ProjectHeader = ({
       />
       <SkipToMainContent />
 
-      <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header data-test-subj="kibanaProjectHeader">
+      {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
+      <HeaderElement data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
-          <EuiHeader position="fixed" className="header__firstBar">
+          <EuiHeader position={isFixed ? 'fixed' : 'static'} className="header__firstBar">
             <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
-              <Router history={application.history}>
-                <ProjectNavigation
-                  isSideNavCollapsed$={observables.isSideNavCollapsed$}
-                  toggleSideNav={toggleSideNav}
-                >
-                  {children}
-                </ProjectNavigation>
-              </Router>
+              {children && (
+                <Router history={application.history}>
+                  <ProjectNavigation
+                    isSideNavCollapsed$={observables.isSideNavCollapsed$}
+                    toggleSideNav={toggleSideNav}
+                  >
+                    {children}
+                  </ProjectNavigation>
+                </Router>
+              )}
 
               <EuiHeaderSectionItem>
                 <Logo
@@ -324,10 +330,10 @@ export const ProjectHeader = ({
             </EuiHeaderSection>
           </EuiHeader>
         </div>
-      </header>
+      </HeaderElement>
 
-      {headerActionMenuMounter.mount && (
-        <AppMenuBar headerActionMenuMounter={headerActionMenuMounter} />
+      {observables.actionMenu$ && (
+        <AppMenuBar appMenuActions$={observables.actionMenu$} isFixed={true} />
       )}
     </>
   );

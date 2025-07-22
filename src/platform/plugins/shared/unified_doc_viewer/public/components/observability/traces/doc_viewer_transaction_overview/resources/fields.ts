@@ -25,3 +25,5 @@ export const transactionFields = [
 ];
 
 export const transactionTraceFields = [TRACE_ID_FIELD];
+
+export const allTransactionFields = [...transactionFields, ...transactionTraceFields];

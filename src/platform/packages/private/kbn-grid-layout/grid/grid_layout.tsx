@@ -198,6 +198,7 @@ export const GridLayout = ({
     <GridLayoutContext.Provider value={memoizedContext}>
       <GridHeightSmoother>
         <div
+          data-test-subj="kbnGridLayout"
           ref={(divElement) => {
             layoutRef.current = divElement;
             setDimensionsRef(divElement);

@@ -21,10 +21,14 @@ import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/component
 import { useNonClosedAlerts } from '../hooks/use_non_closed_alerts';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
-export type CloudPostureEntityIdentifier = Extract<
-  EntityIdentifierFields,
-  EntityIdentifierFields.hostName | EntityIdentifierFields.userName
->;
+export type CloudPostureEntityIdentifier =
+  | Extract<
+      EntityIdentifierFields,
+      | EntityIdentifierFields.hostName
+      | EntityIdentifierFields.userName
+      | EntityIdentifierFields.generic
+    >
+  | 'related.entity'; // related.entity is not an entity identifier field, but it includes entity ids which we use to filter for related entities
 
 export const EntityInsight = <T,>({
   value,

@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const playgroundAttributesSchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ minLength: 1, maxLength: 50 }),
   // Common fields
   indices: schema.arrayOf(schema.string(), { minSize: 1 }),
   queryFields: schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })),

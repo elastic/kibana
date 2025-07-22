@@ -10,6 +10,11 @@
         "-1",
         "0"
       ],
+      "keep_alive": [
+        "5d",
+        "-1",
+        "0"
+      ],
       "keep_on_completion": "__flag__",
       "allow_no_indices": "__flag__",
       "allow_partial_search_results": "__flag__",
@@ -80,7 +85,7 @@
       "_async_search",
       "{index}/_async_search"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/async-search.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-async-search-submit",
     "availability": {
       "stack": true,
       "serverless": true

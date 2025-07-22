@@ -37,7 +37,11 @@ export function FilterExpanded(props: FilterProps) {
   return (
     <EuiPopover
       button={
-        <EuiFilterButton onClick={() => setIsOpen((prevState) => !prevState)} iconType="arrowDown">
+        <EuiFilterButton
+          onClick={() => setIsOpen((prevState) => !prevState)}
+          iconType="arrowDown"
+          isSelected={isOpen}
+        >
           {props.label}
         </EuiFilterButton>
       }

@@ -110,6 +110,7 @@ export const GridSectionTitle = React.memo(
             size="m"
             id={`kbnGridSectionTitle-${sectionId}`}
             aria-controls={`kbnGridSection-${sectionId}`}
+            aria-expanded={!currentSection?.isCollapsed}
             data-test-subj={`kbnGridSectionTitle-${sectionId}`}
             textProps={false}
             className={'kbnGridSectionTitle--button'}

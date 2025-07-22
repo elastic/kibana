@@ -33,6 +33,9 @@ import {
   XYChartSeriesIdentifier,
   Tooltip,
   LegendValue,
+  PointStyle,
+  AreaSeriesStyle,
+  LineSeriesStyle,
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -59,7 +62,12 @@ import {
   sampleLayer,
 } from '../../common/__mocks__';
 import { XYChart, XYChartRenderProps } from './xy_chart';
-import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
+import {
+  ExtendedDataLayerConfig,
+  XYProps,
+  AnnotationLayerConfigResult,
+  PointVisibility,
+} from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
@@ -147,7 +155,6 @@ describe('XYChart component', () => {
       syncColors: false,
       syncTooltips: false,
       syncCursor: true,
-      useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
       renderComplete: jest.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
@@ -324,7 +331,8 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(0);
+        // This prop is no longer set, since v70 Elastic Charts takes care of this internally.
+        expect(axisStyle).toBe(undefined);
       });
       test('it should enable the new time axis for a line time layer when isHistogram is set to true', () => {
         const timeLayerArgs = createArgsWithLayers([defaultTimeLayer]);
@@ -344,7 +352,8 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(2);
+        // This prop is no longer set, since v70 Elastic Charts takes care of this internally.
+        expect(axisStyle).toBe(undefined);
       });
       test('it should disable the new time axis for a vertical bar with break down dimension', () => {
         const timeLayer: DataLayerConfig = {
@@ -368,7 +377,8 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(0);
+        // This prop is no longer set, since v70 Elastic Charts takes care of this internally.
+        expect(axisStyle).toBe(undefined);
       });
 
       test('it should enable the new time axis for a stacked vertical bar with break down dimension', () => {
@@ -394,7 +404,8 @@ describe('XYChart component', () => {
 
         const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
 
-        expect(axisStyle).toBe(2);
+        // This prop is no longer set, since v70 Elastic Charts takes care of this internally.
+        expect(axisStyle).toBe(undefined);
       });
     });
     describe('endzones', () => {
@@ -847,31 +858,59 @@ describe('XYChart component', () => {
     expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
   });
 
-  test('applies showPoints to the chart', () => {
-    const checkIfPointsVisibilityIsApplied = (showPoints: boolean) => {
+  describe('point visibility in line/area chart', () => {
+    const getAreaLinePointStyles = ({
+      pointVisibility,
+      showPoints,
+    }: {
+      pointVisibility?: PointVisibility;
+      showPoints?: boolean;
+    }) => {
       const { args } = sampleArgs();
       const component = shallow(
         <XYChart
           {...defaultProps}
           args={{
             ...args,
+            pointVisibility,
             layers: [{ ...(args.layers[0] as DataLayerConfig), showPoints }],
           }}
         />
       );
       const dataLayers = component.find(DataLayers).dive();
       const lineArea = dataLayers.find(LineSeries).at(0);
-      const expectedSeriesStyle = expect.objectContaining({
-        point: expect.objectContaining({
-          visible: showPoints ? 'always' : 'auto',
-        }),
-      });
-      expect(lineArea.prop('areaSeriesStyle')).toEqual(expectedSeriesStyle);
-      expect(lineArea.prop('lineSeriesStyle')).toEqual(expectedSeriesStyle);
+      return {
+        areaPointStyle: (lineArea.prop('areaSeriesStyle') as AreaSeriesStyle).point as PointStyle,
+        linePointStyle: (lineArea.prop('lineSeriesStyle') as LineSeriesStyle).point as PointStyle,
+      };
     };
 
-    checkIfPointsVisibilityIsApplied(true);
-    checkIfPointsVisibilityIsApplied(false);
+    test(`should be 'auto' when pointVisibility is 'auto'`, () => {
+      const { areaPointStyle, linePointStyle } = getAreaLinePointStyles({
+        pointVisibility: 'auto',
+      });
+
+      expect(areaPointStyle.visible).toBe('auto');
+      expect(linePointStyle.visible).toBe('auto');
+    });
+
+    test(`should be 'always' when pointVisibility is undefined and showPoints is 'true'`, () => {
+      const { areaPointStyle, linePointStyle } = getAreaLinePointStyles({
+        showPoints: true,
+      });
+
+      expect(areaPointStyle.visible).toBe('always');
+      expect(linePointStyle.visible).toBe('always');
+    });
+
+    test(`should be 'auto' when pointVisibility is undefined and showPoints is 'false'`, () => {
+      const { areaPointStyle, linePointStyle } = getAreaLinePointStyles({
+        showPoints: false,
+      });
+
+      expect(areaPointStyle.visible).toBe('auto');
+      expect(linePointStyle.visible).toBe('auto');
+    });
   });
 
   test('applies point radius to the chart', () => {

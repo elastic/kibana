@@ -21,7 +21,7 @@ interface FormEditingDescription {
 export interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
-  tabId: string;
+  tabId: keyof typeof ENDPOINT_ARTIFACT_LISTS;
   nextTabId: string;
   artifactName: string;
   privilegePrefix: string;
@@ -42,6 +42,10 @@ export interface ArtifactsFixtureType {
     os_types: string[];
   };
 }
+
+export const getArtifactsListTestDataForArtifact = (
+  artifact: keyof typeof ENDPOINT_ARTIFACT_LISTS
+) => getArtifactsListTestsData().find(({ tabId }) => tabId === artifact) as ArtifactsFixtureType;
 
 export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
   {

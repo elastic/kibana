@@ -39,7 +39,7 @@ const label = (
           values={{ histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS }}
         />
       }
-      type="questionInCircle"
+      type="question"
     />
   </>
 );

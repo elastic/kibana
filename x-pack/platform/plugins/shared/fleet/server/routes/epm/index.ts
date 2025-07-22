@@ -61,6 +61,10 @@ import {
   GetOneBulkOperationPackagesResponseSchema,
   BulkUninstallPackagesRequestSchema,
   CustomIntegrationRequestSchema,
+  DeletePackageDatastreamAssetsRequestSchema,
+  DeletePackageDatastreamAssetsResponseSchema,
+  RollbackPackageRequestSchema,
+  RollbackPackageResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -85,6 +89,7 @@ import {
   createCustomIntegrationHandler,
   getInputsHandler,
   updateCustomIntegrationHandler,
+  rollbackPackageHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -96,6 +101,7 @@ import {
   postBulkUninstallPackagesHandler,
   getOneBulkOperationPackagesHandler,
 } from './bulk_handler';
+import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -845,4 +851,64 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       updateCustomIntegrationHandler
     );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Delete assets for an input package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DeletePackageDatastreamAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => DeletePackageDatastreamAssetsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      deletePackageDatastreamAssetsHandler
+    );
+
+  if (experimentalFeatures.enablePackageRollback) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.ROLLBACK_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Rollback a package to previous version`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+          availability: {
+            since: '9.1.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: RollbackPackageRequestSchema,
+            response: {
+              200: {
+                body: () => RollbackPackageResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        rollbackPackageHandler
+      );
+  }
 };

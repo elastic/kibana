@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -21,10 +21,6 @@ export interface EntityManagerServerSetup {
   logger: Logger;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-}
-
-export interface ElasticsearchAccessorOptions {
-  elasticsearchClient: ElasticsearchClient;
 }
 
 export interface EntityManagerPluginSetupDependencies {

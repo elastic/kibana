@@ -72,7 +72,7 @@ export const SelectClientPanel: FC<PropsWithChildren<SelectClientPanelProps>> = 
             defaultMessage: 'Try it now in Console',
           })}
           size="m"
-          iconType="iInCircle"
+          iconType="info"
         >
           <p>
             {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.description', {

@@ -18,7 +18,7 @@ const legacyInvalidConfigExitCode = 64;
 /**
  * Parameters for the helper {@link ensureValidConfiguration}
  *
- * @private
+ * @internal
  */
 export interface EnsureValidConfigurationParameters extends ConfigValidateParameters {
   /**
@@ -32,7 +32,7 @@ export interface EnsureValidConfigurationParameters extends ConfigValidateParame
  * @param configService The {@link IConfigService} instance that has the raw configuration preloaded.
  * @param params {@link EnsureValidConfigurationParameters | Options} to enable/disable extra edge-cases.
  *
- * @private
+ * @internal
  */
 export async function ensureValidConfiguration(
   configService: IConfigService,

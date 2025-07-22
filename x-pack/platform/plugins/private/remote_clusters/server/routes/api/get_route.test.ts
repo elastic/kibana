@@ -128,6 +128,7 @@ describe('GET remote clusters', () => {
           isConfiguredByNode: false,
           mode: 'sniff',
           securityModel: SECURITY_MODEL.CERTIFICATE,
+          nodeConnections: null,
         },
       ]);
 

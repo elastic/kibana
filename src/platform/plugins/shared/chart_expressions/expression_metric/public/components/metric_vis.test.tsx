@@ -9,7 +9,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { MetricVis, MetricVisComponentProps } from './metric_vis';
 import { MetricWTrend } from '@elastic/charts';
@@ -238,8 +238,12 @@ describe('MetricVisComponent', function () {
   });
 
   async function waitForChartToRender(renderComplete: MetricVisComponentProps['renderComplete']) {
-    // wait for 1 rAF tick (~16ms)
-    jest.advanceTimersByTime(30);
+    // Interestingly we have to wrap this into an act() call to avoid
+    // issues with the React scheduling when testing
+    await act(async () => {
+      // wait for 1 rAF tick (~16ms)
+      jest.advanceTimersByTime(30);
+    });
     // wait for render complete callback
     await waitFor(() => expect(renderComplete).toHaveBeenCalled());
   }
@@ -306,9 +310,11 @@ describe('MetricVisComponent', function () {
       });
       // for the secondary metric
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
-      expect(
-        screen.getByText(`${secondaryLabel} number-${table.rows[0][minPriceColumnId]}`)
-      ).toBeInTheDocument();
+
+      const secondaryElement = screen.getByTestId('metric-secondary-element');
+      expect(secondaryElement.textContent).toBe(
+        `${secondaryLabel}number-${table.rows[0][minPriceColumnId]}`
+      );
 
       await rerender({
         config: {
@@ -554,10 +560,12 @@ describe('MetricVisComponent', function () {
         },
       });
 
+      let secondaryElements = screen.getAllByTestId('metric-secondary-element');
       for (const row of table.rows) {
-        expect(
-          screen.getByText(new RegExp(`howdy number-${row[minPriceColumnId]}`, 'i'))
-        ).toBeInTheDocument();
+        const regExp = new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i');
+        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
+          true
+        );
       }
 
       // Now remove the prefix and check the secondary label is there
@@ -569,11 +577,14 @@ describe('MetricVisComponent', function () {
         },
       });
 
+      secondaryElements = screen.getAllByTestId('metric-secondary-element');
+
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       for (const row of table.rows) {
-        expect(
-          screen.getByText(new RegExp(`${secondaryLabel} number-${row[minPriceColumnId]}`, 'i'))
-        ).toBeInTheDocument();
+        const regExp = new RegExp(`${secondaryLabel}*number-${row[minPriceColumnId]}`, 'i');
+        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
+          true
+        );
       }
     });
 

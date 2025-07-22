@@ -21,6 +21,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/code-editor",
     "@kbn/rollup",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

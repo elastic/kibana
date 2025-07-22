@@ -250,7 +250,8 @@
             "text": "RequestAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
@@ -1791,7 +1792,8 @@
             "text": "RequestAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,

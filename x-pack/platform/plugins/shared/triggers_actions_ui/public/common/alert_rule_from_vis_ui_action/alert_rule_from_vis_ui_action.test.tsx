@@ -7,11 +7,34 @@
 
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { LensApi } from '@kbn/lens-plugin/public';
-import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
+import { act } from '@testing-library/react';
+import {
+  createParentApiMock,
+  getLensApiMock,
+  makeEmbeddableServices,
+} from '@kbn/lens-plugin/public/mocks';
 import { DimensionType } from '@kbn/expressions-plugin/common';
 import { last } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
+import * as AlertFlyoutComponentModule from './rule_flyout_component';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { AggregateQuery, Query } from '@kbn/es-query';
+
+// mock lazy flyout component
+jest.mock('@kbn/presentation-util', () => ({
+  openLazyFlyout: ({
+    loadContent,
+  }: {
+    loadContent: ({
+      closeFlyout,
+    }: {
+      closeFlyout: () => void;
+    }) => Promise<JSX.Element | null | void>;
+  }) => {
+    return loadContent({ closeFlyout: jest.fn() });
+  },
+}));
 
 const ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract> = {
   has: jest.fn(),
@@ -25,6 +48,8 @@ const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
   get: jest.fn(),
   list: jest.fn(),
 };
+
+const parentApiMock = createParentApiMock();
 
 const embeddableMock = getLensApiMock({
   serializeState: jest.fn(() => ({
@@ -49,23 +74,54 @@ const embeddableMock = getLensApiMock({
       tables: [],
     },
   })),
-}) as jest.Mocked<LensApi>;
-const getCreateAlertRuleLastCalledInitialValues = () =>
-  last(embeddableMock.createAlertRule.mock.calls)![0];
+  parentApi: parentApiMock,
+});
+
+const embeddableServices = makeEmbeddableServices();
+
+const startDependenciesMock = {
+  ...embeddableServices,
+  fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+  coreStart: {
+    ...embeddableServices.coreStart,
+    overlays: {
+      ...embeddableServices.coreStart.overlays,
+      openFlyout: jest.fn((a) => a),
+    },
+  },
+};
+const spy = jest.spyOn(AlertFlyoutComponentModule, 'getRuleFlyoutComponent');
 
 describe('AlertRuleFromVisAction', () => {
-  const action = new AlertRuleFromVisAction(ruleTypeRegistry, actionTypeRegistry);
-  it("creates a rule with the visualization's ES|QL query plus an additional threshold line", () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | STATS count = COUNT(*)',
-        thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
-        xValues: {},
-      },
-    });
+  const action = new AlertRuleFromVisAction(
+    ruleTypeRegistry,
+    actionTypeRegistry,
+    startDependenciesMock
+  );
+
+  const getCreateAlertRuleLastCalledInitialValues = () => last(spy.mock.calls ?? [])?.[5];
+
+  afterAll(() => {
+    // clear the spy created with spyOn
+    jest.clearAllMocks();
+  });
+
+  it("creates a rule with the visualization's ES|QL query plus an additional threshold line", async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query: 'FROM index | STATS count = COUNT(*)',
+            thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
+            xValues: {},
+          },
+        })
+    );
+
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -76,21 +132,27 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('appends a single xValue to the threshold line with an AND operator', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
-        thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
-        xValues: { 'uhhhhhhhh.field': 'zoop' },
-      },
-    });
+  it('appends a single xValue to the threshold line with an AND operator', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
+            thresholdValues: [{ values: { count: 210 }, yField: 'count' }],
+            xValues: { 'uhhhhhhhh.field': 'zoop' },
+          },
+        })
+    );
+
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -101,21 +163,28 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('appends multiple fields in the threshold value with an AND operator', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
-        thresholdValues: [{ values: { count: 210, 'uhhhhhhhh.field': 'zoop' }, yField: 'count' }],
-        xValues: {},
-      },
-    });
+  it('appends multiple fields in the threshold value with an AND operator', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query: 'FROM index | STATS count = COUNT(*) BY uhhhhhhhh.field',
+            thresholdValues: [
+              { values: { count: 210, 'uhhhhhhhh.field': 'zoop' }, yField: 'count' },
+            ],
+            xValues: {},
+          },
+        })
+    );
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -126,24 +195,29 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('appends multiple thresholdValues threshold line in parentheses separated by OR operators', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | KEEP geo.dest, bytes, memory, extension.keyword',
-        thresholdValues: [
-          { values: { bytes: 5000, 'extension.keyword': 'deb' }, yField: 'bytes' },
-          { values: { memory: 50000, 'extension.keyword': 'rpm' }, yField: 'memory' },
-        ],
-        xValues: { 'geo.dest': 'JP' },
-      },
-    });
+  it('appends multiple thresholdValues threshold line in parentheses separated by OR operators', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query: 'FROM index | KEEP geo.dest, bytes, memory, extension.keyword',
+            thresholdValues: [
+              { values: { bytes: 5000, 'extension.keyword': 'deb' }, yField: 'bytes' },
+              { values: { memory: 50000, 'extension.keyword': 'rpm' }, yField: 'memory' },
+            ],
+            xValues: { 'geo.dest': 'JP' },
+          },
+        })
+    );
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -154,21 +228,26 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('converts an array xValue to MATCH queries', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | KEEP tags, something.else',
-        thresholdValues: [{ values: { 'something.else': 3087 }, yField: 'something.else' }],
-        xValues: { tags: 'shibbity,bee,bop,doowop' },
-      },
-    });
+  it('converts an array xValue to MATCH queries', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query: 'FROM index | KEEP tags, something.else',
+            thresholdValues: [{ values: { 'something.else': 3087 }, yField: 'something.else' }],
+            xValues: { tags: 'shibbity,bee,bop,doowop' },
+          },
+        })
+    );
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -179,29 +258,34 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('converts an array in a threshold value to MATCH queries', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | KEEP something.else, @tags.keyword',
-        thresholdValues: [
-          {
-            values: {
-              'something.else': 3087,
-              '@tags.keyword': 'login,warning',
-            },
-            yField: 'something.else',
+  it('converts an array in a threshold value to MATCH queries', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query: 'FROM index | KEEP something.else, @tags.keyword',
+            thresholdValues: [
+              {
+                values: {
+                  'something.else': 3087,
+                  '@tags.keyword': 'login,warning',
+                },
+                yField: 'something.else',
+              },
+            ],
+            xValues: {},
           },
-        ],
-        xValues: {},
-      },
-    });
+        })
+    );
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -212,26 +296,31 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('renders empty splitValues as empty strings', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | KEEP tags, something.else',
-        thresholdValues: [
-          {
-            values: { 'something.else': 3087, tags: '' },
-            yField: 'something.else',
+  it('renders empty splitValues as empty strings', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query: 'FROM index | KEEP tags, something.else',
+            thresholdValues: [
+              {
+                values: { 'something.else': 3087, tags: '' },
+                yField: 'something.else',
+              },
+            ],
+            xValues: {},
           },
-        ],
-        xValues: {},
-      },
-    });
+        })
+    );
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -242,29 +331,34 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('escapes unnamed function columns', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query:
-          'FROM index | RENAME bytes as `meow bytes` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(`meow bytes`)',
-        thresholdValues: [
-          {
-            values: { 'COUNT(*)': 210 },
-            yField: 'COUNT(*)',
+  it('escapes unnamed function columns', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query:
+              'FROM index | RENAME bytes as `meow bytes` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(`meow bytes`)',
+            thresholdValues: [
+              {
+                values: { 'COUNT(*)': 210 },
+                yField: 'COUNT(*)',
+              },
+              { values: { 'PERCENTILE(owowo, 99)': 42.6 }, yField: 'PERCENTILE(owowo, 99)' },
+              { values: { 'COUNT(`meow bytes`)': 1312 }, yField: 'COUNT(`meow bytes`)' },
+            ],
+            xValues: {},
           },
-          { values: { 'PERCENTILE(owowo, 99)': 42.6 }, yField: 'PERCENTILE(owowo, 99)' },
-          { values: { 'COUNT(`meow bytes`)': 1312 }, yField: 'COUNT(`meow bytes`)' },
-        ],
-        xValues: {},
-      },
-    });
+        })
+    );
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -277,31 +371,36 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('does not duplicate function column renames when they are included in multiple threshold values', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query:
-          'FROM logst* | RENAME bytes as `meow bytes` | STATS COUNT(`meow bytes`) BY clientip, extension',
-        thresholdValues: [
-          {
-            values: { 'COUNT(`meow bytes`)': 634, clientip: '131.250.144.62' },
-            yField: 'COUNT(`meow bytes`)',
+  it('does not duplicate function column renames when they are included in multiple threshold values', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query:
+              'FROM logst* | RENAME bytes as `meow bytes` | STATS COUNT(`meow bytes`) BY clientip, extension',
+            thresholdValues: [
+              {
+                values: { 'COUNT(`meow bytes`)': 634, clientip: '131.250.144.62' },
+                yField: 'COUNT(`meow bytes`)',
+              },
+              {
+                values: { 'COUNT(`meow bytes`)': 682, clientip: '7.203.207.131' },
+                yField: 'COUNT(`meow bytes`)',
+              },
+            ],
+            xValues: { extension: 'jpg' },
           },
-          {
-            values: { 'COUNT(`meow bytes`)': 682, clientip: '7.203.207.131' },
-            yField: 'COUNT(`meow bytes`)',
-          },
-        ],
-        xValues: { extension: 'jpg' },
-      },
-    });
+        })
+    );
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -314,29 +413,34 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
-  it('escapes string values with backlashes in them', () => {
-    action.execute({
-      embeddable: embeddableMock,
-      data: {
-        query: 'FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)',
-        thresholdValues: [
-          {
-            values: { 'COUNT(*)': 1 },
-            yField: 'COUNT(*)',
+  it('escapes string values with backlashes in them', async () => {
+    await act(
+      async () =>
+        await action.execute({
+          embeddable: embeddableMock,
+          data: {
+            query: 'FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)',
+            thresholdValues: [
+              {
+                values: { 'COUNT(*)': 1 },
+                yField: 'COUNT(*)',
+              },
+            ],
+            xValues: {
+              'CATEGORIZE(message)':
+                '.*?GET .+?HTTP/1\\.1.+?Mozilla/5\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\.0a',
+            },
           },
-        ],
-        xValues: {
-          'CATEGORIZE(message)':
-            '.*?GET .+?HTTP/1\\.1.+?Mozilla/5\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\.0a',
-        },
-      },
-    });
+        })
+    );
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
       Object {
+        "name": "Elasticsearch query rule from visualization",
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
@@ -349,14 +453,15 @@ describe('AlertRuleFromVisAction', () => {
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
         },
+        "tags": Array [],
       }
     `);
   });
 
   describe('when executed without a data parameter', () => {
-    it('derives data from the embeddable and uses placeholder threshold values', () => {
+    it('derives data from the embeddable and uses placeholder threshold values', async () => {
       const embeddable = getLensApiMock({
-        query$: new BehaviorSubject({
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
           esql: 'FROM index | STATS count = COUNT(*)',
         }),
         getInspectorAdapters: jest.fn(() => ({
@@ -401,11 +506,13 @@ describe('AlertRuleFromVisAction', () => {
               },
             },
           },
-        })),
-      } as Partial<LensApi>) as jest.Mocked<LensApi>;
-      action.execute({ embeddable });
-      expect(last(embeddable.createAlertRule.mock.calls)![0]).toMatchInlineSnapshot(`
+        })) as unknown as LensApi['serializeState'],
+        parentApi: parentApiMock,
+      });
+      await act(async () => await action.execute({ embeddable }));
+      expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
         Object {
+          "name": "Elasticsearch query rule from visualization",
           "params": Object {
             "esqlQuery": Object {
               "esql": "// Original ES|QL query derived from the visualization:
@@ -416,12 +523,13 @@ describe('AlertRuleFromVisAction', () => {
             "searchType": "esqlQuery",
             "timeField": "timestamp",
           },
+          "tags": Array [],
         }
       `);
     });
-    it('uses placeholder split values when the X axis is not a timestamp', () => {
+    it('uses placeholder split values when the X axis is not a timestamp', async () => {
       const embeddable = getLensApiMock({
-        query$: new BehaviorSubject({
+        query$: new BehaviorSubject<Query | AggregateQuery | undefined>({
           esql: 'FROM index | STATS count = COUNT(*) BY group',
         }),
         getInspectorAdapters: jest.fn(() => ({
@@ -466,11 +574,15 @@ describe('AlertRuleFromVisAction', () => {
               },
             },
           },
-        })),
-      } as Partial<LensApi>) as jest.Mocked<LensApi>;
-      action.execute({ embeddable });
-      expect(last(embeddable.createAlertRule.mock.calls)![0]).toMatchInlineSnapshot(`
+        })) as unknown as LensApi['serializeState'],
+      });
+      await act(async () => await action.execute({ embeddable }));
+      // wait for the async operations to complete
+
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
         Object {
+          "name": "Elasticsearch query rule from visualization",
           "params": Object {
             "esqlQuery": Object {
               "esql": "// Original ES|QL query derived from the visualization:
@@ -481,6 +593,7 @@ describe('AlertRuleFromVisAction', () => {
             "searchType": "esqlQuery",
             "timeField": "timestamp",
           },
+          "tags": Array [],
         }
       `);
     });

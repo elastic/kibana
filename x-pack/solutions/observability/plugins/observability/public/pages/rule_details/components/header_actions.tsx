@@ -185,7 +185,11 @@ export function HeaderActions({
 
   return (
     <>
-      <EuiFlexGroup direction="rowReverse" alignItems="center">
+      <EuiFlexGroup
+        direction="rowReverse"
+        alignItems="center"
+        data-test-subj={`ruleType_${rule.ruleTypeId}`}
+      >
         <EuiFlexItem>
           <EuiPopover
             id="contextRuleEditMenu"

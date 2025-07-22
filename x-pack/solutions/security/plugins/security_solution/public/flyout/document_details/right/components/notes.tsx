@@ -69,7 +69,7 @@ export const VIEW_NOTES_BUTTON_ARIA_LABEL = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, isPreview } = useDocumentDetailsContext();
+  const { eventId, isRulePreview } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
   const { notesPrivileges } = useUserPrivileges();
 
@@ -78,7 +78,7 @@ export const Notes = memo(() => {
       tab: LeftPanelNotesTab,
     });
 
-  const isNotesDisabled = !isLinkEnabled || isPreview;
+  const isNotesDisabled = !isLinkEnabled || isRulePreview;
   const cannotAddNotes = isNotesDisabled || !notesPrivileges.crud;
   const cannotReadNotes = isNotesDisabled || !notesPrivileges.read;
 
@@ -163,7 +163,7 @@ export const Notes = memo(() => {
       }
       data-test-subj={NOTES_TITLE_TEST_ID}
     >
-      {isPreview ? (
+      {isRulePreview ? (
         getEmptyTagValue()
       ) : (
         <>

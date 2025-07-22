@@ -15,6 +15,7 @@ import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/comm
 import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { type VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { FormatOverrides } from './helpers';
 
 export interface TrendConfig {
   icon: boolean;
@@ -119,14 +120,12 @@ function SecondaryMetricValue({
   formattedValue,
   trendConfig,
   color,
-  fontSize,
   formatter,
 }: {
   rawValue?: number | string;
   formattedValue?: string;
   trendConfig?: TrendConfig;
   color?: string;
-  fontSize: number;
   formatter?: FieldFormatConvertFunction;
 }) {
   const safeFormattedValue = formattedValue ?? notAvailable;
@@ -152,6 +151,15 @@ function SecondaryMetricValue({
       formatter,
       trendConfig.compareToPrimary
     );
+    // If no value is shown and no icon should be shown (i.e. N/A) then do not render the badge at all
+    if (trendConfig.icon && !trendConfig.value && !icon) {
+      return (
+        <span
+          data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
+          aria-label={getTrendDescription(trendConfig.value, icon != null, valueToShow, iconLabel)}
+        />
+      );
+    }
     return (
       <EuiBadge
         aria-label={
@@ -189,21 +197,43 @@ export interface SecondaryMetricProps {
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   trendConfig?: TrendConfig;
   color?: string;
-  fontSize: number;
-  getMetricFormatter: (accessor: string, columns: DatatableColumn[]) => FieldFormatConvertFunction;
+  getMetricFormatter: (
+    accessor: string,
+    columns: DatatableColumn[],
+    formatOverrides?: FormatOverrides | undefined
+  ) => FieldFormatConvertFunction;
 }
 
 function getMetricColumnAndFormatter(
   columns: SecondaryMetricProps['columns'],
   config: SecondaryMetricProps['config'],
-  getMetricFormatter: SecondaryMetricProps['getMetricFormatter']
+  getMetricFormatter: SecondaryMetricProps['getMetricFormatter'],
+  formatOverrides: FormatOverrides | undefined
 ) {
   if (!config.dimensions.secondaryMetric) {
     return;
   }
   return {
     metricColumn: getColumnByAccessor(config.dimensions.secondaryMetric, columns),
-    metricFormatter: getMetricFormatter(config.dimensions.secondaryMetric, columns),
+    metricFormatter: getMetricFormatter(
+      config.dimensions.secondaryMetric,
+      columns,
+      formatOverrides
+    ),
+  };
+}
+
+function getEnhancedNumberSignFormatter(
+  trendConfig: TrendConfig | undefined
+): FormatOverrides | undefined {
+  if (!trendConfig?.compareToPrimary) {
+    return;
+  }
+  const paramsOverride = { alwaysShowSign: true };
+  return {
+    number: paramsOverride,
+    percent: paramsOverride,
+    bytes: paramsOverride,
   };
 }
 
@@ -214,25 +244,56 @@ export function SecondaryMetric({
   getMetricFormatter,
   trendConfig,
   color,
-  fontSize,
 }: SecondaryMetricProps) {
   const { metricFormatter, metricColumn } =
-    getMetricColumnAndFormatter(columns, config, getMetricFormatter) || {};
+    getMetricColumnAndFormatter(
+      columns,
+      config,
+      getMetricFormatter,
+      getEnhancedNumberSignFormatter(trendConfig)
+    ) || {};
   const prefix = config.metric.secondaryPrefix ?? metricColumn?.name;
   const value = metricColumn ? row[metricColumn.id] : undefined;
 
   return (
-    <span data-test-subj="metric-secondary-element">
-      {prefix}
-      {prefix ? ' ' : ''}
-      <SecondaryMetricValue
-        rawValue={value}
-        formattedValue={metricFormatter?.(value)}
-        trendConfig={color ? undefined : trendConfig}
-        color={color}
-        fontSize={fontSize}
-        formatter={metricFormatter}
-      />
+    <span css={styles.wrapper} data-test-subj="metric-secondary-element">
+      {prefix && <span css={styles.prefix}>{prefix}</span>}
+      <span css={styles.value}>
+        <SecondaryMetricValue
+          rawValue={value}
+          formattedValue={metricFormatter?.(value)}
+          trendConfig={color ? undefined : trendConfig}
+          color={color}
+          formatter={metricFormatter}
+        />
+      </span>
     </span>
   );
 }
+
+const styles = {
+  wrapper: css({
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,
+    width: '100%',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  }),
+  prefix: css({
+    flex: '0 1 auto',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  }),
+  value: css({
+    display: 'inline-flex',
+    flex: '1 0 auto',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    marginLeft: 4,
+    maxWidth: 'calc(100% - 4px)', // Subtract the marginLeft value
+  }),
+};

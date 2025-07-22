@@ -17,7 +17,7 @@
       "_tasks/_cancel",
       "_tasks/{task_id}/_cancel"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/tasks.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-tasks",
     "availability": {
       "stack": true,
       "serverless": false

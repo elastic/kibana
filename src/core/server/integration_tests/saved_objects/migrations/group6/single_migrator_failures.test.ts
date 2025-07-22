@@ -19,7 +19,7 @@ import {
 import { delay } from '../test_utils';
 import '../jest_matchers';
 import { getElasticsearchClientWrapperFactory } from '../elasticsearch_client_wrapper';
-import { BASELINE_TEST_ARCHIVE_1K } from '../kibana_migrator_archive_utils';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
 import {
   getRelocatingMigratorTestKit,
   kibanaSplitIndex,
@@ -56,7 +56,7 @@ describe('split .kibana index into multiple system indices', () => {
 
     beforeEach(async () => {
       esServer = await startElasticsearch({
-        dataArchive: BASELINE_TEST_ARCHIVE_1K,
+        dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
       });
     });
 

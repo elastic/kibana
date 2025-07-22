@@ -11,6 +11,7 @@ import {
   LineAnnotation,
   LineAnnotationStyle,
   PartialTheme,
+  ScaleType,
   Settings,
   Tooltip,
   TooltipType,
@@ -63,7 +64,8 @@ export const LogCategoriesGridHistogramCell: React.FC<LogCategoriesGridHistogram
         data={logCategory.histogram}
         id="documentCount"
         xAccessor={timestampAccessor}
-        xScaleType="time"
+        // Defaults to multi layer time axis as of Elastic Charts v70
+        xScaleType={ScaleType.Time}
         yAccessors={['documentCount']}
         yScaleType="linear"
         enableHistogramMode

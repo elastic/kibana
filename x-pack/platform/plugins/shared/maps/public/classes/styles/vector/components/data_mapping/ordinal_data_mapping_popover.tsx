@@ -140,7 +140,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
               {i18n.translate('xpack.maps.styles.ordinalDataMapping.sigmaLabel', {
                 defaultMessage: 'Sigma',
               })}{' '}
-              <EuiIcon type="questionInCircle" color="subdued" />
+              <EuiIcon type="question" color="subdued" />
             </span>
           </EuiToolTip>
         }
@@ -190,7 +190,7 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
                 </EuiText>
               }
             >
-              <EuiIcon type="questionInCircle" color="subdued" />
+              <EuiIcon type="question" color="subdued" />
             </EuiToolTip>
           </>
         </EuiFormRow>

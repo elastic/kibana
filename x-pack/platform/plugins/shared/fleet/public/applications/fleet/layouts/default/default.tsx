@@ -15,8 +15,7 @@ import { useLink, useConfig, useAuthz, useStartServices } from '../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 
 import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
-
-import { ExperimentalFeaturesService } from '../../services';
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../hooks/use_can_enable_auto_upgrades';
 
 import { DefaultPageTitle } from './default_page_title';
 
@@ -36,7 +35,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const authz = useAuthz();
   const { docLinks } = useStartServices();
   const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
-  const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
+  const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
   const tabs = [
     {
@@ -147,7 +146,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
         {children}
       </WithHeaderLayout>
-      {enableAutomaticAgentUpgrades ? (
+      {canEnableAutomaticAgentUpgrades ? (
         <AutoUpgradeAgentsTour anchor="#fleet-agent-policies-tab" />
       ) : null}
     </>

@@ -23,7 +23,6 @@ export const SummarizationPanel: React.FC = () => {
     <EuiPanel data-test-subj="summarizationPanel">
       <Controller
         name={PlaygroundFormFields.summarizationModel}
-        rules={{ required: true }}
         control={control}
         render={({ field }) => (
           <SummarizationModel
@@ -37,7 +36,6 @@ export const SummarizationPanel: React.FC = () => {
       <Controller
         name={PlaygroundFormFields.prompt}
         control={control}
-        rules={{ required: true }}
         defaultValue="You are an assistant for question-answering tasks."
         render={({ field }) => <InstructionsField value={field.value} onChange={field.onChange} />}
       />

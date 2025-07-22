@@ -19,7 +19,8 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import userEvent from '@testing-library/user-event';
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
+import { render } from '@elastic/eui/lib/test/rtl';
 
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 import type { TextBasedPrivateState } from '../types';

@@ -5,7 +5,7 @@ mapped_pages:
 
 # Advanced settings [advanced-options]
 
-**Advanced Settings** control the behavior of {{kib}}. You can change the settings that apply to spaces, or to all of {{kib}}. For example, you can change the format used to display dates, specify the default data view, and apply your own branding.
+**Advanced Settings** control the behavior of {{kib}}. You can change the settings that apply to a specific space only, or to all of {{kib}}. For example, you can change the format used to display dates, specify the default data view, and apply your own branding.
 
 ::::{warning}
 Changing a setting can affect {{kib}} performance and cause problems that are difficult to diagnose. Setting a property value to a blank field reverts to the default behavior, which might not be compatible with other configuration settings. Deleting a custom setting permanently removes it from {{kib}}.
@@ -27,9 +27,9 @@ To add the privilege, go to the **Roles** management page using the navigation m
 For more information on granting access to {{kib}}, refer to [Granting access to {{kib}}](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/built-in-roles.md).
 
 
-## Change the space settings [kibana-settings-reference]
+## Change the space-specific setting [kibana-settings-reference]
 
-Change the settings that apply only to {{kib}} spaces.
+Change the settings that apply only to a speific {{kib}} space.
 
 1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
 2. Click **Space Settings**.
@@ -325,9 +325,6 @@ $$$apm-aws-price$$$`observability:apmAWSLambdaPriceFactor`
 $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 :   Set the AWS Lambda cost per million requests.
 
-$$$observability-apm-labs$$$`observability:apmLabsButton`
-:   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
-
 $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
 :   When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
@@ -336,9 +333,6 @@ $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServi
 
 $$$observability-default-service-env$$$`observability:apmDefaultServiceEnvironment`
 :   Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
-
-$$$observability-apm-enable-profiling$$$`observability:apmEnableProfilingIntegration`
-:   Enable the Universal Profiling integration in APM.
 
 $$$observability-profiling-show-error-frames$$$`observability:profilingShowErrorFrames`
 :   Show error frames in the Universal Profiling views to indicate stack unwinding failures.
@@ -363,9 +357,6 @@ $$$observability-enable-inspect-es-queries$$$`observability:enableInspectEsQueri
 
 $$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups`
 :   [preview] When enabled, allows users to create Service Groups from the APM Service Inventory page.
-
-$$$observability-infrastructure-profiling-integration$$$`observability:enableInfrastructureProfilingIntegration`
-:   [preview] Enables the Profiling view in Host details within Infrastructure.
 
 $$$observability-profiling-per-vcpu-watt-x86$$$`observability:profilingPervCPUWattX86`
 :   The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.
@@ -498,13 +489,6 @@ $$$timelion-targetbuckets$$$`timelion:target_buckets`
 
 ### Visualization [kibana-visualization-settings]
 
-$$$visualization-uselegacytimeaxis$$$`visualization:useLegacyTimeAxis`
-:   :::{admonition} Deprecated in 8.10.0
-    This setting was deprecated in 8.10.0.
-    :::
-
-    Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
-
 $$$visualization-heatmap-maxbuckets$$$`visualization:heatmap:maxBuckets`
 :   The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
@@ -514,7 +498,7 @@ $$$visualization-visualize-heatmapChartslibrary$$$`visualization:visualize:legac
 
 ## Change the global settings [kibana-global-settings-reference]
 
-Change the settings that apply only to {{kib}} spaces.
+Change the only settings that apply to all of {{kib}}.
 
 1. Go to the **Advanced settings** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
 2. Click **Global Settings**.

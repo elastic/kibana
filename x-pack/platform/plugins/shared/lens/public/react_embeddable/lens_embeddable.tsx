@@ -35,7 +35,6 @@ import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
-import { initializeAlertRules } from './initializers/initialize_alert_rules';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -59,6 +58,12 @@ export const createLensEmbeddableFactory = (
      */
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
+
+      const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+        uuid,
+        () => titleManager.api.title$.getValue(),
+        initialState
+      );
 
       const initialRuntimeState = await deserializeState(
         services,
@@ -114,19 +119,21 @@ export const createLensEmbeddableFactory = (
         parentApi
       );
 
-      const integrationsConfig = initializeIntegrations(getLatestState, services);
+      const integrationsConfig = initializeIntegrations(
+        getLatestState,
+        dynamicActionsManager?.serializeState,
+        services
+      );
       const actionsConfig = initializeActionApi(
         uuid,
         initialRuntimeState,
         getLatestState,
         parentApi,
         searchContextConfig.api,
-        titleManager.api.title$,
         internalApi,
-        services
+        services,
+        dynamicActionsManager
       );
-
-      const alertRulesConfig = initializeAlertRules(uuid, parentApi, services);
 
       /**
        * This is useful to have always the latest version of the state
@@ -192,7 +199,6 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
-          ...alertRulesConfig.api,
         }
       );
 

@@ -298,6 +298,7 @@ export class RenderingService {
         env,
         featureFlags: {
           overrides: featureFlags?.getOverrides() || {},
+          initialFeatureFlags: (await featureFlags?.getInitialFeatureFlags()) || {},
         },
         clusterInfo,
         apmConfig,

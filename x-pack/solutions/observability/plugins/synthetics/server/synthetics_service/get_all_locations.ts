@@ -44,8 +44,8 @@ export async function getAllLocations({
       throttling,
       allLocations: [...publicLocations, ...pvtLocations],
     };
-  } catch (e) {
-    server.logger.error(e);
+  } catch (error) {
+    server.logger.error(`Error getting Synthetics locations, Error: ${error.message}`, { error });
     return { publicLocations: [], privateLocations: [], allLocations: [] };
   }
 }

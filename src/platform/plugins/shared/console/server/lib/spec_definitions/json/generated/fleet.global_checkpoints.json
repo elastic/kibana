@@ -22,7 +22,7 @@
     "patterns": [
       "{index}/_fleet/global_checkpoints"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-global-checkpoints.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-fleet",
     "availability": {
       "stack": true,
       "serverless": false

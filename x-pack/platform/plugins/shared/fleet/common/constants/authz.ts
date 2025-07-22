@@ -8,7 +8,7 @@
 import { deepFreeze } from '@kbn/std';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
-const SECURITY_SOLUTION_APP_ID = 'siemV2';
+export const SECURITY_SOLUTION_APP_ID = 'siemV3';
 
 export interface PrivilegeMapObject {
   appId: string;

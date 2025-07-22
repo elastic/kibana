@@ -10,7 +10,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
@@ -26,7 +25,7 @@ export const renderApp = (
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
+    core.rendering.addContext(
       <Router history={history}>
         <RedirectAppLinks coreStart={core}>
           <EuiPageTemplate offset={0}>
@@ -86,7 +85,7 @@ export const renderApp = (
           </EuiPageTemplate>
         </RedirectAppLinks>
       </Router>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

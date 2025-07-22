@@ -39,3 +39,10 @@ export const EQL_TIME_INTERVAL_NOT_DEFINED = i18n.translate(
     defaultMessage: 'Time intervals are not defined.',
   }
 );
+
+export const ERROR_FETCH_AI_CONNECTORS = i18n.translate(
+  'xpack.securitySolution.hooks.useGetAIConnectors.fetchError',
+  {
+    defaultMessage: 'Error fetching AI connectors',
+  }
+);

@@ -6,16 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import React from 'react';
-import { shallow } from 'enzyme';
-
+import { render, screen, fireEvent } from '@testing-library/react';
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { MarkdownVisParams } from './types';
 import { MarkdownOptions } from './markdown_options';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('MarkdownOptions', () => {
-  const props = {
+  const defaultProps = {
     stateParams: {
       fontSize: 12,
       markdown: 'hello from 2020 🥳',
@@ -25,22 +24,18 @@ describe('MarkdownOptions', () => {
   } as unknown as VisEditorOptionsProps<MarkdownVisParams>;
 
   it('should match snapshot', () => {
-    const comp = shallow(<MarkdownOptions {...props} />);
-    expect(comp).toMatchSnapshot();
+    const { container } = render(<MarkdownOptions {...defaultProps} />, { wrapper: I18nProvider });
+    expect(container).toMatchSnapshot();
   });
 
   it('should update markdown on change', () => {
-    const comp = shallow(<MarkdownOptions {...props} />);
-    const value = 'see you in 2021 😎';
-    const textArea = comp.find('EuiTextArea');
-    const onChange = textArea.prop('onChange');
-    onChange?.({
-      target: {
-        // @ts-expect-error
-        value,
-      },
-    });
+    render(<MarkdownOptions {...defaultProps} />, { wrapper: I18nProvider });
 
-    expect(props.setValue).toHaveBeenCalledWith('markdown', value);
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+    const newValue = 'see you in 2021 😎';
+
+    fireEvent.change(textarea, { target: { value: newValue } });
+
+    expect(defaultProps.setValue).toHaveBeenCalledWith('markdown', newValue);
   });
 });

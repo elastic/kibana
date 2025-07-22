@@ -42,7 +42,7 @@ const ONE_MONTH_IN_MS = 2592000000;
 
 export const NO_EXPIRATION = 'NONE';
 
-const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE']);
+const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE', 'MIGRATE']);
 
 export async function createAgentAction(
   esClient: ElasticsearchClient,
@@ -79,7 +79,6 @@ export async function createAgentAction(
       signature: signedBody.signature,
     };
   }
-
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
     id: uuidv4(),

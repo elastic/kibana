@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CustomScriptSelector } from '../../console_argument_selectors/custom_script_selector';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
@@ -43,7 +44,11 @@ import {
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
-import { CONSOLE_COMMANDS, CROWDSTRIKE_CONSOLE_COMMANDS } from '../../../common/translations';
+import {
+  CONSOLE_COMMANDS,
+  CROWDSTRIKE_CONSOLE_COMMANDS,
+  MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS,
+} from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
@@ -166,9 +171,11 @@ export const getEndpointConsoleCommands = ({
   platform,
 }: GetEndpointConsoleCommandsOptions): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
-
-  const isUploadEnabled = featureFlags.responseActionUploadEnabled;
-  const crowdstrikeRunScriptEnabled = featureFlags.crowdstrikeRunScriptEnabled;
+  const {
+    responseActionUploadEnabled: isUploadEnabled,
+    crowdstrikeRunScriptEnabled,
+    microsoftDefenderEndpointRunScriptEnabled,
+  } = featureFlags;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     // Agent capabilities are only validated for Endpoint agent types
@@ -525,87 +532,56 @@ export const getEndpointConsoleCommands = ({
       privileges: endpointPrivileges,
     }),
   });
-  if (crowdstrikeRunScriptEnabled) {
-    consoleCommands.push({
-      name: 'runscript',
-      about: getCommandAboutInfo({
-        aboutInfo: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
-        isSupported: agentType === 'crowdstrike' && doesEndpointSupportCommand('runscript'),
-      }),
-      RenderComponent: RunScriptActionResult,
-      meta: {
-        agentType,
-        endpointId: endpointAgentId,
-        capabilities: endpointCapabilities,
+  consoleCommands.push({
+    name: 'runscript',
+    about: getCommandAboutInfo({
+      aboutInfo: CONSOLE_COMMANDS.runscript.about,
+      isSupported: doesEndpointSupportCommand('runscript'),
+    }),
+    RenderComponent: RunScriptActionResult,
+    meta: {
+      agentType,
+      endpointId: endpointAgentId,
+      capabilities: endpointCapabilities,
+      privileges: endpointPrivileges,
+    },
+    exampleInstruction: CONSOLE_COMMANDS.runscript.about,
+    validate: capabilitiesAndPrivilegesValidator(agentType),
+    mustHaveArgs: true,
+    helpGroupLabel: HELP_GROUPS.responseActions.label,
+    helpGroupPosition: HELP_GROUPS.responseActions.position,
+    helpCommandPosition: 9,
+    helpDisabled:
+      !doesEndpointSupportCommand('runscript') ||
+      (agentType !== 'crowdstrike' && agentType !== 'microsoft_defender_endpoint'),
+    helpHidden:
+      !getRbacControl({
+        commandName: 'runscript',
         privileges: endpointPrivileges,
-      },
-      exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
-      helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
-      exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.about,
-      validate: capabilitiesAndPrivilegesValidator(agentType),
-      mustHaveArgs: true,
-      args: {
-        Raw: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
-          mustHaveValue: 'non-empty-string',
-          exclusiveOr: true,
-        },
-        CloudFile: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
-          mustHaveValue: 'non-empty-string',
-          exclusiveOr: true,
-        },
-        CommandLine: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
-          mustHaveValue: 'non-empty-string',
-        },
-        HostPath: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
-          mustHaveValue: 'non-empty-string',
-          exclusiveOr: true,
-        },
-        Timeout: {
-          required: false,
-          allowMultiples: false,
-          about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.timeout.about,
-          mustHaveValue: 'number-greater-than-zero',
-        },
-        ...commandCommentArgument(),
-      },
-      helpGroupLabel: HELP_GROUPS.responseActions.label,
-      helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 9,
-      helpDisabled: !doesEndpointSupportCommand('runscript') || agentType !== 'crowdstrike',
-      helpHidden:
-        !getRbacControl({
-          commandName: 'runscript',
-          privileges: endpointPrivileges,
-        }) || agentType !== 'crowdstrike',
-    });
-  }
+      }) ||
+      (agentType !== 'crowdstrike' && agentType !== 'microsoft_defender_endpoint'),
+  });
 
   switch (agentType) {
     case 'sentinel_one':
       return adjustCommandsForSentinelOne({ commandList: consoleCommands, platform });
     case 'crowdstrike':
-      return adjustCommandsForCrowdstrike({ commandList: consoleCommands });
+      return adjustCommandsForCrowdstrike({
+        commandList: consoleCommands,
+        crowdstrikeRunScriptEnabled,
+      });
     case 'microsoft_defender_endpoint':
-      return adjustCommandsForMicrosoftDefenderEndpoint({ commandList: consoleCommands });
+      return adjustCommandsForMicrosoftDefenderEndpoint({
+        commandList: consoleCommands,
+        microsoftDefenderEndpointRunScriptEnabled,
+      });
     default:
       // agentType === endpoint: just returns the defined command list
       return consoleCommands;
   }
 };
 
-/** @private */
+/** @internal */
 const disableCommand = (command: CommandDefinition, agentType: ResponseActionAgentType) => {
   command.helpDisabled = true;
   command.helpHidden = true;
@@ -613,7 +589,7 @@ const disableCommand = (command: CommandDefinition, agentType: ResponseActionAge
     UPGRADE_AGENT_FOR_RESPONDER(agentType, command.name as ConsoleResponseActionCommands);
 };
 
-/** @private */
+/** @internal */
 const adjustCommandsForSentinelOne = ({
   commandList,
   platform,
@@ -683,11 +659,13 @@ const adjustCommandsForSentinelOne = ({
   });
 };
 
-/** @private */
+/** @internal */
 const adjustCommandsForCrowdstrike = ({
   commandList,
+  crowdstrikeRunScriptEnabled,
 }: {
   commandList: CommandDefinition[];
+  crowdstrikeRunScriptEnabled: boolean;
 }): CommandDefinition[] => {
   return commandList.map((command) => {
     if (
@@ -700,6 +678,54 @@ const adjustCommandsForCrowdstrike = ({
     ) {
       disableCommand(command, 'crowdstrike');
     }
+    if (command.name === 'runscript') {
+      if (!crowdstrikeRunScriptEnabled) {
+        disableCommand(command, 'crowdstrike');
+      } else {
+        return {
+          ...command,
+          exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
+          helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+          args: {
+            Raw: {
+              required: false,
+              allowMultiples: false,
+              about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
+              mustHaveValue: 'non-empty-string',
+              exclusiveOr: true,
+            },
+            CloudFile: {
+              required: false,
+              allowMultiples: false,
+              about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
+              mustHaveValue: 'truthy',
+              exclusiveOr: true,
+              SelectorComponent: CustomScriptSelector('crowdstrike'),
+            },
+            CommandLine: {
+              required: false,
+              allowMultiples: false,
+              about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
+              mustHaveValue: 'non-empty-string',
+            },
+            HostPath: {
+              required: false,
+              allowMultiples: false,
+              about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
+              mustHaveValue: 'non-empty-string',
+              exclusiveOr: true,
+            },
+            Timeout: {
+              required: false,
+              allowMultiples: false,
+              about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.timeout.about,
+              mustHaveValue: 'number-greater-than-zero',
+            },
+            ...commandCommentArgument(),
+          },
+        };
+      }
+    }
 
     return command;
   });
@@ -707,8 +733,10 @@ const adjustCommandsForCrowdstrike = ({
 
 const adjustCommandsForMicrosoftDefenderEndpoint = ({
   commandList,
+  microsoftDefenderEndpointRunScriptEnabled,
 }: {
   commandList: CommandDefinition[];
+  microsoftDefenderEndpointRunScriptEnabled: boolean;
 }): CommandDefinition[] => {
   const featureFlags = ExperimentalFeaturesService.get();
   const isMicrosoftDefenderEndpointEnabled = featureFlags.responseActionsMSDefenderEndpointEnabled;
@@ -724,6 +752,33 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
       )
     ) {
       disableCommand(command, 'microsoft_defender_endpoint');
+    }
+
+    if (command.name === 'runscript') {
+      if (!microsoftDefenderEndpointRunScriptEnabled) {
+        disableCommand(command, 'microsoft_defender_endpoint');
+      } else {
+        return {
+          ...command,
+          exampleUsage: `runscript --ScriptName='test.ps1'`,
+          args: {
+            ScriptName: {
+              required: true,
+              allowMultiples: false,
+              about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.scriptName.about,
+              mustHaveValue: 'truthy',
+              SelectorComponent: CustomScriptSelector('microsoft_defender_endpoint'),
+            },
+            Args: {
+              required: false,
+              allowMultiples: false,
+              about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.args.about,
+              mustHaveValue: 'non-empty-string',
+            },
+            ...commandCommentArgument(),
+          },
+        };
+      }
     }
 
     return command;

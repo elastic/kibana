@@ -345,6 +345,10 @@ export const InstallKibanaAssetsResponseSchema = schema.object({
   success: schema.boolean(),
 });
 
+export const DeletePackageDatastreamAssetsResponseSchema = schema.object({
+  success: schema.boolean(),
+});
+
 export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
   schema.object({
     name: schema.string(),
@@ -425,6 +429,11 @@ export const ReauthorizeTransformResponseSchema = schema.arrayOf(
     error: schema.oneOf([schema.literal(null), schema.any()]),
   })
 );
+
+export const RollbackPackageResponseSchema = schema.object({
+  version: schema.string(),
+  success: schema.boolean(),
+});
 
 export const GetInstalledPackagesRequestSchema = {
   query: schema.object({
@@ -665,6 +674,16 @@ export const DeleteKibanaAssetsRequestSchema = {
   }),
 };
 
+export const DeletePackageDatastreamAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  query: schema.object({
+    packagePolicyId: schema.string(),
+  }),
+};
+
 export const GetInputsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
@@ -676,5 +695,11 @@ export const GetInputsRequestSchema = {
     }),
     prerelease: schema.maybe(schema.boolean()),
     ignoreUnverified: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const RollbackPackageRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
   }),
 };

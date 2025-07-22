@@ -15,8 +15,8 @@ import {
   Direction,
   FlowTarget,
   NetworkDnsFields,
-  NetworkTopTablesFields,
   NetworkTlsFields,
+  NetworkTopTablesFields,
   NetworkUsersFields,
   RiskScoreFields,
 } from '../../../common/search_strategy';
@@ -24,18 +24,18 @@ import type { State } from '../store';
 
 import { defaultHeaders } from './header';
 import {
+  DEFAULT_DATA_VIEW_ID,
   DEFAULT_FROM,
-  DEFAULT_TO,
+  DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
+  DEFAULT_TO,
   VIEW_SELECTION,
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
-import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
@@ -374,7 +374,6 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         selectAll: false,
-        sessionViewConfig: null,
         show: false,
         sort: [
           {
@@ -422,8 +421,6 @@ export const mockGlobalState: State = {
             sortDirection: 'desc',
           },
         ],
-        graphEventId: '',
-        sessionViewConfig: null,
         selectAll: false,
         id: TableId.test,
         title: '',
@@ -492,6 +489,16 @@ export const mockGlobalState: State = {
         ),
       },
       [SourcererScopeName.analyzer]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
+      [SourcererScopeName.explore]: {
         ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: getScopePatternListSelection(

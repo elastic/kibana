@@ -22,7 +22,7 @@ import {
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FindingsMisconfigurationPanelExpandableFlyoutPropsPreview } from '@kbn/cloud-security-posture';
-import { CspEvaluationBadge, getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { CspEvaluationBadge, useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 
 import {
   ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS,
@@ -54,57 +54,63 @@ interface MisconfigurationDetailsDistributionBarProps {
   reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
 }
 
-const getFindingsStats = (
-  passedFindingsStats: number,
-  failedFindingsStats: number,
-  filterFunction: (filter: string) => void,
-  currentFilter: string
-) => {
-  const misconfigurationStats: MisconfigurationDetailsDistributionBarProps[] = [];
-  if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
-  if (passedFindingsStats > 0) {
-    misconfigurationStats.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
-        {
-          defaultMessage: '{count, plural, one {Passed finding} other {Passed findings}}',
-          values: { count: passedFindingsStats },
-        }
-      ),
-      count: passedFindingsStats,
-      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
-      filter: () => {
-        filterFunction(MISCONFIGURATION_STATUS.PASSED);
-      },
-      isCurrentFilter: currentFilter === MISCONFIGURATION_STATUS.PASSED,
-      reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
-        filterFunction('');
-        event?.stopPropagation();
-      },
-    });
-  }
-  if (failedFindingsStats > 0) {
-    misconfigurationStats.push({
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
-        {
-          defaultMessage: '{count, plural, one {Failed finding} other {Failed findings}}',
-          values: { count: failedFindingsStats },
-        }
-      ),
-      count: failedFindingsStats,
-      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
-      filter: () => {
-        filterFunction(MISCONFIGURATION_STATUS.FAILED);
-      },
-      isCurrentFilter: currentFilter === MISCONFIGURATION_STATUS.FAILED,
-      reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
-        filterFunction('');
-        event?.stopPropagation();
-      },
-    });
-  }
-  return misconfigurationStats;
+const useGetFindingsStats = () => {
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
+
+  const getFindingsStats = (
+    passedFindingsStats: number,
+    failedFindingsStats: number,
+    filterFunction: (filter: string) => void,
+    currentFilter: string
+  ) => {
+    const misconfigurationStats: MisconfigurationDetailsDistributionBarProps[] = [];
+    if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
+    if (passedFindingsStats > 0) {
+      misconfigurationStats.push({
+        key: i18n.translate(
+          'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
+          {
+            defaultMessage: '{count, plural, one {Passed finding} other {Passed findings}}',
+            values: { count: passedFindingsStats },
+          }
+        ),
+        count: passedFindingsStats,
+        color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
+        filter: () => {
+          filterFunction(MISCONFIGURATION_STATUS.PASSED);
+        },
+        isCurrentFilter: currentFilter === MISCONFIGURATION_STATUS.PASSED,
+        reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+          filterFunction('');
+          event?.stopPropagation();
+        },
+      });
+    }
+    if (failedFindingsStats > 0) {
+      misconfigurationStats.push({
+        key: i18n.translate(
+          'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
+          {
+            defaultMessage: '{count, plural, one {Failed finding} other {Failed findings}}',
+            values: { count: failedFindingsStats },
+          }
+        ),
+        count: failedFindingsStats,
+        color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
+        filter: () => {
+          filterFunction(MISCONFIGURATION_STATUS.FAILED);
+        },
+        isCurrentFilter: currentFilter === MISCONFIGURATION_STATUS.FAILED,
+        reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+          filterFunction('');
+          event?.stopPropagation();
+        },
+      });
+    }
+    return misconfigurationStats;
+  };
+
+  return { getFindingsStats };
 };
 
 /**
@@ -208,6 +214,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const linkWidth = 40;
     const resultWidth = 74;
 
+    const { getFindingsStats } = useGetFindingsStats();
     const misconfigurationStats = getFindingsStats(
       passedFindings,
       failedFindings,

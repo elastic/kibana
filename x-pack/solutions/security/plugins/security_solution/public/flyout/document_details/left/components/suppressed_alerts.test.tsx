@@ -43,14 +43,17 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
 );
 const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = `${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`;
 
-const renderSuppressedAlerts = (alertSuppressionCount: number, isPreview: boolean = false) =>
+const renderSuppressedAlerts = (
+  alertSuppressionCount: number,
+  showInvestigateInTimeline: boolean = true
+) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
         <SuppressedAlerts
           alertSuppressionCount={alertSuppressionCount}
           dataAsNestedObject={mockDataAsNestedObject}
-          isPreview={isPreview}
+          showInvestigateInTimeline={showInvestigateInTimeline}
         />
       </DocumentDetailsContext.Provider>
     </TestProviders>
@@ -96,8 +99,8 @@ describe('<SuppressedAlerts />', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should not render investigate in timeline if in rule creation alert preview', () => {
-    const { getByTestId, queryByTestId } = renderSuppressedAlerts(5, true);
+  it('should not render investigate in timeline if showInvestigateInTimeline is false', () => {
+    const { getByTestId, queryByTestId } = renderSuppressedAlerts(5, false);
 
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toHaveTextContent('5 suppressed alert');

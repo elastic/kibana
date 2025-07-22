@@ -10,7 +10,7 @@ import { createAction } from '@reduxjs/toolkit';
 import type { DataViewManagerScopeName } from '../constants';
 import { SLICE_PREFIX } from '../constants';
 
-export const selectDataViewAsync = createAction<{
+export interface SelectDataViewAsyncPayload {
   id?: string | null;
   /**
    * Fallback patterns are used when the specific data view ID is undefined. This flow results in an ad-hoc data view creation
@@ -19,5 +19,11 @@ export const selectDataViewAsync = createAction<{
   /**
    * Specify one or more security solution scopes where the data view selection should be applied
    */
-  scope: DataViewManagerScopeName[];
-}>(`${SLICE_PREFIX}/selectDataView`);
+  scope: DataViewManagerScopeName;
+}
+
+// NOTE: You should not need to dispatch any actions by yourself. Instead, use one of the hooks that we built to faciliate data view selection and retrieval based on current scope.
+
+export const selectDataViewAsync = createAction<SelectDataViewAsyncPayload>(
+  `${SLICE_PREFIX}/selectDataView`
+);

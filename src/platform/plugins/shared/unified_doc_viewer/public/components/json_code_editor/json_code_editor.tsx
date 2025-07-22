@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './json_code_editor.scss';
-
 import React from 'react';
 import { JsonCodeEditorCommon } from './json_code_editor_common';
 

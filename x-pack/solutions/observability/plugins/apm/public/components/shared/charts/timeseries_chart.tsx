@@ -156,7 +156,7 @@ export function TimeseriesChart({
                     css={{ fontWeight: 'normal' }}
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="iInCircle" />
+                      <EuiIcon type="info" />
                     </EuiFlexItem>
                     <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                   </EuiFlexGroup>
@@ -232,6 +232,7 @@ export function TimeseriesChart({
               key={serie.title}
               id={serie.id || serie.title}
               groupId={serie.groupId}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"

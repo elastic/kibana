@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, memo } from 'react';
-import type { EuiSelectableOption, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
-import { EuiModalBody, EuiModalHeader, EuiCodeBlock } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
+import type { EuiMarkdownEditorUiPlugin, EuiSelectableOption } from '@elastic/eui';
+import { EuiCodeBlock, EuiModalBody, EuiModalHeader } from '@elastic/eui';
 
 import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
 import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
@@ -45,8 +45,8 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
   );
 
   const handleTimelineChange = useCallback(
-    (timelineTitle: string, timelineId: string | null, graphEventId?: string) => {
-      const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
+    (timelineTitle: string, timelineId: string | null) => {
+      const url = formatUrl(getTimelineUrl(timelineId ?? ''), {
         absolute: true,
         skipSearch: true,
       });

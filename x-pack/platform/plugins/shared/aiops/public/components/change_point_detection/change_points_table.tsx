@@ -8,9 +8,7 @@
 import {
   EuiBadge,
   EuiEmptyPrompt,
-  EuiIcon,
   EuiInMemoryTable,
-  EuiToolTip,
   type DefaultItemAction,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -28,7 +26,7 @@ import {
   type ChangePointAnnotation,
 } from './change_point_detection_context';
 import { type ChartComponentProps } from './chart_component';
-import { NoChangePointsWarning } from './no_change_points_warning';
+import { NoDataFoundWarning } from './no_data_warning';
 import { useCommonChartProps } from './use_common_chart_props';
 
 export interface ChangePointsTableProps {
@@ -181,24 +179,19 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       id: 'pValue',
       'data-test-subj': 'aiopsChangePointPValue',
       field: 'p_value',
-      name: (
-        <EuiToolTip
-          content={i18n.translate('xpack.aiops.changePointDetection.pValueTooltip', {
-            defaultMessage:
-              'Indicates how extreme the change is. Lower values indicate greater change.',
-          })}
-        >
-          <span>
-            {i18n.translate('xpack.aiops.changePointDetection.pValueLabel', {
-              defaultMessage: 'p-value',
-            })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
-      ),
+      name: i18n.translate('xpack.aiops.changePointDetection.pValueColumn', {
+        defaultMessage: 'p-value',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.aiops.changePointDetection.pValueTooltip', {
+          defaultMessage:
+            'Indicates how extreme the change is. Lower values indicate greater change.',
+        }),
+      },
       sortable: true,
       truncateText: false,
-      render: (pValue: ChangePointAnnotation['p_value']) => pValue.toPrecision(3),
+      render: (pValue: ChangePointAnnotation['p_value']) =>
+        pValue !== undefined ? pValue.toPrecision(3) : '-',
     },
     ...(fieldConfig.splitField
       ? [
@@ -339,7 +332,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             }
           />
         ) : (
-          <NoChangePointsWarning />
+          <NoDataFoundWarning />
         )
       }
     />

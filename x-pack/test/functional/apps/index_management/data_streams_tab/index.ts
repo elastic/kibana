@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Index Management: data streams tab', function () {
     loadTestFile(require.resolve('./data_streams_tab'));
+    loadTestFile(require.resolve('./index_mode'));
   });
 };

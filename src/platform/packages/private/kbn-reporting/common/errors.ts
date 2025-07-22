@@ -72,6 +72,13 @@ export class AuthenticationExpiredError extends ReportingError {
   }
 }
 
+export class MissingAuthenticationError extends ReportingError {
+  static code = 'missing_authentication_header_error' as const;
+  public get code(): string {
+    return MissingAuthenticationError.code;
+  }
+}
+
 export class QueueTimeoutError extends ReportingError {
   static code = 'queue_timeout_error' as const;
   public get code(): string {

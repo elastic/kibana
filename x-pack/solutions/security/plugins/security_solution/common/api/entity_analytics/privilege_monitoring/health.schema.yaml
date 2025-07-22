@@ -19,5 +19,18 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
+                  status:
+                    oneOf:
+                    - $ref: './common.schema.yaml#/components/schemas/EngineStatus'
+                    - type: string
+                      enum: [not_found]
+                  error:
+                    type: object
+                    required:
+                      - status
+                    properties:
+                      message:
+                        type: string
+
+                required:
+                  - status

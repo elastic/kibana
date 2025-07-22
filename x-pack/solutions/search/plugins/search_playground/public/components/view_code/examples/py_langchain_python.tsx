@@ -7,7 +7,8 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { PlaygroundForm } from '../../../types';
+import { FieldErrors } from 'react-hook-form';
+import { PlaygroundForm, PlaygroundFormFields } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
 import { elasticsearchQueryObject } from '../../../utils/user_query';
 import { getESQuery } from './utils';
@@ -31,9 +32,11 @@ export const getSourceFields = (sourceFields: PlaygroundForm['source_fields']) =
 
 export const LangchainPythonExmaple = ({
   formValues,
+  formErrors,
   clientDetails,
 }: {
   formValues: PlaygroundForm;
+  formErrors: FieldErrors<PlaygroundForm>;
   clientDetails: string;
 }) => {
   const { esQuery, hasContentFieldsArray, indices, prompt, sourceFields } = useMemo(() => {
@@ -43,7 +46,7 @@ export const LangchainPythonExmaple = ({
         elasticsearchQueryObject(
           formValues.elasticsearch_query,
           formValues.user_elasticsearch_query,
-          formValues.user_elasticsearch_query_validations
+          formErrors[PlaygroundFormFields.userElasticsearchQuery]
         )
       ),
       indices: formValues.indices.join(','),
@@ -54,7 +57,7 @@ export const LangchainPythonExmaple = ({
       }),
       ...fields,
     };
-  }, [formValues]);
+  }, [formValues, formErrors]);
   return (
     <EuiCodeBlock language="py" isCopyable overflowHeight="100%">
       {`## Install the required packages

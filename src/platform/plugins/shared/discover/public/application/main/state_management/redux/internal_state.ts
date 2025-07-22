@@ -9,39 +9,53 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
+import { throttle } from 'lodash';
 import {
   type PayloadAction,
   configureStore,
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
+  type AnyAction,
+  type Dispatch,
+  createListenerMiddleware,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import { type RuntimeStateManager } from './runtime_state';
+import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
 import {
   LoadingStatus,
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
   type TabState,
+  type RecentlyClosedTabState,
 } from './types';
-import { loadDataViewList, setTabs } from './actions';
-import { selectAllTabs, selectTab } from './selectors';
-import { createTabItem } from './utils';
+import { loadDataViewList } from './actions/data_views';
+import { selectTab } from './selectors';
+import type { TabsStorageManager } from '../tabs_storage_manager';
+import type { DiscoverAppState } from '../discover_app_state_container';
+
+const MIDDLEWARE_THROTTLE_MS = 300;
+const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
   lastPersistedGlobalState: {},
   dataViewId: undefined,
   isDataViewLoading: false,
-  dataRequestParams: {},
+  dataRequestParams: {
+    timeRangeAbsolute: undefined,
+    timeRangeRelative: undefined,
+    searchSessionId: undefined,
+  },
   overriddenVisContextAfterInvalidation: undefined,
   resetDefaultProfileState: {
     resetId: '',
     columns: false,
     rowHeight: false,
     breakdownField: false,
+    hideChart: false,
   },
   documentsRequest: {
     loadingStatus: LoadingStatus.Uninitialized,
@@ -55,6 +69,7 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
     loadingStatus: LoadingStatus.Uninitialized,
     result: {},
   },
+  uiState: {},
 };
 
 const initialState: DiscoverInternalState = {
@@ -63,7 +78,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
-  tabs: { byId: {}, allIds: [], unsafeCurrentId: '' },
+  tabs: { byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabIds: [] },
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
@@ -93,8 +108,17 @@ export const internalStateSlice = createSlice({
       state.initializationState = action.payload;
     },
 
-    setTabs: (state, action: PayloadAction<{ allTabs: TabState[]; selectedTabId: string }>) => {
-      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
+    setTabs: (
+      state,
+      action: PayloadAction<{
+        allTabs: TabState[];
+        selectedTabId: string;
+        recentlyClosedTabs: RecentlyClosedTabState[];
+      }>
+    ) => {
+      state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
+        Record<string, TabState | RecentlyClosedTabState>
+      >(
         (acc, tab) => ({
           ...acc,
           [tab.id]: tab,
@@ -103,6 +127,7 @@ export const internalStateSlice = createSlice({
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
+      state.tabs.recentlyClosedTabIds = action.payload.recentlyClosedTabs.map((tab) => tab.id);
     },
 
     setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>
@@ -140,6 +165,17 @@ export const internalStateSlice = createSlice({
     ) =>
       withTab(state, action, (tab) => {
         tab.dataRequestParams = action.payload.dataRequestParams;
+      }),
+
+    setTabAppStateAndGlobalState: (
+      state,
+      action: TabAction<{
+        appState: DiscoverAppState | undefined;
+        globalState: TabState['lastPersistedGlobalState'] | undefined;
+      }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.lastPersistedGlobalState = action.payload.globalState || {};
       }),
 
     setOverriddenVisContextAfterInvalidation: (
@@ -185,6 +221,30 @@ export const internalStateSlice = createSlice({
         tab.overriddenVisContextAfterInvalidation = undefined;
         state.expandedDoc = undefined;
       }),
+
+    setDataGridUiState: (
+      state,
+      action: TabAction<{ dataGridUiState: Partial<TabState['uiState']['dataGrid']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.dataGrid = action.payload.dataGridUiState;
+      }),
+
+    setFieldListUiState: (
+      state,
+      action: TabAction<{ fieldListUiState: Partial<TabState['uiState']['fieldList']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.fieldList = action.payload.fieldListUiState;
+      }),
+
+    setLayoutUiState: (
+      state,
+      action: TabAction<{ layoutUiState: Partial<TabState['uiState']['layout']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.layout = action.payload.layoutUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
@@ -193,38 +253,74 @@ export const internalStateSlice = createSlice({
   },
 });
 
-export interface InternalStateThunkDependencies {
+const createMiddleware = ({
+  tabsStorageManager,
+  runtimeStateManager,
+}: {
+  tabsStorageManager: TabsStorageManager;
+  runtimeStateManager: RuntimeStateManager;
+}) => {
+  const listenerMiddleware = createListenerMiddleware();
+
+  listenerMiddleware.startListening({
+    actionCreator: internalStateSlice.actions.setTabs,
+    effect: throttle(
+      (action) => {
+        const getTabAppState = (tabId: string) =>
+          selectTabRuntimeAppState(runtimeStateManager, tabId);
+        void tabsStorageManager.persistLocally(action.payload, getTabAppState);
+      },
+      MIDDLEWARE_THROTTLE_MS,
+      MIDDLEWARE_THROTTLE_OPTIONS
+    ),
+  });
+
+  listenerMiddleware.startListening({
+    actionCreator: internalStateSlice.actions.setTabAppStateAndGlobalState,
+    effect: throttle(
+      (action) => {
+        tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);
+      },
+      MIDDLEWARE_THROTTLE_MS,
+      MIDDLEWARE_THROTTLE_OPTIONS
+    ),
+  });
+
+  return listenerMiddleware;
+};
+
+export interface InternalStateDependencies {
   services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
   runtimeStateManager: RuntimeStateManager;
   urlStateStorage: IKbnUrlStateStorage;
+  tabsStorageManager: TabsStorageManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
-export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
-  const store = configureStore({
+export const createInternalStateStore = (options: InternalStateDependencies) => {
+  return configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         thunk: { extraArgument: options },
         serializableCheck: !IS_JEST_ENVIRONMENT,
-      }),
+      }).prepend(createMiddleware(options).middleware),
+    devTools: {
+      name: 'DiscoverInternalState',
+    },
   });
-
-  // TEMPORARY: Create initial default tab
-  const defaultTab: TabState = {
-    ...defaultTabState,
-    ...createTabItem(selectAllTabs(store.getState())),
-  };
-  store.dispatch(setTabs({ allTabs: [defaultTab], selectedTabId: defaultTab.id }));
-
-  return store;
 };
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
-export type InternalStateDispatch = InternalStateStore['dispatch'];
+export type InternalStateDispatch = ThunkDispatch<
+  DiscoverInternalState,
+  InternalStateDependencies,
+  AnyAction
+> &
+  Dispatch<AnyAction>;
 
 type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,

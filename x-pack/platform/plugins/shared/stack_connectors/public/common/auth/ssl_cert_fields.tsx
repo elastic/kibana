@@ -22,12 +22,14 @@ interface BasicAuthProps {
   readOnly: boolean;
   certTypeDefaultValue: SSLCertType;
   certType: SSLCertType;
+  isPfxEnabled?: boolean;
 }
 
 export const SSLCertFields: React.FC<BasicAuthProps> = ({
   readOnly,
   certTypeDefaultValue,
   certType,
+  isPfxEnabled = true,
 }) => (
   <EuiFlexGroup justifyContent="spaceBetween" data-test-subj="sslCertFields">
     <EuiFlexItem>
@@ -52,21 +54,25 @@ export const SSLCertFields: React.FC<BasicAuthProps> = ({
           <EuiTabs size="s" data-test-subj="webhookCertTypeTabs">
             <EuiTab
               onClick={() => field.setValue(SSLCertType.CRT)}
-              isSelected={field.value === SSLCertType.CRT}
+              isSelected={field.value === SSLCertType.CRT || !isPfxEnabled}
+              data-test-subj="webhookCertTypeCRTab"
             >
               {i18n.CERT_TYPE_CRT_KEY}
             </EuiTab>
-            <EuiTab
-              onClick={() => field.setValue(SSLCertType.PFX)}
-              isSelected={field.value === SSLCertType.PFX}
-            >
-              {i18n.CERT_TYPE_PFX}
-            </EuiTab>
+            {isPfxEnabled && (
+              <EuiTab
+                onClick={() => field.setValue(SSLCertType.PFX)}
+                isSelected={field.value === SSLCertType.PFX}
+                data-test-subj="webhookCertTypePFXTab"
+              >
+                {i18n.CERT_TYPE_PFX}
+              </EuiTab>
+            )}
           </EuiTabs>
         )}
       />
       <EuiSpacer size="s" />
-      {certType === SSLCertType.CRT && (
+      {(!isPfxEnabled || certType === SSLCertType.CRT) && (
         <EuiFlexGroup wrap>
           <EuiFlexItem css={{ minWidth: 200 }}>
             <UseField
@@ -112,7 +118,7 @@ export const SSLCertFields: React.FC<BasicAuthProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {certType === SSLCertType.PFX && (
+      {isPfxEnabled && certType === SSLCertType.PFX && (
         <UseField
           path="secrets.pfx"
           config={{

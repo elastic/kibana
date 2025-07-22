@@ -20,12 +20,12 @@ describe('useNewTabProps', () => {
 
     expect(tab1).toEqual({
       id: expect.any(String),
-      label: 'Untitled session 1',
+      label: 'Untitled 1',
     });
 
     expect(tab2).toEqual({
       id: expect.any(String),
-      label: 'Untitled session 2',
+      label: 'Untitled 2',
     });
 
     expect(tab1.id).not.toEqual(tab2.id);
@@ -37,12 +37,12 @@ describe('useNewTabProps', () => {
 
     expect(getNewTabDefaultProps()).toEqual({
       id: expect.any(String),
-      label: 'Untitled session 6',
+      label: 'Untitled 6',
     });
 
     expect(getNewTabDefaultProps()).toEqual({
       id: expect.any(String),
-      label: 'Untitled session 7',
+      label: 'Untitled 7',
     });
   });
 });

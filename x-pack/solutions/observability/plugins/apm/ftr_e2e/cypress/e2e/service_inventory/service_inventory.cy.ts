@@ -36,9 +36,7 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
-// Failing: See https://github.com/elastic/kibana/issues/219711
-// Failing: See https://github.com/elastic/kibana/issues/219712
-describe.skip('Service Inventory', () => {
+describe('Service Inventory', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
@@ -58,9 +56,7 @@ describe.skip('Service Inventory', () => {
         cy.intercept(method, endpoint).as(aliasName)
       );
       cy.loginAsViewerUser();
-      cy.visitKibana(serviceInventoryHref, {
-        localStorageOptions: [['apm.dismissedEntitiesInventoryCallout', 'false']],
-      });
+      cy.visitKibana(serviceInventoryHref);
     });
 
     it('has no detectable a11y violations on load', () => {
@@ -103,7 +99,7 @@ describe.skip('Service Inventory', () => {
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
         .contains('button', 'production')
-        .click();
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: mainAliasNames,
@@ -112,8 +108,6 @@ describe.skip('Service Inventory', () => {
     });
 
     it('when selecting a different time range and clicking the update button', () => {
-      cy.wait(mainAliasNames);
-
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
         moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
@@ -156,9 +150,6 @@ describe.skip('Service Inventory', () => {
           to: new Date(rangeTo).getTime(),
         })
       );
-    });
-
-    beforeEach(() => {
       cy.loginAsViewerUser();
     });
 
@@ -170,10 +161,8 @@ describe.skip('Service Inventory', () => {
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
         'detailedStatisticsRequest'
       );
-      cy.intercept('GET', '/internal/apm/services?*').as('mainStatisticsRequest');
 
       cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
-      cy.wait('@mainStatisticsRequest');
       cy.contains('Services');
       cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
@@ -186,6 +175,41 @@ describe.skip('Service Inventory', () => {
         expect(payload.request.body.serviceNames).eql(
           JSON.stringify(['18', '19', '2', '20', '21', '22', '23', '24', '25', '26'])
         );
+      });
+    });
+  });
+
+  describe('Check pagination with progressive loading enabled', () => {
+    before(() => {
+      // clean previous data created
+      synthtrace.clean();
+      const { rangeFrom, rangeTo } = timeRange;
+      synthtrace.index(
+        generateMultipleServicesData(
+          {
+            from: new Date(rangeFrom).getTime(),
+            to: new Date(rangeTo).getTime(),
+          },
+          500
+        )
+      );
+      // enable progressive loading
+      cy.loginAsEditorUser().then(() => {
+        cy.updateAdvancedSettings({
+          'observability:apmProgressiveLoading': 'low',
+        });
+      });
+      cy.visitKibana(serviceInventoryHref);
+    });
+
+    it('should navigate to the next page when clicking on the pagination button', () => {
+      cy.getByTestSubj('pagination-button-1').click();
+      cy.url().should('include', 'page=1');
+    });
+
+    after(() => {
+      cy.updateAdvancedSettings({
+        'observability:apmProgressiveLoading': 'off',
       });
     });
   });

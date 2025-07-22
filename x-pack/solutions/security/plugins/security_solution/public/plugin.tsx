@@ -20,12 +20,10 @@ import type {
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import type {
-  SecuritySolutionAppWrapperFeature,
-  SecuritySolutionCellRendererFeature,
-} from '@kbn/discover-shared-plugin/public/services/discover_features';
+import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
+import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -65,7 +63,8 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
-import { hasAccessToSecuritySolution } from './helpers_access';
+import { isSecuritySolutionAccessible } from './helpers_access';
+import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -79,7 +78,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   // Lazily instantiated dependencies
   private _subPlugins?: SubPlugins;
   private _store?: SecurityAppStore;
-  private _securityStoreForDiscover?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -138,7 +136,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
-        return renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
+        const unmountApp = renderApp({
+          ...params,
+          services,
+          store,
+          usageCollection,
+          subPluginRoutes,
+        });
+
+        return () => {
+          unmountApp();
+        };
       },
     });
 
@@ -232,7 +240,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getExternalReferenceAttachmentEndpointRegular()
     );
 
-    this.registerDiscoverSharedFeatures(core, plugins);
+    const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
+    cases?.attachmentFramework?.registerExternalReference(externalAttachmentType);
+
+    this.registerDiscoverSharedFeatures(plugins);
 
     return this.contract.getSetupContract();
   }
@@ -248,10 +259,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.stop();
   }
 
-  public async registerDiscoverSharedFeatures(
-    core: CoreSetup<StartPluginsDependencies, PluginStart>,
-    plugins: SetupPlugins
-  ) {
+  public async registerDiscoverSharedFeatures(plugins: SetupPlugins) {
     const { discoverShared } = plugins;
     const discoverFeatureRegistry = discoverShared.features.registry;
     const cellRendererFeature: SecuritySolutionCellRendererFeature = {
@@ -262,33 +270,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     };
 
-    const appWrapperFeature: SecuritySolutionAppWrapperFeature = {
-      id: 'security-solution-app-wrapper',
-      getWrapper: async () => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-
-        const services = await this.services.generateServices(coreStart, startPlugins);
-        const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
-        const securityStoreForDiscover = await this.getStoreForDiscover(
-          coreStart,
-          startPlugins,
-          subPlugins
-        );
-
-        const { createSecuritySolutionDiscoverAppWrapperGetter } =
-          await this.getLazyDiscoverSharedDeps();
-
-        return createSecuritySolutionDiscoverAppWrapperGetter({
-          core: coreStart,
-          services,
-          plugins: startPlugins,
-          store: securityStoreForDiscover,
-        });
-      },
-    };
-
     discoverFeatureRegistry.register(cellRendererFeature);
-    discoverFeatureRegistry.register(appWrapperFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {
@@ -390,31 +372,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return this._store;
   }
 
-  /**
-   * Lazily instantiate a `SecurityAppStore` for discover.
-   */
-  private async getStoreForDiscover(
-    coreStart: CoreStart,
-    startPlugins: StartPlugins,
-    subPlugins: StartedSubPlugins
-  ): Promise<SecurityAppStore> {
-    if (!this._securityStoreForDiscover) {
-      const { createStoreFactory } = await this.lazyApplicationDependencies();
-
-      this._securityStoreForDiscover = await createStoreFactory(
-        coreStart,
-        startPlugins,
-        subPlugins,
-        this.storage,
-        this.experimentalFeatures
-      );
-    }
-    if (startPlugins.timelines) {
-      startPlugins.timelines.setTimelineEmbeddedStore(this._securityStoreForDiscover);
-    }
-    return this._securityStoreForDiscover;
-  }
-
   private async registerActions(
     store: SecurityAppStore,
     history: H.History,
@@ -438,7 +395,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
     // This is necessary to hide security solution from the selectable solutions in the spaces UI
-    if (!hasAccessToSecuritySolution(capabilities)) {
+    if (!isSecuritySolutionAccessible(capabilities)) {
       this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
       // no need to register the links updater when the plugin is inaccessible. return early
       return;

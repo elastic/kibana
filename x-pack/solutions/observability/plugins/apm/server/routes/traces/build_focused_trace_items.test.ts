@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { WaterfallSpan, WaterfallTransaction } from '../../../common/waterfall/typings';
+import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { buildChildrenTree, buildFocusedTraceItems } from './build_focused_trace_items';
-import type { TraceItems } from './get_trace_items';
 
-const mockTraceDoc = (id: string, parentId?: string) =>
-  ({
-    span: { id },
-    parent: parentId ? { id: parentId } : undefined,
-  } as WaterfallTransaction | WaterfallSpan);
+const mockTraceDoc = (id: string, parentId?: string) => ({ id, parentId } as TraceItem);
 
 describe('buildChildrenTree', () => {
   it('returns an empty array when no children are found', () => {
@@ -104,23 +99,21 @@ describe('buildChildrenTree', () => {
 
 describe('buildFocusedTraceItems', () => {
   it('returns undefined if the focused trace document is not found', () => {
-    const traceItems = { traceDocs: [mockTraceDoc('1')] } as unknown as TraceItems;
+    const traceItems = [mockTraceDoc('1')];
     const result = buildFocusedTraceItems({ traceItems, docId: 'non-existent-id' });
     expect(result).toBeUndefined();
   });
 
   it('returns the correct focused trace document and its children', () => {
-    const traceItems = {
-      traceDocs: [
-        mockTraceDoc('1'),
-        mockTraceDoc('2', '1'),
-        mockTraceDoc('3', '1'),
-        mockTraceDoc('4', '2'),
-      ],
-    } as unknown as TraceItems;
+    const traceItems = [
+      mockTraceDoc('1'),
+      mockTraceDoc('2', '1'),
+      mockTraceDoc('3', '1'),
+      mockTraceDoc('4', '2'),
+    ];
     const result = buildFocusedTraceItems({ traceItems, docId: '1' });
     expect(result).toEqual({
-      rootTransaction: mockTraceDoc('1'),
+      rootDoc: mockTraceDoc('1'),
       parentDoc: undefined,
       focusedTraceDoc: mockTraceDoc('1'),
       focusedTraceTree: [
@@ -138,23 +131,19 @@ describe('buildFocusedTraceItems', () => {
   });
 
   it('returns the correct parent document if it exists', () => {
-    const traceItems = {
-      traceDocs: [mockTraceDoc('1'), mockTraceDoc('2', '1'), mockTraceDoc('3', '2')],
-    } as unknown as TraceItems;
+    const traceItems = [mockTraceDoc('1'), mockTraceDoc('2', '1'), mockTraceDoc('3', '2')];
     const result = buildFocusedTraceItems({ traceItems, docId: '3' });
     expect(result).toEqual({
-      rootTransaction: mockTraceDoc('1'),
+      rootDoc: mockTraceDoc('1'),
       parentDoc: mockTraceDoc('2', '1'),
       focusedTraceDoc: mockTraceDoc('3', '2'),
       focusedTraceTree: [],
     });
   });
 
-  it('handles root transactions correctly', () => {
-    const traceItems = {
-      traceDocs: [mockTraceDoc('1'), mockTraceDoc('2', '1'), mockTraceDoc('3', '2')],
-    } as unknown as TraceItems;
+  it('handles root document correctly', () => {
+    const traceItems = [mockTraceDoc('1'), mockTraceDoc('2', '1'), mockTraceDoc('3', '2')];
     const result = buildFocusedTraceItems({ traceItems, docId: '1' });
-    expect(result?.rootTransaction).toEqual(mockTraceDoc('1'));
+    expect(result?.rootDoc).toEqual(mockTraceDoc('1'));
   });
 });

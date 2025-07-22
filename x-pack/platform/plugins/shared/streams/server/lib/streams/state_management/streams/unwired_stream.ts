@@ -10,7 +10,7 @@ import type {
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
-import { isDslLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { StatusError } from '../../errors/status_error';
@@ -22,28 +22,28 @@ import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
 import type {
   StreamChangeStatus,
+  StreamChanges,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
-import { StreamActiveRecord, PrintableStream } from '../stream_active_record/stream_active_record';
+import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
+
+interface UnwiredStreamChanges extends StreamChanges {
+  processing: boolean;
+  lifecycle: boolean;
+}
 
 export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Definition> {
-  private _processingChanged: boolean = false;
-  private _lifeCycleChanged: boolean = false;
+  protected _changes: UnwiredStreamChanges = {
+    processing: false,
+    lifecycle: false,
+  };
 
   constructor(definition: Streams.UnwiredStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
 
-  clone(): StreamActiveRecord<Streams.UnwiredStream.Definition> {
+  protected doClone(): StreamActiveRecord<Streams.UnwiredStream.Definition> {
     return new UnwiredStream(cloneDeep(this._definition), this.dependencies);
-  }
-
-  toPrintable(): PrintableStream {
-    return {
-      ...super.toPrintable(),
-      processingChanged: this._processingChanged,
-      lifeCycleChanged: this._lifeCycleChanged,
-    };
   }
 
   protected async doHandleUpsertChange(
@@ -70,14 +70,14 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    this._processingChanged =
+    this._changes.processing =
       !startingStateStreamDefinition ||
       !_.isEqual(
         this._definition.ingest.processing,
         startingStateStreamDefinition.ingest.processing
       );
 
-    this._lifeCycleChanged =
+    this._changes.lifecycle =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
 
@@ -100,8 +100,12 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
+    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
+      return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+    }
+
     // Check for conflicts
-    if (this._lifeCycleChanged || this._processingChanged) {
+    if (this._changes.lifecycle || this._changes.processing) {
       try {
         const dataStreamResult =
           await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
@@ -134,19 +138,6 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       }
     }
 
-    if (this._lifeCycleChanged && isDslLifecycle(this.getLifeCycle())) {
-      const dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
-      if (dataStream.ilm_policy !== undefined) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(
-              'Cannot apply DSL lifecycle to a data stream that is already managed by an ILM policy'
-            ),
-          ],
-        };
-      }
-    }
     return { isValid: true, errors: [] };
   }
 
@@ -166,12 +157,12 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     if (this._definition.ingest.processing.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
-    if (!isInheritLifecycle(this.getLifeCycle())) {
+    if (!isInheritLifecycle(this.getLifecycle())) {
       actions.push({
         type: 'update_lifecycle',
         request: {
           name: this._definition.name,
-          lifecycle: this.getLifeCycle(),
+          lifecycle: this.getLifecycle(),
         },
       });
     }
@@ -182,11 +173,11 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     return actions;
   }
 
-  public hasChangedLifeCycle(): boolean {
-    return this._lifeCycleChanged;
+  public hasChangedLifecycle(): boolean {
+    return this._changes.lifecycle;
   }
 
-  public getLifeCycle(): IngestStreamLifecycle {
+  public getLifecycle(): IngestStreamLifecycle {
     return this._definition.ingest.lifecycle;
   }
 
@@ -196,11 +187,11 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     startingStateStream: UnwiredStream
   ): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
-    if (this._processingChanged && this._definition.ingest.processing.length > 0) {
+    if (this._changes.processing && this._definition.ingest.processing.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
 
-    if (this._processingChanged && this._definition.ingest.processing.length === 0) {
+    if (this._changes.processing && this._definition.ingest.processing.length === 0) {
       const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
@@ -223,12 +214,12 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
       });
     }
 
-    if (this._lifeCycleChanged) {
+    if (this._changes.lifecycle) {
       actions.push({
         type: 'update_lifecycle',
         request: {
           name: this._definition.name,
-          lifecycle: this.getLifeCycle(),
+          lifecycle: this.getLifecycle(),
         },
       });
     }

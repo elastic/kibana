@@ -23,9 +23,10 @@ import { PlaygroundHeaderDocs } from './playground_header_docs';
 import { Toolbar } from './toolbar';
 import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
-import { usePlaygroundParameters } from '../hooks/use_playground_parameters';
 
 interface HeaderProps {
+  pageMode: PlaygroundPageMode;
+  viewMode: PlaygroundViewMode;
   showDocs?: boolean;
   onModeChange: (mode: PlaygroundViewMode) => void;
   onSelectPageModeChange: (mode: PlaygroundPageMode) => void;
@@ -33,12 +34,13 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  pageMode,
+  viewMode,
   onModeChange,
   showDocs = false,
   isActionsDisabled = false,
   onSelectPageModeChange,
 }) => {
-  const { pageMode, viewMode } = usePlaygroundParameters();
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { euiTheme } = useEuiTheme();
   const options: Array<EuiButtonGroupOptionProps & { id: PlaygroundViewMode }> = [
@@ -83,6 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
               <FormattedMessage id="xpack.searchPlayground.pageTitle" defaultMessage="Playground" />
             </h2>
           </EuiTitle>
+
           {isSearchModeEnabled && (
             <EuiSelect
               data-test-subj="page-mode-select"

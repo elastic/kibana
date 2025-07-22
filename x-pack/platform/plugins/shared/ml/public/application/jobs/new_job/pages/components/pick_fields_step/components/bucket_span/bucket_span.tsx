@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
 
 import { BucketSpanInput } from './bucket_span_input';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -25,6 +25,9 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
   const [validation, setValidation] = useState(jobValidator.bucketSpan);
   const [estimating, setEstimating] = useState(false);
+  const titleId = useGeneratedHtmlId({
+    prefix: 'bucketSpan',
+  });
 
   useEffect(() => {
     jobCreator.bucketSpan = bucketSpan;
@@ -48,10 +51,11 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   }, [estimating]);
 
   return (
-    <Description validation={validation}>
+    <Description validation={validation} titleId={titleId}>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <BucketSpanInput
+            titleId={titleId}
             setBucketSpan={setBucketSpan}
             // @ts-expect-error bucketSpan is of type `estypes.Duration`
             bucketSpan={bucketSpan}

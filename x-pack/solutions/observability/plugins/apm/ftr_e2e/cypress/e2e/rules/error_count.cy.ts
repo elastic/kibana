@@ -69,7 +69,7 @@ describe('Rules', () => {
 
           // Create a rule in APM
           cy.visitKibana('/app/apm/services');
-          cy.contains('Alerts and rules').click();
+          cy.contains('Alerts').click();
           cy.contains('Create error count rule').click();
 
           // Check for the existence of these elements to make sure the form

@@ -19,14 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
-  const testSubjects = getService('testSubjects');
 
-  const { reporting, common, visualize, visEditor, share } = getPageObjects([
+  const { reporting, common, visualize, visEditor, exports } = getPageObjects([
     'reporting',
     'common',
     'visualize',
     'visEditor',
-    'share',
+    'exports',
   ]);
 
   describe('Visualize Reporting Screenshots', function () {
@@ -69,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
 
       it('is available if new', async () => {
@@ -78,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.clickAggBasedVisualizations();
         await visualize.clickAreaChart();
         await visualize.clickNewSearch('ecommerce');
-        await reporting.openExportTab();
+        await reporting.selectExportItem('PDF');
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
@@ -87,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectAggregation('Date Histogram');
         await visEditor.clickGo();
         await visualize.saveVisualization('my viz');
-        await reporting.openExportTab();
+        await reporting.selectExportItem('PDF');
         expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -120,19 +119,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await share.closeShareModal();
+        await exports.closeExportFlyout();
       });
 
-      // FAILING ARTIFACTS SNAPSHOT: https://github.com/elastic/kibana/issues/189590
-      it.skip('TSVB Gauge: PNG file matches the baseline image', async function () {
+      it('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');
         await visualize.loadSavedVisualization('[K7.6-eCommerce] Sold Products per Day', {
           navigateToVisualize: false,
         });
 
         log.debug('open png reporting panel');
-        await reporting.openExportTab();
-        await testSubjects.click('pngV2-radioOption');
+        await reporting.selectExportItem('PNG');
         log.debug('click generate report button');
         await reporting.clickGenerateReportButton();
 

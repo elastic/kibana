@@ -5,46 +5,42 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { mountWithTheme } from '../../utils/test_helpers';
+import { screen } from '@testing-library/react';
 import { CauseStacktrace } from './cause_stacktrace';
+import { renderWithTheme } from '../../utils/test_helpers';
 
 describe('CauseStacktrace', () => {
-  describe('render', () => {
-    describe('with no stack trace', () => {
-      it('renders without the accordion', () => {
-        const props = { id: 'testId', message: 'testMessage' };
+  it('with no stack trace renders without the accordion', () => {
+    const props = { id: 'testId', message: 'testMessage' };
 
-        expect(mountWithTheme(<CauseStacktrace {...props} />).find('CausedBy')).toHaveLength(1);
-      });
-    });
+    renderWithTheme(<CauseStacktrace {...props} />);
 
-    describe('with no message and a stack trace', () => {
-      it('says "Caused by …', () => {
-        const props = {
-          id: 'testId',
-          stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
-        };
+    expect(screen.getByText('testMessage')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument(); // Accordion button should not exist
+  });
 
-        expect(
-          mountWithTheme(<CauseStacktrace {...props} />)
-            .find('EuiTitle span')
-            .text()
-        ).toEqual('…');
-      });
-    });
+  it('with no message and a stack trace says "Caused by …"', () => {
+    const props = {
+      id: 'testId',
+      stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
+    };
 
-    describe('with a message and a stack trace', () => {
-      it('renders with the accordion', () => {
-        const props = {
-          id: 'testId',
-          message: 'testMessage',
-          stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
-        };
+    renderWithTheme(<CauseStacktrace {...props} />);
 
-        expect(shallow(<CauseStacktrace {...props} />).find('Accordion')).toHaveLength(1);
-      });
-    });
+    expect(screen.getByText('…')).toBeInTheDocument();
+  });
+
+  it('with a message and a stack trace renders with the accordion', () => {
+    const props = {
+      id: 'testId',
+      message: 'testMessage',
+      stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
+    };
+
+    renderWithTheme(<CauseStacktrace {...props} />);
+
+    expect(screen.getByRole('button')).toBeInTheDocument(); // Accordion button should exist
+    expect(screen.getByText('testMessage')).toBeInTheDocument();
   });
 });

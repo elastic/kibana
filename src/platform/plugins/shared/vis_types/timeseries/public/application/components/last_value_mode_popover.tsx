@@ -6,12 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import './last_value_mode_popover.scss';
-
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiSwitch } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface LastValueModePopoverProps {
   isIndicatorDisplayed: boolean;
@@ -29,6 +27,9 @@ export const LastValueModePopover = ({
   return (
     <EuiPopover
       className="tvbLastValueModePopover"
+      css={css`
+        height: auto;
+      `}
       button={
         <EuiButtonIcon
           iconType={'gear'}
@@ -41,7 +42,12 @@ export const LastValueModePopover = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <div className="tvbLastValueModePopoverBody">
+      <div
+        className="tvbLastValueModePopoverBody"
+        css={css`
+          width: 360px;
+        `}
+      >
         <EuiPopoverTitle>
           {i18n.translate('visTypeTimeseries.lastValueModePopover.title', {
             defaultMessage: 'Last value options',

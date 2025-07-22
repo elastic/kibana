@@ -88,3 +88,19 @@ function isHours(duration: string) {
 function isDays(duration: string) {
   return DAYS_REGEX.test(duration);
 }
+
+export function validateDuration(duration: string) {
+  if (duration.match(SECONDS_REGEX)) {
+    return;
+  }
+  if (duration.match(MINUTES_REGEX)) {
+    return;
+  }
+  if (duration.match(HOURS_REGEX)) {
+    return;
+  }
+  if (duration.match(DAYS_REGEX)) {
+    return;
+  }
+  return 'string is not a valid duration: ' + duration;
+}

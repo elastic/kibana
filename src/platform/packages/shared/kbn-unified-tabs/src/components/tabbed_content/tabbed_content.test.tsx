@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { TabbedContent, type TabbedContentProps } from './tabbed_content';
@@ -26,15 +26,33 @@ describe('TabbedContent', () => {
     initialItems,
     initialSelectedItemId,
     onChanged,
-  }: Pick<TabbedContentProps, 'initialItems' | 'initialSelectedItemId' | 'onChanged'>) => {
+  }: {
+    initialItems: TabbedContentProps['items'];
+    initialSelectedItemId?: TabbedContentProps['selectedItemId'];
+    onChanged: TabbedContentProps['onChanged'];
+  }) => {
+    const [{ managedItems, managedSelectedItemId }, setState] = useState<{
+      managedItems: TabbedContentProps['items'];
+      managedSelectedItemId: TabbedContentProps['selectedItemId'];
+    }>(() => ({
+      managedItems: initialItems,
+      managedSelectedItemId: initialSelectedItemId,
+    }));
     return (
       <TabbedContent
-        initialItems={initialItems}
-        initialSelectedItemId={initialSelectedItemId}
+        items={managedItems}
+        selectedItemId={managedSelectedItemId}
+        recentlyClosedItems={[]}
         createItem={() => NEW_TAB}
         getPreviewData={getPreviewDataMock}
         services={servicesMock}
-        onChanged={onChanged}
+        onChanged={(updatedState) => {
+          onChanged(updatedState);
+          setState({
+            managedItems: updatedState.items,
+            managedSelectedItemId: updatedState.selectedItem?.id,
+          });
+        }}
         renderContent={(item) => (
           <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
         )}
@@ -138,7 +156,11 @@ describe('TabbedContent', () => {
 
     screen.getByTestId('unifiedTabs_tabMenuItem_duplicate').click();
 
-    const duplicatedTab = { ...NEW_TAB, label: `${firstTab.label} (copy)` };
+    const duplicatedTab = {
+      ...NEW_TAB,
+      label: `${firstTab.label} (copy)`,
+      duplicatedFromId: firstTab.id,
+    };
 
     await waitFor(() => {
       expect(onChanged).toHaveBeenCalledWith({

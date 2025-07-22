@@ -19,14 +19,7 @@ export {
 export type { TableState, DataTableState, TableById } from './store/data_table/types';
 export type { DataTableModel, SubsetDataTableModel } from './store/data_table/model';
 
-export {
-  Direction,
-  tableEntity,
-  FILTER_OPEN,
-  TimelineTabs,
-  TableId,
-  TableEntityType,
-} from './common/types';
+export { Direction, tableEntity, FILTER_OPEN, TableId, TableEntityType } from './common/types';
 export type {
   TableIdLiteral,
   ViewSelection,

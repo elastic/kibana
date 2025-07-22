@@ -161,15 +161,6 @@ describe('extractMigrationInfo', () => {
   });
 
   describe('modelVersions', () => {
-    it('returns the correct switchToModelVersionAt', () => {
-      const type = createType({
-        switchToModelVersionAt: '8.8.0',
-      });
-      const output = extractMigrationInfo(type);
-
-      expect(output.switchToModelVersionAt).toEqual('8.8.0');
-    });
-
     it('returns a proper summary of the model versions', () => {
       const type = createType({
         modelVersions: {
@@ -319,7 +310,6 @@ describe('extractMigrationInfo', () => {
 
     it('returns the correct values for schemas', () => {
       const type = createType({
-        switchToModelVersionAt: '8.8.0',
         modelVersions: {
           1: {
             changes: [],
@@ -374,7 +364,6 @@ describe('extractMigrationInfo', () => {
             ],
           },
         },
-        switchToModelVersionAt: '8.8.0',
       });
 
       const output = extractMigrationInfo(type);
@@ -382,7 +371,6 @@ describe('extractMigrationInfo', () => {
       expect(output).toEqual(
         expect.objectContaining({
           migrationVersions: ['7.17.7', '8.0.2', '8.3.3'],
-          switchToModelVersionAt: '8.8.0',
           modelVersions: [
             {
               version: '1',

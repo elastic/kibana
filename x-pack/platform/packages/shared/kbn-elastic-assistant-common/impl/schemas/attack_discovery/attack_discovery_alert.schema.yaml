@@ -37,6 +37,21 @@ components:
         connectorName:
           description: The (human readable) name of the connector that generated the attack discovery
           type: string
+        alertStart:
+          description: The optional time the attack discovery alert was created
+          type: string
+        alertUpdatedAt:
+          description: The optional time the attack discovery alert was last updated
+          type: string
+        alertUpdatedByUserId:
+          description: The optional id of the user who last updated the attack discovery alert
+          type: string
+        alertUpdatedByUserName:
+          description: The optional username of the user who updated the attack discovery alert
+          type: string
+        alertWorkflowStatusUpdatedAt:
+          description: The optional time the attack discovery alert workflow status was last updated
+          type: string
         detailsMarkdown:
           description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
           type: string

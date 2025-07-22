@@ -180,7 +180,10 @@ describe('<Vulnerabilities />', () => {
           cspm: { status: 'not-deployed' },
           [VULN_MGMT_POLICY_TEMPLATE]: { status: 'not-installed' },
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
             { index: CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN, status: 'empty' },
           ],

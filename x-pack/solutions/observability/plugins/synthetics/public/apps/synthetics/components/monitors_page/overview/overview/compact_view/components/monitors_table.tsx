@@ -33,7 +33,7 @@ export const MonitorsTable = ({
 
   const getRowProps = useCallback(
     (monitor: OverviewStatusMetaData): EuiTableRowProps => {
-      const { configId, spaceId } = monitor;
+      const { configId, spaces } = monitor;
       const locationId = monitor.locations[0].id;
       const locationLabel = monitor.locations[0].label;
       return {
@@ -51,7 +51,7 @@ export const MonitorsTable = ({
                 id: configId,
                 location: locationLabel,
                 locationId,
-                spaceId,
+                spaces,
               })
             );
           }

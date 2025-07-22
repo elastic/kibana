@@ -20,6 +20,7 @@ interface Props {
   isClearable: boolean;
   testSubject?: string;
   placeholder?: string;
+  titleId: string;
 }
 
 export const SplitFieldSelect: FC<Props> = ({
@@ -29,6 +30,7 @@ export const SplitFieldSelect: FC<Props> = ({
   isClearable,
   testSubject,
   placeholder,
+  titleId,
 }) => {
   const { optionCss } = useFieldStatsTrigger();
   const options: DropDownLabel[] = fields.map(
@@ -63,6 +65,7 @@ export const SplitFieldSelect: FC<Props> = ({
       isClearable={isClearable}
       placeholder={placeholder}
       data-test-subj={testSubject}
+      titleId={titleId}
     />
   );
 };

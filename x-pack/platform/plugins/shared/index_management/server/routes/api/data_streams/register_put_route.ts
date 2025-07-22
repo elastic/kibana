@@ -77,3 +77,66 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
     }
   );
 }
+
+export function registerPutDataStreamFailureStore({
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
+  const bodySchema = schema.object({
+    dataStreams: schema.arrayOf(schema.string()),
+    dsFailureStore: schema.boolean(),
+  });
+
+  router.put(
+    {
+      path: addBasePath('/data_streams/configure_failure_store'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
+    async (context, request, response) => {
+      const { dataStreams, dsFailureStore } = request.body as TypeOf<typeof bodySchema>;
+
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        // Configure failure store for each data stream
+        const promises = dataStreams.map(async (dataStreamName) => {
+          const { headers } = await client.asCurrentUser.transport.request(
+            {
+              method: 'PUT',
+              path: `/_data_stream/${dataStreamName}/_options`,
+              body: {
+                failure_store: {
+                  enabled: dsFailureStore,
+                },
+              },
+            },
+            { meta: true }
+          );
+          return headers;
+        });
+
+        const results = await Promise.all(promises);
+        const warnings = results
+          .map((headers) =>
+            headers?.warning ? getEsWarningText(headers.warning) ?? headers.warning : null
+          )
+          .filter(Boolean);
+
+        return response.ok({
+          body: {
+            success: true,
+            ...(warnings.length > 0 ? { warning: warnings.join('; ') } : {}),
+          },
+        });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    }
+  );
+}

@@ -41,6 +41,8 @@ describe('InTableSearchControl', () => {
 
   it('should update correctly when deps change', async () => {
     const initialProps: InTableSearchControlProps = {
+      initialState: undefined,
+      onInitialStateChange: undefined,
       inTableSearchTerm: 'a',
       pageSize: 10,
       visibleColumns,
@@ -127,6 +129,8 @@ describe('InTableSearchControl', () => {
 
   it('should update correctly when search term changes', async () => {
     const initialProps: InTableSearchControlProps = {
+      initialState: undefined,
+      onInitialStateChange: undefined,
       inTableSearchTerm: 'aa',
       pageSize: null,
       visibleColumns,
@@ -155,6 +159,8 @@ describe('InTableSearchControl', () => {
 
   it('should change pages correctly', async () => {
     const initialProps: InTableSearchControlProps = {
+      initialState: undefined,
+      onInitialStateChange: undefined,
       inTableSearchTerm: 'abc',
       pageSize: 2,
       visibleColumns,
@@ -209,6 +215,8 @@ describe('InTableSearchControl', () => {
 
   it('should highlight the active match correctly', async () => {
     const initialProps: InTableSearchControlProps = {
+      initialState: undefined,
+      onInitialStateChange: undefined,
       inTableSearchTerm: 'aa',
       pageSize: 2,
       visibleColumns,
@@ -319,6 +327,8 @@ describe('InTableSearchControl', () => {
 
   it('should handle timeouts', async () => {
     const initialProps: InTableSearchControlProps = {
+      initialState: undefined,
+      onInitialStateChange: undefined,
       inTableSearchTerm: 'aa',
       pageSize: null,
       visibleColumns,
@@ -347,6 +357,8 @@ describe('InTableSearchControl', () => {
 
   it('should handle ignore errors in cells', async () => {
     const initialProps: InTableSearchControlProps = {
+      initialState: undefined,
+      onInitialStateChange: undefined,
       inTableSearchTerm: 'aa',
       pageSize: null,
       visibleColumns: [visibleColumns[0]],
@@ -372,6 +384,72 @@ describe('InTableSearchControl', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
+    });
+  });
+
+  it('should restore the initial state when provided', async () => {
+    const initialProps: InTableSearchControlProps = {
+      initialState: {
+        searchTerm: 'b',
+        activeMatch: {
+          matchPosition: 2,
+          matchIndexWithinCell: 0,
+          columnId: 'column0',
+          rowIndex: 1,
+        },
+      },
+      onInitialStateChange: jest.fn(),
+      inTableSearchTerm: 'b',
+      pageSize: null,
+      visibleColumns,
+      rows: testData,
+      renderCellValue: getRenderCellValueWrappedMock(testData),
+      getColumnIndexFromId: jest.fn(getColumnIndexFromId),
+      scrollToCell: jest.fn(),
+      shouldOverrideCmdF: jest.fn(),
+      onChange: jest.fn(),
+      onChangeCss: jest.fn(),
+      onChangeToExpectedPage: jest.fn(),
+    };
+
+    const { rerender } = render(<InTableSearchControl {...initialProps} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('2/6');
+    });
+
+    expect(initialProps.onChangeCss).toHaveBeenCalledWith(
+      expect.objectContaining({
+        styles: expect.stringContaining(
+          "[data-gridcell-row-index='1'][data-gridcell-column-id='column0']"
+        ),
+      })
+    );
+
+    expect(initialProps.onInitialStateChange).not.toHaveBeenCalled(); // Initial state should not trigger a change
+
+    rerender(<InTableSearchControl {...initialProps} inTableSearchTerm="aa" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
+    });
+
+    expect(initialProps.onChangeCss).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        styles: expect.stringContaining(
+          "[data-gridcell-row-index='0'][data-gridcell-column-id='column0']"
+        ),
+      })
+    );
+
+    expect(initialProps.onInitialStateChange).toHaveBeenLastCalledWith({
+      searchTerm: 'aa',
+      activeMatch: {
+        matchPosition: 1,
+        matchIndexWithinCell: 0,
+        columnId: 'column0',
+        rowIndex: 0,
+      },
     });
   });
 });

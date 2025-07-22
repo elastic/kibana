@@ -183,7 +183,7 @@ export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
           <>
             <EuiCallOut
               color="primary"
-              iconType="iInCircle"
+              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.fleet.deleteAgentPolicy.confirmModal.warningSharedIntegrationPolicies"

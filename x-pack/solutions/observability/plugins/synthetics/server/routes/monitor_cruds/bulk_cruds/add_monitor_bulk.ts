@@ -39,7 +39,8 @@ export const syncNewMonitorBulk = async ({
   privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
 }) => {
-  const { server, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+  const { server, syntheticsMonitorClient, monitorConfigRepository, request } = routeContext;
+  const { query } = request;
   let newMonitors: CreatedMonitors | null = null;
 
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
@@ -59,6 +60,7 @@ export const syncNewMonitorBulk = async ({
     const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
       monitorConfigRepository.createBulk({
         monitors: monitorsToCreate,
+        savedObjectType: query.savedObjectType,
       }),
       syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
     ]);
@@ -125,9 +127,9 @@ const rollBackNewMonitorBulk = async (
     await deleteMonitorAPI.execute({
       monitorIds: monitorsToCreate.map(({ id }) => id),
     });
-  } catch (e) {
+  } catch (error) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to rollback new monitors, Error: ${error.message}`, { error });
   }
 };
 
@@ -169,6 +171,6 @@ export const deleteMonitorIfCreated = async ({
     }
   } catch (e) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to delete monitor with id ${newMonitorId}`, { error: e });
   }
 };

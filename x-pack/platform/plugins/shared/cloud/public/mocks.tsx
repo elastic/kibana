@@ -34,6 +34,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       projectId: undefined,
       projectName: undefined,
       projectType: undefined,
+      productTier: undefined,
     },
   };
 }

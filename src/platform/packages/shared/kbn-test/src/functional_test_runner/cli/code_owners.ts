@@ -13,7 +13,16 @@ import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersEntries } from '@kbn/code-owners';
 import ignore from 'ignore';
 
-const TEST_DIRECTORIES = ['test', 'x-pack/test', 'x-pack/test_serverless'];
+const TEST_DIRECTORIES = [
+  'test',
+  'x-pack/test',
+  'x-pack/test_serverless',
+  'src/platform/test',
+  'x-pack/platform/test',
+  'x-pack/solutions/search/test',
+  'x-pack/solutions/observability/test',
+  'x-pack/solutions/security/test',
+];
 
 export async function checkFTRCodeOwnersCLI() {
   await run(

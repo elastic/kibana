@@ -87,6 +87,8 @@ export async function runFpm(
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
     `/etc/kibana`,
+    '--config-files',
+    `/etc/${envFolder}/kibana`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
@@ -148,5 +150,6 @@ export async function runFpm(
   await exec(log, 'fpm', args, {
     cwd: config.resolveFromRepo('.'),
     level: 'info',
+    build,
   });
 }

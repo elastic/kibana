@@ -30,6 +30,8 @@ import {
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { css } from '@emotion/react';
+import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
+import { AlertDeleteDescriptiveFormGroup } from '@kbn/response-ops-alerts-delete/components/descriptive_form_group';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -89,6 +91,7 @@ export interface RulesSettingsFlyoutProps {
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
   onClose: () => void;
   onSave?: () => void;
+  alertDeleteCategoryIds?: AlertDeleteCategoryIds[];
 }
 
 export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
@@ -96,6 +99,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
 
   const {
     application: { capabilities },
+    notifications,
     isServerless,
     http,
   } = useKibana().services;
@@ -105,6 +109,8 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       readFlappingSettingsUI,
       writeQueryDelaySettingsUI,
       readQueryDelaySettingsUI,
+      readAlertDeleteSettingsUI,
+      writeAlertDeleteSettingsUI,
     },
   } = capabilities;
 
@@ -164,6 +170,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   const canShowFlappingSettings = readFlappingSettingsUI;
   const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
   const canShowQueryDelaySettings = readQueryDelaySettingsUI;
+  const canShowAlertDeleteSettings = readAlertDeleteSettingsUI;
 
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,
@@ -217,7 +224,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   }
 
   const maybeRenderForm = () => {
-    if (!canShowFlappingSettings && !canShowQueryDelaySettings) {
+    if (!canShowFlappingSettings && !canShowQueryDelaySettings && !canShowAlertDeleteSettings) {
       return <RulesSettingsErrorPrompt />;
     }
     if (isFlappingLoading || isQueryDelayLoading) {
@@ -237,7 +244,6 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
             hasError={hasFlappingError}
           />
         )}
-        {isAlertDeletionSettingsEnabled && <div>Alert Deletion Settings Placeholder</div>}
         {isServerless && queryDelaySettings && (
           <>
             <EuiSpacer />
@@ -250,12 +256,32 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
             />
           </>
         )}
+        {isAlertDeletionSettingsEnabled &&
+          readAlertDeleteSettingsUI &&
+          props.alertDeleteCategoryIds && (
+            <>
+              <EuiSpacer />
+              <AlertDeleteDescriptiveFormGroup
+                services={{ http, notifications }}
+                categoryIds={props.alertDeleteCategoryIds}
+                isDisabled={!writeAlertDeleteSettingsUI}
+              />
+            </>
+          )}
       </>
     );
   };
 
   return (
-    <EuiFlyout type="push" data-test-subj="rulesSettingsFlyout" onClose={onCloseFlyout} size="s">
+    <EuiFlyout
+      type="push"
+      data-test-subj="rulesSettingsFlyout"
+      onClose={onCloseFlyout}
+      size="s"
+      aria-label={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.ruleSettingsLabel', {
+        defaultMessage: 'Rule settings',
+      })}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
           <h3>

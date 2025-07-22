@@ -240,7 +240,7 @@ export const useDataVisualizerGridData = (
           return;
         }
         const fieldName = field.displayName !== undefined ? field.displayName : field.name;
-        if (!OMIT_FIELDS.includes(fieldName)) {
+        if (field.type !== SUPPORTED_FIELD_TYPES.UNKNOWN && !OMIT_FIELDS.includes(fieldName)) {
           if (
             field.aggregatable === true &&
             !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&

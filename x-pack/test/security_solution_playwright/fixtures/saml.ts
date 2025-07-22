@@ -11,7 +11,7 @@ import { HostOptions, SamlSessionManager } from '@kbn/test';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-export const test = base.extend({
+export const test = base.extend<{ samlSessionManager: SamlSessionManager }>({
   samlSessionManager: async ({}, use) => {
     const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
 

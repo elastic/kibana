@@ -50,9 +50,7 @@ export function createOpenFileUploadLiteAction(
       flyoutContent,
     }: OpenFileUploadLiteContext) {
       try {
-        const { share, data } = plugins;
-
-        createFlyout(coreStart, share, data, {
+        createFlyout(coreStart, plugins, {
           onUploadComplete,
           autoAddInference,
           autoCreateDataView,

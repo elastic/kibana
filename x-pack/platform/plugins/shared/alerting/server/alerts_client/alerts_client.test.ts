@@ -77,6 +77,8 @@ import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_window
 import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import type { KibanaRequest } from '@kbn/core/server';
 import { rule } from './lib/test_fixtures';
+import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
+import { DEFAULT_MAX_ALERTS } from '../config';
 
 const date = '2023-03-28T22:27:28.159Z';
 const startedAtDate = '2023-03-28T13:00:00.000Z';
@@ -393,6 +395,20 @@ describe('Alerts Client', () => {
             hits: [],
           },
         });
+        clusterClient.msearch.mockResolvedValue({
+          took: 10,
+          responses: [
+            {
+              took: 10,
+              timed_out: false,
+              _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+              hits: {
+                total: { relation: 'eq', value: 0 },
+                hits: [],
+              },
+            },
+          ],
+        });
         clusterClient.bulk.mockResponse({
           errors: true,
           took: 201,
@@ -698,6 +714,41 @@ describe('Alerts Client', () => {
             request: fakeRequest,
             ruleTypeCategory: 'test',
             spaceId: 'space1',
+          });
+        });
+
+        test('should index new alerts even if updatePersistedAlertsWithMaintenanceWindowIds fails', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            isServerless: true,
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 2 new alerts
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          maintenanceWindowsService.getMaintenanceWindows.mockRejectedValue(
+            'Failed to fetch maintenance windows'
+          );
+
+          const result = await alertsClient.persistAlerts();
+
+          expect(logger.error).toHaveBeenCalledWith(
+            'Error updating maintenance window IDs:',
+            'Failed to fetch maintenance windows'
+          );
+
+          expect(result).toEqual({
+            alertIds: [],
+            maintenanceWindowIds: [],
           });
         });
 
@@ -2221,62 +2272,52 @@ describe('Alerts Client', () => {
       });
 
       describe('getMaintenanceWindowScopedQueryAlerts', () => {
-        const alertWithMwId1 = {
-          ...mockAAD,
-          _id: 'alert_id_1',
-          _source: {
-            ...mockAAD._source,
-            [ALERT_UUID]: 'alert_id_1',
-            [ALERT_MAINTENANCE_WINDOW_IDS]: ['mw1', 'mw2'],
-          },
-        };
-
-        const alertWithMwId2 = {
-          ...mockAAD,
-          _id: 'alert_id_2',
-          _source: {
-            ...mockAAD._source,
-            [ALERT_UUID]: 'alert_id_2',
-            [ALERT_MAINTENANCE_WINDOW_IDS]: ['mw1'],
-          },
-        };
-
         beforeEach(() => {
-          clusterClient.search.mockReturnValueOnce({
-            // @ts-ignore
-            hits: { total: { value: 2 }, hits: [alertWithMwId1, alertWithMwId2] },
-            aggregations: {
-              mw1: {
-                doc_count: 2,
-                alertId: {
-                  hits: {
-                    hits: [
-                      {
-                        _id: 'alert_id_1',
-                        _source: { [ALERT_UUID]: 'alert_id_1' },
+          clusterClient.msearch.mockResolvedValue({
+            took: 10,
+            responses: [
+              {
+                took: 10,
+                timed_out: false,
+                _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+                hits: {
+                  total: { relation: 'eq', value: 0 },
+                  hits: [
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: ['alert_id_1'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
                       },
-                      {
-                        _id: 'alert_id_2',
-                        _source: { [ALERT_UUID]: 'alert_id_2' },
+                    },
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: ['alert_id_2'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
-              mw2: {
-                doc_count: 1,
-                alertId: {
-                  hits: {
-                    hits: [
-                      {
-                        _id: 'alert_id_1',
-                        _source: { [ALERT_UUID]: 'alert_id_1' },
+              {
+                took: 10,
+                timed_out: false,
+                _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+                hits: {
+                  total: { relation: 'eq', value: 0 },
+                  hits: [
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: ['alert_id_1'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw2'],
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
-            },
+            ],
           });
         });
         test('should get the persistent lifecycle alerts affected by scoped query successfully', async () => {
@@ -2285,6 +2326,17 @@ describe('Alerts Client', () => {
           const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts(
             getParamsByMaintenanceWindowScopedQuery
           );
+
+          expect(clusterClient.msearch).toHaveBeenCalledWith({
+            ignore_unavailable: true,
+            index: expect.any(String),
+            searches: [
+              {},
+              expect.objectContaining({ size: DEFAULT_MAX_ALERTS }),
+              {},
+              expect.objectContaining({ size: DEFAULT_MAX_ALERTS }),
+            ],
+          });
 
           expect(result).toEqual({
             mw1: ['alert_id_1', 'alert_id_2'],
@@ -2350,6 +2402,59 @@ describe('Alerts Client', () => {
             )
           ).rejects.toThrowError(
             'Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.'
+          );
+        });
+
+        test('should skip the falied request returned by msearch', async () => {
+          clusterClient.msearch.mockResolvedValue({
+            took: 10,
+            responses: [
+              {
+                took: 10,
+                timed_out: false,
+                _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+                hits: {
+                  total: { relation: 'eq', value: 0 },
+                  hits: [
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: ['alert_id_1'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
+                      },
+                    },
+                    {
+                      _index: '.internal.alerts-test.alerts-default-000001',
+                      fields: {
+                        [ALERT_UUID]: ['alert_id_2'],
+                        [RUNTIME_MAINTENANCE_WINDOW_ID_FIELD]: ['mw1'],
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                error: {
+                  type: 'search_phase_execution_exception',
+                  reason: 'Failed to fetch alerts for maintenance windows with scoped query',
+                },
+                status: 500,
+              },
+            ],
+          });
+          const alertsClient = new AlertsClient(alertsClientParams);
+          // @ts-ignore
+          const result = await alertsClient.getMaintenanceWindowScopedQueryAlerts(
+            getParamsByMaintenanceWindowScopedQuery
+          );
+
+          expect(result).toEqual({
+            mw1: ['alert_id_1', 'alert_id_2'],
+          });
+
+          expect(logger.error).toHaveBeenCalledWith(
+            "Error fetching scoped query alerts for maintenance windows for test.rule-type:1 'rule-name': Failed to fetch alerts for maintenance windows with scoped query",
+            { tags: ['test.rule-type', '1', 'alerts-client'] }
           );
         });
       });

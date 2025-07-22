@@ -62,6 +62,7 @@ export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
 
 export type InheritedFieldDefinitionConfig = FieldDefinitionConfig & {
   from: string;
+  alias_for?: string;
 };
 
 export interface InheritedFieldDefinition {
@@ -70,7 +71,10 @@ export interface InheritedFieldDefinition {
 
 export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> = z.record(
   z.string(),
-  z.intersection(fieldDefinitionConfigSchema, z.object({ from: NonEmptyString }))
+  z.intersection(
+    fieldDefinitionConfigSchema,
+    z.object({ from: NonEmptyString, alias_for: z.optional(NonEmptyString) })
+  )
 );
 
 export type NamedFieldDefinitionConfig = FieldDefinitionConfig & {

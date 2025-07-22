@@ -98,6 +98,7 @@ export function SparkPlot({
       ) : (
         <LineSeries
           id="Sparkline"
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}

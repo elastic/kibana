@@ -9,3 +9,4 @@ export const ALERTS_SUMMARY_PROMPT = '[data-test-subj="alert-summary-landing-pag
 export const GET_STARTED_PAGE = '[data-test-subj="onboarding-hub-page"]';
 export const AI_SOC_NAVIGATION =
   '[data-test-subj="nav-item nav-item-security_solution_ai_nav nav-item-id-security_solution_ai_nav"]';
+export const APP_NOT_FOUND_PAGE = '[data-test-subj="appNotFoundPageContent"]';

@@ -9,7 +9,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { registerDeleteUnusedUrlsRoute } from './unused_urls_task/register_delete_unused_urls_route';
+import {
+  TASK_ID,
+  runDeleteUnusedUrlsTask,
+  scheduleUnusedUrlsCleanupTask,
+} from './unused_urls_task';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
 import {
@@ -20,6 +30,7 @@ import {
 } from './url_service';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
+import { ConfigSchema } from './config';
 
 /** @public */
 export interface SharePublicSetup {
@@ -31,11 +42,13 @@ export interface SharePublicStart {
   url: ServerUrlService;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SharePublicSetupDependencies {}
+export interface SharePublicSetupDependencies {
+  taskManager?: TaskManagerSetupContract;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SharePublicStartDependencies {}
+export interface SharePublicStartDependencies {
+  taskManager?: TaskManagerStartContract;
+}
 
 export class SharePlugin
   implements
@@ -47,13 +60,17 @@ export class SharePlugin
     >
 {
   private url?: ServerUrlService;
-  private version: string;
+  private readonly version: string;
+  private readonly logger: Logger;
+  private readonly config: ConfigSchema;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.version = initializerContext.env.packageInfo.version;
+    this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<ConfigSchema>();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { taskManager }: SharePublicSetupDependencies) {
     this.url = new UrlService({
       baseUrl: core.http.basePath.publicBaseUrl || core.http.basePath.serverBasePath,
       version: this.initializerContext.env.packageInfo.version,
@@ -74,6 +91,15 @@ export class SharePlugin
 
     registerUrlServiceSavedObjectType(core.savedObjects, this.url);
     registerUrlServiceRoutes(core, core.http.createRouter(), this.url);
+
+    registerDeleteUnusedUrlsRoute({
+      router: core.http.createRouter(),
+      core,
+      urlExpirationDuration: this.config.url_expiration.duration,
+      urlLimit: this.config.url_expiration.url_limit,
+      logger: this.logger,
+      isEnabled: this.config.url_expiration.enabled && Boolean(taskManager),
+    });
 
     core.uiSettings.register({
       [CSV_SEPARATOR_SETTING]: {
@@ -98,13 +124,42 @@ export class SharePlugin
       },
     });
 
+    if (taskManager) {
+      taskManager.registerTaskDefinitions({
+        [TASK_ID]: {
+          title: 'Unused URLs Cleanup',
+          description: "Deletes unused saved objects of type 'url'",
+          maxAttempts: 5,
+          createTaskRunner: () => ({
+            run: async () => {
+              await runDeleteUnusedUrlsTask({
+                core,
+                urlExpirationDuration: this.config.url_expiration.duration,
+                logger: this.logger,
+                urlLimit: this.config.url_expiration.url_limit,
+                isEnabled: this.config.url_expiration.enabled,
+              });
+            },
+          }),
+        },
+      });
+    }
+
     return {
       url: this.url,
     };
   }
 
-  public start() {
-    this.initializerContext.logger.get().debug('Starting plugin');
+  public start(_core: CoreStart, { taskManager }: SharePublicStartDependencies) {
+    this.logger.debug('Starting plugin');
+
+    if (taskManager) {
+      void scheduleUnusedUrlsCleanupTask({
+        taskManager,
+        checkInterval: this.config.url_expiration.check_interval,
+        isEnabled: this.config.url_expiration.enabled,
+      });
+    }
 
     return {
       url: this.url!,
@@ -112,6 +167,6 @@ export class SharePlugin
   }
 
   public stop() {
-    this.initializerContext.logger.get().debug('Stopping plugin');
+    this.logger.debug('Stopping plugin');
   }
 }

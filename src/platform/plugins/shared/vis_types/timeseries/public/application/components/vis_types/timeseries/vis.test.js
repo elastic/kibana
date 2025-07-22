@@ -16,7 +16,6 @@ import { createFieldFormatter } from '../../lib/create_field_formatter';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/public';
 
 jest.mock('@kbn/data-plugin/public/services', () => ({
   getUiSettings: () => ({ get: jest.fn() }),
@@ -112,19 +111,6 @@ describe('TimeseriesVisualization', () => {
     const setupTimeSeriesProps = (formatters, valueTemplates) => {
       return renderShallow(formatters, valueTemplates).find(TimeSeries).props();
     };
-
-    test('should enable new time axis if ignore daylight time setting is switched off', () => {
-      const component = renderShallow(['byte'], undefined, { ignore_daylight_time: false });
-      console.log(component.find('TimeSeries').dive().debug());
-      const xAxis = component.find('TimeSeries').dive().find('[id="bottom"]');
-      expect(xAxis.prop('style')).toEqual(MULTILAYER_TIME_AXIS_STYLE);
-    });
-
-    test('should disable new time axis for ignore daylight time setting', () => {
-      const component = renderShallow(['byte'], undefined, { ignore_daylight_time: true });
-      const xAxis = component.find('TimeSeries').dive().find('[id="bottom"]');
-      expect(xAxis.prop('style')).toBeUndefined();
-    });
 
     test('should return byte formatted value from yAxis formatter for single byte series', () => {
       const timeSeriesProps = setupTimeSeriesProps(['byte']);

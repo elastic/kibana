@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { isDeepEqual } from 'react-use/lib/util';
+import isDeepEqual from 'fast-deep-equal/react';
 
 import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { CloudDataAttributes, CloudSecurityAnswer, SolutionType } from '../../common/types';
+import {
+  CloudDataAttributes,
+  CloudSecurityAnswer,
+  SolutionType,
+  ResourceData,
+} from '../../common/types';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from '../routes/constants';
 
@@ -20,12 +25,14 @@ export const persistTokenCloudData = async (
     onboardingToken,
     solutionType,
     security,
+    resourceData,
   }: {
     logger?: Logger;
     returnError?: boolean;
     onboardingToken?: string;
     solutionType?: string;
     security?: CloudSecurityAnswer;
+    resourceData?: ResourceData;
   }
 ): Promise<void> => {
   let cloudDataSo = null;
@@ -48,7 +55,7 @@ export const persistTokenCloudData = async (
   const securityAttributes = cloudDataSo?.attributes.onboardingData?.security;
 
   try {
-    if ((onboardingToken || security) && cloudDataSo === null) {
+    if ((onboardingToken || security || resourceData) && cloudDataSo === null) {
       await savedObjectsClient.create<CloudDataAttributes>(
         CLOUD_DATA_SAVED_OBJECT_TYPE,
         {
@@ -57,13 +64,15 @@ export const persistTokenCloudData = async (
             token: onboardingToken ?? '',
             security,
           },
+          resourceData,
         },
         { id: CLOUD_DATA_SAVED_OBJECT_ID }
       );
     } else if (
-      cloudDataSo &&
-      (cloudDataSo?.attributes.onboardingData.token !== onboardingToken ||
-        !isDeepEqual(securityAttributes, security))
+      (cloudDataSo &&
+        (cloudDataSo?.attributes.onboardingData.token !== onboardingToken ||
+          !isDeepEqual(securityAttributes, security))) ||
+      !isDeepEqual(cloudDataSo?.attributes.resourceData, resourceData)
     ) {
       await savedObjectsClient.update<CloudDataAttributes>(
         CLOUD_DATA_SAVED_OBJECT_TYPE,
@@ -72,9 +81,10 @@ export const persistTokenCloudData = async (
           onboardingData: {
             solutionType:
               (solutionType as SolutionType) ?? cloudDataSo?.attributes.onboardingData.solutionType,
-            token: onboardingToken ?? cloudDataSo?.attributes.onboardingData.token,
+            token: onboardingToken ?? cloudDataSo?.attributes.onboardingData.token ?? '',
             security: security ?? securityAttributes,
           },
+          resourceData: resourceData ?? cloudDataSo?.attributes.resourceData,
         }
       );
     }

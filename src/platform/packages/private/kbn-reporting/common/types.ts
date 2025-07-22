@@ -11,7 +11,7 @@ import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance, RruleSchedule } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
@@ -66,6 +66,7 @@ export interface BaseParams {
   objectType: string;
   title: string;
   version: string; // to handle any state migrations
+  forceNow?: string;
   layout?: LayoutParams; // png & pdf only
   pagingStrategy?: CsvPagingStrategy; // csv only
 }
@@ -152,6 +153,7 @@ export interface ReportSource {
   created_at: string; // timestamp in UTC
   '@timestamp'?: string; // creation timestamp, only used for data streams compatibility
   status: JOB_STATUS;
+  scheduled_report_id?: string;
 
   /*
    * `output` is only populated if the report job is completed or failed.
@@ -168,6 +170,7 @@ export interface ReportSource {
    */
   kibana_name?: string; // for troubleshooting
   kibana_id?: string; // for troubleshooting
+  space_id?: string;
   timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
   max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
   started_at?: string; // timestamp in UTC
@@ -207,4 +210,25 @@ export interface LicenseCheckResults {
   enableLinks: boolean;
   showLinks: boolean;
   message: string;
+}
+
+export interface ScheduledReportApiJSON {
+  id: string;
+  created_at: string;
+  created_by: string;
+  enabled: boolean;
+  jobtype: string;
+  last_run: string | undefined;
+  next_run: string | undefined;
+  notification?: {
+    email?: {
+      to?: string[];
+      cc?: string[];
+      bcc?: string[];
+    };
+  };
+  payload?: ReportApiJSON['payload'];
+  schedule: RruleSchedule;
+  space_id: string;
+  title: string;
 }

@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
-  useEnableExperimental: () => ({ newDataViewPickerEnabled: true }),
+  useIsExperimentalFeatureEnabled: () => true,
 }));
 
 jest.mock('react-redux', () => {
@@ -28,11 +28,11 @@ describe('useInitDataViewPicker', () => {
   it('should render and dispatch an init action', () => {
     renderHook(
       () => {
-        return useInitDataViewManager();
+        return useInitDataViewManager()([]);
       },
       { wrapper: TestProviders }
     );
 
-    expect(useDispatch()).toHaveBeenCalledWith(sharedDataViewManagerSlice.actions.init());
+    expect(useDispatch()).toHaveBeenCalledWith(sharedDataViewManagerSlice.actions.init([]));
   });
 });

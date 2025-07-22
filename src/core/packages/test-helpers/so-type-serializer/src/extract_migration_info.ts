@@ -56,19 +56,21 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     typeof soType.modelVersions === 'function'
       ? soType.modelVersions()
       : soType.modelVersions ?? {};
-  const modelVersionIds = Object.keys(modelVersionMap);
-  const modelVersions = modelVersionIds.map<ModelVersionSummary>((version) => {
-    const entry = modelVersionMap[version];
-    return {
-      version,
-      changeTypes: [...new Set(entry.changes.map((change) => change.type))].sort(),
-      hasTransformation: hasTransformation(entry.changes),
-      newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(entry.changes))),
-      schemas: {
-        forwardCompatibility: !!entry.schemas?.forwardCompatibility,
-      },
-    };
-  });
+
+  const modelVersions: ModelVersionSummary[] = Object.entries(modelVersionMap).map(
+    ([version, modelVersion]) => {
+      const { changes, schemas } = modelVersion ?? { changes: [] };
+      return {
+        version,
+        changeTypes: [...new Set(changes.map((change) => change.type))].sort(),
+        hasTransformation: hasTransformation(changes),
+        newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(changes))),
+        schemas: {
+          forwardCompatibility: !!schemas?.forwardCompatibility,
+        },
+      };
+    }
+  );
 
   return {
     name: soType.name,
@@ -80,7 +82,6 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     mappings: getFlattenedObject(soType.mappings ?? {}),
     hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
     modelVersions,
-    switchToModelVersionAt: soType.switchToModelVersionAt,
   };
 };
 

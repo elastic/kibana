@@ -18,7 +18,7 @@ export const kibana7Palette = new KbnCategoricalPalette({
     KbnPalette.Amsterdam, // to assign to existing default palettes
   ],
   name: i18n.translate('palettes.kibana7.name', {
-    defaultMessage: 'Kibana 7',
+    defaultMessage: 'Kibana 7.0',
   }),
   colorCount: 10,
   colors: [

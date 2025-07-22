@@ -53,7 +53,7 @@ export {
   HJsonLang,
 };
 
-export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID } from './esql';
+export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from './esql';
 export {
   CONSOLE_THEME_ID,
   CONSOLE_OUTPUT_THEME_ID,

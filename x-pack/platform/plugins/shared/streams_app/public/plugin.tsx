@@ -71,6 +71,12 @@ export class StreamsAppPlugin
             PageTemplate,
             telemetryClient: this.telemetry.getClient(),
           };
+
+          // Trigger fetch to ensure the time filter has an up-to-date time range when the app mounts.
+          // This is done to ensure that dynamic time ranges (like "Last 15 minutes") are applied like they
+          // would be in discover or dashboards.
+          pluginsStart.data.query.timefilter.timefilter.triggerFetch();
+
           return (
             <StreamsApplication
               coreStart={coreStart}

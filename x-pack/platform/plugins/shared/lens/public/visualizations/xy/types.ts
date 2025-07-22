@@ -20,6 +20,7 @@ import type {
   IconPosition,
   FillStyle,
   YAxisConfig,
+  PointVisibility,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import {
@@ -96,6 +97,9 @@ export interface XYDataLayerConfig {
   simpleView?: boolean;
   yConfig?: YConfig[];
   splitAccessor?: string;
+  /**
+   * @deprecated use `colorMapping` config
+   */
   palette?: PaletteOutput;
   collapseFn?: CollapseFunction;
   xScaleType?: XScaleType;
@@ -173,6 +177,7 @@ export interface XYState {
   minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
+  pointVisibility?: PointVisibility;
 }
 
 export type State = XYState;

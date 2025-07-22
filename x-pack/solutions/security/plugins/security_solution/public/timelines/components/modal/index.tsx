@@ -33,6 +33,9 @@ interface TimelineModalProps {
    * If true the timeline modal will be visible
    */
   visible?: boolean;
+  /**
+   * Ref to the element opening/closing the modal
+   */
   openToggleRef: React.MutableRefObject<null | HTMLAnchorElement | HTMLButtonElement>;
 }
 
@@ -52,7 +55,7 @@ export const TimelineModal = React.memo<TimelineModalProps>(
     });
 
     const sibling: HTMLDivElement | null = useMemo(
-      () => (!visible ? ref?.current : null),
+      () => (!visible ? ref.current : null),
       [visible]
     );
 

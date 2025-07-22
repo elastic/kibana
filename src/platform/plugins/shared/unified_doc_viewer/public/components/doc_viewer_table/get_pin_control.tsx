@@ -11,7 +11,7 @@ import React from 'react';
 import {
   EuiButtonIcon,
   EuiDataGridControlColumn,
-  EuiScreenReaderOnly,
+  EuiIconTip,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -48,7 +48,7 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onToggl
         overflow: hidden;
       `}
     >
-      <EuiToolTip content={label} delay="long">
+      <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
         <EuiButtonIcon
           data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
           iconSize="m"
@@ -71,17 +71,15 @@ export const getPinColumnControl = ({
   rows: FieldRow[];
   onTogglePinned: (fieldName: string) => void;
 }): EuiDataGridControlColumn => {
+  const pinColumnHeader = i18n.translate('unifiedDocViewer.fieldsTable.pinControlColumnHeader', {
+    defaultMessage: 'Pin field column',
+  });
+
   return {
     id: 'pin_field',
     width: 32,
     headerCellRender: () => (
-      <EuiScreenReaderOnly>
-        <span>
-          {i18n.translate('unifiedDocViewer.fieldsTable.pinControlColumnHeader', {
-            defaultMessage: 'Pin field column',
-          })}
-        </span>
-      </EuiScreenReaderOnly>
+      <EuiIconTip aria-label={pinColumnHeader} type="info" content={pinColumnHeader} />
     ),
     rowCellRender: ({ rowIndex }) => {
       const row = rows[rowIndex];

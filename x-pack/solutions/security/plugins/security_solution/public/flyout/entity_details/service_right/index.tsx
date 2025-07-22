@@ -108,7 +108,7 @@ export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelPr
       <FlyoutNavigation
         flyoutIsExpandable={isRiskScoreExist}
         expandDetails={openPanelFirstTab}
-        isPreview={scopeId === TableId.rulePreview}
+        isRulePreview={scopeId === TableId.rulePreview}
       />
       <ServicePanelHeader serviceName={serviceName} observedService={observedService} />
       <ServicePanelContent

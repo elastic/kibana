@@ -4,25 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ActorRefFrom,
-  MachineImplementationsFrom,
-  SnapshotFrom,
-  assign,
-  fromEventObservable,
-  setup,
-} from 'xstate5';
+import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import {
-  FlattenRecord,
-  SampleDocument,
-  isSchema,
-  processorDefinitionSchema,
-} from '@kbn/streams-schema';
-import { isEmpty, isEqual } from 'lodash';
+import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { BehaviorSubject, map } from 'rxjs';
-import { TimeState } from '@kbn/es-query';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
 import {
@@ -31,22 +17,14 @@ import {
   SimulationEvent,
   Simulation,
   SimulationMachineDeps,
+  SampleDocumentWithUIAttributes,
 } from './types';
-import { PreviewDocsFilterOption } from './preview_docs_filter';
-import {
-  createSamplesFetchActor,
-  createSamplesFetchFailureNofitier,
-} from './samples_fetcher_actor';
+import { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
   createSimulationRunnerActor,
   createSimulationRunFailureNofitier,
 } from './simulation_runner_actor';
-import {
-  composeSamplingCondition,
-  getSchemaFieldsFromSimulation,
-  mapField,
-  unmapField,
-} from './utils';
+import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
 import { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
@@ -55,7 +33,7 @@ export interface ProcessorEventParams {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
-const hasSamples = (samples: SampleDocument[]) => !isEmpty(samples);
+const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
 const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
   isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
@@ -69,29 +47,42 @@ export const simulationMachine = setup({
     events: {} as SimulationEvent,
   },
   actors: {
-    fetchSamples: getPlaceholderFor(createSamplesFetchActor),
     runSimulation: getPlaceholderFor(createSimulationRunnerActor),
-    subscribeTimeUpdates: getPlaceholderFor(createTimeUpdatesActor),
   },
   actions: {
-    notifySamplesFetchFailure: getPlaceholderFor(createSamplesFetchFailureNofitier),
     notifySimulationRunFailure: getPlaceholderFor(createSimulationRunFailureNofitier),
-    storeTimeUpdated: getPlaceholderFor(createSimulationRunFailureNofitier),
     storePreviewDocsFilter: assign((_, params: { filter: PreviewDocsFilterOption }) => ({
       previewDocsFilter: params.filter,
     })),
     storeProcessors: assign((_, params: ProcessorEventParams) => ({
       processors: params.processors,
     })),
-    storeSamples: assign((_, params: { samples: SampleDocument[] }) => ({
+    storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
     })),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
     })),
-    deriveSamplingCondition: assign(({ context }) => ({
-      samplingCondition: composeSamplingCondition(context.processors),
+    storeExplicitlyEnabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
+      explicitlyEnabledPreviewColumns: params.columns,
+      explicitlyDisabledPreviewColumns: context.explicitlyDisabledPreviewColumns.filter(
+        (col) => !params.columns.includes(col)
+      ),
     })),
+    storeExplicitlyDisabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
+      explicitlyDisabledPreviewColumns: params.columns,
+      explicitlyEnabledPreviewColumns: context.explicitlyEnabledPreviewColumns.filter(
+        (col) => !params.columns.includes(col)
+      ),
+    })),
+    storePreviewColumnsOrder: assign(({ context }, params: { columns: string[] }) => ({
+      previewColumnsOrder: params.columns,
+    })),
+    storePreviewColumnsSorting: assign(
+      (_, params: { sorting: SimulationContext['previewColumnsSorting'] }) => ({
+        previewColumnsSorting: params.sorting,
+      })
+    ),
     deriveDetectedSchemaFields: assign(({ context }) => ({
       detectedSchemaFields: context.simulation
         ? getSchemaFieldsFromSimulation(
@@ -107,66 +98,120 @@ export const simulationMachine = setup({
     unmapField: assign(({ context }, params: { fieldName: string }) => ({
       detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
     })),
-    resetSimulation: assign({
+    resetSimulationOutcome: assign({
       processors: [],
       detectedSchemaFields: [],
+      explicitlyEnabledPreviewColumns: [],
+      explicitlyDisabledPreviewColumns: [],
+      previewColumnsOrder: [],
       simulation: undefined,
-      samplingCondition: composeSamplingCondition([]),
       previewDocsFilter: 'outcome_filter_all',
     }),
+    resetProcessors: assign({ processors: [] }),
+    resetSamples: assign({ samples: [] }),
   },
   delays: {
-    debounceTime: 800,
+    processorChangeDebounceTime: 800,
   },
   guards: {
-    canSimulate: ({ context }, params: ProcessorEventParams) =>
-      hasSamples(context.samples) && hasValidProcessors(params.processors),
+    canSimulate: ({ context }) =>
+      hasSamples(context.samples) && hasValidProcessors(context.processors),
     hasProcessors: (_, params: ProcessorEventParams) => !isEmpty(params.processors),
-    hasSamples: ({ context }) => hasSamples(context.samples),
-    hasValidProcessors: (_, params: ProcessorEventParams) => hasValidProcessors(params.processors),
-    shouldRefetchSamples: ({ context }) =>
-      Boolean(
-        context.samplingCondition &&
-          !isEqual(context.samplingCondition, composeSamplingCondition(context.processors))
-      ),
+    '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
+      !hasSamples(params.samples),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYgnzACUdiYA6DABwrzAG0AGAXUVCcKoCJPiAAeiAIwB2AGwAWetICsnTgA5Js2cuUBOZQCYANCACeiALSTOh+rfUBmWdL3TpzzkYC+306kxcYTIA7HwiYnoAYwALWhgABQAnMAA3FDAAdwARQijYADEULDYkrl4kEAEhCNEJBFlHSXplFXVDPRl1ZVlNUwsES2VJR3oRw0dDeXUXR04ZX390MODSUKCI+hTYMDxy0WqUYLrEKdcx9T15ecNJPVlO6X6rQ3V6SddDdzd5K-llRyLEDrcIkUhMJJ5OCwQhJWD0ABU+0qh2OlXqkhmikc8kkhmU6hm+n08meg3xzU4-3aUy0kmmyiBINWEKhsBhSWitCiYCwyP4giOtXRpxGynoBhmhkMsipLlJ5isb2U13u8mk6qmRl0TOWGzBrJ57Nh0TidA4PAOgrRoHqhL07w6elpBL0GjJlkcDoBvWkcr0k0ahl1gVBZEN0JNEF5uwtFQFNREIoQ0oU9GmOlusr9KrJNkULlkmLdk2l6g0IZWEXBkKNHPo0awsfYknjVWtwttpzmdnkuNubk6KscZL7dkL8g+-3V0hllf1kRQxCFOCwKAAXkuoKR+e3E8QTggRo43r9NGOs6m87J6L0epxnZcFPIOvOw-Qlyu15u6DvW1b90PMVmnUdwvC8GxnSuMkXCUSCvE6B4mimN9ggbMAACNCAwYgoi3ABhM0YFgGs2XrWJ4jjAChSTLsEF+aQJXuTgNT0J9Og9HF7FVV4Az9RwCVkVDNmjLCcLwuhCMokixFgPBKHoHAADNSgAClE7DcLAAAVdAwAASjWPV3w08SCKIuBd1RTtxCkWwQJfRxpFAjwNUmPNOBvGQix0dUNHuV5hJIdCxNw8zpNIWT5LYRSVLAJJ1MwzSeV0tADKM0M0NMsLJIs2AWzbazaNso8WJvbR-leTRhlkExFRTXp7G0bQOmkcZXCEvxgWMtCsEIHAIC3ABlHA0CYJsSIgEgwA-YhUkIABrGbYFG8a4AKXZYnigBBKI8FhKyO2KjEVE4JrGnmRwvSuiYPLsVRJ1eB9XAEq4gsiPqBuG1aJtIeLIU5cb8CU2E0HoFaxomja8C2pJdv2spLRRI6D2TQx5jeSQeh6X4XxkBUBhse6qUmctB1e+R3sU9l4oIOghp6iIqDAABHDAUBSNLiDwEjDsA5N6SaehbhYr08SlOqBiLM7CU8kYri+Nr1CpnAaaSOmoAZzKmdZ9nObAbnef-ZH+bowWzvslVZVuFVMRgnRhZmOR3AZS6qaSHDl3pxmwSm4gZqXealvBn3iCoT2dr2g6kYTGjUbouQb1UVQ5g8IwVFkUdJiUUDdCcAE3Wmd3PeG0O-qSAH6CBvAQaSMHmSZiO4ajxHCpRw9nbGDx5kHbQvT0MkCUYrHrnkHR3C0QEgWIQho3gSoG+Kor45KvsHT0ZjWPYyROJPFpqSxhRug1Tgp6WbXgs-AhVw3LdqJtEqxRvOZBJUMeRnUAmlRvNr+-+XRMTlmkFTFAEAmz3xsvUQs9BP7qjxP8DeFIyQakUAhF2fxdAbyptlCSUApLmnnrHB+doRhKF6P8ekWhuh23qpILG6YaqT0QqfZ0VNPqDXpj9OAEDjpSF6M0CYk41StC9EYD01wmq2FlAGB4rw+yUy6ovSIqsdjq1LhfMOusOZgC5jzHhK8MQPAdNoDebhpTox6E8eqXxRi3BGM5U+E8R7F2IF7TWod9FAVsGdAk-9nSunlIPboYw5jZjmE5ekytfDeCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoBjACx2JgAUAnMANxTAHcAIoTqwAYiix4w7ANoAGALqJQAB0KpqxZSAAeiAGwBmOTQDsAJnP65AFnMAOAIw2598wBoQAT0SOArFY09vqmjmGGNvZy+vY2AL5xnhTY+ERkyVRpNJywYHjySkggahpp2noIALSWNEYAnHX2fnX6djHRNp4+CI76zjRycobNFo729sOmCUnoKZrks5m0nHRgKFxgAPqwOGgqWHAF2iUomuWI1ea1hg1NLW1RrV2+poamNC6N5n5+hs4u8USIAyqRIC0ooOI2TAq3WWx2ewOsBkjkKqnUpzKRQqfhs7zq5j+hn0dUihkM5kczwQrT8NEsch++gC9xsfmmwMWkPBcyyKzWG22u32h3MaOKGLO2IuNXqjWarSsj063l8wRMTmsv1iAICHJB8xU7GEcFghHYsBoACojkUTlLQBVLtdbgqHh1qc5KQM6q9hrZzHi7PquYbjatYGb2PRmKssLb0aUSOcqrKbvL7kqPaqen5HO8frY-NFHHI6sNDCGIWGTZHzfQmCwwAmJUmtNKqnZHEFTAFHFZGhEbL7qTZ+pZ9MzYsFxvpzFXeWCjbWozQIGADlIW-asY6LjcbDRjKXeuY6qWKXVqbT6eZGYr7HVi8GgQa0qRlxHV+vN83UcdJV3XQZSuOU7kVdonhzRwn3eAd-EMR9zFMYJ9AXJYoRQCADh5DCaAAM14LAIEtNAcBUbdAOTDtBwGQkbGJQkjG+a8JmuRlA0aYcbnsdDIRoLCcLfWhCI3EiaAwYgyIoxQALbFNaLkejGOJCk-GpFCTFcYl7FCfsfgaPjNDXMAACNCEkugUBYABhRsYFgUgdFgPB8DAGgcHwqR2AACk-U1zTs5gYAEMyLOIVYABV0DAABKXD+PXczLOsqAgqbZFZLtKj2z3BBFOUudVJY6CbneG5GV6Nw3jeKZX1DLIcEjaQCBYAAlMAAEcMBQTg0DAYg8Ecyj5I7UsGnpCJkMiX0YLnT1-HeGJTBsGwjCGH5AyMxrmvYVqoA67rerAfrBuG-9stGvKwjCGgfjW4YGKUlDDGvN52NxRDkIJX1tuWSTiFSgBlBqwQgEh3OsrhCAAa3c4TiDagHpAAQToPBzRGzFqLy4d7BoMYVvLZDhhHHN7jMJw7y9AldLqP6oXYAHgdBshpGNaN9nwfDzTQGgEaR4hiFR9HMayxNsdy4CEDxgndO4kmRmpXTuwpR4KUGUlCQSIFiEIdd4CKBG5MllNKjWuoez7AcJlWsnunzcqLFGKx82sAkGYE7CwBNh1paMfG5DGVxTDqaIzz+akrEPXTkOD30-GZJ9PaS8KrNs+y4F9oCKiKmgw4JSdVv8RxhmpAI6WZIY7HJL6+k9prcj21LDp6vqBqG7Ocel893jkImmn7sc8XscviXz5xGVMUwy0QtlPaZoWWerICd27iown0AZcRJBik7ZUecyQj4z2YomZ7LHW4iAA */
   id: 'simulation',
-  context: ({ input, self, spawn }) => ({
+  context: ({ input }) => ({
     detectedSchemaFields: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
+    explicitlyDisabledPreviewColumns: [],
+    explicitlyEnabledPreviewColumns: [],
+    previewColumnsOrder: [],
+    previewColumnsSorting: { fieldName: undefined, direction: 'asc' },
     processors: input.processors,
     samples: [],
-    samplingCondition: composeSamplingCondition(input.processors),
     streamName: input.streamName,
   }),
-  initial: 'loadingSamples',
-  invoke: {
-    id: 'subscribeTimeUpdatesActor',
-    src: 'subscribeTimeUpdates',
-  },
+  initial: 'idle',
   on: {
-    'dateRange.update': '.loadingSamples',
     'simulation.changePreviewDocsFilter': {
       actions: [{ type: 'storePreviewDocsFilter', params: ({ event }) => event }],
     },
     'simulation.reset': {
       target: '.idle',
-      actions: [{ type: 'resetSimulation' }],
+      actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetProcessors' }],
+    },
+    'simulation.receive_samples': [
+      {
+        guard: { type: '!hasSamples', params: ({ event }) => event },
+        target: '.idle',
+        actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSamples' }],
+      },
+      {
+        guard: {
+          type: 'hasProcessors',
+          params: ({ context }) => ({ processors: context.processors }),
+        },
+        target: '.assertingRequirements',
+        actions: [{ type: 'storeSamples', params: ({ event }) => event }],
+      },
+      {
+        target: '.idle',
+        actions: [{ type: 'storeSamples', params: ({ event }) => event }],
+      },
+    ],
+    'previewColumns.updateExplicitlyEnabledColumns': {
+      actions: [
+        {
+          type: 'storeExplicitlyEnabledPreviewColumns',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
+    },
+    'previewColumns.updateExplicitlyDisabledColumns': {
+      actions: [
+        {
+          type: 'storeExplicitlyDisabledPreviewColumns',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
+    },
+    'previewColumns.order': {
+      actions: [
+        {
+          type: 'storePreviewColumnsOrder',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
+    },
+    'previewColumns.setSorting': {
+      actions: [
+        {
+          type: 'storePreviewColumnsSorting',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
     },
     // Handle adding/reordering processors
     'processors.*': {
-      target: '.assertingSimulationRequirements',
+      target: '.assertingRequirements',
       actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
     'processor.cancel': {
-      target: '.assertingSimulationRequirements',
+      target: '.assertingRequirements',
       actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
     'processor.change': {
       target: '.debouncingChanges',
+      reenter: true,
+      description: 'Re-enter debouncing state and reinitialize the delayed processing.',
       actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
     },
     'processor.delete': [
@@ -175,12 +220,12 @@ export const simulationMachine = setup({
           type: 'hasProcessors',
           params: ({ event }) => ({ processors: event.processors }),
         },
-        target: '.assertingSimulationRequirements',
+        target: '.assertingRequirements',
         actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
       },
       {
         target: '.idle',
-        actions: [{ type: 'resetSimulation' }],
+        actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetProcessors' }],
       },
     ],
   },
@@ -188,80 +233,24 @@ export const simulationMachine = setup({
     idle: {
       on: {
         'simulation.fields.map': {
-          target: 'assertingSimulationRequirements',
+          target: 'assertingRequirements',
           actions: [{ type: 'mapField', params: ({ event }) => event }],
         },
         'simulation.fields.unmap': {
-          target: 'assertingSimulationRequirements',
+          target: 'assertingRequirements',
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
         },
       },
     },
 
     debouncingChanges: {
-      on: {
-        'processor.change': {
-          target: 'debouncingChanges',
-          actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
-          description: 'Re-enter debouncing state and reinitialize the delayed processing.',
-          reenter: true,
-        },
-      },
       after: {
-        debounceTime: [
-          {
-            guard: 'shouldRefetchSamples',
-            target: 'loadingSamples',
-            actions: [{ type: 'deriveSamplingCondition' }],
-          },
-          { target: 'assertingSimulationRequirements' },
-        ],
+        processorChangeDebounceTime: 'assertingRequirements',
       },
     },
 
-    loadingSamples: {
-      invoke: {
-        id: 'samplesFetcherActor',
-        src: 'fetchSamples',
-        input: ({ context }) => ({
-          condition: context.samplingCondition,
-          streamName: context.streamName,
-        }),
-        onDone: [
-          {
-            guard: {
-              type: 'hasProcessors',
-              params: ({ context }) => ({ processors: context.processors }),
-            },
-            target: 'assertingSimulationRequirements',
-            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
-          },
-          {
-            target: 'idle',
-            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
-          },
-        ],
-        onError: {
-          target: 'idle',
-          actions: [
-            { type: 'storeSamples', params: () => ({ samples: [] }) },
-            { type: 'notifySamplesFetchFailure' },
-          ],
-        },
-      },
-    },
-
-    assertingSimulationRequirements: {
-      always: [
-        {
-          guard: {
-            type: 'canSimulate',
-            params: ({ context }) => ({ processors: context.processors }),
-          },
-          target: 'runningSimulation',
-        },
-        { target: 'idle' },
-      ],
+    assertingRequirements: {
+      always: [{ guard: 'canSimulate', target: 'runningSimulation' }, { target: 'idle' }],
     },
 
     runningSimulation: {
@@ -270,7 +259,9 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples.map(flattenObjectNestedLast) as FlattenRecord[],
+          documents: context.samples
+            .map((doc) => doc.document)
+            .map(flattenObjectNestedLast) as FlattenRecord[],
           processors: context.processors,
           detectedFields: context.detectedSchemaFields,
         }),
@@ -293,19 +284,11 @@ export const simulationMachine = setup({
 export const createSimulationMachineImplementations = ({
   streamsRepositoryClient,
   toasts,
-  timeState$,
 }: SimulationMachineDeps): MachineImplementationsFrom<typeof simulationMachine> => ({
   actors: {
-    fetchSamples: createSamplesFetchActor({ streamsRepositoryClient, timeState$ }),
     runSimulation: createSimulationRunnerActor({ streamsRepositoryClient }),
-    subscribeTimeUpdates: createTimeUpdatesActor({ timeState$ }),
   },
   actions: {
-    notifySamplesFetchFailure: createSamplesFetchFailureNofitier({ toasts }),
     notifySimulationRunFailure: createSimulationRunFailureNofitier({ toasts }),
   },
 });
-
-function createTimeUpdatesActor({ timeState$ }: { timeState$: BehaviorSubject<TimeState> }) {
-  return fromEventObservable(() => timeState$.pipe(map(() => ({ type: 'dateRange.update' }))));
-}

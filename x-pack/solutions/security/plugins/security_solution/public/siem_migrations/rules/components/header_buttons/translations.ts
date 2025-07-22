@@ -20,11 +20,3 @@ export const SIEM_MIGRATIONS_OPTION_AREAL_LABEL = i18n.translate(
     defaultMessage: 'Select a migration',
   }
 );
-
-export const SIEM_MIGRATIONS_OPTION_LABEL = (optionIndex: number) =>
-  i18n.translate('xpack.securitySolution.siemMigrations.rules.selectionOption.title', {
-    defaultMessage: 'SIEM rule migration {optionIndex}',
-    values: {
-      optionIndex,
-    },
-  });

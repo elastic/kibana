@@ -142,6 +142,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             prepend={!isSettingsModalVisible ? PROMPT_CONTEXT_SELECTOR_PREFIX : undefined}
             css={css`
               padding-right: 56px !important;
+              ${compressed ? 'font-size: 0.9rem;' : ''}
             `}
           />
         </EuiFormRow>
@@ -155,7 +156,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         `}
       >
         {isClearable && selectedPrompt && (
-          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
+          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
               data-test-subj="clearSystemPrompt"

@@ -492,6 +492,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
     expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
+      hideChart: false,
       rowHeight: false,
       breakdownField: false,
     });
@@ -507,6 +508,7 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() =>
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
+        hideChart: true,
         rowHeight: true,
         breakdownField: true,
       })
@@ -521,6 +523,7 @@ describe('buildEsqlFetchSubscribe', () => {
           columns: false,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
       })
     );
@@ -534,6 +537,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: false,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
     documents$.next({
@@ -550,6 +554,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: true,
         rowHeight: true,
         breakdownField: true,
+        hideChart: true,
       })
     );
     documents$.next({
@@ -567,6 +572,7 @@ describe('buildEsqlFetchSubscribe', () => {
       columns: false,
       rowHeight: false,
       breakdownField: false,
+      hideChart: false,
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -578,6 +584,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: false,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
     documents$.next({
@@ -590,6 +597,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: true,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
   });

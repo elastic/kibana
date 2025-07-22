@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep, union } from 'lodash/fp';
+import { cloneDeep, getOr, isEmpty, isEqualWith, omit, union, uniq } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
-import type { SessionViewConfig } from '../../../common/types';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   DataProvider,
-  QueryOperator,
   QueryMatch,
+  QueryOperator,
 } from '../components/timeline/data_providers/data_provider';
-import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_providers/data_provider';
+import { EXISTS_OPERATOR, IS_OPERATOR } from '../components/timeline/data_providers/data_provider';
+import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
 import {
   type DataProviderType,
   DataProviderTypeEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,
 } from '../../../common/api/timeline';
-import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import type {
   ColumnHeaderOptions,
   SerializedFilterQuery,
-  TimelinePersistInput,
   SortColumnTimeline,
+  TimelinePersistInput,
 } from '../../../common/types/timeline';
-import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
+import { TimelineId } from '../../../common/types/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -243,52 +242,6 @@ export const updateTimelineShowTimeline = ({
     [id]: {
       ...timeline,
       show,
-    },
-  };
-};
-
-export const updateTimelineGraphEventId = ({
-  id,
-  graphEventId,
-  timelineById,
-}: {
-  id: string;
-  graphEventId: string;
-  timelineById: TimelineById;
-}): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      graphEventId,
-      // if use click close analyzer button, it will go back to the previous tab
-      ...(graphEventId === '' &&
-      id === TimelineId.active &&
-      timeline.activeTab === TimelineTabs.graph
-        ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
-        : {}),
-    },
-  };
-};
-
-export const updateTimelineSessionViewConfig = ({
-  id,
-  sessionViewConfig,
-  timelineById,
-}: {
-  id: string;
-  sessionViewConfig: SessionViewConfig | null;
-  timelineById: TimelineById;
-}): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      sessionViewConfig,
     },
   };
 };

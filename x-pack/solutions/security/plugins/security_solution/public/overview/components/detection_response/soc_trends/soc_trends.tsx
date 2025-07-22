@@ -46,7 +46,7 @@ const getListItem = (stat: StatState) => ({
     <EuiToolTip content={stat.description}>
       <EuiText>
         <h6>
-          {stat.title} <EuiIcon type="questionInCircle" />
+          {stat.title} <EuiIcon type="question" />
         </h6>
       </EuiText>
     </EuiToolTip>

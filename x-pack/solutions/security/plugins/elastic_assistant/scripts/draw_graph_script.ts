@@ -52,7 +52,7 @@ const mockLlm = new FakeLLM({
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 const createLlmInstance = () => {
-  return mockLlm;
+  return Promise.resolve(mockLlm);
 };
 
 async function getAssistantGraph(logger: Logger): Promise<Drawable> {

@@ -261,7 +261,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.setColorPickerValue('#90CEEAFF');
 
         const gaugeColor = await visualBuilder.getGaugeColor();
-        expect(gaugeColor).to.be('rgb(144, 206, 234)');
+        expect(gaugeColor).to.be('#90ceea');
       });
 
       describe('Color rules', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { defaultOriginalRule, ruleMigrationRouteHelpersFactory } from '../../utils';
 
@@ -31,29 +32,45 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await migrationRulesRoutes.start({
         migrationId,
         payload: {
-          connector_id: 'preconfigured-bedrock',
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+          },
         },
       });
       expect(body).to.eql({ started: true });
 
       // check if it running correctly
-      let statsResponse = await migrationRulesRoutes.stats({ migrationId });
+      const statsResponse = await migrationRulesRoutes.stats({ migrationId });
       expect(statsResponse.body.status).to.eql('running');
 
       // Stop Migration
       const response = await migrationRulesRoutes.stop({ migrationId });
       expect(response.body).to.eql({ stopped: true });
 
-      // check if the migration is stopped
-      statsResponse = await migrationRulesRoutes.stats({ migrationId });
-      expect(statsResponse.body.status).to.eql('ready');
+      await pRetry(
+        async () => {
+          const currentStatsResponse = await migrationRulesRoutes.stats({ migrationId });
+          if (currentStatsResponse.body.status !== 'stopped') {
+            throw new Error('Retry until migration is stopped');
+          }
+          return currentStatsResponse;
+        },
+        {
+          retries: 3,
+        }
+      );
+
+      const migrationResponse = await migrationRulesRoutes.get({ migrationId });
+      expect(migrationResponse.body?.last_execution?.is_stopped).to.eql(true);
+      expect(migrationResponse.body?.last_execution?.finished_at).to.be.ok();
     });
+
     describe('error scenarios', () => {
       it('should return 404 if migration id is invalid and non-existent', async () => {
         await migrationRulesRoutes.start({
           migrationId: 'invalid_migration_id',
           expectStatusCode: 404,
-          payload: { connector_id: 'preconfigured-bedrock' },
+          payload: { settings: { connector_id: 'preconfigured-bedrock' } },
         });
       });
 

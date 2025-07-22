@@ -5,56 +5,48 @@
  * 2.0.
  */
 
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
 import React from 'react';
+import { screen } from '@testing-library/react';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverErrorLink } from './discover_error_link';
+import { renderWithContext } from '../../../../utils/test_helpers';
 
-describe('DiscoverErrorLink without kuery', () => {
-  let wrapper: ShallowWrapper;
-  beforeEach(() => {
-    const error = {
-      service: { name: 'myServiceName' },
-      error: { grouping_key: 'myGroupingKey' },
-    } as APMError;
+jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: {
+      id: 'apm_0',
+      title: 'apm_0',
+    },
+  }),
+}));
 
-    wrapper = shallow(<DiscoverErrorLink error={error} />);
-  });
+describe('DiscoverErrorLink', () => {
+  const mockError: APMError = {
+    service: { name: 'myServiceName' },
+    error: { grouping_key: 'myGroupingKey' },
+  } as APMError;
 
-  it('should have correct query', () => {
-    const queryProp = wrapper.prop('query') as any;
-    expect(queryProp._a.query.query).toEqual(
-      'service.name:"myServiceName" AND error.grouping_key:"myGroupingKey"'
+  it('should render with correct query without kuery', () => {
+    renderWithContext(<DiscoverErrorLink error={mockError} />);
+
+    const link = screen.getByTestId('apmDiscoverLinkLink');
+    expect(link).toHaveAttribute(
+      'href',
+      expect.stringContaining('service.name:"myServiceName" AND error.grouping_key:"myGroupingKey"')
     );
   });
 
-  it('should match snapshot', () => {
-    expect(wrapper).toMatchSnapshot();
-  });
-});
-
-describe('DiscoverErrorLink with kuery', () => {
-  let wrapper: ShallowWrapper;
-  beforeEach(() => {
-    const error = {
-      service: { name: 'myServiceName' },
-      error: { grouping_key: 'myGroupingKey' },
-    } as APMError;
-
+  it('should render with correct query with kuery', () => {
     const kuery = 'transaction.sampled: true';
 
-    wrapper = shallow(<DiscoverErrorLink error={error} kuery={kuery} />);
-  });
+    renderWithContext(<DiscoverErrorLink error={mockError} kuery={kuery} />);
 
-  it('should have correct query', () => {
-    const queryProp = wrapper.prop('query') as any;
-    expect(queryProp._a.query.query).toEqual(
-      'service.name:"myServiceName" AND error.grouping_key:"myGroupingKey" AND transaction.sampled: true'
+    const link = screen.getByTestId('apmDiscoverLinkLink');
+    expect(link).toHaveAttribute(
+      'href',
+      expect.stringContaining(
+        'service.name:"myServiceName" AND error.grouping_key:"myGroupingKey" AND transaction.sampled: true'
+      )
     );
-  });
-
-  it('should match snapshot', () => {
-    expect(wrapper).toMatchSnapshot();
   });
 });

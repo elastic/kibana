@@ -139,15 +139,6 @@ describe('count operation', () => {
         {} as unknown as DateRange
       );
 
-    test('doesnt support filters', () => {
-      const esql = callToESQL({
-        sourceField: 'bytes',
-        operationType: 'count',
-        filter: { language: 'kquery' },
-      });
-      expect(esql).toBeUndefined();
-    });
-
     test('doesnt support timeShift', () => {
       const esql = callToESQL({
         sourceField: 'bytes',

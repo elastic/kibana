@@ -57,5 +57,7 @@
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-http-browser-mocks",
+    "@kbn/home-plugin",
+    "@kbn/logging"
   ]
 }

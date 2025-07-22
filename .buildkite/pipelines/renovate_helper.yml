@@ -1,0 +1,49 @@
+agents:
+  provider: gcp
+  image: family/kibana-ubuntu-2004
+  imageProject: elastic-images-prod
+  machineType: n2-standard-2
+steps:
+  - group: 'Renovate PR opened or comment'
+    if: >-
+      "(build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'opened')
+       || (build.env('GITHUB_PR_EVENT_TYPE') == 'issue_comment' && build.env('GITHUB_PR_EVENT_ACTION') == 'created')"
+
+    steps:
+      - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
+        label: 'Run Renovate helper on PR opened or comment'
+        key: renovate_helper
+        timeout_in_minutes: 20
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - wait: ~
+
+      - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
+        label: 'Trigger Kibana PR pipeline on PR opened or comment'
+        key: trigger_pr_opened
+        timeout_in_minutes: 10
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+  - group: 'Renovate PR updated'
+    # GITHUB_PR_USER is the PR author and GITHUB_PR_TRIGGER_USER is the commit author
+    if: >-
+      "build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]'
+       && build.env('GITHUB_PR_TRIGGER_USER') != 'elastic-renovate-prod[bot]'
+       && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request'
+       && build.env('GITHUB_PR_EVENT_ACTION') == 'synchronize'"
+
+    steps:
+      - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
+        label: 'Trigger Kibana PR pipeline on PR updated'
+        key: trigger_pr_updated
+        timeout_in_minutes: 10
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1

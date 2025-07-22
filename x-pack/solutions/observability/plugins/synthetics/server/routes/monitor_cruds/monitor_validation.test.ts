@@ -204,7 +204,7 @@ describe('validateMonitor', () => {
         },
         locations: ['somewhere'],
       } as unknown as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
@@ -221,7 +221,7 @@ describe('validateMonitor', () => {
         },
         locations: ['somewhere'],
       } as unknown as MonitorFields;
-      const result = validateMonitor(monitor);
+      const result = validateMonitor(monitor, 'default');
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
@@ -230,13 +230,16 @@ describe('validateMonitor', () => {
     });
 
     it(`when schedule is not valid`, () => {
-      const result = validateMonitor({
-        ...testICMPFields,
-        schedule: {
-          number: '4',
-          unit: ScheduleUnit.MINUTES,
-        },
-      } as unknown as MonitorFields);
+      const result = validateMonitor(
+        {
+          ...testICMPFields,
+          schedule: {
+            number: '4',
+            unit: ScheduleUnit.MINUTES,
+          },
+        } as unknown as MonitorFields,
+        'default'
+      );
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor schedule is invalid',
@@ -246,10 +249,13 @@ describe('validateMonitor', () => {
     });
 
     it(`when timeout is not valid`, () => {
-      const result = validateMonitor({
-        ...testICMPFields,
-        timeout: '3m',
-      } as unknown as MonitorFields);
+      const result = validateMonitor(
+        {
+          ...testICMPFields,
+          timeout: '3m',
+        } as unknown as MonitorFields,
+        'default'
+      );
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor is not a valid monitor of type icmp',
@@ -258,10 +264,13 @@ describe('validateMonitor', () => {
     });
 
     it(`when location is not valid`, () => {
-      const result = validateMonitor({
-        ...testICMPFields,
-        locations: ['invalid-location'],
-      } as unknown as MonitorFields);
+      const result = validateMonitor(
+        {
+          ...testICMPFields,
+          locations: ['invalid-location'],
+        } as unknown as MonitorFields,
+        'default'
+      );
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor is not a valid monitor of type icmp',
@@ -273,7 +282,7 @@ describe('validateMonitor', () => {
   describe('should validate', () => {
     it('when payload is a correct ICMP monitor', () => {
       const testMonitor = testICMPFields as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: true,
         reason: '',
@@ -284,7 +293,7 @@ describe('validateMonitor', () => {
 
     it('when payload is a correct TCP monitor', () => {
       const testMonitor = testTCPFields as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: true,
         reason: '',
@@ -296,7 +305,7 @@ describe('validateMonitor', () => {
     it('when payload is a correct HTTP monitor', () => {
       const testMonitor = testHTTPFields as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: true,
         reason: '',
@@ -307,7 +316,7 @@ describe('validateMonitor', () => {
 
     it('when payload is not a correct Browser monitor', () => {
       const testMonitor = testBrowserFields as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: false,
         details: 'source.inline.script: Script is required for browser monitor.',
@@ -321,7 +330,7 @@ describe('validateMonitor', () => {
         ...testBrowserFields,
         [ConfigKey.SOURCE_INLINE]: 'journey()',
       } as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor is not a valid monitor of type browser',
@@ -336,7 +345,7 @@ describe('validateMonitor', () => {
         ...testBrowserFields,
         [ConfigKey.SOURCE_INLINE]: 'step()',
       } as MonitorFields;
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
       expect(result).toMatchObject({
         valid: true,
         reason: '',
@@ -355,7 +364,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<ICMPSimpleFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result.details).toEqual(expect.stringContaining('Invalid value'));
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.HOSTS));
@@ -374,7 +383,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<TCPFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result.details).toEqual(
         expect.stringContaining('Invalid field "host", must be a non-empty string.')
@@ -394,7 +403,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<HTTPFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result.details).toEqual('Invalid field "url", must be a non-empty string.');
       expect(result).toMatchObject({
@@ -412,7 +421,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<BrowserFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result.details).toEqual(
         expect.stringContaining('source.inline.script: Inline script must be a non-empty string')
@@ -436,7 +445,7 @@ describe('validateMonitor', () => {
         } as unknown as Partial<TCPFields>),
       } as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result).toMatchObject({
         valid: true,
@@ -451,7 +460,7 @@ describe('validateMonitor', () => {
     it('when parsed from serialized JSON', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
 
-      const result = validateMonitor(testMonitor);
+      const result = validateMonitor(testMonitor, 'default');
 
       expect(result).toMatchObject({
         valid: true,
@@ -463,10 +472,13 @@ describe('validateMonitor', () => {
     it('when parsed from serialized JSON for alert', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
 
-      const result = validateMonitor({
-        ...testMonitor,
-        alert: {},
-      });
+      const result = validateMonitor(
+        {
+          ...testMonitor,
+          alert: {},
+        },
+        'default'
+      );
 
       expect(result).toMatchObject({
         valid: false,
@@ -478,14 +490,17 @@ describe('validateMonitor', () => {
     it('when parsed from serialized JSON for alert invalid key', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
 
-      const result = validateMonitor({
-        ...testMonitor,
-        alert: {
-          // @ts-ignore
-          invalidKey: 'invalid',
-          enabled: true,
+      const result = validateMonitor(
+        {
+          ...testMonitor,
+          alert: {
+            // @ts-ignore
+            invalidKey: 'invalid',
+            enabled: true,
+          },
         },
-      });
+        'default'
+      );
 
       expect(result).toMatchObject({
         valid: false,
@@ -664,7 +679,8 @@ describe('normalizeAPIConfig', () => {
       },
     });
     expect(normalizeAPIConfig({ type: 'browser', params: '{d}' } as any)).toEqual({
-      errorMessage: "Invalid params: Expected property name or '}' in JSON at position 1",
+      errorMessage:
+        "Invalid params: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
       formattedConfig: {
         type: 'browser',
         params: '{d}',
@@ -702,7 +718,7 @@ describe('normalizeAPIConfig', () => {
     });
     expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{d}' } as any)).toEqual({
       errorMessage:
-        "Invalid playwright_options: Expected property name or '}' in JSON at position 1",
+        "Invalid playwright_options: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
       formattedConfig: {
         playwright_options: '{d}',
         type: 'browser',

@@ -82,6 +82,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -170,6 +171,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -220,6 +222,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -329,6 +332,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -399,6 +403,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -429,6 +434,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/deleteBackfill",
             "alerting:alert-type/my-consumer/rule/fillGaps",
             "alerting:readonly-alert-type/my-consumer/rule/get",
+            "alerting:readonly-alert-type/my-consumer/rule/bulkGet",
             "alerting:readonly-alert-type/my-consumer/rule/getRuleState",
             "alerting:readonly-alert-type/my-consumer/rule/getAlertSummary",
             "alerting:readonly-alert-type/my-consumer/rule/getExecutionLog",
@@ -524,6 +530,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type/my-consumer/rule/get",
+            "alerting:alert-type/my-consumer/rule/bulkGet",
             "alerting:alert-type/my-consumer/rule/getRuleState",
             "alerting:alert-type/my-consumer/rule/getAlertSummary",
             "alerting:alert-type/my-consumer/rule/getExecutionLog",
@@ -554,6 +561,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/deleteBackfill",
             "alerting:alert-type/my-consumer/rule/fillGaps",
             "alerting:readonly-alert-type/my-consumer/rule/get",
+            "alerting:readonly-alert-type/my-consumer/rule/bulkGet",
             "alerting:readonly-alert-type/my-consumer/rule/getRuleState",
             "alerting:readonly-alert-type/my-consumer/rule/getAlertSummary",
             "alerting:readonly-alert-type/my-consumer/rule/getExecutionLog",
@@ -643,6 +651,7 @@ describe(`feature_privilege_builder`, () => {
         expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
             "alerting:alert-type-1/my-consumer-1/rule/get",
+            "alerting:alert-type-1/my-consumer-1/rule/bulkGet",
             "alerting:alert-type-1/my-consumer-1/rule/getRuleState",
             "alerting:alert-type-1/my-consumer-1/rule/getAlertSummary",
             "alerting:alert-type-1/my-consumer-1/rule/getExecutionLog",
@@ -673,6 +682,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-1/my-consumer-1/rule/deleteBackfill",
             "alerting:alert-type-1/my-consumer-1/rule/fillGaps",
             "alerting:alert-type-1/my-consumer-2/rule/get",
+            "alerting:alert-type-1/my-consumer-2/rule/bulkGet",
             "alerting:alert-type-1/my-consumer-2/rule/getRuleState",
             "alerting:alert-type-1/my-consumer-2/rule/getAlertSummary",
             "alerting:alert-type-1/my-consumer-2/rule/getExecutionLog",
@@ -703,6 +713,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-1/my-consumer-2/rule/deleteBackfill",
             "alerting:alert-type-1/my-consumer-2/rule/fillGaps",
             "alerting:alert-type-2/my-consumer-3/rule/get",
+            "alerting:alert-type-2/my-consumer-3/rule/bulkGet",
             "alerting:alert-type-2/my-consumer-3/rule/getRuleState",
             "alerting:alert-type-2/my-consumer-3/rule/getAlertSummary",
             "alerting:alert-type-2/my-consumer-3/rule/getExecutionLog",
@@ -733,6 +744,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type-2/my-consumer-3/rule/deleteBackfill",
             "alerting:alert-type-2/my-consumer-3/rule/fillGaps",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/get",
+            "alerting:readonly-alert-type-1/my-read-consumer-1/rule/bulkGet",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getRuleState",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getAlertSummary",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/getExecutionLog",
@@ -743,6 +755,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/findBackfill",
             "alerting:readonly-alert-type-1/my-read-consumer-1/rule/findGaps",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/get",
+            "alerting:readonly-alert-type-1/my-read-consumer-2/rule/bulkGet",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getRuleState",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getAlertSummary",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/getExecutionLog",
@@ -753,6 +766,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/findBackfill",
             "alerting:readonly-alert-type-1/my-read-consumer-2/rule/findGaps",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/get",
+            "alerting:readonly-alert-type-2/my-read-consumer-3/rule/bulkGet",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getRuleState",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getAlertSummary",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/getExecutionLog",
@@ -763,6 +777,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/findBackfill",
             "alerting:readonly-alert-type-2/my-read-consumer-3/rule/findGaps",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/get",
+            "alerting:readonly-alert-type-2/my-read-consumer-4/rule/bulkGet",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getRuleState",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getAlertSummary",
             "alerting:readonly-alert-type-2/my-read-consumer-4/rule/getExecutionLog",

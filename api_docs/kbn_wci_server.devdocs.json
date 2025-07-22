@@ -289,7 +289,7 @@
             "section": "def-server.ContentResultTransportFormat",
             "text": "ContentResultTransportFormat"
           },
-          " extends { [x: string]: unknown; type: \"text\"; text: string; }"
+          " extends { [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; }"
         ],
         "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
         "deprecated": false,
@@ -578,7 +578,7 @@
                 "section": "def-common.MaybePromise",
                 "text": "MaybePromise"
               },
-              "<{ [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; mimeType?: string | undefined; }; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; }>"
+              "<{ [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }>"
             ],
             "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
             "deprecated": false,
@@ -905,7 +905,7 @@
                 "section": "def-server.ToolContentResult",
                 "text": "ToolContentResult"
               },
-              "[]) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; mimeType?: string | undefined; }; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
+              "[]) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
             ],
             "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
@@ -946,7 +946,7 @@
               "/**\n   * Generates a plain text tool response\n   */"
             ],
             "signature": [
-              "(text: string) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; mimeType?: string | undefined; }; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
+              "(text: string) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
             ],
             "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
@@ -980,7 +980,7 @@
               "/**\n   * Generates an error tool response\n   */"
             ],
             "signature": [
-              "(message: string) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; mimeType?: string | undefined; }; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; }"
+              "(message: string) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
             ],
             "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
             "deprecated": false,

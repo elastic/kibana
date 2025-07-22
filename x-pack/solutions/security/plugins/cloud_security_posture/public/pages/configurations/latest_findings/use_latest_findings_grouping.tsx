@@ -16,9 +16,10 @@ import {
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import {
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
   buildMutedRulesFilter,
 } from '@kbn/cloud-security-posture-common';
+import type { FindingsGroupingAggregation } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import {
   CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS,
@@ -27,11 +28,7 @@ import {
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
-import {
-  FindingsGroupingAggregation,
-  FindingsRootGroupingAggregation,
-  useGroupedFindings,
-} from './use_grouped_findings';
+import { FindingsRootGroupingAggregation, useGroupedFindings } from './use_grouped_findings';
 import {
   FINDINGS_UNIT,
   groupingTitle,
@@ -208,7 +205,7 @@ export const useLatestFindingsGrouping = ({
     groupByField: currentSelectedGroup,
     uniqueValue,
     timeRange: {
-      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+      from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
       to: 'now',
     },
     pageNumber: activePageIndex * pageSize,

@@ -25,7 +25,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Delete API', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/228826
+  describe.skip('@ess @serverless @serverlessQA Delete API', () => {
     let migrationId: string;
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
@@ -120,7 +121,9 @@ export default ({ getService }: FtrProviderContext) => {
           const response = await ruleMigrationRoutes.start({
             migrationId,
             payload: {
-              connector_id: 'preconfigured-bedrock',
+              settings: {
+                connector_id: 'preconfigured-bedrock',
+              },
             },
           });
 

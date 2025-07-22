@@ -44,7 +44,7 @@ import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
 import { ViewButtons } from './view_buttons/view_buttons';
 
-const ITEM_HEIGHT = 172;
+const ITEM_HEIGHT = 182;
 const ROW_COUNT = 4;
 const MAX_LIST_HEIGHT = 800;
 const MIN_BATCH_SIZE = 20;

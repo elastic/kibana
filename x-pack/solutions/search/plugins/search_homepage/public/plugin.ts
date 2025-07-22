@@ -6,24 +6,24 @@
  */
 
 import {
-  CoreSetup,
-  Plugin,
-  CoreStart,
   AppMountParameters,
-  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 
+import { docLinks } from '../common/doc_links';
 import { SearchHomepage } from './embeddable';
-import { isHomepageEnabled } from './feature_flags';
+import { initQueryClient } from './services/query_client';
 import {
-  SearchHomepageConfigType,
+  SearchHomepageAppInfo,
+  SearchHomepageAppPluginStartDependencies,
   SearchHomepagePluginSetup,
   SearchHomepagePluginStart,
-  SearchHomepageAppPluginStartDependencies,
-  SearchHomepageAppInfo,
-  SearchHomepageServicesContext,
+  SearchHomepageServicesContextDeps,
 } from './types';
 
 const appInfo: SearchHomepageAppInfo = {
@@ -35,35 +35,33 @@ const appInfo: SearchHomepageAppInfo = {
 export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
-  private readonly config: SearchHomepageConfigType;
-  constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<SearchHomepageConfigType>();
-  }
-
   public setup(
     core: CoreSetup<SearchHomepageAppPluginStartDependencies, SearchHomepagePluginStart>
   ) {
+    const queryClient = initQueryClient(core.notifications.toasts);
     const result: SearchHomepagePluginSetup = {
       app: appInfo,
-      isHomepageFeatureEnabled() {
-        return isHomepageEnabled(core.uiSettings);
-      },
     };
-    if (!this.config.ui?.enabled) return result;
-    if (!isHomepageEnabled(core.uiSettings)) return result;
 
     core.application.register({
-      ...result.app,
+      id: PLUGIN_ID,
+      appRoute: '/app/elasticsearch/home',
+      title: i18n.translate('xpack.searchHomepage.appTitle', { defaultMessage: 'Home' }),
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: 'logoElasticsearch',
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: SearchHomepageServicesContext = {
+        docLinks.setDocLinks(coreStart.docLinks.links);
+        const startDeps: SearchHomepageServicesContextDeps = {
           ...depsStart,
           history,
         };
 
-        return renderApp(coreStart, startDeps, element);
+        return renderApp(coreStart, startDeps, element, queryClient);
       },
+      order: 0,
+      visibleIn: ['globalSearch', 'sideNav'],
     });
 
     return result;
@@ -72,9 +70,6 @@ export class SearchHomepagePlugin
   public start(core: CoreStart) {
     return {
       app: appInfo,
-      isHomepageFeatureEnabled() {
-        return isHomepageEnabled(core.uiSettings);
-      },
       SearchHomepage,
     };
   }

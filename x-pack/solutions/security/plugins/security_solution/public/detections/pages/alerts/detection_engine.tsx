@@ -34,7 +34,7 @@ import {
 import { isEqual } from 'lodash';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useGroupTakeActionsItems } from '../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -72,7 +72,6 @@ import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import {
   buildAlertAssigneesFilter,
@@ -94,7 +93,6 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { DetectionEngineAlertsTable } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -111,9 +109,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
-  );
 
   const isTableLoading = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
@@ -163,14 +158,17 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
   const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
     useSourcererDataView(SourcererScopeName.detections);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec: experimentalDataViewSpec, status: dataViewSpecStatus } = useDataViewSpec(
+  const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
     SourcererScopeName.detections
   );
-  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataViewSpec;
+  const runtimeMappings = useMemo(() => {
+    return newDataViewPickerEnabled
+      ? (experimentalDataView.getRuntimeMappings() as RunTimeMappings) ?? {}
+      : (oldSourcererDataViewSpec.runtimeFieldMap as RunTimeMappings) ?? {};
+  }, [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec.runtimeFieldMap]);
+
   const isLoadingIndexPattern = newDataViewPickerEnabled
-    ? dataViewSpecStatus !== 'ready'
+    ? experimentalDataViewStatus !== 'ready'
     : oldIsLoadingIndexPattern;
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
@@ -397,11 +395,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
       ) : !signalIndexNeedsInit && hasIndexRead && canUserREAD ? (
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <FiltersGlobal>
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={sourcererDataViewSpec}
+              sourcererDataView={oldSourcererDataViewSpec} // TODO: newDataViewPicker -   Can be removed after migration to new dataview picker
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper
@@ -437,7 +435,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 query={query}
                 timeRange={pageFiltersTimerange}
                 onInit={setDetectionPageFilterHandler}
-                dataViewSpec={sourcererDataViewSpec}
+                dataView={
+                  newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataViewSpec
+                }
               />
               <EuiSpacer size="l" />
               <ChartPanels
@@ -445,7 +445,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
                 alertsDefaultFilters={alertsDefaultFilters}
                 isLoadingIndexPattern={isChartPanelLoading}
                 query={query}
-                runtimeMappings={sourcererDataViewSpec.runtimeFieldMap as RunTimeMappings}
+                runtimeMappings={runtimeMappings}
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />
@@ -454,7 +454,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
             <GroupedAlertsTable
               accordionButtonContent={defaultGroupTitleRenderers}
               accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-              dataViewSpec={sourcererDataViewSpec}
+              dataView={experimentalDataView}
+              dataViewSpec={oldSourcererDataViewSpec} // TODO: Should be removed after migrating to new data view picker
               defaultFilters={alertsTableDefaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}

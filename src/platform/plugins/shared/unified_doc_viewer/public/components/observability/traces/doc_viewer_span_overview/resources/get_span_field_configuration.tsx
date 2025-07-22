@@ -56,6 +56,8 @@ export const getSpanFieldConfiguration = ({
           {({ content }) => (
             <DependencyNameLink
               dependencyName={value as string}
+              spanType={flattenedDoc[SPAN_TYPE_FIELD]}
+              spanSubtype={flattenedDoc[SPAN_SUBTYPE_FIELD]}
               environment={flattenedDoc[SERVICE_ENVIRONMENT_FIELD]}
               formattedDependencyName={content}
             />
@@ -66,6 +68,12 @@ export const getSpanFieldConfiguration = ({
       formattedValue: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
       fieldMetadata: {
         flat_name: 'span.destination.service.resource',
+        short: i18n.translate(
+          'unifiedDocViewer.observability.traces.details.spanDestinationServiceResource.description',
+          {
+            defaultMessage: 'Identifier for the destination service resource being operated on.',
+          }
+        ),
       },
     },
     [SPAN_TYPE_FIELD]: {

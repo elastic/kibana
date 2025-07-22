@@ -33,6 +33,7 @@ export {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
   apiPublishesSavedSearch,
   type PublishesSavedSearch,
+  type PublishesWritableSavedSearch,
   type HasTimeRange,
   type SearchEmbeddableSerializedState,
   type SearchEmbeddableRuntimeState,

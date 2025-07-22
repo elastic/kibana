@@ -8,7 +8,7 @@
  */
 
 import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   HasEditCapabilities,

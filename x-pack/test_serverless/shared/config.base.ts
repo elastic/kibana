@@ -51,11 +51,11 @@ export default async () => {
   // "Fake" SAML provider
   const idpPath = resolve(
     __dirname,
-    '../../test/security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../platform/test/security_api_integration/plugins/saml_provider/metadata.xml'
   );
   const samlIdPPlugin = resolve(
     __dirname,
-    '../../test/security_api_integration/plugins/saml_provider'
+    '../../platform/test/security_api_integration/plugins/saml_provider'
   );
 
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
@@ -70,7 +70,7 @@ export default async () => {
         port: dockerRegistryPort,
         args: dockerArgs,
         waitForLogLine: 'package manifests loaded',
-        waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+        waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
       },
     }),
     browser: {

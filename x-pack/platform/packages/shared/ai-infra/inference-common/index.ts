@@ -24,12 +24,14 @@ export {
   type ToolSchema,
   type UnvalidatedToolCall,
   type ToolCallsOf,
+  type ToolCallbacksOf,
   type ToolCall,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,
   type ToolChoice,
   type ChatCompleteAPI,
+  type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
   type ChatCompleteCompositeResponse,
   type ChatCompletionTokenCountEvent,
@@ -42,7 +44,6 @@ export {
   type ChatCompleteRetryConfiguration,
   type ChatCompletionTokenCount,
   type BoundChatCompleteAPI,
-  type BoundChatCompleteOptions,
   type UnboundChatCompleteOptions,
   withoutTokenCountEvents,
   withoutChunkEvents,
@@ -59,7 +60,20 @@ export {
   isToolNotFoundError,
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
+  type AnonymizationRule,
+  type RegexAnonymizationRule,
+  type NamedEntityRecognitionRule,
+  type AnonymizationEntity,
+  type Anonymization,
+  type Deanonymization,
+  type AnonymizationOutput,
+  type DeanonymizationOutput,
+  type DeanonymizedMessage,
+  type AnonymizationSettings,
+  type AnonymizationRegexWorkerTaskPayload,
 } from './src/chat_complete';
+
+export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
 export {
   OutputEventType,
   type OutputAPI,
@@ -72,7 +86,6 @@ export {
   type Output,
   type OutputEvent,
   type BoundOutputAPI,
-  type BoundOutputOptions,
   type UnboundOutputOptions,
   isOutputCompleteEvent,
   isOutputUpdateEvent,
@@ -102,7 +115,9 @@ export {
   isInferenceRequestAbortedError,
   isInferenceProviderError,
 } from './src/errors';
-export { generateFakeToolCallId } from './src/utils';
+
+export { Tokenizer, generateFakeToolCallId, ShortIdTable } from './src/utils';
+
 export { elasticModelDictionary } from './src/const';
 
 export { truncateList } from './src/truncate_list';
@@ -112,6 +127,8 @@ export {
   isSupportedConnector,
   getConnectorDefaultModel,
   getConnectorModel,
+  getConnectorFamily,
+  getConnectorPlatform,
   getConnectorProvider,
   connectorToInference,
   type InferenceConnector,
@@ -122,10 +139,23 @@ export {
   elasticModelIds,
 } from './src/inference_endpoints';
 
-export type {
-  InferenceTracingExportConfig,
-  InferenceTracingLangfuseExportConfig,
-  InferenceTracingPhoenixExportConfig,
-} from './src/tracing';
+export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 
-export { Tokenizer } from './src/utils/tokenizer';
+export {
+  type BoundPromptAPI,
+  type Prompt,
+  type PromptAPI,
+  type PromptCompositeResponse,
+  type PromptFactory,
+  type PromptOptions,
+  type PromptResponse,
+  type PromptStreamResponse,
+  type PromptVersion,
+  type ToolOptionsOfPrompt,
+  type UnboundPromptOptions,
+  createPrompt,
+} from './src/prompt';
+
+export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
+
+export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';

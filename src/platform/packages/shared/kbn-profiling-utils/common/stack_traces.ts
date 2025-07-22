@@ -221,6 +221,7 @@ export enum StackTracesDisplayOption {
 export enum TopNType {
   Containers = 'containers',
   Deployments = 'deployments',
+  Executables = 'executables',
   Threads = 'threads',
   Hosts = 'hosts',
   Traces = 'traces',
@@ -235,6 +236,7 @@ export function getFieldNameForTopNType(type: TopNType): string {
   return {
     [TopNType.Containers]: ProfilingESField.ContainerName,
     [TopNType.Deployments]: ProfilingESField.OrchestratorResourceName,
+    [TopNType.Executables]: ProfilingESField.ProcessExecutableName,
     [TopNType.Threads]: ProfilingESField.ProcessThreadName,
     [TopNType.Hosts]: ProfilingESField.HostID,
     [TopNType.Traces]: ProfilingESField.StacktraceID,

@@ -32,7 +32,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["read", "read_alerts"],
+          "siemV3": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["read"],
@@ -81,7 +81,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["read", "read_alerts"],
+          "siemV3": ["read", "read_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["read"],
@@ -140,7 +140,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": [
+          "siemV3": [
             "all",
             "read_alerts",
             "crud_alerts",
@@ -200,6 +200,8 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*",
             ".siem-signals-*"
           ],
           "privileges": ["read", "write", "maintenance", "view_index_metadata"]
@@ -215,7 +217,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -255,6 +257,8 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*",
             ".siem-signals-*"
           ],
           "privileges": ["read", "write", "manage"]
@@ -270,7 +274,7 @@
       {
         "feature": {
           "ml": ["read"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -295,6 +299,8 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*",
             ".lists*",
             ".items*",
             "apm-*-transaction*",
@@ -320,7 +326,7 @@
       {
         "feature": {
           "ml": ["all"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],
@@ -366,6 +372,8 @@
             ".alerts-security*",
             ".preview.alerts-security*",
             ".internal.preview.alerts-security*",
+            ".adhoc.alerts-security*",
+            ".internal.adhoc.alerts-security*",
             ".siem-signals-*"
           ],
           "privileges": ["all"]
@@ -377,7 +385,7 @@
       {
         "feature": {
           "ml": ["all"],
-          "siemV2": ["all", "read_alerts", "crud_alerts"],
+          "siemV3": ["all", "read_alerts", "crud_alerts"],
           "securitySolutionAssistant": ["all"],
           "securitySolutionAttackDiscovery": ["all"],
           "securitySolutionCasesV2": ["all"],

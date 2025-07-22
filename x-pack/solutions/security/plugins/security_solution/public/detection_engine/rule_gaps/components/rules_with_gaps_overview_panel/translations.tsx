@@ -16,7 +16,7 @@ export const RULE_GAPS_OVERVIEW_PANEL_LABEL = i18n.translate(
 export const RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL = i18n.translate(
   'xpack.securitySolution.ruleGapsOverviewPanel.showRulesWithGapsLabel',
   {
-    defaultMessage: 'Only rules with gaps',
+    defaultMessage: 'Only rules with unfilled gaps',
   }
 );
 
@@ -38,5 +38,12 @@ export const RULE_GAPS_OVERVIEW_PANEL_LAST_7_DAYS_LABEL = i18n.translate(
   'xpack.securitySolution.ruleGapsOverviewPanel.last7DaysLabel',
   {
     defaultMessage: 'Last 7 days',
+  }
+);
+
+export const RULE_GAPS_OVERVIEW_PANEL_TOOLTIP_TEXT = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.tooltipText',
+  {
+    defaultMessage: 'Rules with unfilled gaps / Rules with gaps being filled now',
   }
 );

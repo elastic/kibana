@@ -17,43 +17,45 @@ import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
-import { recallAndScore } from '../../utils/recall/recall_and_score';
+import { recallAndScore } from '../../functions/context/utils/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction } from '../../../common/types';
-import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
+import {
+  assistantScopeType,
+  functionRt,
+  messageRt,
+  publicMessageRt,
+  screenContextRt,
+} from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
-const chatCompleteBaseRt = t.type({
-  body: t.intersection([
-    t.type({
-      messages: t.array(messageRt),
-      connectorId: t.string,
-      persist: toBooleanRt,
-    }),
-    t.partial({
-      conversationId: t.string,
-      title: t.string,
-      disableFunctions: t.union([
-        toBooleanRt,
-        t.type({
-          except: t.array(t.string),
-        }),
-      ]),
-      instructions: t.array(
-        t.union([
-          t.string,
-          t.type({
-            id: t.string,
-            text: t.string,
-          }),
-        ])
-      ),
-    }),
-  ]),
-});
+const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
+  t.type({
+    body: t.intersection([
+      t.type({
+        messages: t.array(apiType === 'public' ? publicMessageRt : messageRt),
+        connectorId: t.string,
+        persist: toBooleanRt,
+      }),
+      t.partial({
+        conversationId: t.string,
+        title: t.string,
+        disableFunctions: toBooleanRt,
+        instructions: t.array(
+          t.union([
+            t.string,
+            t.type({
+              id: t.string,
+              text: t.string,
+            }),
+          ])
+        ),
+      }),
+    ]),
+  });
 
 const chatCompleteInternalRt = t.intersection([
-  chatCompleteBaseRt,
+  chatCompleteBaseRt('internal'),
   t.type({
     body: t.type({
       screenContexts: t.array(screenContextRt),
@@ -63,13 +65,10 @@ const chatCompleteInternalRt = t.intersection([
 ]);
 
 const chatCompletePublicRt = t.intersection([
-  chatCompleteBaseRt,
+  chatCompleteBaseRt('public'),
   t.partial({
     body: t.partial({
       actions: t.array(functionRt),
-    }),
-    query: t.partial({
-      format: t.union([t.literal('default'), t.literal('openai')]),
     }),
   }),
 ]);
@@ -181,10 +180,10 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
   },
   params: t.type({
     body: t.type({
-      prompt: t.string,
-      context: t.string,
+      screenDescription: t.string,
       connectorId: t.string,
       scopes: t.array(assistantScopeType),
+      messages: t.array(messageRt),
     }),
   }),
   handler: async (resources): Promise<Readable> => {
@@ -192,7 +191,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       resources
     );
 
-    const { connectorId, prompt, context } = resources.params.body;
+    const { connectorId, screenDescription, messages } = resources.params.body;
 
     const response$ = from(
       recallAndScore({
@@ -205,10 +204,9 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
             simulateFunctionCalling,
             signal,
           }),
-        context,
+        screenDescription,
         logger: resources.logger,
-        messages: [],
-        userPrompt: prompt,
+        messages,
         recall: client.recall,
         signal,
       })
@@ -313,15 +311,15 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
     },
   },
   params: chatCompletePublicRt,
+  options: {
+    tags: ['observability-ai-assistant'],
+  },
   handler: async (resources): Promise<Readable> => {
     const { params, logger } = resources;
 
     const {
       body: { actions, ...restOfBody },
-      query = {},
     } = params;
-
-    const { format = 'default' } = query;
 
     const response$ = await chatComplete({
       ...resources,
@@ -338,9 +336,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       },
     });
 
-    return format === 'openai'
-      ? observableIntoOpenAIStream(response$, logger)
-      : observableIntoStream(response$);
+    return observableIntoOpenAIStream(response$, logger);
   },
 });
 

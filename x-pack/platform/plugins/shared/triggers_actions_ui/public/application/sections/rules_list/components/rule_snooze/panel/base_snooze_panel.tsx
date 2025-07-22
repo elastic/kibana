@@ -31,7 +31,7 @@ import {
 import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
 import React, { useState, useCallback, useMemo } from 'react';
-import { parseInterval } from '../../../../../../../common';
+import { parseInterval } from '../../../../../../../common/parse_interval';
 
 import { SnoozeSchedule } from '../../../../../../types';
 import { COMMON_SNOOZE_TIMES, SnoozeUnit } from './constants';
@@ -488,7 +488,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           </EuiText>
           <EuiSpacer size="s" />
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             size="s"
             title={i18n.translate(
               'xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmCallout',

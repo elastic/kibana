@@ -9,13 +9,15 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
 import type {
   SearchEmbeddableSerializedState,
   SearchEmbeddableApi,
 } from '@kbn/discover-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
+import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
@@ -36,6 +38,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     filters,
     index,
     timestampField,
+    columns,
     height,
   } = props;
 
@@ -65,10 +68,12 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('filter', filters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
-          const attributes = {
+          const attributes: Partial<SavedSearchAttributes> = {
             kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
+            columns,
+            sort: getDefaultSort(dataView, undefined, undefined, isOfAggregateQueryType(query)),
           };
           setInitialSerializedState({
             rawState: {
@@ -94,6 +99,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
       abortController.abort();
     };
   }, [
+    columns,
     dataViews,
     documentViewerEnabled,
     filters,
@@ -137,6 +143,7 @@ const SavedSearchComponentTable: React.FC<
     timeRange,
     timestampField,
     index,
+    columns,
   } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
 
@@ -196,6 +203,14 @@ const SavedSearchComponentTable: React.FC<
       embeddableApi.current.setTimeRange(timeRange);
     },
     [timeRange]
+  );
+
+  useEffect(
+    function syncColumns() {
+      if (!embeddableApi.current) return;
+      embeddableApi.current.setColumns(columns);
+    },
+    [columns]
   );
 
   return (

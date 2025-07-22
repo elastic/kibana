@@ -15,12 +15,30 @@ describe('delete', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      jest.resetAllMocks();
+
+      clientArgs.services.attachmentService.getter.get.mockResolvedValue(mockCaseComments[0]);
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+    });
+
+    it('refreshes when deleting', async () => {
+      await deleteComment({ caseID: 'mock-id-1', attachmentID: 'mock-comment-1' }, clientArgs);
+
+      expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+        attachmentIds: ['mock-comment-1'],
+        refresh: true,
+      });
     });
 
     describe('Alerts', () => {
       const commentSO = mockCaseComments[0];
       const alertsSO = mockCaseComments[3];
-      clientArgs.services.attachmentService.getter.get.mockResolvedValue(alertsSO);
+
+      beforeEach(() => {
+        clientArgs.services.attachmentService.getter.get.mockResolvedValue(alertsSO);
+      });
 
       it('delete alerts correctly', async () => {
         await deleteComment({ caseID: 'mock-id-4', attachmentID: 'mock-comment-4' }, clientArgs);
@@ -38,10 +56,41 @@ describe('delete', () => {
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalledWith();
       });
     });
+
+    describe('Attachment stats', () => {
+      it('updates attachment stats correctly', async () => {
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+          new Map([
+            [
+              'mock-id-1',
+              {
+                userComments: 2,
+                alerts: 2,
+              },
+            ],
+          ])
+        );
+
+        await deleteComment({ caseID: 'mock-id-1', attachmentID: 'mock-comment-1' }, clientArgs);
+
+        const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+        expect(args.updatedAttributes.total_comments).toEqual(2);
+        expect(args.updatedAttributes.total_alerts).toEqual(2);
+        expect(args.updatedAttributes.updated_at).toBeDefined();
+        expect(args.updatedAttributes.updated_by).toEqual({
+          email: 'damaged_raccoon@elastic.co',
+          full_name: 'Damaged Raccoon',
+          profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+          username: 'damaged_raccoon',
+        });
+      });
+    });
   });
 
   describe('deleteAll', () => {
     const clientArgs = createCasesClientMockArgs();
+
     const getAllCaseCommentsResponse = {
       saved_objects: mockCaseComments.map((so) => ({ ...so, score: 0 })),
       total: mockCaseComments.length,
@@ -51,13 +100,36 @@ describe('delete', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-    });
+      jest.resetAllMocks();
 
-    describe('Alerts', () => {
+      clientArgs.services.attachmentService.getter.get.mockResolvedValue(mockCaseComments[0]);
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+
       clientArgs.services.caseService.getAllCaseComments.mockResolvedValue(
         getAllCaseCommentsResponse
       );
+    });
 
+    it('refreshes when deleting', async () => {
+      await deleteAll({ caseID: 'mock-id-1' }, clientArgs);
+
+      expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
+        attachmentIds: [
+          'mock-comment-1',
+          'mock-comment-2',
+          'mock-comment-3',
+          'mock-comment-4',
+          'mock-comment-5',
+          'mock-comment-6',
+          'mock-comment-7',
+        ],
+        refresh: true,
+      });
+    });
+
+    describe('Alerts', () => {
       it('delete alerts correctly', async () => {
         await deleteAll({ caseID: 'mock-id-4' }, clientArgs);
 
@@ -80,6 +152,36 @@ describe('delete', () => {
 
         expect(clientArgs.services.alertsService.ensureAlertsAuthorized).not.toHaveBeenCalledWith();
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalledWith();
+      });
+    });
+
+    describe('Attachment stats', () => {
+      it('updates attachment stats correctly', async () => {
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+          new Map([
+            [
+              'mock-id-1',
+              {
+                userComments: 0,
+                alerts: 0,
+              },
+            ],
+          ])
+        );
+
+        await deleteAll({ caseID: 'mock-id-1' }, clientArgs);
+
+        const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+        expect(args.updatedAttributes.total_comments).toEqual(0);
+        expect(args.updatedAttributes.total_alerts).toEqual(0);
+        expect(args.updatedAttributes.updated_at).toBeDefined();
+        expect(args.updatedAttributes.updated_by).toEqual({
+          email: 'damaged_raccoon@elastic.co',
+          full_name: 'Damaged Raccoon',
+          profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+          username: 'damaged_raccoon',
+        });
       });
     });
   });

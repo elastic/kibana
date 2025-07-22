@@ -49,7 +49,7 @@ interface BuildIndexMetaOpts {
  * @param types The list of all registered SO types.
  */
 export const buildIndexMeta = ({ types }: BuildIndexMetaOpts): IndexMappingMeta => {
-  const typeVersions = getVirtualVersionMap(types);
+  const typeVersions = getVirtualVersionMap({ types, useModelVersionsOnly: true });
 
   return {
     mappingVersions: typeVersions,

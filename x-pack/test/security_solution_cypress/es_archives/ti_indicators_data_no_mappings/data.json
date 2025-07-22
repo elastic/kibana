@@ -5,10 +5,9 @@
     "id": "RP0HlUQkToBRTlZeGAItbyWMx1E=",
     "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
     "source": {
-      "@timestamp": "2022-06-02T13:29:47.677Z",
+      "@timestamp": "2022-06-02T13:29:47.685Z",
       "abusech": {
-        "malware": {
-        }
+        "malware": {}
       },
       "agent": {
         "ephemeral_id": "5c9f7693-8486-4634-a024-994faa6dee51",
@@ -77,8 +76,7 @@
               "pehash": "pehash",
               "vhash": "vhash"
             },
-            "pe": {
-            },
+            "pe": {},
             "size": 441803,
             "type": "zip"
           },
@@ -97,7 +95,7 @@
     "id": "C4ObxkoTZzcjmk1jFwGlRadzMnA=",
     "index": ".ds-logs-ti_abusech.malware-default-2022.06.02-000001",
     "source": {
-      "@timestamp": "2022-06-02T13:29:47.678Z",
+      "@timestamp": "2022-06-02T13:29:47.684Z",
       "abusech": {
         "malware": {
           "virustotal": {
@@ -155,10 +153,25 @@
         "indicator": {
           "file": {
             "hash": {
+              "md5": "md5",
+              "sha1": "sha1",
+              "sha224": "sha224",
+              "sha3-224": "sha3-224",
+              "sha3-256": "sha3-256",
+              "sha384": "sha384",
+              "sha3-384": "sha3-384",
+              "sha512": "sha512",
+              "sha3-512": "sha3-512",
+              "sha512/224": "sha512/224",
+              "sha512/256": "sha512/256",
+              "ssdeep": "ssdeep",
+              "tlsh": "tlsh",
+              "impfuzzy": "impfuzzy",
+              "imphash": "imphash",
+              "pehash": "pehash",
               "vhash": "vhash"
             },
-            "pe": {
-            },
+            "pe": {},
             "size": 1361342,
             "type": "zip"
           },

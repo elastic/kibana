@@ -11,22 +11,19 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ActionDefinition } from '../../actions';
 
-type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
+type StartServices = Pick<CoreStart, 'overlays' | 'rendering'>;
 
 const getMenuItem = (core: StartServices) => {
   return () => {
-    return (
-      <KibanaRenderContextProvider {...core}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem>Hello world!</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={'danger'}>{'secret'}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </KibanaRenderContextProvider>
+    return core.rendering.addContext(
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>Hello world!</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={'danger'}>{'secret'}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   };
 };
@@ -36,17 +33,17 @@ export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 export function createHelloWorldAction(
   coreStart: StartServices & Pick<CoreStart, 'overlays'>
 ): ActionDefinition {
-  const { overlays, ...startServices } = coreStart;
+  const { overlays, rendering } = coreStart;
   return {
     id: ACTION_HELLO_WORLD,
     type: ACTION_HELLO_WORLD,
     getIconType: () => 'lock',
-    MenuItem: getMenuItem(startServices),
+    MenuItem: getMenuItem(coreStart),
     execute: async () => {
       overlays.openFlyout(
         toMountPoint(
           <EuiFlyoutBody>Hello World, I am a hello world action!</EuiFlyoutBody>,
-          startServices
+          rendering
         ),
         {
           'data-test-subj': 'helloWorldAction',

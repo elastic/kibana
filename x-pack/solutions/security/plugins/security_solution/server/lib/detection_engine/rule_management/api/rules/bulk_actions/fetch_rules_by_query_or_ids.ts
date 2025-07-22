@@ -7,39 +7,80 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../../common/constants';
+import { gapStatus } from '@kbn/alerting-plugin/common';
 import type { PromisePoolOutcome } from '../../../../../../utils/promise_pool';
-import { initPromisePool } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
-import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { findRules } from '../../../logic/search/find_rules';
 
 export const fetchRulesByQueryOrIds = async ({
   query,
   ids,
   rulesClient,
-  abortSignal,
   maxRules,
+  gapRange,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
-  abortSignal: AbortSignal;
   maxRules: number;
+  gapRange?: { start: string; end: string };
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
-    return initPromisePool({
-      concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-      items: ids,
-      executor: async (id: string) => {
-        const rule = await readRules({ id, rulesClient, ruleId: undefined });
-        if (rule == null) {
-          throw Error('Rule not found');
-        }
-        return rule;
-      },
-      abortSignal,
+    const fallbackErrorMessage = 'Error resolving the rule';
+    try {
+      const { rules, errors } = await rulesClient.bulkGetRules({ ids });
+      return {
+        results: rules.map((rule) => ({
+          item: rule.id,
+          result: rule,
+        })),
+        errors: errors.map(({ id, error }) => {
+          let message = fallbackErrorMessage;
+          if (error.statusCode === 404) {
+            message = 'Rule not found';
+          }
+          return {
+            item: id,
+            error: new Error(message),
+          };
+        }),
+      };
+    } catch (error) {
+      // When there is an authorization error or it doesn't resolve any rule,
+      // bulkGetRules will not return a partial object but throw an error instead.
+      let message = error.message || fallbackErrorMessage;
+      if (error.message === 'No rules found for bulk get') {
+        message = 'Rule not found';
+      }
+      return {
+        results: [],
+        errors: ids.map((id) => {
+          return {
+            item: id,
+            // We do this to remove any status code set by the bulkGetRules client
+            error: new Error(message),
+          };
+        }),
+      };
+    }
+  }
+
+  let ruleIdsWithGaps: string[] | undefined;
+  // If there is a gap range, we need to find the rules that have gaps in that range
+  if (gapRange) {
+    const ruleIdsWithGapsResponse = await rulesClient.getRuleIdsWithGaps({
+      start: gapRange.start,
+      end: gapRange.end,
+      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+      hasUnfilledIntervals: true,
     });
+    ruleIdsWithGaps = ruleIdsWithGapsResponse.ruleIds;
+    if (ruleIdsWithGaps.length === 0) {
+      return {
+        results: [],
+        errors: [],
+      };
+    }
   }
 
   const { data, total } = await findRules({
@@ -50,6 +91,7 @@ export const fetchRulesByQueryOrIds = async ({
     sortField: undefined,
     sortOrder: undefined,
     fields: undefined,
+    ruleIds: ruleIdsWithGaps,
   });
 
   if (total > maxRules) {

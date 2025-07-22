@@ -46,7 +46,8 @@ export class ObservabilityAIAssistantPlugin
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
-    this.scopeFromConfig = context.config.get().scope;
+    const config = context.config.get();
+    this.scopeFromConfig = config.scope;
   }
   setup(
     coreSetup: CoreSetup,

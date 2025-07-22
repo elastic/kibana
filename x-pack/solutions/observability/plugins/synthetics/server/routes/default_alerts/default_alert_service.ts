@@ -8,8 +8,8 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
+import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
 import { DynamicSettingsAttributes } from '../../runtime_types/settings';
-import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
 import {
   SyntheticsMonitorStatusTranslations,
@@ -40,7 +40,7 @@ export class DefaultAlertService {
 
   async getSettings() {
     if (!this.settings) {
-      this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+      this.settings = await getSyntheticsDynamicSettings(this.soClient);
     }
     return this.settings;
   }
@@ -254,13 +254,13 @@ export class DefaultAlertService {
   async getActionConnectors() {
     const actionsClient = (await this.context.actions)?.getActionsClient();
     if (!this.settings) {
-      this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+      this.settings = await getSyntheticsDynamicSettings(this.soClient);
     }
     let actionConnectors: FindActionResult[] = [];
     try {
       actionConnectors = await actionsClient.getAll();
-    } catch (e) {
-      this.server.logger.error(e);
+    } catch (error) {
+      this.server.logger.error(`Error getting connectors, Error: ${error.message}`, { error });
     }
     return { actionConnectors, settings: this.settings };
   }

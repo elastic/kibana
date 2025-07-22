@@ -17,15 +17,15 @@ import { outputService } from '../../services';
 import { FleetError, FleetNotFoundError } from '../../errors';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
+import { canEnableSyncIntegrations } from '../../services/setup/fleet_synced_integrations';
 
 export const getRemoteSyncedIntegrationsInfoByOutputId = async (
   soClient: SavedObjectsClientContract,
   outputId: string
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
 
-  if (!enableSyncIntegrationsOnRemote) {
+  if (!canEnableSyncIntegrations()) {
     return { integrations: [] };
   }
   try {
@@ -59,20 +59,29 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
       },
       method: 'GET',
     };
-    const url = `${kibanaUrl}/api/fleet/remote_synced_integrations/status`;
-    logger.debug(`Fetching ${kibanaUrl}/api/fleet/remote_synced_integrations/status`);
+    const url = `${kibanaUrl.replace(/\/$/, '')}/api/fleet/remote_synced_integrations/status`;
+    logger.debug(`Fetching ${url}`);
 
     let body;
     let errorMessage;
-    const res = await fetch(url, options);
+    let res;
+
     try {
+      res = await fetch(url, options);
       body = await res.json();
     } catch (error) {
-      errorMessage = `GET ${url} failed with status ${res.status}. ${error.message}`;
+      if (res) {
+        errorMessage = `GET ${url} failed with status ${res.status}. ${error.message}`;
+      } else {
+        errorMessage = `GET ${url} failed with error: ${error.message}`;
+      }
     }
 
     if (body?.statusCode && body?.message) {
       errorMessage = `GET ${url} failed with status ${body.statusCode}. ${body.message}`;
+    }
+    if (body?.ok === false && body?.message) {
+      errorMessage = `GET ${url} failed with status ${res?.status}: ${body.message}`;
     }
 
     return {
@@ -82,7 +91,10 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
     };
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
-      throw new FleetNotFoundError(`No output found with id ${outputId}`);
+      return {
+        integrations: [],
+        error: `No output found with id ${outputId}`,
+      };
     } else if (error.type === 'system' && error.code === 'ECONNREFUSED') {
       throw new FleetError(`${error.message}${error.code}`);
     }

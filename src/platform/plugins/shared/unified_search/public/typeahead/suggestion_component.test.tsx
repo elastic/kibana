@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { render, screen } from '@testing-library/react';
 import { SuggestionComponent } from './suggestion_component';
+import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { userEvent } from '@testing-library/user-event';
 
-const noop = () => {
-  return;
-};
+const noop = () => {};
 
 const mockSuggestion: QuerySuggestion = {
   description: 'This is not a helpful suggestion',
@@ -25,8 +24,8 @@ const mockSuggestion: QuerySuggestion = {
 };
 
 describe('SuggestionComponent', () => {
-  it('Should display the suggestion and use the provided ariaId', () => {
-    const component = shallow(
+  it('displays the suggestion and uses the provided ariaId', () => {
+    render(
       <SuggestionComponent
         index={0}
         onClick={noop}
@@ -34,16 +33,21 @@ describe('SuggestionComponent', () => {
         selected={false}
         suggestion={mockSuggestion}
         innerRef={noop}
-        ariaId={'suggestion-1'}
+        ariaId="suggestion-1"
         shouldDisplayDescription={true}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    const item = screen.getByText(/as promised, not helpful/i);
+    expect(item).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /as promised, not helpful/i })).toHaveAttribute(
+      'id',
+      'suggestion-1'
+    );
   });
 
-  it('Should make the element active if the selected prop is true', () => {
-    const component = shallow(
+  it('marks element as active when selected', () => {
+    render(
       <SuggestionComponent
         index={0}
         onClick={noop}
@@ -51,73 +55,81 @@ describe('SuggestionComponent', () => {
         selected={true}
         suggestion={mockSuggestion}
         innerRef={noop}
-        ariaId={'suggestion-1'}
+        ariaId="suggestion-1"
         shouldDisplayDescription={true}
       />
     );
-
-    expect(component).toMatchSnapshot();
+    expect(screen.getByRole('option', { name: /as promised, not helpful/i })).toHaveAttribute(
+      'id',
+      'suggestion-1'
+    );
+    expect(screen.getByRole('option', { name: /as promised, not helpful/i })).toHaveClass(
+      'kbnTypeahead__item active'
+    );
   });
 
-  it('Should call innerRef with a reference to the root div element', () => {
-    const innerRefCallback = (index: number, ref: HTMLDivElement) => {
-      expect(ref.className).toBe('kbnTypeahead__item');
-      expect(ref.id).toBe('suggestion-1');
-      expect(index).toBe(0);
-    };
+  it('calls innerRef with the reference to the root element', () => {
+    const innerRefMock = jest.fn();
 
-    mount(
+    render(
       <SuggestionComponent
         index={0}
         onClick={noop}
         onMouseEnter={noop}
         selected={false}
         suggestion={mockSuggestion}
-        innerRef={innerRefCallback}
-        ariaId={'suggestion-1'}
+        innerRef={innerRefMock}
+        ariaId="suggestion-1"
         shouldDisplayDescription={true}
       />
     );
+
+    expect(innerRefMock).toHaveBeenCalledTimes(1);
+    const [indexArg, elementArg] = innerRefMock.mock.calls[0];
+    expect(indexArg).toBe(0);
+    expect(elementArg).toBeInstanceOf(HTMLDivElement);
+    expect(elementArg?.id).toBe('suggestion-1');
+    expect(elementArg?.className).toContain('kbnTypeahead__item');
   });
 
-  it('Should call onClick with the provided suggestion', () => {
-    const mockHandler = jest.fn();
+  it('calls onClick with suggestion and index', async () => {
+    const clickHandler = jest.fn();
 
-    const component = shallow(
+    render(
       <SuggestionComponent
         index={0}
-        onClick={mockHandler}
+        onClick={clickHandler}
         onMouseEnter={noop}
         selected={false}
         suggestion={mockSuggestion}
         innerRef={noop}
-        ariaId={'suggestion-1'}
+        ariaId="suggestion-1"
         shouldDisplayDescription={true}
       />
     );
 
-    component.simulate('click');
-    expect(mockHandler).toHaveBeenCalledTimes(1);
-    expect(mockHandler).toHaveBeenCalledWith(mockSuggestion, 0);
+    await userEvent.click(screen.getByText(/as promised, not helpful/i));
+    expect(clickHandler).toHaveBeenCalledWith(mockSuggestion, 0);
+    expect(clickHandler).toHaveBeenCalledTimes(1);
   });
 
-  it('Should call onMouseEnter when user mouses over the element', () => {
-    const mockHandler = jest.fn();
+  it('calls onMouseEnter when user hovers the element', async () => {
+    const mouseEnterHandler = jest.fn();
 
-    const component = shallow(
+    render(
       <SuggestionComponent
         index={0}
         onClick={noop}
-        onMouseEnter={mockHandler}
+        onMouseEnter={mouseEnterHandler}
         selected={false}
         suggestion={mockSuggestion}
         innerRef={noop}
-        ariaId={'suggestion-1'}
+        ariaId="suggestion-1"
         shouldDisplayDescription={true}
       />
     );
 
-    component.simulate('mouseenter');
-    expect(mockHandler).toHaveBeenCalledTimes(1);
+    await userEvent.hover(screen.getByText(/as promised, not helpful/i));
+    expect(mouseEnterHandler).toHaveBeenCalledTimes(1);
   });
 });

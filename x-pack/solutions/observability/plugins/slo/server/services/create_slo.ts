@@ -78,7 +78,6 @@ export class CreateSLO {
       const summaryPipelinePromise = this.createPipeline(
         getSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
       );
-
       rollbackOperations.push(() =>
         this.deletePipeline(getSLOSummaryPipelineId(slo.id, slo.revision))
       );
@@ -87,7 +86,6 @@ export class CreateSLO {
       rollbackOperations.push(() => this.summaryTransformManager.uninstall(summaryTransformId));
 
       const tempDocPromise = this.createTempSummaryDocument(slo);
-
       rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
 
       await Promise.all([
@@ -99,11 +97,7 @@ export class CreateSLO {
         tempDocPromise,
       ]);
 
-      rollbackOperations.push(() => this.transformManager.stop(rollupTransformId));
-      rollbackOperations.push(() => this.summaryTransformManager.stop(summaryTransformId));
-
-      // transforms can only be started after the pipeline is created
-
+      // transforms can only be started after the related pipelines are created
       await Promise.all([
         this.transformManager.start(rollupTransformId),
         this.summaryTransformManager.start(summaryTransformId),
@@ -145,8 +139,9 @@ export class CreateSLO {
       throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
     }
   }
-  async createTempSummaryDocument(slo: SLODefinition) {
-    return await retryTransientEsErrors(
+
+  private async createTempSummaryDocument(slo: SLODefinition) {
+    return retryTransientEsErrors(
       () =>
         this.scopedClusterClient.asCurrentUser.index({
           index: SUMMARY_TEMP_INDEX_NAME,
@@ -158,8 +153,8 @@ export class CreateSLO {
     );
   }
 
-  async deleteTempSummaryDocument(slo: SLODefinition) {
-    return await retryTransientEsErrors(
+  private async deleteTempSummaryDocument(slo: SLODefinition) {
+    return retryTransientEsErrors(
       () =>
         this.scopedClusterClient.asCurrentUser.delete({
           index: SUMMARY_TEMP_INDEX_NAME,
@@ -170,17 +165,21 @@ export class CreateSLO {
     );
   }
 
-  async createPipeline(params: IngestPutPipelineRequest) {
-    return await retryTransientEsErrors(
+  private async createPipeline(params: IngestPutPipelineRequest) {
+    return retryTransientEsErrors(
       () => this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(params),
       { logger: this.logger }
     );
   }
 
-  async deletePipeline(id: string) {
-    return this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-      { id },
-      { ignore: [404] }
+  private async deletePipeline(id: string) {
+    return retryTransientEsErrors(
+      () =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id },
+          { ignore: [404] }
+        ),
+      { logger: this.logger }
     );
   }
 

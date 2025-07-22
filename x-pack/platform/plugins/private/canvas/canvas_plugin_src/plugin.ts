@@ -11,6 +11,8 @@ import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/publi
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/server';
+import type { Reference } from '@kbn/content-management-utils';
 import { CanvasSetup } from '../public';
 
 import { functions } from './functions/browser';
@@ -44,9 +46,12 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     core.getStartServices().then(([coreStart, depsStart]) => {
       const externalFunctions = initFunctions({
         embeddablePersistableStateService: {
-          extract: depsStart.embeddable.extract,
-          inject: depsStart.embeddable.inject,
-          getAllMigrations: depsStart.embeddable.getAllMigrations,
+          extract: (state: EmbeddableStateWithType) => ({
+            state,
+            references: [],
+          }),
+          inject: (state: EmbeddableStateWithType, references: Reference[]) => state,
+          getAllMigrations: () => ({}),
         },
       });
       plugins.canvas.addFunctions(externalFunctions);

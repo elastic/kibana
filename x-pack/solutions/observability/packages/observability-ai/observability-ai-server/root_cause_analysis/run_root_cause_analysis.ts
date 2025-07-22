@@ -8,7 +8,7 @@
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { MessageRole, AssistantMessage, ToolMessage, ToolChoiceType } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-common';
 import { Logger } from '@kbn/logging';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { findLast, pick } from 'lodash';

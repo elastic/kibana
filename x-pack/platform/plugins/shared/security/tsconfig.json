@@ -8,7 +8,7 @@
     "public/**/*",
     "server/**/*",
     "__mocks__/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "../../../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",
@@ -93,6 +93,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/react-kibana-context-theme",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

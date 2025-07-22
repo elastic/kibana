@@ -12,6 +12,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
+import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -43,8 +44,9 @@ describe('RuleMigrationsDataMigrationClient', () => {
   describe('create', () => {
     test('should create a new migration', async () => {
       const index = '.kibana-siem-rule-migrations';
+      const name = 'test name';
 
-      const result = await ruleMigrationsDataMigrationClient.create();
+      const result = await ruleMigrationsDataMigrationClient.create(name);
 
       expect(result).not.toBeFalsy();
       expect(esClient.asInternalUser.create).toHaveBeenCalledWith({
@@ -54,6 +56,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         document: {
           created_by: currentUser.profile_uid,
           created_at: expect.any(String),
+          name,
         },
       });
     });
@@ -63,7 +66,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         esClient.asInternalUser.create as unknown as jest.MockedFn<typeof IndexApi>
       ).mockRejectedValueOnce(new Error('Test error'));
 
-      await expect(ruleMigrationsDataMigrationClient.create()).rejects.toThrow('Test error');
+      await expect(ruleMigrationsDataMigrationClient.create('test')).rejects.toThrow('Test error');
 
       expect(esClient.asInternalUser.create).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();
@@ -146,6 +149,131 @@ describe('RuleMigrationsDataMigrationClient', () => {
           },
         },
       ]);
+    });
+  });
+
+  describe('getAll', () => {
+    it('should return all migrations', async () => {
+      const response = {
+        hits: {
+          hits: [
+            {
+              _index: '.kibana-siem-rule-migrations',
+              _id: '1',
+              _source: {
+                created_by: currentUser.profile_uid,
+                created_at: new Date().toISOString(),
+              },
+            },
+            {
+              _index: '.kibana-siem-rule-migrations',
+              _id: '2',
+              _source: {
+                created_by: currentUser.profile_uid,
+                created_at: new Date().toISOString(),
+              },
+            },
+          ],
+        },
+      } as unknown as ReturnType<typeof esClient.asInternalUser.search>;
+
+      (
+        esClient.asInternalUser.search as unknown as jest.MockedFn<typeof SearchApi>
+      ).mockResolvedValueOnce(response);
+
+      await ruleMigrationsDataMigrationClient.getAll();
+      expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        size: 10000,
+        query: {
+          match_all: {},
+        },
+        _source: true,
+      });
+    });
+  });
+
+  describe('updateLastExecution', () => {
+    const connectorId = 'testConnector';
+    it('should update `started_at` & `connector_id` when called saveAsStarted', async () => {
+      const migrationId = 'testId';
+
+      await ruleMigrationsDataMigrationClient.saveAsStarted({ id: migrationId, connectorId });
+
+      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        id: migrationId,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: {
+            started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+            is_stopped: false,
+            error: null,
+            finished_at: null,
+            connector_id: connectorId,
+            skip_prebuilt_rules_matching: false,
+          },
+        },
+        retry_on_conflict: 1,
+      });
+    });
+
+    it('should update `finished_at` when called saveAsEnded', async () => {
+      const migrationId = 'testId';
+
+      await ruleMigrationsDataMigrationClient.saveAsFinished({ id: migrationId });
+
+      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        id: migrationId,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: {
+            finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+          },
+        },
+        retry_on_conflict: 1,
+      });
+    });
+
+    it('should update `is_stopped` correctly when called setIsStopped', async () => {
+      const migrationId = 'testId';
+
+      await ruleMigrationsDataMigrationClient.setIsStopped({ id: migrationId });
+
+      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        id: migrationId,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: {
+            is_stopped: true,
+          },
+        },
+        retry_on_conflict: 1,
+      });
+    });
+
+    it('should update `error` params correctly when called saveAsFailed', async () => {
+      const migrationId = 'testId';
+
+      await ruleMigrationsDataMigrationClient.saveAsFailed({
+        id: migrationId,
+        error: 'Test error',
+      });
+
+      expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
+        index: '.kibana-siem-rule-migrations',
+        id: migrationId,
+        refresh: 'wait_for',
+        doc: {
+          last_execution: {
+            error: 'Test error',
+            finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+          },
+        },
+        retry_on_conflict: 1,
+      });
     });
   });
 });

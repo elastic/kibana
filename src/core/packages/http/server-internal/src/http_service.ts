@@ -273,7 +273,7 @@ export class HttpService
       version: schema.maybe(schema.string()),
       excludePathsMatching: schema.maybe(stringOrStringArraySchema),
       pathStartsWith: schema.maybe(stringOrStringArraySchema),
-      pluginId: schema.maybe(schema.string()),
+      pluginId: schema.maybe(schema.string()), // i.e. `@kbn/lens-plugin`
     });
 
     server.route({
@@ -311,6 +311,7 @@ export class HttpService
                     title: 'Kibana HTTP APIs',
                     version: '0.0.0', // TODO get a better version here
                     filters,
+                    env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
                   }
                 );
                 return h.response(result);
@@ -323,7 +324,15 @@ export class HttpService
         );
       },
       options: {
-        app: { access: 'public' },
+        app: {
+          access: 'public',
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'Dev only route',
+            },
+          },
+        },
         auth: false,
         cache: {
           privacy: 'public',

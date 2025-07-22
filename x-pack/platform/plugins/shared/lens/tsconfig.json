@@ -59,7 +59,6 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/monaco",
     "@kbn/language-documentation",
-    "@kbn/core-saved-objects-common",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-saved-objects-server",
     "@kbn/safer-lodash-set",
@@ -122,11 +121,10 @@
     "@kbn/esql-types",
     "@kbn/react-kibana-context-theme",
     "@kbn/fields-metadata-plugin",
-    "@kbn/response-ops-rule-form",
     "@kbn/alerts-ui-shared",
-    "@kbn/rule-data-utils",
-    "@kbn/response-ops-rule-params",
-    "@kbn/esql-ast"
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-http-server",
+    "@kbn/presentation-util",
   ],
   "exclude": ["target/**/*"]
 }

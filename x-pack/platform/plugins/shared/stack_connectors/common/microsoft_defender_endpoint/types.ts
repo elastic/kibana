@@ -18,6 +18,8 @@ import type {
   AgentDetailsParamsSchema,
   GetActionsParamsSchema,
   AgentListParamsSchema,
+  GetLibraryFilesResponse,
+  RunScriptParamsSchema,
 } from './schema';
 
 export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
@@ -58,6 +60,11 @@ export interface MicrosoftDefenderEndpointGetActionsResponse {
   page: number;
   pageSize: number;
   value: MicrosoftDefenderEndpointMachineAction[];
+}
+
+export interface MicrosoftDefenderEndpointGetActionResultsResponse {
+  '@odata.context': string;
+  value: string; // Downloadable link
 }
 
 /**
@@ -177,6 +184,7 @@ export type MicrosoftDefenderEndpointTestConnectorParams = TypeOf<typeof TestCon
 export type MicrosoftDefenderEndpointIsolateHostParams = TypeOf<typeof IsolateHostParamsSchema>;
 
 export type MicrosoftDefenderEndpointReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
+export type MicrosoftDefenderEndpointRunScriptParams = TypeOf<typeof RunScriptParamsSchema>;
 
 export type MicrosoftDefenderEndpointActionParams = TypeOf<
   typeof MicrosoftDefenderEndpointActionParamsSchema
@@ -188,3 +196,5 @@ export interface MicrosoftDefenderEndpointApiTokenResponse {
   expires_in: number;
   access_token: string;
 }
+
+export type MicrosoftDefenderGetLibraryFilesResponse = TypeOf<typeof GetLibraryFilesResponse>;

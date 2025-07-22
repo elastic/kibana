@@ -1,0 +1,62 @@
+{
+  "id": "@kbn/core-chrome-layout-constants",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.APP_FIXED_VIEWPORT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_FIXED_VIEWPORT_ID",
+        "description": [
+          "\nThe ID of the fixed viewport container in the application.\nThis div is rendered by the `AppFixedViewport` component on the top of the application area and can be used to render fixed elements that should not scroll with the main content."
+        ],
+        "signature": [
+          "\"app-fixed-viewport\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.APP_MAIN_SCROLL_CONTAINER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "APP_MAIN_SCROLL_CONTAINER_ID",
+        "description": [
+          "\nThe ID of the main scroll container in the application.\n`document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID)` can be used to find the main scroll container"
+        ],
+        "signature": [
+          "\"app-main-scroll\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

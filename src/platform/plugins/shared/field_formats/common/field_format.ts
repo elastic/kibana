@@ -53,13 +53,13 @@ export abstract class FieldFormat {
 
   /**
    * @property {string} - Field Format Type
-   * @private
+   * @internal
    */
   static fieldType: string | string[];
 
   /**
    * @property {FieldFormatConvert}
-   * @private
+   * @internal
    * have to remove the private because of
    * https://github.com/Microsoft/TypeScript/issues/17293
    */
@@ -83,7 +83,7 @@ export abstract class FieldFormat {
 
   /**
    * @property {Function} - ref to child class
-   * @private
+   * @internal
    */
   public type = this.constructor as typeof FieldFormat;
   public allowsNumericalAggregations?: boolean;

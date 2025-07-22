@@ -78,6 +78,8 @@ export enum ConfigKey {
   WAIT = 'wait',
   MONITOR_QUERY_ID = 'id',
   MAX_ATTEMPTS = 'max_attempts',
+  MAINTENANCE_WINDOWS = 'maintenance_windows',
+  KIBANA_SPACES = 'spaces',
 }
 
 export const secretKeys = [

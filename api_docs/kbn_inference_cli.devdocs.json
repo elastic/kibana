@@ -17,207 +17,7 @@
     "objects": []
   },
   "common": {
-    "classes": [
-      {
-        "parentPluginId": "@kbn/inference-cli",
-        "id": "def-common.InferenceCliClient",
-        "type": "Class",
-        "tags": [],
-        "label": "InferenceCliClient",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/inference-cli",
-            "id": "def-common.InferenceCliClient.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/inference-cli",
-                "id": "def-common.InferenceCliClient.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "InferenceCliClientOptions"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/inference-cli",
-            "id": "def-common.InferenceCliClient.chatComplete",
-            "type": "Function",
-            "tags": [],
-            "label": "chatComplete",
-            "description": [],
-            "signature": [
-              "<TToolOptions extends ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string> = ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>, TStream extends boolean = false>(options: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.UnboundChatCompleteOptions",
-                "text": "UnboundChatCompleteOptions"
-              },
-              "<TToolOptions, TStream>) => ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteCompositeResponse",
-                "text": "ChatCompleteCompositeResponse"
-              },
-              "<TToolOptions, TStream>"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/inference-cli",
-                "id": "def-common.InferenceCliClient.chatComplete.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.UnboundChatCompleteOptions",
-                    "text": "UnboundChatCompleteOptions"
-                  },
-                  "<TToolOptions, TStream>"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/inference-cli",
-            "id": "def-common.InferenceCliClient.output",
-            "type": "Function",
-            "tags": [],
-            "label": "output",
-            "description": [],
-            "signature": [
-              "<TId extends string = string, TOutputSchema extends ",
-              "ToolSchemaTypeObject",
-              " | undefined = ",
-              "ToolSchemaTypeObject",
-              " | undefined, TStream extends boolean = false>(options: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.UnboundOutputOptions",
-                "text": "UnboundOutputOptions"
-              },
-              "<TId, TOutputSchema, TStream>) => ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.OutputCompositeResponse",
-                "text": "OutputCompositeResponse"
-              },
-              "<TId, TOutputSchema, TStream>"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/inference-cli",
-                "id": "def-common.InferenceCliClient.output.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.UnboundOutputOptions",
-                    "text": "UnboundOutputOptions"
-                  },
-                  "<TId, TOutputSchema, TStream>"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/inference-cli",
-            "id": "def-common.InferenceCliClient.getLangChainChatModel",
-            "type": "Function",
-            "tags": [],
-            "label": "getLangChainChatModel",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/inference-langchain",
-                "scope": "common",
-                "docId": "kibKbnInferenceLangchainPluginApi",
-                "section": "def-common.InferenceChatModel",
-                "text": "InferenceChatModel"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/inference-cli",
@@ -227,7 +27,7 @@
         "label": "createInferenceClient",
         "description": [],
         "signature": [
-          "({\n  log,\n  prompt,\n  signal,\n  kibanaClient,\n  connectorId,\n}: { log: ",
+          "({\n  log,\n  prompt,\n  signal,\n  kibanaClient: givenKibanaClient,\n  connectorId,\n}: { log: ",
           {
             "pluginId": "@kbn/tooling-log",
             "scope": "common",
@@ -262,7 +62,7 @@
             "id": "def-common.createInferenceClient.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  log,\n  prompt,\n  signal,\n  kibanaClient,\n  connectorId,\n}",
+            "label": "{\n  log,\n  prompt,\n  signal,\n  kibanaClient: givenKibanaClient,\n  connectorId,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_inference_client.ts",
             "deprecated": false,
@@ -356,9 +156,100 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-cli",
+        "id": "def-common.runRecipe",
+        "type": "Function",
+        "tags": [],
+        "label": "runRecipe",
+        "description": [],
+        "signature": [
+          "(...args: [RunRecipeCallback] | [string, RunRecipeCallback] | [",
+          "RunRecipeOptions",
+          ", RunRecipeCallback]) => void"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/run_recipe.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-cli",
+            "id": "def-common.runRecipe.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "[RunRecipeCallback] | [string, RunRecipeCallback] | [",
+              "RunRecipeOptions",
+              ", RunRecipeCallback]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/create_run_recipe.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/inference-cli",
+        "id": "def-common.InferenceCliClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceCliClient",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-cli",
+            "scope": "common",
+            "docId": "kibKbnInferenceCliPluginApi",
+            "section": "def-common.InferenceCliClient",
+            "text": "InferenceCliClient"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.BoundInferenceClient",
+            "text": "BoundInferenceClient"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-cli",
+            "id": "def-common.InferenceCliClient.getLangChainChatModel",
+            "type": "Function",
+            "tags": [],
+            "label": "getLangChainChatModel",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/inference-langchain",
+                "scope": "common",
+                "docId": "kibKbnInferenceLangchainPluginApi",
+                "section": "def-common.InferenceChatModel",
+                "text": "InferenceChatModel"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-cli/src/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []

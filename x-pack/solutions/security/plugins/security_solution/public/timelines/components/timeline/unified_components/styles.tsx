@@ -104,7 +104,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
 
       /* auto row height */
     .euiDataGridRowCell__content--autoHeight {
-      margin-top: 6px;
+      margin-top: 3px;
     }
 
     /* single row height */

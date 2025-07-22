@@ -12,7 +12,7 @@ import type { ColorRange, ColorRangeAccessor } from '../types';
 
 /**
  * Allows to update a ColorRange
- * @private
+ * @internal
  */
 const updateColorRangeItem = (
   colorRanges: ColorRange[],

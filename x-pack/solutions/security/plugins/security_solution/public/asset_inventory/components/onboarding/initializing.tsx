@@ -17,16 +17,13 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import { useKibana } from '../../../common/lib/kibana';
 import { AssetInventoryTitle } from '../asset_inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
 import { TEST_SUBJ_ONBOARDING_INITIALIZING } from '../../constants';
+import { useAddIntegrationPath } from './hooks/use_add_integration_path';
 
 export const Initializing = () => {
-  const { application } = useKibana().services;
-
-  const onAddIntegrationClick = () => application.navigateToApp(INTEGRATIONS_PLUGIN_ID);
+  const { addIntegrationPath, isLoading } = useAddIntegrationPath();
 
   return (
     <EuiFlexGroup>
@@ -79,7 +76,12 @@ export const Initializing = () => {
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton size="s" iconType="plusInCircle" onClick={onAddIntegrationClick}>
+                  <EuiButton
+                    size="s"
+                    iconType="plusInCircle"
+                    href={addIntegrationPath}
+                    isDisabled={isLoading}
+                  >
                     <FormattedMessage
                       id="xpack.securitySolution.assetInventory.initializing.addIntegration"
                       defaultMessage="Add integration"

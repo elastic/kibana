@@ -38,6 +38,16 @@ export async function getNonAggregatableDataStreams({
   });
 
   const indices = response?.indices ?? [];
+
+  // if no indices are returned, it means there are no data streams matching the criteria
+  // so we return an empty response - aggregatable is set to true so no error is thrown in the UI
+  if (indices.length === 0) {
+    return {
+      aggregatable: true,
+      datasets: [],
+    };
+  }
+
   const nonAggregatableIndices = response.fields._ignored?._ignored?.non_aggregatable_indices ?? [];
 
   const datasets = extractNonAggregatableDatasets(indices, nonAggregatableIndices);

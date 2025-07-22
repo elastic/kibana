@@ -47,17 +47,14 @@ describe('allows named params', () => {
   test('WHERE boolean expression can contain a param', async () => {
     const { validate } = await setup();
 
-    const res0 = await validate('FROM index | STATS var = ?func(?field) | WHERE var >= ?value');
+    const res0 = await validate('FROM index | STATS var = ??func(??field) | WHERE var >= ?value');
     expect(res0).toMatchObject({ errors: [], warnings: [] });
 
-    const res1 = await validate('FROM index | STATS var = ?param | WHERE var >= ?value');
+    const res1 = await validate('FROM index | WHERE textField >= ?value');
     expect(res1).toMatchObject({ errors: [], warnings: [] });
 
-    const res2 = await validate('FROM index | STATS var = ?param | WHERE var >= ?value');
+    const res2 = await validate('FROM index | WHERE ??field >= ?value');
     expect(res2).toMatchObject({ errors: [], warnings: [] });
-
-    const res3 = await validate('FROM index | STATS var = ?param | WHERE ?value >= var');
-    expect(res3).toMatchObject({ errors: [], warnings: [] });
   });
 
   test('in column names', async () => {

@@ -21,7 +21,7 @@ import { getLazyMlNodeCount, getMlNodeCount } from '../lib/node_utils';
  */
 export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
-  { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
+  { getSpaces, cloud, resolveMlCapabilities, isServerless }: SystemRouteDeps
 ) {
   router.versioned
     .post({
@@ -205,6 +205,8 @@ export function systemRoutes(
               isCloudTrial,
               cloudUrl: cloud.baseUrl,
               isMlAutoscalingEnabled,
+              showNodeInfo: !isServerless,
+              showLicenseInfo: !isServerless,
             },
           });
         } catch (error) {

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BinaryExpressionGroup } from '../ast/constants';
-import { binaryExpressionGroup, isBinaryExpression } from '../ast/helpers';
+import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
+import { isBinaryExpression } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
 import {
   CommandOptionVisitorContext,
@@ -547,25 +547,17 @@ export class WrappingPrettyPrinter {
       return { txt, indented };
     })
 
-    .on('visitRenameExpression', (ctx, inp: Input): Output => {
-      const operator = this.keyword('AS');
-      const expression = this.printBinaryOperatorExpression(ctx, operator, inp);
-      const { txt, indented } = this.decorateWithComments(
-        { ...inp, suffix: '' },
-        ctx.node,
-        expression.txt,
-        expression.indented
-      );
-
-      return { txt, indented };
-    })
-
     .on('visitListLiteralExpression', (ctx, inp: Input): Output => {
       const args = this.printChildrenList(ctx, {
         indent: inp.indent,
         remaining: inp.remaining - 1,
       });
-      const formatted = `[${args.txt}]`;
+      const node = ctx.node;
+      const isTuple = node.subtype === 'tuple';
+      const leftParenthesis = isTuple ? '(' : '[';
+      const rightParenthesis = isTuple ? ')' : ']';
+      const rightParenthesisIndent = args.oneArgumentPerLine ? '\n' + inp.indent : '';
+      const formatted = leftParenthesis + args.txt + rightParenthesisIndent + rightParenthesis;
       const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
 
       return { txt, indented };

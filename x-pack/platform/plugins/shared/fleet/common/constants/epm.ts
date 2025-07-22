@@ -22,8 +22,10 @@ export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
 export const FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE = 'profiler_symbolizer';
 export const FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE = 'profiler_collector';
 export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
+export const FLEET_CLOUD_SECURITY_ASSET_PACKAGE = 'cloud_asset_inventory';
 export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE = 'cspm';
+export const FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE = 'asset_inventory';
 export const FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE = 'vuln_mgmt';
 export const FLEET_CLOUD_BEAT_PACKAGE = 'cloudbeat';
 export const FLEET_CONNECTORS_PACKAGE = 'elastic_connectors';
@@ -47,6 +49,7 @@ export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
+export const DATA_STREAM_TYPE_VAR_NAME = 'data_stream.type';
 
 export const CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION = '2.9.0';
 

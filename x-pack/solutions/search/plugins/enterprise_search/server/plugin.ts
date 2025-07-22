@@ -20,25 +20,21 @@ import { i18n } from '@kbn/i18n';
 import {
   ENTERPRISE_SEARCH_HOME_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
-  ELASTICSEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
-  VECTOR_SEARCH_PLUGIN,
-  SEMANTIC_SEARCH_PLUGIN,
-  AI_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_INDICES,
+  SEARCH_HOMEPAGE,
   SEARCH_INDICES_START,
+  SEARCH_INDEX_MANAGEMENT,
 } from '../common/constants';
 
 import {
-  websiteSearchGuideId,
   databaseSearchGuideId,
-  websiteSearchGuideConfig,
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
@@ -109,13 +105,11 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     const PLUGIN_IDS = [
       ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
       ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
-      ELASTICSEARCH_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
-      VECTOR_SEARCH_PLUGIN.ID,
-      SEMANTIC_SEARCH_PLUGIN.ID,
-      AI_SEARCH_PLUGIN.ID,
+      SEARCH_HOMEPAGE,
       SEARCH_INDICES,
       SEARCH_INDICES_START,
+      SEARCH_INDEX_MANAGEMENT,
     ];
 
     if (customIntegrations) {
@@ -303,10 +297,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     /**
      * Register a config for the search guide
      */
-    if (config.hasWebCrawler) {
-      // TODO: Do we remove this guide with the removal of native crawler?
-      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
-    }
     if (config.hasConnectors) {
       guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }

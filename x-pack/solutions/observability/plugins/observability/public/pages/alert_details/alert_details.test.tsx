@@ -13,7 +13,6 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { useBreadcrumbs, TagsList } from '@kbn/observability-shared-plugin/public';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
-import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Chance } from 'chance';
@@ -26,8 +25,9 @@ import { Subset } from '../../typings';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
-import { AlertDetails, getPageTitle } from './alert_details';
+import { AlertDetails } from './alert_details';
 import { alertDetail, alertWithNoData } from './mock/alert';
+import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -49,13 +49,48 @@ const ruleType: RuleTypeModel = {
   ruleParamsExpression: () => <Fragment />,
   alertDetailsAppSection: () => <Fragment />,
 };
+
+jest.mock('./hooks/use_add_suggested_dashboard', () => ({
+  useAddSuggestedDashboards: () => ({
+    onClickAddSuggestedDashboard: jest.fn(),
+    addingDashboardId: undefined,
+  }),
+}));
+
+jest.mock('./hooks/use_related_dashboards', () => ({
+  useRelatedDashboards: () => ({
+    isLoadingSuggestedDashboards: false,
+    suggestedDashboards: [
+      {
+        id: 'suggested-dashboard-1',
+        title: 'Suggested Dashboard 1',
+        description: 'A suggested dashboard for testing',
+      },
+    ],
+    linkedDashboards: [
+      {
+        id: 'dashboard-1',
+      },
+    ],
+  }),
+}));
+
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const useKibanaMock = useKibana as jest.Mock;
 
-const dashboardServiceProviderMock = dashboardServiceProvider as jest.Mock;
-
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
+const spacesUnsubscribeMock = jest.fn();
+const spacesSubscribeMock = jest.fn().mockReturnValue({ unsubscribe: spacesUnsubscribeMock });
+const mockSpaces = {
+  getActiveSpace$: jest.fn().mockReturnValue({
+    subscribe: spacesSubscribeMock,
+    pipe: () => ({
+      subscribe: spacesSubscribeMock,
+    }),
+  }),
+};
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -72,30 +107,36 @@ const mockKibana = () => {
       observabilityAIAssistant: mockObservabilityAIAssistant,
       theme: {},
       dashboard: {},
+      spaces: mockSpaces,
+      telemetryClient: createTelemetryClientMock(),
     },
   });
 };
 
+const MOCK_RULE_TYPE_ID = 'observability.rules.custom_threshold';
+
+const MOCK_RULE = {
+  id: 'ruleId',
+  name: 'ruleName',
+  ruleTypeId: MOCK_RULE_TYPE_ID,
+  consumer: 'logs',
+  artifacts: {
+    dashboards: [
+      {
+        id: 'dashboard-1',
+      },
+      {
+        id: 'dashboard-2',
+      },
+    ],
+  },
+};
 jest.mock('../../hooks/use_fetch_alert_detail');
 jest.mock('../../hooks/use_fetch_rule', () => {
   return {
     useFetchRule: () => ({
       reloadRule: jest.fn(),
-      rule: {
-        id: 'ruleId',
-        name: 'ruleName',
-        consumer: 'logs',
-        artifacts: {
-          dashboards: [
-            {
-              id: 'dashboard-1',
-            },
-            {
-              id: 'dashboard-2',
-            },
-          ],
-        },
-      },
+      rule: MOCK_RULE,
     }),
   };
 });
@@ -111,14 +152,6 @@ const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
-
-dashboardServiceProviderMock.mockReturnValue({
-  fetchValidDashboards: jest.fn().mockResolvedValue([
-    {
-      id: 'dashboard-1',
-    },
-  ]),
-});
 
 const chance = new Chance();
 const params = {
@@ -159,34 +192,6 @@ describe('Alert details', () => {
       config
     );
 
-  describe('getPageTitle', () => {
-    const renderPageTitle = (ruleCategory: string) =>
-      render(
-        <IntlProvider locale="en">
-          <span data-test-subj="title">{getPageTitle(ruleCategory)}</span>
-        </IntlProvider>,
-        config
-      );
-
-    it('should display Log threshold title', () => {
-      const { getByTestId } = renderPageTitle('Log threshold');
-
-      expect(getByTestId('title').textContent).toContain('Log threshold breached');
-    });
-
-    it('should display Anomaly title', () => {
-      const { getByTestId } = renderPageTitle('Anomaly');
-
-      expect(getByTestId('title').textContent).toContain('Anomaly detected');
-    });
-
-    it('should display Inventory title', () => {
-      const { getByTestId } = renderPageTitle('Inventory');
-
-      expect(getByTestId('title').textContent).toContain('Inventory threshold breached');
-    });
-  });
-
   it('should show the alert detail page with all necessary components', async () => {
     useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
 
@@ -196,11 +201,12 @@ describe('Alert details', () => {
 
     expect(alertDetails.queryByTestId('alertDetails')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
-    expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
+    expect(alertDetails.queryByTestId(MOCK_RULE_TYPE_ID)).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsTabbedContent')).toBeTruthy();
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeFalsy();
     expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
+    expect(alertDetails.queryByTestId('relatedAlertsTab')).toBeTruthy();
   });
 
   it('should show Metadata tab', async () => {
@@ -238,5 +244,34 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
     expect(alertDetails.queryByTestId('alertDetails')).toBeFalsy();
+  });
+
+  it('should navigate to Related Dashboards tab and display linked and suggested dashboards', async () => {
+    useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
+
+    const alertDetails = renderComponent();
+
+    await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
+
+    // Find and click the Related Dashboards tab
+    const relatedDashboardsTab = alertDetails.getByText(/Related dashboards/);
+    expect(relatedDashboardsTab).toBeTruthy();
+    expect(relatedDashboardsTab.textContent).toContain('2');
+
+    // Click on the Related Dashboards tab
+    await userEvent.click(relatedDashboardsTab);
+
+    // Check that linked dashboards section is displayed
+    expect(alertDetails.queryByTestId('linked-dashboards')).toBeTruthy();
+
+    // Check that suggested dashboards section is displayed
+    expect(alertDetails.queryByTestId('suggested-dashboards')).toBeTruthy();
+
+    // Verify the suggested dashboard from our mock is displayed
+    expect(alertDetails.queryByText('Suggested Dashboard 1')).toBeTruthy();
+    expect(alertDetails.queryByText('A suggested dashboard for testing')).toBeTruthy();
+    expect(
+      alertDetails.queryByTestId('addSuggestedDashboard_alertDetailsPage_custom_threshold')
+    ).toBeTruthy();
   });
 });

@@ -35,8 +35,8 @@
 
 ## Introduction
 
-The modelVersion API is a new way to define transformations (*"migrations"*) for your savedObject types, and will 
-replace the "old" migration API after Kibana version `8.10.0` (where it will no longer be possible to register 
+The modelVersion API is a new way to define transformations (*"migrations"*) for your savedObject types, and will
+replace the "old" migration API after Kibana version `8.10.0` (where it will no longer be possible to register
 migrations using the old system).
 
 The main purpose of this API is to address two problems of the old migration system regarding managed ("serverless") deployments:
@@ -56,7 +56,7 @@ migrations was the stack version. You couldn't for example, add 2 consecutive mi
 
 It was fine for on-prem distributions, given there is no way to upgrade Kibana to something else than a "fixed" stack version.
 
-For our managed offering however, where we're planning on decoupling deployments and upgrades from stack versions 
+For our managed offering however, where we're planning on decoupling deployments and upgrades from stack versions
 (deploying more often, so more than once per stack release), it would have been an issue, as it wouldn't have been possible
 to add a new migration in-between 2 stack versions.
 
@@ -66,8 +66,8 @@ We needed a way to decouple SO versioning from the stack versioning to support t
 
 ### 2. The current migrations API is unsafe for the zero-downtime and backward-compatible requirements
 
-On traditional deployments (on-prem/non-managed cloud), upgrading Kibana is done with downtime. 
-The upgrade process requires shutting down all the nodes of the prior version before deploying the new one. 
+On traditional deployments (on-prem/non-managed cloud), upgrading Kibana is done with downtime.
+The upgrade process requires shutting down all the nodes of the prior version before deploying the new one.
 That way, there is always a single version of Kibana running at a given time, which avoids all risks of data incompatibility
 between version (e.g the new version introduces a migration that changes the shape of the document in a way that breaks compatibility
 with the previous version)
@@ -75,9 +75,9 @@ with the previous version)
 For serverless however, the same process can't be used, as we need to be able to upgrade Kibana without interruption of service.
 Which means that the old and new version of Kibana will have to cohabitate for a time.
 
-This leads to a lot of constraints regarding what can, or cannot, be done with data transformations (migrations) during an upgrade. 
+This leads to a lot of constraints regarding what can, or cannot, be done with data transformations (migrations) during an upgrade.
 And, unsurprisingly, the existing migration API (which allows to register any kind of *(doc) => doc* transformations) was way too permissive and
-unsafe given our backward compatibility requirements. 
+unsafe given our backward compatibility requirements.
 
 ## Defining model versions
 
@@ -87,7 +87,7 @@ When registering a SO type, a new [modelVersions](https://github.com/elastic/kib
 property is available. This attribute is a map of [SavedObjectsModelVersion](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L13-L21)
 which is the top-level type/container to define model versions.
 
-This map follows a similar `{ [version number] => version definition }` format as the old migration map, however 
+This map follows a similar `{ [version number] => version definition }` format as the old migration map, however
 a given SO type's model version is now identified by a single integer.
 
 The first version must be numbered as version 1, incrementing by one for each new version.
@@ -100,7 +100,6 @@ That way:
 ```ts
 const myType: SavedObjectsType = {
   name: 'test',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: modelVersion1, // valid: start with version 1
     2: modelVersion2, // valid: no gap between versions
@@ -113,7 +112,6 @@ const myType: SavedObjectsType = {
 ```ts
 const myType: SavedObjectsType = {
   name: 'test',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     2: modelVersion2, // invalid: first version must be 1
     4: modelVersion3, // invalid: skipped version 3
@@ -132,7 +130,6 @@ are not just functions as the previous migrations were, but structured objects d
 ```ts
 const myType: SavedObjectsType = {
   name: 'test',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [
@@ -157,7 +154,7 @@ const myType: SavedObjectsType = {
 };
 ```
 
-**Note:** Having multiple changes of the same type for a given version is supported by design 
+**Note:** Having multiple changes of the same type for a given version is supported by design
         to allow merging different sources (to prepare for an eventual higher-level API)
 
 *This definition would be perfectly valid:*
@@ -188,9 +185,9 @@ It's currently composed of two main properties:
 
 [link to the TS doc for `changes`](https://github.com/elastic/kibana/blob/f0eb5d695745f1f3a19ae6392618d1826ce29ce2/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L22-L73)
 
-Describes the list of changes applied during this version. 
+Describes the list of changes applied during this version.
 
-**Important:** This is the part that replaces the old migration system, and allows defining when a version adds new mapping, 
+**Important:** This is the part that replaces the old migration system, and allows defining when a version adds new mapping,
 mutates the documents, or other type-related changes.
 
 The current types of changes are:
@@ -249,12 +246,12 @@ let change: SavedObjectsModelDataBackfillChange = {
 };
 ```
 
-**note:** *Even if no check is performed to ensure it, this type of model change should only be used to 
+**note:** *Even if no check is performed to ensure it, this type of model change should only be used to
            backfill newly introduced fields.*
 
 #### - data_removal
 
-Used to remove data (unset fields) from all documents of the type. 
+Used to remove data (unset fields) from all documents of the type.
 
 *Usage example:*
 
@@ -276,12 +273,24 @@ Used to execute an arbitrary transformation function.
 *Usage example:*
 
 ```ts
-let change: SavedObjectsModelUnsafeTransformChange = {
+// Please define your transform function on a separate const.
+// Use explicit types for the generic arguments, as shown below.
+// This will reduce the chances of introducing bugs.
+const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
+  doc: SavedObjectModelTransformationDoc<BeforeType>
+) => {
+  const attributes: AfterType = {
+    ...doc.attributes,
+    someAddedField: 'defaultValue',
+  };
+
+  return { document: { ...doc, attributes } };
+};
+
+// this is how you would specify a change in the changes: []
+const change: SavedObjectsModelUnsafeTransformChange = {
   type: 'unsafe_transform',
-  transformFn: (document) => {
-    document.attributes.someAddedField = 'defaultValue';
-    return { document };
-  },
+  transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
 };
 ```
 
@@ -306,7 +315,7 @@ This is a new concept introduced by model versions. This schema is used for inte
 When retrieving a savedObject document from an index, if the version of the document is higher than the latest version
 known of the Kibana instance, the document will go through the `forwardCompatibility` schema of the associated model version.
 
-**Important:** These conversion mechanism shouldn't assert the data itself, and only strip unknown fields to convert the document to 
+**Important:** These conversion mechanism shouldn't assert the data itself, and only strip unknown fields to convert the document to
 the **shape** of the document at the given version.
 
 Basically, this schema should keep all the known fields of a given version, and remove all the unknown fields, without throwing.
@@ -352,7 +361,7 @@ definition, now directly included in the model version definition.
 As a refresher the `create` schema is a `@kbn/config-schema` object-type schema, and is used to validate the properties of the document
 during `create` and `bulkCreate` operations.
 
-**note:** *Implementing this schema is optional, but still recommended, as otherwise there will be no validating when 
+**note:** *Implementing this schema is optional, but still recommended, as otherwise there will be no validating when
            importing objects*
 
 ## Use-case examples
@@ -373,7 +382,6 @@ The definition of the type at version 1 would look like:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     // initial (and current) model version
     1: {
@@ -402,7 +410,7 @@ const myType: SavedObjectsType = {
 
 From here, say we want to introduce a new `dolly` field that is not indexed, and that we don't need to populate with a default value.
 
-To achieve that, we need to introduce a new model version, with the only thing to do will be to define the 
+To achieve that, we need to introduce a new model version, with the only thing to do will be to define the
 associated schemas to include this new field.
 
 The added model version would look like:
@@ -425,13 +433,12 @@ let modelVersion2: SavedObjectsModelVersion = {
 };
 ```
 
-The full type definition after the addition of the new model version: 
+The full type definition after the addition of the new model version:
 
 ```ts
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [],
@@ -470,7 +477,7 @@ const myType: SavedObjectsType = {
 ### Adding an indexed field without default value
 
 This scenario is fairly close to the previous one. The difference being that working with an indexed field means
-adding a `mappings_addition` change and to also update the root mappings accordingly.  
+adding a `mappings_addition` change and to also update the root mappings accordingly.
 
 To reuse the previous example, let's say the `dolly` field we want to add would need to be indexed instead.
 
@@ -479,7 +486,7 @@ In that case, the new version needs to do the following:
 - update the root `mappings` accordingly
 - add the updated schemas as we did for the previous example
 
-The new version definition would look like: 
+The new version definition would look like:
 
 ```ts
 let modelVersion2: SavedObjectsModelVersion = {
@@ -523,7 +530,6 @@ the full type definition after the addition of the model version 2 would be:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [
@@ -619,7 +625,6 @@ The full type definition would look like:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     1: {
       changes: [
@@ -689,7 +694,6 @@ The definition of the type at version 1 would look like:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     // initial (and current) model version
     1: {
@@ -721,7 +725,7 @@ From here, say we want to remove the `removed` field, as our application doesn't
 The first thing to understand here is the impact toward backward compatibility:
 Say that Kibana version `X` was still using this field, and that we stopped utilizing the field in version `X+1`.
 
-We can't remove the data in version `X+1`, as we need to be able to rollback to the prior version at **any time**. 
+We can't remove the data in version `X+1`, as we need to be able to rollback to the prior version at **any time**.
 If we were to delete the data of this `removed` field during the upgrade to version `X+1`, and if then, for any reason,
 we'd need to rollback to version `X`,  it would cause a data loss, as version `X` was still using this field, but it would
 no longer present in our document after the rollback.
@@ -763,7 +767,6 @@ The full type definition after the addition of the new model version:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     // initial (and current) model version
     1: {
@@ -815,11 +818,11 @@ let modelVersion3: SavedObjectsModelVersion = {
   ],
   schemas: {
     forwardCompatibility: schema.object(
-      { kept: schema.string() }, 
+      { kept: schema.string() },
       { unknowns: 'ignore' }
     ),
     create:  schema.object(
-      { kept: schema.string() }, 
+      { kept: schema.string() },
     )
   },
 };
@@ -831,7 +834,6 @@ The full type definition after the data removal would look like:
 const myType: SavedObjectsType = {
   name: 'test',
   namespaceType: 'single',
-  switchToModelVersionAt: '8.10.0',
   modelVersions: {
     // initial (and current) model version
     1: {
@@ -896,32 +898,32 @@ with model version and their associated transformations.
 
 ### Tooling for unit tests
 
-For unit tests, the package exposes utilities to easily test the impact of transforming documents 
+For unit tests, the package exposes utilities to easily test the impact of transforming documents
 from a model version to another one, either upward or backward.
 
 #### Model version test migrator
 
-The `createModelVersionTestMigrator` helper allows to create a test migrator that can be used to 
+The `createModelVersionTestMigrator` helper allows to create a test migrator that can be used to
 test model version changes between versions, by transforming documents the same way the migration
 algorithm would during an upgrade.
 
 **Example:**
 
 ```ts
-import { 
-  createModelVersionTestMigrator, 
-  type ModelVersionTestMigrator 
+import {
+  createModelVersionTestMigrator,
+  type ModelVersionTestMigrator
 } from '@kbn/core-test-helpers-model-versions';
 
 const mySoTypeDefinition = someSoType();
 
 describe('mySoTypeDefinition model version transformations', () => {
   let migrator: ModelVersionTestMigrator;
-  
+
   beforeEach(() => {
     migrator = createModelVersionTestMigrator({ type: mySoTypeDefinition });
   });
-  
+
   describe('Model version 2', () => {
     it('properly backfill the expected fields when converting from v1 to v2', () => {
       const obj = createSomeSavedObject();
@@ -955,7 +957,7 @@ describe('mySoTypeDefinition model version transformations', () => {
 During integration tests, we can boot a real Elasticsearch cluster, allowing us to manipulate SO
 documents in a way almost similar to how it would be done on production runtime. With integration
 tests, we can even simulate the cohabitation of two Kibana instances with different model versions
-to assert the behavior of their interactions. 
+to assert the behavior of their interactions.
 
 #### Model version test bed
 
@@ -966,7 +968,7 @@ and to initiate the migration between the two versions we're testing.
 **Example:**
 
 ```ts
-import { 
+import {
   createModelVersionTestBed,
   type ModelVersionTestKit
 } from '@kbn/core-test-helpers-model-versions';
@@ -1032,7 +1034,7 @@ test bed currently has some limitations:
 ## Limitations and edge cases in serverless environments
 
 The serverless environment, and the fact that upgrade in such environments are performed in a way
-where, at some point, the old and new version of the application are living in cohabitation, leads 
+where, at some point, the old and new version of the application are living in cohabitation, leads
 to some particularities regarding the way the SO APIs works, and to some limitations / edge case
 that we need to document
 

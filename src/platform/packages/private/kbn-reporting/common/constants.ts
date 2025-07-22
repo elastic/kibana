@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  DISCOVER_APP_LOCATOR,
+  CANVAS_APP_LOCATOR,
+  DASHBOARD_APP_LOCATOR,
+  LENS_APP_LOCATOR,
+  VISUALIZE_APP_LOCATOR,
+} from '@kbn/deeplinks-analytics';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
   'application/pdf',
@@ -33,6 +42,13 @@ export const LICENSE_TYPE_CLOUD_STANDARD = 'standard' as const;
 export const LICENSE_TYPE_GOLD = 'gold' as const;
 export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
+export const SCHEDULED_REPORT_VALID_LICENSES: LicenseType[] = [
+  LICENSE_TYPE_TRIAL,
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_ENTERPRISE,
+];
 
 /*
  * Notifications
@@ -45,12 +61,23 @@ export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
  * Client-side paths
  */
 
+// Allowed locator types for reporting: the "reportable" analytical apps we expect to redirect to during screenshotting
+export const REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES = [
+  DISCOVER_APP_LOCATOR,
+  CANVAS_APP_LOCATOR,
+  DASHBOARD_APP_LOCATOR,
+  LENS_APP_LOCATOR,
+  VISUALIZE_APP_LOCATOR,
+];
+
 // Redirection URL used to load app state for screenshotting
 export const REPORTING_REDIRECT_APP = '/app/reportingRedirect';
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+export const REPORTING_MANAGEMENT_SCHEDULES =
+  '/app/management/insightsAndAlerting/reporting/schedules';
 
 /*
  * ILM

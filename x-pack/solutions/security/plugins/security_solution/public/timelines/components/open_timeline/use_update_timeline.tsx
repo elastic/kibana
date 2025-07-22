@@ -69,7 +69,7 @@ export const useUpdateTimeline = () => {
         selectDataView({
           id: _timeline.dataViewId,
           fallbackPatterns: _timeline.indexNames,
-          scope: [DataViewManagerScopeName.timeline],
+          scope: DataViewManagerScopeName.timeline,
         });
       }
 

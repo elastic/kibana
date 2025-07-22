@@ -15,11 +15,23 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
-import { RULE_NAME_INPUT_TITLE, RULE_TAG_INPUT_TITLE, RULE_TAG_PLACEHOLDER } from '../translations';
+import {
+  RULE_INVESTIGATION_GUIDE_LABEL,
+  RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
+  RULE_NAME_INPUT_TITLE,
+  RULE_TAG_INPUT_TITLE,
+  RULE_TAG_PLACEHOLDER,
+} from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
+import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
+import { LabelWithTooltip } from './label_with_tooltip';
+
+export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
   const { formData, baseErrors, plugins } = useRuleFormState();
@@ -72,6 +84,19 @@ export const RuleDetails = () => {
     }
   }, [dispatch, tags]);
 
+  const onSetArtifacts = useCallback(
+    (value: object) => {
+      dispatch({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'artifacts',
+          value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
+        },
+      });
+    },
+    [dispatch, formData.artifacts]
+  );
+
   return (
     <>
       <EuiFlexGroup>
@@ -89,6 +114,7 @@ export const RuleDetails = () => {
               placeholder={RULE_NAME_INPUT_TITLE}
               onChange={onNameChange}
               data-test-subj="ruleDetailsNameInput"
+              isInvalid={!!baseErrors?.name?.length}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -101,6 +127,7 @@ export const RuleDetails = () => {
             error={baseErrors?.tags}
           >
             <EuiComboBox
+              isInvalid={!!baseErrors?.tags?.length}
               fullWidth
               noSuggestions
               placeholder={RULE_TAG_PLACEHOLDER}
@@ -113,7 +140,28 @@ export const RuleDetails = () => {
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiFormRow
+        fullWidth
+        label={
+          <LabelWithTooltip
+            labelContent={RULE_INVESTIGATION_GUIDE_LABEL}
+            tooltipContent={RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT}
+          />
+        }
+        labelAppend={OptionalFieldLabel}
+        isInvalid={
+          (formData.artifacts?.investigation_guide?.blob?.length ?? 0) >
+          MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH
+        }
+      >
+        <InvestigationGuideEditor
+          setRuleParams={onSetArtifacts}
+          value={formData.artifacts?.investigation_guide?.blob ?? ''}
+        />
+      </EuiFormRow>
       {contentManagement && <RuleDashboards contentManagement={contentManagement} />}
+      <EuiSpacer size="xxl" />
     </>
   );
 };

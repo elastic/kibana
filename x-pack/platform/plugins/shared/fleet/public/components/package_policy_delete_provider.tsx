@@ -19,13 +19,15 @@ import {
   useMultipleAgentPolicies,
   useLink,
   useDeletePackagePolicyMutation,
+  sendDeletePackageDatastreamAssets,
 } from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy, PackagePolicyPackage } from '../types';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
   from?: 'fleet-policy-list' | undefined;
+  packagePolicyPackage?: PackagePolicyPackage;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -40,6 +42,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   agentPolicies,
   from,
   children,
+  packagePolicyPackage,
 }) => {
   const { notifications } = useStartServices();
   const {
@@ -56,7 +59,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const { mutateAsync: deletePackagePolicyMutationAsync } = useDeletePackagePolicyMutation();
-
   const isShared = useMemo(() => {
     if (agentPolicies?.length !== 1) {
       return false;
@@ -119,11 +121,22 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     () => agentPolicies?.map((p) => p.name).join(', '),
     [agentPolicies]
   );
-
   const deletePackagePolicies = useCallback(async () => {
     setIsLoading(true);
-
     try {
+      /**
+       * Try to delete assets if there are any
+       */
+      if (packagePolicyPackage?.type === 'input') {
+        const assetsData = await sendDeletePackageDatastreamAssets(
+          { pkgName: packagePolicyPackage?.name, pkgVersion: packagePolicyPackage?.version },
+          { packagePolicyId: packagePolicies[0] }
+        );
+        if (assetsData?.error?.message) {
+          notifications.toasts.addDanger(`Error: ${assetsData.error.message}`);
+        }
+      }
+
       const data = await deletePackagePolicyMutationAsync({ packagePolicyIds: packagePolicies });
       const successfulResults = data?.filter((result) => result.success) || [];
       const failedResults = data?.filter((result) => !result.success) || [];
@@ -183,20 +196,21 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle', {
-          defaultMessage: 'Error deleting integration',
+          defaultMessage: `Error deleting integration`,
         })
       );
     }
     closeModal();
   }, [
-    closeModal,
     packagePolicies,
-    notifications.toasts,
-    agentPolicies,
+    closeModal,
     deletePackagePolicyMutationAsync,
-    getPath,
-    history,
+    packagePolicyPackage,
+    agentPolicies,
+    notifications.toasts,
     from,
+    history,
+    getPath,
   ]);
 
   const renderModal = () => {
@@ -251,6 +265,22 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
+        {packagePolicyPackage?.type === 'input' && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.inputPackage.message"
+                  defaultMessage="This action will also remove the installed assets"
+                />
+              }
+              data-test-subj="InputPackageCallOut"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {(hasMultipleAgentPolicies || isShared) && (
           <>
             <EuiCallOut
@@ -295,7 +325,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
                   values={{
                     toolTip: (
                       <EuiIconTip
-                        type="iInCircle"
+                        type="info"
                         iconProps={{
                           className: 'eui-alignTop',
                         }}

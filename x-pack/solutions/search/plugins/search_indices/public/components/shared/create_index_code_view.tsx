@@ -22,7 +22,7 @@ import { CodeSample } from './code_sample';
 import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
 import { Workflow } from '../../code_examples/workflows';
-import { CreateIndexCodeExamples } from '../../types';
+import { CreateIndexCodeExamples, CodeSnippetParameters } from '../../types';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;
@@ -49,19 +49,20 @@ export const CreateIndexCodeView = ({
   selectedLanguage,
   selectedCodeExamples,
 }: CreateIndexCodeViewProps) => {
-  const { application, share, console: consolePlugin } = useKibana().services;
+  const { application, share, cloud, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
 
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
 
-  const codeParams = useMemo(() => {
+  const codeParams: CodeSnippetParameters = useMemo(() => {
     return {
       indexName: indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
       apiKey: apiKey || undefined,
+      isServerless: cloud?.isServerlessEnabled ?? undefined,
     };
-  }, [indexName, elasticsearchUrl, apiKey]);
+  }, [indexName, elasticsearchUrl, apiKey, cloud]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);

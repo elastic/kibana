@@ -155,11 +155,11 @@ Object {
         "params": Object {
           "colorStops": Array [
             Object {
-              "color": "#aaa",
+              "color": "#D3DAE6",
               "stop": 0,
             },
             Object {
-              "color": "#54B399",
+              "color": "#BECFE3",
               "stop": 20,
             },
             Object {
@@ -186,11 +186,11 @@ Object {
           "steps": 3,
           "stops": Array [
             Object {
-              "color": "#aaa",
+              "color": "#D3DAE6",
               "stop": 20,
             },
             Object {
-              "color": "#54B399",
+              "color": "#BECFE3",
               "stop": 40,
             },
             Object {

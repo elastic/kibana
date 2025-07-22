@@ -70,6 +70,7 @@ export const getRowItemsWithActions = ({
           idPrefix={idPrefix}
           overflowIndexStart={displayCount}
           maxOverflowItems={maxOverflow}
+          render={render}
         />
       </>
     ) : (
@@ -86,6 +87,7 @@ interface RowItemOverflowProps {
   idPrefix: string;
   overflowIndexStart: number;
   maxOverflowItems: number;
+  render?: (item: string) => React.ReactNode;
 }
 
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
@@ -94,6 +96,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   idPrefix,
   overflowIndexStart = 5,
   maxOverflowItems = 5,
+  render,
 }) => {
   const { euiTheme } = useEuiTheme();
   const maxVisibleValues = useMemo(
@@ -111,6 +114,7 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
               values={maxVisibleValues}
               overflowIndexStart={overflowIndexStart}
               moreMaxHeight="none"
+              render={render}
             />
           </EuiText>
           {values.length > overflowIndexStart + maxOverflowItems && (

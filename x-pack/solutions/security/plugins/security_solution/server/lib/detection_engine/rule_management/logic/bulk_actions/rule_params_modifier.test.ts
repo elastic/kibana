@@ -7,6 +7,7 @@
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import type { RuleAlertType } from '../../../rule_schema';
 
 describe('addItemsToArray', () => {
@@ -685,6 +686,311 @@ describe('ruleParamsModifier', () => {
     });
   });
 
+  describe('alert_suppression', () => {
+    describe('delete_alert_suppression action', () => {
+      test.each([
+        [
+          'removes alert suppression',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            resultingAlertSuppression: undefined,
+            isParamsUpdateSkipped: false,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'skips updates if suppression is not configured',
+          {
+            existingAlertSuppression: undefined,
+            resultingAlertSuppression: undefined,
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'removes alert suppression in threshold rule',
+          {
+            existingAlertSuppression: {
+              duration: { value: 5, unit: 'h' },
+            },
+            resultingAlertSuppression: undefined,
+            isParamsUpdateSkipped: false,
+            ruleType: 'threshold',
+          },
+        ],
+        [
+          'skips updates if suppression is not configured in threshold rule',
+          {
+            existingAlertSuppression: undefined,
+            resultingAlertSuppression: undefined,
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+      ])(
+        'should delete alert suppression, case:"%s"',
+        (
+          caseName,
+          { existingAlertSuppression, resultingAlertSuppression, isParamsUpdateSkipped, ruleType }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              alertSuppression: existingAlertSuppression,
+              type: ruleType,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.delete_alert_suppression,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty('alertSuppression', resultingAlertSuppression);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+    });
+
+    describe('set_alert_suppression action', () => {
+      test.each([
+        [
+          '3 existing groupBy fields overwritten with 2 of them = 2 groupBy fields',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              duration: { value: 1, unit: 'h' },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: false,
+            ruleType: 'query',
+          },
+        ],
+        [
+          '`undefined` existing alert suppression overwritten with 2 groupBy fields = 2 groupBy fields',
+          {
+            existingAlertSuppression: undefined,
+            alertSuppressionToSet: {
+              group_by: ['field-1', 'field-2'],
+              duration: { value: 5, unit: 'h' as const },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-1', 'field-2'],
+              duration: { value: 5, unit: 'h' },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: false,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'sets missingFieldsStrategy to default when it is not set in action',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-x'],
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-x'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: false,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'skips update when existing alert suppression is the same as action',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2'],
+              duration: { value: 5, unit: 'h' },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-1', 'field-2'],
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+              duration: { value: 5, unit: 'h' as const },
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-1', 'field-2'],
+              duration: { value: 5, unit: 'h' },
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+        [
+          'skips update when existing alert suppression is the same as action for absent duration',
+          {
+            existingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            alertSuppressionToSet: {
+              group_by: ['field-1', 'field-2', 'field-3'],
+              missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            resultingAlertSuppression: {
+              groupBy: ['field-1', 'field-2', 'field-3'],
+              missingFieldsStrategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+            },
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+      ])(
+        'should set alert suppression, case:"%s"',
+        (
+          caseName,
+          {
+            existingAlertSuppression,
+            alertSuppressionToSet,
+            resultingAlertSuppression,
+            isParamsUpdateSkipped,
+            ruleType,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              alertSuppression: existingAlertSuppression,
+              type: ruleType,
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.set_alert_suppression,
+                value: alertSuppressionToSet,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty('alertSuppression', resultingAlertSuppression);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+
+      test('should throw error when applied to threshold rule', () => {
+        expect(() =>
+          ruleParamsModifier({ type: 'threshold' } as RuleAlertType['params'], [
+            {
+              type: BulkActionEditTypeEnum.set_alert_suppression,
+              value: {
+                group_by: ['field-1', 'field-2', 'field-3'],
+                missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+              },
+            },
+          ])
+        ).toThrow(
+          "Threshold rule doesn't support this action. Use 'set_alert_suppression_for_threshold' action instead"
+        );
+      });
+    });
+
+    describe('set_alert_suppression_for_threshold action', () => {
+      test.each([
+        [
+          'overwrites existing alert suppression with new duration',
+          {
+            existingAlertSuppression: {
+              duration: { value: 1, unit: 'h' },
+            },
+            alertSuppressionToSet: {
+              duration: { value: 30, unit: 'm' as const },
+            },
+            resultingAlertSuppression: {
+              duration: { value: 30, unit: 'm' },
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          'set new duration when existing suppression is undefined',
+          {
+            existingAlertSuppression: undefined,
+            alertSuppressionToSet: {
+              duration: { value: 5, unit: 'h' as const },
+            },
+            resultingAlertSuppression: {
+              duration: { value: 5, unit: 'h' },
+            },
+            isParamsUpdateSkipped: false,
+          },
+        ],
+        [
+          'skips update when existing alert suppression is the same as action',
+          {
+            existingAlertSuppression: {
+              duration: { value: 5, unit: 'h' },
+            },
+            alertSuppressionToSet: {
+              duration: { value: 5, unit: 'h' as const },
+            },
+            resultingAlertSuppression: {
+              duration: { value: 5, unit: 'h' },
+            },
+            isParamsUpdateSkipped: true,
+            ruleType: 'query',
+          },
+        ],
+      ])(
+        'should set alert suppression, case:"%s"',
+        (
+          caseName,
+          {
+            existingAlertSuppression,
+            alertSuppressionToSet,
+            resultingAlertSuppression,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
+            {
+              ...ruleParamsMock,
+              alertSuppression: existingAlertSuppression,
+              type: 'threshold',
+            } as RuleAlertType['params'],
+            [
+              {
+                type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+                value: alertSuppressionToSet,
+              },
+            ]
+          );
+          expect(modifiedParams).toHaveProperty('alertSuppression', resultingAlertSuppression);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
+        }
+      );
+
+      test('should throw error when applied not to threshold rule', () => {
+        expect(() =>
+          ruleParamsModifier({ type: 'new_terms' } as RuleAlertType['params'], [
+            {
+              type: BulkActionEditTypeEnum.set_alert_suppression_for_threshold,
+              value: {
+                duration: { value: 30, unit: 'm' as const },
+              },
+            },
+          ])
+        ).toThrow(
+          "new_terms rule type doesn't support this action. Use 'set_alert_suppression' action instead."
+        );
+      });
+    });
+  });
   describe('timeline', () => {
     test('should set timeline', () => {
       const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [

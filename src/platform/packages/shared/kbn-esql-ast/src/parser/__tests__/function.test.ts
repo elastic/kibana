@@ -270,13 +270,13 @@ describe('function AST nodes', () => {
     it('logical NOT IN', () => {
       const query = 'FROM a | STATS a NOT IN (1, 2, 3)';
       const { ast, errors } = parse(query);
-      const fn = Walker.findFunction(ast, ({ name }) => name === 'not_in');
+      const fn = Walker.findFunction(ast, ({ name }) => name === 'not in');
 
       expect(errors.length).toBe(0);
       expect(fn).toMatchObject({
         type: 'function',
         subtype: 'binary-expression',
-        name: 'not_in',
+        name: 'not in',
         args: [expect.any(Object), expect.any(Object)],
       });
     });
@@ -320,6 +320,120 @@ describe('function AST nodes', () => {
         subtype: 'binary-expression',
         name: '=',
         args: [expect.any(Object), expect.any(Object)],
+      });
+    });
+
+    describe('IN-expression', () => {
+      it('empty tuple', () => {
+        const query = 'FROM a | STATS a IN ( )';
+        const { root, errors } = parse(query);
+        const expression = Walker.findFunction(root, ({ name }) => name === 'in');
+
+        expect(errors.length > 0).toBe(true);
+        expect(expression?.incomplete).toBe(true);
+        expect((expression?.args[1] as any)?.incomplete).toBe(true);
+
+        expect(expression?.args.length).toBe(2);
+        expect(expression).toMatchObject({
+          type: 'function',
+          subtype: 'binary-expression',
+          name: 'in',
+          args: [
+            { type: 'column', name: 'a' },
+            {
+              type: 'list',
+              subtype: 'tuple',
+              values: [],
+            },
+          ],
+        });
+      });
+
+      it('single tuple item', () => {
+        const query = 'FROM a | STATS a IN ("asdf")';
+        const { root, errors } = parse(query);
+        const expression = Walker.findFunction(root, ({ name }) => name === 'in');
+
+        expect(errors.length).toBe(0);
+        expect(expression?.args.length).toBe(2);
+        expect(expression).toMatchObject({
+          type: 'function',
+          subtype: 'binary-expression',
+          name: 'in',
+          args: [
+            { type: 'column', name: 'a' },
+            {
+              type: 'list',
+              subtype: 'tuple',
+              values: [{ type: 'literal', valueUnquoted: 'asdf' }],
+            },
+          ],
+        });
+      });
+
+      it('multiple items in tuple', () => {
+        const query = 'FROM a | STATS a IN (1, 2, 3)';
+        const { root, errors } = parse(query);
+        const expression = Walker.findFunction(root, ({ name }) => name === 'in');
+
+        expect(errors.length).toBe(0);
+        expect(expression?.args.length).toBe(2);
+        expect(expression).toMatchObject({
+          type: 'function',
+          subtype: 'binary-expression',
+          name: 'in',
+          args: [
+            { type: 'column', name: 'a' },
+            {
+              type: 'list',
+              subtype: 'tuple',
+              values: [
+                { type: 'literal', value: 1 },
+                { type: 'literal', value: 2 },
+                { type: 'literal', value: 3 },
+              ],
+            },
+          ],
+        });
+      });
+
+      it('logical NOT IN', () => {
+        const query = 'FROM a | STATS a NOT /* comment */ IN (1, 2, 3)';
+        const { root, errors } = parse(query);
+        const expression = Walker.findFunction(root, 'not in');
+
+        expect(errors.length).toBe(0);
+        expect(expression?.args.length).toBe(2);
+        expect(expression).toMatchObject({
+          type: 'function',
+          subtype: 'binary-expression',
+          name: 'not in',
+          args: [
+            { type: 'column', name: 'a' },
+            {
+              type: 'list',
+              subtype: 'tuple',
+              values: [
+                { type: 'literal', value: 1 },
+                { type: 'literal', value: 2 },
+                { type: 'literal', value: 3 },
+              ],
+            },
+          ],
+        });
+      });
+
+      it('correctly parses location', () => {
+        const src = 'FROM a | STATS a /* asdf */ IN /* 1 */ (1, /* 2 */ 2, /* 3 */ 3 /* 4 */ )';
+        const { root } = parse(src);
+        const expression = Walker.findFunction(root, ({ name }) => name === 'in');
+        const tuple = Walker.match(expression!, { type: 'list', subtype: 'tuple' });
+
+        const expressionText = src.slice(expression!.location!.min, expression!.location!.max + 1);
+        const tupleText = src.slice(tuple!.location!.min, tuple!.location!.max + 1);
+
+        expect(expressionText).toBe('a /* asdf */ IN /* 1 */ (1, /* 2 */ 2, /* 3 */ 3 /* 4 */ )');
+        expect(tupleText).toBe('(1, /* 2 */ 2, /* 3 */ 3 /* 4 */ )');
       });
     });
   });

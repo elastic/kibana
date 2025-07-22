@@ -50,7 +50,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:3d19648819612728a676ab4061edfb3283bd7117a22c6c4479ee1c1d51831832';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:350eea0e8b97e1332f3bfa20866a4a9af0be6daebea8c3fd3ea954a8662bb585';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -60,7 +60,7 @@ export async function runDockerGenerator(
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:68e0781cd592beda39880428985d5fecca1cf2abb18365da73bf1f7ebd994974';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:65cf5330da1a537c4d5aa528fb80b0969799ce813d6942cc802aa5fd74248aef';
   }
 
   // General docker var config
@@ -151,7 +151,14 @@ export async function runDockerGenerator(
   // Write all the needed docker config files
   // into kibana-docker folder
   for (const [, dockerTemplate] of Object.entries(dockerTemplates)) {
-    await write(resolve(dockerBuildDir, dockerTemplate.name), dockerTemplate.generator(scope));
+    let filename: string;
+    if (!dockerTemplate.name.includes('kibana.yml')) {
+      filename = `${dockerTemplate.name}.${artifactArchitecture}`;
+    } else {
+      filename = dockerTemplate.name;
+    }
+
+    await write(resolve(dockerBuildDir, filename), dockerTemplate.generator(scope));
   }
 
   // Copy serverless-only configuration files
@@ -182,7 +189,8 @@ export async function runDockerGenerator(
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
   // and we just run that bash script
-  await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
+  const dockerBuildScript = `build_docker.sh.${artifactArchitecture}`;
+  await chmodAsync(`${resolve(dockerBuildDir, dockerBuildScript)}`, '755');
 
   // Only build images on native targets
   if (flags.image) {
@@ -201,9 +209,10 @@ export async function runDockerGenerator(
       await linkAsync(src, dest);
     }
 
-    await exec(log, `./build_docker.sh`, [], {
+    await exec(log, `./${dockerBuildScript}`, [], {
       cwd: dockerBuildDir,
       level: 'info',
+      build,
     });
   }
 

@@ -12,7 +12,7 @@
     "patterns": [
       "_connector/{connector_id}/_configuration"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/update-connector-configuration-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-update-configuration",
     "availability": {
       "stack": true,
       "serverless": true

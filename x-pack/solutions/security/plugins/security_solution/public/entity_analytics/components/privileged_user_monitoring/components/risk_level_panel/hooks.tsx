@@ -5,39 +5,59 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import { useRiskEngineStatus } from '../../../../api/hooks/use_risk_engine_status';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
-import { useEsqlQueryWithGlobalFilters } from '../../../../../common/hooks/esql/use_esql_query_with_global_filter';
+import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_global_filter';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetDefaultRiskIndex } from '../../../../hooks/use_get_default_risk_index';
-import { RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY } from './constants';
 import type { RiskLevelsTableItem, RiskLevelsPrivilegedUsersQueryResult } from './types';
 import { RiskScoreLevel } from '../../../severity/common';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
+import { getRiskLevelsPrivilegedUsersQueryBody } from '../../queries/risk_level_esql_query';
 
-export const useRiskLevelsPrivilegedUserQuery = ({ skip }: { skip: boolean }) => {
+export const useRiskLevelsPrivilegedUserQuery = ({
+  skip,
+  spaceId,
+}: {
+  skip: boolean;
+  spaceId: string;
+}) => {
   const { data } = useKibana().services;
 
   const index = useGetDefaultRiskIndex(true); // only latest
-  const { query, filterQuery } = useEsqlQueryWithGlobalFilters(
-    `FROM ${index} ${RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY}`
-  );
+  const filterQuery = useEsqlGlobalFilterQuery();
+
+  const query = `FROM ${index} ${getRiskLevelsPrivilegedUsersQueryBody(spaceId)}`;
 
   const {
-    isLoading,
+    data: riskEngineStatus,
+    isFetching: isStatusLoading,
+    refetch: refetchEngineStatus,
+  } = useRiskEngineStatus();
+
+  const {
     isRefetching,
     data: result,
     error,
     isError,
     refetch,
-  } = useQuery(
-    [filterQuery, query],
+  } = useQuery<
+    {
+      response: ESQLSearchResponse;
+      params: ESQLSearchParams;
+    },
+    SecurityAppError
+  >(
+    [], // query doesn't need a key since it is only run when refetch is called
     async ({ signal }) =>
       getESQLResults({
         esqlQuery: query,
@@ -47,9 +67,13 @@ export const useRiskLevelsPrivilegedUserQuery = ({ skip }: { skip: boolean }) =>
       }),
     {
       keepPreviousData: true,
-      enabled: !skip,
+      enabled: false,
+      retry: 1, // retry once on failure
     }
   );
+
+  // Hide unknown index errors from UI because they index might take some time to be created
+  const filteredError = error && !error.message.includes('Unknown index') ? error : undefined;
 
   useErrorToast(
     i18n.translate(
@@ -58,27 +82,43 @@ export const useRiskLevelsPrivilegedUserQuery = ({ skip }: { skip: boolean }) =>
         defaultMessage: 'There was an error loading the data',
       }
     ),
-    error
+    filteredError
   );
+
   const response = result?.response;
 
   const inspect = useMemo(() => {
     return {
-      dsl: [JSON.stringify({ index: [index] ?? [''], body: prettifyQuery(query, false) }, null, 2)],
+      dsl: [
+        JSON.stringify(
+          { index: index ? [index] : [''], body: prettifyQuery(query, false) },
+          null,
+          2
+        ),
+      ],
       response: response ? [JSON.stringify(response, null, 2)] : [],
     };
   }, [index, query, response]);
 
+  // Fetch risk score when components mounts or when the risk engine status changes
+  useEffect(() => {
+    if (!skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED') {
+      refetch();
+    }
+  }, [riskEngineStatus, isStatusLoading, refetch, skip]);
+
   return {
     records: esqlResponseToRecords<RiskLevelsPrivilegedUsersQueryResult>(response),
-    isLoading: isLoading || isRefetching,
-    refetch,
+    isLoading: isRefetching || isStatusLoading,
+    refetch: refetchEngineStatus, // refetching the status will force the risk score to be fetched,
     inspect,
     error,
     isRefetching,
     isError,
+    hasEngineBeenInstalled: riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED',
   };
 };
+
 export const useRiskLevelsTableColumns = () => {
   return useMemo(
     (): Array<EuiBasicTableColumn<RiskLevelsTableItem>> => [

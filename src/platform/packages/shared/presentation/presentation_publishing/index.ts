@@ -17,6 +17,8 @@ export {
   areComparatorsEqual,
   diffComparators,
   initializeStateManager,
+  shouldLogStateDiff,
+  logStateDiff,
 } from './state_manager';
 export {
   apiCanAccessViewMode,
@@ -157,3 +159,4 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
+export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';

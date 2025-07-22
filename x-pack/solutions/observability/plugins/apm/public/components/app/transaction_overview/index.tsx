@@ -21,8 +21,6 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { SloCallout } from '../../shared/slo_callout';
 import { TransactionsTable } from '../../shared/transactions_table';
-import { isLogsOnlySignal } from '../../../utils/get_signal_type';
-import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 export function TransactionOverview() {
   const {
@@ -64,11 +62,6 @@ export function TransactionOverview() {
     });
   }, [setScreenContext, serviceName, transactionType]);
 
-  const { serviceEntitySummary } = useApmServiceContext();
-
-  const hasLogsOnlySignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
-
   const handleOnLoadTable = useCallback(() => {
     onPageReady({
       meta: {
@@ -77,10 +70,6 @@ export function TransactionOverview() {
       },
     });
   }, [start, end, onPageReady]);
-
-  if (hasLogsOnlySignal) {
-    return <ServiceTabEmptyState id="transactionOverview" />;
-  }
 
   return (
     <>

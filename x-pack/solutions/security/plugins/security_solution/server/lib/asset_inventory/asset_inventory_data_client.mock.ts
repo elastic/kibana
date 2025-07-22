@@ -12,6 +12,7 @@ const createAssetInventoryDataClientMock = () =>
     init: jest.fn(),
     enable: jest.fn(),
     delete: jest.fn(),
+    installAssetInventoryDataView: jest.fn(),
   } as unknown as jest.Mocked<AssetInventoryDataClient>);
 
 export const AssetInventoryDataClientMock = { create: createAssetInventoryDataClientMock };

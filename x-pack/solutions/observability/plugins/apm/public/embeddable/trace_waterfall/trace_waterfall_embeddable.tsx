@@ -4,14 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useWaterfallFetcher } from '../../components/app/transaction_details/use_waterfall_fetcher';
-import { Waterfall } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall';
-import { WaterfallLegends } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
-import { isPending } from '../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../hooks/use_fetcher';
 import { Loading } from './loading';
 import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
+import { TraceWaterfall } from '../../components/shared/trace_waterfall';
 
 export function TraceWaterfallEmbeddable({
   serviceName,
@@ -20,33 +17,35 @@ export function TraceWaterfallEmbeddable({
   rangeTo,
   traceId,
   displayLimit,
+  scrollElement,
+  onNodeClick,
+  getRelatedErrorsHref,
 }: ApmTraceWaterfallEmbeddableEntryProps) {
-  const waterfallFetchResult = useWaterfallFetcher({
-    traceId,
-    transactionId: entryTransactionId,
-    start: rangeFrom,
-    end: rangeTo,
-  });
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
+        params: {
+          path: { traceId },
+          query: { entryTransactionId, start: rangeFrom, end: rangeTo },
+        },
+      });
+    },
+    [entryTransactionId, rangeFrom, rangeTo, traceId]
+  );
 
-  if (isPending(waterfallFetchResult.status)) {
+  if (isPending(status)) {
     return <Loading />;
   }
 
-  const { legends, colorBy } = waterfallFetchResult.waterfall;
-
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <Waterfall
-          showCriticalPath={false}
-          waterfall={waterfallFetchResult.waterfall}
-          displayLimit={displayLimit}
-          isEmbeddable
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <TraceWaterfall
+      traceItems={data?.traceItems!}
+      onClick={(id) => onNodeClick?.(id)}
+      scrollElement={scrollElement}
+      getRelatedErrorsHref={getRelatedErrorsHref}
+      isEmbeddable
+      showLegend
+      serviceName={serviceName}
+    />
   );
 }

@@ -19,8 +19,10 @@ import {
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
+  INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { getPrompt } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../lib/build_response';
@@ -80,6 +82,13 @@ export const postActionsConnectorExecuteRoute = (
         const telemetry = assistantContext.telemetry;
         let onLlmResponse;
 
+        const coreContext = await context.core;
+        const inferenceChatModelDisabled =
+          (await coreContext?.featureFlags?.getBooleanValue(
+            INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+            false
+          )) ?? false;
+
         try {
           const checkResponse = await performChecks({
             context: ctx,
@@ -116,7 +125,9 @@ export const postActionsConnectorExecuteRoute = (
           const inference = ctx.elasticAssistant.inference;
           const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
           const productDocsAvailable =
-            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
+            (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable({
+              inferenceId: defaultInferenceEndpoints.ELSER,
+            })) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
           const connector = connectors.length > 0 ? connectors[0] : undefined;
@@ -192,6 +203,7 @@ export const postActionsConnectorExecuteRoute = (
               connectorId,
               contentReferencesStore,
               isOssModel,
+              inferenceChatModelDisabled,
               conversationId,
               context: ctx,
               logger,

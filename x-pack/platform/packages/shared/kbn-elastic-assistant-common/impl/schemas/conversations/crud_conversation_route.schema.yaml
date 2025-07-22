@@ -71,7 +71,63 @@ paths:
                   message:
                     type: string
                     example: "Missing required parameter: title"
-
+    delete:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: DeleteAllConversations
+      description: This endpoint allows users to permanently delete all conversations.
+      summary: Delete conversations
+      tags:
+        - Conversation API
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                excludedIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Optional list of conversation IDs to delete.
+                  example: ["abc123", "def456"]
+      responses:
+        200:
+          description: Indicates a successful call. The conversations were deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  totalDeleted:
+                    type: number
+                    example: 10
+                  failures:
+                    type: array
+                    items:
+                      type: string
+              example:
+                success: true
+        400:
+          description: Generic Error. This response indicates an issue with the request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    example: "Invalid conversation ID"
   /api/security_ai_assistant/current_user/conversations/{id}:
     get:
       x-codegen-enabled: true

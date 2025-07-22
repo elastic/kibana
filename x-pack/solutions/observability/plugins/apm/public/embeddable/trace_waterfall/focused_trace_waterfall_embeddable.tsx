@@ -44,5 +44,5 @@ export function FocusedTraceWaterfallEmbeddable({
     );
   }
 
-  return <FocusedTraceWaterfall items={data} isEmbeddable />;
+  return <FocusedTraceWaterfall items={data} />;
 }

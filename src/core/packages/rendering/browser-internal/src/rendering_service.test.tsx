@@ -33,6 +33,7 @@ import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { RenderingService } from './rendering_service';
 
 describe('RenderingService', () => {
@@ -44,6 +45,7 @@ describe('RenderingService', () => {
   let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
   let theme: ReturnType<typeof themeServiceMock.createStartContract>;
   let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
+  let featureFlags: ReturnType<typeof coreFeatureFlagsMock.createStart>;
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
 
@@ -54,7 +56,7 @@ describe('RenderingService', () => {
     application.getComponent.mockReturnValue(<div>Hello application!</div>);
 
     chrome = chromeServiceMock.createStartContract();
-    chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
+    chrome.getLegacyHeaderComponentForFixedLayout.mockReturnValue(<div>Hello chrome!</div>);
 
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
@@ -63,6 +65,7 @@ describe('RenderingService', () => {
     userProfile = userProfileServiceMock.createStart();
     theme = themeServiceMock.createStartContract();
     i18n = i18nServiceMock.createStartContract();
+    featureFlags = coreFeatureFlagsMock.createStart();
 
     targetDomElement = document.createElement('div');
     rendering = new RenderingService();
@@ -81,7 +84,7 @@ describe('RenderingService', () => {
 
     it('renders application service into provided DOM element', () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
         <div
           class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
@@ -101,7 +104,7 @@ describe('RenderingService', () => {
       const isVisible$ = new BehaviorSubject(true);
       chrome.getIsVisible$.mockReturnValue(isVisible$);
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
 
       const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
       expect(appWrapper.className).toEqual('kbnAppWrapper');
@@ -120,7 +123,7 @@ describe('RenderingService', () => {
 
     it('renders the banner UI', () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
       expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
                 <div
                   id="globalBannerList"

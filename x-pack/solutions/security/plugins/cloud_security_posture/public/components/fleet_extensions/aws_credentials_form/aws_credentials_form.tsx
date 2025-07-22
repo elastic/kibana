@@ -214,7 +214,7 @@ export const AwsCredentialsForm = ({
   packageInfo,
   onChange,
   setIsValid,
-  disabled,
+  disabled = false,
   hasInvalidRequiredVars,
 }: AwsFormProps) => {
   const {
@@ -271,6 +271,7 @@ export const AwsCredentialsForm = ({
       {setupFormat === AWS_SETUP_FORMAT.MANUAL && (
         <>
           <AwsCredentialTypeSelector
+            disabled={disabled}
             label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
               defaultMessage: 'Preferred manual method',
             })}
@@ -308,18 +309,20 @@ export const AwsCredentialTypeSelector = ({
   onChange,
   label,
   options,
+  disabled = false,
 }: {
   onChange(type: AwsCredentialsType): void;
   type: AwsCredentialsType;
   label: string;
   options: AwsCredentialsTypeOptions;
-  disabled?: boolean;
+  disabled: boolean;
 }) => (
   <EuiFormRow fullWidth label={label}>
     <EuiSelect
       fullWidth
       options={options}
       value={type}
+      disabled={disabled}
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AwsCredentialsType);
       }}

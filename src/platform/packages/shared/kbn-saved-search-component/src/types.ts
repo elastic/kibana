@@ -26,6 +26,7 @@ export interface SavedSearchComponentProps {
   query?: Query;
   filters?: Filter[];
   timestampField?: string;
+  columns?: string[];
   height?: CSSProperties['height'];
   displayOptions?: NonPersistedDisplayOptions;
 }

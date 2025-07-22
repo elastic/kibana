@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
 import { css } from '@emotion/css';
 import { ManagedBadge } from './managed_badge';
@@ -26,21 +26,26 @@ export function IndexTemplateDetails({ indexTemplate, onFlyoutOpen }: IndexTempl
       hasBorder
       className={css`
         min-width: 400px;
+        max-height: 100px;
       `}
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailView.indexTemplate', {
-            defaultMessage: 'Index template',
-          })}
-        </EuiText>
-        <EuiFlexGroup direction="row" gutterSize="m">
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiText size="s">
-              {i18n.translate('xpack.streams.streamDetailView.indexTemplateName', {
-                defaultMessage: 'Name',
-              })}
-            </EuiText>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiTitle size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetailView.indexTemplate', {
+              defaultMessage: 'Index template',
+            })}
+          </p>
+        </EuiTitle>
+        <EuiFlexGroup direction="row" gutterSize="xs">
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.indexTemplateName', {
+                  defaultMessage: 'Name',
+                })}
+              </p>
+            </EuiTitle>
             <EuiLink
               onClick={() => {
                 onFlyoutOpen(indexTemplate?.name || '');
@@ -50,13 +55,15 @@ export function IndexTemplateDetails({ indexTemplate, onFlyoutOpen }: IndexTempl
               <ManagedBadge meta={indexTemplate?.index_template._meta} />
             </EuiLink>
           </EuiFlexGroup>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiText size="s">
-              {i18n.translate('xpack.streams.streamDetailView.indexPatterns', {
-                defaultMessage: 'Patterns',
-              })}
-            </EuiText>
-            <EuiText>{Array.isArray(patterns) ? patterns.join(', ') : '-'}</EuiText>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.indexPatterns', {
+                  defaultMessage: 'Patterns',
+                })}
+              </p>
+            </EuiTitle>
+            <EuiText size="s">{Array.isArray(patterns) ? patterns.join(', ') : '-'}</EuiText>
           </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlexGroup>

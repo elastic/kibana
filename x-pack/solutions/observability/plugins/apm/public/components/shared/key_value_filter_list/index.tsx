@@ -6,7 +6,7 @@
  */
 import {
   EuiAccordion,
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -107,26 +107,26 @@ export function KeyValueFilterList({
                     grow={false}
                   >
                     {isFilterable && (
-                      <EuiButtonEmpty
-                        onClick={() => {
-                          onClickFilter({ key, value });
-                        }}
-                        aria-label={i18n.translate(
-                          'xpack.apm.keyValueFilterList.actionFilterLabel',
-                          { defaultMessage: 'Filter by value' }
-                        )}
-                        data-test-subj={`filter_by_${key}`}
+                      <EuiToolTip
+                        position="top"
+                        content={i18n.translate('xpack.apm.keyValueFilterList.actionFilterLabel', {
+                          defaultMessage: 'Filter by value',
+                        })}
                       >
-                        <EuiToolTip
-                          position="top"
-                          content={i18n.translate(
+                        <EuiButtonIcon
+                          iconType="filter"
+                          color="text"
+                          size="m"
+                          onClick={() => {
+                            onClickFilter({ key, value });
+                          }}
+                          aria-label={i18n.translate(
                             'xpack.apm.keyValueFilterList.actionFilterLabel',
                             { defaultMessage: 'Filter by value' }
                           )}
-                        >
-                          <EuiIcon type="filter" color="text" size="m" />
-                        </EuiToolTip>
-                      </EuiButtonEmpty>
+                          data-test-subj={`filter_by_${key}`}
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

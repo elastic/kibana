@@ -1,0 +1,29 @@
+{
+  "inference.put_hugging_face": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "url_components": {
+      "task_type": [
+        "chat_completion",
+        "completion",
+        "rerank",
+        "text_embedding"
+      ]
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_inference/{task_type}/{huggingface_inference_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-hugging-face",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

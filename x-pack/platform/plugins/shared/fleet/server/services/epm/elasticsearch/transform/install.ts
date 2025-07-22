@@ -46,7 +46,10 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 import { isUserSettingsTemplate } from '../template/utils';
 
-import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
+import {
+  MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+} from '../../../../constants';
 
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
@@ -579,7 +582,10 @@ const installTransformsAssets = async (
                       ?.get('destinationIndex').index,
                   ],
                   _meta: destinationIndexTemplate._meta,
-                  composed_of: Object.keys(componentTemplates),
+                  composed_of: [
+                    ...Object.keys(componentTemplates),
+                    STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
+                  ],
                   ignore_missing_component_templates:
                     Object.keys(componentTemplates).filter(isUserSettingsTemplate),
                 },

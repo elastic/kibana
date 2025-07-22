@@ -39,6 +39,7 @@ import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 import { TOOLTIP_MODES } from '../../../../common/enums';
+import { panelConfigContainerStyles } from './_panel_config';
 
 const positionOptions = [
   {
@@ -171,7 +172,7 @@ export class TimeseriesPanelConfig extends Component<
       );
     } else {
       view = (
-        <div className="tvbPanelConfig__container">
+        <div className="tvbPanelConfig__container" css={panelConfigContainerStyles}>
           <EuiPanel>
             <EuiTitle size="s">
               <span>

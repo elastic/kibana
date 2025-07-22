@@ -6,18 +6,18 @@
  */
 
 import { Streams } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack-observability/api_integration_deployment_agnostic/ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryCustomRoleClient,
-} from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/streams/helpers/repository_client';
+} from '@kbn/test-suites-xpack-observability/api_integration_deployment_agnostic/apis/streams/helpers/repository_client';
 import {
   disableStreams,
   enableStreams,
   getStream,
   putStream,
-} from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/streams/helpers/requests';
+} from '@kbn/test-suites-xpack-observability/api_integration_deployment_agnostic/apis/streams/helpers/requests';
 
 const STREAM_NAME = 'logs.crud';
 const request: Streams.WiredStream.UpsertRequest = {
@@ -31,7 +31,7 @@ const request: Streams.WiredStream.UpsertRequest = {
       wired: {
         routing: [],
         fields: {
-          numberfield: {
+          'attributes.numberfield': {
             type: 'long',
           },
         },

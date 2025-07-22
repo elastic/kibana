@@ -29,8 +29,6 @@ export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
   const { services } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const { ExploratoryViewEmbeddable } = services.exploratoryView;
-
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
@@ -79,9 +77,10 @@ export function UXSection({ bucketSize }: Props) {
     ]
   );
 
-  if (!uxHasDataResponse?.hasData) {
+  if (!uxHasDataResponse?.hasData || !services.exploratoryView) {
     return null;
   }
+  const ExploratoryViewEmbeddable = services.exploratoryView.ExploratoryViewEmbeddable;
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

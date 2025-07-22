@@ -68,6 +68,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         ],
       },
       originSpaceId: 'default',
+      tags: [],
       EndpointActions: {
         action_id: this.seededUUIDv4(),
         expiration: this.randomFutureDate(timeStamp),

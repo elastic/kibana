@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
-import { SuggestionComponent } from './suggestion_component';
 import { SuggestionsComponent } from './suggestions_component';
+import { EuiThemeProvider } from '@elastic/eui';
+import { userEvent } from '@testing-library/user-event';
 
-const noop = () => {
-  return;
-};
+const noop = () => {};
 
 const mockContainerDiv = document.createElement('div');
 
@@ -36,9 +35,13 @@ const mockSuggestions: QuerySuggestion[] = [
   },
 ];
 
+const renderWithTheme = (ui: React.ReactElement) => {
+  return render(<EuiThemeProvider>{ui}</EuiThemeProvider>);
+};
+
 describe('SuggestionsComponent', () => {
-  it('Should not display anything if the show prop is false', () => {
-    const component = shallow(
+  it('Should not render if show is false', () => {
+    const { container } = renderWithTheme(
       <SuggestionsComponent
         index={0}
         onClick={noop}
@@ -49,12 +52,11 @@ describe('SuggestionsComponent', () => {
         inputContainer={mockContainerDiv}
       />
     );
-
-    expect(component.isEmptyRender()).toBe(true);
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it('Should not display anything if there are no suggestions', () => {
-    const component = shallow(
+  it('Should not render if there are no suggestions', () => {
+    const { container } = renderWithTheme(
       <SuggestionsComponent
         index={0}
         onClick={noop}
@@ -65,12 +67,11 @@ describe('SuggestionsComponent', () => {
         inputContainer={mockContainerDiv}
       />
     );
-
-    expect(component.isEmptyRender()).toBe(true);
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it('Should display given suggestions if the show prop is true', () => {
-    const component = mount(
+  it('Should render suggestions when show is true', () => {
+    renderWithTheme(
       <SuggestionsComponent
         index={0}
         onClick={noop}
@@ -81,13 +82,12 @@ describe('SuggestionsComponent', () => {
         inputContainer={mockContainerDiv}
       />
     );
-
-    expect(component.isEmptyRender()).toBe(false);
-    expect(component.find(SuggestionComponent)).toHaveLength(2);
+    const items = screen.getAllByRole('option');
+    expect(items).toHaveLength(2);
   });
 
-  it('Passing the index should control which suggestion is selected', () => {
-    const component = mount(
+  it('Should apply selection based on index prop', () => {
+    renderWithTheme(
       <SuggestionsComponent
         index={1}
         onClick={noop}
@@ -99,15 +99,16 @@ describe('SuggestionsComponent', () => {
       />
     );
 
-    expect(component.find(SuggestionComponent).at(1).prop('selected')).toBe(true);
+    const selected = screen.getAllByRole('option')[1];
+    expect(selected.getAttribute('aria-selected')).toBe('true');
   });
 
-  it('Should call onClick with the selected suggestion when it is clicked', () => {
-    const mockCallback = jest.fn();
-    const component = mount(
+  it('Should call onClick with selected suggestion when clicked', async () => {
+    const mockClick = jest.fn();
+    renderWithTheme(
       <SuggestionsComponent
         index={0}
-        onClick={mockCallback}
+        onClick={mockClick}
         onMouseEnter={noop}
         show={true}
         suggestions={mockSuggestions}
@@ -115,28 +116,26 @@ describe('SuggestionsComponent', () => {
         inputContainer={mockContainerDiv}
       />
     );
-
-    component.find(SuggestionComponent).at(1).simulate('click');
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1], 1);
+    const item = screen.getAllByRole('option')[1];
+    await userEvent.click(item);
+    expect(mockClick).toHaveBeenCalledWith(mockSuggestions[1], 1);
   });
 
-  it('Should call onMouseEnter with the index of the suggestion that was entered', () => {
-    const mockCallback = jest.fn();
-    const component = mount(
+  it('Should call onMouseEnter with correct index when suggestion is hovered', async () => {
+    const mockEnter = jest.fn();
+    renderWithTheme(
       <SuggestionsComponent
         index={0}
         onClick={noop}
-        onMouseEnter={mockCallback}
+        onMouseEnter={mockEnter}
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
         inputContainer={mockContainerDiv}
       />
     );
-
-    component.find(SuggestionComponent).at(1).simulate('mouseenter');
-    expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1], 1);
+    const item = screen.getAllByRole('option')[1];
+    await userEvent.hover(item);
+    expect(mockEnter).toHaveBeenCalledWith(mockSuggestions[1], 1);
   });
 });
