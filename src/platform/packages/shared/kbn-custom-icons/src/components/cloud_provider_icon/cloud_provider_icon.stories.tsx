@@ -8,7 +8,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import React from 'react';
 import { CloudProviderIcon } from '.';
 import { CloudProvider } from './get_cloud_provider_icon';

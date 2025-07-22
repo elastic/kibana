@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { generateMockIndicator } from '../../../../../../common/threat_intelligence/types/indicator';

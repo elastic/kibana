@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css, ThemeProvider } from '@emotion/react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { NodeProps, NodeViewModel } from '..';

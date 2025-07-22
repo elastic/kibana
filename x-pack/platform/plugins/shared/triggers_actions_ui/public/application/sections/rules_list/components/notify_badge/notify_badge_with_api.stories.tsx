@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { StoryObj, Meta, StoryFn } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import { StoryObj, Meta, StoryFn } from '@storybook/react-webpack5';
+import { action } from 'storybook/actions';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 

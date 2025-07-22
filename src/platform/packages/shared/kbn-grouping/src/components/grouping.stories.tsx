@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import { mockGroupingProps } from './grouping.mock';
 import { Grouping } from './grouping';
 import readme from '../../README.mdx';

@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import React from 'react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';

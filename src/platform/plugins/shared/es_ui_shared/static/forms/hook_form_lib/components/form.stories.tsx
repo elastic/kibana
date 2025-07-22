@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react-webpack5';
 import { EuiButton } from '@elastic/eui';
 
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import { TextField } from '../../components';
 import { FormHook, FieldConfig } from '../types';
 import { useForm } from '../hooks/use_form';

@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
+import { Title, Subtitle, Description, Primary, Stories } from '@storybook/addon-docs/blocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { Decorator } from '@storybook/react';
+import type { Decorator } from '@storybook/react-webpack5';
 
 const queryClient = new QueryClient({
   defaultOptions: {

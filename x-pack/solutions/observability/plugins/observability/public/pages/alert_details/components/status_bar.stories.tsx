@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn, StoryObj } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react-webpack5';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 

@@ -8,7 +8,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiToolTip } from '@elastic/eui';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import React from 'react';
 import { AGENT_NAMES } from '@kbn/elastic-agent-utils';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';

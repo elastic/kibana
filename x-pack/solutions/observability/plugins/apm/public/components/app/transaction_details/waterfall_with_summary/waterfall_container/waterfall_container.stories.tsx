@@ -7,7 +7,7 @@
 import { EuiFilePicker, EuiForm } from '@elastic/eui';
 import { apm, dedot } from '@kbn/apm-synthtrace-client';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { StoryFn, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import { noop } from 'lodash';
 import type { ComponentProps } from 'react';
 import React, { useState } from 'react';

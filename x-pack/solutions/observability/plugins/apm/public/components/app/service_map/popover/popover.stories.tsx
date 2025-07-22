@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryObj, Meta } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react-webpack5';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import type { PopoverProps } from '.';

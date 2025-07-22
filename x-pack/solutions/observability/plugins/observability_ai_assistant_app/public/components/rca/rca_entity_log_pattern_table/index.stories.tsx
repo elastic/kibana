@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, StoryFn } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react-webpack5';
 import React from 'react';
 import { RootCauseAnalysisEntityLogPatternTable } from '.';
 import { controllerEntityHealthAnalysis } from '../mock';

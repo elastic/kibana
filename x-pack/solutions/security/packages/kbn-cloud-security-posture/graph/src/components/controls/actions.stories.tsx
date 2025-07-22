@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import { ThemeProvider, css } from '@emotion/react';
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 

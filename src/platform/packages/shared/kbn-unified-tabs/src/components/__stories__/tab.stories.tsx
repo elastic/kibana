@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react-webpack5';
+import { action } from 'storybook/actions';
 import { Tab, type TabProps } from '../tab';
 import { servicesMock } from '../../../__mocks__/services';
 import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';

@@ -8,7 +8,7 @@
  */
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiToolTip } from '@elastic/eui';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import React from 'react';
 import { getSpanIcon, spanTypeIcons } from './get_span_icon';
 import { SpanIcon } from '.';

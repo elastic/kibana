@@ -6,8 +6,8 @@
  */
 
 import React, { ComponentProps } from 'react';
-import type { StoryFn } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import type { StoryFn } from '@storybook/react-webpack5';
+import { action } from 'storybook/actions';
 import { RuleTagFilter } from './rule_tag_filter';
 
 type Args = ComponentProps<typeof RuleTagFilter>;

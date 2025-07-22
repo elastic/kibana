@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import type { StoryObj, Meta } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react-webpack5';
 import type { ComponentProps } from 'react';
 import React from 'react';
 import { ErrorGroupList } from '.';

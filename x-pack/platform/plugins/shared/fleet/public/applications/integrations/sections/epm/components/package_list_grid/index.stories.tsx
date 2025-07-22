@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 
 import type { PackageListGridProps } from '.';
 import { PackageListGrid } from '.';

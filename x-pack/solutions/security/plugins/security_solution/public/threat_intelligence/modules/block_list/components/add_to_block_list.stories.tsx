@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { AddToBlockListContextMenu } from './add_to_block_list';
 import { BlockListProvider } from '../../indicators/containers/block_list_provider';

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { StoryObj } from '@storybook/react';
+import type { StoryObj } from '@storybook/react-webpack5';
 import { ESQLEditor } from '../esql_editor';
 import type { ESQLEditorProps } from '../types';
 

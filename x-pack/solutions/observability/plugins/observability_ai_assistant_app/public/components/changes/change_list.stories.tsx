@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 
 import { ChangeListProps, ChangeList as Component, ChangeListItemImpact } from './change_list';
 

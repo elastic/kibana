@@ -8,8 +8,8 @@
  */
 
 import React, { useState } from 'react';
-import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react-webpack5';
+import { action } from 'storybook/actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { useNewTabProps } from '../../hooks/use_new_tab_props';
 import { servicesMock } from '../../../__mocks__/services';

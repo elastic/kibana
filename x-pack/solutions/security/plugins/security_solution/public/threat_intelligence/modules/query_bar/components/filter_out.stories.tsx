@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { EuiContextMenuPanel, EuiDataGrid } from '@elastic/eui';
 import type { EuiDataGridColumnVisibility } from '@elastic/eui/src/components/datagrid/data_grid_types';

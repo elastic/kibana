@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react-webpack5';
 import React from 'react';
 import { FocusedTraceWaterfall } from '.';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';

@@ -10,7 +10,7 @@
 import React, { FC, useState } from 'react';
 import { getKbnPalettes } from '@kbn/palettes';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import { css } from '@emotion/react';
 import {
   MultiFieldKey,

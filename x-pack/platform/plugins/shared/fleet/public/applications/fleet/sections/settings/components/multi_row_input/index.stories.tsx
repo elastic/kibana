@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useState } from '@storybook/preview-api';
-import type { StoryObj } from '@storybook/react';
+import { useState } from 'storybook/preview-api';
+import type { StoryObj } from '@storybook/react-webpack5';
 import React from 'react';
 
 import { MultiRowInput as Component } from '.';

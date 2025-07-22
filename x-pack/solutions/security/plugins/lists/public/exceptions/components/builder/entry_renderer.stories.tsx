@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import React from 'react';
 import { HttpStart } from '@kbn/core/public';
 import {

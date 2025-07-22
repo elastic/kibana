@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import React from 'react';
 import type { QualityWarning } from '../../../../common/log_analysis';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';

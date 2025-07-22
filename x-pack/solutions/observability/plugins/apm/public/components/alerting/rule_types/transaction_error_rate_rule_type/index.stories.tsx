@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryObj } from '@storybook/react';
+import type { StoryObj } from '@storybook/react-webpack5';
 import type { ComponentType } from 'react';
 import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';

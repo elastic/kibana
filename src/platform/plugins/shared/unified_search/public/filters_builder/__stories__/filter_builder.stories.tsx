@@ -11,10 +11,10 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { action } from '@storybook/addon-actions';
+import { action } from 'storybook/actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { StoryObj } from '@storybook/react';
+import type { StoryObj } from '@storybook/react-webpack5';
 import { getFiltersMock, getFiltersMockOrHide } from '../__mock__/filters';
 import { FiltersBuilder } from '../filters_builder';
 

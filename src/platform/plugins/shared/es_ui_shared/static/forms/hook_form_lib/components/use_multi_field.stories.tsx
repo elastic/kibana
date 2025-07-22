@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { Meta } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import { Meta } from '@storybook/react-webpack5';
+import { action } from 'storybook/actions';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { FormHook } from '../types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react-webpack5';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { ComponentProps } from 'react';
 import { EuiPanel } from '@elastic/eui';

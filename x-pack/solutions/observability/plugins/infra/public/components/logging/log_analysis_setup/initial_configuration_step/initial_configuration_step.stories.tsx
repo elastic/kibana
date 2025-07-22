@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { actions } from '@storybook/addon-actions';
-import type { Meta } from '@storybook/react';
+import { actions } from 'storybook/actions';
+import type { Meta } from '@storybook/react-webpack5';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { InitialConfigurationStep } from './initial_configuration_step';

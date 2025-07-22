@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn, StoryObj } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react-webpack5';
 import type { DiffViewProps } from './diff_view';
 import { DiffView } from './diff_view';
 import { DiffMethod } from './mark_edits';

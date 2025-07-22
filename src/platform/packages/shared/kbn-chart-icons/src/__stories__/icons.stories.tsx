@@ -9,7 +9,7 @@
 
 import React, { FC, ComponentType } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiEmptyPrompt, EuiForm, IconType } from '@elastic/eui';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 
 import {
   IconCircle,

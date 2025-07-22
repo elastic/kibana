@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setProjectAnnotations } from '@storybook/react';
+import { setProjectAnnotations } from '@storybook/react-webpack5';
 import * as globalStorybookConfig from './preview';
 
 setProjectAnnotations(globalStorybookConfig);

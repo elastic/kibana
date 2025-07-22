@@ -21,7 +21,7 @@ import {
   type Edge as xyEdge,
 } from '@xyflow/react';
 import { isEmpty, isEqual, pick, size, xorWith } from 'lodash';
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-webpack5';
 import { DefaultEdge } from '.';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { LabelNode } from '../node';

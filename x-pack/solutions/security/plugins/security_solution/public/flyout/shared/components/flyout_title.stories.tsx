@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn } from '@storybook/react-webpack5';
 import { EuiLink } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { FlyoutTitle } from './flyout_title';

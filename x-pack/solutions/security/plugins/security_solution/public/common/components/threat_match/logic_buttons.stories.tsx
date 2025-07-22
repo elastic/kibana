@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
-import type { Meta } from '@storybook/react';
+import { action } from 'storybook/actions';
+import type { Meta } from '@storybook/react-webpack5';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';

@@ -6,8 +6,8 @@
  */
 
 import React, { ComponentProps } from 'react';
-import type { StoryFn } from '@storybook/react';
-import { action } from '@storybook/addon-actions';
+import type { StoryFn } from '@storybook/react-webpack5';
+import { action } from 'storybook/actions';
 import { RuleStatusDropdown } from './rule_status_dropdown';
 import { mockRule } from '../../rule_details/components/test_helpers';
 

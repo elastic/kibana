@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import type { StoryFn, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EditAPMPolicyForm } from './edit_apm_policy_form';
