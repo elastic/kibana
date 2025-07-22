@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { services as functionalServices } from '@kbn/test-suites-xpack-platform/functional/services';
+import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
 
 export const services = {
-  ...functionalServices,
+  ...platformServices,
 };
