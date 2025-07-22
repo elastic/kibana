@@ -98,7 +98,7 @@ export const getManageRulesFeature = (): KibanaFeatureConfig => ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['alerting:save', 'alerting:show', 'show'],
+      ui: ['save', 'show'],
     },
     read: {
       app: ['kibana'],
@@ -115,7 +115,7 @@ export const getManageRulesFeature = (): KibanaFeatureConfig => ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['alerting:show', 'show'],
+      ui: ['show'],
     },
   },
 });
