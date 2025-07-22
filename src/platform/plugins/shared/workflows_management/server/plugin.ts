@@ -8,36 +8,35 @@
  */
 
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
-  Logger,
   DEFAULT_APP_CATEGORIES,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { Client } from '@elastic/elasticsearch';
+import {
+  WORKFLOWS_EXECUTION_LOGS_INDEX,
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../common';
+import { workflowSavedObjectType } from './saved_objects/workflow';
+import { SchedulerService } from './scheduler/scheduler_service';
+import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
+import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
+  WorkflowsExecutionEnginePluginStartDeps,
   WorkflowsManagementPluginServerDependenciesSetup,
   WorkflowsPluginSetup,
   WorkflowsPluginStart,
 } from './types';
-import { defineRoutes } from './workflows_management/workflows_management_routes';
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
+import { defineRoutes } from './workflows_management/workflows_management_routes';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
-import type { WorkflowsExecutionEnginePluginStartDeps } from './types';
-import { SchedulerService } from './scheduler/scheduler_service';
-import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
-import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
-import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-  WORKFLOWS_EXECUTION_LOGS_INDEX,
-} from '../common';
-import { workflowSavedObjectType } from './saved_objects/workflow';
 
 /**
  * The order of appearance in the feature privilege page
@@ -53,13 +52,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
   private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
   // TODO: replace with esClient promise from core
-  private esClient: Client = new Client({
-    node: 'http://localhost:9200', // or your ES URL
-    auth: {
-      username: 'elastic',
-      password: 'changeme',
-    },
-  });
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -269,7 +261,9 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.logger.debug('Workflows Management: Creating workflows service');
 
     // Get ES client from core
-    const getEsClient = () => Promise.resolve(this.esClient);
+    const esClientPromise = core
+      .getStartServices()
+      .then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
 
     // Get saved objects client from core
     const getSavedObjectsClient = () =>
@@ -278,7 +272,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
         .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
 
     this.workflowsService = new WorkflowsService(
-      getEsClient(),
+      esClientPromise,
       this.logger,
       getSavedObjectsClient,
       WORKFLOWS_EXECUTIONS_INDEX,
