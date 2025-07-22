@@ -234,6 +234,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             }
           >
             <EuiFieldNumber
+              isInvalid={!isMaxSeriesToPlotValid}
               data-test-subj="mlAnomalyChartsInitializerMaxSeries"
               id="selectMaxSeriesToPlot"
               name="selectMaxSeriesToPlot"

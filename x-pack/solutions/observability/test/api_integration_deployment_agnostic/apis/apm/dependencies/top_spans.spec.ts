@@ -38,8 +38,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       params: {
         query: {
           dependencyName,
-          start: new Date(start).toISOString(),
-          end: new Date(end).toISOString(),
+          start: new Date('2021-01-01T00:13:55.000Z').toISOString(),
+          end: new Date('2021-01-01T00:14:10.000Z').toISOString(),
           environment,
           kuery,
           spanName,
@@ -153,7 +153,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(javaSpans.length + goSpans.length).to.eql(spans.length);
 
           expect(omit(javaSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
-            '@timestamp': 1609460040000,
+            '@timestamp': 1609460040000, // '2021-01-01T00:14:00.000Z'
             agentName: 'java',
             duration: 100000,
             serviceName: 'java',
@@ -164,7 +164,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           expect(omit(goSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
-            '@timestamp': 1609460040000,
+            '@timestamp': 1609460040000, // 2021-01-01T00:14:00.000Z
             agentName: 'go',
             duration: 50000,
             serviceName: 'go',
