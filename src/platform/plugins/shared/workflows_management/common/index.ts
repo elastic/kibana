@@ -13,9 +13,9 @@ export const PLUGIN_ID = 'workflows';
 export const PLUGIN_NAME = 'Workflows';
 
 export const WORKFLOWS_INDEX = '.workflows';
-export const WORKFLOWS_EXECUTIONS_INDEX = '.workflow-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflow-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
+export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
+export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
+export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
 
 const connectors = [
   {
