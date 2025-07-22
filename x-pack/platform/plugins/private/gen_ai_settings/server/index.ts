@@ -6,9 +6,13 @@
  */
 
 import { GenAiSettingsPlugin } from './plugin';
+import { config } from '../common/config';
 
 export function plugin() {
   return new GenAiSettingsPlugin();
 }
 
+export { config };
+
 export type { GenAiSettingsPluginSetup, GenAiSettingsPluginStart } from './plugin';
+export type { GenAiSettingsConfigType } from '../common/config';

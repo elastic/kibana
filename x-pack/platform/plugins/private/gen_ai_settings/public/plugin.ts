@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { GenAiSettingsConfigType } from '../common/config';
 
 export interface GenAiSettingsStartDeps {
   spaces?: SpacesPluginStart;
@@ -38,11 +39,7 @@ export class GenAiSettingsPlugin
       GenAiSettingsStartDeps
     >
 {
-  private isServerless: boolean = false;
-
-  constructor(private initializerContext: PluginInitializerContext) {
-    this.isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-  }
+  constructor(private initializerContext: PluginInitializerContext<GenAiSettingsConfigType>) {}
 
   public setup(
     core: CoreSetup<GenAiSettingsStartDeps, GenAiSettingsPluginStart>,
@@ -61,7 +58,7 @@ export class GenAiSettingsPlugin
         return mountManagementSection({
           core,
           mountParams,
-          isServerless: this.isServerless,
+          config: this.initializerContext.config.get(),
         });
       },
     });

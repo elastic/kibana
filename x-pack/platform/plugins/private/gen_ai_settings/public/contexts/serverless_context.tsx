@@ -11,6 +11,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
+import type { GenAiSettingsConfigType } from '../../common/config';
 
 export interface EnabledFeatures {
   showSpacesIntegration: boolean;
@@ -25,12 +26,12 @@ export const EnabledFeaturesContext = createContext<EnabledFeatures>({
 });
 
 interface Props {
-  isServerless: boolean;
+  config: GenAiSettingsConfigType;
 }
 
 export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   children,
-  isServerless,
+  config,
 }) => {
   const { services } = useKibana();
   const spaces = services?.spaces ?? undefined;
@@ -41,18 +42,19 @@ export const EnabledFeaturesContextProvider: FC<PropsWithChildren<Props>> = ({
   );
   const activeSpace = useObservable(activeSpace$);
 
-  const features: EnabledFeatures = useMemo(() => {
+  const contextFeatures = useMemo(() => {
     const isSolutionView = Boolean(activeSpace?.solution && activeSpace.solution !== 'classic');
-
     return {
-      showSpacesIntegration: !isServerless,
+      showSpacesIntegration: config.showSpacesIntegration,
+      showAiBreadcrumb: config.showAiBreadcrumb,
       isPermissionsBased: isSolutionView,
-      showAiBreadcrumb: !isServerless,
     };
-  }, [isServerless, activeSpace]);
+  }, [config, activeSpace]);
 
   return (
-    <EnabledFeaturesContext.Provider value={features}>{children}</EnabledFeaturesContext.Provider>
+    <EnabledFeaturesContext.Provider value={contextFeatures}>
+      {children}
+    </EnabledFeaturesContext.Provider>
   );
 };
 

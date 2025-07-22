@@ -8,7 +8,7 @@
     "id": "genAiSettings",
     "browser": true,
     "server": true,
-    "configPath": ["genAiSettings"],
+    "configPath": ["xpack", "genAiSettings"],
     "requiredPlugins": ["management"],
     "optionalPlugins": ["spaces"],
     "requiredBundles": ["kibanaReact"]
