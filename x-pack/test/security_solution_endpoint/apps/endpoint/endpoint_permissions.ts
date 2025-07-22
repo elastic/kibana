@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../security_solution_api_integration/config/services/common';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
