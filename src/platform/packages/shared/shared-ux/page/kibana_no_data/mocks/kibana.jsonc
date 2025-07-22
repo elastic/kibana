@@ -1,10 +1,8 @@
 {
   "type": "shared-common",
   "id": "@kbn/shared-ux-page-kibana-no-data-mocks",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
+  "owner": ["@elastic/appex-sharedux"],
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "devOnly": true
 }
