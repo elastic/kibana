@@ -20,8 +20,8 @@ const LENS_VISUALIZATION_HEIGHT = 150;
 const LENS_VISUALIZATION_MIN_WIDTH = 220;
 
 interface KeyInsightsTileProps {
-  title: ReactElement;
-  label: ReactElement;
+  title: string;
+  label: string;
   getEsqlQuery: (namespace: string) => string;
   id: string;
   inspectTitle: ReactElement;
@@ -43,13 +43,9 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // Use prop spaceId if provided, otherwise use hook spaceId, fallback to 'default'
   const effectiveSpaceId = propSpaceId || hookSpaceId || 'default';
 
-  // Extract the defaultMessage from FormattedMessage elements
-  const titleString = title.props.defaultMessage;
-  const labelString = label.props.defaultMessage;
-
   const lensAttributes = createKeyInsightsPanelLensAttributes({
-    title: titleString,
-    label: labelString,
+    title,
+    label,
     esqlQuery: getEsqlQuery(effectiveSpaceId),
     dataViewId: 'default-dataview',
     filterQuery,
@@ -91,7 +87,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
       >
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4>{titleString}</h4>
+            <h4>{title}</h4>
           </EuiTitle>
         </EuiFlexItem>
 

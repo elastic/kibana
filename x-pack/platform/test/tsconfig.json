@@ -130,6 +130,14 @@
     "@kbn/embeddable-alerts-table-plugin",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
+    "@kbn/streams-schema",
+    "@kbn/streams-plugin",
+    "@kbn/es-errors",
+    "@kbn/content-packs-schema",
+    "@kbn/utility-types",
+    "@kbn/server-route-repository-utils",
+    "@kbn/management-settings-ids",
+    "@kbn/server-route-repository",
     "@kbn/ml-string-hash",
     "@kbn/data-visualizer-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
@@ -140,6 +148,8 @@
     "@kbn/sse-utils-server",
     "@kbn/inference-common",
     "@kbn/rule-registry-plugin",
-    "@kbn/controls-plugin"
+    "@kbn/controls-plugin",
+    "@kbn/global-search-plugin",
+    "@kbn/global-search-test-plugin"
   ]
 }

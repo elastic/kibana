@@ -49,6 +49,7 @@ jest.mock('../constants', () => ({
     'yawn',
     'sampleTaskSharedConcurrencyType1',
     'sampleTaskSharedConcurrencyType2',
+    'sampleTaskZeroMaxConcurrency',
   ],
 }));
 
@@ -2346,6 +2347,50 @@ describe('TaskClaiming', () => {
         `Background task node "${taskPartitioner.getPodName()}" now claiming with assigned partitions`,
         { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
       );
+    });
+
+    test('should not claim the tasks that has 0 maxConcurrency (pollEnabled:false)', async () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          createTaskRunner: jest.fn(),
+        },
+        bar: {
+          title: 'bar',
+          createTaskRunner: jest.fn(),
+        },
+        baz: {
+          title: 'baz',
+          createTaskRunner: jest.fn(),
+        },
+        sampleTaskZeroMaxConcurrency: {
+          title: 'report',
+          createTaskRunner: jest.fn(),
+          maxConcurrency: 0,
+        },
+      });
+      const { taskClaiming, store } = initialiseTestClaiming({
+        storeOpts: {
+          definitions,
+        },
+        taskClaimingOpts: {
+          maxAttempts: 5,
+        },
+      });
+
+      await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      const searchQuery = store.msearch.mock.calls[0]?.[0]?.[0].query;
+      const searchQueryMust = searchQuery?.bool?.must;
+
+      expect(Array.isArray(searchQueryMust) && searchQueryMust[1]).toEqual({
+        bool: { must: [{ terms: { 'task.taskType': ['foo', 'bar', 'baz'] } }] },
+      });
+
+      expect(JSON.stringify(searchQuery)).not.toContain('sampleTaskZeroMaxConcurrency');
     });
   });
 

@@ -9,27 +9,34 @@ import {
   CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiButton,
+  EuiButtonIcon,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiHorizontalRule,
   EuiInMemoryTable,
   EuiText,
   EuiTitle,
   Search,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolDefinition } from '@kbn/onechat-common';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useDeleteToolModal } from '../../../hooks/tools/use_delete_tools';
+import { useEsqlTools } from '../../../hooks/tools/use_tools';
 import { useToasts } from '../../../hooks/use_toasts';
-import { useOnechatEsqlTools } from '../../../hooks/use_tools';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { OnechatToolTags } from '../tags/tool_tags';
 import { OnechatCreateEsqlToolFlyout } from './create_esql_tool_flyout';
 
-const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
+const getColumns = ({
+  deleteTool,
+}: {
+  deleteTool: (toolId: string) => void;
+}): Array<EuiBasicTableColumn<ToolDefinition>> => [
   {
     field: 'id',
     name: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'Tool' }),
-    valign: 'top',
     sortable: true,
     render: (id: string) => (
       <EuiText size="s">
@@ -42,8 +49,7 @@ const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
     name: i18n.translate('xpack.onechat.tools.toolDescriptionLabel', {
       defaultMessage: 'Description',
     }),
-    width: '60%',
-    valign: 'top',
+    width: '50%',
     render: (description: string) => {
       return <EuiText size="s">{truncateAtNewline(description)}</EuiText>;
     },
@@ -53,17 +59,74 @@ const columns: Array<EuiBasicTableColumn<ToolDefinition>> = [
     name: i18n.translate('xpack.onechat.tools.tagsLabel', {
       defaultMessage: 'Tags',
     }),
-    width: '15%',
     valign: 'top',
     render: (tags: string[]) => <OnechatToolTags tags={tags} />,
+  },
+  {
+    name: i18n.translate('xpack.onechat.tools.actionsLabel', {
+      defaultMessage: 'Actions',
+    }),
+    width: '64px',
+    align: 'center',
+    render: ({ id }: ToolDefinition) => {
+      return (
+        <EuiButtonIcon
+          iconType="trash"
+          color="danger"
+          onClick={() => {
+            deleteTool(id);
+          }}
+          aria-label={i18n.translate('xpack.onechat.tools.deleteToolButtonLabel', {
+            defaultMessage: 'Delete tool',
+          })}
+        />
+      );
+    },
   },
 ];
 
 export const OnechatEsqlTools: React.FC = () => {
-  const { tools, isLoading: isLoadingTools, error: toolsError } = useOnechatEsqlTools();
+  const { tools, isLoading: isLoadingTools, error: toolsError } = useEsqlTools();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const { addSuccessToast, addErrorToast } = useToasts();
+
+  const onDeleteSuccess = useCallback(
+    (toolId: string) => {
+      addSuccessToast({
+        title: i18n.translate('xpack.onechat.tools.deleteToolSuccessToast', {
+          defaultMessage: 'Tool "{toolId}" deleted',
+          values: {
+            toolId,
+          },
+        }),
+      });
+    },
+    [addSuccessToast]
+  );
+
+  const onDeleteError = useCallback(
+    (toolId: string) => {
+      addErrorToast({
+        title: i18n.translate('xpack.onechat.tools.deleteToolErrorToast', {
+          defaultMessage: 'Unable to delete tool "{toolId}"',
+          values: {
+            toolId,
+          },
+        }),
+      });
+    },
+    [addErrorToast]
+  );
+
+  const {
+    isModalOpen: isDeleteModalOpen,
+    isLoading: isDeletingTool,
+    toolId: deleteToolId,
+    deleteTool,
+    confirmDelete,
+    cancelDelete,
+  } = useDeleteToolModal({ onSuccess: onDeleteSuccess, onError: onDeleteError });
 
   const handleCloseFlyout = useCallback(() => {
     setIsFlyoutOpen(false);
@@ -72,6 +135,12 @@ export const OnechatEsqlTools: React.FC = () => {
   const handleOpenFlyout = useCallback(() => {
     setIsFlyoutOpen(true);
   }, []);
+
+  const columns = useMemo(() => getColumns({ deleteTool }), [deleteTool]);
+
+  const deleteEsqlToolTitleId = useGeneratedHtmlId({
+    prefix: 'deleteEsqlToolTitle',
+  });
 
   const errorMessage = toolsError
     ? i18n.translate('xpack.onechat.tools.listToolsErrorMessage', {
@@ -153,20 +222,48 @@ export const OnechatEsqlTools: React.FC = () => {
         onSuccess={() => {
           handleCloseFlyout();
           addSuccessToast({
-            title: i18n.translate('xpack.onechat.tools.esqlToolCreationSuccessToast', {
+            title: i18n.translate('xpack.onechat.tools.createEsqlToolSuccessToast', {
               defaultMessage: 'ES|QL tool created',
             }),
           });
         }}
         onError={(error) => {
           addErrorToast({
-            title: i18n.translate('xpack.onechat.tools.esqlToolCreationErrorToast', {
+            title: i18n.translate('xpack.onechat.tools.createEsqlToolErrorToast', {
               defaultMessage: 'Unable to create ES|QL tool',
             }),
             text: error.message,
           });
         }}
       />
+      {isDeleteModalOpen && (
+        <EuiConfirmModal
+          title={i18n.translate('xpack.onechat.tools.deleteEsqlToolTitle', {
+            defaultMessage: 'Delete tool "{toolId}"?',
+            values: {
+              toolId: deleteToolId,
+            },
+          })}
+          aria-labelledby={deleteEsqlToolTitleId}
+          titleProps={{ id: deleteEsqlToolTitleId }}
+          onCancel={cancelDelete}
+          onConfirm={confirmDelete}
+          isLoading={isDeletingTool}
+          cancelButtonText={i18n.translate('xpack.onechat.tools.deleteEsqlToolCancelButton', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('xpack.onechat.tools.deleteEsqlToolConfirmButton', {
+            defaultMessage: 'Delete',
+          })}
+          buttonColor="danger"
+        >
+          <EuiText>
+            {i18n.translate('xpack.onechat.tools.deleteEsqlToolConfirmationText', {
+              defaultMessage: "You can't recover deleted data.",
+            })}
+          </EuiText>
+        </EuiConfirmModal>
+      )}
     </>
   );
 };
