@@ -91,9 +91,14 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
         if (!editorState.esqlVariableString) {
           nextEditorState.esqlVariableString = fieldToESQLVariable(result.column);
         }
-        if (!editorState.fieldName) {
-          const dataViewHasColumn = fieldRegistry && Object.hasOwn(fieldRegistry, result.column);
-          if (dataViewHasColumn) nextEditorState.fieldName = result.column;
+        if (!editorState.fieldName && fieldRegistry) {
+          if (Object.hasOwn(fieldRegistry, result.column)) {
+            nextEditorState.fieldName = result.column;
+          } else if (!result.column.endsWith('.keyword')) {
+            const columnWithKeyword = `${result.column}.keyword`;
+            if (Object.hasOwn(fieldRegistry, columnWithKeyword))
+              nextEditorState.fieldName = columnWithKeyword;
+          }
         }
         setEditorState(nextEditorState);
 
