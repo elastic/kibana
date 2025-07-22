@@ -194,7 +194,7 @@ import {
   UpsertRuleMigrationResourcesRequestParamsInput,
   UpsertRuleMigrationResourcesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
+import { routeWithNamespace } from './helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {

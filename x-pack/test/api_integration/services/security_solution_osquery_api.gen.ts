@@ -48,7 +48,7 @@ import {
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import { ReadAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
 import { UpdateAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
+import { routeWithNamespace } from './helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
