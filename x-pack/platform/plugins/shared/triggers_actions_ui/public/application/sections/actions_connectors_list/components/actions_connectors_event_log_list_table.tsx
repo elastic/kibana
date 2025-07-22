@@ -280,8 +280,10 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
     [search, setSearchText]
   );
 
-  const columns: EuiDataGridColumn[] = useMemo(
-    () => [
+  const columns: EuiDataGridColumn[] = useMemo(() => {
+    const lastVisibleColumnId = visibleColumns[visibleColumns.length - 1];
+
+    const baseColumms: EuiDataGridColumn[] = [
       {
         id: 'connector_id',
         displayAsText: i18n.translate(
@@ -291,6 +293,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           }
         ),
         isSortable: getIsColumnSortable('connector_id'),
+        initialWidth: 315,
       },
       {
         id: 'id',
@@ -301,6 +304,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           }
         ),
         isSortable: getIsColumnSortable('id'),
+        initialWidth: 320,
       },
       {
         id: 'timestamp',
@@ -315,7 +319,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         actions: {
           showHide: false,
         },
-        initialWidth: 250,
+        initialWidth: 230,
       },
       {
         id: 'status',
@@ -374,6 +378,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
                 showSortDesc: false,
                 showHide: false,
               },
+              initialWidth: 220,
             },
           ]
         : []),
@@ -391,6 +396,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         ),
         isSortable: getIsColumnSortable('source'),
         cellActions: [],
+        initialWidth: 150,
       },
       {
         id: 'message',
@@ -406,6 +412,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         ),
         isSortable: getIsColumnSortable('message'),
         cellActions: [],
+        initialWidth: 600,
       },
       {
         id: 'execution_duration',
@@ -431,6 +438,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           }
         ),
         isSortable: getIsColumnSortable('schedule_delay'),
+        initialWidth: 100,
       },
       {
         id: 'timed_out',
@@ -441,6 +449,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
           }
         ),
         isSortable: getIsColumnSortable('timed_out'),
+        initialWidth: 100,
       },
       ...(showFromAllSpaces
         ? [
@@ -458,12 +467,19 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
                 showSortDesc: false,
                 showHide: false,
               },
+              initialWidth: 100,
             },
           ]
         : []),
-    ],
-    [onFilterChange, hasConnectorNames, showFromAllSpaces]
-  );
+    ];
+
+    return baseColumms.map((col) => {
+      if (col.id !== lastVisibleColumnId) return col;
+
+      const { initialWidth, ...rest } = col;
+      return rest;
+    });
+  }, [onFilterChange, hasConnectorNames, showFromAllSpaces, visibleColumns]);
 
   const renderList = () => {
     if (!logs) {
