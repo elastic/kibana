@@ -17,16 +17,11 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { SavedObjectsReference } from '@kbn/content-management-content-editor';
+import type { RelatedDashboard } from '@kbn/observability-schema';
 import { useKibana } from '../../../../utils/kibana_react';
-export interface DashboardMetadata {
-  id: string;
-  title: string;
-  description: string;
-  tags?: string[];
-}
 
 export interface ActionButtonProps {
-  onClick: (dashboard: DashboardMetadata) => void;
+  onClick: (dashboard: RelatedDashboard) => void;
   label: string;
   isLoading: boolean;
   isDisabled: boolean;
@@ -37,7 +32,7 @@ export function DashboardTile({
   dashboard,
   actionButtonProps,
 }: {
-  dashboard: DashboardMetadata;
+  dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
 }) {
   const {
