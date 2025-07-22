@@ -71,6 +71,40 @@
       "resource": {
         "id": "aubFychsB7J0pkeyxZZcZrp4MrWm2WcjI8jPdGhRmnOiAXELn6KxJtjwfkQ0RaukgKdNSNrPoER9Xx4UJYgbDUF",
         "name": "nU0sWv5jtydf8GLtQWJiFkQ79c9TiQqFNNz4",
+        "raw": {
+          "id": "raw_id_test_3",
+          "name": "raw_name_test_3",
+          "properties": {
+            "assignableScopes": [
+              "/providers/Microsoft.Management/managementGroups/research-and-development"
+            ],
+            "createdBy": "creator_name_test_3",
+            "createdOn": "2025-04-29T17:45:23.736Z",
+            "description": "PointFive SP Custom Role Actions",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.CostManagementExports/register/action",
+                  "Microsoft.Insights/diagnosticSettings/write",
+                  "Microsoft.OperationalInsights/workspaces/sharedKeys/action"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "PointFive SP Custom Role Actions",
+            "type": "CustomRole",
+            "updatedBy": "updater_name_test_3",
+            "updatedOn": "2025-04-29T17:45:23.736Z"
+          },
+          "tenant_id": "tenant_id_test_3",
+          "type": "microsoft.authorization/roledefinitions"
+        },
         "sub_type": "azure-role-definition",
         "type": "identity-management"
       },
@@ -195,6 +229,40 @@
       "resource": {
         "id": "3ROVMaCfYWTbXIRJ3MyD2QMwv0Jq12qpyz3wzdHArkD7X0s7e8K9BzgqpLq7KeLXJeDVUCBAhucUDATFVZPCGvS",
         "name": "Fudn0YQeuFkMgsiI6aqV4tBfGIV4cOjU1TF4",
+        "raw": {
+          "id": "raw_id_test_4",
+          "name": "raw_name_test_4",
+          "properties": {
+            "assignableScopes": [
+              "test_4"
+            ],
+            "createdBy": "creator_id_test_4",
+            "createdOn": "2025-04-29T17:45:23.736Z",
+            "description": "PointFive SP Custom Role Actions",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.CostManagementExports/register/action",
+                  "Microsoft.Insights/diagnosticSettings/write",
+                  "Microsoft.OperationalInsights/workspaces/sharedKeys/action"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "PointFive SP Custom Role Actions",
+            "type": "CustomRole",
+            "updatedBy": "Updater_id_test_4",
+            "updatedOn": "2025-04-29T17:45:23.736Z"
+          },
+          "tenant_id": "tenant_id_test_4",
+          "type": "microsoft.authorization/roledefinitions"
+        },
         "sub_type": "azure-role-definition",
         "type": "identity-management"
       },
@@ -319,6 +387,40 @@
       "resource": {
         "id": "ZAXWs2WYSGYW6ZKPTaQ76HrXQxJmQwLvJFkX1ZGQylfQzrbDowyyD6s6omOtEkVgsp102DP8xOGGSm7BoGgnxRw",
         "name": "jeiBKQUVjfwHFSjyA4t9GL48CV05Sj5dQg8q",
+        "raw": {
+          "id": "raw_id_test_5",
+          "name": "raw_name_test_5",
+          "properties": {
+            "assignableScopes": [
+              "test_5"
+            ],
+            "createdBy": "creator_id_5",
+            "createdOn": "2024-03-11T11:45:13.927Z",
+            "description": "Additional read permissions for cloudbeatVM",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.Web/sites/*/read",
+                  "Microsoft.Web/sites/config/Read",
+                  "Microsoft.Web/sites/config/list/Action"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "cloudbeatVM additional permissions",
+            "type": "CustomRole",
+            "updatedBy": "Updater_id_test_5",
+            "updatedOn": "2025-07-18T04:32:57.292Z"
+          },
+          "tenant_id": "tenant_id_test_5",
+          "type": "microsoft.authorization/roledefinitions"
+        },
         "sub_type": "azure-role-definition",
         "type": "identity-management"
       },
@@ -443,6 +545,38 @@
       "resource": {
         "id": "Bsw4uOLGW3w78qVwyoQUfXDXXgRit3PmEI2eWE25MRM11v1XDIKkX95KkhbpA8LBWFKkBA0jlxeyfatb08Bq0nR",
         "name": "51hRPI4oevnrLw9OtgG7zkRuXCyM4gQ1wGce",
+        "raw": {
+          "id": "raw_id_test_2",
+          "name": "raw_name_test_2",
+          "properties": {
+            "assignableScopes": [
+              "test_2"
+            ],
+            "createdBy": "creator_id_test_2",
+            "createdOn": "2024-04-26T21:06:30.399Z",
+            "description": "Read access to Azure Subscription",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.Resources/subscriptions/read"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "AzureSubscriptionReader",
+            "type": "CustomRole",
+            "updatedBy": "updater_id_test_2",
+            "updatedOn": "2024-04-26T21:06:30.399Z"
+          },
+          "tenant_id": "tenant_id_test_2",
+          "type": "microsoft.authorization/roledefinitions"
+        },
         "sub_type": "azure-role-definition",
         "type": "identity-management"
       },
@@ -567,6 +701,38 @@
       "resource": {
         "id": "tU4VLRs2ZSjXQggLJHSNCcmATYgT040UykWA8isEG8WXIjo9ZO7xWCcHeEpid4c2hDemrVgIs2WAyLgm82MlotB",
         "name": "Q68xK5Cp8eVeSaAhT5gBe2KHmfKoiAKlmTr9",
+        "raw": {
+          "id": "raw_id_test_7",
+          "name": "raw_name_test_7",
+          "properties": {
+            "assignableScopes": [
+              "test_7"
+            ],
+            "createdBy": "creator_id_test_7",
+            "createdOn": "2024-04-02T09:04:10.25Z",
+            "description": "Permissions to register application as owners",
+            "isServiceRole": false,
+            "permissions": [
+              {
+                "actions": [
+                  "*"
+                ],
+                "dataActions": [
+                ],
+                "notActions": [
+                ],
+                "notDataActions": [
+                ]
+              }
+            ],
+            "roleName": "Register Application",
+            "type": "CustomRole",
+            "updatedBy": "Updater_test_id_7",
+            "updatedOn": "2024-04-04T08:34:36.827Z"
+          },
+          "tenant_id": "tenant_id_test_7",
+          "type": "microsoft.authorization/roledefinitions"
+        },
         "sub_type": "azure-role-definition",
         "type": "identity-management"
       },
@@ -703,6 +869,102 @@
         "id": "JXAgM0KIHlVLtTdVIrPmD1miRSCyE3kqbOoMKPZoJnHgjO8RBrxfS230MNiB80nFqB9Poj9sT0t3P783m16DjZthFHb7OEhwoSiybg8SaEVf3wzcbRY5b6hgHampjMftxlGXggREBUiNlvqvBYriIMx",
         "name": "ba7LevRhdQM",
         "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
         "sub_type": "azure-vm",
         "type": "cloud-compute"
       },
@@ -833,6 +1095,102 @@
         "id": "pYuOLyeCsh49vokqUDoN4wUxliTuLIwPGYY3Fi3gpQnPzILi9uYDT1LsgcOWYB5J4S8J49ODj5TXSUVNGIDxGDai1128zQ4qNNN61h7nN1aO1Au2NedvFWtNi7ODf5e60sendvLZLz5Anhawr22Unos",
         "name": "EmU4xMIQFAN",
         "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
         "sub_type": "azure-vm",
         "type": "cloud-compute"
       },
@@ -963,6 +1321,102 @@
         "id": "AviOPfHj7oaDWQAUM0rWiARlQf55r3EsIdhLkzkQEuw7oWpC5rpzGO9aXSejDy5rIoHzjznMKjGvVicsm7CBspTKqOKZt7xQeE7jG8e8mUcmlmJbZtUIl9vPhoYN1syBVakR0T8nhtP2nTfSIZlwoVo",
         "name": "b9LPBgGO6AO",
         "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
         "sub_type": "azure-vm",
         "type": "cloud-compute"
       },
@@ -1093,6 +1547,102 @@
         "id": "vXCLvwCsXKofuwzQEpg6FFltouZ2KLwlUNpXTcXIdOQsAt23OoRWlfUaCvws6rRrbpdSH67Kwkgl007u9iBcRNJIc8pa97KE8j0MjFTo93gfdJ9691IQ7DEu4JgHWcHwU1B68Eat8tk6mIv3uOk6YTs",
         "name": "wzJq4zD3num",
         "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
         "sub_type": "azure-vm",
         "type": "cloud-compute"
       },
@@ -1223,6 +1773,102 @@
         "id": "W0LcSIl7aTCUWPII8agBKA6ycMU98zcYjOYqIWxXZePhXAFgVeKXAgrdRaVZpjgiu2gowd53qvzmz1zlt4tvwXodZXN9fC97iXXH5Mj5ODeBVPx92ZmOS64WW4p8yj26eXf1SgoZjQ3FwUjBxm0oi0a",
         "name": "OQfaRQSpt7d",
         "region": "centralus",
+        "raw": {
+          "id": "id_test_raw_1",
+          "identity": {
+            "principalId": "principal_id_test_1",
+            "tenantId": "tenant_id_test_1",
+            "type": "SystemAssigned"
+          },
+          "location": "centralus",
+          "name": "name_test_raw_1",
+          "properties": {
+            "extended": {
+              "instanceView": {
+                "computerName": "computer_name_raw_1",
+                "hyperVGeneration": "V2",
+                "osName": "ubuntu",
+                "osVersion": "22.04",
+                "powerState": {
+                  "code": "PowerState/running",
+                  "displayStatus": "VM running",
+                  "level": "Info"
+                }
+              }
+            },
+            "hardwareProfile": {
+              "vmSize": "Standard_DS2_v2"
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "network_interfaces_id_1"
+                }
+              ]
+            },
+            "osProfile": {
+              "adminUsername": "admin_username_test_1",
+              "allowExtensionOperations": true,
+              "computerName": "osprofile_computer_name_1",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "patchSettings": {
+                  "assessmentMode": "ImageDefault",
+                  "patchMode": "ImageDefault"
+                },
+                "provisionVMAgent": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "keyData": "keyData_test_1",
+                      "path": "publickey_path_test_1"
+                    }
+                  ]
+                }
+              },
+              "requireGuestProvisionSignal": true,
+              "secrets": [
+              ]
+            },
+            "provisioningState": "Succeeded",
+            "storageProfile": {
+              "dataDisks": [
+              ],
+              "diskControllerType": "SCSI",
+              "imageReference": {
+                "exactVersion": "22.04.202407250",
+                "offer": "0001-com-ubuntu-server-jammy",
+                "publisher": "canonical",
+                "sku": "22_04-lts-gen2",
+                "version": "latest"
+              },
+              "osDisk": {
+                "caching": "ReadWrite",
+                "createOption": "FromImage",
+                "deleteOption": "Detach",
+                "diskSizeGB": 30,
+                "managedDisk": {
+                  "id": "managedDisk_id_test_1",
+                  "storageAccountType": "Standard_LRS"
+                },
+                "name": "vm_name_test_id_1",
+                "osType": "Linux"
+              }
+            },
+            "timeCreated": "2024-07-28T08:26:21.665Z",
+            "vmId": "vm_id_test_1"
+          },
+          "resource_group": "resource_group_test_1",
+          "subscription_id": "subscription_id_1",
+          "tags": {
+            "division": "engineering",
+            "org": "security",
+            "project": "test-environments",
+            "team": "team_123"
+          },
+          "tenant_id": "tenant_id_test1",
+          "type": "microsoft.compute/virtualmachines"
+        },
         "sub_type": "azure-vm",
         "type": "cloud-compute"
       },
@@ -1349,6 +1995,49 @@
         "id": "qOzq70VPowYDIouG2qkT4EJGiqZm6BdCpd5aynTZmtIxIPno0RIlV2fE1Aigp2bhflpkN4RwwjtxFqMaBjnykbXIJpuOyz1OrR8myqvzgyWb6qtLG5P35tKIQnsYht502yyJ68dVsHLFBDIfzE5KzYtPXayFLX97gNjJSdqe31pQQKmS4giC8k9",
         "name": "M67VdiyWlG4dRqivrDA0i2l84V7VH7wQEYL8VN1l80TIAtRq0nFIG",
         "region": "centralus",
+        "raw": {
+          "id": "raw_id_test_6",
+          "location": "centralus",
+          "name": "raw_name_test_6",
+          "properties": {
+            "LastOwnershipUpdateTime": "2024-07-28T08:26:23.0865673Z",
+            "creationData": {
+              "createOption": "FromImage",
+              "imageReference": {
+                "id": "image_id_test_6"
+              }
+            },
+            "diskIOPSReadWrite": 500,
+            "diskMBpsReadWrite": 60,
+            "diskSizeBytes": 32213303296,
+            "diskSizeGB": 30,
+            "diskState": "Attached",
+            "encryption": {
+              "type": "EncryptionAtRestWithPlatformKey"
+            },
+            "hyperVGeneration": "V2",
+            "networkAccessPolicy": "AllowAll",
+            "osType": "Linux",
+            "provisioningState": "Succeeded",
+            "publicNetworkAccess": "Enabled",
+            "supportedCapabilities": {
+              "acceleratedNetwork": true,
+              "architecture": "x64",
+              "diskControllerTypes": "SCSI, NVMe"
+            },
+            "supportsHibernation": true,
+            "timeCreated": "2024-07-28T08:26:23.0865673Z",
+            "uniqueId": "unique_id_test_6"
+          },
+          "resource_group": "resource_group_test_6",
+          "sku": {
+            "name": "Standard_LRS",
+            "tier": "Standard"
+          },
+          "subscription_id": "subscription_id_test_6",
+          "tenant_id": "tenant_id_test_6",
+          "type": "microsoft.compute/disks"
+        },
         "sub_type": "azure-disk",
         "type": "cloud-compute"
       },
