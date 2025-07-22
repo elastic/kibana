@@ -88,11 +88,11 @@ export function PreviewTable({
     return {
       columns: sorting?.fieldName
         ? [
-          {
-            id: sorting?.fieldName || '',
-            direction: sorting?.direction || 'asc',
-          },
-        ]
+            {
+              id: sorting?.fieldName || '',
+              direction: sorting?.direction || 'asc',
+            },
+          ]
         : [],
       onSort: (newSorting) => {
         if (setSorting) {
@@ -138,12 +138,12 @@ export function PreviewTable({
       actions:
         Boolean(setVisibleColumns) || Boolean(setSorting)
           ? {
-            showHide: Boolean(setVisibleColumns),
-            showMoveLeft: Boolean(setVisibleColumns),
-            showMoveRight: Boolean(setVisibleColumns),
-            showSortAsc: Boolean(setSorting),
-            showSortDesc: Boolean(setSorting),
-          }
+              showHide: Boolean(setVisibleColumns),
+              showMoveLeft: Boolean(setVisibleColumns),
+              showMoveRight: Boolean(setVisibleColumns),
+              showSortAsc: Boolean(setSorting),
+              showSortDesc: Boolean(setSorting),
+            }
           : (false as false),
       initialWidth: columnWidths[column],
     }));
@@ -157,7 +157,7 @@ export function PreviewTable({
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
-        setVisibleColumns: setVisibleColumns || (() => { }),
+        setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
       sorting={sortingConfig}
