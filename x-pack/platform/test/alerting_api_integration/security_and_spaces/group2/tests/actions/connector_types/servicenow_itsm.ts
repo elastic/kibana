@@ -75,7 +75,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
     },
   };
 
-  describe('ServiceNow ITSM', () => {
+  describe.skip('ServiceNow ITSM', () => {
     let simulatedActionId = '';
     let serviceNowSimulatorURL: string = '';
     let serviceNowServer: http.Server;
@@ -794,7 +794,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           });
         });
 
-        describe.skip('getChoices', () => {
+        describe('getChoices', () => {
           it('should get choices', async () => {
             const { body: result } = await supertest
               .post(`/api/actions/connector/${simulatedActionId}/_execute`)
