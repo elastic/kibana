@@ -66,13 +66,13 @@ export class LinksPlugin
 
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
+          const { createLinksSavedObjectRef } = await import('./lib/saved_object_ref_utils');
           container.addNewPanel<LinksSerializedState>(
             {
               panelType: CONTENT_ID,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
+                rawState: {},
+                references: [createLinksSavedObjectRef(savedObject.id)],
               },
             },
             true

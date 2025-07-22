@@ -245,7 +245,7 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiResizableButton.verticalResizerAriaLabel\\": \\"Press the up or down arrow keys to adjust panels size\\",
     \\"euiResizablePanel.toggleButtonAriaLabel\\": \\"Press to toggle this panel\\",
     \\"euiSaturation.screenReaderInstructions\\": \\"Arrow keys to navigate the square color gradient. Coordinates will be used to calculate HSV color mode \\\\\\"saturation\\\\\\" and \\\\\\"value\\\\\\" numbers, in the range of 0 to 1. Left and right to change the saturation. Up and down change the value.\\",
-    \\"euiSaturation.ariaLabel\\": \\"HSV color mode saturation and value 2-axis slider\\",
+    \\"euiSaturation.ariaLabel\\": \\"Select a color\\",
     \\"euiSearchBox.ariaLabel\\": \\"This is a search bar. After typing your query, hit enter to filter the results lower in the page.\\",
     \\"euiSearchBox.incrementalAriaLabel\\": \\"This is a search bar. As you type, the results lower in the page will automatically filter.\\",
     \\"euiSearchBox.placeholder\\": \\"Search...\\",
@@ -292,7 +292,11 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiRange.sliderScreenReaderInstructions\\": \\"You are in a custom range slider. Use the Up and Down arrow keys to change the value.\\",
     \\"euiSuperSelect.ariaLabel\\": \\"Select listbox\\",
     \\"euiFieldValueSelectionFilter.buttonLabelHint\\": \\"Selection\\",
-    \\"euiCodeBlockFullScreen.ariaLabel\\": \\"Expanded code block\\"
+    \\"euiCodeBlockFullScreen.ariaLabel\\": \\"Expanded code block\\",
+    \\"euiSaturation.roleDescription\\": \\"HSV color mode saturation and value 2-axis slider.\\",
+    \\"euiHue.ariaValueText\\": \\"Hue\\",
+    \\"euiHue.ariaRoleDescription\\": \\"Hue slider\\",
+    \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\"
   }
 }"
 `;
