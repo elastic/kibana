@@ -255,7 +255,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
   },
 ];
 
-const getEvidenceList = (finding: CspFinding) =>
+const getEvidenceList = (evidence: object) =>
   [
     {
       title: '',
@@ -268,24 +268,11 @@ const getEvidenceList = (finding: CspFinding) =>
             />
           </EuiText>
           <EuiSpacer size={'s'} />
-          <CodeBlock language="json">
-            {JSON.stringify(getEvaluationEvidence(finding), null, 2)}
-          </CodeBlock>
+          <CodeBlock language="json">{JSON.stringify(evidence, null, 2)}</CodeBlock>
         </>
       ),
     },
   ].filter(truthy);
-
-const getEvaluationEvidence = ({
-  result,
-  resource,
-}: CspFinding): Record<string, unknown> | undefined => {
-  return (
-    result?.evidence || // for all CIS benchmarks except CIS_GCP
-    (resource?.raw as { resource?: unknown })?.resource || // for CIS_GCP benchmarks, prefer the specific resource
-    resource?.raw // fallback to the raw resource
-  );
-};
 
 export const OverviewTab = ({
   data,
@@ -322,10 +309,7 @@ export const OverviewTab = ({
     [data.data_stream?.dataset, discover.locator, cdrMisconfigurationsDataView.data?.id]
   );
 
-  const hasEvidence =
-    !isEmpty(data.result?.evidence) ||
-    (data.rule.benchmark?.id === CIS_GCP && !isEmpty(data.resource.raw));
-
+  const evidence = getEvaluationEvidence(data);
   const accordions: Accordion[] = useMemo(
     () =>
       [
@@ -354,17 +338,17 @@ export const OverviewTab = ({
           listItems: getRemediationList(data.rule),
         },
         INTERNAL_FEATURE_FLAGS.showFindingFlyoutEvidence &&
-          hasEvidence && {
+          !isEmpty(evidence) && {
             initialIsOpen: true,
             title: i18n.translate(
               'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
               { defaultMessage: 'Evidence' }
             ),
             id: 'evidenceAccordion',
-            listItems: getEvidenceList(data),
+            listItems: getEvidenceList(evidence),
           },
       ].filter(truthy),
-    [data, discoverDataViewLink, euiTheme, hasEvidence, ruleFlyoutLink]
+    [data, discoverDataViewLink, euiTheme, ruleFlyoutLink, evidence]
   );
 
   return (
@@ -389,4 +373,12 @@ export const OverviewTab = ({
       ))}
     </>
   );
+};
+
+const getEvaluationEvidence = (data: CspFinding) => {
+  if (data.rule.benchmark?.id === CIS_GCP) {
+    // For CIS GCP, the evidence is the resource.raw field, which may contain a nested 'resource' field
+    return (data.resource?.raw as { resource?: unknown })?.resource || data.resource?.raw;
+  }
+  return data.result?.evidence;
 };
