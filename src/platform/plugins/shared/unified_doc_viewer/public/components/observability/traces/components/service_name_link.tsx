@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLink } from '@elastic/eui';
-import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { AgentIcon } from '@kbn/custom-icons';
+import { AgentName } from '@kbn/elastic-agent-utils';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { ServiceNameWithIcon } from './service_name_with_icon';
 
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
 
@@ -62,7 +63,14 @@ export function ServiceNameLink({
     : undefined;
 
   const content = (
-    <ServiceNameWithIcon agentName={agentName} formattedServiceName={formattedServiceName} />
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      {agentName && (
+        <EuiFlexItem grow={false}>
+          <AgentIcon agentName={agentName as AgentName} size="m" />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>{formattedServiceName}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   return (
