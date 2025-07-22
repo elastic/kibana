@@ -9,15 +9,15 @@ import { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
 
+export type { ContextRegistryServerSetup, ContextRegistryServerStart } from './plugin';
 export type {
-  CaseSuggestionRegistryServerSetup,
-  CaseSuggestionRegistryServerStart,
-} from './plugin';
-export type { SuggestionDefinitionServer, Registry } from './services/case_suggestion_registry';
+  ContextDefinitionServer,
+  ContextRegistryServer,
+} from './services/context_registry_server';
 
-export type { SuggestionPayload } from '../common/types';
+export type { ContextResponse } from '../common/types';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
-  const { CaseSuggestionRegistryPlugin } = await import('./plugin');
-  return new CaseSuggestionRegistryPlugin(initializerContext);
+  const { ContextRegistryPlugin } = await import('./plugin');
+  return new ContextRegistryPlugin(initializerContext);
 }

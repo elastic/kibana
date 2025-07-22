@@ -6,11 +6,11 @@
  */
 
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { caseSuggestionRegistryConfigSchema } from '../common/config';
+import { ContextRegistryConfigSchema } from '../common/config';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     unsafe: true,
   },
-  schema: caseSuggestionRegistryConfigSchema,
+  schema: ContextRegistryConfigSchema,
 };

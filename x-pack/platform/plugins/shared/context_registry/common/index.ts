@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { SuggestionPayload } from './types';
+export type { ContextResponse } from './types';

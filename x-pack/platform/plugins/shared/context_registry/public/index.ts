@@ -5,20 +5,17 @@
  * 2.0.
  */
 import { PluginInitializerContext } from '@kbn/core/public';
-import { CaseSuggestionRegistryPlugin } from './plugin';
+import { ContextRegistryPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new CaseSuggestionRegistryPlugin(initializerContext);
+  return new ContextRegistryPlugin(initializerContext);
 };
 
-export type { SuggestionPayload } from '../common/types';
+export type { ContextResponse } from '../common/types';
 
 export type {
-  SuggestionDefinitionPublic,
-  SuggestionDefinitionPublicProps,
-} from './services/case_suggestion_registry';
+  ContextDefinitionPublic,
+  ContextDefinitionPublicProps,
+} from './services/context_registry_public';
 
-export type {
-  CaseSuggestionRegistryPublicSetup,
-  CaseSuggestionRegistryPublicStart,
-} from './plugin';
+export type { ContextRegistryPublicSetup, ContextRegistryPublicStart } from './plugin';
