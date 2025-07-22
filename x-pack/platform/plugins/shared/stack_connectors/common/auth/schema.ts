@@ -43,21 +43,46 @@ export const SecretConfiguration = {
 
 export const SecretConfigurationSchemaValidation = {
   validate: (secrets: any) => {
-    if (secrets.clientSecret) {
-      if (!secrets.user && !secrets.password && !secrets.crt && !secrets.key && !secrets.pfx)
-        return;
+    // user and password must be set together (or not at all)
+    if (
+      !secrets.password &&
+      !secrets.user &&
+      !secrets.crt &&
+      !secrets.key &&
+      !secrets.pfx &&
+      !secrets.clientSecret
+    )
+      return;
+    if (
+      secrets.password &&
+      secrets.user &&
+      !secrets.crt &&
+      !secrets.key &&
+      !secrets.pfx &&
+      !secrets.clientSecret
+    )
+      return;
+    if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx && !secrets.clientSecret)
+      return;
+    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx && !secrets.clientSecret)
+      return;
+    if (
+      !secrets.password &&
+      !secrets.user &&
+      !secrets.crt &&
+      !secrets.key &&
+      !secrets.pfx &&
+      secrets.clientSecret
+    )
+      return;
+
+    if ('clientSecret' in secrets) {
       return i18n.translate('xpack.stackConnectors.webhook.invalidSecretsWithOauth', {
         defaultMessage:
-          'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or OAuth2 client secret',
+          'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)',
       });
     }
 
-    // user and password must be set together (or not at all)
-    if (!secrets.password && !secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
-    if (secrets.password && secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
-    if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx) return;
-    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx) return;
-    if (!secrets.crt && !secrets.key && !secrets.user && !secrets.pfx) return;
     return i18n.translate('xpack.stackConnectors.webhook.invalidSecrets', {
       defaultMessage:
         'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)',
