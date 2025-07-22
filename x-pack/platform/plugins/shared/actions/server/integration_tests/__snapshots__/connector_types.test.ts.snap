@@ -39018,7 +39018,7 @@ Object {
         Object {
           "schema": Object {
             "allow": Array [
-              "webhook-authentication-oauth2",
+              "webhook-oauth2-client-credentials",
             ],
             "flags": Object {
               "error": [Function],

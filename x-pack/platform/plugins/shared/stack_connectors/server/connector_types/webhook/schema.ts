@@ -6,8 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AuthConfiguration } from '../../../common/auth/schema';
-import { WebhookMethods } from '../../../common/auth/constants';
+import {
+  AuthConfiguration,
+  SecretConfiguration,
+  SecretConfigurationSchemaValidation,
+} from '../../../common/auth/schema';
+import { AuthType, WebhookMethods } from '../../../common/auth/constants';
 
 export const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
@@ -18,14 +22,26 @@ const configSchemaProps = {
   }),
   headers: schema.nullable(HeadersSchema),
   hasAuth: AuthConfiguration.hasAuth,
-  authType: AuthConfiguration.authType,
+  authType: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal(AuthType.Basic),
+        schema.literal(AuthType.SSL),
+        schema.literal(AuthType.OAuth2ClientCredentials),
+        schema.literal(null),
+      ],
+      {
+        defaultValue: AuthType.Basic,
+      }
+    )
+  ),
   certType: AuthConfiguration.certType,
   ca: AuthConfiguration.ca,
   verificationMode: AuthConfiguration.verificationMode,
-  accessTokenUrl: AuthConfiguration.accessTokenUrl,
-  clientId: AuthConfiguration.clientId,
-  scope: AuthConfiguration.scope,
-  additionalFields: AuthConfiguration.additionalFields,
+  accessTokenUrl: schema.maybe(schema.string()),
+  clientId: schema.maybe(schema.string()),
+  scope: schema.maybe(schema.string()),
+  additionalFields: schema.maybe(schema.string()),
 };
 
 export const ConfigSchema = schema.object(configSchemaProps);
@@ -34,3 +50,11 @@ export const ConfigSchema = schema.object(configSchemaProps);
 export const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
+
+export const SecretsSchema = schema.object(
+  {
+    ...SecretConfiguration,
+    clientSecret: schema.nullable(schema.string()),
+  },
+  SecretConfigurationSchemaValidation
+);
