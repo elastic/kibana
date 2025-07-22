@@ -10,10 +10,15 @@ import type { HostFormulas } from './formulas';
 import type { HostCharts } from './charts';
 import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 
+const legacyMetrics: Array<keyof HostAggregations> = ['cpu', 'rx', 'tx'];
 export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, HostCharts> = {
+  legacyMetrics,
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
-    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    const catalog = new MetricsCatalog(snapshot, args?.schema, {
+      includeLegacyMetrics: args?.schema === 'ecs',
+      legacyMetrics,
+    });
     return catalog;
   },
   getFormulas: async (args) => {

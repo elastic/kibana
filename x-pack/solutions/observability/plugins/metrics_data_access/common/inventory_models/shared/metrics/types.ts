@@ -75,9 +75,9 @@ export type LensMetricChartConfig = Record<
 
 /** inventory types */
 export interface BaseInventoryMetricsConfig<TAggregations extends AggregationConfigMap> {
-  defaultSnapshot: SnapshotMetricType;
+  defaultSnapshot: keyof TAggregations;
   defaultTimeRangeInSeconds: number;
-  legacyMetrics?: Array<keyof TAggregations>;
+  legacyMetrics?: SnapshotMetricType[];
   getAggregations: (args?: { schema?: SchemaTypes }) => Promise<AggregationsCatalog<TAggregations>>;
 }
 

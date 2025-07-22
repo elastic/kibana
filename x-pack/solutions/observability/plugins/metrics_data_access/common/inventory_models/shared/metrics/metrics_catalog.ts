@@ -21,8 +21,22 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
   implements BaseMetricsCatalog<TConfig>
 {
   private readonly catalog: ResolvedMetricMap<TConfig>;
+  private readonly includeLegacyMetrics: boolean;
+  private readonly legacyMetrics: Set<keyof TConfig>;
 
-  constructor(configCatalog: TConfig, private readonly schema: SchemaTypes = 'ecs') {
+  constructor(
+    configCatalog: TConfig,
+    private readonly schema: SchemaTypes = 'ecs',
+    options?: {
+      includeLegacyMetrics?: boolean;
+      legacyMetrics?: Array<keyof TConfig>;
+    }
+  ) {
+    const { includeLegacyMetrics = false, legacyMetrics = [] } = options ?? {};
+
+    this.includeLegacyMetrics = includeLegacyMetrics;
+    this.legacyMetrics = new Set(legacyMetrics);
+
     this.catalog = this.resolveSchemaMetrics(configCatalog);
   }
   get<K extends keyof ResolvedMetricMap<TConfig>>(key: K): ResolvedMetricMap<TConfig>[K];
@@ -43,6 +57,10 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
     const catalog = Object.entries(configCatalog).reduce((acc, [key, config]) => {
       const typedKey = key as keyof TConfig;
 
+      if (!this.includeLegacyMetrics && this.legacyMetrics.has(typedKey)) {
+        return acc;
+      }
+
       if (this.isAggregationWithSchemaVariation(config)) {
         acc[typedKey] = config[this.schema] as any;
       } else if (this.isFormulaWithSchemaVariation(config)) {
@@ -50,7 +68,7 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
           ...config,
           value: config.value[this.schema],
         } as any;
-      } else if (this.schema === 'ecs') {
+      } else {
         acc[typedKey] = config as any;
       }
 
