@@ -471,7 +471,7 @@ export const PresentationPanelHoverActions = ({
                 delay="regular"
                 position="top"
                 data-test-subj="embeddablePanelDescriptionTooltip"
-                type="iInCircle"
+                type="info"
                 iconProps={{
                   css: css`
                     margin: ${euiTheme.size.xs};

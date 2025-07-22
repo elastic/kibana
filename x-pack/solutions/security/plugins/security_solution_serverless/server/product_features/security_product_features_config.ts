@@ -18,6 +18,7 @@ import {
   SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
 import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
+import { APP_ID } from '@kbn/security-solution-plugin/common';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export const getSecurityProductFeaturesConfigurator =
@@ -93,6 +94,10 @@ const securityProductFeaturesConfig: Record<
                         // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
                         // This migration is for Endpoint Exceptions artifact in Serverless offering, as it included in Security:ALL privilege.
                         'global_artifact_management_all',
+
+                        // As we are switching from `all` to `minimal_all`, Endpoint Exceptions is needed to be added, as it was included in `all`,
+                        // but not in `minimal_all`.
+                        'endpoint_exceptions_all',
                       ],
                     };
                   }
@@ -101,6 +106,13 @@ const securityProductFeaturesConfig: Record<
                 }
               ),
             },
+
+            api: [
+              ...(baseFeatureConfig.privileges.all.api ?? []),
+
+              // API access must be also added, as only UI privileges are copied when replacing a deprecated feature
+              `${APP_ID}-writeGlobalArtifacts`,
+            ],
 
             // minimal_all is not overwritten, as it does not includes Endpoint Exceptions ALL.
           },

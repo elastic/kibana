@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 import supertest from 'supertest';
 
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -20,8 +20,6 @@ import { createMockPluginSetup, createMockReportingCore } from '../../../../test
 import { ReportingRequestHandlerContext } from '../../../../types';
 import { registerDiagnoseBrowser } from '../browser';
 
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
-
 const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';
 
@@ -31,8 +29,9 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
   const mockLogger = loggingSystemMock.createLogger();
 
   let server: SetupServerReturn['server'];
+  let registerRouteHandlerContext: SetupServerReturn['registerRouteHandlerContext'];
   let usageCounter: IUsageCounter;
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
   let core: ReportingCore;
   let screenshotting: jest.Mocked<ScreenshottingStart>;
 
@@ -42,8 +41,8 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
   });
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+    ({ server, createRouter, registerRouteHandlerContext } = await setupServer(reportingSymbol));
+    registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
       () => reportingMock.createStart()
@@ -53,7 +52,7 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     core = await createMockReportingCore(
       config,
       createMockPluginSetup({
-        router: httpSetup.createRouter(''),
+        router: createRouter(''),
         security: null,
         docLinks: {
           ...docLinksSetupMock,
@@ -88,7 +87,7 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
 
     screenshotting.diagnose.mockReturnValue(Rx.of(devtoolMessage));
 
-    return supertest(httpSetup.server.listener)
+    return supertest(server.listener)
       .get(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
       .expect(200)
       .then(({ body }) => {
@@ -104,7 +103,7 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(logs));
 
-    return supertest(httpSetup.server.listener)
+    return supertest(server.listener)
       .get(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
       .expect(200)
       .then(({ body }) => {
@@ -128,7 +127,7 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(fontErrorLog));
 
-    return supertest(httpSetup.server.listener)
+    return supertest(server.listener)
       .get(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
       .expect(200)
       .then(({ body }) => {
@@ -150,7 +149,7 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     await server.start();
     screenshotting.diagnose.mockReturnValue(Rx.of(`${devtoolMessage}\n${fontNotFoundMessage}`));
 
-    return supertest(httpSetup.server.listener)
+    return supertest(server.listener)
       .get(INTERNAL_ROUTES.DIAGNOSE.BROWSER)
       .expect(200)
       .then(({ body }) => {
@@ -175,7 +174,7 @@ describe(`GET ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
 
       screenshotting.diagnose.mockReturnValue(Rx.of(devtoolMessage));
 
-      await supertest(httpSetup.server.listener).get(INTERNAL_ROUTES.DIAGNOSE.BROWSER).expect(200);
+      await supertest(server.listener).get(INTERNAL_ROUTES.DIAGNOSE.BROWSER).expect(200);
 
       expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({

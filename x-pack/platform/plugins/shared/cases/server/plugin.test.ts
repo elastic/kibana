@@ -25,9 +25,11 @@ import type { CasesServerSetupDependencies, CasesServerStartDependencies } from 
 
 function getConfig(overrides = {}) {
   return {
+    enabled: true,
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
+    analytics: { index: { enabled: true } },
     ...overrides,
   };
 }
@@ -74,6 +76,7 @@ describe('Cases Plugin', () => {
       security: securityMock.createStart(),
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
+      taskManager: taskManagerMock.createStart(),
     };
   });
 

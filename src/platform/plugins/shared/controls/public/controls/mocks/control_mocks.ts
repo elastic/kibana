@@ -25,12 +25,18 @@ export const getMockedControlGroupApi = (
   overwriteApi?: Partial<ControlGroupApi>
 ) => {
   const controlStateMap: Record<string, BehaviorSubject<SerializedPanelState<object>>> = {};
+  const controlFetchMap = new Map<string, BehaviorSubject<ControlFetchContext>>();
   return {
     type: CONTROL_GROUP_TYPE,
     parentApi: dashboardApi,
     autoApplySelections$: new BehaviorSubject(true),
     ignoreParentSettings$: new BehaviorSubject(undefined),
-    controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
+    controlFetch$: (uuid: string) => {
+      if (!controlFetchMap.has(uuid)) {
+        controlFetchMap.set(uuid, new BehaviorSubject<ControlFetchContext>({}));
+      }
+      return controlFetchMap.get(uuid);
+    },
     allowExpensiveQueries$: new BehaviorSubject(true),
     lastSavedStateForChild$: (childId: string) => controlStateMap[childId] ?? of(undefined),
     getLastSavedStateForChild: (childId: string) => {

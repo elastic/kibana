@@ -19,6 +19,15 @@ export interface AlertSuppressionUsage {
   does_not_suppress_missing_fields: number;
 }
 
+export interface ResponseActionsUsage {
+  enabled: number;
+  disabled: number;
+  response_actions: {
+    endpoint: number;
+    osquery: number;
+  };
+}
+
 export interface FeatureTypeUsage {
   enabled: number;
   disabled: number;
@@ -30,18 +39,28 @@ export interface FeatureTypeUsage {
   notifications_disabled: number;
   legacy_investigation_fields: number;
   alert_suppression: AlertSuppressionUsage;
+  has_exceptions: number;
+  response_actions: ResponseActionsUsage;
 }
-
 export interface RulesTypeUsage {
   query: FeatureTypeUsage;
+  query_custom: FeatureTypeUsage;
   threshold: FeatureTypeUsage;
+  threshold_custom: FeatureTypeUsage;
   eql: FeatureTypeUsage;
+  eql_custom: FeatureTypeUsage;
   machine_learning: FeatureTypeUsage;
+  machine_learning_custom: FeatureTypeUsage;
   threat_match: FeatureTypeUsage;
+  threat_match_custom: FeatureTypeUsage;
   new_terms: FeatureTypeUsage;
+  new_terms_custom: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
+  elastic_customized_total: FeatureTypeUsage;
+  elastic_noncustomized_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
   esql: FeatureTypeUsage;
+  esql_custom: FeatureTypeUsage;
 }
 
 export interface SpacesUsage {
@@ -63,6 +82,7 @@ export interface RuleMetric {
   rule_version: number;
   enabled: boolean;
   elastic_rule: boolean;
+  is_customized: boolean;
   created_on: string;
   updated_on: string;
   alert_count_daily: number;
@@ -74,6 +94,10 @@ export interface RuleMetric {
   has_alert_suppression_per_time_period: boolean;
   has_alert_suppression_missing_fields_strategy_do_not_suppress: boolean;
   alert_suppression_fields_count: number;
+  has_exceptions: boolean;
+  has_response_actions: boolean;
+  has_response_actions_endpoint: boolean;
+  has_response_actions_osquery: boolean;
 }
 
 /**

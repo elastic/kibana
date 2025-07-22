@@ -892,24 +892,6 @@
           },
           {
             "parentPluginId": "features",
-            "id": "def-public.KibanaFeatureConfig.reserved",
-            "type": "Object",
-            "tags": [
-              "private"
-            ],
-            "label": "reserved",
-            "description": [],
-            "signature": [
-              "{ description: string; privileges: readonly ",
-              "ReservedKibanaPrivilege",
-              "[]; } | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
             "id": "def-public.KibanaFeatureConfig.hidden",
             "type": "CompoundType",
             "tags": [],
@@ -3158,24 +3140,6 @@
           },
           {
             "parentPluginId": "features",
-            "id": "def-server.KibanaFeatureConfig.reserved",
-            "type": "Object",
-            "tags": [
-              "private"
-            ],
-            "label": "reserved",
-            "description": [],
-            "signature": [
-              "{ description: string; privileges: readonly ",
-              "ReservedKibanaPrivilege",
-              "[]; } | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
             "id": "def-server.KibanaFeatureConfig.hidden",
             "type": "CompoundType",
             "tags": [],
@@ -4770,24 +4734,6 @@
             ],
             "signature": [
               "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "features",
-            "id": "def-common.KibanaFeatureConfig.reserved",
-            "type": "Object",
-            "tags": [
-              "private"
-            ],
-            "label": "reserved",
-            "description": [],
-            "signature": [
-              "{ description: string; privileges: readonly ",
-              "ReservedKibanaPrivilege",
-              "[]; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/features/common/kibana_feature.ts",
             "deprecated": false,

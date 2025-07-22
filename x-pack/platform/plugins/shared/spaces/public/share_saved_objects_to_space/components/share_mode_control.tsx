@@ -63,7 +63,7 @@ const CANNOT_CHANGE_TOOLTIP = (
       { defaultMessage: 'You need additional privileges to change this option.' }
     )}
     position="left"
-    type="iInCircle"
+    type="info"
   />
 );
 
@@ -81,7 +81,7 @@ const ALL_SPACES_PROHIBITED_TOOLTIP = (
       }
     )}
     position="left"
-    type="iInCircle"
+    type="info"
   />
 );
 
@@ -116,7 +116,7 @@ export const ShareModeControl = (props: Props) => {
       <EuiFlexItem grow={false}>
         <EuiCallOut
           size="s"
-          iconType="help"
+          iconType="question"
           title={
             <FormattedMessage
               id="xpack.spaces.shareToSpace.privilegeWarningTitle"

@@ -552,7 +552,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
-        options: { force },
+        options: { force, validateUniqueName: true },
       });
 
       spaceId = spaceIds[0];

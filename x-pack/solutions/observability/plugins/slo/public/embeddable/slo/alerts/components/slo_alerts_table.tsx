@@ -147,6 +147,7 @@ export const useSloAlertsQuery = (
 };
 
 export function SloAlertsTable({
+  deps: { data, http, notifications, fieldFormats, application, licensing, cases, settings },
   slos,
   timeRange,
   onLoaded,
@@ -173,6 +174,16 @@ export function SloAlertsTable({
         if (onLoaded) {
           onLoaded();
         }
+      }}
+      services={{
+        data,
+        http,
+        notifications,
+        fieldFormats,
+        application,
+        licensing,
+        cases,
+        settings,
       }}
     />
   );

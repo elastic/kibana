@@ -329,6 +329,42 @@ describe('Field', () => {
         expect(getByText('Custom setting')).toBeInTheDocument();
       });
 
+      it('should render technical preview badge if it is technical preview', () => {
+        const { getByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting: { ...setting, technicalPreview: true },
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(getByText('Technical preview')).toBeInTheDocument();
+      });
+
+      it('should NOT render technical preview badge if the technicalPreview is false or unspecified', () => {
+        const { queryByText } = render(
+          wrap(
+            <FieldRow
+              field={getFieldDefinition({
+                id,
+                setting,
+                params: { isCustom: true },
+              })}
+              onFieldChange={handleChange}
+              isSavingEnabled={true}
+            />
+          )
+        );
+
+        expect(queryByText('Technical preview')).not.toBeInTheDocument();
+      });
+
       it('should render unsaved value if there are unsaved changes', () => {
         const { getByTestId, getByAltText } = render(
           wrap(

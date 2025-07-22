@@ -27,14 +27,17 @@ export class TheHiveSimulator extends Simulator {
     if (this.returnError) {
       return TheHiveSimulator.sendErrorResponse(response);
     }
-
-    return TheHiveSimulator.sendResponse(response);
+    const pathName = request.url!;
+    return TheHiveSimulator.sendResponse(
+      response,
+      pathName.includes('case') ? theHiveCaseSuccessResponse : theHiveAlertSuccessResponse
+    );
   }
 
-  private static sendResponse(response: http.ServerResponse) {
+  private static sendResponse(response: http.ServerResponse, data: any) {
     response.statusCode = 201;
     response.setHeader('Content-Type', 'application/json');
-    response.end(JSON.stringify(theHiveSuccessResponse, null, 4));
+    response.end(JSON.stringify(data, null, 4));
   }
 
   private static sendErrorResponse(response: http.ServerResponse) {
@@ -44,7 +47,7 @@ export class TheHiveSimulator extends Simulator {
   }
 }
 
-export const theHiveSuccessResponse = {
+export const theHiveCaseSuccessResponse = {
   _id: '~172064',
   _type: 'Case',
   _createdBy: 'user1@thehive.local',
@@ -93,6 +96,34 @@ export const theHiveSuccessResponse = {
   ],
   extraData: {},
   newDate: 1712128153029,
+  timeToDetect: 0,
+};
+
+export const theHiveAlertSuccessResponse = {
+  _id: '~245821592',
+  _type: 'Alert',
+  _createdBy: 'user1@thehive.local',
+  _createdAt: 1750411773815,
+  type: 'type',
+  source: 'source',
+  sourceRef: 'sourceRef',
+  title: 'title',
+  description: 'description',
+  severity: 1,
+  severityLabel: 'LOW',
+  date: 1750411773798,
+  tags: ['tags1', 'tags2'],
+  tlp: 2,
+  tlpLabel: 'AMBER',
+  pap: 2,
+  papLabel: 'AMBER',
+  follow: true,
+  customFields: [],
+  observableCount: 3,
+  status: 'New',
+  stage: 'New',
+  extraData: {},
+  newDate: 1750411773800,
   timeToDetect: 0,
 };
 

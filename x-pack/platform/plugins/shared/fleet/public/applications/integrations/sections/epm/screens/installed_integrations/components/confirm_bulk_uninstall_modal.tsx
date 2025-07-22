@@ -70,7 +70,7 @@ export const ConfirmBulkUninstallModal: React.FunctionComponent<{
     >
       <EuiCallOut
         color="danger"
-        iconType="iInCircle"
+        iconType="info"
         title={i18n.translate('xpack.fleet.installedIntegrations.bulkUninstallModal.calloutTitle', {
           defaultMessage: 'This action cannot be undone.',
         })}

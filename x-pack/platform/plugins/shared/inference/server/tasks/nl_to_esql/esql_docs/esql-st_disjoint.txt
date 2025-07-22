@@ -1,6 +1,6 @@
 # ST_DISJOINT
 
-The ST_DISJOINT function checks if two geometries or geometry columns are disjoint, meaning they do not intersect. This function is the inverse of the ST_INTERSECTS function. In mathematical terms, if A and B are two geometries, ST_Disjoint(A, B) is true if and only if the intersection of A and B is empty.
+Determines whether two geometries or geometry columns are disjoint. This is the inverse of the `ST_INTERSECTS` function. Mathematically, two geometries are disjoint if their intersection is empty: `ST_Disjoint(A, B) ⇔ A ⋂ B = ∅`.
 
 ## Syntax
 
@@ -10,13 +10,17 @@ The ST_DISJOINT function checks if two geometries or geometry columns are disjoi
 
 #### geomA
 
-This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`.
+Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 #### geomB
 
-This is an expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`.
+Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must have the same coordinate system as the first. Combining `geo_*` and `cartesian_*` parameters is not supported.
 
 ## Examples
+
+Filtering disjoint geometries
+
+The following query filters rows where the `city_boundary` geometry is disjoint from a specified polygon. It keeps only the specified columns in the result.
 
 ```esql
 FROM airport_city_boundaries
@@ -32,4 +36,4 @@ FROM airport_city_boundaries
 
 ## Limitations
 
-It's important to note that the second parameter must have the same coordinate system as the first. This means you cannot combine `geo_*` and `cartesian_*` parameters.
+- The two geometries must share the same coordinate system. For example, you cannot mix `geo_*` and `cartesian_*` types in the same function call.

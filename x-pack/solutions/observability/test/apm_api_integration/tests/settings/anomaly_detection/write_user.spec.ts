@@ -58,6 +58,12 @@ export default function apiTest({ getService }: FtrProviderContext) {
         });
 
         describe('when calling create endpoint', () => {
+          beforeEach(async () => {
+            const res = await getJobs({ user });
+            const jobIds = res.body.jobs.map((job: any) => job.jobId);
+            await deleteJobs(jobIds);
+          });
+
           it('creates two jobs', async () => {
             await createJobs(['production', 'staging'], { user });
 
@@ -69,19 +75,22 @@ export default function apiTest({ getService }: FtrProviderContext) {
             });
           });
 
-          describe('with existing ML jobs', () => {
-            before(async () => {
-              await createJobs(['production', 'staging'], { user });
-            });
-            it('skips duplicate job creation', async () => {
-              await createJobs(['production', 'test'], { user });
+          it('creates job with long environment name', async () => {
+            const longEnvironmentName =
+              'Production: This Is A Deliberately Long Environment Name To Test Limits - 1234567890';
+            const { status } = await createJobs([longEnvironmentName], { user });
+            expect(status).to.be(200);
+          });
 
-              const { body } = await getJobs({ user });
-              expect(countBy(body.jobs, 'environment')).to.eql({
-                production: 1,
-                staging: 1,
-                test: 1,
-              });
+          it('skips duplicate job creation', async () => {
+            await createJobs(['production', 'staging'], { user });
+            await createJobs(['production', 'test'], { user });
+
+            const { body } = await getJobs({ user });
+            expect(countBy(body.jobs, 'environment')).to.eql({
+              production: 1,
+              staging: 1,
+              test: 1,
             });
           });
         });

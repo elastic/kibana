@@ -11,7 +11,6 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverAppStateContainer } from '../state_management/discover_app_state_container';
@@ -37,6 +36,7 @@ import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
+import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -49,6 +49,7 @@ export interface CommonFetchParams {
   searchSessionId: string;
   services: DiscoverServices;
   scopedProfilesManager: ScopedProfilesManager;
+  scopedEbtManager: ScopedDiscoverEBTManager;
 }
 
 /**
@@ -72,6 +73,7 @@ export function fetchAll(
     appStateContainer,
     services,
     scopedProfilesManager,
+    scopedEbtManager,
     inspectorAdapters,
     savedSearch,
     abortController,
@@ -123,19 +125,14 @@ export function fetchAll(
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
-    const startTime = window.performance.now();
+    const fetchAllRequestOnlyTracker = scopedEbtManager.trackPerformanceEvent(
+      'discoverFetchAllRequestsOnly'
+    );
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
       .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        if (services.analytics) {
-          const duration = window.performance.now() - startTime;
-          reportPerformanceMetricEvent(services.analytics, {
-            eventName: 'discoverFetchAllRequestsOnly',
-            duration,
-            meta: { fetchType },
-          });
-        }
+        fetchAllRequestOnlyTracker.reportEvent({ meta: { fetchType } });
 
         if (isEsqlQuery) {
           const fetchStatus =

@@ -16,12 +16,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
+import { Timestamp } from '@kbn/apm-ui-shared';
 import type { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import type { ITableColumn } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
-import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 
 interface Props {
   items: CustomLink[];
@@ -56,7 +56,9 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
         defaultMessage: 'Last updated',
       }),
       sortable: true,
-      render: (value: number) => <TimestampTooltip time={value} timeUnit="minutes" />,
+      render: (value: number) => (
+        <Timestamp timestamp={value} timeUnit="minutes" renderMode="tooltip" />
+      ),
     },
     {
       width: '48px',

@@ -106,7 +106,7 @@ export const SerialDiffAgg = (props) => {
                       defaultMessage="The historical bucket to subtract from the current value. Must be a positive, non-zero integer"
                     />
                   }
-                  type="questionInCircle"
+                  type="question"
                 />
               </>
             }

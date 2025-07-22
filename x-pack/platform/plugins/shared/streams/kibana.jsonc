@@ -23,6 +23,7 @@
       "usageCollection"
     ],
     "optionalPlugins": ["cloud", "serverless"],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

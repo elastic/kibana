@@ -31,6 +31,15 @@ export const graphRequestSchema = schema.object({
   }),
 });
 
+export const DOCUMENT_TYPE_EVENT = 'event' as const;
+export const DOCUMENT_TYPE_ALERT = 'alert' as const;
+
+export const nodeDocumentDataSchema = schema.object({
+  id: schema.string(),
+  type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
+  index: schema.maybe(schema.string()),
+});
+
 export const graphResponseSchema = () =>
   schema.object({
     nodes: schema.arrayOf(
@@ -42,10 +51,17 @@ export const graphResponseSchema = () =>
     ),
   });
 
-export const colorSchema = schema.oneOf([
+export const nodeColorSchema = schema.oneOf([
   schema.literal('primary'),
   schema.literal('danger'),
   schema.literal('warning'),
+]);
+
+export const edgeColorSchema = schema.oneOf([
+  schema.literal('primary'),
+  schema.literal('danger'),
+  schema.literal('warning'),
+  schema.literal('subdued'),
 ]);
 
 export const nodeShapeSchema = schema.oneOf([
@@ -67,7 +83,7 @@ export const nodeBaseDataSchema = schema.object({
 export const entityNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
-    color: colorSchema,
+    color: nodeColorSchema,
     shape: schema.oneOf([
       schema.literal('hexagon'),
       schema.literal('pentagon'),
@@ -75,6 +91,7 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('rectangle'),
       schema.literal('diamond'),
     ]),
+    documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);
 
@@ -90,7 +107,8 @@ export const labelNodeDataSchema = schema.allOf([
   schema.object({
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
-    color: colorSchema,
+    color: nodeColorSchema,
+    documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);
 
@@ -98,6 +116,6 @@ export const edgeDataSchema = schema.object({
   id: schema.string(),
   source: schema.string(),
   target: schema.string(),
-  color: colorSchema,
+  color: edgeColorSchema,
   type: schema.maybe(schema.oneOf([schema.literal('solid'), schema.literal('dashed')])),
 });

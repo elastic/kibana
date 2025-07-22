@@ -59,20 +59,29 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
       },
       method: 'GET',
     };
-    const url = `${kibanaUrl}/api/fleet/remote_synced_integrations/status`;
-    logger.debug(`Fetching ${kibanaUrl}/api/fleet/remote_synced_integrations/status`);
+    const url = `${kibanaUrl.replace(/\/$/, '')}/api/fleet/remote_synced_integrations/status`;
+    logger.debug(`Fetching ${url}`);
 
     let body;
     let errorMessage;
-    const res = await fetch(url, options);
+    let res;
+
     try {
+      res = await fetch(url, options);
       body = await res.json();
     } catch (error) {
-      errorMessage = `GET ${url} failed with status ${res.status}. ${error.message}`;
+      if (res) {
+        errorMessage = `GET ${url} failed with status ${res.status}. ${error.message}`;
+      } else {
+        errorMessage = `GET ${url} failed with error: ${error.message}`;
+      }
     }
 
     if (body?.statusCode && body?.message) {
       errorMessage = `GET ${url} failed with status ${body.statusCode}. ${body.message}`;
+    }
+    if (body?.ok === false && body?.message) {
+      errorMessage = `GET ${url} failed with status ${res?.status}: ${body.message}`;
     }
 
     return {

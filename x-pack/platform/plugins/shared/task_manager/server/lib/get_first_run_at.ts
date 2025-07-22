@@ -24,11 +24,19 @@ export function getFirstRunAt({
 
   if (taskInstance.schedule?.rrule && rruleHasFixedTime(taskInstance.schedule.rrule)) {
     try {
-      const rrule = new RRule({
-        ...taskInstance.schedule.rrule,
-        bysecond: [0],
-        dtstart: now,
-      });
+      const rrule = taskInstance.schedule.rrule.dtstart
+        ? new RRule({
+            ...taskInstance.schedule.rrule,
+            // when "dtstart" is provided, we use as-is with no overrides
+            dtstart: new Date(taskInstance.schedule.rrule.dtstart),
+          })
+        : new RRule({
+            ...taskInstance.schedule.rrule,
+            // when "dtstart" is not provided, we use the current time as the start but
+            // override the seconds to 0 to ensure the first run is at the start of the minute
+            dtstart: now,
+            bysecond: [0],
+          });
       return rrule.after(now)?.toISOString() || nowString;
     } catch (e) {
       logger.error(`runAt for the rrule with fixed time could not be calculated: ${e}`);

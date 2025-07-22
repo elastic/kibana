@@ -56,6 +56,7 @@ import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { GroupObj } from '../components/job_selector/job_selector';
+import type { TableSeverityState } from '../components/controls/select_severity';
 
 export interface ExplorerJob {
   id: string;
@@ -488,7 +489,7 @@ export async function loadAnomaliesTableData(
   bounds: Required<TimeRangeBounds>,
   fieldName: string,
   tableInterval: string,
-  tableSeverity: number,
+  tableSeverity: TableSeverityState,
   influencersFilterQuery?: InfluencersFilterQuery
 ): Promise<AnomaliesTableData> {
   const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
@@ -503,7 +504,7 @@ export async function loadAnomaliesTableData(
         [],
         influencers,
         tableInterval,
-        tableSeverity,
+        tableSeverity.val,
         timeRange.earliestMs,
         timeRange.latestMs,
         dateFormatTz,

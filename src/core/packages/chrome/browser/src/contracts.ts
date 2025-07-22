@@ -151,11 +151,6 @@ export interface ChromeStart {
   getHelpSupportUrl$(): Observable<string>;
 
   /**
-   * Get an observable of the current locked state of the nav drawer.
-   */
-  getIsNavDrawerLocked$(): Observable<boolean>;
-
-  /**
    * Set the banner that will appear on top of the chrome header.
    *
    * @remarks Using `undefined` when invoking this API will remove the banner.

@@ -36,7 +36,7 @@ export const LogstashInstructions = ({ isSSLEnabled }: LogstashInstructionsProps
 
   return (
     <CollapsibleCallout
-      iconType="iInCircle"
+      iconType="info"
       title={
         <FormattedMessage
           id="xpack.fleet.settings.logstashInstructions.calloutTitle"

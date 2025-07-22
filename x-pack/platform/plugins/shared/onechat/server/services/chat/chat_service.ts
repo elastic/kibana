@@ -24,20 +24,18 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
+  AgentMode,
   type RoundInput,
   type Conversation,
   type ChatEvent,
   type ChatAgentEvent,
   type RoundCompleteEvent,
-  OneChatDefaultAgentId,
-  toSerializedAgentIdentifier,
-  AgentIdentifier,
-  SerializedAgentIdentifier,
+  oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isOnechatError,
   createInternalError,
 } from '@kbn/onechat-common';
-import type { ExecutableConversationalAgent } from '@kbn/onechat-server';
+import { withConverseSpan, getCurrentTraceId } from '../../tracing';
 import { getConnectorList, getDefaultConnector } from '../runner/utils';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -67,7 +65,11 @@ export interface ChatConverseParams {
    * Id of the conversational agent to converse with.
    * If empty, will use the default agent id.
    */
-  agentId?: AgentIdentifier;
+  agentId?: string;
+  /**
+   * Agent mode to use for this round of conversation.
+   */
+  mode?: AgentMode;
   /**
    * Id of the genAI connector to use.
    * If empty, will use the default connector.
@@ -114,94 +116,106 @@ class ChatServiceImpl implements ChatService {
   }
 
   converse({
-    agentId = OneChatDefaultAgentId,
+    agentId = oneChatDefaultAgentId,
+    mode = AgentMode.normal,
     conversationId,
     connectorId,
     request,
     nextInput,
-  }: {
-    agentId?: string;
-    connectorId?: string;
-    conversationId?: string;
-    nextInput: RoundInput;
-    request: KibanaRequest;
-  }): Observable<ChatEvent> {
+  }: ChatConverseParams): Observable<ChatEvent> {
     const isNewConversation = !conversationId;
 
-    return forkJoin({
-      conversationClient: defer(async () => this.conversationService.getScopedClient({ request })),
-      agent: defer(async () =>
-        this.agentService.registry.asPublicRegistry().get({ agentId, request })
-      ),
-      chatModel: defer(async () => {
-        if (connectorId) {
-          return connectorId;
-        }
-        const connectors = await getConnectorList({ actions: this.actions, request });
-        const defaultConnector = getDefaultConnector({ connectors });
-        return defaultConnector.connectorId;
-      }).pipe(
-        switchMap((selectedConnectorId) => {
-          return this.inference.getChatModel({
-            request,
-            connectorId: selectedConnectorId,
-            chatModelOptions: {},
-          });
-        })
-      ),
-    }).pipe(
-      switchMap(({ conversationClient, chatModel, agent }) => {
-        const agentIdentifier = toSerializedAgentIdentifier({
-          agentId: agent.agentId,
-          providerId: agent.providerId,
-        });
-
-        const conversation$ = getConversation$({
-          agentId: agentIdentifier,
-          conversationId,
-          conversationClient,
-        });
-        const agentEvents$ = getExecutionEvents$({ agent, conversation$, nextInput });
-
-        const title$ = isNewConversation
-          ? generatedTitle$({ chatModel, conversation$, nextInput })
-          : conversation$.pipe(
-              switchMap((conversation) => {
-                return of(conversation.title);
-              })
-            );
-
-        const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
-
-        const saveOrUpdateAndEmit$ = isNewConversation
-          ? createConversation$({
-              agentId: agentIdentifier,
-              conversationClient,
-              title$,
-              roundCompletedEvents$,
-            })
-          : updateConversation$({
-              conversationClient,
-              conversation$,
-              title$,
-              roundCompletedEvents$,
+    return withConverseSpan({ agentId, mode, conversationId }, (span) => {
+      return forkJoin({
+        conversationClient: defer(async () =>
+          this.conversationService.getScopedClient({ request })
+        ),
+        agent: defer(async () => {
+          const agentClient = await this.agentService.getScopedClient({ request });
+          return agentClient.get(agentId);
+        }),
+        chatModel: defer(async () => {
+          let selectedConnectorId = connectorId;
+          if (!selectedConnectorId) {
+            const connectors = await getConnectorList({ actions: this.actions, request });
+            const defaultConnector = getDefaultConnector({ connectors });
+            selectedConnectorId = defaultConnector.connectorId;
+          }
+          span?.setAttribute('elastic.connector.id', selectedConnectorId);
+          return selectedConnectorId;
+        }).pipe(
+          switchMap((selectedConnectorId) => {
+            return this.inference.getChatModel({
+              request,
+              connectorId: selectedConnectorId,
+              chatModelOptions: {},
             });
+          })
+        ),
+      }).pipe(
+        switchMap(({ conversationClient, chatModel, agent }) => {
+          const conversation$ = getConversation$({
+            agentId,
+            conversationId,
+            conversationClient,
+          });
+          const agentEvents$ = getExecutionEvents$({
+            agentId,
+            request,
+            mode,
+            conversation$,
+            nextInput,
+            agentService: this.agentService,
+          });
 
-        return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
-          catchError((err) => {
-            this.logger.error(`Error executing agent: ${err.stack}`);
-            return throwError(() =>
-              isOnechatError(err)
-                ? err
-                : createInternalError(`Error executing agent: ${err.message}`, {
+          const title$ = isNewConversation
+            ? generatedTitle$({ chatModel, conversation$, nextInput })
+            : conversation$.pipe(
+                switchMap((conversation) => {
+                  return of(conversation.title);
+                })
+              );
+
+          const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
+
+          const saveOrUpdateAndEmit$ = isNewConversation
+            ? createConversation$({
+                agentId,
+                conversationClient,
+                title$,
+                roundCompletedEvents$,
+              })
+            : updateConversation$({
+                conversationClient,
+                conversation$,
+                title$,
+                roundCompletedEvents$,
+              });
+
+          return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
+            catchError((err) => {
+              this.logger.error(`Error executing agent: ${err.stack}`);
+              return throwError(() => {
+                const traceId = getCurrentTraceId();
+                if (isOnechatError(err)) {
+                  err.meta = {
+                    ...err.meta,
+                    traceId,
+                  };
+                  return err;
+                } else {
+                  return createInternalError(`Error executing agent: ${err.message}`, {
                     statusCode: 500,
-                  })
-            );
-          }),
-          shareReplay()
-        );
-      })
-    );
+                    traceId,
+                  });
+                }
+              });
+            }),
+            shareReplay()
+          );
+        })
+      );
+    });
   }
 }
 
@@ -236,7 +250,7 @@ const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -248,7 +262,7 @@ const createConversation$ = ({
     switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.create({
         title,
-        agentId,
+        agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
       });
     }),
@@ -291,20 +305,29 @@ const updateConversation$ = ({
 };
 
 const getExecutionEvents$ = ({
+  agentId,
+  request,
+  agentService,
   conversation$,
+  mode,
   nextInput,
-  agent,
 }: {
+  agentId: string;
+  request: KibanaRequest;
+  agentService: AgentsServiceStart;
   conversation$: Observable<Conversation>;
+  mode: AgentMode;
   nextInput: RoundInput;
-  agent: ExecutableConversationalAgent;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
     switchMap((conversation) => {
       return new Observable<ChatAgentEvent>((observer) => {
-        agent
+        agentService
           .execute({
+            request,
+            agentId,
             agentParams: {
+              agentMode: mode,
               nextInput,
               conversation: conversation.rounds,
             },
@@ -324,7 +347,7 @@ const getExecutionEvents$ = ({
         return () => {};
       });
     }),
-    shareReplay(1)
+    shareReplay()
   );
 };
 
@@ -333,7 +356,7 @@ const getConversation$ = ({
   conversationId,
   conversationClient,
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   conversationId: string | undefined;
   conversationClient: ConversationClient;
 }): Observable<Conversation> => {
@@ -346,18 +369,14 @@ const getConversation$ = ({
   }).pipe(shareReplay());
 };
 
-const placeholderConversation = ({
-  agentId,
-}: {
-  agentId: SerializedAgentIdentifier;
-}): Conversation => {
+const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
   return {
     id: uuidv4(),
     title: 'New conversation',
-    agentId,
+    agent_id: agentId,
     rounds: [],
-    updatedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
     user: {
       id: 'unknown',
       username: 'unknown',

@@ -9,7 +9,7 @@ import rison from '@kbn/rison';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { SetupServerReturn, setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
@@ -31,14 +31,13 @@ import { ReportingRequestHandlerContext } from '../../../../types';
 import { EventTracker } from '../../../../usage';
 import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
 
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
-
 describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
+  let registerRouteHandlerContext: SetupServerReturn['registerRouteHandlerContext'];
   let usageCounter: IUsageCounter;
   let eventTracker: EventTracker;
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
   let mockExportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let store: ReportingStore;
@@ -59,8 +58,8 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
   );
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+    ({ server, createRouter, registerRouteHandlerContext } = await setupServer(reportingSymbol));
+    registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
       () => reportingMock.createStart()
@@ -68,7 +67,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     const mockSetupDeps = createMockPluginSetup({
       security: { license: { isEnabled: () => true, getFeature: () => true } },
-      router: httpSetup.createRouter(''),
+      router: createRouter(''),
     });
 
     const mockStartDeps = await createMockPluginStart(
@@ -125,7 +124,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .expect(400)
       .then(({ body }) =>
@@ -140,7 +139,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2?jobParams=foo:`)
       .expect(400)
       .then(({ body }) => expect(body.message).toMatchInlineSnapshot('"invalid rison: foo:"'));
@@ -151,7 +150,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: `foo:` })
       .expect(400)
@@ -163,7 +162,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/TonyHawksProSkater2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(400)
@@ -177,7 +176,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
@@ -193,7 +192,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({ jobParams: rison.encode({ title: `abc` }) })
       .expect(500);
@@ -204,7 +203,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({
         jobParams: rison.encode({
@@ -245,7 +244,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
       await server.start();
 
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
         .send({
           jobParams: rison.encode({
@@ -269,7 +268,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener)
+    await supertest(server.listener)
       .post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/printablePdfV2`)
       .send({
         jobParams: rison.encode({

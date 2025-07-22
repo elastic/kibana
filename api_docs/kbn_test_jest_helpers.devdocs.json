@@ -1131,14 +1131,6 @@
             "path": "x-pack/platform/plugins/private/index_lifecycle_management/integration_tests/edit_policy/init_test_bed.ts"
           },
           {
-            "plugin": "reporting",
-            "path": "x-pack/platform/plugins/private/reporting/public/management/__test__/report_listing.test.helpers.tsx"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/platform/plugins/private/reporting/public/management/__test__/report_listing.test.helpers.tsx"
-          },
-          {
             "plugin": "snapshotRestore",
             "path": "x-pack/platform/plugins/private/snapshot_restore/__jest__/client_integration/helpers/home.helpers.ts"
           },
@@ -1289,6 +1281,14 @@
           {
             "plugin": "remoteClusters",
             "path": "x-pack/platform/plugins/private/remote_clusters/__jest__/client_integration/add/remote_clusters_add.helpers.tsx"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/platform/plugins/private/reporting/public/management/__test__/report_listing.test.helpers.tsx"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/platform/plugins/private/reporting/public/management/__test__/report_listing.test.helpers.tsx"
           },
           {
             "plugin": "snapshotRestore",

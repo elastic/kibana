@@ -12,7 +12,8 @@
       "discover",
       "embeddable",
       "kibanaUtils",
-      "data"
+      "data",
+      "savedSearch"
     ]
   }
 }

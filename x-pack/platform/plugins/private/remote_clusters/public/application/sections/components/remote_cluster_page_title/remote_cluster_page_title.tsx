@@ -26,7 +26,7 @@ export const RemoteClusterPageTitle: React.FC<Props> = ({ title, description }) 
           flush="right"
           href={remoteClustersUrl}
           target="_blank"
-          iconType="help"
+          iconType="question"
           data-test-subj="remoteClusterDocsButton"
         >
           <FormattedMessage

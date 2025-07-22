@@ -24,7 +24,11 @@ import { isEmpty } from 'lodash';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
-import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+  syntheticsParamType,
+} from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
@@ -299,7 +303,7 @@ export class SyntheticsService {
 
     return await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
       {
-        type: syntheticsMonitorType,
+        type: [legacySyntheticsMonitorTypeSingle, syntheticsMonitorSavedObjectType],
         perPage: pageSize,
         namespaces: [ALL_SPACES_ID],
       }

@@ -108,7 +108,7 @@ export function Configuration({ onCreate, onCancel }: Props) {
                       }
                     )}
                   >
-                    <EuiIcon type="questionInCircle" />
+                    <EuiIcon type="question" />
                   </EuiToolTip>
                 }
               />

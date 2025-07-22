@@ -81,7 +81,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       const adapter = getObsAIAssistantConnectorAdapter();
       const params = adapter.buildActionParams({
         params: { connector: '.azure', message: 'hello' },
-        rule: { id: 'foo', name: 'bar', tags: [], consumer: '', producer: '' },
+        rule: { id: 'foo', name: 'bar', tags: [], consumer: '', producer: '', ruleTypeId: 'baz' },
         ruleUrl: 'http://myrule.com',
         spaceId: 'default',
         alerts: {
@@ -146,7 +146,7 @@ describe('observabilityAIAssistant rule_connector', () => {
     }) => {
       return adapter.buildActionParams({
         params,
-        rule: { id: 'foo', name: 'bar', tags: [], consumer: '', producer: '' },
+        rule: { id: 'foo', name: 'bar', tags: [], consumer: '', producer: '', ruleTypeId: 'baz' },
         spaceId: 'default',
         alerts: {
           all: { count: 1, data: [] },

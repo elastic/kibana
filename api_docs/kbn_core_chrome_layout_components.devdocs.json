@@ -94,6 +94,80 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-common.LayoutDebugOverlay",
+        "type": "Function",
+        "tags": [],
+        "label": "LayoutDebugOverlay",
+        "description": [
+          "\nA debug overlay component that visually outlines the main layout slots (banner, header, navigation, sidebar, etc.)\nusing colored rectangles. This is useful for development and debugging to understand the placement and sizing of layout regions.\n"
+        ],
+        "signature": [
+          "({ colors }: LayoutDebugOverlayProps) => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/layout_debug_overlay.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-components",
+            "id": "def-common.LayoutDebugOverlay.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ colors = {} }",
+            "description": [],
+            "signature": [
+              "LayoutDebugOverlayProps"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/layout_debug_overlay.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The rendered debug overlay as a fixed-position set of rectangles."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-common.SimpleDebugOverlay",
+        "type": "Function",
+        "tags": [],
+        "label": "SimpleDebugOverlay",
+        "description": [
+          "\nA minimal debug component for temporary overlays (sidebar, footer, banner, etc.)\nFills its parent container, with customizable background and text.\n"
+        ],
+        "signature": [
+          "({ label, background, color, style, children, }: SimpleDebugOverlayProps) => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/simple_debug_overlay.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-components",
+            "id": "def-common.SimpleDebugOverlay.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  label = 'Debug Overlay',\n  background = '#e6f4ff',\n  color = '#0099ff',\n  style = {},\n  children,\n}",
+            "description": [],
+            "signature": [
+              "SimpleDebugOverlayProps"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/simple_debug_overlay.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The rendered debug overlay."
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -118,7 +192,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "{ bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; navigationPanelWidth?: number | undefined; sidebarWidth?: number | undefined; sidebarPanelWidth?: number | undefined; }"
+              "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; navigationPanelWidth?: number | undefined; sidebarPanelWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
             "deprecated": false,
@@ -171,7 +245,7 @@
           "\nConfiguration for the layout."
         ],
         "signature": [
-          "{ bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; navigationPanelWidth?: number | undefined; sidebarWidth?: number | undefined; sidebarPanelWidth?: number | undefined; }"
+          "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; navigationPanelWidth?: number | undefined; sidebarPanelWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
         "deprecated": false,

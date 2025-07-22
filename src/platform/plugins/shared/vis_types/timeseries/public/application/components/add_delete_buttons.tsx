@@ -37,7 +37,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
     }
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={props.deleteTooltip}>
+        <EuiToolTip content={props.deleteTooltip} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj={`${testSubj}DeleteBtn`}
             aria-label={props.deleteTooltip}
@@ -55,7 +55,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
     }
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={props.addTooltip}>
+        <EuiToolTip content={props.addTooltip} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj={`${testSubj}AddBtn`}
             aria-label={props.addTooltip}
@@ -73,7 +73,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
     if (props.onClone && !props.disableAdd) {
       cloneBtn = (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={props.cloneTooltip}>
+          <EuiToolTip content={props.cloneTooltip} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj={`${testSubj}CloneBtn`}
               aria-label={props.cloneTooltip}
@@ -99,7 +99,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
 
       activatePanelBtn = (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={tooltip}>
+          <EuiToolTip content={tooltip} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj={`${testSubj}ActivatePanelBtn`}
               aria-label={tooltip}

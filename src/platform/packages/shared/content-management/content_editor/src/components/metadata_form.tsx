@@ -61,7 +61,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
   return (
     <EuiForm isInvalid={isSubmitted && !isValid} error={getErrors()} data-test-subj="metadataForm">
       <ContentEditorFlyoutWarningsCallOut warningMessages={getWarnings()} />
-      {isReadonly && <EuiCallOut size="s" title={readonlyReason} iconType="iInCircle" />}
+      {isReadonly && <EuiCallOut size="s" title={readonlyReason} iconType="info" />}
       <EuiFormRow
         label={i18n.translate('contentManagement.contentEditor.metadataForm.nameInputLabel', {
           defaultMessage: 'Name',

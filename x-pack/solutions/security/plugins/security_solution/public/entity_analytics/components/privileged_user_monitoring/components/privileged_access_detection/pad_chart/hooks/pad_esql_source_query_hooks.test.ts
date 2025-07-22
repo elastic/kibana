@@ -35,7 +35,7 @@ describe('the source queries for privileged access detection', () => {
             | LOOKUP JOIN .entity_analytics.monitoring.users-default ON user.name
             | RENAME event_timestamp AS @timestamp
             | WHERE user.is_privileged == true
-            | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, 100, "desc") by user.name
+            | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, 1, "desc") by user.name
             | WHERE user.is_privileged == true
             | SORT max_record_score DESC
             | KEEP user.name
@@ -82,7 +82,7 @@ describe('the source queries for privileged access detection', () => {
             | LOOKUP JOIN .entity_analytics.monitoring.users-default ON user.name
             | RENAME event_timestamp AS @timestamp
             | WHERE user.is_privileged == true
-            | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, 100, "desc") by user.name
+            | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, 1, "desc") by user.name
             | WHERE user.is_privileged == true
             | SORT max_record_score DESC
             | KEEP user.name

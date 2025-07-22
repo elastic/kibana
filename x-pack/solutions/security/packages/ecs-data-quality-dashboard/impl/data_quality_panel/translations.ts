@@ -78,10 +78,10 @@ export const DATA_QUALITY_SUBTITLE: string = i18n.translate(
 );
 
 export const DATA_QUALITY_SUGGESTED_USER_PROMPT = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.dataQualitySuggestedUserPrompt',
+  'securitySolutionPackages.ecsDataQualityDashboard.dataQualitySuggestedUserPromptV2',
   {
     defaultMessage:
-      'Explain the results above, and describe some options to fix incompatibilities.',
+      'Explain the ECS incompatibility results above, and describe some options to fix incompatibilities. In your explanation, include information about remapping fields, reindexing data, and modifying data ingestion pipelines. Also, describe how ES|QL can be used to identify and correct incompatible data, including examples of using RENAME, EVAL, DISSECT, GROK, and CASE functions.',
   }
 );
 

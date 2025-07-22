@@ -8,11 +8,16 @@
 import type { RulesTypeUsage, RuleMetric, FeatureTypeUsage } from '../types';
 import { getNotificationsEnabledDisabled } from './get_notifications_enabled_disabled';
 import { updateAlertSuppressionUsage } from './update_alert_suppression_usage';
+import { updateResponseActionsUsage } from './update_response_actions_usage';
 
 export interface UpdateTotalUsageOptions {
   detectionRuleMetric: RuleMetric;
   updatedUsage: RulesTypeUsage;
-  totalType: 'custom_total' | 'elastic_total';
+  totalType:
+    | 'custom_total'
+    | 'elastic_total'
+    | 'elastic_customized_total'
+    | 'elastic_noncustomized_total';
 }
 
 export const updateTotalUsage = ({
@@ -52,6 +57,13 @@ export const updateTotalUsage = ({
       ? updatedUsage[totalType].legacy_investigation_fields + 1
       : updatedUsage[totalType].legacy_investigation_fields,
     alert_suppression: updateAlertSuppressionUsage({
+      usage: updatedUsage[totalType],
+      detectionRuleMetric,
+    }),
+    has_exceptions: detectionRuleMetric.has_exceptions
+      ? updatedUsage[totalType].has_exceptions + 1
+      : updatedUsage[totalType].has_exceptions,
+    response_actions: updateResponseActionsUsage({
       usage: updatedUsage[totalType],
       detectionRuleMetric,
     }),

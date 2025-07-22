@@ -29,6 +29,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
+import { getCategorizationDataViewField } from '@kbn/aiops-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import type { PatternAnalysisEmbeddableRuntimeState } from './types';
@@ -43,7 +44,7 @@ import {
   DEFAULT_MINIMUM_TIME_RANGE_OPTION,
   type MinimumTimeRangeOption,
 } from '../../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
-import { getMessageField } from '../../components/log_categorization/utils';
+
 import { FieldSelector } from '../../components/log_categorization/log_categorization_for_embeddable/field_selector';
 import { SamplingPanel } from '../../components/log_categorization/sampling_menu/sampling_panel';
 
@@ -272,7 +273,7 @@ export const FormControls: FC<{
             setSelectedField(null);
             return;
           }
-          const { dataViewFields, messageField } = getMessageField(dataView);
+          const { dataViewFields, messageField } = getCategorizationDataViewField(dataView);
           setFields(dataViewFields);
           const field = dataViewFields.find((f) => f.name === formInput.fieldName);
           if (formInput.fieldName === undefined) {

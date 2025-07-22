@@ -37,6 +37,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -84,6 +91,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -123,6 +137,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -154,6 +175,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -181,6 +209,13 @@ describe('useHighlightedFields', () => {
       },
       'user.name': {
         values: ['user-name'],
+      },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
       },
     });
   });
@@ -223,6 +258,13 @@ describe('useHighlightedFields', () => {
         'user.name': {
           values: ['user-name'],
         },
+        'kibana.alert.ancestors.id': {
+          overrideField: {
+            field: 'Source event',
+            values: [],
+          },
+          values: ['ancestors-id'],
+        },
       });
     }
   );
@@ -262,6 +304,13 @@ describe('useHighlightedFields', () => {
       },
       'user.name': {
         values: ['user-name'],
+      },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
       },
     });
   });

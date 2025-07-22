@@ -42392,6 +42392,122 @@
         ]
       }
     },
+    "/api/fleet/space_settings": {
+      "get": {
+        "operationId": "get-fleet-space-settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allowed_namespace_prefixes": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "managed_by": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "allowed_namespace_prefixes"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get space settings",
+        "tags": [],
+        "x-state": "Generally available"
+      },
+      "put": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-all.",
+        "operationId": "put-fleet-space-settings",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "allowed_namespace_prefixes": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allowed_namespace_prefixes": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "managed_by": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "allowed_namespace_prefixes"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create space settings",
+        "tags": [],
+        "x-state": "Generally available"
+      }
+    },
     "/api/fleet/uninstall_tokens": {
       "get": {
         "description": "List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
@@ -45880,7 +45996,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -47992,7 +48107,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -49819,7 +49933,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -51678,7 +51791,6 @@
                                           "additionalProperties": false,
                                           "properties": {
                                             "query": {
-                                              "minLength": 1,
                                               "type": "string"
                                             }
                                           },
@@ -53507,7 +53619,6 @@
                                       "additionalProperties": false,
                                       "properties": {
                                         "query": {
-                                          "minLength": 1,
                                           "type": "string"
                                         }
                                       },
@@ -58169,7 +58280,6 @@
                                       "additionalProperties": false,
                                       "properties": {
                                         "query": {
-                                          "minLength": 1,
                                           "type": "string"
                                         }
                                       },
@@ -58338,7 +58448,6 @@
                     "additionalProperties": false,
                     "properties": {
                       "query": {
-                        "minLength": 1,
                         "type": "string"
                       }
                     },
@@ -58387,7 +58496,6 @@
             "name": "from",
             "required": true,
             "schema": {
-              "format": "date-time",
               "type": "string"
             }
           },
@@ -58396,7 +58504,6 @@
             "name": "to",
             "required": true,
             "schema": {
-              "format": "date-time",
               "type": "string"
             }
           },
@@ -58435,6 +58542,98 @@
         },
         "responses": {},
         "summary": "Read the significant events",
+        "tags": [
+          "streams"
+        ],
+        "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/significant_events/_preview": {
+      "post": {
+        "description": "Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "operationId": "post-streams-name-significant-events-preview",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bucketSize",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "query": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "kql": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "query": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "query"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "kql"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Preview significant events",
         "tags": [
           "streams"
         ],

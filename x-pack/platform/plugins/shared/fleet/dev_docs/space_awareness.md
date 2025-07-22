@@ -77,4 +77,4 @@ appContextService.getInternalUserSOClientWithoutSpaceExtension().find({
 
 ## Testing
 
-As we need the feature flag enabled there is a special test config for space awareness in `x-pack/test/fleet_api_integration/apis/space_awareness` it's important to have test coverage that entities that should only be accessible in a space are not accessible in a other one.
+As we need the feature flag enabled there is a special test config for space awareness in `x-pack/platform/test/fleet_api_integration/apis/space_awareness` it's important to have test coverage that entities that should only be accessible in a space are not accessible in a other one.

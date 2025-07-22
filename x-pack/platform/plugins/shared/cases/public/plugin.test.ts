@@ -22,6 +22,7 @@ import type { CasesPublicStartDependencies, CasesPublicSetupDependencies } from 
 import { CasesUiPlugin } from './plugin';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { CASE_PAGE_VIEW_EVENT_TYPE } from '../common/constants';
 
 function getConfig(overrides = {}) {
   return {
@@ -99,6 +100,17 @@ describe('Cases Ui Plugin', () => {
           },
         }
     `);
+    });
+
+    it('registers cases page view event type', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASE_PAGE_VIEW_EVENT_TYPE,
+          schema: expect.objectContaining({ owner: expect.objectContaining({ type: 'keyword' }) }),
+        })
+      );
     });
 
     it('should register kibana feature when stack is enabled', async () => {

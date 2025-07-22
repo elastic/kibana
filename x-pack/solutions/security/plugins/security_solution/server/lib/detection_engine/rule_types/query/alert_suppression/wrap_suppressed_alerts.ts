@@ -16,8 +16,8 @@ import {
 } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../../common/api/detection_engine/model/alerts';
 import type { SecuritySharedParams, SignalSource } from '../../types';
 import { transformHitToAlert } from '../../factories/utils/transform_hit_to_alert';
@@ -51,7 +51,7 @@ export const wrapSuppressedAlerts = ({
   sharedParams: SecuritySharedParams;
   suppressionBuckets: SuppressionBucket[];
   buildReasonMessage: BuildReasonMessage;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
   const { completeRule, spaceId } = sharedParams;
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
@@ -68,7 +68,7 @@ export const wrapSuppressedAlerts = ({
       ruleId: completeRule.alertId,
       spaceId,
     });
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
       sharedParams,
       doc: bucket.event,
       applyOverrides: true,

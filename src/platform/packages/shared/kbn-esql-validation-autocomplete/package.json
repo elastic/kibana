@@ -3,11 +3,5 @@
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
-  "sideEffects": false,
-  "scripts": {
-    "make:defs": "ts-node --transpileOnly ./scripts/generate_function_definitions.ts",
-    "postmake:defs": "yarn run lint:fix:generated",
-    "lint:fix:generated": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/generated",
-    "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.test.ts"
-  }
+  "sideEffects": false
 }

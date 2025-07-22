@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, useState } from 'react';
+import { isEqual } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -51,6 +51,10 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   });
   const latestVersion = agentsAvailableVersions?.items[0];
   const [errors, setErrors] = useState<string[]>([]);
+
+  const targetVersionsChanged = useMemo(() => {
+    return isEqual(targetVersions, agentPolicy.required_versions || []) === false;
+  }, [targetVersions, agentPolicy.required_versions]);
 
   const submitUpdateAgentPolicy = async () => {
     setIsLoading(true);
@@ -103,7 +107,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
       }
       onCancel={() => onClose(false)}
       onConfirm={onSubmit}
-      confirmButtonDisabled={isLoading || errors.length > 0}
+      confirmButtonDisabled={isLoading || errors.length > 0 || !targetVersionsChanged}
       cancelButtonText={
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.cancelButtonLabel"
@@ -243,7 +247,7 @@ const TargetVersionsRow: React.FunctionComponent<{
                 defaultMessage="Target agent version"
               />
               <EuiIconTip
-                type="iInCircle"
+                type="info"
                 content={
                   <FormattedMessage
                     data-test-subj="targetVersionTooltip"
@@ -274,7 +278,7 @@ const TargetVersionsRow: React.FunctionComponent<{
                 defaultMessage="% of agents to upgrade"
               />
               <EuiIconTip
-                type="iInCircle"
+                type="info"
                 title={'Rounding Applied'}
                 content={
                   <FormattedMessage

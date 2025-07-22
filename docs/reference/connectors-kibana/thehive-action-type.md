@@ -93,14 +93,14 @@ Source reference
 :   A source reference for the alert.
 
 Body
-:   A Json payload specifying additional parameter, such as observables and procedures. It can be populated using a predefined template or customized using the `Custom Template` option. For example:
+:   A Json payload specifying additional parameter, such as observables and procedures. For example:
 
     ```json
     {
       "observables": [
         {
           "dataType": "url",
-          "data": "http://example.org"
+          "data": "<EXAMPLE_URL>"
         }
       ],
       "procedures": [

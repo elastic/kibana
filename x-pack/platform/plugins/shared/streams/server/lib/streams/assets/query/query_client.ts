@@ -12,7 +12,6 @@ import { StreamQuery } from '@kbn/streams-schema';
 import { map, partition } from 'lodash';
 import pLimit from 'p-limit';
 import { QueryLink } from '../../../../../common/assets';
-import { StreamsConfig } from '../../../../../common/config';
 import { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetClient, getAssetLinkUuid } from '../asset_client';
 import { ASSET_ID, ASSET_TYPE } from '../fields';
@@ -32,31 +31,21 @@ function toQueryLink(query: StreamQuery, stream: string): QueryLink {
 }
 
 export class QueryClient {
-  private readonly isSignificantEventsEnabled: boolean;
-
   constructor(
     private readonly dependencies: {
       assetClient: AssetClient;
       rulesClient: RulesClient;
       logger: Logger;
-      config: StreamsConfig;
-    }
-  ) {
-    this.isSignificantEventsEnabled =
-      dependencies.config.experimental?.significantEventsEnabled ?? false;
-  }
+    },
+    private readonly isSignificantEventsEnabled: boolean = false
+  ) {}
 
   public async syncQueries(stream: string, queries: StreamQuery[]) {
     if (!this.isSignificantEventsEnabled) {
-      return await this.dependencies.assetClient.syncAssetList(
-        stream,
-        queries.map((query) => ({
-          [ASSET_ID]: query.id,
-          [ASSET_TYPE]: 'query' as const,
-          query,
-        })),
-        'query'
+      this.dependencies.logger.debug(
+        `Skipping syncQueries for stream "${stream}" because significant events feature is disabled.`
       );
+      return;
     }
 
     /**
@@ -112,27 +101,22 @@ export class QueryClient {
   }
 
   public async upsert(stream: string, query: StreamQuery) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.linkAsset(stream, {
-        [ASSET_ID]: query.id,
-        [ASSET_TYPE]: 'query',
-        query,
-      });
+      this.dependencies.logger.debug(
+        `Skipping upsert for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
     }
 
     await this.bulk(stream, [{ index: query }]);
   }
 
   public async delete(stream: string, queryId: string) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.unlinkAsset(stream, {
-        [ASSET_TYPE]: 'query',
-        [ASSET_ID]: queryId,
-      });
+      this.dependencies.logger.debug(
+        `Skipping delete for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
     }
 
     await this.bulk(stream, [{ delete: { id: queryId } }]);
@@ -142,33 +126,11 @@ export class QueryClient {
     stream: string,
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>
   ) {
-    const { assetClient } = this.dependencies;
-
     if (!this.isSignificantEventsEnabled) {
-      return await assetClient.bulk(
-        stream,
-        operations.map((operation) => {
-          if (operation.index) {
-            return {
-              index: {
-                asset: {
-                  [ASSET_TYPE]: 'query',
-                  [ASSET_ID]: operation.index.id,
-                  query: operation.index,
-                },
-              },
-            };
-          }
-          return {
-            delete: {
-              asset: {
-                [ASSET_TYPE]: 'query',
-                [ASSET_ID]: operation.delete!.id,
-              },
-            },
-          };
-        })
+      this.dependencies.logger.debug(
+        `Skipping bulk update for stream "${stream}" because significant events feature is disabled.`
       );
+      return;
     }
 
     const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);

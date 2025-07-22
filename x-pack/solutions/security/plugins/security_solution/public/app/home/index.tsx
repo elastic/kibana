@@ -24,7 +24,6 @@ import { useUpdateExecutionContext } from '../../common/hooks/use_update_executi
 import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
 import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
-import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
@@ -40,11 +39,15 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { pathname } = useLocation();
-  const sourcererScope = getScopeFromPath(pathname);
-  const { browserFields: oldBrowserFields } = useInitSourcerer(sourcererScope);
-  const { browserFields: experimentalBrowserFields } = useBrowserFields(sourcererScope);
+  const { browserFields: oldBrowserFields } = useInitSourcerer(getScopeFromPath(pathname, false));
+  const { browserFields: experimentalBrowserFields } = useBrowserFields(
+    getScopeFromPath(pathname, newDataViewPickerEnabled)
+  );
 
-  useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), sourcererScope);
+  useRestoreDataViewManagerStateFromURL(
+    useInitDataViewManager(),
+    getScopeFromPath(pathname, newDataViewPickerEnabled)
+  );
 
   useUrlState();
   useUpdateBrowserTitle();
@@ -73,7 +76,6 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
             </DragDropContextWrapper>
             <HelpMenu />
             <TopValuesPopover />
-            <AssistantOverlay />
           </>
         </TourContextProvider>
       </ConsoleManager>

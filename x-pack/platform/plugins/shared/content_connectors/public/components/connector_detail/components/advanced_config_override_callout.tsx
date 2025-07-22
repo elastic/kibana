@@ -19,7 +19,7 @@ export const AdvancedConfigOverrideCallout: React.FC = () => (
       'xpack.contentConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
       { defaultMessage: 'Configuration warning' }
     )}
-    iconType="iInCircle"
+    iconType="info"
     color="warning"
   >
     <FormattedMessage

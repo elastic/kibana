@@ -6,9 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { SEARCH_AI_LAKE_PACKAGES, type PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses, useGetPackagesQuery } from '@kbn/fleet-plugin/public';
-import { AI_FOR_SOC_INTEGRATIONS } from '../../../../common/constants';
 
 export interface UseFetchIntegrationsResult {
   /**
@@ -33,6 +32,7 @@ export interface UseFetchIntegrationsResult {
  * - microsoft_sentinel
  * - sentinel_one
  * - crowdstrike
+ * - elastic_security
  */
 export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
   // TODO this might need to be revisited once the integration make it out of prerelease
@@ -42,7 +42,7 @@ export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
   });
 
   const aiForSOCPackages: PackageListItem[] = useMemo(
-    () => (allPackages?.items || []).filter((pkg) => AI_FOR_SOC_INTEGRATIONS.includes(pkg.name)),
+    () => (allPackages?.items || []).filter((pkg) => SEARCH_AI_LAKE_PACKAGES.includes(pkg.name)),
     [allPackages]
   );
   const availablePackages: PackageListItem[] = useMemo(

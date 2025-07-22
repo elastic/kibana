@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { EntityCell } from './entity_cell';
 
 const defaultProps = {
@@ -18,17 +19,33 @@ const defaultProps = {
 
 describe('EntityCell', () => {
   test('Icons are displayed when filter, entityName, and entityValue are defined', () => {
-    const wrapper = mountWithIntl(<EntityCell {...defaultProps} />);
-    const icons = wrapper.find('EuiButtonIcon');
+    renderWithI18n(<EntityCell {...defaultProps} />);
 
-    expect(icons.length).toBe(2);
+    // Test for the presence of both add and remove filter buttons
+    const addFilterButton = screen.getByTestId(
+      `mlAnomaliesTableEntityCellAddFilterButton-${defaultProps.entityValue}`
+    );
+    const removeFilterButton = screen.getByTestId(
+      `mlAnomaliesTableEntityCellRemoveFilterButton-${defaultProps.entityValue}`
+    );
+
+    expect(addFilterButton).toBeInTheDocument();
+    expect(removeFilterButton).toBeInTheDocument();
   });
 
   test('Icons are not displayed when filter, entityName, or entityValue are undefined', () => {
     const propsUndefinedFilter = { ...defaultProps, filter: undefined };
-    const wrapper = mountWithIntl(<EntityCell {...propsUndefinedFilter} />);
-    const icons = wrapper.find('EuiButtonIcon');
+    renderWithI18n(<EntityCell {...propsUndefinedFilter} />);
 
-    expect(icons.length).toBe(0);
+    // Test that filter buttons are not present
+    const addFilterButton = screen.queryByTestId(
+      `mlAnomaliesTableEntityCellAddFilterButton-${defaultProps.entityValue}`
+    );
+    const removeFilterButton = screen.queryByTestId(
+      `mlAnomaliesTableEntityCellRemoveFilterButton-${defaultProps.entityValue}`
+    );
+
+    expect(addFilterButton).not.toBeInTheDocument();
+    expect(removeFilterButton).not.toBeInTheDocument();
   });
 });

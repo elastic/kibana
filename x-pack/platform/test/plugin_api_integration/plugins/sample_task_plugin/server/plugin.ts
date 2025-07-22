@@ -360,6 +360,36 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      normalLongRunningPriorityTask: {
+        title: 'Task used for testing long running priority claiming',
+        priority: TaskPriority.Low,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'normalLongRunningPriorityTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
+        }),
+      },
     });
 
     const taskWithTiming = {
