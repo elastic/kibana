@@ -172,8 +172,7 @@ async function getActions(
   options: ActionStatusOptions,
   namespace?: string
 ): Promise<ActionStatus[]> {
-  // can't use ES|QL because unmapped fields are not supported, e.g. data.version
-  // https://github.com/elastic/elasticsearch/issues/120072
+  // could access source fields in the ES|QL response with "METADATA _source"
   const query = {
     bool: {
       must_not: [
@@ -332,10 +331,6 @@ async function getPolicyChangeActions(
   | KEEP revision_idx, @timestamp, policy_id
   | LIMIT ${getPerPage(options)}`;
 
-  const agentPoliciesRes = await esClient.esql.query({
-    query: esqlQuery,
-  });
-
   interface AgentPolicyRevision {
     policyId: string;
     revision: number;
@@ -344,8 +339,14 @@ async function getPolicyChangeActions(
     agentsOnAtLeastThisRevision: number;
   }
 
-  const agentPolicies: { [key: string]: AgentPolicyRevision } = agentPoliciesRes.values.reduce(
-    (acc, curr) => {
+  let agentPolicies: { [key: string]: AgentPolicyRevision } = {};
+
+  try {
+    const agentPoliciesRes = await esClient.esql.query({
+      query: esqlQuery,
+    });
+
+    agentPolicies = agentPoliciesRes.values.reduce((acc, curr) => {
       const revision = curr[0] as number;
       const timestamp = curr[1] as string;
       const policyId = curr[2] as string;
@@ -357,9 +358,13 @@ async function getPolicyChangeActions(
         agentsOnAtLeastThisRevision: 0,
       };
       return acc;
-    },
-    {} as { [key: string]: AgentPolicyRevision }
-  );
+    }, {} as { [key: string]: AgentPolicyRevision });
+  } catch (err) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+      appContextService.getLogger().debug(err);
+    }
+    throw err;
+  }
 
   let agentsPerPolicyRevisionRes;
   let agentPolicyUpdateActions: ActionStatus[];
