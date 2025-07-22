@@ -188,7 +188,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                         switch (integration.pkgName) {
                           case 'system':
                             actionLinks =
-                              assetDetailsLocator !== undefined
+                              metricsOnboardingEnabled && assetDetailsLocator !== undefined
                                 ? [
                                     {
                                       id: 'inventory-host-details',
@@ -217,19 +217,68 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                       }),
                                     },
                                   ]
-                                : [];
+                                : [
+                                    {
+                                      id: 'inventory-host-details',
+                                      title: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsTitle',
+                                        {
+                                          defaultMessage: 'View and analyze system logs',
+                                        }
+                                      ),
+                                      label: i18n.translate(
+                                        'xpack.observability_onboarding.autoDetectPanel.systemLogsLabel',
+                                        {
+                                          defaultMessage: 'Explore logs',
+                                        }
+                                      ),
+                                      href:
+                                        logsLocator?.getRedirectUrl({
+                                          dataViewSpec: {
+                                            name: integration.pkgName,
+                                            title: `logs-system*`,
+                                            timeFieldName: '@timestamp',
+                                          },
+                                        }) ?? '',
+                                    },
+                                  ];
                             break;
                           default:
                             actionLinks =
-                              dashboardLocator !== undefined
+                              dashboardLocator !== undefined && logsLocator !== undefined
                                 ? integration.kibanaAssets
                                     .filter((asset) => asset.type === 'dashboard')
                                     .map((asset) => {
                                       const dashboard =
                                         DASHBOARDS[asset.id as keyof typeof DASHBOARDS];
-                                      const href = dashboardLocator.getRedirectUrl({
-                                        dashboardId: asset.id,
-                                      });
+
+                                      if (
+                                        dashboard.type === 'metrics' &&
+                                        !metricsOnboardingEnabled
+                                      ) {
+                                        return {
+                                          id: asset.id,
+                                          title: i18n.translate(
+                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDataDiscoverTitle',
+                                            {
+                                              defaultMessage: 'View and analyze your logs',
+                                            }
+                                          ),
+                                          label: i18n.translate(
+                                            'xpack.observability_onboarding.autoDetectPanel.exploreLogsDiscoverDataLabel',
+                                            {
+                                              defaultMessage: 'Explore logs',
+                                            }
+                                          ),
+                                          href: logsLocator.getRedirectUrl({
+                                            dataViewSpec: {
+                                              name: integration.pkgName,
+                                              title: `logs-${integration.pkgName}*`,
+                                              timeFieldName: '@timestamp',
+                                            },
+                                          }),
+                                        };
+                                      }
 
                                       return {
                                         id: asset.id,
@@ -263,7 +312,9 @@ export const AutoDetectPanel: FunctionComponent = () => {
                                                   defaultMessage: 'Explore logs data',
                                                 }
                                               ),
-                                        href,
+                                        href: dashboardLocator.getRedirectUrl({
+                                          dashboardId: asset.id,
+                                        }),
                                       };
                                     })
                                 : [];

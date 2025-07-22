@@ -572,6 +572,47 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const nameTitle = await testSubjects.find('playgroundName');
         expect(await nameTitle.getVisibleText()).to.be(name);
       },
+      async clickEditPlaygroundNameButton() {
+        await testSubjects.existOrFail('edit-playground-name-button');
+        await testSubjects.click('edit-playground-name-button');
+        await testSubjects.existOrFail('edit-playground-name-modal');
+      },
+      async setPlaygroundNameInEditModal(name: string) {
+        await testSubjects.existOrFail('edit-playground-name-modal');
+        await testSubjects.existOrFail('searchPlaygroundEditPlaygroundNameModalFieldText');
+        const nameInput = await testSubjects.find(
+          'searchPlaygroundEditPlaygroundNameModalFieldText'
+        );
+        await nameInput.clearValueWithKeyboard();
+        await nameInput.type(name);
+      },
+      async savePlaygroundNameInModal() {
+        await testSubjects.existOrFail('edit-playground-name-modal');
+        await testSubjects.existOrFail('searchPlaygroundEditPlaygroundNameModalSaveButton');
+        await testSubjects.click('searchPlaygroundEditPlaygroundNameModalSaveButton');
+        await testSubjects.missingOrFail('edit-playground-name-modal');
+      },
+      async expectUnSavedChangesBadegeExists() {
+        await testSubjects.existOrFail('playground-unsaved-changes-badge');
+      },
+      async expectUnSavedChangesBadegeNotExists() {
+        await testSubjects.missingOrFail('playground-unsaved-changes-badge');
+      },
+      async expectSavedPlaygroundButtonToExist() {
+        await testSubjects.existOrFail('saved-playground-save-button');
+      },
+      async expectSavedPlaygroundButtonToBeEnabled() {
+        await testSubjects.existOrFail('saved-playground-save-button');
+        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.be(true);
+      },
+      async expectSavedPlaygroundButtonToBeDisabled() {
+        await testSubjects.existOrFail('saved-playground-save-button');
+        expect(await testSubjects.isEnabled('saved-playground-save-button')).to.be(false);
+      },
+      async clickSavedPlaygroundSaveButton() {
+        await testSubjects.existOrFail('saved-playground-save-button');
+        await testSubjects.click('saved-playground-save-button');
+      },
     },
   };
 }

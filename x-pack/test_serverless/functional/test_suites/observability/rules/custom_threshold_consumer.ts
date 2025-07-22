@@ -24,8 +24,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   function createCustomThresholdRule({ ruleName }: { ruleName: string }) {
     it('navigates to the rules page', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-      await testSubjects.click('manageRulesPageButton');
+      await retry.try(async () => {
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        expect(await testSubjects.exists('manageRulesPageButton')).toBeTruthy();
+        await testSubjects.click('manageRulesPageButton');
+      });
     });
 
     it('should open the rule creation flyout', async () => {
@@ -58,9 +61,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/225800
-  // Failing: See https://github.com/elastic/kibana/issues/224460
-  describe.skip('Custom threshold rule - consumers', function () {
+  describe('Custom threshold rule - consumers', function () {
     // custom roles are not yet supported in MKI
     this.tags(['skipMKI']);
     const ruleIdList: string[] = [];

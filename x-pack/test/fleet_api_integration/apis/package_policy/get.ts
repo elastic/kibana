@@ -120,10 +120,6 @@ export default function (providerContext: FtrProviderContext) {
         await deleteEndpointPackage();
       });
 
-      it('should succeed with a valid id', async function () {
-        await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`).expect(200);
-      });
-
       it('should succeed when requesting with policy ids that match package names allowed by package privileges', async function () {
         await superTestWithoutAuth
           .get(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
@@ -148,36 +144,6 @@ export default function (providerContext: FtrProviderContext) {
             error: 'Forbidden',
             message: 'Authorization denied to package: filetest. Allowed package(s): endpoint',
           });
-      });
-
-      it('should return a 404 with an invalid id', async function () {
-        await supertest.get(`/api/fleet/package_policies/IS_NOT_PRESENT`).expect(404);
-      });
-
-      it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
-        const {
-          body: { item },
-        } = await supertest
-          .get(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
-          .expect(200);
-
-        expect(Array.isArray(item.inputs)).to.be(false);
-      });
-
-      it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
-        const {
-          body: { item },
-        } = await supertest
-          .get(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
-          .expect(200);
-
-        expect(Array.isArray(item.inputs));
-      });
-
-      it('should return 400 if an invalid format query param is passed', async function () {
-        await supertest
-          .get(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
-          .expect(400);
       });
     });
 

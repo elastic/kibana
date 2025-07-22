@@ -341,6 +341,7 @@ export type RegistrySearchResult = Pick<
   | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
+  | 'discovery'
 >;
 
 // from /categories

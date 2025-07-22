@@ -226,7 +226,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.maxSize (number?)',
         'xpack.cases.markdownPlugins.lens (boolean?)',
         'xpack.cases.stack.enabled (boolean?)',
-        'xpack.cases.incrementalId.enabled (boolean?)',
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',
@@ -298,6 +297,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (boolean?)',
         // to be removed in https://github.com/elastic/kibana/issues/221904
         'xpack.infra.featureFlags.profilingEnabled (boolean?)',
+        'xpack.infra.featureFlags.hostOtelEnabled (boolean?)',
 
         'xpack.index_management.enableIndexActions (boolean?|never)',
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
@@ -381,7 +381,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
-        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
         /**
          * Rule form V2 feature flags
          */

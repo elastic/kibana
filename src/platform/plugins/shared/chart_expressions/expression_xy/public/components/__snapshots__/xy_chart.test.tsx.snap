@@ -578,6 +578,12 @@ exports[`XYChart component it renders area 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -606,11 +612,22 @@ exports[`XYChart component it renders area 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -727,6 +744,9 @@ exports[`XYChart component it renders area 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -776,7 +796,7 @@ exports[`XYChart component it renders area 1`] = `
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -866,11 +886,11 @@ exports[`XYChart component it renders area 1`] = `
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -979,11 +999,22 @@ exports[`XYChart component it renders area 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -2135,6 +2166,12 @@ exports[`XYChart component it renders bar 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -2163,11 +2200,22 @@ exports[`XYChart component it renders bar 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -2284,6 +2332,9 @@ exports[`XYChart component it renders bar 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -2333,7 +2384,7 @@ exports[`XYChart component it renders bar 1`] = `
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -2423,11 +2474,11 @@ exports[`XYChart component it renders bar 1`] = `
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -2536,11 +2587,22 @@ exports[`XYChart component it renders bar 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -3692,6 +3754,12 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -3720,11 +3788,22 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -3841,6 +3920,9 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -3890,7 +3972,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -3980,11 +4062,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -4093,11 +4175,22 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -5249,6 +5342,12 @@ exports[`XYChart component it renders line 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -5277,11 +5376,22 @@ exports[`XYChart component it renders line 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -5398,6 +5508,9 @@ exports[`XYChart component it renders line 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -5447,7 +5560,7 @@ exports[`XYChart component it renders line 1`] = `
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -5537,11 +5650,11 @@ exports[`XYChart component it renders line 1`] = `
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -5650,11 +5763,22 @@ exports[`XYChart component it renders line 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -6806,6 +6930,12 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -6834,11 +6964,22 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -6955,6 +7096,9 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -7004,7 +7148,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -7094,11 +7238,11 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -7207,11 +7351,22 @@ exports[`XYChart component it renders stacked area 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -8363,6 +8518,12 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -8391,11 +8552,22 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -8512,6 +8684,9 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -8561,7 +8736,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -8651,11 +8826,11 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -8764,11 +8939,22 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -9920,6 +10106,12 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -9948,11 +10140,22 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -10069,6 +10272,9 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -10118,7 +10324,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -10208,11 +10414,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -10321,11 +10527,22 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -11510,6 +11727,12 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -11538,11 +11761,22 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -11659,6 +11893,9 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -11708,7 +11945,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -11798,11 +12035,11 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -11911,11 +12148,22 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -13311,6 +13559,12 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -13339,11 +13593,22 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -13460,6 +13725,9 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -13509,7 +13777,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -13599,11 +13867,11 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -13712,11 +13980,22 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -15105,6 +15384,12 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "texture": Object {
+                      "opacity": 0.25,
+                    },
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -15133,11 +15418,22 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.5)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -15254,6 +15550,9 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -15303,7 +15602,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               },
               "crosshair": Object {
                 "band": Object {
-                  "fill": "rgba(23 80 186 / 0.04)",
+                  "fill": "rgba(23, 80, 186, 0.04)",
                   "visible": true,
                 },
                 "crossLine": Object {
@@ -15393,11 +15692,11 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "visible": true,
                 },
                 "brushMask": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": true,
                 },
                 "brushTool": Object {
-                  "fill": "rgba(255 255 255 / 0.7)",
+                  "fill": "rgba(255, 255, 255, 0.7)",
                   "visible": false,
                 },
                 "cell": Object {
@@ -15506,11 +15805,22 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "stroke": "rgba(202, 211, 226, 0.35)",
+                    "strokeWidth": 1,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 2.5,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "fill": "rgba(202, 211, 226, 0.15)",
+                    "stroke": "rgba(202, 211, 226, 0.15)",
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,

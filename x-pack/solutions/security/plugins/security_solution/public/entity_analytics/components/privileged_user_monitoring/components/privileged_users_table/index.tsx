@@ -246,7 +246,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
                 </span>
               </EuiText>
               <EuiSpacer size="s" />
-              <EuiHorizontalRule margin="none" style={{ height: 2 }} />
+              <EuiHorizontalRule margin="none" css={{ height: 2 }} />
               <EuiBasicTable
                 id={PRIVILEGED_USERS_TABLE_QUERY_ID}
                 loading={loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality}
