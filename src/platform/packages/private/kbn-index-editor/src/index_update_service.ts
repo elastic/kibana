@@ -537,7 +537,7 @@ export class IndexUpdateService {
       await this.bulkUpdate(updates);
 
       this.setIndexCreated(true);
-      this.actions$.next({ type: 'discard-unsaved-columns' });
+      this._actions$.next({ type: 'discard-unsaved-columns' });
     } catch (error) {
       throw error;
     } finally {
