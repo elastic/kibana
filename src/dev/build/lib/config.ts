@@ -184,6 +184,16 @@ export class Config {
       return ALL_PLATFORMS;
     }
 
+    if (process.platform === 'linux') {
+      if (process.arch === 'x64')
+        return [this.getPlatform('linux', 'x64'), this.getPlatform('linux', 'x64', 'serverless')];
+      if (process.arch === 'arm64')
+        return [
+          this.getPlatform('linux', 'arm64'),
+          this.getPlatform('linux', 'arm64', 'serverless'),
+        ];
+    }
+
     return [this.getPlatformForThisOs()];
   }
 
@@ -200,15 +210,23 @@ export class Config {
       return ALL_PLATFORMS;
     }
 
-    if (process.platform === 'linux' && process.arch === 'x64') {
-      return [this.getPlatform('linux', 'x64')];
+    if (process.platform === 'linux') {
+      if (process.arch === 'x64')
+        return [this.getPlatform('linux', 'x64'), this.getPlatform('linux', 'x64', 'serverless')];
+      if (process.arch === 'arm64')
+        return [
+          this.getPlatform('linux', 'arm64'),
+          this.getPlatform('linux', 'arm64', 'serverless'),
+          this.getPlatform('linux', 'x64'),
+        ];
     }
 
     return [this.getPlatformForThisOs(), this.getPlatform('linux', 'x64')];
   }
 
-  getPlatform(name: PlatformName, arch: PlatformArchitecture) {
-    const selected = ALL_PLATFORMS.find((p) => {
+  getPlatform(name: PlatformName, arch: PlatformArchitecture, variant?: string) {
+    const platforms = variant === 'serverless' ? SERVERLESS_PLATFORMS : ALL_PLATFORMS;
+    const selected = platforms.find((p) => {
       return name === p.getName() && arch === p.getArchitecture();
     });
 
