@@ -6,18 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects([
-    'common',
-    'svlCommonPage',
-    'searchPlayground',
-    'solutionNavigation',
-  ]);
-
+  const pageObjects = getPageObjects(['common', 'searchPlayground', 'solutionNavigation']);
   const esArchiver = getService('esArchiver');
 
   const createIndices = async () => {
@@ -33,8 +27,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Search Playground - Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
-
-      await pageObjects.svlCommonPage.loginWithRole('developer');
     });
     after(async () => {
       try {
@@ -72,6 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectAndCloseSavedPlaygroundToast();
       });
     });
+
     describe('View a Saved Playground', function () {
       it('should open saved playground', async () => {
         await pageObjects.common.navigateToUrl('searchPlayground');
@@ -179,9 +172,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeExists();
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
         await pageObjects.searchPlayground.SavedPlaygroundPage.clickSavedPlaygroundSaveButton();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists(
-          pageObjects.searchPlayground.SavedPlaygroundPage.SaveExtendedTimeout
-        );
+        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
       });
       it('should allow updating playground query fields', async () => {
