@@ -63,8 +63,10 @@ export const ValueInput: React.FC<ValueInputProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   useLayoutEffect(() => {
     // On mount, focus the input
-    setTimeout(() => inputRef.current?.focus(), 0);
-  }, []);
+    if (autoFocus) {
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }
+  }, [autoFocus]);
 
   const InputComponent = useMemo(() => {
     return getInputComponentForType(columnType);
