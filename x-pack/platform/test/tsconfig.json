@@ -151,6 +151,10 @@
     "@kbn/controls-plugin",
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/upgrade-assistant-pkg-server",
+    "@kbn/palettes",
+    "@kbn/field-formats-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/datemath",
     "@kbn/global-search-plugin",
     "@kbn/global-search-test-plugin"
   ]
