@@ -23,8 +23,8 @@ import { isNil } from 'lodash';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { PendingSave } from '../index_update_service';
-import { ValueInput } from './value_input';
+import type { PendingSave } from '../../index_update_service';
+import { ValueInput } from '../value_input';
 
 export type OnCellValueChange = (docId: string, update: any) => void;
 
@@ -93,7 +93,7 @@ export const getCellValueRenderer =
     rows: DataTableRecord[],
     savingDocs: PendingSave | undefined,
     dataTableRef: RefObject<EuiDataGridRefProps>,
-    isIndexCreated: boolean,
+    isIndexCreated: boolean
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, colIndex, columnId }) => {
     const row = rows[rowIndex];
@@ -124,7 +124,6 @@ export const getCellValueRenderer =
       <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
         <EuiFlexItem>
           <div
-            tabIndex={0}
             css={{
               cursor: 'pointer',
               height: '100%',

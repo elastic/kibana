@@ -24,12 +24,13 @@ import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, times } from 'lodash';
-import { getCellValueRenderer } from './grid_custom_renderers/value_input_control';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
 import { COLUMN_PLACEHOLDER_PREFIX } from '../constants';
 import { KibanaContextExtra } from '../types';
-import { getCellValueRenderer, getValueInputPopover } from './value_input_control';
-import { AddColumnHeader } from './add_column_header';
+import {
+  getCellValueRenderer,
+  getValueInputPopover,
+} from './grid_custom_renderers/value_input_control';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
@@ -161,12 +162,11 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         columns: props.columns,
         onValueChange,
         dataTableRef,
-        isIndexCreated,
       }),
-    [rows, props.columns, onValueChange, dataTableRef, isIndexCreated]
+    [rows, props.columns, onValueChange, dataTableRef]
   );
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(rows, savingDocs, isIndexCreated, dataTableRef);
+    return getCellValueRenderer(rows, savingDocs, dataTableRef, isIndexCreated);
   }, [rows, savingDocs, isIndexCreated]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
