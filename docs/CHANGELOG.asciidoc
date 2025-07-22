@@ -231,7 +231,7 @@ Data ingestion and Fleet::
 * Adds support for collapsible sections in integration overview pages ({kibana-pull}223916[#223916]).
 Discover::
 * Expands the {esql} editor to fit the query size automatically when loading **Discover** ({kibana-pull}225509[#225509]).
-* Shows list of keyboard shortcuts at the bottom of the editor ({kibana-pull}221331[#221331]).
+* Shows list of keyboard shortcuts at the bottom of the {esql} editor ({kibana-pull}221331[#221331]).
 * Adds suggestions for full text search when writing queries ({kibana-pull}221239[#221239]).
 * Adds full text search suggestions to `STATS ... WHERE` queries ({kibana-pull}220691[#220691]).
 * Hides the "Selected only" toggle in **Discover**'s pages that don't support filtering by value ({kibana-pull}220624[#220624]).
