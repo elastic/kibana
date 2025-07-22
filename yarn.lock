@@ -2282,10 +2282,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.5":
-  version "3.1.5"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.5.tgz#663cf39f902c6fbb82a096a393cdfd80a4d16127"
-  integrity sha512-+2HwYfKHrrYAoK6g49p6Tr5D1BsU3q0489U47jpU+xlQvQU8tEYuHrwFaRPI94mK5PG2lKcNrjvfPXx71MfgWg==
+"@elastic/monaco-esql@^3.1.6":
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.6.tgz#c89a1eb142b9a8bd713bc697d651373a9c4144df"
+  integrity sha512-roRLyZelCI0Vb9Z2/Ugu/w+aUghoLIqrnF/oVQqYH1VHXSBpzKDtItGEp5SXcXWdz7gcta3mlygfNxvr5DTEvw==
 
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -5982,7 +5982,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/global-search-test-plugin@link:x-pack/test/plugin_functional/plugins/global_search_test":
+"@kbn/global-search-test-plugin@link:x-pack/platform/test/plugin_functional/plugins/global_search_test":
   version "0.0.0"
   uid ""
 
@@ -6782,6 +6782,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/page-attachment-schema@link:x-pack/platform/packages/shared/kbn-page-attachment-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/painless-lab-plugin@link:x-pack/platform/plugins/private/painless_lab":
   version "0.0.0"
   uid ""
@@ -7026,7 +7030,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/resolver-test-plugin@link:x-pack/test/plugin_functional/plugins/resolver_test":
+"@kbn/resolver-test-plugin@link:x-pack/solutions/security/test/plugin_functional/plugins/resolver_test":
   version "0.0.0"
   uid ""
 
@@ -8375,6 +8379,22 @@
   uid ""
 
 "@kbn/workchat-framework-plugin@link:x-pack/solutions/chat/plugins/workchat-framework":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-execution-engine@link:src/platform/plugins/shared/workflows_execution_engine":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-plugin-example@link:examples/workflows":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows@link:src/platform/packages/shared/kbn-workflows":
   version "0.0.0"
   uid ""
 
@@ -20110,18 +20130,20 @@ form-data@4.0.0:
     mime-types "^2.1.12"
 
 form-data@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-3.0.1.tgz#ebd53791b78356a99af9a300d4282c4d5eb9755f"
-  integrity sha512-RHkBKtLWUVwd7SqRIvCZMEvAMoGUp0XU+seQiZejj0COz3RI3hWP4sCv3gZWWLjJTd7rGwcsF5eKZGii0r/hbg==
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-3.0.4.tgz#938273171d3f999286a4557528ce022dc2c98df1"
+  integrity sha512-f0cRzm6dkyVYV3nPoooP8XlccPQukegwhAnpoLcXy+X+A8KfpGOoXwDr9FLZd3wzgLaBGQBE3lY93Zm/i1JvIQ==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
-    mime-types "^2.1.12"
+    es-set-tostringtag "^2.1.0"
+    hasown "^2.0.2"
+    mime-types "^2.1.35"
 
-form-data@^4.0.0, form-data@^4.0.3, form-data@~4.0.0:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.3.tgz#608b1b3f3e28be0fccf5901fc85fb3641e5cf0ae"
-  integrity sha512-qsITQPfmvMOSAdeyZ+12I1c+CKSstAFAwu+97zrnWAbIr5u8wfsExUzCesVLC8NgHuRUqNN4Zy6UPWUTRGslcA==
+form-data@^4.0.0, form-data@^4.0.4, form-data@~4.0.0:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.4.tgz#784cdcce0669a9d68e94d11ac4eea98088edd2c4"
+  integrity sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
