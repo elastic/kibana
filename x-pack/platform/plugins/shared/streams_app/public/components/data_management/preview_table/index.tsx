@@ -88,11 +88,11 @@ export function PreviewTable({
     return {
       columns: sorting?.fieldName
         ? [
-          {
-            id: sorting?.fieldName || '',
-            direction: sorting?.direction || 'asc',
-          },
-        ]
+            {
+              id: sorting?.fieldName || '',
+              direction: sorting?.direction || 'asc',
+            },
+          ]
         : [],
       onSort: (newSorting) => {
         if (setSorting) {
@@ -138,12 +138,12 @@ export function PreviewTable({
       actions:
         Boolean(setVisibleColumns) || Boolean(setSorting)
           ? {
-            showHide: Boolean(setVisibleColumns),
-            showMoveLeft: Boolean(setVisibleColumns),
-            showMoveRight: Boolean(setVisibleColumns),
-            showSortAsc: Boolean(setSorting),
-            showSortDesc: Boolean(setSorting),
-          }
+              showHide: Boolean(setVisibleColumns),
+              showMoveLeft: Boolean(setVisibleColumns),
+              showMoveRight: Boolean(setVisibleColumns),
+              showSortAsc: Boolean(setSorting),
+              showSortDesc: Boolean(setSorting),
+            }
           : (false as false),
       initialWidth: columnWidths[column],
     }));
@@ -153,30 +153,30 @@ export function PreviewTable({
     () =>
       selectableRow && visibleColumns.length > 0
         ? [
-          {
-            id: 'selection',
-            width: 36,
-            headerCellRender: () => null,
-            rowCellRender: ({ rowIndex }) => (
-              <EuiButtonIcon
-                onClick={() => {
-                  if (selectableRow && onRowSelected) {
-                    onRowSelected(rowIndex);
-                  }
-                }}
-                aria-label={i18n.translate(
-                  'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
-                  {
-                    defaultMessage: 'Select row {rowIndex}',
-                    values: { rowIndex: rowIndex + 1 },
-                  }
-                )}
-                iconType={selectedRowIndex === rowIndex && selectableRow ? 'minimize' : 'expand'}
-                color={selectedRowIndex === rowIndex && selectableRow ? 'primary' : 'text'}
-              />
-            ),
-          },
-        ]
+            {
+              id: 'selection',
+              width: 36,
+              headerCellRender: () => null,
+              rowCellRender: ({ rowIndex }) => (
+                <EuiButtonIcon
+                  onClick={() => {
+                    if (selectableRow && onRowSelected) {
+                      onRowSelected(rowIndex);
+                    }
+                  }}
+                  aria-label={i18n.translate(
+                    'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+                    {
+                      defaultMessage: 'Select row {rowIndex}',
+                      values: { rowIndex: rowIndex + 1 },
+                    }
+                  )}
+                  iconType={selectedRowIndex === rowIndex && selectableRow ? 'minimize' : 'expand'}
+                  color={selectedRowIndex === rowIndex && selectableRow ? 'primary' : 'text'}
+                />
+              ),
+            },
+          ]
         : [],
     [onRowSelected, selectableRow, selectedRowIndex, visibleColumns.length]
   );
@@ -189,7 +189,7 @@ export function PreviewTable({
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
-        setVisibleColumns: setVisibleColumns || (() => { }),
+        setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
       sorting={sortingConfig}
