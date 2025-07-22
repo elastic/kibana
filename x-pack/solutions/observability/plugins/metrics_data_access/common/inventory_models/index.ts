@@ -15,8 +15,7 @@ import { awsS3 } from './aws_s3';
 import { awsRDS } from './aws_rds';
 import { awsSQS } from './aws_sqs';
 import { container } from './container';
-import type { InventoryItemType, InventoryModel } from './types';
-import type { InventoryMetricsConfig } from './shared/metrics/types';
+import type { InventoryItemType } from './types';
 export { metrics } from './metrics';
 
 const catalog = {
@@ -27,7 +26,7 @@ const catalog = {
   awsS3,
   awsRDS,
   awsSQS,
-} satisfies Record<string, InventoryModel<InventoryItemType, InventoryMetricsConfig>>;
+};
 
 export const inventoryModels = Object.values(catalog);
 

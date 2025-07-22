@@ -16,26 +16,25 @@ import type {
   SchemaWrappedEntry,
 } from './types';
 
-export class MetricsCatalog<
-  TConfig extends MetricConfigMap,
-  TResolved extends ResolvedMetricMap<TConfig> = ResolvedMetricMap<TConfig>
-> implements BaseMetricsCatalog<TConfig, TResolved>
+export class MetricsCatalog<TConfig extends MetricConfigMap>
+  implements BaseMetricsCatalog<TConfig>
 {
-  private readonly catalog: TResolved;
+  private readonly catalog: ResolvedMetricMap<TConfig>;
 
   constructor(configCatalog: TConfig, private readonly schema: SchemaTypes = 'ecs') {
     this.catalog = this.resolveSchemaMetrics(configCatalog);
   }
-
-  get<TKey extends keyof TResolved | string>(key: TKey): TResolved[TKey] {
-    return this.catalog[key];
+  get<K extends keyof ResolvedMetricMap<TConfig>>(key: K): ResolvedMetricMap<TConfig>[K];
+  get(key: string): ResolvedMetricMap<TConfig>[keyof ResolvedMetricMap<TConfig>] | undefined;
+  get(key: string): ResolvedMetricMap<TConfig>[keyof ResolvedMetricMap<TConfig>] | undefined {
+    return this.catalog[key as keyof ResolvedMetricMap<TConfig>];
   }
 
   getAll() {
     return this.catalog;
   }
 
-  private resolveSchemaMetrics(configCatalog: TConfig): TResolved {
+  private resolveSchemaMetrics(configCatalog: TConfig): ResolvedMetricMap<TConfig> {
     if (this.schema !== 'ecs' && this.schema !== 'semconv') {
       throw new Error(`Unsupported schema: ${this.schema}`);
     }
@@ -53,7 +52,7 @@ export class MetricsCatalog<
       }
 
       return acc;
-    }, {} as TResolved);
+    }, {} as ResolvedMetricMap<TConfig>);
 
     return catalog;
   }

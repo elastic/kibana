@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { JsonObject } from '@kbn/utility-types';
-import type {
-  MetricsAggregationsCatalog,
-  MetricsUIAggregation,
-} from '@kbn/metrics-data-access-plugin/common';
+import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
 import type { SnapshotRequest } from '../../../../common/http_api';
@@ -29,7 +26,7 @@ export const getMetricsAggregations = async (
   const { metrics, nodeType } = options;
 
   const inventoryModel = findInventoryModel(nodeType);
-  const aggregations: MetricsAggregationsCatalog = await inventoryModel.metrics.getAggregations();
+  const aggregations = await inventoryModel.metrics.getAggregations();
 
   return metrics.reduce<MetricsUIAggregation>((aggs, metric, index) => {
     if (SnapshotCustomMetricInputRT.is(metric)) {

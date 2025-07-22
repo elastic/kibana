@@ -37,10 +37,7 @@ export type {
   TSVBMetricModel,
 } from './inventory_models/types';
 
-export type {
-  MetricsAggregationsCatalog,
-  MetricsFormulasCatalog,
-} from './inventory_models/shared/metrics/types';
+export type { AggregationsCatalog, FormulasCatalog } from './inventory_models/shared/metrics/types';
 
 export { networkTraffic } from './inventory_models/shared/metrics/snapshot/network_traffic';
 export { METRICS_EXPLORER_API_MAX_METRICS } from './constants';

@@ -533,16 +533,16 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
   );
 
   const inventoryModels = findInventoryModel(nodeType);
-  const { value: aggregrations } = useAsync(
+  const { value: aggregations } = useAsync(
     () => inventoryModels.metrics.getAggregations(),
     [inventoryModels]
   );
 
   const ofFields = useMemo(() => {
-    return (Object.keys(aggregrations?.getAll() ?? {}) as SnapshotMetricType[]).map((key) =>
+    return (Object.keys(aggregations?.getAll() ?? {}) as SnapshotMetricType[]).map((key) =>
       toMetricOpt(key, nodeType)
     );
-  }, [aggregrations, nodeType]);
+  }, [aggregations, nodeType]);
 
   return (
     <>

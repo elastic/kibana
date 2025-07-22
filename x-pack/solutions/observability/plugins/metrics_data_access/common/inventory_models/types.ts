@@ -8,7 +8,12 @@
 import * as rt from 'io-ts';
 import type { estypes } from '@elastic/elasticsearch';
 import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
-import type { InventoryMetricsConfig } from './shared/metrics/types';
+import type {
+  AggregationConfigMap,
+  FormulasConfigMap,
+  InventoryMetricsConfig,
+  LensMetricChartConfig,
+} from './shared/metrics/types';
 export type { BaseMetricsCatalog } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -270,7 +275,9 @@ type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
 
 export interface InventoryModel<
   TEntityType extends InventoryItemType,
-  TMetrics = InventoryMetricsConfig
+  TAggeggations extends AggregationConfigMap,
+  TFormulas extends FormulasConfigMap | undefined = undefined,
+  TCharts extends LensMetricChartConfig | undefined = undefined
 > {
   id: TEntityType;
   displayName: string;
@@ -289,7 +296,7 @@ export interface InventoryModel<
     apm: boolean;
     uptime: boolean;
   };
-  metrics: TMetrics;
+  metrics: InventoryMetricsConfig<TAggeggations, TFormulas, TCharts>;
   requiredMetrics: InventoryMetric[];
   legacyMetrics?: SnapshotMetricType[];
   tooltipMetrics: SnapshotMetricType[];

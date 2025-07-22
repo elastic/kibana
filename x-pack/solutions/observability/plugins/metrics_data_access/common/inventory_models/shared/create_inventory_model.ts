@@ -5,11 +5,20 @@
  * 2.0.
  */
 import type { InventoryItemType, InventoryModel } from '../types';
-import type { InventoryMetricsConfig } from './metrics/types';
+import type {
+  AggregationConfigMap,
+  FormulasConfigMap,
+  LensMetricChartConfig,
+} from './metrics/types';
 
 export function createInventoryModel<
   TType extends InventoryItemType,
-  TMetrics extends InventoryMetricsConfig<any, any, any>
->(id: TType, config: Omit<InventoryModel<TType, TMetrics>, 'id'>): InventoryModel<TType, TMetrics> {
+  TAggsConfigMap extends AggregationConfigMap = AggregationConfigMap,
+  TFormulasConfigMap extends FormulasConfigMap | undefined = undefined,
+  TCharts extends LensMetricChartConfig | undefined = undefined
+>(
+  id: TType,
+  config: Omit<InventoryModel<TType, TAggsConfigMap, TFormulasConfigMap, TCharts>, 'id'>
+): InventoryModel<TType, TAggsConfigMap, TFormulasConfigMap, TCharts> {
   return { id, ...config };
 }

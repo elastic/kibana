@@ -27,6 +27,7 @@ export const metrics: InventoryMetricsConfig<PodAggregations> = {
     const catalog = new MetricsCatalog(snapshot);
     return catalog;
   },
+
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

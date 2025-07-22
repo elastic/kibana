@@ -6,10 +6,10 @@
  */
 
 import { MetricsCatalog } from './metrics_catalog';
-import type { AggregationConfig, MetricConfigMap, LensFormulaConfig } from './types';
+import type { MetricConfigMap } from './types';
 
 describe('MetricsCatalog', () => {
-  const aggregationsPerSchema: MetricConfigMap<AggregationConfig> = {
+  const aggregationsPerSchema = {
     cpu: {
       ecs: {
         cpuAgg: {
@@ -51,22 +51,22 @@ describe('MetricsCatalog', () => {
       ecs: { memoryAgg: { avg: 'field.ecs' } },
       semconv: { memoryAgg: { avg: 'field.semconv' } },
     },
-  };
+  } satisfies MetricConfigMap;
 
-  const aggregations: MetricConfigMap<AggregationConfig> = {
+  const aggregations = {
     cpu: { cpuAgg: { avg: { field: 'field.ecs' } } },
     memory: { memoryAgg: { avg: { field: 'field.ecs' } } },
-  };
+  } satisfies MetricConfigMap;
 
-  const formulasPerSchema: MetricConfigMap<LensFormulaConfig> = {
+  const formulasPerSchema = {
     cpu: { value: { ecs: 'avg(field.ecs)', semconv: 'avg(field.semconv)' } },
     memory: { value: { ecs: 'avg(field.ecs)', semconv: 'avg(field.semconv)' } },
-  };
+  } satisfies MetricConfigMap;
 
-  const formulas: MetricConfigMap<LensFormulaConfig> = {
+  const formulas = {
     cpu: { value: 'avg(field.ecs)' },
     memory: { value: 'avg(field.ecs)' },
-  };
+  } satisfies MetricConfigMap;
 
   describe('Schema variation', () => {
     describe('ecs', () => {

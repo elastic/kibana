@@ -24,17 +24,17 @@ interface Props extends ToolbarProps {
 export const MetricsAndGroupByToolbarItems = (props: Props) => {
   const inventoryModel = findInventoryModel(props.nodeType);
 
-  const { value: aggregrations } = useAsync(
+  const { value: aggregations } = useAsync(
     () => inventoryModel.metrics.getAggregations(),
     [inventoryModel]
   );
 
   const metricOptions = useMemo(
     () =>
-      (Object.keys(aggregrations?.getAll() ?? {}) as SnapshotMetricType[])
+      (Object.keys(aggregations?.getAll() ?? {}) as SnapshotMetricType[])
         .map((metric) => toMetricOpt(metric, props.nodeType))
         .filter((v) => v) as Array<{ text: string; value: string }>,
-    [aggregrations, props.nodeType]
+    [aggregations, props.nodeType]
   );
 
   const groupByOptions = useMemo(

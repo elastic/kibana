@@ -6,7 +6,6 @@
  */
 
 import { identity } from 'lodash';
-import type { MetricsAggregationsCatalog } from '@kbn/metrics-data-access-plugin/common';
 import { networkTraffic, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { MetricsAPIMetric } from '@kbn/metrics-data-access-plugin/common/http_api/metrics_api';
 import { type SnapshotRequest, SnapshotCustomMetricInputRT } from '../../../../common/http_api';
@@ -15,7 +14,7 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = async (
   snapshotRequest: SnapshotRequest
 ): Promise<MetricsAPIMetric[]> => {
   const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
-  const aggregations: MetricsAggregationsCatalog = await inventoryModel.metrics.getAggregations();
+  const aggregations = await inventoryModel.metrics.getAggregations();
 
   return snapshotRequest.metrics
     .map((metric, index) => {
