@@ -176,6 +176,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     // Metadata
+    async getMetadataTab() {
+      return testSubjects.find('infraAssetDetailsMetadataTab');
+    },
+
     async clickMetadataTab() {
       return testSubjects.click('infraAssetDetailsMetadataTab');
     },

@@ -32,6 +32,13 @@ import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 
+const summaryFieldLabel = i18n.translate(
+  'xpack.stackConnectors.components.jira.summaryFieldLabel',
+  {
+    defaultMessage: 'Summary',
+  }
+);
+
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,
   actionParams,
@@ -285,9 +292,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             Number(errors['subActionParams.incident.summary'].length) > 0 &&
             incident.summary !== undefined
           }
-          label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
-            defaultMessage: 'Summary',
-          })}
+          label={summaryFieldLabel}
+          aria-label={summaryFieldLabel}
           labelAppend={
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.stackConnectors.components.jira.summaryFieldRequiredLabel', {

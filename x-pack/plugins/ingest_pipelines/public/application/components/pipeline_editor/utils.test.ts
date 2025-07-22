@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getValue, setValue, hasTemplateSnippet } from './utils';
+import { getValue, setValue, hasTemplateSnippet, convertProccesorsToJson } from './utils';
 
 describe('get and set values', () => {
   const testObject = Object.freeze([{ onFailure: [{ onFailure: 1 }] }]);
@@ -49,5 +49,74 @@ describe('template snippets', () => {
     expect(hasTemplateSnippet('hello{{{world}}}')).toBe(true);
     expect(hasTemplateSnippet('{{{hello}}}world')).toBe(true);
     expect(hasTemplateSnippet('{{{hello.world}}}')).toBe(true);
+  });
+});
+
+describe('convert processors to json', () => {
+  it('returns converted processors', () => {
+    const obj = {
+      field1: 'mustNotChange',
+      field2: 123,
+      field3: '{1: "mustNotChange"}',
+      value: '{"1": """aaa"bbb"""}',
+      customOptions: '{"customProcessor": """aaa"bbb"""}',
+    };
+
+    expect(convertProccesorsToJson(obj)).toEqual({
+      field1: 'mustNotChange',
+      field2: 123,
+      field3: '{1: "mustNotChange"}',
+      value: { 1: 'aaa"bbb' },
+      customProcessor: 'aaa"bbb',
+    });
+  });
+
+  it('preserves empty string values', () => {
+    const obj = {
+      field1: 'normalString',
+      value: '',
+      inference_config: '',
+      field_map: '',
+      params: '',
+      pattern_definitions: '',
+      processor: '',
+      customOptions: '',
+    };
+
+    const result = convertProccesorsToJson(obj);
+
+    expect(result).toEqual({
+      field1: 'normalString',
+      value: '',
+      inference_config: '',
+      field_map: '',
+      params: '',
+      pattern_definitions: '',
+      processor: '',
+    });
+
+    // Explicitly check that empty strings are preserved and not converted to undefined
+    expect(result.value).toBe('');
+    expect(result.inference_config).toBe('');
+    expect(result.field_map).toBe('');
+    expect(result.params).toBe('');
+    expect(result.pattern_definitions).toBe('');
+    expect(result.processor).toBe('');
+  });
+
+  it('handles null and undefined values correctly', () => {
+    const obj = {
+      value: null,
+      inference_config: undefined,
+      field_map: 'normalString',
+    };
+
+    const result = convertProccesorsToJson(obj);
+
+    expect(result).toEqual({
+      value: undefined,
+      inference_config: undefined,
+      field_map: 'normalString',
+    });
   });
 });

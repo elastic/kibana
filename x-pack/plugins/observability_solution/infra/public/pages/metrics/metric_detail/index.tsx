@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
@@ -23,15 +22,11 @@ export const NodeDetail = () => {
   const isContainerAssetViewEnabled = useUiSetting(enableInfrastructureContainerAssetView);
 
   const showContainerAssetDetailPage = nodeType === 'container' && isContainerAssetViewEnabled;
-  return (
-    <EuiErrorBoundary>
-      {nodeType === 'host' || showContainerAssetDetailPage ? (
-        <AssetDetailPage />
-      ) : (
-        <MetricsTimeProvider>
-          <MetricDetailPage />
-        </MetricsTimeProvider>
-      )}
-    </EuiErrorBoundary>
+  return nodeType === 'host' || showContainerAssetDetailPage ? (
+    <AssetDetailPage />
+  ) : (
+    <MetricsTimeProvider>
+      <MetricDetailPage />
+    </MetricsTimeProvider>
   );
 };

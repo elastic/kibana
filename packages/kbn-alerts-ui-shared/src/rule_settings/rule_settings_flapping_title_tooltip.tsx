@@ -62,6 +62,13 @@ const flappingOffContentSettings = i18n.translate(
   }
 );
 
+const alertFlappingTitleInfo = i18n.translate(
+  'alertsUIShared.ruleSettingsFlappingTitleTooltip.alertFlappingTitleInfo',
+  {
+    defaultMessage: 'Rule settings flapping title info',
+  }
+);
+
 interface RuleSettingsFlappingTitleTooltipProps {
   isOpen: boolean;
   setIsPopoverOpen: (isOpen: boolean) => void;
@@ -87,7 +94,7 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
             display="empty"
             color="primary"
             iconType="questionInCircle"
-            aria-label="Flapping title info"
+            aria-label={alertFlappingTitleInfo}
             onClick={() => setIsPopoverOpen(!isOpen)}
           />
         }
