@@ -7,6 +7,7 @@
     "__mocks__/**/*",
     "common/**/*",
     "public/**/*",
+    "scripts/**/*",
     "server/**/*",
   ],
   "kbn_references": [
