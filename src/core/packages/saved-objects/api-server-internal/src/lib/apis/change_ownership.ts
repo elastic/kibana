@@ -27,8 +27,8 @@ export const isSavedObjectsChangeOwnershipOptions = <Attributes = unknown>(
   return (
     typeof options === 'object' &&
     options !== null &&
-    'owner' in options &&
-    typeof options.owner === 'string'
+    'newOwnerProfileUid' in options &&
+    typeof options.newOwnerProfileUid === 'string'
   );
 };
 export const performChangeOwnership = async <T>(
