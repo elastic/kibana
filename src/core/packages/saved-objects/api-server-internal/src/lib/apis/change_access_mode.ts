@@ -28,8 +28,8 @@ export const isSavedObjectsChangeAccessModeOptions = <Attributes = unknown>(
   return (
     typeof options === 'object' &&
     options !== null &&
-    (typeof (options as any).accessMode === 'undefined' ||
-      (options as any).accessMode === 'read_only')
+    'accessMode' in options &&
+    (options.accessMode === 'read_only' || options.accessMode === 'default')
   );
 };
 

@@ -337,7 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
       });
 
-      it('allow owner to update post change access mode', async () => {
+      it('allow owner to update after access mode change', async () => {
         const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
         const createResponse = await supertestWithoutAuth
           .post('/read_only_objects/create')
@@ -420,8 +420,16 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', testUserCookie.cookieString())
           .send({
             objects: [{ id: objectId, type: 'read_only_type' }],
+            newAccessMode: 'default',
           })
           .expect(200);
+
+        await es.security.putUser({
+          username: 'simple_user',
+          refresh: 'wait_for',
+          password: 'changeme',
+          roles: ['kibana_savedobjects_editor'],
+        });
 
         const { cookie: simpleUserCookie } = await login('simple_user', 'changeme');
 

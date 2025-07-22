@@ -68,13 +68,18 @@ export const changeObjectAccessControl = async <T>(
 
   if (actionType === 'changeOwnership' && !newOwnerProfileUid) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      'The "owner" field is required to change ownership of a saved object.'
+      'The "newOwnerProfileUid" field is required to change ownership of a saved object.'
     );
   }
 
-  if (actionType === 'changeAccessMode' && accessMode !== undefined && accessMode !== 'read_only') {
+  if (
+    actionType === 'changeAccessMode' &&
+    accessMode !== undefined &&
+    accessMode !== 'default' &&
+    accessMode !== 'read_only'
+  ) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      'When specified, the "accessMode" field can only be "read_only".'
+      'When specified, the "accessMode" field can only be "default" or "read_only.'
     );
   }
 
@@ -243,7 +248,7 @@ export const changeObjectAccessControl = async <T>(
         updated_at: time,
         accessControl: {
           owner: ownerFromSource,
-          ...(accessMode !== undefined && { accessMode }),
+          accessMode: accessMode ?? 'default',
         },
       };
     }

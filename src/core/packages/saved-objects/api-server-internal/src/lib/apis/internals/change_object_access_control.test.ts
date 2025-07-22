@@ -195,6 +195,7 @@ describe('changeObjectAccessControl', () => {
             id: 'id-1',
             accessControl: {
               owner: 'new-owner',
+              accessMode: 'default',
             },
           },
         ]);
@@ -205,20 +206,23 @@ describe('changeObjectAccessControl', () => {
           options: { newOwnerProfileUid: 'new-owner', namespace: 'default' },
           actionType: 'changeOwnership',
         });
-        expect(mockSecurityExt.authorizeChangeAccessControl).toHaveBeenCalledWith({
-          namespace: 'default',
-          objects: [
-            {
-              type: READ_ONLY_TYPE,
-              id: 'id-1',
-              accessControl: {
-                owner: 'new-owner',
+        expect(mockSecurityExt.authorizeChangeAccessControl).toHaveBeenCalledWith(
+          {
+            namespace: 'default',
+            objects: [
+              {
+                type: READ_ONLY_TYPE,
+                id: 'id-1',
+                accessControl: {
+                  owner: 'new-owner',
+                  accessMode: 'default',
+                },
+                existingNamespaces: ['default'],
               },
-              existingNamespaces: ['default'],
-            },
-          ],
-          operation: 'changeOwnership',
-        });
+            ],
+          },
+          'changeOwnership'
+        );
       });
     });
   });

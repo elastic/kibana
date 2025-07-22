@@ -91,7 +91,7 @@ describe('AccessControlService', () => {
         {
           id: '1',
           type: 'dashboard',
-          accessControl: { owner: 'alice' },
+          accessControl: { owner: 'alice', accessMode: 'default' as const },
         },
       ];
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
