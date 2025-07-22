@@ -48,7 +48,7 @@ interface ExpandButtonProps {
 
 const ExpandButton: React.FC<ExpandButtonProps> = ({ isCurrentRowExpanded, onClickHandler }) => {
   return (
-    <EuiToolTip content={buttonLabel}>
+    <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         size="xs"
         iconSize="s"

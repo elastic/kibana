@@ -29,6 +29,7 @@ import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/containers/source');
+jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),

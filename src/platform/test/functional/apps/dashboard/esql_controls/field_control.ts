@@ -14,7 +14,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common, header } = getPageObjects([
+  const { dashboardControls, dashboard, timePicker, common, header } = getPageObjects([
+    'dashboardControls',
     'dashboard',
     'timePicker',
     'common',
@@ -102,7 +103,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should update the Lens chart accordingly', async () => {
       // change the control value
-      await comboBox.set('esqlControlValuesDropdown', 'clientip');
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSelectOption('clientip');
       await dashboard.waitForRenderComplete();
 
       await retry.try(async () => {

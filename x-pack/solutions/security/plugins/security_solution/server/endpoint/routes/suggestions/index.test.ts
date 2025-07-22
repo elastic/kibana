@@ -43,6 +43,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   return {
@@ -465,7 +466,7 @@ describe('when calling the Suggestions route handler', () => {
           expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
             mockSavedObjectClient,
             {
-              kuery: 'ingest-package-policies.package.name:endpoint',
+              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
               spaceIds: ['*'],
             }
           );
@@ -643,7 +644,7 @@ describe('when calling the Suggestions route handler', () => {
           expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
             mockSavedObjectClient,
             {
-              kuery: 'ingest-package-policies.package.name:endpoint',
+              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
               spaceIds: ['default'],
             }
           );
@@ -731,7 +732,7 @@ describe('when calling the Suggestions route handler', () => {
           expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
             mockSavedObjectClient,
             {
-              kuery: 'ingest-package-policies.package.name:endpoint',
+              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
               spaceIds: ['default'],
             }
           );
@@ -855,7 +856,7 @@ describe('when calling the Suggestions route handler', () => {
           expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
             mockSavedObjectClient,
             {
-              kuery: 'ingest-package-policies.package.name:endpoint',
+              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
               spaceIds: [customSpaceId],
             }
           );

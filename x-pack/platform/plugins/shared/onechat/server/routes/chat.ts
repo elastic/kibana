@@ -115,6 +115,7 @@ export function registerChatRoutes({ router, getInternalServices, logger }: Rout
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
+            trace_id: round.trace_id,
             steps: round.steps,
             response: round.response,
           },
