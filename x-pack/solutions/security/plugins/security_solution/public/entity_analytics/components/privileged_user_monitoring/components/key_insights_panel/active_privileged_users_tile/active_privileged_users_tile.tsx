@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { getActivePrivilegedUsersEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
@@ -17,18 +18,12 @@ export const ActivePrivilegedUsersTile: React.FC<{
 }> = ({ spaceId, sourcerDataView }) => {
   return (
     <KeyInsightsTile
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.privmon.activePrivilegedUsers.title"
-          defaultMessage="Active Privileged Users"
-        />
-      }
-      label={
-        <FormattedMessage
-          id="xpack.securitySolution.privmon.activePrivilegedUsers.label"
-          defaultMessage="Active Privileged Users"
-        />
-      }
+      title={i18n.translate('xpack.securitySolution.privmon.activePrivilegedUsers.title', {
+        defaultMessage: 'Active Privileged Users',
+      })}
+      label={i18n.translate('xpack.securitySolution.privmon.activePrivilegedUsers.label', {
+        defaultMessage: 'Active Privileged Users',
+      })}
       getEsqlQuery={(namespace: string) =>
         getActivePrivilegedUsersEsqlCount(namespace, sourcerDataView)
       }
