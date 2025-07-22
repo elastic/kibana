@@ -380,12 +380,6 @@ src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
-src/platform/packages/private/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/analytics_no_data/types @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/kibana_no_data/impl @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/kibana_no_data/mocks @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/kibana_no_data/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -641,6 +635,12 @@ src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/modal/tabbed @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/analytics_no_data/types @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/kibana_no_data/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/kibana_no_data/mocks @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/kibana_no_data/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/kibana_template/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/kibana_template/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/kibana_template/types @elastic/appex-sharedux
