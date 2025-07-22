@@ -11,7 +11,6 @@ import {
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   getCustomQueryRuleParams,
-  installMockPrebuiltRulesPackage,
   importRules,
   importRulesWithSuccess,
   assertImportedRule,
@@ -34,19 +33,10 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 
   describe('@ess @serverless @skipInServerlessMKI Import with missing fields', () => {
-    before(async () => {
-      await installMockPrebuiltRulesPackage(es, supertest);
-    });
-
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
       await createHistoricalPrebuiltRuleAssetSavedObjects(es, [PREBUILT_RULE_ASSET]);
-    });
-
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
     });
 
     it('imports a non-customized prebuilt rule without rule_source', async () => {
