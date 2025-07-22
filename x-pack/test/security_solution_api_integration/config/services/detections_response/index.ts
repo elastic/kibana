@@ -12,3 +12,4 @@ export * from './route_with_namespace';
 export * from './rules';
 export * from './tasks';
 export * from './wait_for';
+export * from './spaces';

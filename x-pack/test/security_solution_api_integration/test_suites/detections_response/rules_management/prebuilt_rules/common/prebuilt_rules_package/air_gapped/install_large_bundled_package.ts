@@ -12,7 +12,7 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../../utils';
-import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
