@@ -149,6 +149,7 @@ describe('Helpers', () => {
       const expected: FormattedEntry[] = [
         {
           id: '123',
+          negate: false,
           entryIndex: 0,
           field: {
             name: 'field.one',
@@ -171,6 +172,7 @@ describe('Helpers', () => {
       const expected: FormattedEntry[] = [
         {
           id: '123',
+          negate: false,
           entryIndex: 0,
           field: {
             name: 'machine.os',
@@ -200,6 +202,7 @@ describe('Helpers', () => {
       const expected: FormattedEntry[] = [
         {
           id: '123',
+          negate: false,
           entryIndex: 0,
           field: {
             name: 'machine.os',
@@ -237,6 +240,7 @@ describe('Helpers', () => {
       const expected: FormattedEntry[] = [
         {
           id: '123',
+          negate: false,
           field: {
             name: 'machine.os',
             type: 'string',
@@ -262,6 +266,7 @@ describe('Helpers', () => {
         },
         {
           id: '123',
+          negate: false,
           field: {
             name: 'ip',
             type: 'ip',

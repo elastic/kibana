@@ -91,6 +91,7 @@ describe('EntryItem', () => {
         field: 'machine.os',
         type: 'mapping',
         value: 'ip',
+        negate: false,
       },
       0
     );
@@ -133,7 +134,7 @@ describe('EntryItem', () => {
     ).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { id: '123', field: 'ip', type: 'mapping', value: '' },
+      { id: '123', field: 'ip', type: 'mapping', value: '', negate: false },
       0
     );
   });

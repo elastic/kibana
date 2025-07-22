@@ -170,7 +170,7 @@ export const encodeThreatMatchNamedQuery = (
 export const decodeThreatMatchNamedQuery = (encoded: string): DecodedThreatNamedQuery => {
   const queryValues = encoded.split(separator);
   const [id, index, field, value, queryType, negate] = queryValues;
-  const query = { id, index, field, value, queryType, negate: negate === 'negate' };
+  const query = { id, index, field, value, queryType, negate: negate === 'negate' || undefined };
   let isValidQuery = false;
   if (queryType === ThreatMatchQueryType.match) {
     const filterQueryValues = queryValues.filter((v) => v !== 'negate');
