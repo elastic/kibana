@@ -17,10 +17,9 @@ import {
 } from '../../common';
 import { ScoutLogger } from '../../common/services/logger';
 import { ScoutTestOptions } from '../types';
-import { getScoutLogLevel } from '../../common/services/logger';
 
 export async function ingestTestDataHook(config: FullConfig, archives: string[]) {
-  const log = new ScoutLogger('scout: global hook', getScoutLogLevel());
+  const log = new ScoutLogger('scout: global hook');
 
   if (archives.length === 0) {
     log.debug('[setup] no test data to ingest');

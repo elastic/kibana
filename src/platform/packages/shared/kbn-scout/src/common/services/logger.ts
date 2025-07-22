@@ -10,7 +10,40 @@
 import { LogLevel, ToolingLog, LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
 
 export class ScoutLogger extends ToolingLog {
-  constructor(workerContext: string, level: LogLevel) {
+  /**
+   * Creates a ScoutLogger instance.
+   *
+   * Log level resolution priority:
+   *   1. The logLevel argument (if provided)
+   *   2. The SCOUT_LOG_LEVEL environment variable (if set)
+   *   3. The LOG_LEVEL environment variable (if set)
+   *   4. The default log level ('info')
+   *
+   * The log level string is normalized (case-insensitive), and 'quiet' is treated as 'error'.
+   * Only valid log levels from LOG_LEVEL_FLAGS are accepted.
+   *
+   * @param workerContext - Unique context string for the logger
+   * @param logLevel - Optional log level string (highest priority)
+   */
+  constructor(workerContext: string, logLevel?: LogLevel) {
+    // Helper to normalize and resolve log level string
+    const resolveLogLevelFromEnv = (value: string | undefined): LogLevel | undefined => {
+      if (typeof value === 'string' && value) {
+        let normalized = value.toLowerCase();
+        if (normalized === 'quiet') {
+          normalized = 'error';
+        }
+        const found = LOG_LEVEL_FLAGS.find(({ name }) => name === normalized);
+        if (found) return found.name as LogLevel;
+      }
+      return undefined;
+    };
+
+    const level =
+      logLevel ||
+      resolveLogLevelFromEnv(process.env.SCOUT_LOG_LEVEL) ||
+      resolveLogLevelFromEnv(process.env.LOG_LEVEL) ||
+      DEFAULT_LOG_LEVEL;
     super({ level, writeTo: process.stdout }, { context: workerContext });
   }
 
@@ -28,29 +61,4 @@ export class ScoutLogger extends ToolingLog {
   public serviceMessage(name: string, message: string) {
     this.debug(`[${name}] ${message}`);
   }
-}
-
-/**
- * Returns the resolved log level for Scout, prioritizing SCOUT_PW_LOG_LEVEL over LOG_LEVEL,
- * and falling back to DEFAULT_LOG_LEVEL if neither is set or recognized.
- */
-function resolveLogLevel(envValue: string | undefined): LogLevel | undefined {
-  if (typeof envValue === 'string' && envValue) {
-    let normalized = envValue.toLowerCase();
-    // Normalize common aliases for log levels
-    if (normalized === 'quiet') {
-      normalized = 'error';
-    }
-    const found = LOG_LEVEL_FLAGS.find(({ name }) => name === normalized);
-    if (found) return found.name as LogLevel;
-  }
-  return undefined;
-}
-
-export function getScoutLogLevel(): LogLevel {
-  return (
-    resolveLogLevel(process.env.SCOUT_PW_LOG_LEVEL) ||
-    resolveLogLevel(process.env.LOG_LEVEL) ||
-    DEFAULT_LOG_LEVEL
-  );
 }

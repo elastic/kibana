@@ -144,8 +144,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const globalFlags = getFlags(process.argv.slice(2), {
     allowUnexpected: true,
   });
-  // Temporarily use `debug` log level for Playwright tests to better understand test performance issues;
-  // We are going to change it to `info` in the future. Servers are always started in `info` mode by default.
+  // Temporarily use `debug` log level for Playwright tests to better understand performance issues;
+  // We are going to change it to `info` in the future. This change doesn't affect Test Servers logging.
   const logsLevel = pickLevelFromFlags(globalFlags, { default: 'debug' });
 
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
@@ -166,11 +166,11 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
     if (pwProject === 'local') {
       await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, {
-        SCOUT_PW_LOG_LEVEL: logsLevel,
+        SCOUT_LOG_LEVEL: logsLevel,
       });
     } else {
       await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, {
-        SCOUT_PW_LOG_LEVEL: logsLevel,
+        SCOUT_LOG_LEVEL: logsLevel,
       });
     }
 

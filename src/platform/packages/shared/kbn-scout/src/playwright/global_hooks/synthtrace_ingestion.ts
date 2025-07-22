@@ -22,7 +22,6 @@ import { createScoutConfig, measurePerformanceAsync, getEsClient } from '../../c
 import { ScoutLogger } from '../../common/services/logger';
 import { ScoutTestOptions } from '../types';
 import { getSynthtraceClient } from '../../common/services/synthtrace';
-import { getScoutLogLevel } from '../../common/services/logger';
 
 export type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;
 
@@ -40,7 +39,7 @@ const INGESTION_CLIENT_MAP: Record<string, SynthtraceClientTypes> = {
  * @deprecated Use `globalSetupHook` and synthtrace fixtures instead
  */
 export async function ingestSynthtraceDataHook(config: FullConfig, data: SynthtraceIngestionData) {
-  const log = new ScoutLogger('scout: global hook', getScoutLogLevel());
+  const log = new ScoutLogger('scout: global hook');
 
   const { apm, infra } = data;
   const hasApmData = apm.length > 0;
