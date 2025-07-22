@@ -35,7 +35,7 @@ NODE_VARIANT="node-glibc-217/"
 if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
   NODE_VARIANT="node-pointer-compression/"
   # Node.js 22.17.1 with pointer compression enabled
-  sed -i 's#kibana-ci-proxy-cache/dist#kibana-ci-proxy-cache/node-pointer-compression/dist#' WORKSPACE.bazel
+  sed -i 's#kibana-ci-proxy-cache/node-glibc-217/dist#kibana-ci-proxy-cache/node-pointer-compression/dist#' WORKSPACE.bazel
   sed -i 's#"node-v22.17.1-linux-arm64", "37bb596033e6477b5cec845ab18fd02bc6dc8af846f1ace813a005e91298e9ea"#"node-v22.17.1-linux-arm64", "303d5c5986ba5e587350c1012937dab691906e143294e4e72f6c3ee8c0d2eb4b"#' WORKSPACE.bazel
   sed -i 's#"node-v22.17.1-linux-x64", "45431ec948e80f63819de4767581e838119bc9a13daa15805b205f447d086bee"#"node-v22.17.1-linux-x64", "3f701a570adc1d58af85393cb154f5bd363225cdd1658d6dd6b93d2bbfe6f33e"#' WORKSPACE.bazel
   echo ' -- Using Node.js variant with pointer compression enabled'
