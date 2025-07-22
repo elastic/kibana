@@ -836,19 +836,20 @@ const UseBug223981FixRepositionSuggestWidget: FC<
         suggestWidgetModifierClassName
       );
 
+      let originalTopPosition: string | null = null;
+
       suggestionWidget.onDidShow(() => {
         if ($suggestWidgetNode) {
-          const headerOffset = getComputedStyle(document.documentElement).getPropertyValue(
-            '--euiFixedHeadersOffset'
-          );
-
-          $suggestWidgetNode.style.top = `max(${$suggestWidgetNode.style.top}, calc(${headerOffset} + ${euiTheme.size.m}))`;
+          originalTopPosition = $suggestWidgetNode.style.top;
+          const headerOffset = `var(--kbn-layout--application-top, var(--euiFixedHeadersOffset, 0px))`;
+          $suggestWidgetNode.style.top = `max(${originalTopPosition}, calc(${headerOffset} + ${euiTheme.size.m}))`;
           $suggestWidgetNode.classList.remove(suggestWidgetModifierClassName);
         }
       });
       suggestionWidget.onDidHide(() => {
         if ($suggestWidgetNode) {
           $suggestWidgetNode.classList.add(suggestWidgetModifierClassName);
+          $suggestWidgetNode.style.top = originalTopPosition ?? '';
         }
       });
     }
@@ -857,9 +858,10 @@ const UseBug223981FixRepositionSuggestWidget: FC<
   return (
     <React.Fragment>
       <Global
+        // @ts-expect-error -- it's necessary that we apply the important modifier
         styles={{
           [`.${suggestWidgetModifierClassName}`]: {
-            visibility: 'hidden',
+            visibility: 'hidden !important',
           },
         }}
       />
