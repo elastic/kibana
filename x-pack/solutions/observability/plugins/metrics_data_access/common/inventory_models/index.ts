@@ -26,11 +26,13 @@ const catalog = {
   awsS3,
   awsRDS,
   awsSQS,
-};
-
+} as const;
 export const inventoryModels = Object.values(catalog);
+export type InventoryModels = typeof catalog;
 
-export const findInventoryModel = <TType extends InventoryItemType>(type: TType) => {
+export const findInventoryModel = <TType extends keyof InventoryModels>(
+  type: TType
+): InventoryModels[TType] => {
   const model = catalog[type];
   if (!model) {
     throw new Error(

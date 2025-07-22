@@ -9,6 +9,7 @@ import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import type {
   AggregationConfig,
   BaseMetricsCatalog,
+  UnwrapRawConfig,
   MetricConfigEntry,
   MetricConfigMap,
   ResolvedMetricMap,
@@ -25,9 +26,9 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
     this.catalog = this.resolveSchemaMetrics(configCatalog);
   }
   get<K extends keyof ResolvedMetricMap<TConfig>>(key: K): ResolvedMetricMap<TConfig>[K];
-  get(key: string): ResolvedMetricMap<TConfig>[keyof ResolvedMetricMap<TConfig>] | undefined;
-  get(key: string): ResolvedMetricMap<TConfig>[keyof ResolvedMetricMap<TConfig>] | undefined {
-    return this.catalog[key as keyof ResolvedMetricMap<TConfig>];
+  get(key: string): UnwrapRawConfig<TConfig, keyof TConfig> | undefined;
+  get(key: string): UnwrapRawConfig<TConfig, keyof TConfig> | undefined {
+    return this.catalog[key as keyof ResolvedMetricMap<TConfig>] as any;
   }
 
   getAll() {
@@ -40,15 +41,17 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
     }
 
     const catalog = Object.entries(configCatalog).reduce((acc, [key, config]) => {
+      const typedKey = key as keyof TConfig;
+
       if (this.isAggregationWithSchemaVariation(config)) {
-        acc[key as keyof TConfig] = config[this.schema] as any;
+        acc[typedKey] = config[this.schema] as any;
       } else if (this.isFormulaWithSchemaVariation(config)) {
-        acc[key as keyof TConfig] = {
+        acc[typedKey] = {
           ...config,
           value: config.value[this.schema],
         } as any;
-      } else {
-        acc[key as keyof TConfig] = config as any;
+      } else if (this.schema === 'ecs') {
+        acc[typedKey] = config as any;
       }
 
       return acc;

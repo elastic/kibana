@@ -22,11 +22,8 @@ export type SchemaBasedAggregations = Record<SchemaTypes, MetricsUIAggregation>;
 
 export type FormulasConfig = LensBaseLayer | SchemaBasedFormulas;
 export type AggregationConfig = MetricsUIAggregation | SchemaBasedAggregations;
-export type RawMetricEntry = FormulasConfig | AggregationConfig;
-export type MetricConfigMap<T extends RawMetricEntry = RawMetricEntry> = Record<
-  string,
-  MetricConfigEntry<T>
->;
+export type RawConfig = FormulasConfig | AggregationConfig;
+export type MetricConfigMap<T extends RawConfig = RawConfig> = Record<string, MetricConfigEntry<T>>;
 export type AggregationConfigMap = MetricConfigMap<AggregationConfig>;
 export type FormulasConfigMap = MetricConfigMap<FormulasConfig>;
 
@@ -37,7 +34,7 @@ export type SchemaWrappedEntry<T> = T extends AggregationConfig
   ? SchemaBasedFormulas
   : never;
 
-export type MetricConfigEntry<T extends RawMetricEntry = RawMetricEntry> =
+export type MetricConfigEntry<T extends RawConfig = RawConfig> =
   | MetricsUIAggregation
   | LensBaseLayer
   | SchemaWrappedEntry<T>;
@@ -52,11 +49,16 @@ export type ResolvedMetricMap<T extends MetricConfigMap> = {
   [K in keyof T]: UnwrapMetricConfig<T[K]>;
 };
 
-/** catalog types */
-export interface BaseMetricsCatalog<TConfigMap extends MetricConfigMap = MetricConfigMap> {
-  get<K extends keyof ResolvedMetricMap<TConfigMap>>(key: K): ResolvedMetricMap<TConfigMap>[K];
+export type UnwrapRawConfig<T extends MetricConfigMap, K extends keyof T> = UnwrapMetricConfig<
+  T[K]
+>;
 
-  get(key: string): ResolvedMetricMap<TConfigMap>[keyof ResolvedMetricMap<TConfigMap>] | undefined;
+/** catalog types */
+export interface BaseMetricsCatalog<TConfigMap extends MetricConfigMap> {
+  get<K extends keyof ResolvedMetricMap<TConfigMap>>(
+    key: K
+  ): UnwrapRawConfig<TConfigMap, keyof TConfigMap>;
+  get(key: string): UnwrapRawConfig<TConfigMap, keyof TConfigMap> | undefined;
   getAll(): ResolvedMetricMap<TConfigMap>;
 }
 export type AggregationsCatalog<TConfigMap extends AggregationConfigMap> =

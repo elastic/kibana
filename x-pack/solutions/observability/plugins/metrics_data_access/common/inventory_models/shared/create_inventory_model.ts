@@ -13,7 +13,7 @@ import type {
 
 export function createInventoryModel<
   TType extends InventoryItemType,
-  TAggsConfigMap extends AggregationConfigMap = AggregationConfigMap,
+  TAggsConfigMap extends AggregationConfigMap,
   TFormulasConfigMap extends FormulasConfigMap | undefined = undefined,
   TCharts extends LensMetricChartConfig | undefined = undefined
 >(
