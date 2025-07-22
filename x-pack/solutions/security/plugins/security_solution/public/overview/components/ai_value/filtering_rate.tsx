@@ -6,54 +6,45 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiStat,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { formatPercent } from './metrics';
 import { ComparePercentage } from './compare_percentage';
 import { getTimeRangeAsDays } from './utils';
 import * as i18n from './translations';
+import { AlertFilteringTrend } from './alert_filtering_trend';
 
 interface Props {
   filteredAlertsPerc: number;
   filteredAlertsPercCompare: number;
+  attackAlertIds: string[];
   from: string;
   to: string;
+  totalAlerts: number;
 }
 
 export const FilteringRate: React.FC<Props> = ({
+  attackAlertIds,
   filteredAlertsPerc,
   filteredAlertsPercCompare,
   from,
   to,
+  totalAlerts,
 }) => {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+  console.log('AlertFilteringTrendComponent', {
+    filteredAlertsPerc,
+    totalAlerts,
+  });
   return (
-    <EuiPanel paddingSize="l">
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h3>{i18n.FILTERING_RATE}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="visLine" color={colors.vis.euiColorVis4} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiStat title={formatPercent(filteredAlertsPerc)} description={i18n.FILTERING_RATE_DESC} />
-      <EuiSpacer size="s" />
+    <EuiPanel paddingSize="none">
+      <AlertFilteringTrend
+        attackAlertIds={attackAlertIds}
+        totalAlerts={totalAlerts}
+        from={from}
+        to={to}
+      />
       <ComparePercentage
+        description={i18n.FILTERING_RATE_DESC}
+        positionForLens
         currentCount={filteredAlertsPerc}
         previousCount={filteredAlertsPercCompare}
         stat={formatPercent(filteredAlertsPercCompare)}

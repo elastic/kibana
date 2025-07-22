@@ -57,6 +57,8 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
           to={to}
         />
         <FilteringRate
+          attackAlertIds={attackAlertIds}
+          totalAlerts={valueMetrics.totalAlerts}
           filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
           filteredAlertsPercCompare={valueMetricsCompare.filteredAlertsPerc}
           from={from}

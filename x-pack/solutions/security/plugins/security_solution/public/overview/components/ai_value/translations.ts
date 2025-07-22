@@ -11,7 +11,7 @@ export const UP = i18n.translate('xpack.securitySolution.aiValue.up', {
 });
 
 export const DOWN = i18n.translate('xpack.securitySolution.aiValue.down', {
-  defaultMessage: 'up',
+  defaultMessage: 'down',
 });
 
 export const COST_SAVINGS = i18n.translate('xpack.securitySolution.aiValue.costSavings', {

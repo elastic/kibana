@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
-import type { ExtraOptions, LensAttributes } from '../../types';
-export type MyGetLensAttributes = (params: {
-  stackByField?: string;
-  euiTheme: EuiThemeComputed;
-  extraOptions?: ExtraOptions;
-  esql?: string;
-  extra?: React.JSX.Element;
-}) => LensAttributes;
-export const getThreatsDetectedTrendLensAttributes: MyGetLensAttributes = ({ extra }) => {
+import type { GetLensAttributes, LensAttributes } from '../../types';
+
+export const getThreatsDetectedTrendLensAttributes: GetLensAttributes = () => {
   return {
     description: '',
     state: {
