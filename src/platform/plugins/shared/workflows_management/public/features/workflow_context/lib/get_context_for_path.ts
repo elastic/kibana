@@ -21,6 +21,16 @@ function getRootContext(definition: WorkflowYaml): CurrentStepContext {
   };
 }
 
+function getOutputSchema(stepType: string) {
+  // TODO: get output schema for connector
+  if (stepType === 'console.log') {
+    return {
+      message: '',
+    };
+  }
+  return {};
+}
+
 function getAvailableOutputs(
   definition: WorkflowYaml,
   workflowGraph: WorkflowGraph,
@@ -37,7 +47,7 @@ function getAvailableOutputs(
     return {
       ...acc,
       [predecessor]: {
-        // TODO: get output schema for connector
+        output: getOutputSchema(node.type),
       },
     };
   }, {});
