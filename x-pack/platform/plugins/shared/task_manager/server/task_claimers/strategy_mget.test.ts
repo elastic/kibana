@@ -2383,11 +2383,14 @@ describe('TaskClaiming', () => {
         claimOwnershipUntil: new Date(),
       });
 
-      const searchQueryMust = store.msearch.mock.calls[0]?.[0]?.[0].query?.bool?.must;
+      const searchQuery = store.msearch.mock.calls[0]?.[0]?.[0].query;
+      const searchQueryMust = searchQuery?.bool?.must;
 
       expect(Array.isArray(searchQueryMust) && searchQueryMust[1]).toEqual({
         bool: { must: [{ terms: { 'task.taskType': ['foo', 'bar', 'baz'] } }] },
       });
+
+      expect(JSON.stringify(searchQuery)).not.toContain('sampleTaskZeroMaxConcurrency');
     });
   });
 
