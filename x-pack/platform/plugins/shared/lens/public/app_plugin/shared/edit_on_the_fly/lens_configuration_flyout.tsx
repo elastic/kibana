@@ -322,7 +322,7 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         isSaveable={isSaveable}
-        isScrollable={false}
+        isScrollable
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
@@ -367,7 +367,18 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <div ref={editorContainer} />
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              css={css`
+                > * {
+                  flex-grow: 0;
+                }
+              `}
+              gutterSize="none"
+              direction="column"
+              ref={editorContainer}
+            />
+          </EuiFlexItem>
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
