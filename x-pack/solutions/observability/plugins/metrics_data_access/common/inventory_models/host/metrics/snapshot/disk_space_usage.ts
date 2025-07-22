@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AggregationSchemaVariant } from '../../../shared/metrics/types';
+import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
 
-export const diskSpaceUsage: AggregationSchemaVariant = {
+export const diskSpaceUsage: SchemaBasedAggregations = {
   ecs: {
     diskSpaceUsage: { max: { field: 'system.filesystem.used.pct' } },
   },

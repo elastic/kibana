@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AggregationSchemaVariant } from '../../../shared/metrics/types';
+import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
 
-export const load: AggregationSchemaVariant = {
+export const load: SchemaBasedAggregations = {
   ecs: { load: { avg: { field: 'system.load.5' } } },
   semconv: { load: { avg: { field: 'system.cpu.load_average.5m' } } },
 };

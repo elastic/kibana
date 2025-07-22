@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AggregationSchemaVariant } from '../../../shared/metrics/types';
+import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
 
-export const rxV2: AggregationSchemaVariant = {
+export const rxV2: SchemaBasedAggregations = {
   ecs: {
     rx_sum: {
       sum: {

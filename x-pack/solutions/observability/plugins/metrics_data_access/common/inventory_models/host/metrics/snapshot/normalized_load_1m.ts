@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AggregationSchemaVariant } from '../../../shared/metrics/types';
+import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
 
-export const normalizedLoad1m: AggregationSchemaVariant = {
+export const normalizedLoad1m: SchemaBasedAggregations = {
   ecs: {
     load_1m: {
       avg: {

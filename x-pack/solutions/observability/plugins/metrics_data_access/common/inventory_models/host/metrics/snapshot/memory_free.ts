@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AggregationSchemaVariant } from '../../../shared/metrics/types';
-export const memoryFree: AggregationSchemaVariant = {
+import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
+export const memoryFree: SchemaBasedAggregations = {
   ecs: {
     memory_total: {
       max: {
