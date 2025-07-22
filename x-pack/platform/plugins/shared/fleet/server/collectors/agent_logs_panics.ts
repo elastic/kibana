@@ -14,10 +14,6 @@ export interface AgentPanicLogsData {
   agent_logs_panics_last_hour: Array<{ message: string; timestamp: string }>;
 }
 
-interface MaybeLogsDoc {
-  message?: string;
-  '@timestamp'?: string;
-}
 const DEFAULT_LOGS_DATA = {
   agent_logs_panics_last_hour: [],
 };
@@ -29,37 +25,30 @@ export async function getPanicLogsLastHour(
     return DEFAULT_LOGS_DATA;
   }
 
-  const res = await esClient.search<MaybeLogsDoc>({
-    index: AGENT_LOGS_INDEX_PATTERN,
-    size: MAX_MESSAGE_COUNT,
-    sort: [{ '@timestamp': 'desc' }],
-    _source: ['message', '@timestamp'],
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: 'now-1h',
-              },
-            },
-          },
-          {
-            match: {
-              message: 'panic',
-            },
-          },
-        ],
-      },
-    },
-  });
+  try {
+    const esqlQuery = `FROM ${AGENT_LOGS_INDEX_PATTERN} 
+   | KEEP message, @timestamp
+  | WHERE MATCH(message, \"panic\") AND @timestamp >= NOW() - 1 hour
+  | SORT @timestamp DESC
+  | LIMIT ${MAX_MESSAGE_COUNT}`;
 
-  const panicLogsLastHour = res.hits.hits.map((hit) => ({
-    message: hit._source?.message || '',
-    timestamp: hit._source?.['@timestamp'] || '',
-  }));
+    const res = await esClient.esql.query({
+      query: esqlQuery,
+    });
 
-  return {
-    agent_logs_panics_last_hour: panicLogsLastHour,
-  };
+    const panicLogsLastHour = res.values.map((value) => ({
+      message: (value[0] as string) || '',
+      timestamp: (value[1] as string) || '',
+    }));
+
+    return {
+      agent_logs_panics_last_hour: panicLogsLastHour,
+    };
+  } catch (err) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
+      return DEFAULT_LOGS_DATA;
+    } else {
+      throw err;
+    }
+  }
 }

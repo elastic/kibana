@@ -65,7 +65,7 @@ async function getActionResults(
   let acks: EsqlQueryResponse | undefined;
 
   try {
-    const esqlQuery = `FROM ${AGENT_ACTIONS_RESULTS_INDEX} 
+    const esqlQuery = `FROM ${AGENT_ACTIONS_RESULTS_INDEX}
     | WHERE action_id IN (${actions.map((a) => `"${a.actionId}"`).join(', ')}) 
     | KEEP @timestamp, action_id 
     | STATS ack_counts = COUNT(*), max_timestamp = MAX(@timestamp) BY action_id 
@@ -75,7 +75,7 @@ async function getActionResults(
       query: esqlQuery,
     });
   } catch (err) {
-    if (err.statusCode === 404) {
+    if (err.statusCode === 400 && err.message.includes('Unknown index')) {
       // .fleet-actions-results does not yet exist
       appContextService.getLogger().debug(err);
     } else {
@@ -123,7 +123,7 @@ async function getActionResults(
         });
       }
     } catch (err) {
-      if (err.statusCode === 404) {
+      if (err.statusCode === 400 && err.message.includes('Unknown index')) {
         // .fleet-actions-results does not yet exist
         appContextService.getLogger().debug(err);
       } else {
