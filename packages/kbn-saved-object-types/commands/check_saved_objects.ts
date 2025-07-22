@@ -16,19 +16,21 @@ import {
   assertValidUpdates,
 } from '../src/snapshots';
 
-export function checkSavedObjectTypes(baseBranch: string) {
+export function checkSavedObjectTypes(baseBranchSha?: string) {
   run(async ({ log }) => {
     try {
-      log.info(`Fetching snapshot for base branch '${baseBranch}'`);
-      const baseBranchSnapshot = await fetchBaseBranchSnapshot({ log, baseBranch });
+      log.info(`Fetching snapshot for base branch '${baseBranchSha}'`);
+      const baseBranchSnapshot = await fetchBaseBranchSnapshot({ log, gitRev: baseBranchSha });
       log.info(`Fetching snapshot for current serverless release`);
       const latestServerlessSnapshot = await fetchLatestServerlessSnapshot({ log });
       log.info(`Starting ES + Kibana to capture current SO type definitions`);
       const currentSnapshot = await takeSnapshot({ log });
 
-      log.info(`Checking SO type updates between base branch and current branch`);
-      assertValidUpdates({ log, from: baseBranchSnapshot, to: currentSnapshot });
-      log.info('✅ Current SO type definitions are compatible with the base branch');
+      if (baseBranchSnapshot) {
+        log.info(`Checking SO type updates between base branch and current branch`);
+        assertValidUpdates({ log, from: baseBranchSnapshot, to: currentSnapshot });
+        log.info('✅ Current SO type definitions are compatible with the base branch');
+      }
 
       log.info(`Checking SO type updates between current serverless release and current branch`);
       assertValidUpdates({ log, from: latestServerlessSnapshot, to: currentSnapshot });

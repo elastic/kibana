@@ -9,15 +9,14 @@
 
 require('../src/setup_node_env');
 
-if (process.argv.length !== 3) {
+if (process.argv.length !== 2) {
   var scriptName = process.argv[1].replace(/^.*scripts\//, 'scripts/');
 
   console.log(`
-    Usage: node ${scriptName} <baseBranch>
-    e.g. node ${scriptName} main
+    Usage: node ${scriptName}
 
     Compares the saved object type definitions from the current branch (current working tree) against:
-    - The latest snapshot from baseBranch.
+    - A snapshot from the base branch of the PR (based on the merge-base commit, if available).
     - The latest Serverless release snapshot.
 
     It performs various sanity checks to ensure that current changes (if any) are not breaking the Saved Object migrations.
@@ -26,5 +25,4 @@ if (process.argv.length !== 3) {
   process.exit(0);
 }
 
-var baseBranch = process.argv[2];
-require('@kbn/saved-object-types').checkSavedObjectTypes(baseBranch);
+require('@kbn/saved-object-types').checkSavedObjectTypes(process.env.GITHUB_PR_MERGE_BASE);
