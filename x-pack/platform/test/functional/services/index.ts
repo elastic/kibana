@@ -5,54 +5,57 @@
  * 2.0.
  */
 
-import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
+import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
-import { UserMenuProvider } from './user_menu';
+import { ReportingFunctionalProvider } from '../../reporting_functional/services';
 import { AceEditorProvider } from './ace_editor';
-import { SampleDataServiceProvider } from './sample_data';
-import { GrokDebuggerProvider } from './grok_debugger';
-import { SearchSessionsService } from './search_sessions';
-import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
 import { AiopsProvider } from './aiops';
-import { RulesServiceProvider } from './rules';
 import { CanvasElementProvider } from './canvas_element';
+import { CasesServiceProvider } from './cases';
+import { DataStreamProvider } from './data_stream';
+import { GrokDebuggerProvider } from './grok_debugger';
 import { MachineLearningProvider } from './ml';
+import { PipelineEditorProvider } from './pipeline_editor';
+import { PipelineListProvider } from './pipeline_list';
+import { RandomProvider } from './random';
+import { RulesServiceProvider } from './rules';
+import { SampleDataServiceProvider } from './sample_data';
+import { SearchSessionsService } from './search_sessions';
 import { TransformProvider } from './transform';
-import { ReportingFunctionalProvider } from '../../reporting_functional/services';
+import { UserMenuProvider } from './user_menu';
 
 import {
-  MonitoringNoDataProvider,
+  MonitoringAlertsProvider,
+  MonitoringBeatDetailProvider,
+  MonitoringBeatsListingProvider,
+  MonitoringBeatsOverviewProvider,
+  MonitoringBeatsSummaryStatusProvider,
+  MonitoringClusterAlertsProvider,
   MonitoringClusterListProvider,
   MonitoringClusterOverviewProvider,
-  MonitoringClusterAlertsProvider,
-  MonitoringElasticsearchSummaryStatusProvider,
-  MonitoringElasticsearchOverviewProvider,
-  MonitoringElasticsearchNodesProvider,
-  MonitoringElasticsearchNodeDetailProvider,
-  MonitoringElasticsearchIndicesProvider,
   MonitoringElasticsearchIndexDetailProvider,
+  MonitoringElasticsearchIndicesProvider,
+  MonitoringElasticsearchNodeDetailProvider,
+  MonitoringElasticsearchNodesProvider,
+  MonitoringElasticsearchOverviewProvider,
   MonitoringElasticsearchShardsProvider,
-  MonitoringBeatsOverviewProvider,
-  MonitoringBeatsListingProvider,
-  MonitoringBeatDetailProvider,
-  MonitoringBeatsSummaryStatusProvider,
-  MonitoringLogstashOverviewProvider,
-  MonitoringLogstashNodesProvider,
+  MonitoringElasticsearchSummaryStatusProvider,
+  MonitoringEnterpriseSearchOverviewProvider,
+  MonitoringEnterpriseSearchSummaryStatusProvider,
+  MonitoringKibanaInstanceProvider,
+  MonitoringKibanaInstancesProvider,
+  MonitoringKibanaOverviewProvider,
+  MonitoringKibanaSummaryStatusProvider,
   MonitoringLogstashNodeDetailProvider,
+  MonitoringLogstashNodesProvider,
+  MonitoringLogstashOverviewProvider,
   MonitoringLogstashPipelinesProvider,
   MonitoringLogstashPipelineViewerProvider,
   MonitoringLogstashSummaryStatusProvider,
-  MonitoringKibanaOverviewProvider,
-  MonitoringKibanaInstancesProvider,
-  MonitoringKibanaInstanceProvider,
-  MonitoringKibanaSummaryStatusProvider,
+  MonitoringNoDataProvider,
   MonitoringSetupModeProvider,
-  MonitoringAlertsProvider,
-  MonitoringEnterpriseSearchOverviewProvider,
-  MonitoringEnterpriseSearchSummaryStatusProvider,
-  // @ts-ignore not ts yet
 } from './monitoring';
 
 // define the name and providers for services that should be
@@ -78,6 +81,10 @@ export const services = {
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
+  random: RandomProvider,
+  pipelineList: PipelineListProvider,
+  pipelineEditor: PipelineEditorProvider,
+  dataStreams: DataStreamProvider,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,
   monitoringClusterOverview: MonitoringClusterOverviewProvider,
