@@ -12,7 +12,12 @@ import { AuthType, SSLCertType } from './constants';
 
 export const authTypeSchema = schema.maybe(
   schema.oneOf(
-    [schema.literal(AuthType.Basic), schema.literal(AuthType.SSL), schema.literal(null)],
+    [
+      schema.literal(AuthType.Basic),
+      schema.literal(AuthType.SSL),
+      schema.literal(AuthType.OAuth2ClientCredentials),
+      schema.literal(null),
+    ],
     {
       defaultValue: AuthType.Basic,
     }
@@ -31,6 +36,10 @@ export const AuthConfiguration = {
   verificationMode: schema.maybe(
     schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
   ),
+  accessTokenUrl: schema.maybe(schema.string()),
+  clientId: schema.maybe(schema.string()),
+  scope: schema.maybe(schema.string()),
+  additionalFields: schema.maybe(schema.string()),
 };
 
 export const SecretConfiguration = {
@@ -39,6 +48,7 @@ export const SecretConfiguration = {
   crt: schema.nullable(schema.string()),
   key: schema.nullable(schema.string()),
   pfx: schema.nullable(schema.string()),
+  clientSecret: schema.nullable(schema.string()),
 };
 
 export const SecretConfigurationSchemaValidation = {
@@ -76,16 +86,9 @@ export const SecretConfigurationSchemaValidation = {
     )
       return;
 
-    if ('clientSecret' in secrets) {
-      return i18n.translate('xpack.stackConnectors.webhook.invalidSecretsWithOauth', {
-        defaultMessage:
-          'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)',
-      });
-    }
-
-    return i18n.translate('xpack.stackConnectors.webhook.invalidSecrets', {
+    return i18n.translate('xpack.stackConnectors.webhook.invalidSecretsWithOauth', {
       defaultMessage:
-        'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)',
+        'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)',
     });
   },
 };

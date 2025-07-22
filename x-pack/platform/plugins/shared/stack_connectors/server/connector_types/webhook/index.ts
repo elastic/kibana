@@ -39,8 +39,9 @@ import type {
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import type { Result } from '../lib/result_type';
 import { isOk, promiseResult } from '../lib/result_type';
-import { ConfigSchema, ParamsSchema, SecretsSchema } from './schema';
+import { ConfigSchema, ParamsSchema } from './schema';
 import { buildConnectorAuth } from '../../../common/auth/utils';
+import { SecretConfigurationSchema } from '../../../common/auth/schema';
 import { AuthType } from '../../../common/auth/constants';
 
 export const ConnectorTypeId = '.webhook';
@@ -64,7 +65,7 @@ export function getConnectorType(): WebhookConnectorType {
         customValidator: validateConnectorTypeConfig,
       },
       secrets: {
-        schema: SecretsSchema,
+        schema: SecretConfigurationSchema,
       },
       params: {
         schema: ParamsSchema,

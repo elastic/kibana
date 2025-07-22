@@ -18,6 +18,7 @@ describe('SecretConfigurationSchemaValidation', () => {
         crt: null,
         key: null,
         pfx: null,
+        clientSecret: null,
       });
       expect(result).toBeUndefined();
     });
@@ -29,6 +30,7 @@ describe('SecretConfigurationSchemaValidation', () => {
         crt: null,
         key: null,
         pfx: null,
+        clientSecret: null,
       });
       expect(result).toBeUndefined();
     });
@@ -40,6 +42,7 @@ describe('SecretConfigurationSchemaValidation', () => {
         crt: 'certificate-content',
         key: 'key-content',
         pfx: null,
+        clientSecret: null,
       });
       expect(result).toBeUndefined();
     });
@@ -51,6 +54,7 @@ describe('SecretConfigurationSchemaValidation', () => {
         crt: 'certificate-content',
         key: 'key-content',
         pfx: null,
+        clientSecret: null,
       });
       expect(result).toBeUndefined();
     });
@@ -62,6 +66,7 @@ describe('SecretConfigurationSchemaValidation', () => {
         crt: null,
         key: null,
         pfx: 'pfx-content',
+        clientSecret: null,
       });
       expect(result).toBeUndefined();
     });
@@ -73,101 +78,11 @@ describe('SecretConfigurationSchemaValidation', () => {
         crt: null,
         key: null,
         pfx: 'pfx-content',
+        clientSecret: null,
       });
       expect(result).toBeUndefined();
     });
-  });
 
-  describe('invalid configurations', () => {
-    const errorMessage =
-      'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)';
-
-    it('should reject mixed basic auth and SSL certificate', () => {
-      const result = validate({
-        user: 'username',
-        password: 'password',
-        crt: 'certificate-content',
-        key: 'key-content',
-        pfx: null,
-      });
-      expect(result).toBe(errorMessage);
-    });
-
-    it('should reject mixed basic auth and PFX certificate', () => {
-      const result = validate({
-        user: 'username',
-        password: 'password',
-        crt: null,
-        key: null,
-        pfx: 'pfx-content',
-      });
-      expect(result).toBe(errorMessage);
-    });
-
-    it('should reject mixed SSL certificate and PFX certificate', () => {
-      const result = validate({
-        user: null,
-        password: null,
-        crt: 'certificate-content',
-        key: 'key-content',
-        pfx: 'pfx-content',
-      });
-      expect(result).toBe(errorMessage);
-    });
-
-    it('should reject incomplete basic auth (missing password)', () => {
-      const result = validate({
-        user: 'username',
-        password: null,
-        crt: null,
-        key: null,
-        pfx: null,
-      });
-      expect(result).toBe(errorMessage);
-    });
-
-    it('should reject incomplete basic auth (missing username)', () => {
-      const result = validate({
-        user: null,
-        password: 'password',
-        crt: null,
-        key: null,
-        pfx: null,
-      });
-      expect(result).toBe(errorMessage);
-    });
-
-    it('should reject incomplete SSL certificate (missing key)', () => {
-      const result = validate({
-        user: null,
-        password: null,
-        crt: 'certificate-content',
-        key: null,
-        pfx: null,
-      });
-      expect(result).toBe(errorMessage);
-    });
-
-    it('should reject incomplete SSL certificate (missing certificate)', () => {
-      const result = validate({
-        user: null,
-        password: null,
-        crt: null,
-        key: 'key-content',
-        pfx: null,
-      });
-      expect(result).toBe(errorMessage);
-    });
-  });
-});
-
-describe('SecretConfigurationSchemaValidation (with OAuth2 clientSecret)', () => {
-  const errorMessage =
-    'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)';
-
-  const { validate } = SecretConfigurationSchemaValidation;
-
-  describe('valid configurations', () => {
     it('should accept OAuth2 credentials', () => {
       const result = validate({
         user: null,
@@ -182,6 +97,9 @@ describe('SecretConfigurationSchemaValidation (with OAuth2 clientSecret)', () =>
   });
 
   describe('invalid configurations', () => {
+    const errorMessage =
+      'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)';
+
     it('should reject mixed basic auth and SSL certificate', () => {
       const result = validate({
         user: 'username',
