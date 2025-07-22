@@ -76,7 +76,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
   return (
     <div data-test-subj="genAiSettingsPage">
       <EuiTitle size="l">
-        <h2>
+        <h2 data-test-subj="genAiSettingsTitle">
           {i18n.translate('xpack.genAiSettings.pageTitle', {
             defaultMessage: 'GenAI Settings',
           })}
@@ -86,6 +86,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
       <EuiPageSection>
         <EuiPanel hasBorder grow={false}>
           <EuiDescribedFormGroup
+            data-test-subj="connectorsSection"
             fullWidth
             title={
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -94,7 +95,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <h3>
+                    <h3 data-test-subj="connectorsTitle">
                       {i18n.translate('genAiSettings.aiConnectorLabel', {
                         defaultMessage: 'AI Connector',
                       })}
@@ -138,7 +139,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
                   <EuiButton
                     iconType="popout"
                     iconSide="right"
-                    data-test-subj="genAiSettingsGoToConnectorsButton"
+                    data-test-subj="manageConnectorsLink"
                     href={getConnectorsManagementHref(http)}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -157,8 +158,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({
           {showSpacesIntegration && (
             <EuiDescribedFormGroup
               fullWidth
+              data-test-subj="aiFeatureVisibilitySection"
               title={
-                <h3>
+                <h3 data-test-subj="aiFeatureVisibilityTitle">
                   {i18n.translate('genAiSettings.aiFeatureVisibilityLabel', {
                     defaultMessage: 'AI feature visibility',
                   })}

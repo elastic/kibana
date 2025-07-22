@@ -30,11 +30,7 @@ export const GoToSpacesButton: React.FC<GoToSpacesButtonProps> = ({
     <EuiButton
       iconType="popout"
       iconSide="right"
-      data-test-subj={
-        navigateToPermissions
-          ? 'genAiSettingsGoToPermissionsTabButton'
-          : 'genAiSettingsGoToSpacesButton'
-      }
+      data-test-subj={navigateToPermissions ? 'goToPermissionsTabButton' : 'goToSpacesButton'}
       href={getUrlForSpaces(navigateToPermissions)}
       target="_blank"
       rel="noopener noreferrer"
