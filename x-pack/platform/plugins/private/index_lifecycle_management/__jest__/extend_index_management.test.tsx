@@ -199,6 +199,7 @@ const indexWithNonExistentPolicyError: Index = {
     index: 'testy3',
     managed: true,
     policy: 'testy',
+    phase: 'hot',
     index_creation_date_millis: 1753074916462,
     step: 'ERROR',
     step_info: {
