@@ -60,7 +60,7 @@ export const sanitizeToolId = (toolId: string): string => {
  *
  * Handles id sanitization (e.g. removing dot prefixes), and potential id conflict.
  */
-export const createToolIdMappings = (tools: ExecutableTool[]): ToolIdMapping => {
+export const createToolIdMappings = <T extends { id: string }>(tools: T[]): ToolIdMapping => {
   const toolIds = new Set<string>();
   const mapping: ToolIdMapping = new Map();
 
