@@ -15,7 +15,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
+} from '@kbn/test-suites-xpack/security_solution_api_integration/config/services/detections_response';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 
 import {
