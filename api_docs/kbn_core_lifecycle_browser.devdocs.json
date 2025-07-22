@@ -464,10 +464,6 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
-              },
-              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/plugins/browser-internal/src/plugins_service.test.ts"
               },

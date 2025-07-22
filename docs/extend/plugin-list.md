@@ -99,6 +99,8 @@ mapped_pages:
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
+| [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | WARNING: Missing or empty README. |
+| [workflowsManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_management/README.md) | This directory contains the foundational structure for the Workflows plugin. |
 
 ## x-pack/plugins [_x_packplugins]
 
@@ -147,7 +149,7 @@ mapped_pages:
 | [globalSearch](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/global_search/README.md) | The GlobalSearch plugin provides an easy way to search for various objects, such as applications or dashboards from the Kibana instance, from both server and client-side plugins |
 | [globalSearchBar](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/global_search_bar/README.md) | The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.) |
 | [globalSearchProviders](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/global_search_providers/README.md) | The globalSearchProviders plugin provides Kibana default search providers for the GlobalSearch plugin. |
-| [graph](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/graph/README.md) | This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests. |
+| [graph](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/graph/README.md) | This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/platform/test/functional/apps/graph contains additional functional tests. |
 | [grokdebugger](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/grokdebugger/README.md) | This plugin helps users define Grok patterns, which are particularly useful for ingesting logs. |
 | [indexLifecycleManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/index_lifecycle_management/README.md) | You can test that the Frozen badge, phase filtering, and lifecycle information is surfaced in Index Management by running this series of requests in Console: |
 | [indexManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/index_management/README.md) | This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page. |
