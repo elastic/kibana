@@ -28,7 +28,7 @@ import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
 import { withDiagnoseButton } from './with_diagnose_button';
-import { DiagnosticFlyout } from '../diagnostic_flyout';
+import { DiagnosticFlyout } from '../diagnostic_tool/diagnostic_flyout';
 
 function getContentsComponent(
   selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition

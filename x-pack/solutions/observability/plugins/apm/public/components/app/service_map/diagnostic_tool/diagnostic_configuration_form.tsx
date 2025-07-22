@@ -20,19 +20,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { SuggestionsSelect } from '../../shared/suggestions_select';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../hooks/use_time_range';
+import { SuggestionsSelect } from '../../../shared/suggestions_select';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import {
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+} from '../../../../../common/es_fields/apm';
 
-interface DiagnoseMissingConnectionPanelProps {
-  onRunDiagnostic: (traceId: string, service: string, dependencyService: string) => void;
+interface DiagnosticConfigurationFormProps {
   selectedNode: cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined;
+  onSelectionUpdate: (fields: Record<string, string>, traceId?: string) => void;
 }
 
-export function DiagnoseMissingConnectionPanel({
-  onRunDiagnostic,
+export function DiagnosticConfigurationForm({
   selectedNode,
-}: DiagnoseMissingConnectionPanelProps) {
+  onSelectionUpdate,
+}: DiagnosticConfigurationFormProps) {
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
@@ -42,49 +46,41 @@ export function DiagnoseMissingConnectionPanel({
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const [traceId, setTraceId] = useState('');
-  const [selectedService, setSelectedService] = useState('');
-  const [selectedDependency, setSelectedDependency] = useState('');
 
-  // State for managing dropdown field selections and values
   const [selectedFields, setSelectedFields] = useState<string[]>([
-    'service.name',
-    'span.destination.service.resource',
+    SERVICE_NAME,
+    SPAN_DESTINATION_SERVICE_RESOURCE,
   ]);
   const [selectedValues, setSelectedValues] = useState<string[]>(['', '']);
 
-  const handleRunDiagnostic = () => {
-    onRunDiagnostic(traceId, selectedService, selectedDependency);
+  const updateArrayAtIndex = <T,>(array: T[], index: number, value: T): T[] => {
+    return array.map((item, i) => (i === index ? value : item));
   };
 
-  const onChangeField = (fieldName: string, index: number) => {
-    const newSelectedFields = [...selectedFields];
-    newSelectedFields[index] = fieldName;
-    setSelectedFields(newSelectedFields);
+  // Update parent component when selections change
+  React.useEffect(() => {
+    const fields: Record<string, string> = {};
+    selectedFields.forEach((field, index) => {
+      if (field && selectedValues[index]) {
+        fields[field] = selectedValues[index];
+      }
+    });
 
-    // Reset the value when field changes to trigger new suggestions
-    const newSelectedValues = [...selectedValues];
-    newSelectedValues[index] = '';
-    setSelectedValues(newSelectedValues);
+    onSelectionUpdate(fields, traceId);
+  }, [selectedFields, selectedValues, traceId, onSelectionUpdate]);
+
+  const onChangeField = (fieldName: string, index: number) => {
+    setSelectedFields((prev) => updateArrayAtIndex(prev, index, fieldName));
+    setSelectedValues((prev) => updateArrayAtIndex(prev, index, ''));
   };
 
   const onChangeValue = (value: string, index: number) => {
-    const newSelectedValues = [...selectedValues];
-    newSelectedValues[index] = value;
-    setSelectedValues(newSelectedValues);
-
-    // Update the appropriate state based on index
-    if (index === 0) {
-      setSelectedService(value);
-    } else {
-      setSelectedDependency(value);
-    }
+    setSelectedValues((prev) => updateArrayAtIndex(prev, index, value));
   };
 
-  const isRunDisabled = !traceId && !selectedService && !selectedDependency;
-
   const fieldOptions: EuiSelectOption[] = [
-    { value: 'service.name', text: 'service.name' },
-    { value: 'span.destination.service.resource', text: 'span.destination.service.resource' },
+    { value: SERVICE_NAME, text: SERVICE_NAME },
+    { value: SPAN_DESTINATION_SERVICE_RESOURCE, text: SPAN_DESTINATION_SERVICE_RESOURCE },
   ];
 
   const steps = [
@@ -215,10 +211,10 @@ export function DiagnoseMissingConnectionPanel({
           })}
         </h3>
       </EuiTitle>
+
       <EuiSpacer size="s" />
       <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiSpacer size="s" />
-
         <EuiSteps headingElement="h2" steps={steps} />
       </EuiPanel>
     </>
