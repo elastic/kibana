@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const ContextRegistryConfigSchema = schema.object({
   unsafe: schema.maybe(
     schema.object({
-      caseSuggestionsEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
+      contextRegistryEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
     })
   ),
 });
