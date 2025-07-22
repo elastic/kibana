@@ -10,7 +10,9 @@
 import { TypeOf } from '@kbn/config-schema';
 import {
   CreateIn,
+  CreateResult,
   GetIn,
+  GetResult,
   SearchIn,
   SearchResult,
   UpdateIn,
@@ -23,12 +25,14 @@ import {
   sectionSchema,
   dashboardCreateOptionsSchema,
   dashboardCreateResultSchema,
-  dashboardGetResultSchema,
   dashboardSearchOptionsSchema,
   dashboardSearchResultsSchema,
   dashboardUpdateOptionsSchema,
   optionsSchema,
   dashboardAttributesSchemaRequest,
+  dashboardGetResultMetaSchema,
+  dashboardCreateResultDataSchema,
+  dashboardCreateResultMetaSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
@@ -56,16 +60,28 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
-export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;
+export type DashboardGetOut = GetResult<
+  TypeOf<typeof dashboardItemSchema>,
+  TypeOf<typeof dashboardGetResultMetaSchema>
+>;
 
 export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardAttributes>;
-export type DashboardCreateOut = TypeOf<typeof dashboardCreateResultSchema>;
+export type DashboardCreateOut = CreateResult<
+  TypeOf<typeof dashboardCreateResultDataSchema>,
+  TypeOf<typeof dashboardCreateResultMetaSchema>
+>;
 export type DashboardCreateOptions = TypeOf<typeof dashboardCreateOptionsSchema>;
 
 export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardAttributes>>;
-export type DashboardUpdateOut = TypeOf<typeof dashboardCreateResultSchema>;
+export type DashboardUpdateOut = CreateResult<
+  TypeOf<typeof dashboardCreateResultDataSchema>,
+  TypeOf<typeof dashboardCreateResultMetaSchema>
+>;
 export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>;
 
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
-export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
+export type DashboardSearchOut = SearchResult<
+  TypeOf<typeof dashboardCreateResultDataSchema>,
+  TypeOf<typeof dashboardCreateResultMetaSchema>
+>;

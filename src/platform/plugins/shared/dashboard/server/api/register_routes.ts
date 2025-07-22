@@ -22,7 +22,10 @@ import {
   referenceSchema,
   DashboardItem,
 } from '../content_management/v1';
-import { dashboardCreateRequestAttributesSchema } from '../content_management/v1/cm_services';
+import {
+  dashboardAttributesSchemaRequest,
+  dashboardCreateRequestAttributesSchema,
+} from '../content_management/v1/cm_services';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -122,7 +125,7 @@ export function registerAPIRoutes({
         return res.badRequest({ body: e });
       }
 
-      return res.ok({ body: result.item });
+      return res.ok({ body: result });
     }
   );
 
@@ -144,10 +147,7 @@ export function registerAPIRoutes({
               meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
-          body: schema.object({
-            attributes: dashboardCreateRequestAttributesSchema,
-            references: schema.maybe(schema.arrayOf(referenceSchema)),
-          }),
+          body: dashboardAttributesSchemaRequest,
         },
         response: {
           200: {
@@ -157,7 +157,7 @@ export function registerAPIRoutes({
       },
     },
     async (ctx, req, res) => {
-      const { attributes, references } = req.body;
+      const { references, ...attributes } = req.body;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, LATEST_VERSION);
@@ -175,7 +175,7 @@ export function registerAPIRoutes({
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
         }
-        return res.badRequest(e.message);
+        return res.badRequest({ body: e.output.payload });
       }
       return res.ok({ body: result });
     }

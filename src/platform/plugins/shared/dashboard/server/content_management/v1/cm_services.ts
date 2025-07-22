@@ -376,10 +376,13 @@ export const dashboardUpdateOptionsSchema = schema.object({
   mergeAttributes: schema.maybe(updateOptionsSchema.mergeAttributes),
 });
 
+export const dashboardCreateResultDataSchema = dashboardAttributesSchemaResponse;
+export const dashboardCreateResultMetaSchema = dashboardResponseMetaSchema;
+
 export const dashboardCreateResultSchema = schema.oneOf([
   schema.object({
-    data: dashboardAttributesSchemaResponse,
-    meta: dashboardResponseMetaSchema,
+    data: dashboardCreateResultDataSchema,
+    meta: dashboardCreateResultMetaSchema,
   }),
   schema.object(
     {
@@ -391,26 +394,25 @@ export const dashboardCreateResultSchema = schema.oneOf([
 
 export const dashboardItemSchema = dashboardCreateResultSchema;
 
+const dashboardGetResultMetaSchemaSettings = {
+  outcome: schema.oneOf([
+    schema.literal('exactMatch'),
+    schema.literal('aliasMatch'),
+    schema.literal('conflict'),
+  ]),
+  aliasTargetId: schema.maybe(schema.string()),
+  aliasPurpose: schema.maybe(
+    schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
+  ),
+};
+export const dashboardGetResultMetaSchema = schema.object(dashboardGetResultMetaSchemaSettings, {
+  unknowns: 'forbid',
+});
+
 export const dashboardGetResultSchema = schema.object(
   {
-    data: dashboardItemSchema,
-    meta: schema.object(
-      {
-        outcome: schema.oneOf([
-          schema.literal('exactMatch'),
-          schema.literal('aliasMatch'),
-          schema.literal('conflict'),
-        ]),
-        aliasTargetId: schema.maybe(schema.string()),
-        aliasPurpose: schema.maybe(
-          schema.oneOf([
-            schema.literal('savedObjectConversion'),
-            schema.literal('savedObjectImport'),
-          ])
-        ),
-      },
-      { unknowns: 'forbid' }
-    ),
+    data: dashboardCreateResultDataSchema,
+    meta: dashboardCreateResultMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
   },
   { unknowns: 'forbid' }
 );
@@ -446,7 +448,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: dashboardUpdateOptionsSchema,
       },
       data: {
-        schema: dashboardAttributesSchema,
+        schema: dashboardCreateRequestAttributesSchema,
       },
     },
   },

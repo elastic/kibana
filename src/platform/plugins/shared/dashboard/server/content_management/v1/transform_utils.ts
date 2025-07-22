@@ -18,7 +18,7 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-type SavedObjectToItemReturn<T> =
+export type SavedObjectToItemReturn<T> =
   | {
       item: T;
       error: null;

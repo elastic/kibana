@@ -17,13 +17,13 @@ import { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
+import { TypeOf } from '@kbn/config-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { savedObjectToItem, transformDashboardIn } from './latest';
 import type {
   DashboardAttributes,
-  DashboardItem,
   DashboardCreateOut,
   DashboardCreateOptions,
   DashboardGetOut,
@@ -32,6 +32,11 @@ import type {
   DashboardUpdateOut,
   DashboardSearchOptions,
 } from './latest';
+import {
+  dashboardCreateResultDataSchema,
+  dashboardCreateResultMetaSchema,
+  dashboardGetResultSchema,
+} from './v1/cm_services';
 
 const getRandomColor = (): string => {
   return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
@@ -173,7 +178,15 @@ export class DashboardStorage {
     return combinedTagNames;
   }
 
-  async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
+  async get(
+    ctx: StorageContext,
+    id: string
+  ): Promise<
+    CreateResult<
+      TypeOf<typeof dashboardCreateResultDataSchema>,
+      TypeOf<typeof dashboardCreateResultMetaSchema>
+    >
+  > {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
@@ -194,7 +207,15 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
 
-    const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
+    // Handle the null case
+    if (!item || !('data' in item)) {
+      throw Boom.badRequest('No item returned from savedObjectToItem');
+    }
+
+    const response: TypeOf<typeof dashboardGetResultSchema> = {
+      data: item.data,
+      meta: { ...item.meta, aliasPurpose, aliasTargetId, outcome },
+    };
 
     const validationError = transforms.get.out.result.validate(response);
     if (validationError) {
@@ -207,8 +228,8 @@ export class DashboardStorage {
 
     // Validate response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<
-      DashboardGetOut,
-      DashboardGetOut
+      TypeOf<typeof dashboardGetResultSchema>,
+      TypeOf<typeof dashboardGetResultSchema>
     >(
       response,
       undefined, // do not override version
@@ -294,13 +315,19 @@ export class DashboardStorage {
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.create.out.result.down<
-      CreateResult<DashboardItem>
+      CreateResult<
+        TypeOf<typeof dashboardCreateResultDataSchema>,
+        TypeOf<typeof dashboardCreateResultMetaSchema>
+      >,
+      CreateResult<
+        TypeOf<typeof dashboardCreateResultDataSchema>,
+        TypeOf<typeof dashboardCreateResultMetaSchema>
+      >
     >(
-      { item },
+      item,
       undefined, // do not override version
       { validate: false } // validation is done above
     );
-
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
@@ -335,7 +362,6 @@ export class DashboardStorage {
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
-
     const {
       attributes: soAttributes,
       references: soReferences,
@@ -380,7 +406,7 @@ export class DashboardStorage {
       DashboardUpdateOut,
       DashboardUpdateOut
     >(
-      { item },
+      item,
       undefined, // do not override version
       { validate: false } // validation is done above
     );
@@ -388,7 +414,7 @@ export class DashboardStorage {
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-
+    console.log('DashboardStorage.update------', JSON.stringify(value, null, 2));
     return value;
   }
 
