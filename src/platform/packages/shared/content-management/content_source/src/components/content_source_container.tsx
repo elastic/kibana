@@ -29,17 +29,21 @@ export const ContentSourceContainer = ({ getContent }: ContentSourceContainerPro
         .then((_content) =>
           setContent((prevState) => ({
             ...prevState,
-            loading: false,
             content: _content,
           }))
         )
         .catch((err) =>
           setContent((prevState) => ({
             ...prevState,
-            loading: false,
             error: err,
           }))
-        );
+        )
+        .finally(() => {
+          setContent((prevState) => ({
+            ...prevState,
+            loading: false,
+          }));
+        });
     };
 
     loadContent();
