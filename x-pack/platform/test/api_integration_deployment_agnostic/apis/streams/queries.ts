@@ -20,7 +20,7 @@ import { RoleCredentials } from '../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const alertingApi = getService('alertingApi');
+  const alertingApi = getService('alertingApiCommon');
   const samlAuth = getService('samlAuth');
   const kibanaServer = getService('kibanaServer');
   let roleAuthc: RoleCredentials;
