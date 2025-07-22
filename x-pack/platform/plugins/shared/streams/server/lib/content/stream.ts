@@ -81,31 +81,27 @@ export function prepareStreamsForImport({
 
   const streamObjects = entries.map(({ name, request }) => {
     if (name === ROOT_STREAM_ID) {
-      // merge imported root stream's routing and fields with the new root.
-      // if it already routes to an imported destination, we overwrite the
-      // existing condition
-      const rootRouting = [...root.request.stream.ingest.wired.routing];
-      prepareIncludedDestinations(request.stream.ingest.wired.routing).forEach((definition) => {
-        const pos = rootRouting.findIndex(
-          ({ destination }) => destination === definition.destination
-        );
-        if (pos === -1) {
-          rootRouting.push(definition);
-        } else {
-          rootRouting.splice(pos, 1, definition);
-        }
-      });
+      const rootRouting = root.request.stream.ingest.wired.routing;
+      const importedRouting = prepareIncludedDestinations(request.stream.ingest.wired.routing);
+      assertNoConflictingRouting(rootRouting, importedRouting);
 
-      // merge imported root stream's fields with the new root
-      const rootFields = {
-        ...root.request.stream.ingest.wired.fields,
-        ...Object.keys(request.stream.ingest.wired.fields)
-          .filter((field) => !baseFields[field])
-          .reduce((fields, field) => {
-            fields[field] = request.stream.ingest.wired.fields[field];
-            return fields;
-          }, {} as FieldDefinition),
-      };
+      const rootFields = root.request.stream.ingest.wired.fields;
+      const importedFields = Object.keys(request.stream.ingest.wired.fields)
+        .filter((field) => !baseFields[field])
+        .reduce((fields, field) => {
+          fields[field] = request.stream.ingest.wired.fields[field];
+          return fields;
+        }, {} as FieldDefinition);
+      assertNoConflictingFields(rootFields, importedFields);
+
+      const mergedRouting = [
+        ...rootRouting,
+        ...importedRouting.filter(
+          ({ destination }) =>
+            !rootRouting.some((existingRule) => existingRule.destination === destination)
+        ),
+      ];
+      const mergedFields = { ...rootFields, ...importedFields };
 
       return {
         type: 'stream' as const,
@@ -118,8 +114,8 @@ export function prepareStreamsForImport({
               ...root.request.stream.ingest,
               wired: {
                 ...root.request.stream.ingest.wired,
-                routing: rootRouting,
-                fields: rootFields,
+                routing: mergedRouting,
+                fields: mergedFields,
               },
             },
           },
@@ -174,4 +170,23 @@ export function withRootPrefix(root: string, name: string) {
 export function resolveAncestors(leafs: string[]) {
   const streamNames = leafs.flatMap((name) => getAncestorsAndSelf(name));
   return uniq(streamNames);
+}
+
+function assertNoConflictingRouting(
+  rootRouting: RoutingDefinition[],
+  importedRouting: RoutingDefinition[]
+) {
+  for (const { destination } of importedRouting) {
+    if (rootRouting.some((rule) => rule.destination === destination)) {
+      throw new Error(`Child stream [${destination}] already exists`);
+    }
+  }
+}
+
+function assertNoConflictingFields(rootFields: FieldDefinition, importedFields: FieldDefinition) {
+  for (const [field, { type }] of Object.entries(importedFields)) {
+    if (rootFields[field] && rootFields[field].type !== type) {
+      throw new Error(`Cannot change mapping of [${field}]`);
+    }
+  }
 }
