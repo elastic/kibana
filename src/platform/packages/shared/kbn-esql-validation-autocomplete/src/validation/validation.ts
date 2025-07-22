@@ -97,6 +97,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getTimeseriesIndices: [],
   getEditorExtensions: [],
   getInferenceEndpoints: [],
+  getLicense: [],
 };
 
 /**
