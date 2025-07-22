@@ -16,12 +16,10 @@ import {
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { useKibana } from '../../utils/kibana_react';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -40,22 +38,20 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   refresh,
   openAlertInFlyout,
   parentAlert,
+  services,
   ...rest
 }) => {
-  const services = useKibana().services;
   const {
     http: {
       basePath: { prepend },
     },
+    cases,
   } = services;
-  const {
-    helpers: { canUseCases },
-  } = services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
-  const userCasesPermissions = canUseCases([observabilityFeatureId]);
+  const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
@@ -88,6 +84,9 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     useCaseActions({
       refresh,
       alerts: [alert],
+      services: {
+        cases,
+      },
     });
 
   const closeActionsPopover = useCallback(() => {
@@ -99,7 +98,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   };
 
   const actionsMenuItems = [
-    ...(userCasesPermissions.createComment && userCasesPermissions.read
+    ...(userCasesPermissions?.createComment && userCasesPermissions?.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"
@@ -142,6 +141,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           refresh={refresh}
           alert={alert}
           openAlertInFlyout={openAlertInFlyout}
+          services={services}
           {...rest}
         />
       ),
@@ -151,6 +151,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         observabilityRuleTypeRegistry,
         openAlertInFlyout,
         refresh,
+        services,
         rest,
         tableId,
       ]
@@ -194,6 +195,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
               defaultMessage: 'View in app',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="o11yAlertActionsButton"
@@ -219,7 +221,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         <EuiPopover
           anchorPosition="downLeft"
           button={
-            <EuiToolTip content={actionsToolTip}>
+            <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={actionsToolTip}
                 color="text"

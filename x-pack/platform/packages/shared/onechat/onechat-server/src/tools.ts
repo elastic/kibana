@@ -15,13 +15,19 @@ import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
 
+export type BuiltinToolId = `.${string}`;
+
 /**
  * Onechat tool, as registered by built-in tool providers.
  */
 export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   RunOutput = unknown
-> extends Omit<ToolDefinition, 'type' | 'configuration'> {
+> extends Omit<ToolDefinition, 'id' | 'type' | 'configuration'> {
+  /**
+   * Built-in tool ID following the {@link BuiltinToolId} pattern
+   */
+  id: BuiltinToolId;
   /**
    * Tool's input schema, defined as a zod schema.
    */
