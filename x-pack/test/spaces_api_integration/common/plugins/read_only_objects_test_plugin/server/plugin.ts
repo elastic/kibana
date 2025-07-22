@@ -241,7 +241,6 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
           const result = await soClient.changeAccessMode(request.body.objects, {
             accessMode: request.body.newAccessMode,
           });
-          console.log({ result });
           return response.ok({
             body: result,
           });

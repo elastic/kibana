@@ -402,6 +402,41 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updateResponse.body).to.have.property('message');
         expect(updateResponse.body.message).to.contain(`Unable to update read_only_type`);
       });
+
+      it('allows updates on removing read only access mode', async () => {
+        const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
+
+        await supertestWithoutAuth
+          .put('/read_only_objects/change_access_mode')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({
+            objects: [{ id: objectId, type: 'read_only_type' }],
+          })
+          .expect(200);
+
+        const { cookie: simpleUserCookie } = await login('simple_user', 'changeme');
+
+        const updateResponse = await supertestWithoutAuth
+          .put('/read_only_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', simpleUserCookie.cookieString())
+          .send({ objectId, type: 'read_only_type' })
+          .expect(200);
+        expect(updateResponse.body.id).to.eql(objectId);
+        expect(updateResponse.body.attributes).to.have.property(
+          'description',
+          'updated description'
+        );
+      });
     });
   });
 }

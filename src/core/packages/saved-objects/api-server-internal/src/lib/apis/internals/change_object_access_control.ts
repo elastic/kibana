@@ -238,15 +238,15 @@ export const changeObjectAccessControl = async <T>(
         },
       };
     } else {
+      const ownerFromSource = currentSource?.accessControl?.owner;
       documentToSave = {
         updated_at: time,
         accessControl: {
-          ...(currentSource?.accessControl || {}),
-          accessMode,
+          owner: ownerFromSource,
+          ...(accessMode !== undefined && { accessMode }),
         },
       };
     }
-
     // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
     bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
 
@@ -271,6 +271,7 @@ export const changeObjectAccessControl = async <T>(
         const { type, id, esRequestIndex } = expectedResult.value;
         if (esRequestIndex !== undefined) {
           const response = bulkOperationResponse?.items[esRequestIndex] ?? {};
+
           const rawResponse = Object.values(response)[0] as any;
           const error = getBulkOperationError(type, id, rawResponse);
           if (error) {
