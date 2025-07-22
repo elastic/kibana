@@ -20,6 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
 
+const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
+  defaultMessage: 'Selected schema is not available for this query.',
+});
+
 const PrependLabel = ({ count }: { count: number }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
@@ -30,7 +34,9 @@ const PrependLabel = ({ count }: { count: number }) => (
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiBadge color="primary" data-test-subj="infraSchemaSelectorCount">
+      <EuiBadge color="primary" data-test-subj="infraSchemaSelectorCount" aria-label={i18n.translate('xpack.infra.schemaSelector.count', {
+        defaultMessage: 'Schemas available',
+      })}>
         {count}
       </EuiBadge>
     </EuiFlexItem>
@@ -50,9 +56,7 @@ const InvalidDropdownDisplay = ({ value }: { value: string }) => {
     <>
       <EuiText size="s">{value}</EuiText>
       <EuiText size="xs">
-        {i18n.translate('xpack.infra.schemaSelector.invalid', {
-          defaultMessage: 'Selected schema is not available for this query.',
-        })}
+        {SCHEMA_NOT_AVAILABLE}
       </EuiText>
     </>
   );
@@ -67,9 +71,7 @@ const InvalidDisplay = ({ value }: { value: string }) => {
       <EuiFlexItem grow={false}>
         <EuiToolTip
           position="top"
-          content={i18n.translate('xpack.infra.schemaSelector.invalidTooltip', {
-            defaultMessage: 'Selected schema is not available for this query.',
-          })}
+          content={SCHEMA_NOT_AVAILABLE}
         >
           <EuiToken
             iconType="alert"
@@ -77,13 +79,11 @@ const InvalidDisplay = ({ value }: { value: string }) => {
             size="s"
             color="euiColorVis9"
             data-test-subj="infraSchemaSelectorInvalidToken"
-            aria-label={i18n.translate('xpack.infra.schemaSelector.invalidAriaLabel', {
-              defaultMessage: 'Invalid schema token',
-            })}
             shape="square"
             fill="dark"
+            aria-label={SCHEMA_NOT_AVAILABLE}
             title={i18n.translate('xpack.infra.invalidDisplay.euiIcon.iconWithTooltipLabel', {
-              defaultMessage: 'Invalid schema token',
+              defaultMessage: 'Invalid schema warning',
             })}
             css={{
               verticalAlign: 'text-bottom',
@@ -159,7 +159,7 @@ export const SchemaSelector = ({
             <EuiFlexItem>
               <EuiFormRow
                 aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
-                  defaultMessage: 'Schema select',
+                  defaultMessage: 'Schema selector for data collection',
                 })}
                 css={{ minWidth: '356px' }}
               >
@@ -171,9 +171,6 @@ export const SchemaSelector = ({
                   onChange={onSelect}
                   isLoading={!schemas.length}
                   fullWidth
-                  aria-label={i18n.translate('xpack.infra.schemaSelector.ariaLabel', {
-                    defaultMessage: 'Select schema for data collection',
-                  })}
                   prepend={<PrependLabel count={schemas.length} />}
                 />
               </EuiFormRow>

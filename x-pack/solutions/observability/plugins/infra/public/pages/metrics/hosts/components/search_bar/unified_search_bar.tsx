@@ -25,7 +25,7 @@ export const UnifiedSearchBar = () => {
   const {
     services: { unifiedSearch },
   } = useKibanaContextForPlugin();
-  // const config = usePluginConfig();
+  const { featureFlags } = usePluginConfig();
   const { metricsView } = useMetricsDataViewContext();
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit, onPreferredSchemaChange } =
     useUnifiedSearchContext();
@@ -37,9 +37,9 @@ export const UnifiedSearchBar = () => {
 
   const schemas = useMemo(() => timeRangeMetadata?.schemas || [], [timeRangeMetadata]);
 
-  // Set preferredSchema in URL if not set
+  // Set preferredSchema in URL if not set and hostOtelEnabled
   useEffect(() => {
-    if (!timeRangeMetadata || schemas.length === 0) return;
+    if (!timeRangeMetadata || schemas.length === 0 || !featureFlags.hostOtelEnabled) return;
     const current = searchCriteria.preferredSchema;
     // Only set if not set
     if (current === null) {
@@ -62,13 +62,15 @@ export const UnifiedSearchBar = () => {
   return (
     <StickyContainer>
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <SchemaSelector
-            onChange={onPreferredSchemaChange}
-            schemas={schemas}
-            value={searchCriteria.preferredSchema}
-          />
-        </EuiFlexItem>
+        {featureFlags.hostOtelEnabled && (
+          <EuiFlexItem>
+            <SchemaSelector
+              onChange={onPreferredSchemaChange}
+              schemas={schemas}
+              value={searchCriteria.preferredSchema}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <SearchBar
             appName={'Infra Hosts'}
