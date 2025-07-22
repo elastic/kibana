@@ -329,6 +329,7 @@ describe('Helpers', () => {
           field: 'ip',
           type: 'mapping',
           value: 'ip',
+          negate: false,
         },
       };
       expect(output).toEqual(expected);
