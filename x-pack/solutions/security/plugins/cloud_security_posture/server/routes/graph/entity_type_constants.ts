@@ -28,6 +28,7 @@ export const entityTypeMappings: EntityTypeMapping[] = [
       'user',
       'service account',
       'identity provider',
+      'identity',
       'group',
       'access management',
       'secret',

@@ -27,6 +27,8 @@ export const FIND_CSP_BENCHMARK_RULE_API_CURRENT_VERSION = '1';
 
 export const GRAPH_ROUTE_PATH = '/internal/cloud_security_posture/graph';
 export const GRAPH_API_CURRENT_VERSION = '1';
+export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
+  'entity_store_field_retention_generic_default_v1.0.0';
 
 export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
   '/internal/cloud_security_posture/rules/_bulk_action';

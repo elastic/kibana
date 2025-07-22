@@ -15,7 +15,6 @@ import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/managemen
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
-import { enhanceGraphWithEntityData } from './enhance_graph_with_entity_data';
 
 interface GraphContextServices {
   logger: Logger;
@@ -51,7 +50,7 @@ export const getGraph = async ({
     )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
-  const assetInventoryEnabled = await uiSettings.client.get(
+  const isAssetInventoryEnabled = await uiSettings.client.get(
     SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
   );
 
@@ -64,23 +63,11 @@ export const getGraph = async ({
     originEventIds,
     indexPatterns,
     esQuery,
+    isAssetInventoryEnabled,
   });
 
   // Convert results into set of nodes and edges
   const graphData = parseRecords(logger, results.records, nodesLimit);
 
-  if (assetInventoryEnabled) {
-    // Enhance nodes with entity data
-    const enhancedGraphData = await enhanceGraphWithEntityData({
-      logger,
-      graphData,
-      esClient,
-      spaceId,
-    });
-
-    // Return enhanced graph data
-    return enhancedGraphData;
-  }
-  // Return graph data
   return graphData;
 };
