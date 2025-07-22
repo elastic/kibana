@@ -158,6 +158,13 @@ export const DataControlEditorStrings = {
             }}
           />
         ),
+        getSelectAColumnText: () =>
+          i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.valuesPreview.selectAColumnText',
+            {
+              defaultMessage: 'Select a column',
+            }
+          ),
       },
     },
     displaySettings: {
