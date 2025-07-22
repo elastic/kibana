@@ -83,7 +83,6 @@
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/osquery-plugin",
-    "@kbn/palettes",
     "@kbn/scout-info",
     "@kbn/inference-common",
     "@kbn/test-suites-xpack-platform",
