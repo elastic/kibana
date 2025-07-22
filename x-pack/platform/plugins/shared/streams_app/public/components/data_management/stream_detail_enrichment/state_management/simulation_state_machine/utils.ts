@@ -23,31 +23,29 @@ export function getSourceField(processor: ProcessorDefinitionWithUIAttributes) {
 }
 
 export function getTableColumns({
-  currentProcessor,
+  currentProcessorSourceField,
   detectedFields = [],
   previewDocsFilter,
   allColumns,
 }: {
-  currentProcessor?: ProcessorDefinitionWithUIAttributes;
+  currentProcessorSourceField?: string;
   detectedFields?: DetectedField[];
   previewDocsFilter: PreviewDocsFilterOption;
   allColumns: string[];
 }) {
-  if (!currentProcessor) return [];
+  if (!currentProcessorSourceField) return [];
 
-  const processorSourceField = getSourceField(currentProcessor);
-
-  if (!processorSourceField || !allColumns.includes(processorSourceField)) {
+  if (!currentProcessorSourceField || !allColumns.includes(currentProcessorSourceField)) {
     return [];
   }
 
   if (['outcome_filter_failed', 'outcome_filter_skipped'].includes(previewDocsFilter)) {
-    return [processorSourceField];
+    return [currentProcessorSourceField];
   }
 
   const uniqueDetectedFields = uniq(detectedFields.map((field) => field.name));
 
-  return uniq([processorSourceField, ...uniqueDetectedFields]);
+  return uniq([currentProcessorSourceField, ...uniqueDetectedFields]);
 }
 
 type SimulationDocReport = Simulation['documents'][number];

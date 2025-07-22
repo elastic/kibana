@@ -87,6 +87,8 @@ export function ProcessingPreviewTable({
   return <PreviewTable {...otherProps} leadingControlColumns={leadingControlColumns} />;
 }
 
+export const MemoProcessingPreviewTable = React.memo(ProcessingPreviewTable);
+
 function dataSourceTypeToI18nKey(type: EnrichmentDataSourceWithUIAttributes['type']) {
   switch (type) {
     case 'random-samples':
