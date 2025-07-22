@@ -72,8 +72,8 @@ describe('Playground APIs', function () {
     const chatMessages = [
       {
         role: MessageRole.User,
-        content: response.data as string,
-        data: response.data as string,
+        content: typeof response.data === 'string' ? response.data : '',
+        data: typeof response.data === 'string' ? response.data : '',
       },
     ];
 
@@ -115,8 +115,8 @@ describe('Playground APIs', function () {
     const chatMessages = [
       {
         role: MessageRole.User,
-        content: response.data as string,
-        data: response.data as string,
+        content: typeof response.data === 'string' ? response.data : '',
+        data: typeof response.data === 'string' ? response.data : '',
       },
     ];
 
