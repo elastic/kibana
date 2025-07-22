@@ -231,9 +231,6 @@ Data ingestion and Fleet::
 * Adds support for collapsible sections in integration overview pages ({kibana-pull}223916[#223916]).
 Discover::
 * Expands the {esql} editor to fit the query size automatically when loading **Discover** ({kibana-pull}225509[#225509]).
-* Shows list of keyboard shortcuts at the bottom of the {esql} editor ({kibana-pull}221331[#221331]).
-* Adds suggestions for full text search when writing queries ({kibana-pull}221239[#221239]).
-* Adds full text search suggestions to `STATS ... WHERE` queries ({kibana-pull}220691[#220691]).
 * Hides the "Selected only" toggle in **Discover**'s pages that don't support filtering by value ({kibana-pull}220624[#220624]).
 * Adds a **Copy value** button to field value cells in the Document viewer ({kibana-pull}218817[#218817]).
 * Adds a warning and a tooltip for explaining the `_score` column in **Discover** ({kibana-pull}211013[#211013]).
@@ -245,6 +242,9 @@ Discover::
 * The {esql} `FORK` command is now available in technical preview ({kibana-pull}224680[#224680]).
 * Adds suggestions for all operators when writing queries ({kibana-pull}223503[#223503]).
 * Improves handling of long fields ({kibana-pull}223222[#223222]).
+* Shows list of keyboard shortcuts at the bottom of the {esql} editor ({kibana-pull}221331[#221331]).
+* Adds suggestions for full text search when writing queries ({kibana-pull}221239[#221239]).
+* Adds full text search suggestions to `STATS ... WHERE` queries ({kibana-pull}220691[#220691]).
 * Adds autocomplete suggestions for `STATS...WHERE` ({kibana-pull}216379[#216379]).
 * Enables suggestions for the `CHANGE_POINT` command ({kibana-pull}218100[#218100]).
 * Adds validation and autocomplete support for the `CHANGE_POINT` command ({kibana-pull}216043[#216043]).
@@ -361,6 +361,7 @@ Discover::
 * Fixes an issue causing **Discover** to freeze when dragging & dropping columns with animations disabled ({kibana-pull}226592[#226592]).
 * Fixes an issue causing an error when updating then deleting a saved query ({kibana-pull}226569[#226569]).
 * Fixes an issue causing the selected document to change when resizing flyout with keyboard ({kibana-pull}225594[#225594]).
+* Fixes an issue where an {esql} query was overwritten when edited while the previous request was still running ({kibana-pull}224671[#224671]).
 * The request URL now appears correctly again when inspecting an ES|QL request ({kibana-pull}221816[#221816]).
 * Fixes an issue causing the icon of field list to change when mapping changes from unmapped to mapped ({kibana-pull}221308[#221308]).
 * Fixes the parsing of index patterns in the **Inspect** feature of Kibana. Previously, certain index pattern strings were not being parsed and displayed correctly in the **Inspect** feature ({kibana-pull}221084[#221084]).
@@ -369,7 +370,6 @@ Discover::
 * Fixes inability to clear Document ID in data view field editor preview ({kibana-pull}220891[#220891]).
 * Fixed multiple accessibility issues, including adding missing aria labels and column headers, improving keyboard navigation and interactions, and improving focus changes when interacting with **Discover** features https://github.com/elastic/kibana/issues?q=state:closed%20label:Project:Accessibility%20label:v8.19.0%20label:Team:DataDiscovery[View list of fixes].
 {esql} editor::
-* Fixes an issue where an {esql} query was overwritten when edited while the previous request was still running ({kibana-pull}224671[#224671]).
 * Fixes wrong validation on expressions between aggregations ({kibana-pull}227989[#227989]).
 * Hides lookup index hidden indices from autocomplete ({kibana-pull}227819[#227819]).
 * Fixes several issues with `BUCKET` function signatures ({kibana-pull}222553[#222553]).
