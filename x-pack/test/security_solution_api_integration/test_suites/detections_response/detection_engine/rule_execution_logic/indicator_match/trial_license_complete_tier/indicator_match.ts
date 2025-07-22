@@ -1653,7 +1653,7 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           });
 
-          it('should create alert when one of fields not matching', async () => {
+          it('should create alert when one of fields not matching in single AND group', async () => {
             const id = uuidv4();
 
             // Add filler events to ensure we have more events than threats when threats are first
@@ -1716,7 +1716,7 @@ export default ({ getService }: FtrProviderContext) => {
             ]);
           });
 
-          it('should create alerts for OR condition', async () => {
+          it('should create alerts for not matching fields in OR condition', async () => {
             const id = uuidv4();
 
             // Add filler events to ensure we have more events than threats when threats are first
@@ -1821,7 +1821,7 @@ export default ({ getService }: FtrProviderContext) => {
             jestExpect(previewAlerts[1]).toHaveProperty('_source.client.ip', '127.0.0.100');
           });
 
-          it('should not create alerts when docouments not matching threats', async () => {
+          it('should not create alerts when does not match condition is not met', async () => {
             const id = uuidv4();
 
             // Add filler events to ensure we have more events than threats when threats are first
@@ -1884,7 +1884,7 @@ export default ({ getService }: FtrProviderContext) => {
             jestExpect(previewAlerts).toHaveLength(0);
           });
 
-          it('should work with multiple docs', async () => {
+          it('should create multiple alerts when conditions are met', async () => {
             const id = uuidv4();
 
             // Add filler events to ensure we have more events than threats when threats are first
@@ -1957,6 +1957,149 @@ export default ({ getService }: FtrProviderContext) => {
             });
 
             jestExpect(previewAlerts).toHaveLength(3);
+          });
+
+          it('should create alert when source event not matching field is undefined', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                geo: { country_name: `filler-country${i + 1}` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                geo: { country_name: `filler-threat-country${i + 1}` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: basicThreatMatchRuleWithDoesNotMatch(id),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+            });
+
+            jestExpect(previewAlerts).toHaveLength(1);
+
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            jestExpect(previewAlerts[0]).not.toHaveProperty('_source.geo.country_name');
+          });
+
+          it('should create alert when threat not matching field is undefined', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                geo: { country_name: `filler-country${i + 1}` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+                geo: { country_name: 'UK' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                geo: { country_name: `filler-threat-country${i + 1}` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-1' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: basicThreatMatchRuleWithDoesNotMatch(id),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+            });
+
+            jestExpect(previewAlerts).toHaveLength(1);
+
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'UK');
+          });
+
+          it('should not create alert not matching field is undefined in both source and threat', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                geo: { country_name: `filler-country${i + 1}` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'user-1' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                geo: { country_name: `filler-threat-country${i + 1}` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'user-1' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: basicThreatMatchRuleWithDoesNotMatch(id),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+            });
+
+            jestExpect(previewAlerts).toHaveLength(0);
           });
         });
       });

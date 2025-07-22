@@ -60,6 +60,10 @@ export const filterThreatMapping = ({
   threatMapping
     .map((threatMap) => {
       const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
+        // DOES NOT MATCH clause allows undefined values
+        if (entry.negate) {
+          return false;
+        }
         const itemValue = get(entry[entryKey], threatListItem.fields);
         return itemValue == null || itemValue.length !== 1;
       });
@@ -78,46 +82,67 @@ export const createInnerAndClauses = ({
 }: CreateInnerAndClausesOptions): QueryDslQueryContainer[] => {
   return threatMappingEntries.reduce<QueryDslQueryContainer[]>((accum, threatMappingEntry) => {
     const value = get(threatMappingEntry[entryKey], threatListItem.fields);
-    if (value != null && value.length === 1) {
-      const queryName = encodeThreatMatchNamedQuery({
-        id: threatListItem._id,
-        index: threatListItem._index,
-        field: threatMappingEntry.field,
-        value: threatMappingEntry.value,
-        queryType: ThreatMatchQueryType.match,
-        negate: threatMappingEntry.negate,
-      });
+    const queryName = encodeThreatMatchNamedQuery({
+      id: threatListItem._id,
+      index: threatListItem._index,
+      field: threatMappingEntry.field,
+      value: threatMappingEntry.value,
+      queryType: ThreatMatchQueryType.match,
+      negate: threatMappingEntry.negate,
+    });
+    const matchKey = threatMappingEntry[entryKey === 'field' ? 'value' : 'field'];
 
-      const matchKey = threatMappingEntry[entryKey === 'field' ? 'value' : 'field'];
-
+    if (threatMappingEntry.negate) {
+      const negateClause = buildNegateClause(value, matchKey, queryName);
+      if (negateClause) {
+        accum.push(negateClause);
+      }
+    } else if (value != null && value.length === 1) {
       // These values could be potentially 10k+ large so mutating the array intentionally
-      accum.push(
-        threatMappingEntry.negate
-          ? {
-              bool: {
-                must_not: {
-                  match: {
-                    [matchKey]: {
-                      query: value[0],
-                    },
-                  },
-                },
-                _name: queryName,
-              },
-            }
-          : {
-              match: {
-                [matchKey]: {
-                  query: value[0],
-                  _name: queryName,
-                },
-              },
-            }
-      );
+      accum.push({
+        match: {
+          [matchKey]: {
+            query: value[0],
+            _name: queryName,
+          },
+        },
+      });
     }
 
     return accum;
   }, []);
+};
+
+const buildNegateClause = (
+  value: unknown,
+  matchKey: string,
+  queryName: string
+): QueryDslQueryContainer | undefined => {
+  if (value == null) {
+    return {
+      exists: {
+        field: matchKey,
+        _name: queryName,
+      },
+    };
+  }
+
+  if (Array.isArray(value) && value.length === 1) {
+    return {
+      bool: {
+        must_not: {
+          match: {
+            [matchKey]: {
+              query: value[0],
+            },
+          },
+        },
+        _name: queryName,
+      },
+    };
+  }
+
+  return undefined;
 };
 
 export const createAndOrClauses = ({
