@@ -17,7 +17,6 @@ import { Observable } from 'rxjs';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
@@ -41,7 +40,6 @@ describe('renderApp', () => {
       charts: chartPluginMock.createStartContract(),
       contentConnectors: searchConnectorsMock.createStart(),
       data: dataPluginMock.createStartContract(),
-      guidedOnboarding: guidedOnboardingMock.createStart(),
       indexManagement: {
         getIndexMappingComponent: jest.fn(),
       },
