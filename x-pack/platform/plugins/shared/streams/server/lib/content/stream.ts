@@ -9,6 +9,7 @@ import { uniq } from 'lodash';
 import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
 import { FieldDefinition, RoutingDefinition, getAncestorsAndSelf } from '@kbn/streams-schema';
 import { baseFields } from '../streams/component_templates/logs_layer';
+import { ContentPackConflictError } from './error';
 
 export function prepareStreamsForExport({
   root,
@@ -178,7 +179,7 @@ function assertNoConflictingRouting(
 ) {
   for (const { destination } of importedRouting) {
     if (rootRouting.some((rule) => rule.destination === destination)) {
-      throw new Error(`Child stream [${destination}] already exists`);
+      throw new ContentPackConflictError(`Child stream [${destination}] already exists`);
     }
   }
 }
@@ -186,7 +187,7 @@ function assertNoConflictingRouting(
 function assertNoConflictingFields(rootFields: FieldDefinition, importedFields: FieldDefinition) {
   for (const [field, { type }] of Object.entries(importedFields)) {
     if (rootFields[field] && rootFields[field].type !== type) {
-      throw new Error(`Cannot change mapping of [${field}]`);
+      throw new ContentPackConflictError(`Cannot change mapping of [${field}]`);
     }
   }
 }

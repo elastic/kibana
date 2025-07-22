@@ -210,10 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   description: 'ok',
                   ingest: {
                     processing: [],
-                    wired: {
-                      fields: {},
-                      routing: [],
-                    },
+                    wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
                 },
@@ -229,10 +226,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   description: 'a'.repeat(twoMB),
                   ingest: {
                     processing: [],
-                    wired: {
-                      fields: {},
-                      routing: [],
-                    },
+                    wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
                   },
                 },
@@ -264,11 +258,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'branch_a_child1_content_pack',
           description: 'Content pack from branch_a with nested child',
           version: '1.0.0',
-          include: {
-            objects: {
-              streams: ['nested'],
-            },
-          },
+          include: { objects: { streams: ['nested'] } },
         };
         const archiveBuffer = await exportContent(apiClient, 'logs.branch_a.child1', exportBody);
 
@@ -338,40 +328,124 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      it('can successfully import the same content pack', async () => {
-        const targetStreamName = 'logs.reimport_target';
+      it('fails when importing conflicting mappings', async () => {
+        const targetStreamName = 'logs.branch_a';
+
+        const archive = await generateArchive(
+          {
+            name: 'conflict_pack',
+            description: 'Content pack with conflicting mappings',
+            version: '1.0.0',
+          },
+          [
+            {
+              type: 'stream',
+              name: ROOT_STREAM_ID,
+              request: {
+                stream: {
+                  description: '',
+                  ingest: {
+                    processing: [],
+                    wired: {
+                      fields: {
+                        'resource.attributes.foo.bar': { type: 'long' },
+                      },
+                      routing: [],
+                    },
+                    lifecycle: { inherit: {} },
+                  },
+                },
+                dashboards: [],
+                queries: [],
+              },
+            },
+          ]
+        );
+
+        const response = await importContent(
+          apiClient,
+          targetStreamName,
+          {
+            include: { all: {} },
+            content: Readable.from(archive),
+            filename: 'conflict_pack-1.0.0.zip',
+          },
+          409
+        );
+
+        expect((response as unknown as { message: string }).message).to.eql(
+          'Cannot change mapping of [resource.attributes.foo.bar]'
+        );
+      });
+
+      it('fails when importing overlapping child', async () => {
+        const targetStreamName = 'logs.overlapping.child';
         await putStream(apiClient, targetStreamName, upsertRequest({}, []));
 
-        const archiveBuffer = await exportContent(apiClient, 'logs', {
-          name: 'logs_content_pack',
-          description: 'Content pack with branch_a',
-          version: '1.0.0',
-          include: { objects: { streams: ['branch_a.child2'] } },
-        });
+        const archive = await generateArchive(
+          {
+            name: 'content_pack',
+            description: 'with overlapping child',
+            version: '1.0.0',
+          },
+          [
+            {
+              type: 'stream',
+              name: ROOT_STREAM_ID,
+              request: {
+                stream: {
+                  description: '',
+                  ingest: {
+                    processing: [],
+                    wired: {
+                      fields: {},
+                      routing: [
+                        {
+                          destination: 'child',
+                          if: { never: {} },
+                        },
+                      ],
+                    },
+                    lifecycle: { inherit: {} },
+                  },
+                },
+                dashboards: [],
+                queries: [],
+              },
+            },
+            {
+              type: 'stream',
+              name: 'child',
+              request: {
+                stream: {
+                  description: '',
+                  ingest: {
+                    processing: [],
+                    wired: { fields: {}, routing: [] },
+                    lifecycle: { inherit: {} },
+                  },
+                },
+                dashboards: [],
+                queries: [],
+              },
+            },
+          ]
+        );
 
-        const firstImportResponse = await importContent(apiClient, targetStreamName, {
-          include: { all: {} },
-          content: Readable.from(archiveBuffer),
-          filename: 'reimport_content_pack-1.0.0.zip',
-        });
+        const response = await importContent(
+          apiClient,
+          'logs.overlapping',
+          {
+            include: { all: {} },
+            content: Readable.from(archive),
+            filename: 'overlap-1.0.0.zip',
+          },
+          409
+        );
 
-        expect(firstImportResponse.result.created).to.eql([
-          `${targetStreamName}.branch_a`,
-          `${targetStreamName}.branch_a.child2`,
-        ]);
-
-        const secondImportResponse = await importContent(apiClient, targetStreamName, {
-          include: { all: {} },
-          content: Readable.from(archiveBuffer),
-          filename: 'reimport_content_pack-1.0.1.zip',
-        });
-
-        expect(secondImportResponse.result.created).to.eql([]);
-        expect(
-          secondImportResponse.result.updated
-            .filter((name) => isDescendantOf(targetStreamName, name))
-            .sort()
-        ).to.eql([`${targetStreamName}.branch_a`, `${targetStreamName}.branch_a.child2`]);
+        expect((response as unknown as { message: string }).message).to.eql(
+          'Child stream [logs.overlapping.child] already exists'
+        );
       });
     });
   });

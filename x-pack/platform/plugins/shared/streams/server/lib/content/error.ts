@@ -13,3 +13,10 @@ export class InvalidContentPackError extends StatusError {
     this.name = 'InvalidContentPackError';
   }
 }
+
+export class ContentPackConflictError extends StatusError {
+  constructor(message: string) {
+    super(message, 409);
+    this.name = 'ContentPackConflictError';
+  }
+}
