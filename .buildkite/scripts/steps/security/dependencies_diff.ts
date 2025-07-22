@@ -84,6 +84,14 @@ async function main() {
   // Reverting changes (if dependency was added, then removed in the same PR)
   if (!packageJsonChanged && dependenciesAdded) {
     console.info(`Reverting changes for ${filePath}`);
+
+    try {
+      execSync(`git cat-file -e ${process.env.GITHUB_PR_MERGE_BASE}:${filePath}`, { stdio: 'ignore' });
+    } catch (error) {
+      console.info(`File does not exist in merge base, skipping revert`);
+      return;
+    }
+
     execSync(`git checkout ${process.env.GITHUB_PR_MERGE_BASE} -- ${filePath}`);
 
     return;
