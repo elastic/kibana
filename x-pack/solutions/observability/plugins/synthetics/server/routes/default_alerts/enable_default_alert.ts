@@ -7,13 +7,15 @@
 
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { ALERTING_SAVE, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
 
 export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
+  requiredPrivileges: [ALERTING_SAVE],
+  writeAccess: false, // setting to false to cancel automatic requirement of uptime write privilege
   handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
 

@@ -35,7 +35,8 @@ export const ToggleAlertFlyoutButton = () => {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { application } = useKibana<ClientPluginsStart>().services;
-  const hasUptimeWrite = application?.capabilities.uptime?.save ?? false;
+  const hasAlertingWrite =
+    application?.capabilities.observabilityManageRules?.['alerting:save'] ?? false;
 
   const { EditAlertFlyout, loading, NewRuleFlyout } = useSyntheticsRules(isOpen);
   const { loaded, data: monitors } = useSelector(selectMonitorListState);
@@ -84,8 +85,8 @@ export const ToggleAlertFlyoutButton = () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_STATUS_RULE, isNewRuleFlyout: false }));
             setIsOpen(false);
           },
-          toolTipContent: !hasUptimeWrite ? noWritePermissionsTooltipContent : null,
-          disabled: !hasUptimeWrite || loading,
+          toolTipContent: !hasAlertingWrite ? noWritePermissionsTooltipContent : null,
+          disabled: !hasAlertingWrite || loading,
           icon: 'bell',
         },
       ],
@@ -110,8 +111,8 @@ export const ToggleAlertFlyoutButton = () => {
             dispatch(setAlertFlyoutVisible({ id: SYNTHETICS_TLS_RULE, isNewRuleFlyout: false }));
             setIsOpen(false);
           },
-          toolTipContent: !hasUptimeWrite ? noWritePermissionsTooltipContent : null,
-          disabled: !hasUptimeWrite || loading,
+          toolTipContent: !hasAlertingWrite ? noWritePermissionsTooltipContent : null,
+          disabled: !hasAlertingWrite || loading,
           icon: 'bell',
         },
       ],
