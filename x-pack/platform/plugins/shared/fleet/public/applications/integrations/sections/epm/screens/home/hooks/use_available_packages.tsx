@@ -17,6 +17,7 @@ import {
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
   useGetReplacementCustomIntegrationsQuery,
+  useGetPackageVerificationKeyId,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
@@ -105,11 +106,23 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
         })
       : [];
 
-    const tiles = filterPolicyTemplatesTiles<PackageListItem>(
+    let tiles = filterPolicyTemplatesTiles<PackageListItem>(
       pkg.policy_templates_behavior,
       topPackage,
       integrationsPolicyTemplates
     );
+
+    // remove tiles that only have data streams of excluded types e.g. aws.ebs, but keep partial matches e.g. aws.cloudfront_logs
+    tiles = tiles.filter((tile) => {
+      return (
+        !tile.integration ||
+        !tile.data_streams ||
+        tile.data_streams.some((dataStream) =>
+          dataStream.dataset.includes(`${tile.name}.${tile.integration}`)
+        )
+      );
+    });
+
     return [...acc, ...tiles];
   }, []);
 };
@@ -141,6 +154,8 @@ export const useAvailablePackages = ({
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
 
   const { isAgentlessEnabled } = useAgentless();
+
+  const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
 
   const {
     initialSelectedCategory,
@@ -200,10 +215,17 @@ export const useAvailablePackages = ({
 
     return eprAndCustomPackages
       .map((item) => {
-        return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
+        return mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId });
       })
       .sort((a, b) => a.title.localeCompare(b.title));
-  }, [addBasePath, appendCustomIntegrations, getAbsolutePath, getHref, mergedEprPackages]);
+  }, [
+    addBasePath,
+    appendCustomIntegrations,
+    getAbsolutePath,
+    getHref,
+    mergedEprPackages,
+    packageVerificationKeyId,
+  ]);
 
   // Packages to show
   // Filters out based on selected category and subcategory (if any)

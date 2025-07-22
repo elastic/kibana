@@ -47,5 +47,13 @@
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-server",
     "@kbn/utility-types",
+    "@kbn/inference-tracing",
+    "@kbn/std",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-utils",
+    "@kbn/esql",
+    "@kbn/field-types",
+    "@kbn/monaco",
+    "@kbn/safer-lodash-set",
   ]
 }
