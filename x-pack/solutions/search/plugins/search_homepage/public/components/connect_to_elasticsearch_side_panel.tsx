@@ -8,10 +8,16 @@ import React, { useCallback } from 'react';
 import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SampleDataActionButton, useIngestSampleData } from '@kbn/search-indices/public';
 import { useKibana } from '../hooks/use_kibana';
 
 export const ConnectToElasticsearchSidePanel = () => {
   const { application } = useKibana().services;
+
+  const { ingestSampleData, isLoading } = useIngestSampleData();
+  const onIngestSampleData = useCallback(() => {
+    ingestSampleData();
+  }, [ingestSampleData]);
 
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
@@ -46,8 +52,8 @@ export const ConnectToElasticsearchSidePanel = () => {
             </EuiButtonEmpty>
           }
         />
-        {/* TODO:   Enable The “Sample Data” section when the one-click sample data ingestion feature is complete. */}
-        {/* <EuiCard
+
+        <EuiCard
           display="plain"
           hasBorder
           textAlign="left"
@@ -65,13 +71,9 @@ export const ConnectToElasticsearchSidePanel = () => {
             />
           }
           footer={
-            <EuiButtonEmpty href="#" iconType="importAction" data-test-subj="sampleDatasetButton">
-              {i18n.translate('xpack.searchHomepage.connectToElasticsearch.sampleDatasetButton', {
-                defaultMessage: 'Add sample data',
-              })}
-            </EuiButtonEmpty>
+            <SampleDataActionButton isLoading={isLoading} onIngestSampleData={onIngestSampleData} />
           }
-        /> */}
+        />
 
         {/* TODO: Enable CE block once we can discern the billing type.
         <EuiCard
