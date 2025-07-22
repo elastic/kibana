@@ -27,12 +27,14 @@ import { css } from '@emotion/react';
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useUsageTracker } from '../../../hooks/use_usage_tracker';
 import { SearchQueryRulesQueryRule } from '../../../../common/types';
 import { DroppableContainer } from '../styles';
 import { QueryRuleDraggableListHeader } from './query_rule_draggable_list_header';
 import { QueryRuleDraggableListItemActionTypeBadge } from './query_rule_draggable_item_action_type_badge';
 import { QueryRuleDraggableItemCriteriaDisplay } from './query_rule_draggable_item_criteria_display';
 import { DeleteRulesetRuleModal } from './delete_ruleset_rule_modal';
+import { AnalyticsEvents } from '../../../analytics/constants';
 
 export interface QueryRuleDraggableListItemProps {
   rules: SearchQueryRulesQueryRule[];
@@ -60,6 +62,7 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
   isLastItem = false,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const useTracker = useUsageTracker();
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const localTourTargetRef = useRef<HTMLDivElement>(null);
   const effectiveRef = tourInfo?.tourTargetRef || localTourTargetRef;
@@ -174,6 +177,7 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
                             icon="pencil"
                             data-test-subj="searchQueryRulesQueryRulesetDetailEditButton"
                             onClick={() => {
+                              useTracker?.click(AnalyticsEvents.editRuleClicked);
                               onEditRuleFlyoutOpen(queryRule.rule_id);
                               closePopover();
                             }}
@@ -204,6 +208,7 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
                             `}
                             data-test-subj="searchQueryRulesQueryRulesetDetailDeleteButton"
                             onClick={() => {
+                              useTracker?.click(AnalyticsEvents.deleteRuleClicked);
                               setRuleToDelete(queryRule.rule_id);
                               closePopover();
                             }}
@@ -263,11 +268,13 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
   tourInfo,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const useTracker = useUsageTracker();
 
   return (
     <EuiDragDropContext
       onDragEnd={({ source, destination }) => {
         if (source && destination) {
+          useTracker?.click(AnalyticsEvents.rulesReordered);
           const items = euiDragDropReorder(rules, source.index, destination.index);
           onReorder(items);
         }

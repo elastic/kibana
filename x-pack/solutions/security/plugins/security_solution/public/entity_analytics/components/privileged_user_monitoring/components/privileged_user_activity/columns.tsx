@@ -42,7 +42,7 @@ const timestampColumn: EuiBasicTableColumn<TableItemType> = {
   },
 };
 
-const getPrivilegedUserColumn = (fieldName: string) => ({
+const getPrivilegedUserColumn = () => ({
   field: 'privileged_user',
   name: (
     <FormattedMessage
@@ -52,21 +52,16 @@ const getPrivilegedUserColumn = (fieldName: string) => ({
   ),
   width: COLUMN_WIDTHS.privileged_user,
   render: (user: string[] | string) =>
-    user != null
-      ? getRowItemsWithActions({
-          values: isArray(user) ? user : [user],
-          // TODO We need a way to filter by several field with an OR expression
-          // because the ESQL queries several source indices that have different field names
-          // Issue to extend SecurityCellActions to support this: https://github.com/elastic/security-team/issues/12712
-          fieldName,
-          idPrefix: 'privileged-user-monitoring-privileged-user',
-          render: (item) => <UserName userName={item} />,
-          displayCount: 1,
-        })
-      : getEmptyTagValue(),
+    getRowItemsWithActions({
+      values: isArray(user) ? user : [user],
+      fieldName: 'user.name',
+      idPrefix: 'privileged-user-monitoring-privileged-user',
+      render: (item) => <UserName userName={item} scopeId={SCOPE_ID} />,
+      displayCount: 1,
+    }),
 });
 
-const getTargetUserColumn = (fieldName: string) => ({
+const getTargetUserColumn = () => ({
   field: 'target_user',
   name: (
     <FormattedMessage
@@ -74,16 +69,8 @@ const getTargetUserColumn = (fieldName: string) => ({
       defaultMessage="Target user"
     />
   ),
-  render: (user: string[] | string) =>
-    user != null
-      ? getRowItemsWithActions({
-          values: isArray(user) ? user : [user],
-          fieldName,
-          idPrefix: 'privileged-user-monitoring-target-user',
-          render: (item) => <UserName userName={item} />,
-          displayCount: 1,
-        })
-      : getEmptyTagValue(),
+  render: (user: string) =>
+    user != null ? <UserName userName={user} scopeId={SCOPE_ID} /> : getEmptyTagValue(),
 });
 
 const getIpColumn = (fieldName = 'source.ip') => ({
@@ -95,15 +82,13 @@ const getIpColumn = (fieldName = 'source.ip') => ({
     />
   ),
   render: (ips: string[] | string) =>
-    ips != null
-      ? getRowItemsWithActions({
-          values: isArray(ips) ? ips : [ips],
-          fieldName,
-          idPrefix: 'privileged-user-monitoring-ip',
-          render: (item) => <NetworkDetails ip={item} />,
-          displayCount: 1,
-        })
-      : getEmptyTagValue(),
+    getRowItemsWithActions({
+      values: isArray(ips) ? ips : [ips],
+      fieldName: '', // Dirty hack to disable CellActions, remove this when CellActions support multiple fields
+      idPrefix: 'privileged-user-monitoring-ip',
+      render: (item) => <NetworkDetails ip={item} />,
+      displayCount: 1,
+    }),
 });
 
 const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => ({
@@ -148,8 +133,8 @@ export const buildGrantedRightsColumns = (
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openRightPanel),
   timestampColumn,
-  getPrivilegedUserColumn('user.name'),
-  getTargetUserColumn('user.target.name'),
+  getPrivilegedUserColumn(),
+  getTargetUserColumn(),
   {
     field: 'group_name',
     name: (
@@ -167,9 +152,9 @@ export const buildAccountSwitchesColumns = (
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openRightPanel),
   timestampColumn,
-  getPrivilegedUserColumn('process.real_user.name'),
+  getPrivilegedUserColumn(),
   {
-    ...getTargetUserColumn('process.group_leader.user.name'),
+    ...getTargetUserColumn(),
     name: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.targetAccount"
@@ -203,7 +188,7 @@ export const buildAuthenticationsColumns = (
 ): Array<EuiBasicTableColumn<TableItemType>> => [
   getActionsColumn(openRightPanel),
   timestampColumn,
-  getPrivilegedUserColumn('client.user.name'),
+  getPrivilegedUserColumn(),
   {
     field: 'source',
     name: (
@@ -221,27 +206,20 @@ export const buildAuthenticationsColumns = (
     },
   },
   {
-    field: 'url',
+    field: 'type',
     name: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type"
         defaultMessage="Type"
       />
     ),
-    render: (url?: string) => {
-      if (!url) {
-        return getEmptyTagValue();
-      }
-
-      const type = getLoginTypeFromUrl(url);
-
+    render: (type?: string) => {
       if (!type) {
         return getEmptyTagValue();
       }
 
       return type;
     },
-    truncateText: true,
   },
   // TODO Add the column depending on this ticket output https://github.com/elastic/security-team/issues/12713
   // {
@@ -293,26 +271,4 @@ const getResultColor = (value: string) => {
     return 'danger';
   }
   return 'default';
-};
-
-// TODO Verify if we can improve this logic https://github.com/elastic/security-team/issues/12713
-const getLoginTypeFromUrl = (url: string) => {
-  if (url.startsWith('/api/v1/authn')) {
-    return i18n.translate(
-      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.direct',
-      { defaultMessage: 'Direct' }
-    );
-  }
-
-  if (
-    url.startsWith('/oauth2/v1/authorize') ||
-    url.startsWith('/oauth2/v1/token') ||
-    url.includes('/sso/saml')
-  ) {
-    return i18n.translate(
-      'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.type.federated',
-      { defaultMessage: 'Federated' }
-    );
-  }
-  return undefined;
 };

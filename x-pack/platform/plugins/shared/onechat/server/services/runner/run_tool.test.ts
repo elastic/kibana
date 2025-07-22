@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { ScopedRunnerRunToolsParams, OnechatToolEvent } from '@kbn/onechat-server';
 import {
   createScopedRunnerDepsMock,
   createMockedTool,
+  createToolRegistryMock,
   CreateScopedRunnerDepsMock,
   MockedTool,
+  ToolRegistryMock,
 } from '../../test_utils';
 import { RunnerManager } from './runner';
 import { runTool } from './run_tool';
@@ -18,25 +21,28 @@ import { runTool } from './run_tool';
 describe('runTool', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
   let runnerManager: RunnerManager;
+  let registry: ToolRegistryMock;
   let tool: MockedTool;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
 
+    registry = createToolRegistryMock();
     const {
-      toolsService: { registry },
+      toolsService: { getRegistry },
     } = runnerDeps;
+    getRegistry.mockResolvedValue(registry);
 
-    tool = createMockedTool({});
+    tool = createMockedTool({
+      schema: z.object({
+        foo: z.string(),
+      }),
+    });
     registry.get.mockResolvedValue(tool);
   });
 
   it('calls the tool registry with the expected parameters', async () => {
-    const {
-      toolsService: { registry },
-    } = runnerDeps;
-
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
       toolParams: { foo: 'bar' },
@@ -48,10 +54,28 @@ describe('runTool', () => {
     });
 
     expect(registry.get).toHaveBeenCalledTimes(1);
-    expect(registry.get).toHaveBeenCalledWith({
-      toolId: params.toolId,
-      request: runnerDeps.request,
+    expect(registry.get).toHaveBeenCalledWith(params.toolId);
+  });
+
+  it('throws if the tool parameters do not match the schema', async () => {
+    tool = createMockedTool({
+      schema: z.object({
+        bar: z.string(),
+      }),
     });
+    registry.get.mockResolvedValue(tool);
+
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await expect(
+      runTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      })
+    ).rejects.toThrowError(/Tool test-tool was called with invalid parameters/);
   });
 
   it('calls the tool handler with the expected parameters', async () => {
@@ -69,13 +93,30 @@ describe('runTool', () => {
     expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
   });
 
+  it('truncates the parameters not defined on the schema', async () => {
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar', extra: true },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(tool.handler).toHaveBeenCalledTimes(1);
+    expect(tool.handler).toHaveBeenCalledWith({ foo: 'bar' }, expect.any(Object));
+  });
+
   it('returns the expected value', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: {
+        foo: 'bar',
+      },
     };
 
-    tool.handler.mockReturnValue({ test: true, over: 9000 });
+    tool.handler.mockReturnValue({ result: { test: true, over: 9000 } });
 
     const result = await runTool({
       toolExecutionParams: params,
@@ -91,11 +132,13 @@ describe('runTool', () => {
   it('exposes a context with the expected shape to the tool handler', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: {
+        foo: 'bar',
+      },
     };
 
     tool.handler.mockImplementation((toolParams, context) => {
-      return 'foo';
+      return { result: 'foo' };
     });
 
     await runTool({
@@ -121,7 +164,9 @@ describe('runTool', () => {
 
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
-      toolParams: {},
+      toolParams: {
+        foo: 'bar',
+      },
       onEvent: (event) => {
         emittedEvents.push(event);
       },
@@ -132,7 +177,7 @@ describe('runTool', () => {
         type: 'test-event',
         data: { foo: 'bar' },
       });
-      return 42;
+      return { result: 42 };
     });
 
     await runTool({

@@ -24,10 +24,11 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import {
-  getRecommendedQueries,
   getRecommendedQueriesTemplatesFromExtensions,
-} from '@kbn/esql-validation-autocomplete';
+  getRecommendedQueriesTemplates,
+} from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
+import { getCategorizationField } from '@kbn/aiops-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
@@ -52,17 +53,25 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     RecommendedQuery[]
   >([]);
 
-  const { queryForRecommendedQueries, timeFieldName } = useMemo(() => {
+  const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
     if (adHocDataview && typeof adHocDataview !== 'string') {
+      const textFields = adHocDataview.fields?.getByType('string') ?? [];
+      let tempCategorizationField;
+      if (textFields.length) {
+        tempCategorizationField = getCategorizationField(textFields.map((field) => field.name));
+      }
+
       return {
         queryForRecommendedQueries: `FROM ${adHocDataview.name}`,
         timeFieldName:
           adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name,
+        categorizationField: tempCategorizationField,
       };
     }
     return {
       queryForRecommendedQueries: '',
       timeFieldName: undefined,
+      categorizationField: undefined,
     };
   }, [adHocDataview]);
 
@@ -130,11 +139,13 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         }))
       );
     }
+
     // Handle the static recommended queries, no solutions specific
     if (queryForRecommendedQueries && timeFieldName) {
-      const recommendedQueriesFromStaticTemplates = getRecommendedQueries({
+      const recommendedQueriesFromStaticTemplates = getRecommendedQueriesTemplates({
         fromCommand: queryForRecommendedQueries,
         timeField: timeFieldName,
+        categorizationField,
       });
 
       recommendedQueries.push(...recommendedQueriesFromStaticTemplates);
@@ -165,11 +176,11 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
             name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
               defaultMessage: 'Documentation',
             }),
-            icon: 'iInCircle',
+            icon: 'info',
             renderItem: () => (
               <EuiContextMenuItem
                 key="about"
-                icon="iInCircle"
+                icon="info"
                 data-test-subj="esql-about"
                 target="_blank"
                 href={docLinks.links.query.queryESQL}
@@ -239,6 +250,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     timeFieldName,
     toggleLanguageComponent,
     solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
+    categorizationField,
   ]);
 
   const esqlMenuPopoverStyles = css`

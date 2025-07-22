@@ -26,7 +26,7 @@ import {
   type ESQLControlState,
   type ControlWidthOptions,
 } from '@kbn/esql-types';
-import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete';
+import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { ControlWidth, ControlLabel } from './shared_form_components';
 import { getQueryForFields } from './helpers';

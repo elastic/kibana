@@ -328,7 +328,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         selectedEntities,
         selectedForecastId: selectedForecastIdProp,
         tableInterval: tableInterval.val,
-        tableSeverity: tableSeverity.val,
+        tableSeverity,
         timefilter,
         zoom: zoomProp,
         invalidTimeRangeError,

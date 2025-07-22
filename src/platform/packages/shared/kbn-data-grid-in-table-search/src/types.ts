@@ -20,6 +20,7 @@ export interface ActiveMatch {
   rowIndex: number;
   columnId: string;
   matchIndexWithinCell: number;
+  matchPosition: number;
 }
 
 export interface InTableSearchHighlightsWrapperProps {
@@ -35,15 +36,23 @@ export type RenderCellValuePropsWithInTableSearch = EuiDataGridCellValueElementP
 
 export type RenderCellValueWrapper = (props: RenderCellValuePropsWithInTableSearch) => ReactNode;
 
+export interface InTableSearchRestorableState {
+  searchTerm?: string;
+  activeMatch?: ActiveMatch;
+}
+
 export interface UseFindMatchesProps {
+  initialState: InTableSearchRestorableState | undefined;
+  onInitialStateChange: ((state: InTableSearchRestorableState) => void) | undefined;
   inTableSearchTerm: string;
   visibleColumns: string[];
   rows: unknown[];
   renderCellValue: RenderCellValueWrapper;
-  onScrollToActiveMatch: (activeMatch: ActiveMatch) => void;
+  onScrollToActiveMatch: (activeMatch: ActiveMatch, animate: boolean) => void;
 }
 
 export interface UseFindMatchesState {
+  term: string;
   matchesList: RowMatches[];
   matchesCount: number | null;
   activeMatchPosition: number | null;
@@ -52,7 +61,8 @@ export interface UseFindMatchesState {
   renderCellsShadowPortal: (() => ReactNode) | null;
 }
 
-export interface UseFindMatchesReturn extends Omit<UseFindMatchesState, 'matchesList' | 'columns'> {
+export interface UseFindMatchesReturn
+  extends Omit<UseFindMatchesState, 'matchesList' | 'columns' | 'term'> {
   goToPrevMatch: () => void;
   goToNextMatch: () => void;
   resetState: () => void;
@@ -63,5 +73,9 @@ export type AllCellsProps = Pick<
   'renderCellValue' | 'visibleColumns' | 'inTableSearchTerm'
 > & {
   rowsCount: number;
-  onFinish: (params: { matchesList: RowMatches[]; totalMatchesCount: number }) => void;
+  onFinish: (params: {
+    term: string;
+    matchesList: RowMatches[];
+    totalMatchesCount: number;
+  }) => void;
 };

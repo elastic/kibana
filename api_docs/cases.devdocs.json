@@ -3498,7 +3498,7 @@
         "tags": [],
         "label": "SAVED_OBJECT_TYPES",
         "description": [
-          "\nIf more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins"
+          "\nIf more values are added here please also add them here: x-pack/platform/test/cases_api_integration/common/plugins"
         ],
         "signature": [
           "(\"cases\" | \"cases-connector-mappings\" | \"cases-user-actions\" | \"cases-comments\" | \"cases-configure\")[]"

@@ -23,6 +23,8 @@ export interface LayoutDimensions {
   navigationPanelWidth: number;
   sidebarWidth: number;
   sidebarPanelWidth: number;
+  applicationTopBarHeight: number;
+  applicationBottomBarHeight: number;
 }
 
 /**
@@ -36,6 +38,8 @@ export interface LayoutState extends LayoutDimensions {
   hasHeader: boolean;
   hasNavigation: boolean;
   hasNavigationPanel: boolean;
+  hasApplicationTopBar: boolean;
+  hasApplicationBottomBar: boolean;
 }
 
 /**
@@ -59,4 +63,6 @@ export interface ChromeLayoutSlots {
   footer?: Slot | null;
   sidebarPanel?: Slot | null;
   sidebar?: Slot | null;
+  applicationTopBar?: Slot | null;
+  applicationBottomBar?: Slot | null;
 }

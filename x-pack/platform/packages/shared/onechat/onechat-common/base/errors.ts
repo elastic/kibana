@@ -6,14 +6,13 @@
  */
 
 import { ServerSentEventError } from '@kbn/sse-utils';
-import type { SerializedToolIdentifier } from '../tools';
-import type { SerializedAgentIdentifier } from '../agents';
 
 /**
  * Code to identify onechat errors
  */
 export enum OnechatErrorCode {
   internalError = 'internalError',
+  badRequest = 'badRequest',
   toolNotFound = 'toolNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
@@ -61,6 +60,25 @@ export const createInternalError = (
 };
 
 /**
+ * Represents a generic bad request error
+ */
+export type OnechatBadRequestError = OnechatError<OnechatErrorCode.badRequest>;
+
+/**
+ * Checks if the given error is a {@link OnechatInternalError}
+ */
+export const isBadRequestError = (err: unknown): err is OnechatBadRequestError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.badRequest;
+};
+
+export const createBadRequestError = (
+  message: string,
+  meta: Record<string, any> = {}
+): OnechatBadRequestError => {
+  return new OnechatError(OnechatErrorCode.badRequest, message, { ...meta, statusCode: 400 });
+};
+
+/**
  * Error thrown when trying to retrieve or execute a tool not present or available in the current context.
  */
 export type OnechatToolNotFoundError = OnechatError<OnechatErrorCode.toolNotFound>;
@@ -77,7 +95,7 @@ export const createToolNotFoundError = ({
   customMessage,
   meta = {},
 }: {
-  toolId: SerializedToolIdentifier;
+  toolId: string;
   customMessage?: string;
   meta?: Record<string, any>;
 }): OnechatToolNotFoundError => {
@@ -105,7 +123,7 @@ export const createAgentNotFoundError = ({
   customMessage,
   meta = {},
 }: {
-  agentId: SerializedAgentIdentifier;
+  agentId: string;
   customMessage?: string;
   meta?: Record<string, any>;
 }): OnechatAgentNotFoundError => {

@@ -19,6 +19,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { ASSET_FIELDS, MAX_ASSETS_TO_LOAD, QUERY_KEY_GRID_DATA } from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
 import { useDataViewContext } from './data_view_context';
+import { addEmptyDataFilterQuery } from '../utils/add_empty_data_filter';
 
 interface UseAssetsOptions extends BaseEsQuery {
   sort: string[][];
@@ -39,6 +40,7 @@ const getAssetsQuery = (
   if (!indexPattern) {
     throw new Error('Index pattern is required');
   }
+
   return {
     index: indexPattern,
     sort: getMultiFieldsSort(sort),
@@ -53,7 +55,7 @@ const getAssetsQuery = (
       bool: {
         ...query?.bool,
         filter: [...(query?.bool?.filter ?? [])],
-        must_not: [...(query?.bool?.must_not ?? [])],
+        must_not: addEmptyDataFilterQuery([...(query?.bool?.must_not ?? [])]),
       },
     },
     ...(pageParam ? { from: pageParam } : {}),

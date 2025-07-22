@@ -64,7 +64,7 @@ export const SetAlertSuppressionForThresholdForm = React.memo(function SetAlertS
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="iInCircle" />
+          <EuiIcon type="info" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs">{i18n.SUPPRESSION_FOR_THRESHOLD_INFO_TEXT}</EuiText>

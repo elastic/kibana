@@ -19,10 +19,6 @@ import { logAnalysisValidationV1 } from '../../../../common/http_api';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendLibs) => {
-  if (!framework.config.featureFlags.logsUIEnabled) {
-    return;
-  }
-
   framework
     .registerVersionedRoute({
       access: 'internal',

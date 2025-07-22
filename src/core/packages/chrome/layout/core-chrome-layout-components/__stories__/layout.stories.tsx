@@ -33,6 +33,8 @@ interface StoryArgs {
   navigationPanelWidth: number;
   sidebarPanelWidth: number;
   sidebarWidth: number;
+  applicationTopBarHeight: number;
+  applicationBottomBarHeight: number;
   includeSidebar: boolean;
   includeSidebarPanel: boolean;
   includeBanner: boolean;
@@ -40,6 +42,8 @@ interface StoryArgs {
   includeNavigationPanel: boolean;
   includeNavigation: boolean;
   includeHeader: boolean;
+  includeApplicationTopBar: boolean;
+  includeApplicationBottomBar: boolean;
 }
 
 type PropsAndArgs = React.ComponentProps<typeof ChromeLayout> & StoryArgs;
@@ -69,6 +73,8 @@ const LayoutExample = ({
   includeNavigationPanel,
   includeNavigation,
   includeHeader,
+  includeApplicationBottomBar,
+  includeApplicationTopBar,
   ...props
 }: StoryArgs) => {
   const {
@@ -186,12 +192,23 @@ const LayoutExample = ({
               </EuiFlexGroup>
             ) : null
           }
+          applicationTopBar={
+            includeApplicationTopBar && (
+              <Box label="AppBar" color={colors.text} backgroundColor={colors.success} />
+            )
+          }
+          applicationBottomBar={
+            includeApplicationBottomBar && (
+              <Box label="BottomBar" color={colors.text} backgroundColor={colors.accent} />
+            )
+          }
         >
           <Box
             label="Application"
             color={colors.textWarning}
             backgroundColor={colors.warning}
             rootCSS={css`
+              /* demo to make the application area scrollable */
               height: 1000px;
             `}
           />
@@ -211,6 +228,8 @@ export const Layout: StoryObj<PropsAndArgs> = {
     includeHeader: true,
     includeSidebar: true,
     includeSidebarPanel: true,
+    includeApplicationBottomBar: true,
+    includeApplicationTopBar: true,
     bannerHeight: 48,
     footerHeight: 48,
     headerHeight: 48,
@@ -218,6 +237,8 @@ export const Layout: StoryObj<PropsAndArgs> = {
     navigationPanelWidth: 240,
     sidebarPanelWidth: 368,
     sidebarWidth: 48,
+    applicationTopBarHeight: 48,
+    applicationBottomBarHeight: 48,
   },
   argTypes: {
     debug: {
@@ -252,6 +273,14 @@ export const Layout: StoryObj<PropsAndArgs> = {
       control: 'boolean',
       description: 'Whether to include the header in the layout',
     },
+    includeApplicationTopBar: {
+      control: 'boolean',
+      description: 'Whether to include the application top bar (appbar) in the layout',
+    },
+    includeApplicationBottomBar: {
+      control: 'boolean',
+      description: 'Whether to include the application bottom bar (bottombar) in the layout',
+    },
     bannerHeight: { control: 'number', description: 'Height of the banner' },
     footerHeight: { control: 'number', description: 'Height of the footer' },
     headerHeight: { control: 'number', description: 'Height of the header' },
@@ -259,6 +288,14 @@ export const Layout: StoryObj<PropsAndArgs> = {
     navigationPanelWidth: { control: 'number', description: 'Width of the navigation panel' },
     sidebarPanelWidth: { control: 'number', description: 'Width of the sidebar panel' },
     sidebarWidth: { control: 'number', description: 'Width of the sidebar' },
+    applicationTopBarHeight: {
+      control: 'number',
+      description: 'Height of the application top bar (appbar)',
+    },
+    applicationBottomBarHeight: {
+      control: 'number',
+      description: 'Height of the application bottom bar (bottombar)',
+    },
   },
   render: (args) => <LayoutExample {...args} />,
 };

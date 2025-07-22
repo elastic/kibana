@@ -198,7 +198,7 @@ export class SessionService {
   /**
    * Holds snapshot of last cleared session so that it can be continued
    * Can be used to re-use a session between apps
-   * @private
+   * @internal
    */
   private lastSessionSnapshot?: SessionSnapshot;
 

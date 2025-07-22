@@ -47,7 +47,7 @@ export const INACTIVE_ALERTS_DESCRIPTION = i18n.translate(
   'responseOpsAlertDelete.inactiveAlertsDescription',
   {
     defaultMessage:
-      'Remove alerts that were recovered, closed, or untracked longer than the threshold',
+      'Remove alerts that were recovered, closed, acknowledged, or untracked longer than the threshold',
   }
 );
 

@@ -105,6 +105,11 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  public async waitUntilTabIsLoaded() {
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
+
   public async getColumnHeaders() {
     return await this.dataGrid.getHeaderFields();
   }
@@ -304,6 +309,16 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async getHistogramHeight() {
+    const histogram = await this.testSubjects.find('unifiedHistogramResizablePanelFixed');
+    return (await histogram.getSize()).height;
+  }
+
+  public async resizeHistogramBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('unifiedHistogramResizableButton');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: 0, y: distance } });
+  }
+
   public async getChartInterval() {
     const button = await this.testSubjects.find('unifiedHistogramTimeIntervalSelectorButton');
     return await button.getAttribute('data-selected-value');
@@ -438,6 +453,16 @@ export class DiscoverPageObject extends FtrService {
       (await this.testSubjects.exists('fieldList')) &&
       (await this.testSubjects.exists('unifiedFieldListSidebar__toggle-collapse'))
     );
+  }
+
+  public async getSidebarWidth() {
+    const sidebar = await this.testSubjects.find('discover-sidebar');
+    return (await sidebar.getSize()).width;
+  }
+
+  public async resizeSidebarBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('discoverLayoutResizableButton');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: distance, y: 0 } });
   }
 
   public async editField(field: string) {

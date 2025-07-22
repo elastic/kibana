@@ -151,6 +151,7 @@ describe('updatePrivateLocationMonitors', () => {
         schedule: { number: '10', unit: 'm' },
         namespace: FIRST_SPACE_ID,
       },
+      namespaces: [FIRST_SPACE_ID],
     },
     {
       id: SECOND_MONITOR_ID,
@@ -166,6 +167,7 @@ describe('updatePrivateLocationMonitors', () => {
         schedule: { number: '5', unit: 'm' },
         namespace: SECOND_SPACE_ID,
       },
+      namespaces: [SECOND_SPACE_ID],
     },
   ];
 

@@ -21,6 +21,7 @@ import { ChartTitle } from './chart_title';
 import { Axis } from './axis/axis';
 import { ChartGrid as Grid } from './chart_grid';
 import { Binder } from './binder';
+import { visContainerClassName } from '@kbn/visualizations-plugin/public';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -129,7 +130,7 @@ export class Handler {
    * used to render the Vis. Throws a no results error if data is not
    * present.
    *
-   * @private
+   * @internal
    */
   _validateData() {
     const dataType = this.data.type;
@@ -223,7 +224,7 @@ export class Handler {
       .append('div')
       // class name needs `chart` in it for the polling checkSize function
       // to continuously call render on resize
-      .attr('class', 'visError chart error')
+      .attr('class', `visError chart error ${visContainerClassName}`)
       .attr('data-test-subj', 'vislibVisualizeError');
 
     div.append('h4').text(markdownIt.renderInline(message));

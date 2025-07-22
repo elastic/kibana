@@ -31,11 +31,14 @@ import {
 import { createContextAwarenessMocks } from '../__mocks__';
 import { type ScopedProfilesManager } from '../profiles_manager';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import { v4 as uuidv4 } from 'uuid';
+import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 
 let mockScopedProfilesManager: ScopedProfilesManager;
+let mockScopedEbtManager: ScopedDiscoverEBTManager;
 let mockUuid = 0;
 
-jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => (++mockUuid).toString() }));
+jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: jest.fn() }));
 
 const mockActions: Array<ActionDefinition<DiscoverCellActionExecutionContext>> = [];
 const mockTriggerActions: Record<string, string[]> = { [DISCOVER_CELL_ACTIONS_TRIGGER.id]: [] };
@@ -83,6 +86,7 @@ describe('useAdditionalCellActions', () => {
         <DiscoverTestProvider
           services={discoverServiceMock}
           scopedProfilesManager={mockScopedProfilesManager}
+          scopedEbtManager={mockScopedEbtManager}
         >
           {children}
         </DiscoverTestProvider>
@@ -91,13 +95,19 @@ describe('useAdditionalCellActions', () => {
   };
 
   beforeEach(() => {
-    discoverServiceMock.profilesManager = createContextAwarenessMocks().profilesManagerMock;
-    mockScopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager();
+    (uuidv4 as jest.Mock).mockImplementation(jest.requireActual('uuid').v4);
+    const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
+    discoverServiceMock.profilesManager = profilesManagerMock;
+    mockScopedEbtManager = scopedEbtManagerMock;
+    mockScopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager({
+      scopedEbtManager: mockScopedEbtManager,
+    });
+    (uuidv4 as jest.Mock).mockImplementation(() => (++mockUuid).toString());
   });
 
   afterEach(() => {
-    mockUuid = 0;
     jest.clearAllMocks();
+    mockUuid = 0;
   });
 
   it('should return metadata', async () => {

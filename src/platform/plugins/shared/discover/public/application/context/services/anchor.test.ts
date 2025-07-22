@@ -34,7 +34,9 @@ describe('context app', function () {
       searchSourceStub,
       [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
       discoverServices,
-      discoverServices.profilesManager.createScopedProfilesManager()
+      discoverServices.profilesManager.createScopedProfilesManager({
+        scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),
+      })
     );
 
   describe('function fetchAnchor', function () {

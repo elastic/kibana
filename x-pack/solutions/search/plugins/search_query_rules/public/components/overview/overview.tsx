@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -25,29 +26,27 @@ import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isPermissionError } from '../../utils/query_rules_utils';
 import queryRulesBackground from '../../assets/query-rule-background.svg';
+import queryRulesBackgroundDark from '../../assets/query-rule-background-dark.svg';
 import { QueryRulesSets } from '../query_rules_sets/query_rules_sets';
 import { CreateRulesetModal } from './create_ruleset_modal';
 
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useQueryRulesBreadcrumbs } from '../../hooks/use_query_rules_breadcrumbs';
 
 export const QueryRulesOverview = () => {
-  const {
-    data: queryRulesData,
-    isInitialLoading,
-    isError,
-    error,
-    refetch,
-  } = useFetchQueryRulesSets();
+  const usageTracker = useUsageTracker();
+  const { colorMode } = useEuiTheme();
+  useQueryRulesBreadcrumbs();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetch();
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [refetch]);
+  const { data: queryRulesData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+
   const backgroundProps = css({
-    backgroundImage: `url(${queryRulesBackground})`,
+    backgroundImage: `url(${
+      colorMode === 'DARK' ? queryRulesBackgroundDark : queryRulesBackground
+    })`,
     backgroundSize: 'contain',
     backgroundRepeat: 'no-repeat',
     height: '100%',
@@ -56,6 +55,7 @@ export const QueryRulesOverview = () => {
     alignContent: 'center',
     backgroundPosition: 'center center',
   });
+
   return (
     <QueryRulesPageTemplate restrictWidth={false}>
       {!isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0 && (
@@ -90,6 +90,7 @@ export const QueryRulesOverview = () => {
                   fill
                   iconType="plusInCircle"
                   onClick={() => {
+                    usageTracker?.click(AnalyticsEvents.addRulesetClicked);
                     setIsCreateModalVisible(true);
                   }}
                 >
@@ -138,6 +139,7 @@ export const QueryRulesOverview = () => {
             <EuiFlexItem>
               <EmptyPrompt
                 getStartedAction={() => {
+                  usageTracker?.click(AnalyticsEvents.gettingStartedButtonClicked);
                   setIsCreateModalVisible(true);
                 }}
               />

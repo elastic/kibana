@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { TimeRangeBar } from './timerange_bar';
 
 describe('TimeRangeBar', () => {
@@ -17,16 +17,16 @@ describe('TimeRangeBar', () => {
   };
 
   test('Renders gantt bar when isRunning is false', () => {
-    const wrapper = mount(<TimeRangeBar timerange={timeRange} />);
-    const ganttBar = wrapper.find('div[data-test-subj="mlJobSelectorGanttBar"]');
+    const { getByTestId } = render(<TimeRangeBar timerange={timeRange} />);
+    const ganttBar = getByTestId('mlJobSelectorGanttBar');
 
-    expect(ganttBar).toHaveLength(1);
+    expect(ganttBar).toBeInTheDocument();
   });
 
   test('Renders running animation bar when isRunning is true', () => {
-    const wrapper = mount(<TimeRangeBar timerange={timeRange} isRunning={true} />);
-    const runningBar = wrapper.find('div[data-test-subj="mlJobSelectorGanttBarRunning"]');
+    const { getByTestId } = render(<TimeRangeBar timerange={timeRange} isRunning={true} />);
+    const runningBar = getByTestId('mlJobSelectorGanttBarRunning');
 
-    expect(runningBar).toHaveLength(1);
+    expect(runningBar).toBeInTheDocument();
   });
 });

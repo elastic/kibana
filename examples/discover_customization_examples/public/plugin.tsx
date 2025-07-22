@@ -25,6 +25,9 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { SOWithMetadata } from '@kbn/content-management-utils';
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import image from './discover_customization_examples.png';
 
 export interface DiscoverCustomizationExamplesSetupPlugins {
@@ -35,6 +38,7 @@ export interface DiscoverCustomizationExamplesSetupPlugins {
 export interface DiscoverCustomizationExamplesStartPlugins {
   discover: DiscoverStart;
   data: DataPublicPluginStart;
+  savedSearch: SavedSearchPublicPluginStart;
 }
 
 const PLUGIN_ID = 'discoverCustomizationExamples';
@@ -112,15 +116,13 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           const togglePopover = () => setIsPopoverOpen((open) => !open);
           const closePopover = () => setIsPopoverOpen(false);
           const [savedSearches, setSavedSearches] = useState<
-            Array<SimpleSavedObject<{ title: string }>>
+            Array<SOWithMetadata<SavedSearchAttributes>>
           >([]);
 
           useEffect(() => {
-            core.savedObjects.client
-              .find<{ title: string }>({ type: 'search' })
-              .then((response) => {
-                setSavedSearches(response.savedObjects);
-              });
+            plugins.savedSearch.getAll().then((response) => {
+              setSavedSearches(response);
+            });
           }, []);
 
           const currentSavedSearch = useObservable(
@@ -154,7 +156,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       id: 0,
                       title: 'Saved logs views',
                       items: savedSearches.map((savedSearch) => ({
-                        name: savedSearch.get('title'),
+                        name: savedSearch.attributes.title,
                         onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
                         icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(

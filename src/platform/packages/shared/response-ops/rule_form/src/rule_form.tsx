@@ -19,6 +19,7 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
 } from './translations';
 import { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
+import { RuleFormStepId } from './constants';
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   showMustacheAutocompleteSwitch?: boolean;
   initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
   initialMetadata?: MetaData;
+  initialEditStep?: RuleFormStepId;
 }
 
 export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
@@ -65,6 +67,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     showMustacheAutocompleteSwitch,
     initialValues,
     initialMetadata,
+    initialEditStep,
   } = props;
 
   const {
@@ -122,6 +125,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           connectorFeatureId={connectorFeatureId}
           initialMetadata={initialMetadata}
+          initialEditStep={initialEditStep}
         />
       );
     }
@@ -175,25 +179,26 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    fieldsMetadata,
     contentManagement,
+    onChangeMetaData,
     id,
     ruleTypeId,
-    validConsumers,
-    multiConsumerSelection,
     onCancel,
     onSubmit,
-    onChangeMetaData,
     isFlyout,
     showMustacheAutocompleteSwitch,
     connectorFeatureId,
     initialMetadata,
+    initialEditStep,
     consumer,
+    multiConsumerSelection,
     hideInterval,
+    validConsumers,
     filteredRuleTypes,
     shouldUseRuleProducer,
     canShowConsumerSelection,
     initialValues,
-    fieldsMetadata,
   ]);
 
   return (

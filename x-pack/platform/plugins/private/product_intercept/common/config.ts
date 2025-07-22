@@ -18,10 +18,10 @@ export const configSchema = schema.object({
    * It's worth noting that if the intercept plugin is disabled this setting will have no effect.
    */
   enabled: schema.boolean({
-    defaultValue: false,
+    defaultValue: true,
   }),
   interval: schema.string({
-    defaultValue: '30m',
+    defaultValue: '90d',
     validate(value) {
       if (!/^[0-9]+(d|h|m|s)$/.test(value)) {
         return 'must be a supported duration string';

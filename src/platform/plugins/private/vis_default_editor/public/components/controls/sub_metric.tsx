@@ -16,6 +16,7 @@ import { AggParamType, IAggConfig, AggGroupNames } from '@kbn/data-plugin/public
 import { useSubAggParamsHandlers } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { DefaultEditorAggParams } from '../agg_params';
+import { visEditorSubAggStyles } from '../../_agg.styles';
 
 function SubMetricParamEditor({
   agg,
@@ -79,6 +80,7 @@ function SubMetricParamEditor({
         setTouched={setTouched}
         schemas={schemas}
         hideCustomLabel={!isCustomMetric}
+        css={visEditorSubAggStyles}
       />
     </>
   );

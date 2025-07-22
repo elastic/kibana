@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { Dictionary } from '../../../../common/types/common';
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function EmbeddedMapComponentWrapper({ seriesConfig }: Props) {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { maps: mapsPlugin },
   } = useMlKibana();
@@ -25,11 +27,11 @@ export function EmbeddedMapComponentWrapper({ seriesConfig }: Props) {
   useEffect(() => {
     if (seriesConfig.mapData && seriesConfig.mapData.length > 0) {
       setLayerList([
-        getMLAnomaliesActualLayer(seriesConfig.mapData),
+        getMLAnomaliesActualLayer(seriesConfig.mapData, euiTheme),
         getMLAnomaliesTypicalLayer(seriesConfig.mapData),
       ]);
     }
-  }, [seriesConfig]);
+  }, [seriesConfig, euiTheme]);
 
   return mapsPlugin ? (
     <div data-test-subj="xpack.ml.explorer.embeddedMap" style={{ width: '100%', height: 300 }}>

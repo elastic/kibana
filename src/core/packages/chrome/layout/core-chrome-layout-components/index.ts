@@ -14,3 +14,5 @@ export {
   type LayoutConfig as ChromeLayoutConfig,
   type LayoutConfigProviderProps as ChromeLayoutConfigProviderProps,
 } from './layout_config_context';
+export { SimpleDebugOverlay } from './debug/simple_debug_overlay';
+export { LayoutDebugOverlay } from './debug/layout_debug_overlay';

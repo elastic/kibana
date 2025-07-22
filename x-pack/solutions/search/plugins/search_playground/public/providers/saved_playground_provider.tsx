@@ -10,11 +10,11 @@ import { type QueryClient, useQueryClient } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { FormProvider as ReactHookFormProvider, UseFormReturn, useForm } from 'react-hook-form';
 
-import { ROUTE_VERSIONS } from '../../common';
+import { ROUTE_VERSIONS, SearchPlaygroundQueryKeys } from '../../common';
 import { useKibana } from '../hooks/use_kibana';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 
-import { LLMS_QUERY_KEY, LLMsQuery } from '../hooks/use_llms_models';
+import { LLMsQuery } from '../hooks/use_llms_models';
 import {
   APIRoutes,
   SavedPlaygroundForm,
@@ -50,7 +50,10 @@ const fetchSavedPlayground =
     }
     let models: LLMModel[];
     try {
-      models = await client.fetchQuery(LLMS_QUERY_KEY, LLMsQuery(http, client));
+      models = await client.fetchQuery(
+        [SearchPlaygroundQueryKeys.LLMsQuery],
+        LLMsQuery(http, client)
+      );
     } catch (e) {
       models = [];
     }

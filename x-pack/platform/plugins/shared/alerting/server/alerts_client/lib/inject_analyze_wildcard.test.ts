@@ -7,6 +7,10 @@
 
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
+jest.mock('./constants', () => ({
+  MAX_QUERIES: 25,
+}));
+
 const getQuery = (query?: string) => {
   return {
     bool: {
@@ -55,6 +59,7 @@ const getQuery = (query?: string) => {
     },
   };
 };
+
 describe('injectAnalyzeWildcard', () => {
   test('should inject analyze_wildcard field', () => {
     const query = getQuery();
@@ -165,5 +170,62 @@ describe('injectAnalyzeWildcard', () => {
         },
       }
     `);
+  });
+
+  test('should throw error if the query is too deeply nested', async () => {
+    const mockedQuery = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              query_string: {
+                                fields: ['kibana.alert.instance.id'],
+                                query: '*elastic*',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                'kibana.alert.action_group': 'test',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        should: [],
+        must_not: [
+          {
+            match_phrase: {
+              _id: 'assdasdasd',
+            },
+          },
+        ],
+      },
+    };
+
+    expect(() => injectAnalyzeWildcard(mockedQuery)).toThrow('Query is too deeply nested');
   });
 });

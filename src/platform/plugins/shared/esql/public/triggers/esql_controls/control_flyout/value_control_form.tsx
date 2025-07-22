@@ -20,6 +20,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import {
@@ -46,12 +47,15 @@ interface ValueControlFormProps {
   setControlState: (state: ESQLControlState) => void;
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
+  timeRange?: TimeRange;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 const INITIAL_EMPTY_STATE_QUERY = `/** Example
 To get the agent field values use: 
-FROM logs-* | STATS BY agent
+FROM logs-* 
+|  WHERE @timestamp <=?_tend and @timestamp >?_tstart
+| STATS BY agent
 */`;
 
 export function ValueControlForm({
@@ -63,6 +67,7 @@ export function ValueControlForm({
   search,
   setControlState,
   valuesRetrieval,
+  timeRange,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
 
@@ -157,6 +162,7 @@ export function ValueControlForm({
           signal: undefined,
           filter: undefined,
           dropNullColumns: true,
+          timeRange,
         }).then((results) => {
           if (!isMounted()) {
             return;
@@ -185,7 +191,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search]
+    [isMounted, search, timeRange]
   );
 
   useEffect(() => {
@@ -253,32 +259,28 @@ export function ValueControlForm({
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
         <>
-          <EuiFormRow
-            label={i18n.translate('esql.flyout.valuesQueryEditor.label', {
+          <ESQLLangEditor
+            query={{ esql: valuesQuery }}
+            onTextLangQueryChange={(q) => {
+              setValuesQuery(q.esql);
+            }}
+            hideTimeFilterInfo={true}
+            disableAutoFocus={true}
+            errors={esqlQueryErrors}
+            editorIsInline
+            hideRunQueryText
+            onTextLangQuerySubmit={async (q, a) => {
+              if (q) {
+                await onValuesQuerySubmit(q.esql);
+              }
+            }}
+            isDisabled={false}
+            isLoading={false}
+            hasOutline
+            formLabel={i18n.translate('esql.flyout.valuesQueryEditor.label', {
               defaultMessage: 'Values query',
             })}
-            fullWidth
-          >
-            <ESQLLangEditor
-              query={{ esql: valuesQuery }}
-              onTextLangQueryChange={(q) => {
-                setValuesQuery(q.esql);
-              }}
-              hideTimeFilterInfo={true}
-              disableAutoFocus={true}
-              errors={esqlQueryErrors}
-              editorIsInline
-              hideRunQueryText
-              onTextLangQuerySubmit={async (q, a) => {
-                if (q) {
-                  await onValuesQuerySubmit(q.esql);
-                }
-              }}
-              isDisabled={false}
-              isLoading={false}
-              hasOutline
-            />
-          </EuiFormRow>
+          />
           {queryColumns.length > 0 && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {

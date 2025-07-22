@@ -6,9 +6,13 @@
  */
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { createPrivilegeMonitoringIndicesRoute } from './create_index';
 import { healthCheckPrivilegeMonitoringRoute } from './health';
 import { initPrivilegeMonitoringEngineRoute } from './init';
-import { monitoringEntitySourceRoute } from './monitoring_entity_source';
+import {
+  monitoringEntitySourceRoute,
+  listMonitoringEntitySourceRoute,
+} from './monitoring_entity_source';
 import { searchPrivilegeMonitoringIndicesRoute } from './search_indices';
 
 import {
@@ -21,18 +25,23 @@ import {
 
 import { padInstallRoute } from './privileged_access_detection/pad_install';
 import { padGetStatusRoute } from './privileged_access_detection/pad_get_installation_status';
+import { privilegesCheckPrivilegeMonitoringRoute } from './privileges';
 
 export const registerPrivilegeMonitoringRoutes = ({
   router,
   logger,
   config,
+  getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
-  initPrivilegeMonitoringEngineRoute(router, logger, config);
-  healthCheckPrivilegeMonitoringRoute(router, logger, config);
   padInstallRoute(router, logger, config);
   padGetStatusRoute(router, logger, config);
-  searchPrivilegeMonitoringIndicesRoute(router, logger, config);
+  initPrivilegeMonitoringEngineRoute(router, logger, config);
+  healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  privilegesCheckPrivilegeMonitoringRoute(router, logger, getStartServices);
+  searchPrivilegeMonitoringIndicesRoute(router, logger);
+  createPrivilegeMonitoringIndicesRoute(router, logger);
   monitoringEntitySourceRoute(router, logger, config);
+  listMonitoringEntitySourceRoute(router, logger, config);
   createUserRoute(router, logger);
   deleteUserRoute(router, logger);
   listUsersRoute(router, logger);

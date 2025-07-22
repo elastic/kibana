@@ -102,7 +102,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
                 defaultMessage: 'Please select a connector type.',
               })}
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
             />
           </EuiFlexItem>
         )}
@@ -115,7 +115,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
                 defaultMessage: 'Waiting for connection',
               })}
               color="warning"
-              iconType="iInCircle"
+              iconType="info"
             />
           </EuiFlexItem>
         ) : null}

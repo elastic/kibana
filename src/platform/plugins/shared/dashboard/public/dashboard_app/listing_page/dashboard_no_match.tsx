@@ -38,7 +38,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
       bannerId = coreServices.overlays.banners.replace(
         bannerId,
         toMountPoint(
-          <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
+          <EuiCallOut color="warning" iconType="info" title={bannerMessage}>
             <p>
               <FormattedMessage
                 id="dashboard.noMatchRoute.bannerText"

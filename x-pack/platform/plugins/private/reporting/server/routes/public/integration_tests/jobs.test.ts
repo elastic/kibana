@@ -14,7 +14,7 @@ import { Readable } from 'stream';
 import supertest from 'supertest';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, type ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
@@ -35,14 +35,13 @@ import { ReportingRequestHandlerContext } from '../../../types';
 import { EventTracker } from '../../../usage';
 import { registerJobInfoRoutesPublic } from '../jobs';
 
-type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
-
 describe(`Reporting Job Management Routes: Public`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let eventTracker: EventTracker;
   let usageCounter: IUsageCounter;
-  let httpSetup: SetupServerReturn['httpSetup'];
+  let createRouter: SetupServerReturn['createRouter'];
+  let registerRouteHandlerContext: SetupServerReturn['registerRouteHandlerContext'];
   let exportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
@@ -75,8 +74,8 @@ describe(`Reporting Job Management Routes: Public`, () => {
   const mockConfigSchema = createMockConfigSchema();
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+    ({ server, createRouter, registerRouteHandlerContext } = await setupServer(reportingSymbol));
+    registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
       () => reportingMock.createStart()
@@ -86,7 +85,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       security: {
         license: { isEnabled: () => true },
       },
-      router: httpSetup.createRouter(''),
+      router: createRouter(''),
     });
 
     mockStartDeps = await createMockPluginStart(
@@ -149,7 +148,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
 
       await server.start();
 
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/1`)
         .expect(400)
         .then(({ body }) =>
@@ -175,7 +174,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
 
       await server.start();
 
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
         .expect(401)
         .then(({ body }) =>
@@ -189,9 +188,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
 
       await server.start();
 
-      await supertest(httpSetup.server.listener)
-        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
-        .expect(404);
+      await supertest(server.listener).get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`).expect(404);
     });
 
     it('when a job is incomplete', async () => {
@@ -205,7 +202,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       registerJobInfoRoutesPublic(reportingCore);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(503)
         .expect('Content-Type', 'text/plain; charset=utf-8')
@@ -225,7 +222,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       registerJobInfoRoutesPublic(reportingCore);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(500)
         .expect('Content-Type', 'application/json; charset=utf-8')
@@ -239,7 +236,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       registerJobInfoRoutesPublic(reportingCore);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
@@ -264,7 +261,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       registerJobInfoRoutesPublic(reportingCore);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .delete(`${PUBLIC_ROUTES.JOBS.DELETE_PREFIX}/denk`)
         .expect(500)
         .expect('Content-Type', 'application/json; charset=utf-8');
@@ -277,7 +274,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       registerJobInfoRoutesPublic(reportingCore);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'text/csv; charset=utf-8')
@@ -295,7 +292,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       registerJobInfoRoutesPublic(reportingCore);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .delete(`${PUBLIC_ROUTES.JOBS.DELETE_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'application/json; charset=utf-8');
@@ -312,7 +309,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       registerJobInfoRoutesPublic(reportingCore);
 
       await server.start();
-      await supertest(httpSetup.server.listener).get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`);
+      await supertest(server.listener).get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`);
 
       expect(eventTracker.downloadReport).toHaveBeenCalledTimes(1);
     });
@@ -333,7 +330,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       registerJobInfoRoutesPublic(reportingCore);
 
       await server.start();
-      await supertest(httpSetup.server.listener)
+      await supertest(server.listener)
         .delete(`${PUBLIC_ROUTES.JOBS.DELETE_PREFIX}/dank`)
         .expect(200)
         .expect('Content-Type', 'application/json; charset=utf-8');

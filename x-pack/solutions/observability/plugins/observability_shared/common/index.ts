@@ -13,6 +13,8 @@ export const sloFeatureId = 'slo';
 
 // SLO alerts table in slo detail page
 export const SLO_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
+export const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
+
 // Emebeddable SLO alerts table
 export const SLO_ALERTS_TABLE_CONFIG_ID = `${AlertConsumers.SLO}-embeddable-alerts-table`;
 
@@ -184,11 +186,8 @@ export type {
   StacktracesLocator,
   TopNFunctionsLocatorParams,
   TopNFunctionsLocator,
-  ServiceEntityLocator,
-  ServiceEntityLocatorParams,
   TransactionDetailsByTraceIdLocator,
   TransactionDetailsByTraceIdLocatorParams,
-  EntitiesInventoryLocator,
 } from './locators';
 
 export {
@@ -200,7 +199,7 @@ export {
   AssetDetailsFlyoutLocatorDefinition,
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorDefinition,
-  SupportedAssetTypes,
+  SupportedEntityTypes,
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,
@@ -210,12 +209,8 @@ export {
   StacktracesLocatorDefinition,
   TopNFunctionsLocatorDefinition,
   HOSTS_LOCATOR_ID,
-  ServiceEntityLocatorDefinition,
-  SERVICE_ENTITY_LOCATOR,
   TransactionDetailsByTraceIdLocatorDefinition,
   TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
-  EntitiesInventoryLocatorDefinition,
-  ENTITIES_INVENTORY_LOCATOR_ID,
 } from './locators';
 
 export { COMMON_OBSERVABILITY_GROUPING } from './embeddable_grouping';

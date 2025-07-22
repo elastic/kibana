@@ -101,21 +101,21 @@ export const updatePrivateLocationMonitors = async ({
         monitorWithRevision,
       };
 
-      const namespace = m.attributes.namespace;
+      const spaceId = m.namespaces?.[0] || 'default'; // Default to 'default' if no namespace is found
       return {
         ...acc,
-        [namespace]: [...(acc[namespace] || []), monitorToUpdate],
+        [spaceId]: [...(acc[spaceId] || []), monitorToUpdate],
       };
     },
     {}
   );
 
-  const promises = Object.keys(updatedMonitorsPerSpace).map((namespace) => [
+  const promises = Object.keys(updatedMonitorsPerSpace).map((spaceId) => [
     syncEditedMonitorBulk({
-      monitorsToUpdate: updatedMonitorsPerSpace[namespace],
+      monitorsToUpdate: updatedMonitorsPerSpace[spaceId],
       privateLocations: allPrivateLocations,
       routeContext,
-      spaceId: namespace,
+      spaceId,
     }),
   ]);
 

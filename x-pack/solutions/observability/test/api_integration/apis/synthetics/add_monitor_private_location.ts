@@ -93,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...monitor,
             [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
             url: apiResponse.body.url,
+            spaces: [SPACE_ID],
           })
         );
         monitorId = apiResponse.body.id;

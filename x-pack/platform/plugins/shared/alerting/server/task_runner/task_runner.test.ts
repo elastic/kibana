@@ -2693,8 +2693,8 @@ describe('Task Runner', () => {
     for (let i = 0; i < 300; i++) {
       await taskRunner.run();
     }
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult.monitoring?.run.history.length).toBe(200);
+    await taskRunner.run();
+    expect(mockedRuleTypeSavedObject.monitoring?.run.history.length).toEqual(200);
   });
 
   test('Actions circuit breaker kicked in, should set status as warning and log a message in event log', async () => {

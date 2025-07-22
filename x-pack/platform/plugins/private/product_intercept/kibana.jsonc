@@ -9,7 +9,7 @@
     "id": "productIntercept",
     "browser": true,
     "server": true,
-    "requiredPlugins": ["intercepts"],
+    "requiredPlugins": ["intercepts", "cloud"],
     "requiredBundles": [],
     "configPath": ["xpack", "product_intercept"]
   }

@@ -8,7 +8,16 @@
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import type { MlAction } from '../../../common/types';
+import {
+  ReindexStep,
+  ESUpgradeStatus,
+  EnrichedDeprecationInfo,
+  MlAction,
+  ReindexAction,
+  UnfreezeAction,
+  ReindexStatus,
+  DataStreamMigrationStatus,
+} from '../../../common/types';
 import { setupEnvironment } from '../helpers';
 import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
 import {
@@ -16,6 +25,9 @@ import {
   MOCK_SNAPSHOT_ID,
   MOCK_JOB_ID,
   createEsDeprecationsMockResponse,
+  MOCK_DS_DEPRECATION,
+  MOCK_DS_DEPRECATION_REINDEX,
+  MOCK_DS_DEPRECATION_READ_ONLY,
 } from './mocked_responses';
 
 describe('ES deprecations table', () => {
@@ -282,6 +294,34 @@ describe('ES deprecations table', () => {
       expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(1);
       expect(find('deprecationTableRow').length).toEqual(reindexDeprecations.length);
     });
+
+    it('maintains correct row state across pagination', async () => {
+      const { find, actions } = testBed;
+
+      // Verify we have multiple pages
+      expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toBeGreaterThan(
+        1
+      );
+
+      // Get the message of the first deprecation on page 1
+      const firstDeprecationMessagePage1 = find('deprecationTableRow').at(0).text();
+
+      // Navigate to page 2
+      await actions.pagination.clickPaginationAt(1);
+
+      // Get the message of the first deprecation on page 2
+      const firstDeprecationMessagePage2 = find('deprecationTableRow').at(0).text();
+
+      // The first items on different pages should be different
+      expect(firstDeprecationMessagePage1).not.toEqual(firstDeprecationMessagePage2);
+
+      // Navigate back to page 1
+      await actions.pagination.clickPaginationAt(0);
+
+      // Verify the first deprecation on page 1 is still the same
+      const firstDeprecationMessagePage1Again = find('deprecationTableRow').at(0).text();
+      expect(firstDeprecationMessagePage1Again).toEqual(firstDeprecationMessagePage1);
+    });
   });
 
   describe('no deprecations', () => {
@@ -307,6 +347,581 @@ describe('ES deprecations table', () => {
       expect(exists('noDeprecationsPrompt')).toBe(true);
       expect(find('noDeprecationsPrompt').text()).toContain(
         'Your Elasticsearch configuration is up to date'
+      );
+    });
+  });
+
+  describe('recommended actions for indices', () => {
+    // Helper to DRY up repeated setup
+    const setupRecommendedActionTest = async ({
+      correctiveAction,
+      reindexMeta = {},
+      deprecationIndex = 3,
+    }: {
+      correctiveAction: any;
+      reindexMeta?: Partial<any>;
+      deprecationIndex?: number;
+    }) => {
+      httpRequestsMockHelpers.setLoadEsDeprecationsResponse({
+        ...esDeprecationsMockResponse,
+        migrationsDeprecations: esDeprecationsMockResponse.migrationsDeprecations.map(
+          (deprecation, idx) =>
+            idx === deprecationIndex
+              ? ({
+                  level: 'critical',
+                  resolveDuringUpgrade: false,
+                  type: 'index_settings',
+                  message: 'Index created before 7.0',
+                  details: 'deprecation details',
+                  url: 'doc_url',
+                  index: correctiveAction.index || 'reindex_index',
+                  correctiveAction,
+                } as EnrichedDeprecationInfo)
+              : deprecation
+        ),
+      } as ESUpgradeStatus);
+
+      if (correctiveAction.type === 'reindex' || correctiveAction.type === 'unfreeze') {
+        httpRequestsMockHelpers.setReindexStatusResponse(
+          correctiveAction.index || 'reindex_index',
+          {
+            reindexOp: null,
+            warnings: [],
+            hasRequiredPrivileges: true,
+            meta: {
+              indexName: reindexMeta.indexName || 'foo',
+              reindexName: reindexMeta.reindexName || 'reindexed-foo',
+              aliases: [],
+              isFrozen: reindexMeta.isFrozen || false,
+              isReadonly: reindexMeta.isReadonly || false,
+              isInDataStream: reindexMeta.isInDataStream || false,
+              isFollowerIndex: reindexMeta.isFollowerIndex || false,
+              ...reindexMeta,
+            },
+          }
+        );
+      }
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup);
+      });
+      testBed.component.update();
+    };
+
+    it('recommends set unfreeze if index is frozen', async () => {
+      await setupRecommendedActionTest({
+        correctiveAction: {
+          type: 'unfreeze',
+          index: 'reindex_index',
+          metadata: {
+            isClosedIndex: false,
+            isFrozenIndex: true,
+            isInDataStream: false,
+          },
+        },
+      });
+      const { find } = testBed;
+      expect(find('reindexTableCell-correctiveAction').length).toBe(1);
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: unfreeze');
+    });
+
+    it('recommends set as read-only if index is a follower index', async () => {
+      await setupRecommendedActionTest({
+        correctiveAction: {
+          type: 'reindex',
+          index: 'reindex_index',
+          metadata: {
+            isClosedIndex: false,
+            isFrozenIndex: false,
+            isInDataStream: false,
+          },
+        },
+        reindexMeta: {
+          isFollowerIndex: true,
+          indexName: 'follower-index',
+          reindexName: 'reindexed-follower-index',
+        },
+      });
+      const { find } = testBed;
+      expect(find('reindexTableCell-correctiveAction').length).toBe(1);
+      expect(find('reindexTableCell-correctiveAction').text()).toContain(
+        'Recommended: set to read-only'
+      );
+    });
+
+    it('recommends set as read-only if index is bigger than 1GB', async () => {
+      await setupRecommendedActionTest({
+        correctiveAction: {
+          type: 'reindex',
+          index: 'reindex_index',
+          indexSizeInBytes: 1173741824, // > 1GB
+          metadata: {
+            isClosedIndex: false,
+            isFrozenIndex: false,
+            isInDataStream: false,
+          },
+        },
+        reindexMeta: {
+          indexName: 'large-index',
+          reindexName: 'reindexed-large-index',
+        },
+      });
+      const { find } = testBed;
+      expect(find('reindexTableCell-correctiveAction').length).toBe(1);
+      expect(find('reindexTableCell-correctiveAction').text()).toContain(
+        'Recommended: set to read-only'
+      );
+    });
+
+    it('recommends reindexing if index is already read-only', async () => {
+      await setupRecommendedActionTest({
+        correctiveAction: {
+          type: 'reindex',
+          index: 'reindex_index',
+          metadata: {
+            isClosedIndex: false,
+            isFrozenIndex: false,
+            isInDataStream: false,
+          },
+        },
+        reindexMeta: {
+          isReadonly: true,
+          indexName: 'readonly-index',
+          reindexName: 'reindexed-readonly-index',
+        },
+      });
+      const { find } = testBed;
+      expect(find('reindexTableCell-correctiveAction').length).toBe(1);
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: reindex');
+    });
+
+    it('recommends set as read-only if reindexing is excluded', async () => {
+      await setupRecommendedActionTest({
+        correctiveAction: {
+          type: 'reindex',
+          index: 'reindex_index',
+          excludedActions: ['readOnly'],
+          metadata: {
+            isClosedIndex: false,
+            isFrozenIndex: false,
+            isInDataStream: false,
+          },
+        },
+        reindexMeta: {
+          indexName: 'excluded-index',
+          reindexName: 'reindexed-excluded-index',
+        },
+      });
+      const { find } = testBed;
+      expect(find('reindexTableCell-correctiveAction').length).toBe(1);
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: reindex');
+    });
+
+    it('recommends manual fix if follower index and already read-only', async () => {
+      await setupRecommendedActionTest({
+        correctiveAction: {
+          type: 'reindex',
+          index: 'large_and_readonly_index',
+          metadata: {
+            isClosedIndex: false,
+            isFrozenIndex: false,
+            isInDataStream: false,
+          },
+        },
+        reindexMeta: {
+          isFollowerIndex: true,
+          isReadonly: true,
+          indexName: 'large_and_readonly_index',
+          reindexName: 'reindexed-large_and_readonly_index',
+        },
+      });
+      const { find } = testBed;
+      expect(find('reindexTableCell-correctiveAction').length).toBe(1);
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Resolve manually');
+    });
+    it('recommends reindexing by default', async () => {
+      await setupRecommendedActionTest({
+        correctiveAction: {
+          type: 'reindex',
+          index: 'reindex_index',
+          metadata: {
+            isClosedIndex: false,
+            isFrozenIndex: false,
+            isInDataStream: false,
+          },
+        },
+      });
+      const { find } = testBed;
+      expect(find('reindexTableCell-correctiveAction').length).toBe(1);
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: reindex');
+    });
+  });
+  describe('recommended actions for data streams', () => {
+    it('recommends read-only by default', async () => {
+      const { find } = testBed;
+
+      expect(find('dataStreamReindexTableCell-correctiveAction').at(0).text()).toContain(
+        'Recommended: set to read-only'
+      );
+    });
+
+    it('recommends reindexing if read-only is excluded', async () => {
+      const { find } = testBed;
+
+      expect(find('dataStreamReindexTableCell-correctiveAction').at(1).text()).toContain(
+        'Recommended: reindex'
+      );
+    });
+  });
+
+  describe('action buttons', () => {
+    describe('frozen indices', () => {
+      beforeEach(async () => {
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse({
+          ...esDeprecationsMockResponse,
+          migrationsDeprecations: esDeprecationsMockResponse.migrationsDeprecations.map(
+            (deprecation) =>
+              deprecation === esDeprecationsMockResponse.migrationsDeprecations[3]
+                ? ({
+                    level: 'critical',
+                    resolveDuringUpgrade: false,
+                    type: 'index_settings',
+                    message: 'Index created before 7.0',
+                    details: 'deprecation details',
+                    url: 'doc_url',
+                    index: 'reindex_index',
+                    correctiveAction: {
+                      type: 'unfreeze',
+                      metadata: {
+                        isClosedIndex: false,
+                        isFrozenIndex: true,
+                        isInDataStream: false,
+                      },
+                    } as UnfreezeAction,
+                  } as EnrichedDeprecationInfo)
+                : deprecation
+          ),
+        } as ESUpgradeStatus);
+
+        httpRequestsMockHelpers.setUpdateIndexResponse(
+          esDeprecationsMockResponse.migrationsDeprecations[3].index!,
+          { data: '', error: null }
+        );
+
+        await act(async () => {
+          testBed = await setupElasticsearchPage(httpSetup);
+        });
+        testBed.component.update();
+      });
+      it('it displays reindexing and unfreeze button for frozen index', async () => {
+        const { find, exists } = testBed;
+
+        expect(find('reindexTableCell-actions').length).toBe(1);
+
+        expect(exists('deprecation-unfreeze-unfreeze')).toBe(true);
+        expect(exists('deprecation-unfreeze-reindex')).toBe(true);
+      });
+      it('it only displays reindexing button if reindex in progress', async () => {
+        httpRequestsMockHelpers.setReindexStatusResponse(
+          esDeprecationsMockResponse.migrationsDeprecations[3].index!,
+          {
+            reindexOp: {
+              status: ReindexStatus.inProgress,
+              lastCompletedStep: ReindexStep.readonly,
+              reindexTaskPercComplete: null,
+            },
+            warnings: [],
+            hasRequiredPrivileges: true,
+            meta: {
+              indexName: 'foo',
+              reindexName: 'reindexed-foo',
+              aliases: [],
+              isFrozen: false,
+              isReadonly: false,
+              isInDataStream: false,
+              isFollowerIndex: false,
+            },
+          }
+        );
+
+        await act(async () => {
+          testBed = await setupElasticsearchPage(httpSetup);
+        });
+        testBed.component.update();
+        const { find, exists } = testBed;
+        expect(find('reindexTableCell-actions').length).toBe(1);
+
+        expect(exists('deprecation-unfreeze-unfreeze')).toBe(false);
+        expect(exists('deprecation-unfreeze-reindex')).toBe(true);
+      });
+      it('it only displays unfreeze button if unfreezing in progress', async () => {
+        const { find, exists, actions } = testBed;
+
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'unfreeze',
+          index: 0,
+          action: 'unfreeze',
+        });
+        await actions.reindexDeprecationFlyout.clickUnfreezeButton();
+
+        expect(find('reindexTableCell-actions').length).toBe(1);
+
+        expect(exists('deprecation-unfreeze-unfreeze')).toBe(true);
+        expect(exists('deprecation-unfreeze-reindex')).toBe(false);
+      });
+    });
+    describe('reindexing indices', () => {
+      const setupReindexingTest = async ({
+        excludedActions = [],
+        index = 'reindex_index',
+        metaOverrides = {},
+      }: {
+        excludedActions?: string[];
+        index?: string;
+        metaOverrides?: Partial<any>;
+      } = {}) => {
+        httpRequestsMockHelpers.setLoadEsDeprecationsResponse({
+          ...esDeprecationsMockResponse,
+          migrationsDeprecations: esDeprecationsMockResponse.migrationsDeprecations.map(
+            (deprecation) =>
+              deprecation === esDeprecationsMockResponse.migrationsDeprecations[3]
+                ? ({
+                    level: 'critical',
+                    resolveDuringUpgrade: false,
+                    type: 'index_settings',
+                    message: 'Index created before 7.0',
+                    details: 'deprecation details',
+                    url: 'doc_url',
+                    index,
+                    correctiveAction: {
+                      type: 'reindex',
+                      excludedActions,
+                      metadata: {
+                        isClosedIndex: false,
+                        isFrozenIndex: false,
+                        isInDataStream: false,
+                        ...metaOverrides,
+                      },
+                    } as ReindexAction,
+                  } as EnrichedDeprecationInfo)
+                : deprecation
+          ),
+        } as ESUpgradeStatus);
+
+        httpRequestsMockHelpers.setReindexStatusResponse(index, {
+          reindexOp: null,
+          warnings: [],
+          hasRequiredPrivileges: true,
+          meta: {
+            indexName: 'excluded-index',
+            reindexName: 'reindexed-excluded-index',
+            aliases: [],
+            isFrozen: false,
+            isReadonly: false,
+            isInDataStream: false,
+            isFollowerIndex: false,
+            ...metaOverrides,
+          },
+        });
+
+        await act(async () => {
+          testBed = await setupElasticsearchPage(httpSetup);
+        });
+        testBed.component.update();
+      };
+
+      it('it displays reindexing and readonly for indices if both are valid', async () => {
+        await setupReindexingTest();
+        const { find, exists } = testBed;
+        expect(find('reindexTableCell-actions').length).toBe(1);
+        expect(exists('deprecation-reindex-readonly')).toBe(true);
+        expect(exists('deprecation-reindex-reindex')).toBe(true);
+      });
+      it('only displays read-only button if reindexing is excluded', async () => {
+        await setupReindexingTest({ excludedActions: ['readOnly'] });
+        const { find, exists } = testBed;
+        expect(find('reindexTableCell-actions').length).toBe(1);
+        expect(exists('deprecation-reindex-readonly')).toBe(false);
+        expect(exists('deprecation-reindex-reindex')).toBe(true);
+      });
+      it('only displays read-only button if index is a follower index', async () => {
+        await setupReindexingTest({ metaOverrides: { isFollowerIndex: true } });
+        const { find, exists } = testBed;
+        expect(find('reindexTableCell-actions').length).toBe(1);
+        expect(exists('deprecation-reindex-readonly')).toBe(true);
+        expect(exists('deprecation-reindex-reindex')).toBe(false);
+      });
+      it('only displays reindex button if read-only is excluded', async () => {
+        await setupReindexingTest({
+          excludedActions: ['reindex'],
+          index: 'readonly_index',
+        });
+        const { find, exists } = testBed;
+        expect(find('reindexTableCell-actions').length).toBe(1);
+        expect(exists('deprecation-reindex-readonly')).toBe(true);
+        expect(exists('deprecation-reindex-reindex')).toBe(false);
+      });
+      it('it only displays readonly button if readonly in progress', async () => {
+        const { exists, actions } = testBed;
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'reindex',
+          index: 0,
+          action: 'readonly',
+        });
+        await actions.reindexDeprecationFlyout.clickReadOnlyButton();
+
+        expect(exists('deprecation-reindex-readonly')).toBe(true);
+        expect(exists('deprecation-reindex-reindex')).toBe(false);
+      });
+    });
+  });
+  describe('datastreams', () => {
+    const defaultMigrationResponse = {
+      hasRequiredPrivileges: true,
+      migrationOp: { status: DataStreamMigrationStatus.notStarted },
+      warnings: [
+        {
+          warningType: 'incompatibleDataStream',
+          resolutionType: 'reindex',
+        },
+        {
+          warningType: 'incompatibleDataStream',
+          resolutionType: 'readonly',
+        },
+      ],
+    };
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
+        MOCK_DS_DEPRECATION.index!,
+        defaultMigrationResponse
+      );
+      httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
+        MOCK_DS_DEPRECATION_READ_ONLY.index!,
+        defaultMigrationResponse
+      );
+
+      httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
+        MOCK_DS_DEPRECATION_REINDEX.index!,
+        defaultMigrationResponse
+      );
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup);
+      });
+
+      testBed.component.update();
+    });
+
+    it('displays read-only and reindex depending if both are valid', async () => {
+      const { find } = testBed;
+      const actionsCell = find('dataStreamReindexTableCell-actions').at(0);
+
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-reindex"]').exists()).toBe(
+        true
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        true
+      );
+    });
+
+    it('recommends reindexing if read-only is excluded', async () => {
+      const { find } = testBed;
+
+      const actionsCell = find('dataStreamReindexTableCell-actions').at(1);
+
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-reindex"]').exists()).toBe(
+        true
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        false
+      );
+    });
+
+    it('recommends readonly if reindex is excluded', async () => {
+      const { find } = testBed;
+
+      const actionsCell = find('dataStreamReindexTableCell-actions').at(2);
+
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-reindex"]').exists()).toBe(
+        false
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        true
+      );
+    });
+    it('only displays reindex button if reindexing is in progress', async () => {
+      httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
+        hasRequiredPrivileges: true,
+        migrationOp: {
+          resolutionType: 'reindex',
+          status: DataStreamMigrationStatus.inProgress,
+          taskPercComplete: 1,
+          progressDetails: {
+            startTimeMs: Date.now() - 10000, // now - 10 seconds
+            successCount: 0,
+            pendingCount: 1,
+            inProgressCount: 0,
+            errorsCount: 0,
+          },
+        },
+        warnings: [
+          {
+            warningType: 'incompatibleDataStream',
+            resolutionType: 'reindex',
+          },
+        ],
+      });
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup);
+      });
+
+      testBed.component.update();
+      const { find } = testBed;
+
+      const actionsCell = find('dataStreamReindexTableCell-actions').at(0);
+
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-reindex"]').exists()).toBe(
+        true
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        false
+      );
+    });
+    it('only displays readonly button if setting read-only is in progress', async () => {
+      httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
+        hasRequiredPrivileges: true,
+        migrationOp: {
+          resolutionType: 'readonly',
+          status: DataStreamMigrationStatus.inProgress,
+          taskPercComplete: 1,
+          progressDetails: {
+            startTimeMs: Date.now() - 10000, // now - 10 seconds
+            successCount: 0,
+            pendingCount: 1,
+            inProgressCount: 0,
+            errorsCount: 0,
+          },
+        },
+        warnings: [
+          {
+            warningType: 'incompatibleDataStream',
+            resolutionType: 'readonly',
+          },
+        ],
+      });
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup);
+      });
+
+      testBed.component.update();
+      const { find } = testBed;
+
+      const actionsCell = find('dataStreamReindexTableCell-actions').at(0);
+
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-reindex"]').exists()).toBe(
+        false
+      );
+      expect(actionsCell.find('[data-test-subj="deprecation-dataStream-readonly"]').exists()).toBe(
+        true
       );
     });
   });

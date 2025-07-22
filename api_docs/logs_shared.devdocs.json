@@ -304,172 +304,6 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-public.LogColumnHeader",
-        "type": "Function",
-        "tags": [],
-        "label": "LogColumnHeader",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<{ columnWidth: ",
-          "LogEntryColumnWidth",
-          "; 'data-test-subj'?: string | undefined; } & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogColumnHeader.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogColumnHeadersWrapper",
-        "type": "Function",
-        "tags": [],
-        "label": "LogColumnHeadersWrapper",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<Omit<{ [x: string]: any; role?: string | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogColumnHeadersWrapper.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogEntryColumn",
-        "type": "Function",
-        "tags": [],
-        "label": "LogEntryColumn",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<Omit<Omit<Omit<any, \"ref\"> & React.RefAttributes<unknown>, \"ref\"> & { ref?: ((instance: unknown) => void) | React.RefObject<unknown> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryColumn.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogEntryContextMenu",
-        "type": "Function",
-        "tags": [],
-        "label": "LogEntryContextMenu",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "LogEntryContextMenuProps",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryContextMenu.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogEntryFieldColumn",
-        "type": "Function",
-        "tags": [],
-        "label": "LogEntryFieldColumn",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "LogEntryFieldColumnProps",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryFieldColumn.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-public.LogEntryFlyout",
         "type": "Function",
         "tags": [],
@@ -494,242 +328,6 @@
             "description": [],
             "signature": [
               "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogEntryMessageColumn",
-        "type": "Function",
-        "tags": [],
-        "label": "LogEntryMessageColumn",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "LogEntryMessageColumnProps",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryMessageColumn.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogEntryRowWrapper",
-        "type": "Function",
-        "tags": [],
-        "label": "LogEntryRowWrapper",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<Omit<Omit<Omit<any, \"ref\"> & React.RefAttributes<unknown>, \"ref\"> & { ref?: ((instance: unknown) => void) | React.RefObject<unknown> | null | undefined; }, \"ref\"> & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryRowWrapper.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogEntryTimestampColumn",
-        "type": "Function",
-        "tags": [],
-        "label": "LogEntryTimestampColumn",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          "LogEntryTimestampColumnProps",
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryTimestampColumn.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogPositionStateProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "LogPositionStateProvider",
-        "description": [],
-        "signature": [
-          "React.FunctionComponent<React.PropsWithChildren<{ logStreamPageState: ",
-          "State",
-          "<any, any, any, any, any> & { value: { hasLogViewIndices: \"initialized\"; }; }; logStreamPageCallbacks: ",
-          "LogStreamPageCallbacks",
-          "; }>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_position/use_log_position.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogPositionStateProvider.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogPositionStateProvider.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogStream",
-        "type": "Function",
-        "tags": [],
-        "label": "LogStream",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogStreamProps",
-            "text": "LogStreamProps"
-          },
-          " & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogStream.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogStreamProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "LogStreamProvider",
-        "description": [],
-        "signature": [
-          "React.FunctionComponent<React.PropsWithChildren<LogStreamProps>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_stream/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogStreamProvider.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogStreamProvider.$2",
-            "type": "Any",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
@@ -1008,48 +606,6 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-public.ScrollableLogTextStreamView",
-        "type": "Function",
-        "tags": [],
-        "label": "ScrollableLogTextStreamView",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<Omit<",
-          "ScrollableLogTextStreamViewProps",
-          " & React.RefAttributes<",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.ScrollableLogTextStreamView",
-            "text": "ScrollableLogTextStreamView"
-          },
-          ">, \"ref\"> & React.RefAttributes<{}>>"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.ScrollableLogTextStreamView.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-public.updateContextInUrl",
         "type": "Function",
         "tags": [],
@@ -1135,148 +691,6 @@
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.useColumnWidths",
-        "type": "Function",
-        "tags": [],
-        "label": "useColumnWidths",
-        "description": [
-          "\nThis hook calculates the column widths based on the given configuration. It\ndepends on the `CharacterDimensionsProbe` it returns being rendered so it can\nmeasure the monospace character size."
-        ],
-        "signature": [
-          "({ columnConfigurations, scale, timeFormat, }: { columnConfigurations: ",
-          "LogColumnRenderConfiguration",
-          "[]; scale: ",
-          "TextScale",
-          "; timeFormat?: ",
-          "TimeFormat",
-          " | undefined; }) => { columnWidths: ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogEntryColumnWidths",
-            "text": "LogEntryColumnWidths"
-          },
-          "; CharacterDimensionsProbe: () => React.JSX.Element; }"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.useColumnWidths.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  columnConfigurations,\n  scale,\n  timeFormat = 'time',\n}",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "logsShared",
-                "id": "def-public.useColumnWidths.$1.columnConfigurations",
-                "type": "Array",
-                "tags": [],
-                "label": "columnConfigurations",
-                "description": [],
-                "signature": [
-                  "LogColumnRenderConfiguration",
-                  "[]"
-                ],
-                "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "logsShared",
-                "id": "def-public.useColumnWidths.$1.scale",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "scale",
-                "description": [],
-                "signature": [
-                  "\"small\" | \"medium\" | \"large\""
-                ],
-                "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "logsShared",
-                "id": "def-public.useColumnWidths.$1.timeFormat",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "timeFormat",
-                "description": [],
-                "signature": [
-                  "TimeFormat",
-                  " | undefined"
-                ],
-                "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.useLogPositionStateContext",
-        "type": "Function",
-        "tags": [],
-        "label": "useLogPositionStateContext",
-        "description": [],
-        "signature": [
-          "() => DateRange & { targetPosition: TimeKeyOrNull; isStreaming: boolean; firstVisiblePosition: TimeKeyOrNull; pagesBeforeStart: number; pagesAfterEnd: number; visibleMidpoint: TimeKeyOrNull; visibleMidpointTime: number | null; visibleTimeInterval: { start: number; end: number; } | null; } & ",
-          "LogPositionCallbacks"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_position/use_log_position.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.useLogStreamContext",
-        "type": "Function",
-        "tags": [],
-        "label": "useLogStreamContext",
-        "description": [],
-        "signature": [
-          "() => { fetchEntries: () => void; fetchNextEntries: FetchPageCallback; fetchPreviousEntries: FetchPageCallback; fetchNewestEntries: () => void; isLoadingMore: boolean; isReloading: boolean; entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          "; highlights: string[]; } | { columnId: string; message: ({ constant: string; } | { field: string; value: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; topCursor: { time: string; tiebreaker: number; } | null; bottomCursor: { time: string; tiebreaker: number; } | null; hasMoreBefore: boolean; hasMoreAfter: boolean; lastLoadedTime?: Date | undefined; }"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/containers/logs/log_stream/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [],
         "initialIsOpen": false
       },
       {
@@ -1536,7 +950,13 @@
           ", ",
           "ServiceMap",
           ">>; logViewStateNotifications: ",
-          "NotificationChannel",
+          {
+            "pluginId": "@kbn/xstate-utils",
+            "scope": "public",
+            "docId": "kibKbnXstateUtilsPluginApi",
+            "section": "def-public.NotificationChannel",
+            "text": "NotificationChannel"
+          },
           "<",
           "LogViewContextWithReference",
           " | (",
@@ -2125,7 +1545,13 @@
           ", ",
           "ServiceMap",
           ">>; logViewStateNotifications: ",
-          "NotificationChannel",
+          {
+            "pluginId": "@kbn/xstate-utils",
+            "scope": "public",
+            "docId": "kibKbnXstateUtilsPluginApi",
+            "section": "def-public.NotificationChannel",
+            "text": "NotificationChannel"
+          },
           "<",
           "LogViewContextWithReference",
           " | (",
@@ -2458,137 +1884,6 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-public.LogEntryColumnWidths",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogEntryColumnWidths",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryColumnWidths.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[columnId: string]: LogEntryColumnWidth",
-            "description": [],
-            "signature": [
-              "[columnId: string]:  ",
-              "LogEntryColumnWidth"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryColumnWidths.iconColumnId",
-            "type": "Object",
-            "tags": [],
-            "label": "[iconColumnId]",
-            "description": [],
-            "signature": [
-              "{ baseWidth: string; growWeight: number; shrinkWeight: number; }"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.LogEntryStreamItem",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogEntryStreamItem",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/item.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryStreamItem.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "\"logEntry\""
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/item.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryStreamItem.logEntry",
-            "type": "Object",
-            "tags": [],
-            "label": "logEntry",
-            "description": [],
-            "signature": [
-              "{ id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.JsonArray",
-                "text": "JsonArray"
-              },
-              "; highlights: string[]; } | { columnId: string; message: ({ constant: string; } | { field: string; value: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.JsonArray",
-                "text": "JsonArray"
-              },
-              "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/item.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogEntryStreamItem.highlights",
-            "type": "Array",
-            "tags": [],
-            "label": "highlights",
-            "description": [],
-            "signature": [
-              "{ id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.JsonArray",
-                "text": "JsonArray"
-              },
-              "; highlights: string[]; } | { columnId: string; message: ({ constant: string; } | { field: string; value: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.JsonArray",
-                "text": "JsonArray"
-              },
-              "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/item.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-public.LogsSharedClientSetupDeps",
         "type": "Interface",
         "tags": [],
@@ -2759,6 +2054,8 @@
             "signature": [
               "{ services: { logSourcesService: ",
               "LogSourcesService",
+              "; logDataService: ",
+              "LogDataService",
               "; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/types.ts",
@@ -3007,44 +2304,6 @@
       },
       {
         "parentPluginId": "logsShared",
-        "id": "def-public.LogStreamProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "LogStreamProps",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogStreamProps",
-            "text": "LogStreamProps"
-          },
-          " extends LogStreamContentProps"
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_stream/log_stream.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.LogStreamProps.height",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "height",
-            "description": [],
-            "signature": [
-              "string | number | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/log_stream/log_stream.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
         "id": "def-public.LogViewContextWithError",
         "type": "Interface",
         "tags": [],
@@ -3113,163 +2372,10 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.UpdatedDateRange",
-        "type": "Interface",
-        "tags": [],
-        "label": "UpdatedDateRange",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.UpdatedDateRange.startDateExpression",
-            "type": "string",
-            "tags": [],
-            "label": "startDateExpression",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.UpdatedDateRange.endDateExpression",
-            "type": "string",
-            "tags": [],
-            "label": "endDateExpression",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.VisibleInterval",
-        "type": "Interface",
-        "tags": [],
-        "label": "VisibleInterval",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.VisibleInterval.pagesBeforeStart",
-            "type": "number",
-            "tags": [],
-            "label": "pagesBeforeStart",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.VisibleInterval.pagesAfterEnd",
-            "type": "number",
-            "tags": [],
-            "label": "pagesAfterEnd",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.VisibleInterval.startKey",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "startKey",
-            "description": [],
-            "signature": [
-              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.VisibleInterval.middleKey",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "middleKey",
-            "description": [],
-            "signature": [
-              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.VisibleInterval.endKey",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "endKey",
-            "description": [],
-            "signature": [
-              "({ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }) | null"
-            ],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-public.VisibleInterval.fromScroll",
-            "type": "boolean",
-            "tags": [],
-            "label": "fromScroll",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/scrollable_log_text_stream_view.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "logsShared",
-        "id": "def-public.iconColumnId",
-        "type": "Uncategorized",
-        "tags": [],
-        "label": "iconColumnId",
-        "description": [],
-        "signature": [
-          "typeof ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.iconColumnId",
-            "text": "iconColumnId"
-          }
-        ],
-        "path": "x-pack/platform/plugins/shared/logs_shared/public/components/logging/log_text_stream/log_entry_column.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "logsShared",
         "id": "def-public.LogsOverviewProps",
@@ -3303,7 +2409,13 @@
         "label": "LogViewNotificationChannel",
         "description": [],
         "signature": [
-          "NotificationChannel",
+          {
+            "pluginId": "@kbn/xstate-utils",
+            "scope": "public",
+            "docId": "kibKbnXstateUtilsPluginApi",
+            "section": "def-public.NotificationChannel",
+            "text": "NotificationChannel"
+          },
           "<",
           "LogViewContextWithReference",
           " | (",

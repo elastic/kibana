@@ -46,11 +46,12 @@
     "@kbn/react-kibana-context-render",
     "@kbn/data-view-utils",
     "@kbn/esql-utils",
-    "@kbn/esql-validation-autocomplete",
     "@kbn/react-kibana-mount",
     "@kbn/field-utils",
     "@kbn/language-documentation",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/aiops-utils",
+    "@kbn/esql-ast",
   ],
   "exclude": [
     "target/**/*",

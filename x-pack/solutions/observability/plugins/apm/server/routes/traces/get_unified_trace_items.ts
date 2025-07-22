@@ -24,6 +24,10 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TIMESTAMP_US,
+  EVENT_OUTCOME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
@@ -43,6 +47,11 @@ const optionalFields = asMutableArray([
   PROCESSOR_EVENT,
   PARENT_ID,
   STATUS_CODE,
+  TIMESTAMP_US,
+  EVENT_OUTCOME,
+  STATUS_CODE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
 ] as const);
 
 export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -134,7 +143,6 @@ export async function getUnifiedTraceItems({
   );
 
   const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
-
   return response.hits.hits
     .map((hit) => {
       const event = unflattenKnownApmEventFields(hit.fields, fields);
@@ -147,17 +155,20 @@ export async function getUnifiedTraceItems({
       const docErrorCount = errorCountByDocId[id] || 0;
       return {
         id: event.span?.id ?? event.transaction?.id,
-        timestamp: event[AT_TIMESTAMP],
+        timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
         duration: resolveDuration(apmDuration, event.duration),
-        hasError:
-          docErrorCount > 0 ||
-          (event.status?.code && Array.isArray(event.status.code)
-            ? event.status.code[0] === 'Error'
-            : false),
+        ...((event.event?.outcome || event.status?.code) && {
+          status: {
+            fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
+            value: event.event?.outcome || event.status?.code,
+          },
+        }),
+        errorCount: docErrorCount,
         parentId: event.parent?.id,
         serviceName: event.service.name,
+        spanType: event.span?.subtype || event.span?.type,
       } as TraceItem;
     })
     .filter((_) => _) as TraceItem[];
@@ -179,3 +190,5 @@ function resolveDuration(apmDuration?: number, otelDuration?: number[] | string)
 
   return duration * 0.001;
 }
+
+const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us

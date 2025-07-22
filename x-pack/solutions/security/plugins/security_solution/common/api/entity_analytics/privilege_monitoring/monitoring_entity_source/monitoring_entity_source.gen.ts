@@ -15,9 +15,10 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
-export type MonitoringEntitySourceDescriptor = z.infer<typeof MonitoringEntitySourceDescriptor>;
-export const MonitoringEntitySourceDescriptor = z.object({
+export type CreateMonitoringEntitySource = z.infer<typeof CreateMonitoringEntitySource>;
+export const CreateMonitoringEntitySource = z.object({
   type: z.string(),
   name: z.string(),
   managed: z.boolean().optional(),
@@ -33,14 +34,42 @@ export const MonitoringEntitySourceDescriptor = z.object({
       })
     )
     .optional(),
-  filter: z.object({}).optional(),
+  filter: z
+    .object({
+      kuery: z.union([z.string(), z.object({})]).optional(),
+    })
+    .optional(),
 });
 
-export type MonitoringEntitySourceResponse = z.infer<typeof MonitoringEntitySourceResponse>;
-export const MonitoringEntitySourceResponse = z.object({
-  id: z.string().optional(),
+export type UpdatedMonitoringEntitySource = z.infer<typeof UpdatedMonitoringEntitySource>;
+export const UpdatedMonitoringEntitySource = z.object({
+  type: z.string().optional(),
+  name: z.string().optional(),
+  managed: z.boolean().optional(),
+  indexPattern: z.string().optional(),
+  enabled: z.boolean().optional(),
+  error: z.string().optional(),
+  integrationName: z.string().optional(),
+  matchers: z
+    .array(
+      z.object({
+        fields: z.array(z.string()),
+        values: z.array(z.string()),
+      })
+    )
+    .optional(),
+  filter: z
+    .object({
+      kuery: z.union([z.string(), z.object({})]).optional(),
+    })
+    .optional(),
+});
+
+export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
+export const MonitoringEntitySourceProperties = z.object({
   name: z.string().optional(),
   type: z.string().optional(),
+  managed: z.boolean().optional(),
   indexPattern: z.string().optional(),
   integrationName: z.string().optional(),
   enabled: z.boolean().optional(),
@@ -52,4 +81,64 @@ export const MonitoringEntitySourceResponse = z.object({
       })
     )
     .optional(),
+  filter: z
+    .object({
+      kuery: z.union([z.string(), z.object({})]).optional(),
+    })
+    .optional(),
 });
+
+export type MonitoringEntitySourceNoId = z.infer<typeof MonitoringEntitySourceNoId>;
+export const MonitoringEntitySourceNoId = MonitoringEntitySourceProperties.merge(z.object({}));
+
+export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
+export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
+  z.object({
+    id: z.string(),
+  })
+);
+
+export type CreateEntitySourceRequestBody = z.infer<typeof CreateEntitySourceRequestBody>;
+export const CreateEntitySourceRequestBody = CreateMonitoringEntitySource;
+export type CreateEntitySourceRequestBodyInput = z.input<typeof CreateEntitySourceRequestBody>;
+
+export type CreateEntitySourceResponse = z.infer<typeof CreateEntitySourceResponse>;
+export const CreateEntitySourceResponse = UpdatedMonitoringEntitySource;
+
+export type DeleteEntitySourceRequestParams = z.infer<typeof DeleteEntitySourceRequestParams>;
+export const DeleteEntitySourceRequestParams = z.object({
+  id: z.string(),
+});
+export type DeleteEntitySourceRequestParamsInput = z.input<typeof DeleteEntitySourceRequestParams>;
+
+export type GetEntitySourceRequestParams = z.infer<typeof GetEntitySourceRequestParams>;
+export const GetEntitySourceRequestParams = z.object({
+  id: z.string(),
+});
+export type GetEntitySourceRequestParamsInput = z.input<typeof GetEntitySourceRequestParams>;
+
+export type GetEntitySourceResponse = z.infer<typeof GetEntitySourceResponse>;
+export const GetEntitySourceResponse = MonitoringEntitySource;
+export type ListEntitySourcesRequestQuery = z.infer<typeof ListEntitySourcesRequestQuery>;
+export const ListEntitySourcesRequestQuery = z.object({
+  type: z.string().optional(),
+  managed: BooleanFromString.optional(),
+  name: z.string().optional(),
+});
+export type ListEntitySourcesRequestQueryInput = z.input<typeof ListEntitySourcesRequestQuery>;
+
+export type ListEntitySourcesResponse = z.infer<typeof ListEntitySourcesResponse>;
+export const ListEntitySourcesResponse = z.array(MonitoringEntitySource);
+
+export type UpdateEntitySourceRequestParams = z.infer<typeof UpdateEntitySourceRequestParams>;
+export const UpdateEntitySourceRequestParams = z.object({
+  id: z.string(),
+});
+export type UpdateEntitySourceRequestParamsInput = z.input<typeof UpdateEntitySourceRequestParams>;
+
+export type UpdateEntitySourceRequestBody = z.infer<typeof UpdateEntitySourceRequestBody>;
+export const UpdateEntitySourceRequestBody = MonitoringEntitySourceNoId;
+export type UpdateEntitySourceRequestBodyInput = z.input<typeof UpdateEntitySourceRequestBody>;
+
+export type UpdateEntitySourceResponse = z.infer<typeof UpdateEntitySourceResponse>;
+export const UpdateEntitySourceResponse = UpdatedMonitoringEntitySource;

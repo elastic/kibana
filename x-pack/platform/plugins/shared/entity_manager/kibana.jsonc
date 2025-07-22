@@ -8,7 +8,7 @@
   "plugin": {
     "id": "entityManager",
     "configPath": ["xpack", "entityManager"],
-    "browser": true,
+    "browser": false,
     "server": true,
     "requiredPlugins": [
       "security",

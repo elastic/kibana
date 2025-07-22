@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { RuleActionsOverflow } from '.';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
@@ -13,6 +13,8 @@ import { TestProviders } from '../../../../../common/mock';
 import { useBulkExport } from '../../../../rule_management/logic/bulk_actions/use_bulk_export';
 import { useExecuteBulkAction } from '../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { mockRule } from '../../../../rule_management_ui/components/rules_table/__mocks__/mock';
+import type { ExternalRuleSource } from '../../../../../../common/api/detection_engine';
+import { useRuleCustomizationsContext } from '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context';
 
 const showBulkDuplicateExceptionsConfirmation = () => Promise.resolve(null);
 const showManualRuleRunConfirmation = () => Promise.resolve(null);
@@ -20,6 +22,9 @@ const showManualRuleRunConfirmation = () => Promise.resolve(null);
 jest.mock('../../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
 jest.mock('../../../../rule_management/logic/bulk_actions/use_bulk_export');
+jest.mock(
+  '../../../../rule_management/components/rule_details/rule_customizations_diff/rule_customizations_context'
+);
 
 const mockReportEvent = jest.fn();
 jest.mock('../../../../../common/lib/kibana', () => {
@@ -46,8 +51,15 @@ jest.mock('../../../../../common/lib/kibana', () => {
 
 const useExecuteBulkActionMock = useExecuteBulkAction as jest.Mock;
 const useBulkExportMock = useBulkExport as jest.Mock;
+const useRuleCustomizationsContextMock = useRuleCustomizationsContext as jest.Mock;
 
 describe('RuleActionsOverflow', () => {
+  beforeEach(() => {
+    useRuleCustomizationsContextMock.mockReturnValue({
+      actions: { openCustomizationsRevertFlyout: jest.fn() },
+      state: { doesBaseVersionExist: true },
+    });
+  });
   describe('rules details menu panel', () => {
     test('menu items rendered when a rule is passed to the component', () => {
       const { getByTestId } = render(
@@ -66,6 +78,7 @@ describe('RuleActionsOverflow', () => {
       expect(getByTestId('rules-details-menu-panel')).toHaveTextContent('Export rule');
       expect(getByTestId('rules-details-menu-panel')).toHaveTextContent('Delete rule');
       expect(getByTestId('rules-details-menu-panel')).toHaveTextContent('Manual run');
+      expect(getByTestId('rules-details-menu-panel')).not.toHaveTextContent('Revert rule'); // Don't show revert rule action when rule is custom
     });
 
     test('menu is empty when no rule is passed to the component', () => {
@@ -278,6 +291,54 @@ describe('RuleActionsOverflow', () => {
           }
         );
       });
+    });
+  });
+
+  describe('rule revert to base version flyout', () => {
+    const customizedMockRule = {
+      ...mockRule('id'),
+      rule_source: { type: 'external', is_customized: true } as ExternalRuleSource,
+    };
+    test('it shows the revert action when rule is prebuilt and customized', () => {
+      const { getByTestId } = render(
+        <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
+          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+          rule={customizedMockRule}
+          userHasPermissions
+          canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
+        />,
+        { wrapper: TestProviders }
+      );
+      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
+      const revertRuleButton = within(getByTestId('rules-details-menu-panel')).getByText(
+        'Revert to Elastic version'
+      );
+
+      fireEvent.click(revertRuleButton);
+      // Popover is not shown
+      expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
+    });
+
+    test('it disabled the revert action when isRevertBaseVersionDisabled is true', async () => {
+      useRuleCustomizationsContextMock.mockReturnValue({
+        actions: { openCustomizationsRevertFlyout: jest.fn() },
+        state: { doesBaseVersionExist: false },
+      });
+      const { getByTestId } = render(
+        <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
+          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+          rule={customizedMockRule}
+          userHasPermissions
+          canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
+        />,
+        { wrapper: TestProviders }
+      );
+      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
+      expect(getByTestId('rules-details-revert-rule')).toBeDisabled();
     });
   });
 });

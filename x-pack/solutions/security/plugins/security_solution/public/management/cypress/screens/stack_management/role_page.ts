@@ -139,7 +139,7 @@ export const ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS = Object.freeze([
 
 type EndpointSubFeaturePrivilegeId = (typeof ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS)[number];
 
-/* @private */
+/* @internal */
 const privilegeMapToTitle = Object.freeze({
   all: 'All',
   read: 'Read',

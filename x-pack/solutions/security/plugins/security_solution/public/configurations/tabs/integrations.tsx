@@ -10,7 +10,8 @@ import { EuiSkeletonLoading } from '@elastic/eui';
 import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { AI_FOR_SOC_INTEGRATIONS, CONFIGURATIONS_PATH } from '../../../common/constants';
+import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
+import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { useEnhancedIntegrationCards } from '../../common/lib/search_ai_lake/hooks';
 import { ConfigurationTabs, IntegrationsFacets } from '../constants';
 import { IntegrationsPage, IntegrationsSkeleton } from './integrations/components';
@@ -27,7 +28,7 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
     });
 
     const allowedIntegrations = filteredCards.filter((card) =>
-      AI_FOR_SOC_INTEGRATIONS.includes(card.name)
+      SEARCH_AI_LAKE_PACKAGES.includes(card.name)
     );
 
     const { available, installed } = useEnhancedIntegrationCards(allowedIntegrations);

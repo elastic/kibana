@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('can specify references to return', async () => {
       const searchPayload = {
         contentTypeId: 'dashboard',
-        version: 3,
+        version: 1,
         query: {},
         options: {},
       };

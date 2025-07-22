@@ -17,6 +17,7 @@ interface AssetInventorySearchBarProps {
   setQuery(v: Partial<AssetsURLQuery>): void;
   placeholder?: string;
   query: AssetsURLQuery;
+  isLoading: boolean;
 }
 
 export const AssetInventorySearchBar = ({
@@ -28,6 +29,7 @@ export const AssetInventorySearchBar = ({
       defaultMessage: 'Filter your data using KQL syntax',
     }
   ),
+  isLoading,
 }: AssetInventorySearchBarProps) => {
   const { dataView } = useDataViewContext();
   const { euiTheme } = useEuiTheme();
@@ -47,13 +49,13 @@ export const AssetInventorySearchBar = ({
           showDatePicker={false}
           indexPatterns={[dataView]}
           onQuerySubmit={setQuery}
-          onFiltersUpdated={(filters: Filter[]) => setQuery({ filters })}
+          onFiltersUpdated={(newFilters: Filter[]) => setQuery({ filters: newFilters })}
           placeholder={placeholder}
           query={{
             query: query?.query?.query || '',
             language: query?.query?.language || 'kuery',
           }}
-          filters={query?.filters || []}
+          isLoading={isLoading}
         />
       </div>
     </FiltersGlobal>

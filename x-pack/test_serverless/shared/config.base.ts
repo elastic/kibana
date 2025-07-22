@@ -51,11 +51,11 @@ export default async () => {
   // "Fake" SAML provider
   const idpPath = resolve(
     __dirname,
-    '../../test/security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../platform/test/security_api_integration/plugins/saml_provider/metadata.xml'
   );
   const samlIdPPlugin = resolve(
     __dirname,
-    '../../test/security_api_integration/plugins/saml_provider'
+    '../../platform/test/security_api_integration/plugins/saml_provider'
   );
 
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
@@ -181,8 +181,6 @@ export default async () => {
         `--xpack.cloud.deployments_url=/deployments`,
         `--xpack.cloud.organization_url=/account/`,
         `--xpack.cloud.users_and_roles_url=/account/members/`,
-        // disable product intercept for all ftr tests by default
-        '--xpack.intercepts.enabled=false',
       ],
     },
 

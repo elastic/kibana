@@ -11,7 +11,11 @@
     "src/**/*",
     "**/*.ts",
   ],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/esql-types",
+  ],
   "exclude": [
     "target/**/*",
   ]

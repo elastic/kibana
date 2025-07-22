@@ -23,7 +23,7 @@ const cssProp = css`
     'banner banner banner banner banner'
     'navigation navigationPanel header sidebarPanel sidebar'
     'navigation navigationPanel application sidebarPanel sidebar'
-    'navigation navigationPanel footer sidebarPanel sidebar';
+    'footer footer footer footer footer';
 `;
 
 // TODO: clintandrewhall - Handle smaller screens using `useEuiBreakpoints`.

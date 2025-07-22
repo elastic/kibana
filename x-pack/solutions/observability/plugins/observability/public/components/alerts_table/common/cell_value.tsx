@@ -42,6 +42,7 @@ import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
+import { ElapsedTimestampTooltip } from '../../../../common';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -72,6 +73,7 @@ export type AlertCellRenderers = Record<string, (value: string) => ReactNode>;
 // eslint-disable-next-line react/function-component-definition
 export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = (props) => {
   const {
+    tableId,
     columnId,
     alert,
     openAlertInFlyout,
@@ -92,9 +94,12 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     [TIMESTAMP]: (value) => (
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
-    [ALERT_START]: (value) => (
-      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
-    ),
+    [ALERT_START]: (value) =>
+      tableId === 'xpack.observability.alerts.relatedAlerts' ? (
+        <ElapsedTimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+      ) : (
+        <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+      ),
     [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),

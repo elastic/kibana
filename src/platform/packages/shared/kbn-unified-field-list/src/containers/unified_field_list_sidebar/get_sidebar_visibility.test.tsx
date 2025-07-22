@@ -21,6 +21,7 @@ describe('UnifiedFieldList getSidebarVisibility', () => {
     const state = getSidebarVisibility({ localStorageKey });
 
     expect(state.isCollapsed$.getValue()).toBe(false);
+    expect(state.initialValue).toBe(false);
 
     act(() => {
       state.toggle(true);
@@ -43,6 +44,7 @@ describe('UnifiedFieldList getSidebarVisibility', () => {
     const state = getSidebarVisibility({ localStorageKey });
 
     expect(state.isCollapsed$.getValue()).toBe(true);
+    expect(state.initialValue).toBe(true);
 
     act(() => {
       state.toggle(false);
@@ -50,6 +52,15 @@ describe('UnifiedFieldList getSidebarVisibility', () => {
 
     expect(state.isCollapsed$.getValue()).toBe(false);
     expect(localStorage.getItem(localStorageKey)).toBe('false');
+  });
+
+  it('should ignore local storage value if initial value is specified', async () => {
+    localStorage.setItem(localStorageKey, 'true');
+
+    const state = getSidebarVisibility({ localStorageKey, isInitiallyCollapsed: false });
+
+    expect(state.isCollapsed$.getValue()).toBe(false);
+    expect(state.initialValue).toBe(false);
   });
 
   it('should not persist if local storage key is not defined', async () => {

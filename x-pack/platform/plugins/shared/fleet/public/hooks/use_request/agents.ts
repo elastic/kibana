@@ -21,6 +21,8 @@ import type {
   UpdateAgentRequest,
   MigrateSingleAgentRequest,
   MigrateSingleAgentResponse,
+  BulkMigrateAgentsRequest,
+  BulkMigrateAgentsResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -389,6 +391,20 @@ export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']
     body: {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
+      settings: options.settings ?? {},
+    },
+  });
+}
+
+export function useBulkMigrateAgents(options: BulkMigrateAgentsRequest['body']) {
+  return sendRequest<BulkMigrateAgentsResponse>({
+    path: agentRouteService.postBulkMigrateAgents(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: {
+      agents: options.agents,
+      uri: options.uri,
+      enrollment_token: options.enrollment_token,
       settings: options.settings ?? {},
     },
   });

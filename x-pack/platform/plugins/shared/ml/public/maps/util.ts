@@ -19,7 +19,7 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { VectorSourceRequestMeta } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '@kbn/maps-plugin/common';
-import { type MLAnomalyDoc, ML_SEVERITY_COLOR_RAMP } from '@kbn/ml-anomaly-utils';
+import { type MLAnomalyDoc, getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { MlApi } from '../application/services/ml_api_service';
@@ -34,26 +34,26 @@ export const ML_ANOMALY_LAYERS = {
   TYPICAL_TO_ACTUAL: 'typical to actual',
 } as const;
 
-export const CUSTOM_COLOR_RAMP = {
+export const getCustomColorRampStyleProperty = (euiTheme: EuiThemeComputed) => ({
   type: STYLE_TYPE.DYNAMIC,
   options: {
-    customColorRamp: ML_SEVERITY_COLOR_RAMP,
+    customColorRamp: getMlSeverityColorRampValue(euiTheme),
     field: {
       name: 'record_score',
       origin: FIELD_ORIGIN.SOURCE,
     },
     useCustomColorRamp: true,
   },
-};
+});
 
-export const ACTUAL_STYLE = {
+export const getActualStyle = (euiTheme: EuiThemeComputed) => ({
   type: 'VECTOR',
   properties: {
-    fillColor: CUSTOM_COLOR_RAMP,
-    lineColor: CUSTOM_COLOR_RAMP,
+    fillColor: getCustomColorRampStyleProperty(euiTheme),
+    lineColor: getCustomColorRampStyleProperty(euiTheme),
   },
   isTimeAware: false,
-};
+});
 
 export const TYPICAL_STYLE = {
   type: 'VECTOR',
@@ -95,7 +95,7 @@ function getCoordinates(latLonString: string): number[] {
     .reverse();
 }
 
-export function getInitialAnomaliesLayers(jobId: string) {
+export function getInitialAnomaliesLayers(jobId: string, euiTheme: EuiThemeComputed) {
   const initialLayers = [];
   for (const layer in ML_ANOMALY_LAYERS) {
     if (Object.hasOwn(ML_ANOMALY_LAYERS, layer)) {
@@ -109,7 +109,7 @@ export function getInitialAnomaliesLayers(jobId: string) {
         style:
           ML_ANOMALY_LAYERS[layer as keyof typeof ML_ANOMALY_LAYERS] === ML_ANOMALY_LAYERS.TYPICAL
             ? TYPICAL_STYLE
-            : ACTUAL_STYLE,
+            : getActualStyle(euiTheme),
       });
     }
   }

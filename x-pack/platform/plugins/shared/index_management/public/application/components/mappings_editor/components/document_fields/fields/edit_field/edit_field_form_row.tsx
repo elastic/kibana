@@ -161,11 +161,11 @@ export const EditFieldFormRow = React.memo(
 
             {docLink ? (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={docLink.text}>
+                <EuiToolTip content={docLink.text} disableScreenReaderOutput>
                   <EuiButtonIcon
                     href={docLink.href}
                     target="_blank"
-                    iconType="help"
+                    iconType="question"
                     aria-label={docLink.text}
                   />
                 </EuiToolTip>

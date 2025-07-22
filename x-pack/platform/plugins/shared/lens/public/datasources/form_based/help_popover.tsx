@@ -34,7 +34,7 @@ export const HelpPopoverButton = ({
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon size="s" type="help" css={helpPopoverStyles.button(euiThemeContext)} />
+        <EuiIcon size="s" type="question" css={helpPopoverStyles.button(euiThemeContext)} />
         {children}
       </EuiLink>
     </EuiText>

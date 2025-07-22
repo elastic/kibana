@@ -1,0 +1,73 @@
+{
+  "id": "@kbn/core-chrome-layout",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout",
+        "id": "def-public.LAYOUT_DEBUG_FEATURE_FLAG_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "LAYOUT_DEBUG_FEATURE_FLAG_KEY",
+        "description": [],
+        "signature": [
+          "\"core.chrome.layoutDebug\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout/layout_feature_flag.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout",
+        "id": "def-public.LAYOUT_FEATURE_FLAG_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "LAYOUT_FEATURE_FLAG_KEY",
+        "description": [],
+        "signature": [
+          "\"core.chrome.layoutType\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout/layout_feature_flag.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout",
+        "id": "def-public.LayoutFeatureFlag",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutFeatureFlag",
+        "description": [],
+        "signature": [
+          "\"grid\" | \"legacy-fixed\""
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout/layout_feature_flag.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

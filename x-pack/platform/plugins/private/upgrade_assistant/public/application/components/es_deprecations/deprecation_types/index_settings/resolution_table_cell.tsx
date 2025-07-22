@@ -7,14 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiFlexItem,
-  EuiText,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Status } from '../../../types';
 
@@ -71,7 +64,9 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.deleteInProgressText}</EuiText>
+          <EuiText size="s" color="subdued">
+            <em>{i18nTexts.deleteInProgressText}</em>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -85,7 +80,7 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
         data-test-subj="indexSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" />
+          <EuiIcon type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteCompleteText}</EuiText>
@@ -102,7 +97,7 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
         data-test-subj="indexSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="danger" />
+          <EuiIcon type="warningFilled" color="danger" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteFailedText}</EuiText>
@@ -111,20 +106,5 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
     );
   }
 
-  return (
-    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        data-test-subj="indexSettingsResolutionStatusCell"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
+  return <></>;
 };

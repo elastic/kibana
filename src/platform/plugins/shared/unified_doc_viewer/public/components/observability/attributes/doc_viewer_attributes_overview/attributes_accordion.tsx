@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { EuiAccordion, EuiText, EuiNotificationBadge } from '@elastic/eui';
+import { EuiAccordion, EuiText, EuiNotificationBadge, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AttributesTable } from './attributes_table';
+import { AttributesEmptyPrompt } from './attributes_empty_prompt';
+import { AttributeField } from './attributes_overview';
 
 interface AttributesAccordionProps {
   id: string;
   title: string;
   ariaLabel: string;
-  fields: string[];
+  tooltipMessage: string;
+  fields: AttributeField[];
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];
@@ -26,12 +29,13 @@ interface AttributesAccordionProps {
   onAddColumn?: (col: string) => void;
   onRemoveColumn?: (col: string) => void;
   filter?: DocViewFilterFn;
+  isEsqlMode: boolean;
 }
 
 export const AttributesAccordion = ({
   id,
   title,
-  ariaLabel,
+  tooltipMessage,
   fields,
   hit,
   dataView,
@@ -41,34 +45,51 @@ export const AttributesAccordion = ({
   onAddColumn,
   onRemoveColumn,
   filter,
-}: AttributesAccordionProps) => (
-  <EuiAccordion
-    id={id}
-    buttonContent={
-      <EuiText size="s">
-        <strong aria-label={ariaLabel}>{title}</strong>
-      </EuiText>
-    }
-    initialIsOpen={fields.length > 0}
-    forceState={fields.length === 0 ? 'closed' : undefined}
-    isDisabled={fields.length === 0}
-    extraAction={
-      <EuiNotificationBadge size="m" color="subdued">
-        {fields.length}
-      </EuiNotificationBadge>
-    }
-    paddingSize="m"
-  >
-    <AttributesTable
-      hit={hit}
-      dataView={dataView}
-      columns={columns}
-      columnsMeta={columnsMeta}
-      fields={fields}
-      searchTerm={searchTerm}
-      onAddColumn={onAddColumn}
-      onRemoveColumn={onRemoveColumn}
-      filter={filter}
-    />
-  </EuiAccordion>
-);
+  isEsqlMode = false,
+}: AttributesAccordionProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiAccordion
+      id={id}
+      buttonContent={
+        <EuiText size="s">
+          <strong css={{ marginRight: euiTheme.size.xs }}>{title}</strong>
+          <EuiIconTip
+            aria-label={tooltipMessage}
+            type="question"
+            color="subdued"
+            size="s"
+            content={tooltipMessage}
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
+          />
+        </EuiText>
+      }
+      initialIsOpen={fields.length > 0}
+      extraAction={
+        <EuiNotificationBadge size="m" color="subdued">
+          {fields.length}
+        </EuiNotificationBadge>
+      }
+      paddingSize="m"
+    >
+      {fields.length === 0 ? (
+        <AttributesEmptyPrompt />
+      ) : (
+        <AttributesTable
+          hit={hit}
+          dataView={dataView}
+          columns={columns}
+          columnsMeta={columnsMeta}
+          fields={fields}
+          searchTerm={searchTerm}
+          onAddColumn={onAddColumn}
+          onRemoveColumn={onRemoveColumn}
+          filter={filter}
+          isEsqlMode={isEsqlMode}
+        />
+      )}
+    </EuiAccordion>
+  );
+};
