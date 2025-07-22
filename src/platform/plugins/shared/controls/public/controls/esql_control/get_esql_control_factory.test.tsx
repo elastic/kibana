@@ -146,7 +146,7 @@ describe('ESQLControlApi', () => {
       });
 
       const { findByTestId, findByTitle } = render(<Component className="" />);
-      fireEvent.click(await findByTestId('comboBoxSearchInput'));
+      fireEvent.click(await findByTestId('optionsListSelections'));
       fireEvent.click(await findByTitle('option2'));
 
       await waitFor(() => {

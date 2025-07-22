@@ -50,7 +50,7 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
 
   public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
     return (
-      <EuiToolTip content={this.getDisplayName(context)}>
+      <EuiToolTip content={this.getDisplayName(context)} disableScreenReaderOutput>
         <EuiButtonIcon
           data-test-subj={`control-action-${(context.embeddable as HasUniqueId).uuid}-edit`}
           aria-label={this.getDisplayName(context)}

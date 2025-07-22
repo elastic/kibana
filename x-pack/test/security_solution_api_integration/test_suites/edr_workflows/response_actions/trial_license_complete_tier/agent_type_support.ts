@@ -28,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(400, {
             statusCode: 400,
             error: 'Bad Request',
-            message: 'No stack connector instance configured for [.sentinelone]',
+            message:
+              'Unable to build list of indexes while retrieving policy information for SentinelOne agents [test]. Check to ensure at least one integration policy exists.',
           });
       });
     });
