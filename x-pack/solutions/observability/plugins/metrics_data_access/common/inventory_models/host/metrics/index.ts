@@ -10,13 +10,13 @@ import type { HostFormulas } from './formulas';
 import type { HostCharts } from './charts';
 import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 
-const legacyMetrics: Array<keyof HostAggregations> = ['cpu', 'rx', 'tx'];
+const legacyMetrics: Array<keyof HostAggregations> = ['cpu', 'tx', 'rx'];
 export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, HostCharts> = {
   legacyMetrics,
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema, {
-      includeLegacyMetrics: args?.schema === 'ecs',
+      includeLegacyMetrics: (args?.schema ?? 'ecs') === 'ecs',
       legacyMetrics,
     });
     return catalog;
@@ -35,7 +35,7 @@ export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, Hos
       return ['cpuV2', 'memory', 'txV2', 'rxV2'];
     }
 
-    return legacyMetrics.concat(['cpuV2', 'memory', 'txV2', 'rxV2']);
+    return ['cpuV2', 'memory', 'txV2', 'rxV2', ...legacyMetrics];
   },
   defaultSnapshot: 'cpuV2',
   defaultTimeRangeInSeconds: 3600, // 1 hour

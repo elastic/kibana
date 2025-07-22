@@ -32,7 +32,7 @@ export class MetricsCatalog<TConfig extends MetricConfigMap>
       legacyMetrics?: Array<keyof TConfig>;
     }
   ) {
-    const { includeLegacyMetrics = false, legacyMetrics = [] } = options ?? {};
+    const { includeLegacyMetrics = true, legacyMetrics = [] } = options ?? {};
 
     this.includeLegacyMetrics = includeLegacyMetrics;
     this.legacyMetrics = new Set(legacyMetrics);

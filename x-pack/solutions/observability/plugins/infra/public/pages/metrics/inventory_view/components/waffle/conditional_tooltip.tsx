@@ -54,21 +54,16 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       },
     },
   });
-  const { nodes, loading } = useSnapshot(
-    {
-      filterQuery: query,
-      metrics: requestMetrics,
-      groupBy: [],
-      nodeType,
-      sourceId,
-      currentTime: requestCurrentTime.current,
-      accountId: '',
-      region: '',
-    },
-    {
-      sendRequestImmediately: requestMetrics.length > 0,
-    }
-  );
+  const { nodes, loading } = useSnapshot({
+    filterQuery: query,
+    metrics: requestMetrics,
+    groupBy: [],
+    nodeType,
+    sourceId,
+    currentTime: requestCurrentTime.current,
+    accountId: '',
+    region: '',
+  });
 
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];
