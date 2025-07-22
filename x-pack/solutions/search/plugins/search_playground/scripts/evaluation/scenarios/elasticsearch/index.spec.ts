@@ -7,6 +7,9 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
+import fs from 'fs';
+import path from 'path';
+
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient, kibanaClient } from '../../services';
@@ -15,31 +18,35 @@ describe('Elasticsearch function', () => {
   describe('index management', () => {
     describe('existing index', () => {
       before(async () => {
+        // Create the index
         await esClient.indices.create({
-          index: 'kb',
+          index: 'work-from-home-policies',
           mappings: {
             properties: {
-              date: {
-                type: 'date',
-              },
-              kb_doc: {
-                type: 'keyword',
-              },
-              user: {
-                type: 'keyword',
-              },
+              date: { type: 'date' },
+              kb_doc: { type: 'keyword' },
+              user: { type: 'keyword' },
+              content: { type: 'text' },
+              summary: { type: 'text' },
+              name: { type: 'keyword' },
+              url: { type: 'keyword' },
+              created_on: { type: 'date' },
+              updated_at: { type: 'date' },
+              category: { type: 'keyword' },
             },
           },
         });
 
-        await esClient.index({
-          index: 'kb',
-          document: {
-            date: '2024-01-23T12:30:00.000Z',
-            kb_doc: 'document_1',
-            user: 'user1',
-          },
-        });
+        // Read and bulk ingest documents from JSON
+        const docs = JSON.parse(
+          fs.readFileSync(path.resolve(__dirname, 'workplace_documents.json'), 'utf-8')
+        );
+
+        const body = docs.flatMap((doc: any) => [
+          { index: { _index: 'work-from-home-policies' } },
+          doc,
+        ]);
+        await esClient.bulk({ refresh: true, body });
       });
 
       it('provides a response based on indexed documents', async () => {
@@ -49,16 +56,16 @@ describe('Elasticsearch function', () => {
           {
             data: {
               connector_id: 'e31e2627-57ce-42b6-b23d-b59faad9fe96',
-              indices: 'search-azwv',
+              indices: 'work-from-home-policies',
               prompt: 'You are an assistant for question-answering tasks.',
               citations: true,
               elasticsearch_query:
-                '{"retriever":{"standard":{"query":{"match_all":{}}}},"highlight":{"fields":{"text":{"type":"semantic","number_of_fragments":2,"order":"score"}}}}',
+                '{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["content"]}}}}}',
               summarization_model: 'anthropic.claude-3-haiku-20240307-v1:0',
               doc_size: 1,
-              source_fields: '{"search-azwv":["text"]}',
+              source_fields: '{"work-from-home-policies":["content"]}',
             },
-            messages: [{ role: 'human', content: 'Yellowstone' }],
+            messages: [{ role: 'human', content: 'Remote Work' }],
           }
         );
 
@@ -76,7 +83,7 @@ describe('Elasticsearch function', () => {
             errors: [],
           },
           [
-            'The assistant gave good description of Yellowstone National Park',
+            'The assistant gave good information about remote work',
             'The assistant cited the source of the information',
             'The assitant provided document source',
           ]
@@ -92,16 +99,16 @@ describe('Elasticsearch function', () => {
           {
             data: {
               connector_id: 'e31e2627-57ce-42b6-b23d-b59faad9fe96',
-              indices: 'search-azwv',
+              indices: 'work-from-home-policies',
               prompt: 'You are an assistant for question-answering tasks.',
               citations: true,
               elasticsearch_query:
-                '{"retriever":{"standard":{"query":{"match_all":{}}}},"highlight":{"fields":{"text":{"type":"semantic","number_of_fragments":2,"order":"score"}}}}',
+                '{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["content"]}}}}}',
               summarization_model: 'anthropic.claude-3-haiku-20240307-v1:0',
               doc_size: 1,
-              source_fields: '{"search-azwv":["text"]}',
+              source_fields: '{"work-from-home-policies":["content"]}',
             },
-            messages: [{ role: 'human', content: 'Die hard' }],
+            messages: [{ role: 'human', content: 'National Parks' }],
           }
         );
 
@@ -126,7 +133,7 @@ describe('Elasticsearch function', () => {
 
       after(async () => {
         await esClient.indices.delete({
-          index: 'kb',
+          index: 'work-from-home-policies',
         });
       });
     });
