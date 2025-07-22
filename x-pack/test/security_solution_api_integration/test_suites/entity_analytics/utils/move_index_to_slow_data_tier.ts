@@ -104,7 +104,6 @@ export const moveIndexToSlowDataTier = async ({
     }
 
     const indexInfo = response.indices[newIndexName];
-    log.info(`ALL RETURNED INFO ${JSON.stringify(response.indices)}`);
 
     log.debug(`INDEX INFO ${JSON.stringify(response)}`);
 
