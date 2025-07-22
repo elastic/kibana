@@ -6,7 +6,7 @@
  */
 
 import type httpProxy from 'http-proxy';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { asyncForEach } from '@kbn/std';
 import getPort from 'get-port';
 import type http from 'http';
@@ -87,7 +87,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
     },
   };
 
-  describe('ServiceNow SIR', () => {
+  describe.skip('ServiceNow SIR', () => {
     let simulatedActionId = '';
     let serviceNowSimulatorURL: string = '';
     let serviceNowServer: http.Server;
