@@ -49,6 +49,12 @@ export const EVENT_FILTERS = '[data-test-subj~="panelNavItem-id-event_filters"]'
 
 export const BLOCKLIST = '[data-test-subj~="panelNavItem-id-blocklist"]';
 
+export const HOST_ISOLATION_EXCEPTIONS =
+  '[data-test-subj~="panelNavItem-id-host_isolation_exceptions"]';
+
+export const RESPONSE_ACTIONS_HISTORY =
+  '[data-test-subj~="panelNavItem-id-response_actions_history"]';
+
 export const CSP_BENCHMARKS =
   '[data-test-subj~="panelNavItem-id-cloud_security_posture-benchmarks"]';
 
