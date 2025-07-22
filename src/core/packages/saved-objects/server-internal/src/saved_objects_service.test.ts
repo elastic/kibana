@@ -53,9 +53,23 @@ import {
 
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
+import * as SavedObjectsExporterModule from '@kbn/core-saved-objects-import-export-server-internal';
 
 jest.mock('./object_types');
 jest.mock('./deprecations');
+
+// Mock the importer and exporter constructors
+jest.mock('@kbn/core-saved-objects-import-export-server-internal', () => {
+  return {
+    SavedObjectsExporter: jest.fn().mockImplementation(() => {
+      return {};
+    }),
+    SavedObjectsImporter: jest.fn().mockImplementation(() => {
+      return {};
+    }),
+  };
+});
 
 const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'test-type',
@@ -383,6 +397,49 @@ describe('SavedObjectsService', () => {
         expect(serviceStatus.level.toString()).toEqual('available');
         expect(serviceStatus.summary).toEqual(
           'SavedObjects service has completed migrations and is available'
+        );
+      });
+    });
+
+    describe('#setAccessControlTransforms', () => {
+      it('sets the access control transforms', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const accessControlTransforms: SavedObjectsAccessControlTransforms = {
+          exportTransform: jest.fn(),
+          createImportTransforms: jest.fn(),
+        };
+
+        setup.setAccessControlTransforms(accessControlTransforms);
+
+        const request = httpServerMock.createKibanaRequest();
+        const start = await soService.start(createStartDeps());
+        start.createExporter(start.getScopedClient(request));
+
+        expect(SavedObjectsExporterModule.SavedObjectsExporter).toHaveBeenCalledWith(
+          expect.objectContaining({
+            accessControlExportTransform: accessControlTransforms.exportTransform,
+          })
+        );
+      });
+
+      it('throws if a factory is already registered', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const accessControlTransforms: SavedObjectsAccessControlTransforms = {
+          exportTransform: jest.fn(),
+          createImportTransforms: jest.fn(),
+        };
+
+        setup.setAccessControlTransforms(accessControlTransforms);
+        expect(() => {
+          setup.setAccessControlTransforms(accessControlTransforms);
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"access control tranforms have already been set, and can only be set once"`
         );
       });
     });
@@ -763,6 +820,88 @@ describe('SavedObjectsService', () => {
             '.kibana_foo',
           ]);
         });
+      });
+    });
+
+    describe('#createExporter', () => {
+      it(`calls the 'SavedObjectsExporter' constructor with export transform if set`, async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const accessControlTransforms: SavedObjectsAccessControlTransforms = {
+          exportTransform: jest.fn(),
+          createImportTransforms: jest.fn(),
+        };
+
+        setup.setAccessControlTransforms(accessControlTransforms);
+
+        const request = httpServerMock.createKibanaRequest();
+        const start = await soService.start(createStartDeps());
+        start.createExporter(start.getScopedClient(request));
+
+        expect(SavedObjectsExporterModule.SavedObjectsExporter).toHaveBeenCalledWith(
+          expect.objectContaining({
+            accessControlExportTransform: accessControlTransforms.exportTransform,
+          })
+        );
+      });
+
+      it(`call the 'SavedObjectsExporter' constructor with undefined export transform if not set`, async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+
+        const request = httpServerMock.createKibanaRequest();
+        const start = await soService.start(createStartDeps());
+        start.createExporter(start.getScopedClient(request));
+
+        expect(SavedObjectsExporterModule.SavedObjectsExporter).toHaveBeenCalledWith(
+          expect.objectContaining({
+            accessControlExportTransform: undefined,
+          })
+        );
+      });
+    });
+
+    describe('#createImporter', () => {
+      it(`calls the 'SavedObjectsImporter' constructor with the 'createImportTransforms' function if set`, async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const accessControlTransforms: SavedObjectsAccessControlTransforms = {
+          exportTransform: jest.fn(),
+          createImportTransforms: jest.fn(),
+        };
+
+        setup.setAccessControlTransforms(accessControlTransforms);
+
+        const request = httpServerMock.createKibanaRequest();
+        const start = await soService.start(createStartDeps());
+        start.createImporter(start.getScopedClient(request));
+
+        expect(SavedObjectsExporterModule.SavedObjectsImporter).toHaveBeenCalledWith(
+          expect.objectContaining({
+            createAccessControlImportTransforms: accessControlTransforms.createImportTransforms,
+          })
+        );
+      });
+
+      it(`call the 'SavedObjectsImporter' constructor with undefined 'createImportTransforms' function if not set`, async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+
+        const request = httpServerMock.createKibanaRequest();
+        const start = await soService.start(createStartDeps());
+        start.createImporter(start.getScopedClient(request));
+
+        expect(SavedObjectsExporterModule.SavedObjectsImporter).toHaveBeenCalledWith(
+          expect.objectContaining({
+            createAccessControlImportTransforms: undefined,
+          })
+        );
       });
     });
   });
