@@ -58,7 +58,7 @@ export function getScopedClientsStartFactory({
     });
 }
 
-export async function getScopedClients({
+async function getScopedClients({
   request,
   coreStart,
   pluginsStart,
