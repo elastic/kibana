@@ -26,7 +26,6 @@ import {
   resolveAncestors,
   withRootPrefix,
 } from '../../lib/content/stream';
-import { AssetClient } from '../../lib/streams/assets/asset_client';
 import { baseFields } from '../../lib/streams/component_templates/logs_layer';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
@@ -54,8 +53,8 @@ const exportContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, response, getScopedClients, context }) {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+  async handler({ params, request, response, getScopedClients }) {
+    const { streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -82,9 +81,9 @@ const exportContentRoute = createServerRoute({
 
     const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
     const streamObjects = prepareStreamsForExport({
-      root: await asContentPackEntry({ stream: root, assetClient }),
+      root: await asContentPackEntry({ stream: root }),
       descendants: await Promise.all(
-        exportedDescendants.map((stream) => asContentPackEntry({ stream, assetClient }))
+        exportedDescendants.map((stream) => asContentPackEntry({ stream }))
       ),
       inheritedFields: Object.keys(inheritedFields)
         .filter((field) => !baseFields[field])
@@ -108,10 +107,8 @@ const exportContentRoute = createServerRoute({
 
 async function asContentPackEntry({
   stream,
-  assetClient,
 }: {
   stream: Streams.WiredStream.Definition;
-  assetClient: AssetClient;
 }): Promise<ContentPackStream> {
   return {
     type: 'stream' as const,
@@ -149,11 +146,12 @@ const importContentRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }) {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
-    const root = await streamsClient
-      .getStream(params.path.name)
-      .then(Streams.WiredStream.Definition.parse);
+    const root = await streamsClient.getStream(params.path.name);
+    if (!Streams.WiredStream.Definition.is(root)) {
+      throw new StatusError('Can only import content into wired streams', 400);
+    }
 
     const contentPack = await parseArchive(params.body.content);
     const parentEntry = contentPack.entries.find(
@@ -180,7 +178,7 @@ const importContentRoute = createServerRoute({
         ];
 
     const streams = prepareStreamsForImport({
-      root: await asContentPackEntry({ stream: root, assetClient }),
+      root: await asContentPackEntry({ stream: root }),
       entries: importedStreamEntries,
     });
 
