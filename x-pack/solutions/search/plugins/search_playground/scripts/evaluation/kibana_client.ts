@@ -435,8 +435,8 @@ export class KibanaClient {
 
         const message = await chat('evaluate', {
           connectorIdOverride: evaluationConnectorId,
-          systemMessage: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
-                which helps our users make sense of their Observability data.
+          systemMessage: `You are a critical assistant for evaluating conversations with the Search Playground APIs,
+                which helps our users make sense of their data.
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
 
