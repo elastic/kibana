@@ -14,7 +14,6 @@ import {
 import { deleteConnectors } from '../../../../tasks/api_calls/common';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { cleanMigrationData } from '../../../../tasks/api_calls/siem_migrations';
-import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import {
   openUploadRulesFlyout,
@@ -26,6 +25,7 @@ import {
   renameMigration,
 } from '../../../../tasks/siem_migrations';
 import { GET_STARTED_URL } from '../../../../urls/navigation';
+import { role } from './role';
 
 export const SPLUNK_TEST_RULES = [
   {
@@ -72,88 +72,89 @@ export const SPLUNK_TEST_RULES = [
   },
 ];
 
-describe(
-  'Rule Migrations - Basic Workflow',
-  {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-  },
-  () => {
+describe('Rule Migrations - Basic Workflow', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    role.setup();
+  });
+
+  beforeEach(() => {
+    deleteConnectors();
+    cy.task('esArchiverLoad', {
+      archiveName: 'siem_migrations/rules',
+    });
+
+    cy.task('esArchiverLoad', {
+      archiveName: 'siem_migrations/rule_migrations',
+    });
+
+    role.login();
+    createBedrockConnector();
+    visit(GET_STARTED_URL);
+  });
+
+  after(() => {
+    role.teardown();
+
+    cy.task('esArchiverUnload', {
+      archiveName: 'siem_migrations/rules',
+    });
+
+    cy.task('esArchiverUnload', {
+      archiveName: 'siem_migrations/rule_migrations',
+    });
+  });
+
+  context('First Migration', () => {
     beforeEach(() => {
-      deleteConnectors();
-      cy.task('esArchiverLoad', {
-        archiveName: 'siem_migrations/rules',
-      });
-
-      cy.task('esArchiverLoad', {
-        archiveName: 'siem_migrations/rule_migrations',
-      });
-      login(Cypress.env('IS_SERVERLESS') ? 'admin' : undefined);
-      createBedrockConnector();
-      visit(GET_STARTED_URL);
+      cleanMigrationData();
     });
-
-    after(() => {
-      cy.task('esArchiverUnload', {
-        archiveName: 'siem_migrations/rules',
-      });
-
-      cy.task('esArchiverUnload', {
-        archiveName: 'siem_migrations/rule_migrations',
+    it('should be able to create migrations', () => {
+      selectMigrationConnector();
+      openUploadRulesFlyout();
+      saveDefaultMigrationName();
+      uploadRules(SPLUNK_TEST_RULES);
+      cy.intercept({
+        url: '**/start',
+      }).as('startMigration');
+      startMigrationFromFlyout();
+      cy.wait('@startMigration')
+        .its('request.body.settings')
+        .should('have.property', 'skip_prebuilt_rules_matching', false);
+      cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
+        cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
+        cy.get(RULE_MIGRATION_PROGRESS_BAR).should('have.length', 1);
       });
     });
+  });
 
-    context('First Migration', () => {
+  context('On Successful Translation', () => {
+    context('Migration Results', () => {
       beforeEach(() => {
-        cleanMigrationData();
-      });
-      it('should be able to create migrations', () => {
         selectMigrationConnector();
-        openUploadRulesFlyout();
-        saveDefaultMigrationName();
-        uploadRules(SPLUNK_TEST_RULES);
-        cy.intercept({
-          url: '**/start',
-        }).as('startMigration');
-        startMigrationFromFlyout();
-        cy.wait('@startMigration')
-          .its('request.body.settings')
-          .should('have.property', 'skip_prebuilt_rules_matching', false);
+        toggleMigrateRulesCard();
+      });
+
+      it('should be able to see the result of the completed migration', () => {
         cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
           cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
-          cy.get(RULE_MIGRATION_PROGRESS_BAR).should('have.length', 1);
+          cy.get(ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Failed')).should(
+            'have.text',
+            1
+          );
+          cy.get(
+            ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Partially translated')
+          ).should('have.text', 4);
+          cy.get(
+            ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Translated')
+          ).should('have.text', 1);
         });
       });
-    });
 
-    context('On Successful Translation', () => {
-      context('Migration Results', () => {
-        beforeEach(() => {
-          selectMigrationConnector();
-          toggleMigrateRulesCard();
-        });
-
-        it('should be able to see the result of the completed migration', () => {
-          cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
-            cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
-            cy.get(ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Failed')).should(
-              'have.text',
-              1
-            );
-            cy.get(
-              ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Partially translated')
-            ).should('have.text', 4);
-            cy.get(
-              ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Translated')
-            ).should('have.text', 1);
-          });
-        });
-
-        it('should be able to rename the migration', () => {
-          cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
-          renameMigration('New Migration Name');
-          cy.get(MIGRATION_PANEL_NAME).should('have.text', 'New Migration Name');
-        });
+      it('should be able to rename the migration', () => {
+        cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
+        renameMigration('New Migration Name');
+        cy.get(MIGRATION_PANEL_NAME).should('have.text', 'New Migration Name');
       });
     });
-  }
-);
+  });
+});

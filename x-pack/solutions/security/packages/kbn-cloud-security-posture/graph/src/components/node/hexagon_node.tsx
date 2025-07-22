@@ -21,9 +21,10 @@ import type { EntityNodeViewModel, NodeProps } from '../types';
 import { HexagonHoverShape, HexagonShape } from './shapes/hexagon_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { Label } from './label';
+import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 
-const NODE_WIDTH = 87;
-const NODE_HEIGHT = 96;
+const NODE_SHAPE_WIDTH = 87;
+const NODE_SHAPE_HEIGHT = 96;
 
 export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
@@ -34,9 +35,9 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
       <NodeShapeContainer>
         {interactive && (
           <NodeShapeOnHoverSvg
-            width={NODE_WIDTH}
-            height={NODE_HEIGHT}
-            viewBox={`0 0 ${NODE_WIDTH} ${NODE_HEIGHT}`}
+            width={NODE_SHAPE_WIDTH}
+            height={NODE_SHAPE_HEIGHT}
+            viewBox={`0 0 ${NODE_SHAPE_WIDTH} ${NODE_SHAPE_HEIGHT}`}
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
@@ -62,8 +63,12 @@ export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
             <NodeExpandButton
               color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
-              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 2 + 2}px`}
-              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2 - 2}px`}
+              x={`${
+                NODE_WIDTH -
+                NodeExpandButton.ExpandButtonSize / 2 -
+                (NODE_WIDTH - NODE_SHAPE_WIDTH) / 2
+              }px`}
+              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
             />
           </>
         )}

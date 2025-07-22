@@ -7,8 +7,11 @@
 
 import * as React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { RuleTableItem } from '../../../../types';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from './rule_quick_edit_buttons';
+import { render, screen, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { RuleTableItem } from '../../../../types';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
@@ -19,10 +22,82 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 const updateRulesToBulkEdit = jest.fn();
+const onDisable = jest.fn();
 
 describe('rule_quick_edit_buttons', () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('Lifecycle alerts', () => {
+    const renderComponent = ({ autoRecoverAlerts }: { autoRecoverAlerts?: boolean }) => {
+      const mockRule: RuleTableItem = {
+        id: '1',
+        enabled: true,
+        enabledInLicense: true,
+        autoRecoverAlerts,
+      } as RuleTableItem;
+
+      return render(
+        <IntlProvider locale="en">
+          <RuleQuickEditButtons
+            isAllSelected={false}
+            getFilter={() => null}
+            selectedItems={[mockRule]}
+            onPerformingAction={() => {}}
+            onActionPerformed={() => {}}
+            onEnable={async () => {}}
+            onDisable={onDisable}
+            updateRulesToBulkEdit={() => {}}
+          />
+        </IntlProvider>
+      );
+    };
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
+      renderComponent({ autoRecoverAlerts: true });
+
+      await userEvent.click(await screen.getByTestId('bulkDisable'));
+
+      await waitFor(async () => {
+        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(onDisable).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(onDisable).toHaveBeenCalledTimes(1);
+        expect(onDisable).toHaveBeenCalledWith(false);
+      });
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
+      renderComponent({ autoRecoverAlerts: undefined });
+
+      await userEvent.click(await screen.getByTestId('bulkDisable'));
+
+      await waitFor(async () => {
+        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(onDisable).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(onDisable).toHaveBeenCalledTimes(1);
+        expect(onDisable).toHaveBeenCalledWith(false);
+      });
+    });
+
+    it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
+      renderComponent({ autoRecoverAlerts: false });
+
+      await userEvent.click(await screen.getByTestId('bulkDisable'));
+
+      await waitFor(async () => {
+        expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+        expect(onDisable).toHaveBeenCalledWith(false);
+      });
+    });
   });
 
   it('renders buttons', async () => {
