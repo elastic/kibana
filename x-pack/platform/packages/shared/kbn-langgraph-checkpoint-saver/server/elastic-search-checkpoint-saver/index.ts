@@ -1,5 +1,12 @@
-import { Client as ESClient, estypes } from "@elastic/elasticsearch";
-import type { RunnableConfig } from "@langchain/core/runnables";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Client as ESClient, estypes } from '@elastic/elasticsearch';
+import type { RunnableConfig } from '@langchain/core/runnables';
 import {
   BaseCheckpointSaver,
   type Checkpoint,
@@ -9,10 +16,9 @@ import {
   type PendingWrite,
   type CheckpointMetadata,
   CheckpointPendingWrite,
-} from "@langchain/langgraph-checkpoint";
+} from '@langchain/langgraph-checkpoint';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-type CheckpointDocument = {
+interface CheckpointDocument {
   thread_id: string;
   checkpoint_ns: string;
   checkpoint_id: string;
@@ -20,10 +26,9 @@ type CheckpointDocument = {
   type: string;
   checkpoint: string;
   metadata: string;
-};
+}
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-type WritesDocument = {
+interface WritesDocument {
   thread_id: string;
   checkpoint_ns: string;
   checkpoint_id: string;
@@ -32,58 +37,58 @@ type WritesDocument = {
   channel: string;
   value: string;
   type: string;
-};
+}
 
-export type ElasticSearchSaverParams = {
+export interface ElasticSearchSaverParams {
   client: ESClient;
   checkpointIndex?: string;
   checkpointWritesIndex?: string;
   refreshPolicy?: estypes.Refresh;
-};
+}
 
 /**
  * A LangGraph checkpoint saver backed by a Elasticsearch database.
  */
 export class ElasticSearchSaver extends BaseCheckpointSaver {
-  static defaultCheckpointIndex = "checkpoints";
+  static defaultCheckpointIndex = 'checkpoints';
 
-  static defaultCheckpointWritesIndex = "checkpoint_writes";
+  static defaultCheckpointWritesIndex = 'checkpoint_writes';
 
   static readonly checkpointIndexMapping = {
-    thread_id: { type: "keyword" },
-    checkpoint_ns: { type: "keyword" },
-    checkpoint_id: { type: "keyword" },
-    parent_checkpoint_id: { type: "keyword" },
-    type: { type: "keyword" },
-    checkpoint: { type: "binary" },
-    metadata: { type: "binary" },
-  } as const
+    thread_id: { type: 'keyword' },
+    checkpoint_ns: { type: 'keyword' },
+    checkpoint_id: { type: 'keyword' },
+    parent_checkpoint_id: { type: 'keyword' },
+    type: { type: 'keyword' },
+    checkpoint: { type: 'binary' },
+    metadata: { type: 'binary' },
+  } as const;
 
   static readonly checkpointWritesIndexMapping = {
-    thread_id: { type: "keyword" },
-    checkpoint_ns: { type: "keyword" },
-    checkpoint_id: { type: "keyword" },
-    task_id: { type: "keyword" },
-    idx: { type: "unsigned_long" },
-    channel: { type: "keyword" },
-    type: { type: "keyword" },
-    value: { type: "binary" },
-  } as const
+    thread_id: { type: 'keyword' },
+    checkpoint_ns: { type: 'keyword' },
+    checkpoint_id: { type: 'keyword' },
+    task_id: { type: 'keyword' },
+    idx: { type: 'unsigned_long' },
+    channel: { type: 'keyword' },
+    type: { type: 'keyword' },
+    value: { type: 'binary' },
+  } as const;
 
   protected client: ESClient;
-  
-  checkpointIndex: string 
 
-  checkpointWritesIndex: string 
+  checkpointIndex: string;
 
-  refreshPolicy: estypes.Refresh = "wait_for";
+  checkpointWritesIndex: string;
+
+  refreshPolicy: estypes.Refresh = 'wait_for';
 
   constructor(
     {
       client,
       checkpointIndex,
       checkpointWritesIndex,
-      refreshPolicy = "wait_for",
+      refreshPolicy = 'wait_for',
     }: ElasticSearchSaverParams,
     serde?: SerializerProtocol
   ) {
@@ -102,56 +107,50 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
    * for the given thread ID is retrieved.
    */
   async getTuple(config: RunnableConfig): Promise<CheckpointTuple | undefined> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const {
       thread_id: threadId,
-      checkpoint_ns: checkpointNs = "",
+      checkpoint_ns: checkpointNs = '',
       checkpoint_id: checkpointId,
     } = config.configurable ?? {};
 
-    const result = await this.client
-      .search<CheckpointDocument>({
-        index: this.checkpointIndex,
-        size: 1,
-        sort: [{ checkpoint_id: { order: "desc" } }],
-        query: {
-          bool: {
-            must: [
-              { term: { thread_id: threadId } },
-              { term: { checkpoint_ns: checkpointNs } },
-              ...(checkpointId ? [{ term: { checkpoint_id: checkpointId } }] : []),
-            ],
-          },
+    const result = await this.client.search<CheckpointDocument>({
+      index: this.checkpointIndex,
+      size: 1,
+      sort: [{ checkpoint_id: { order: 'desc' } }],
+      query: {
+        bool: {
+          must: [
+            { term: { thread_id: threadId } },
+            { term: { checkpoint_ns: checkpointNs } },
+            ...(checkpointId ? [{ term: { checkpoint_id: checkpointId } }] : []),
+          ],
         },
-      })
+      },
+    });
 
-    if (
-      result.hits.hits.length === 0 ||
-      result.hits.hits[0]?._source === undefined
-    ) {
+    if (result.hits.hits.length === 0 || result.hits.hits[0]?._source === undefined) {
       return undefined;
     }
 
     const doc = result.hits.hits[0]._source;
 
-    const serializedWrites = await this.client
-      .search<WritesDocument>({
-        index: this.checkpointWritesIndex,
-        sort: [{ idx: { order: "asc" } }],
-        query: {
-          bool: {
-            must: [
-              { term: { thread_id: threadId } },
-              { term: { checkpoint_ns: checkpointNs } },
-              { term: { checkpoint_id: doc.checkpoint_id } },
-            ],
-          },
+    const serializedWrites = await this.client.search<WritesDocument>({
+      index: this.checkpointWritesIndex,
+      sort: [{ idx: { order: 'asc' } }],
+      query: {
+        bool: {
+          must: [
+            { term: { thread_id: threadId } },
+            { term: { checkpoint_ns: checkpointNs } },
+            { term: { checkpoint_id: doc.checkpoint_id } },
+          ],
         },
-      })
+      },
+    });
 
     const checkpoint = (await this.serde.loadsTyped(
       doc.type,
-      new Uint8Array(Buffer.from(doc.checkpoint, "base64"))
+      new Uint8Array(Buffer.from(doc.checkpoint, 'base64'))
     )) as Checkpoint;
 
     const pendingWrites: CheckpointPendingWrite[] = await Promise.all(
@@ -162,13 +161,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
           source.channel,
           await this.serde.loadsTyped(
             source.type,
-            new Uint8Array(Buffer.from(source.value, "base64"))
+            new Uint8Array(Buffer.from(source.value, 'base64'))
           ),
         ] as CheckpointPendingWrite;
       })
     );
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const configurableValues = {
       thread_id: threadId,
       checkpoint_ns: checkpointNs,
@@ -181,18 +179,17 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       pendingWrites,
       metadata: (await this.serde.loadsTyped(
         doc.type,
-        new Uint8Array(Buffer.from(doc.metadata, "base64"))
+        new Uint8Array(Buffer.from(doc.metadata, 'base64'))
       )) as CheckpointMetadata,
       parentConfig:
         doc.parent_checkpoint_id != null
           ? {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            configurable: {
-              thread_id: threadId,
-              checkpoint_ns: checkpointNs,
-              checkpoint_id: doc.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: threadId,
+                checkpoint_ns: checkpointNs,
+                checkpoint_id: doc.parent_checkpoint_id,
+              },
+            }
           : undefined,
     };
   }
@@ -209,12 +206,10 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     const { limit, before, filter } = options ?? {};
     const mustClauses = [];
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     if (config?.configurable?.thread_id) {
       mustClauses.push({ term: { thread_id: config.configurable.thread_id } });
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     if (
       config?.configurable?.checkpoint_ns !== undefined &&
       config?.configurable?.checkpoint_ns !== null
@@ -225,7 +220,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     }
 
     if (before) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       mustClauses.push({
         range: { checkpoint_id: { lt: before.configurable?.checkpoint_id } },
       });
@@ -237,17 +231,16 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       });
     }
 
-    const result = await this.client
-      .search<CheckpointDocument>({
-        index: this.checkpointIndex,
-        ...(limit ? { size: limit } : {}),
-        sort: [{ checkpoint_id: { order: "desc" } }],
-        query: {
-          bool: {
-            must: mustClauses,
-          },
+    const result = await this.client.search<CheckpointDocument>({
+      index: this.checkpointIndex,
+      ...(limit ? { size: limit } : {}),
+      sort: [{ checkpoint_id: { order: 'desc' } }],
+      query: {
+        bool: {
+          must: mustClauses,
         },
-      })
+      },
+    });
 
     for await (const hit of result.hits.hits) {
       const source = hit._source;
@@ -256,15 +249,14 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       }
       const checkpoint = (await this.serde.loadsTyped(
         source.type,
-        new Uint8Array(Buffer.from(source.checkpoint, "base64"))
+        new Uint8Array(Buffer.from(source.checkpoint, 'base64'))
       )) as Checkpoint;
       const metadata = (await this.serde.loadsTyped(
         source.type,
-        new Uint8Array(Buffer.from(source.metadata, "base64"))
+        new Uint8Array(Buffer.from(source.metadata, 'base64'))
       )) as CheckpointMetadata;
       yield {
         config: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           configurable: {
             thread_id: source.thread_id,
             checkpoint_ns: source.checkpoint_ns,
@@ -275,13 +267,12 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         metadata,
         parentConfig: source.parent_checkpoint_id
           ? {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            configurable: {
-              thread_id: source.thread_id,
-              checkpoint_ns: source.checkpoint_ns,
-              checkpoint_id: source.parent_checkpoint_id,
-            },
-          }
+              configurable: {
+                thread_id: source.thread_id,
+                checkpoint_ns: source.checkpoint_ns,
+                checkpoint_id: source.parent_checkpoint_id,
+              },
+            }
           : undefined,
       };
     }
@@ -296,10 +287,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     checkpoint: Checkpoint,
     metadata: CheckpointMetadata
   ): Promise<RunnableConfig> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const threadId = config.configurable?.thread_id;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const checkpointNs = config.configurable?.checkpoint_ns ?? "";
+
+    const checkpointNs = config.configurable?.checkpoint_ns ?? '';
     const checkpointId = checkpoint.id;
     if (threadId === undefined) {
       throw new Error(
@@ -307,36 +297,33 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       );
     }
 
-    const [checkpointType, serializedCheckpoint] =
-      this.serde.dumpsTyped(checkpoint);
+    const [checkpointType, serializedCheckpoint] = this.serde.dumpsTyped(checkpoint);
     const [metadataType, serializedMetadata] = this.serde.dumpsTyped(metadata);
     if (checkpointType !== metadataType) {
-      throw new Error("Mismatched checkpoint and metadata types.");
+      throw new Error('Mismatched checkpoint and metadata types.');
     }
 
     const doc: CheckpointDocument = {
       thread_id: threadId,
       checkpoint_ns: checkpointNs,
       checkpoint_id: checkpointId,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+
       parent_checkpoint_id: config.configurable?.checkpoint_id,
       type: checkpointType,
-      checkpoint: Buffer.from(serializedCheckpoint).toString("base64"),
-      metadata: Buffer.from(serializedMetadata).toString("base64"),
+      checkpoint: Buffer.from(serializedCheckpoint).toString('base64'),
+      metadata: Buffer.from(serializedMetadata).toString('base64'),
     };
 
     const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}`;
 
-    await this.client
-      .index({
-        index: this.checkpointIndex,
-        id: compositeId,
-        document: doc,
-        refresh: this.refreshPolicy,
-      })
+    await this.client.index({
+      index: this.checkpointIndex,
+      id: compositeId,
+      document: doc,
+      refresh: this.refreshPolicy,
+    });
 
     return {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       configurable: {
         thread_id: threadId,
         checkpoint_ns: checkpointNs,
@@ -348,22 +335,13 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   /**
    * Saves intermediate writes associated with a checkpoint to Elastic Search.
    */
-  async putWrites(
-    config: RunnableConfig,
-    writes: PendingWrite[],
-    taskId: string
-  ): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+  async putWrites(config: RunnableConfig, writes: PendingWrite[], taskId: string): Promise<void> {
     const threadId = config.configurable?.thread_id;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     const checkpointNs = config.configurable?.checkpoint_ns;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+
     const checkpointId = config.configurable?.checkpoint_id;
-    if (
-      threadId === undefined ||
-      checkpointNs === undefined ||
-      checkpointId === undefined
-    ) {
+    if (threadId === undefined || checkpointNs === undefined || checkpointId === undefined) {
       throw new Error(
         `The provided config must contain a configurable field with "thread_id", "checkpoint_ns" and "checkpoint_id" fields.`
       );
@@ -382,7 +360,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
         task_id: taskId,
         idx,
         channel,
-        value: Buffer.from(serializedValue).toString("base64"),
+        value: Buffer.from(serializedValue).toString('base64'),
         type,
       };
 
@@ -397,10 +375,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
       ];
     });
 
-    await this.client
-      .bulk({
-        operations,
-        refresh: this.refreshPolicy,
-      })
+    await this.client.bulk({
+      operations,
+      refresh: this.refreshPolicy,
+    });
   }
 }
