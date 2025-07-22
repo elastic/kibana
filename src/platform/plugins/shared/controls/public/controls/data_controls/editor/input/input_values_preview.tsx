@@ -11,8 +11,10 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
@@ -31,6 +33,7 @@ export const InputValuesPreview: React.FC<{
   updateQuery: (column: string) => void;
   runQuery: () => void;
   runButtonDisabled: boolean;
+  isQueryRunning: boolean;
 }> = ({
   previewOptions,
   previewError,
@@ -38,6 +41,7 @@ export const InputValuesPreview: React.FC<{
   updateQuery,
   runQuery,
   runButtonDisabled,
+  isQueryRunning,
 }) => {
   const isEmpty = useMemo(() => previewOptions.length === 0, [previewOptions]);
 
@@ -60,43 +64,55 @@ export const InputValuesPreview: React.FC<{
     return visibleOptions;
   }, [previewOptions]);
 
-  const body = previewError ? (
-    <EuiCallOut
-      title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
-      color="danger"
-      iconType="error"
-      size="s"
-    >
-      <p>{previewError.message}</p>
-    </EuiCallOut>
-  ) : multiColumnResult ? (
-    <EuiCallOut
-      title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
-      color="warning"
-      iconType="warning"
-      size="s"
-      data-test-subj="esqlMoreThanOneColumnCallout"
-    >
-      <p>
-        {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
-          previewColumns.length
-        )}
-        <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
-      </p>
-    </EuiCallOut>
-  ) : isEmpty ? (
-    <>
-      <EuiText size="s">
-        {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiButton disabled={runButtonDisabled} onClick={runQuery} iconType="play">
-        {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getRunQueryButton()}
-      </EuiButton>
-    </>
-  ) : (
-    <EuiSelect options={options} />
-  );
+  const body =
+    // Display only loading spinner when initializing the preview in edit mode, or after selecting a column
+    isQueryRunning && (!isEmpty || multiColumnResult) ? (
+      <EuiLoadingSpinner size="xl" />
+    ) : previewError ? (
+      <EuiCallOut
+        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getErrorTitle()}
+        color="danger"
+        iconType="error"
+        size="s"
+      >
+        <p>{previewError.message}</p>
+        <EuiButtonEmpty isLoading={isQueryRunning} onClick={runQuery} iconType="play">
+          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getRetryButton()}
+        </EuiButtonEmpty>
+      </EuiCallOut>
+    ) : multiColumnResult ? (
+      <EuiCallOut
+        title={DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorTitle()}
+        color="warning"
+        iconType="warning"
+        size="s"
+        data-test-subj="esqlMoreThanOneColumnCallout"
+      >
+        <p>
+          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getMultiColumnErrorBody(
+            previewColumns.length
+          )}
+          <ChooseColumnPopover columns={previewColumns} updateQuery={updateQuery} />
+        </p>
+      </EuiCallOut>
+    ) : isEmpty ? (
+      <>
+        <EuiText size="s">
+          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getEmptyText()}
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiButton
+          disabled={runButtonDisabled}
+          isLoading={isQueryRunning}
+          onClick={runQuery}
+          iconType="play"
+        >
+          {DataControlEditorStrings.manageControl.dataSource.valuesPreview.getRunQueryButton()}
+        </EuiButton>
+      </>
+    ) : (
+      <EuiSelect options={options} />
+    );
 
   const panelColor = previewError ? 'danger' : multiColumnResult ? 'warning' : undefined;
 

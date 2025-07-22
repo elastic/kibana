@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -190,6 +190,24 @@ const CompatibleControlTypesComponent = ({
   );
 };
 
+const useStepStatus = (status: EditorComponentStatus, isEdit: boolean) => {
+  const hasInitialized = useRef(false);
+  const initialStatus = useRef(status);
+  if (isEdit && !hasInitialized.current) {
+    // In edit mode, render untouched complete steps as a filled in blue circle
+    if (status !== initialStatus.current) hasInitialized.current = true;
+    return undefined;
+  }
+  switch (status) {
+    case EditorComponentStatus.INCOMPLETE:
+      return 'incomplete';
+    case EditorComponentStatus.ERROR:
+      return 'danger';
+    case EditorComponentStatus.COMPLETE:
+      return 'complete';
+  }
+};
+
 export const DataControlEditor = <State extends DefaultDataControlState = DefaultDataControlState>({
   initialState,
   controlId,
@@ -200,6 +218,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   controlGroupApi,
   ariaLabelledBy,
 }: ControlEditorProps<State>) => {
+  const isEdit = useMemo(() => !!controlId, [controlId]); // if no ID, then we are creating a new control
+
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
     initialDefaultPanelTitle ?? initialState.fieldName ?? ''
@@ -207,15 +227,14 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
+
   const [esqlQueryValidation, setEsqlQueryValidation] = useState<EditorComponentStatus>(
-    initialState.esqlQuery ? EditorComponentStatus.COMPLETE : EditorComponentStatus.INCOMPLETE
+    isEdit ? EditorComponentStatus.COMPLETE : EditorComponentStatus.INCOMPLETE
   );
 
   const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
 
   const [isFieldOutputPopoverOpen, setIsFieldOutputPopoverOpen] = useState<boolean>(false);
-
-  const isEdit = useMemo(() => !!controlId, [controlId]); // if no ID, then we are creating a new control
 
   const isDSLInputMode = useMemo(
     () => (editorState.input ?? DEFAULT_CONTROL_INPUT) === ControlInputOption.DSL,
@@ -384,7 +403,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const steps: EuiContainedStepProps[] = [
     {
       title: 'Select input',
-      status: inputStatus,
+      status: useStepStatus(inputStatus, isEdit),
       children: (
         <SelectInput
           inputMode={editorState.input ?? DEFAULT_CONTROL_INPUT}
@@ -396,12 +415,13 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           setSelectedControlType={setSelectedControlType}
           setControlOptionsValid={setControlOptionsValid}
           setESQLQueryValidation={setEsqlQueryValidation}
+          isEdit={isEdit}
         />
       ),
     },
     {
       title: 'Select output',
-      status: outputStatus,
+      status: useStepStatus(outputStatus, isEdit),
       children: (
         <>
           <EuiFormRow data-test-subj="control-editor-output-settings">
@@ -505,7 +525,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
     },
     {
       title: 'Configure control',
-      status: controlConfigStatus,
+      status: useStepStatus(controlConfigStatus, isEdit),
       children: (
         <>
           <EuiFormRow

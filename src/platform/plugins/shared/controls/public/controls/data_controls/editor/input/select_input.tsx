@@ -11,6 +11,7 @@ import { EuiFormRow, EuiButtonGroup, EuiSpacer, EuiSelectOption } from '@elastic
 import React, { useCallback, useMemo, useState } from 'react';
 import { appendStatsByToQuery } from '@kbn/esql-utils';
 import { AggregateQuery } from '@kbn/es-query';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import {
   DEFAULT_CONTROL_INPUT,
   ControlOutputOption,
@@ -40,6 +41,7 @@ interface SelectInputProps<State> {
   setDefaultPanelTitle: (title: string) => void;
   setControlOptionsValid: (valid: boolean) => void;
   setESQLQueryValidation: (status: EditorComponentStatus) => void;
+  isEdit: boolean;
 }
 
 export const SelectInput = <State extends DefaultDataControlState = DefaultDataControlState>({
@@ -52,10 +54,12 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
   setDefaultPanelTitle,
   setControlOptionsValid,
   setESQLQueryValidation,
+  isEdit,
 }: SelectInputProps<State>) => {
   const [previewOptions, setPreviewOptions] = useState<string[]>([]);
   const [previewColumns, setPreviewColumns] = useState<string[]>([]);
   const [previewError, setPreviewError] = useState<Error | undefined>();
+  const [isPreviewQueryRunning, setIsPreviewQueryRunning] = useState<boolean>(isEdit);
 
   const [staticOptions, setStaticOptions] = useState<EuiSelectOption[]>([]);
 
@@ -68,7 +72,9 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
 
   const submitESQLQuery = useCallback(
     async (query: string) => {
+      setIsPreviewQueryRunning(true);
       const result = await getESQLSingleColumnValues({ query });
+      setIsPreviewQueryRunning(false);
       const isSuccess = getESQLSingleColumnValues.isSuccess(result);
       const isMultiColumnError = getESQLSingleColumnValues.isMultiColumnError(result);
 
@@ -120,6 +126,10 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
       setSelectedControlType,
     ]
   );
+  // For edit mode, initialize the values preview
+  useEffectOnce(() => {
+    if (isEdit && editorState.esqlQuery) submitESQLQuery(editorState.esqlQuery);
+  });
 
   const onClickPreviewESQLQuery = useCallback(
     () => submitESQLQuery(editorState.esqlQuery ?? ''),
@@ -241,6 +251,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
             updateQuery={appendColumnToESQLQuery}
             runQuery={onClickPreviewESQLQuery}
             runButtonDisabled={!editorState.esqlQuery}
+            isQueryRunning={isPreviewQueryRunning}
           />
         </>
       )}

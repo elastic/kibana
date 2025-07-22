@@ -114,7 +114,7 @@ export const CONTROL_OUTPUT_OPTIONS = [
 export const DEFAULT_ESQL_VARIABLE_NAME = '?variable';
 
 export enum EditorComponentStatus {
-  COMPLETE = 'complete',
-  INCOMPLETE = 'incomplete',
-  ERROR = 'danger',
+  COMPLETE,
+  INCOMPLETE,
+  ERROR,
 }

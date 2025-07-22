@@ -118,6 +118,13 @@ export const DataControlEditorStrings = {
               defaultMessage: 'Run query',
             }
           ),
+        getRetryButton: () =>
+          i18n.translate(
+            'controls.controlGroup.manageControl.dataSource.valuesPreview.retryButton',
+            {
+              defaultMessage: 'Retry',
+            }
+          ),
         getEmptyText: () =>
           i18n.translate('controls.controlGroup.manageControl.dataSource.valuesPreview.emptyText', {
             defaultMessage: 'Run the query to get a preview of possible values.',
