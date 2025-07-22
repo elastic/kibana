@@ -94,6 +94,8 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should run the forecast and close the modal');
         await ml.forecast.clickForecastModalRunButton();
 
+        await ml.forecast.moveZoomSlider();
+
         await ml.testExecution.logTestStep('should display the forecasts toggle checkbox');
         await ml.forecast.assertForecastCheckboxExists();
 
