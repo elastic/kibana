@@ -102,7 +102,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,
-    search,
     setSearch,
     selectedAgentPolicies,
     setSelectedAgentPolicies,
