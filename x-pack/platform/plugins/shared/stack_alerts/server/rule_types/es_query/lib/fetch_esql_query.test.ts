@@ -16,7 +16,7 @@ import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitor
 import { getEsqlQueryHits } from '../../../../common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -167,6 +167,61 @@ describe('fetchEsqlQuery', () => {
 
       const warning =
         'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues. Failures: [{"reason":{"type":"test_failure","reason":"too big data"},"shard":0,"index":"test-index"}]';
+      expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
+      expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
+    });
+
+    it('should add a warning when is_partial is true but there is no shard failure', async () => {
+      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+        columns: [],
+        values: [],
+        is_partial: true, // is_partial is true
+        _clusters: {
+          details: {},
+        },
+      });
+
+      (getEsqlQueryHits as jest.Mock).mockReturnValue({
+        results: {
+          esResult: {
+            _shards: { failed: 0, successful: 0, total: 0 },
+            aggregations: {},
+            hits: { hits: [] },
+            timed_out: false,
+            took: 0,
+          },
+          isCountAgg: false,
+          isGroupAgg: true,
+        },
+      });
+
+      await fetchEsqlQuery({
+        ruleId: 'testRuleId',
+        alertLimit: 1,
+        params: { ...defaultParams, groupBy: 'row' },
+        services: {
+          logger,
+          scopedClusterClient,
+          // @ts-expect-error
+          share: {
+            url: {
+              locators: {
+                get: jest.fn().mockReturnValue({
+                  getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+              },
+            },
+          } as SharePluginStart,
+          ruleResultService: mockRuleResultService,
+        },
+        spacePrefix: '',
+        dateStart: new Date().toISOString(),
+        dateEnd: new Date().toISOString(),
+      });
+
+      const warning =
+        'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.';
       expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(warning);
       expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(warning);
     });

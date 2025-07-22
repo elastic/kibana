@@ -183,7 +183,9 @@ function getPartialResultsWarning(response: EsqlTable) {
 
   return i18n.translate('xpack.stackAlerts.esQuery.partialResultsWarning', {
     defaultMessage:
-      'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues. Failures: {failures}',
+      shardFailures.length > 0
+        ? 'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues. Failures: {failures}'
+        : 'The query returned partial results. Some clusters may have been skipped due to timeouts or other issues.',
     values: { failures: JSON.stringify(shardFailures) },
   });
 }
