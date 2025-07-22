@@ -16,6 +16,12 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
+import {
+  RETENTION_ILM_POLICY_DESCRIPTION,
+  INFINITE_RETENTION_LABEL,
+  NO_RETENTION_LABEL,
+  NO_DATA_SHORT_LABEL,
+} from './translations';
 
 export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
   const {
@@ -74,9 +80,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
           })}
         </EuiLink>
         <span id="ilm-policy-description" className="euiScreenReaderOnly">
-          {i18n.translate('xpack.streams.streamsRetentionColumn.ilmPolicyDescription', {
-            defaultMessage: 'Index Lifecycle Management policy that controls data retention',
-          })}
+          {RETENTION_ILM_POLICY_DESCRIPTION}
         </span>
       </EuiBadge>
     );
@@ -100,32 +104,19 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
     }
 
     return (
-      <EuiIcon
-        type="infinity"
-        size="m"
-        aria-label={i18n.translate(
-          'xpack.streams.streamsRetentionColumn.infiniteRetentionAriaLabel',
-          {
-            defaultMessage: 'Infinite retention - data is kept indefinitely',
-          }
-        )}
+      <span
         tabIndex={0}
-        role="img"
-      />
+        aria-label={INFINITE_RETENTION_LABEL}
+        style={{ display: 'inline-flex', alignItems: 'center' }}
+      >
+        <EuiIcon type="infinity" size="m" aria-hidden="true" />
+      </span>
     );
   }
 
   return (
-    <EuiText
-      color="subdued"
-      tabIndex={0}
-      aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.noDataAriaLabel', {
-        defaultMessage: 'No retention policy configured',
-      })}
-    >
-      {i18n.translate('xpack.streams.streamsRetentionColumn.noDataLabel', {
-        defaultMessage: 'N/A',
-      })}
+    <EuiText color="subdued" tabIndex={0} aria-label={NO_RETENTION_LABEL}>
+      {NO_DATA_SHORT_LABEL}
     </EuiText>
   );
 }

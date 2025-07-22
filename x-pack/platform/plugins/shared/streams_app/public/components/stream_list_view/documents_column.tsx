@@ -26,6 +26,7 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
+import { NO_DATA_SHORT_LABEL, DOCUMENTS_NO_DATA_ICON_ARIA_LABEL } from './translations';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
@@ -159,6 +160,16 @@ export function DocumentsColumn({
     });
   }, [hasData, indexPattern, docCount, xFormatter, timeState.start, timeState.end]);
 
+  const cellAriaLabel = hasData
+    ? i18n.translate('xpack.streams.documentsColumn.cellDocCountLabel', {
+        defaultMessage: '{docCount} documents in {indexPattern}',
+        values: { docCount, indexPattern },
+      })
+    : i18n.translate('xpack.streams.documentsColumn.cellNoDataLabel', {
+        defaultMessage: 'No document data available for {indexPattern}',
+        values: { indexPattern },
+      });
+
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -167,11 +178,7 @@ export function DocumentsColumn({
         height: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
-      tabIndex={0}
-      aria-label={i18n.translate('xpack.streams.documentsColumn.cellAriaLabel', {
-        defaultMessage: 'Documents column for {indexPattern}',
-        values: { indexPattern },
-      })}
+      aria-label={cellAriaLabel}
     >
       {histogramQueryFetch.loading ? (
         <LoadingPlaceholder />
@@ -179,34 +186,16 @@ export function DocumentsColumn({
         <>
           <EuiFlexItem
             grow={2}
+            aria-hidden="true"
             className={css`
               text-align: right;
             `}
           >
-            {hasData ? (
-              <span
-                aria-label={i18n.translate('xpack.streams.documentsColumn.documentCountAriaLabel', {
-                  defaultMessage: '{docCount} documents in {indexPattern}',
-                  values: { docCount, indexPattern },
-                })}
-              >
-                <EuiI18nNumber value={docCount} />
-              </span>
-            ) : (
-              <span
-                aria-label={i18n.translate('xpack.streams.documentsColumn.noDataAriaLabel', {
-                  defaultMessage: 'No document data available for {indexPattern}',
-                  values: { indexPattern },
-                })}
-              >
-                {i18n.translate('xpack.streams.documentsColumn.noDataLabel', {
-                  defaultMessage: 'N/A',
-                })}
-              </span>
-            )}
+            {hasData ? <EuiI18nNumber value={docCount} /> : NO_DATA_SHORT_LABEL}
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}
+            aria-hidden="true"
             className={css`
               border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
               display: flex;
@@ -216,9 +205,7 @@ export function DocumentsColumn({
           >
             {hasData ? (
               <div
-                role="img"
-                aria-label={chartDescription}
-                tabIndex={0}
+                aria-hidden="true"
                 className={css`
                   width: 100%;
                   &:focus {
@@ -254,13 +241,7 @@ export function DocumentsColumn({
                 </Chart>
               </div>
             ) : (
-              <EuiIcon
-                type="visLine"
-                size="m"
-                aria-label={i18n.translate('xpack.streams.documentsColumn.noDataIconAriaLabel', {
-                  defaultMessage: 'No chart data available',
-                })}
-              />
+              <EuiIcon type="visLine" size="m" aria-label={DOCUMENTS_NO_DATA_ICON_ARIA_LABEL} />
             )}
           </EuiFlexItem>
         </>
