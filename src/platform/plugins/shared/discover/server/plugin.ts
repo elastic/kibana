@@ -14,6 +14,8 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { extractTabs } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DISCOVER_APP_LOCATOR } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -60,6 +62,13 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
+    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, {
+      transformOut: (state) => {
+        if (!state.attributes) return state;
+        const attributes = extractTabs(state.attributes);
+        return { ...state, attributes };
+      },
+    });
 
     core.pricing.registerProductFeatures([
       {
