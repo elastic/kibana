@@ -103,7 +103,7 @@ function runEvaluations() {
             evaluationConnectorId: evaluationConnector.id!,
             persist: argv.persist,
             suite: mocha.suite,
-            scopes: ['observability'],
+            scopes: ['search'],
           });
 
           const header: string[][] = [
@@ -214,6 +214,7 @@ function runEvaluations() {
             chatClient,
             synthtraceEsClients,
             logger: log,
+            selectedConnector: connector,
           });
 
           mocha.suite.beforeAll(async () => {

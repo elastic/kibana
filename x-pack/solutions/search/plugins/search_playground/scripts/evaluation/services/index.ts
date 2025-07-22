@@ -28,6 +28,7 @@ export let chatClient: ChatClient = createErrorThrowingProxy('ChatClient');
 export let esClient: Client = createErrorThrowingProxy('esClient');
 export let kibanaClient: KibanaClient = createErrorThrowingProxy('kibanaClient');
 export let logger: ToolingLog = createErrorThrowingProxy('logger');
+export let selectedConnector: any = createErrorThrowingProxy('selectedConnector');
 
 export let synthtraceEsClients: SynthtraceEsClients =
   createErrorThrowingProxy('synthtraceEsClients');
@@ -38,10 +39,12 @@ export const initServices = (services: {
   kibanaClient: KibanaClient;
   synthtraceEsClients: SynthtraceEsClients;
   logger: ToolingLog;
+  selectedConnector: any;
 }) => {
   chatClient = services.chatClient;
   esClient = services.esClient;
   kibanaClient = services.kibanaClient;
   synthtraceEsClients = services.synthtraceEsClients;
   logger = services.logger;
+  selectedConnector = services.selectedConnector;
 };

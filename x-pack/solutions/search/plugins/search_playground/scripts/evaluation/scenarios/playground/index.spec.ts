@@ -14,6 +14,8 @@ import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient, kibanaClient } from '../../services';
 
+import { selectedConnector } from '../../services';
+
 describe('Playground APIs', function () {
   before(async () => {
     // Create the index
@@ -53,7 +55,7 @@ describe('Playground APIs', function () {
       { pathname: '/internal/search_playground/chat' },
       {
         data: {
-          connector_id: 'e31e2627-57ce-42b6-b23d-b59faad9fe96',
+          connector_id: selectedConnector.id,
           indices: 'work-from-home-policies',
           prompt: 'You are an assistant for question-answering tasks.',
           citations: true,
@@ -96,7 +98,7 @@ describe('Playground APIs', function () {
       { pathname: '/internal/search_playground/chat' },
       {
         data: {
-          connector_id: 'e31e2627-57ce-42b6-b23d-b59faad9fe96',
+          connector_id: selectedConnector.id,
           indices: 'work-from-home-policies',
           prompt: 'You are an assistant for question-answering tasks.',
           citations: true,
