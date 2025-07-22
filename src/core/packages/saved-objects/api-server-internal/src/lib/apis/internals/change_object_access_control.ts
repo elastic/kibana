@@ -79,7 +79,7 @@ export const changeObjectAccessControl = async <T>(
     accessMode !== 'read_only'
   ) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      'When specified, the "accessMode" field can only be "default" or "read_only.'
+      'When specified, the "accessMode" field can only be "default" or "read_only".'
     );
   }
 
