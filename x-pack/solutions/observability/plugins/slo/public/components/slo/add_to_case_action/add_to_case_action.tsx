@@ -62,7 +62,7 @@ function Content({ slo, onCancel, onConfirm }: Props) {
         return [
           {
             persistableStateAttachmentState: {
-              type: 'slo',
+              type: 'slo_history',
               url: {
                 pathAndQuery: sloPaths.sloDetails(
                   slo.id,
@@ -72,7 +72,7 @@ function Content({ slo, onCancel, onConfirm }: Props) {
                 ),
                 label: slo.name,
                 actionLabel: i18n.translate('xpack.slo.addToCase.caseAttachmentLabel', {
-                  defaultMessage: 'Go to SLO details',
+                  defaultMessage: 'Go to SLO history',
                 }),
                 iconType: 'metricbeatApp',
               },

@@ -36,11 +36,15 @@ export interface Props {
 export function HeaderControl({ slo }: Props) {
   const { services } = useKibana();
   const {
+    observabilityShared,
     notifications: { toasts },
     application: { navigateToUrl, capabilities },
     http: { basePath },
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
+
+  const isAddToCaseEnabled =
+    observabilityShared.config?.unsafe?.investigativeExperienceEnabled ?? false;
 
   const hasApmReadCapabilities = capabilities.apm.show;
   const { data: permissions } = usePermissions();
@@ -403,22 +407,28 @@ export function HeaderControl({ slo }: Props) {
                   defaultMessage: 'Reset',
                 })}
                 {showRemoteLinkIcon}
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                key="add_to_case"
-                icon="casesApp"
-                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
-                onClick={handleAddToCase}
-                data-test-subj="sloDetailsHeaderControlPopoverAddToCase"
-                toolTipContent={
-                  hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
-                }
-              >
-                {i18n.translate('xpack.slo.sloDetails.headerControl.addToCase', {
-                  defaultMessage: 'Add to case',
-                })}
-                {showRemoteLinkIcon}
               </EuiContextMenuItem>
+            )
+            .concat(
+              isAddToCaseEnabled ? (
+                <EuiContextMenuItem
+                  key="add_to_case"
+                  icon="casesApp"
+                  disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+                  onClick={handleAddToCase}
+                  data-test-subj="sloDetailsHeaderControlPopoverAddToCase"
+                  toolTipContent={
+                    hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                  }
+                >
+                  {i18n.translate('xpack.slo.sloDetails.headerControl.addToCase', {
+                    defaultMessage: 'Add to case',
+                  })}
+                  {showRemoteLinkIcon}
+                </EuiContextMenuItem>
+              ) : (
+                []
+              )
             )}
         />
       </EuiPopover>
