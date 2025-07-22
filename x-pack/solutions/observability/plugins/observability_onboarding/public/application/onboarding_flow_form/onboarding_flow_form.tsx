@@ -21,6 +21,7 @@ import {
   useEuiTheme,
   EuiBadge,
   EuiFlexGrid,
+  EuiSwitch,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -28,6 +29,7 @@ import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
 import { Category } from './types';
@@ -207,6 +209,19 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   return (
     <EuiPanel hasBorder paddingSize="xl">
+      <div>
+      <EuiSwitch
+        label={i18n.translate(
+          'xpack.observability_onboarding.onboardingFlowForm.euiSwitch.useLogsStreamLabel',
+          { defaultMessage: 'Use logs stream' }
+        )}
+        checked={false}
+        onChange={function (event: EuiSwitchEvent): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+      </div>
+      <EuiSpacer size="l" />
       <EuiTitle size="s" id={categorySelectorTitleId}>
         <strong>
           {i18n.translate(
