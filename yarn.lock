@@ -1886,7 +1886,7 @@
   resolved "https://registry.yarnpkg.com/@babel/regjsgen/-/regjsgen-0.8.0.tgz#f0ba69b075e1f05fb2825b7fad991e7adbb18310"
   integrity sha512-x/rqGMdzj+fWZvCOYForTghzbtqPDZ5gPwaoNGHdgDfF2QA/XZbCBp4Moo5scrkAMPhB7z26XM/AaHuIJdgauA==
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.24.1", "@babel/runtime@^7.24.7", "@babel/runtime@^7.25.0", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.15.4", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.24.1", "@babel/runtime@^7.24.7", "@babel/runtime@^7.25.0", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.4.5", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.3", "@babel/runtime@^7.7.2", "@babel/runtime@^7.7.6", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
   version "7.27.6"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.27.6.tgz#ec4070a04d76bae8ddbb10770ba55714a417b7c6"
   integrity sha512-vbavdySgbTTrmFE+EsiqUTzlOr5bzlnJtUv9PynGCAKvfQqjIXbvFdumPM/GxMDfyuGMJaJAU6TO4zc1Jf1i8Q==
@@ -2451,7 +2451,7 @@
     json-bigint "^1.0.0"
     safe-stable-stringify "^2.4.3"
 
-"@elastic/react-search-ui-views@1.20.2":
+"@elastic/react-search-ui-views@1.20.2", "@elastic/react-search-ui-views@^1.20.2":
   version "1.20.2"
   resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.20.2.tgz#31d9e90be0694b1259d1885463919eb7478b6511"
   integrity sha512-nx2XOxQ9ONIrd9MhJ1/z0p7AXYYXUr4Tqx8TPUqQd6m/yTa55qrCdEcBm59+MGSBFtVCRsix8KBMiOij+/afxQ==
@@ -2460,16 +2460,6 @@
     downshift "^3.2.10"
     rc-pagination "^1.20.1"
     react-select "^5.0.0"
-
-"@elastic/react-search-ui-views@^1.20.2":
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.24.1.tgz#d09b9e4ea99ee11b8cc20e645007df7917229fa1"
-  integrity sha512-OThWyEDNtFqpg9ywnyFXsYn3RzHxulrC6f9SBsMbPx/f4bxD804DcIUda1Rq9+i6Ldp9nQsGNvT8YyeeIM/Yog==
-  dependencies:
-    "@elastic/search-ui" "1.24.1"
-    downshift "^3.2.10"
-    rc-pagination "^4.0.4"
-    react-select "^5.10.1"
 
 "@elastic/react-search-ui@^1.20.2":
   version "1.20.2"
@@ -2515,7 +2505,7 @@
     "@elastic/search-ui" "1.20.2"
     "@searchkit/sdk" "^3.0.0"
 
-"@elastic/search-ui@1.20.2":
+"@elastic/search-ui@1.20.2", "@elastic/search-ui@^1.20.2":
   version "1.20.2"
   resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.20.2.tgz#afb679b4a06ef14ce8ab4a4f3053e09c68588386"
   integrity sha512-48O0jKeMbhohxnVB6oOxT5R+x4nrwG0UWvFTCWPZJ4hKCLsPZZOWIFHziMaxhR8f0ckZCoiif+eD6FAgDW6kwA==
@@ -2524,16 +2514,6 @@
     deep-equal "^1.0.1"
     history "^4.9.0"
     qs "^6.7.0"
-
-"@elastic/search-ui@1.24.1", "@elastic/search-ui@^1.20.2":
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.24.1.tgz#d56e7fabf854f618af76164c6b6d2b0cfbccad95"
-  integrity sha512-uXV1RM1FlSj2nfzDjc6Y4yg/QWf3gp4R5GYQ6PYUyZbj4AXT8HRtQGcSxQxTK7qZD8R/+Tpug784vldbHUz9Xw==
-  dependencies:
-    date-fns "^1.30.1"
-    deep-equal "^1.0.1"
-    history "^4.9.0"
-    qs "^6.9.7"
 
 "@elastic/synthetics@^1.17.2":
   version "1.17.2"
@@ -28629,7 +28609,7 @@ qs@6.13.0:
   dependencies:
     side-channel "^1.0.6"
 
-qs@^6.10.0, qs@^6.11.0, qs@^6.12.3, qs@^6.7.0, qs@^6.9.7:
+qs@^6.10.0, qs@^6.11.0, qs@^6.12.3, qs@^6.7.0:
   version "6.14.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.14.0.tgz#c63fa40680d2c5c941412a0e899c89af60c0a930"
   integrity sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==
@@ -28791,23 +28771,6 @@ rc-pagination@^1.20.1:
     classnames "^2.2.6"
     prop-types "^15.5.7"
     react-lifecycles-compat "^3.0.4"
-
-rc-pagination@^4.0.4:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/rc-pagination/-/rc-pagination-4.3.0.tgz#c6022f820aa3a45fd734ae33a2915d39597dce1d"
-  integrity sha512-UubEWA0ShnroQ1tDa291Fzw6kj0iOeF26IsUObxYTpimgj4/qPCWVFl18RLZE+0Up1IZg0IK4pMn6nB3mjvB7g==
-  dependencies:
-    "@babel/runtime" "^7.10.1"
-    classnames "^2.3.2"
-    rc-util "^5.38.0"
-
-rc-util@^5.38.0:
-  version "5.44.4"
-  resolved "https://registry.yarnpkg.com/rc-util/-/rc-util-5.44.4.tgz#89ee9037683cca01cd60f1a6bbda761457dd6ba5"
-  integrity sha512-resueRJzmHG9Q6rI/DfK6Kdv9/Lfls05vzMs1Sk3M2P+3cJa+MakaZyWY8IPfehVuhPJFKrIY1IK4GqbiaiY5w==
-  dependencies:
-    "@babel/runtime" "^7.18.3"
-    react-is "^18.2.0"
 
 rc@^1.2.7:
   version "1.2.8"
@@ -29209,7 +29172,7 @@ react-select@^3.2.0:
     react-input-autosize "^3.0.0"
     react-transition-group "^4.3.0"
 
-react-select@^5.0.0, react-select@^5.10.1:
+react-select@^5.0.0:
   version "5.10.1"
   resolved "https://registry.yarnpkg.com/react-select/-/react-select-5.10.1.tgz#e858dd98358ccd864b65d53ab0fb682cd5e96b89"
   integrity sha512-roPEZUL4aRZDx6DcsD+ZNreVl+fM8VsKn0Wtex1v4IazH60ILp5xhdlp464IsEAlJdXeD+BhDAFsBVMfvLQueA==
