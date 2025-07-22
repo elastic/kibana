@@ -231,7 +231,7 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
                 ]),
               })
             ),
-            newAccessMode: schema.maybe(schema.literal('read_only')),
+            newAccessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
           }),
         },
       },

@@ -107,11 +107,12 @@ export const performCreate = async <T>(
     );
   }
   const typeSupportsAccessControl = registry.supportsAccessControl(type);
+  const accessMode = options.accessControl?.accessMode ?? 'default';
   const accessControlToWrite =
     typeSupportsAccessControl && createdBy
       ? {
           owner: createdBy,
-          accessMode: options.accessControl?.accessMode,
+          accessMode,
         }
       : undefined;
 
