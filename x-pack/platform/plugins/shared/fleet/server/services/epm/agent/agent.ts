@@ -30,6 +30,8 @@ export function compileTemplate(
   packagePolicyId?: string
 ) {
   const logger = appContextService.getLogger();
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
@@ -50,7 +52,11 @@ export function compileTemplate(
     const yamlFromCompiledTemplate = load(compiledTemplate, {});
 
     let patchedYaml = yamlFromCompiledTemplate;
-    if (inputType === OTEL_COLLECTOR_INPUT_TYPE && packagePolicyId) {
+    if (
+      experimentalFeature.enableOtelInputIntegrations &&
+      inputType === OTEL_COLLECTOR_INPUT_TYPE &&
+      packagePolicyId
+    ) {
       patchedYaml = patchYamlForOtelcol(yamlFromCompiledTemplate, packagePolicyId);
     }
 
@@ -73,43 +79,46 @@ export function compileTemplate(
     throw new PackagePolicyValidationError(error);
   }
 }
-// Patch YAML for OTEL Collector - adds the package policy ID to the first key under 'receivers'.
-function patchYamlForOtelcol(yaml: any, packagePolicyId: string): OTelCollectorConfig {
-  const parentKey = 'receivers';
-  const keyToUpdate = Object.keys(yaml[parentKey])[0];
+// Patch YAML for OTEL Collector
+function patchYamlForOtelcol(yaml: any, packagePolicyId: string): string | undefined {
+  const parentKeys = ['receivers', 'processors', 'extensions'];
 
-  const updatedYaml = replaceKeyByParent(
-    yaml,
-    parentKey,
-    keyToUpdate,
-    `${keyToUpdate}/${packagePolicyId}`
-  );
+  const updatedYaml = replaceKeyByParent(yaml, parentKeys, packagePolicyId);
+
   return updatedYaml;
 }
 
-// Recursive function, replaces keys by parent key
-function replaceKeyByParent(
+// Recursive function, appends suffix to the first key under the keys specified in targetParents.
+export function replaceKeyByParent(
   obj: any,
-  targetParent: string,
-  oldKey: string,
-  newKey: string,
+  targetParents: string[],
+  suffix: string,
   parentKey: string | null = null
 ): any {
   if (Array.isArray(obj)) {
-    if (parentKey === targetParent) {
+    const oldKey = obj[0];
+    if (parentKey && targetParents.includes(parentKey)) {
       return obj.map((item) =>
-        item === oldKey ? newKey : replaceKeyByParent(item, targetParent, oldKey, newKey, parentKey)
+        item === oldKey
+          ? `${oldKey}/${suffix}`
+          : replaceKeyByParent(item, targetParents, suffix, parentKey)
       );
     } else {
-      return obj.map((item) => replaceKeyByParent(item, targetParent, oldKey, newKey, parentKey));
+      return obj.map((item) => replaceKeyByParent(item, targetParents, suffix, parentKey));
     }
   } else if (typeof obj === 'object' && obj !== null) {
     const newObj: any = {};
+
     for (const key in obj) {
       if (Object.hasOwn(obj, key)) {
         const value = obj[key];
-        const updatedKey = parentKey === targetParent && key === oldKey ? newKey : key;
-        newObj[updatedKey] = replaceKeyByParent(value, targetParent, oldKey, newKey, key);
+        if (parentKey && targetParents.includes(parentKey)) {
+          const oldKey = Object.keys(obj)[0];
+          const updatedKey = key === oldKey ? `${oldKey}/${suffix}` : key;
+          newObj[updatedKey] = replaceKeyByParent(value, targetParents, suffix, key);
+        } else {
+          newObj[key] = replaceKeyByParent(value, targetParents, suffix, key);
+        }
       }
     }
     return newObj;

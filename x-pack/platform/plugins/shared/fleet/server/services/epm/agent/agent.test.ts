@@ -10,9 +10,11 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { Logger } from '@kbn/core/server';
 
+import { load, dump } from 'js-yaml';
+
 import { appContextService } from '../..';
 
-import { compileTemplate } from './agent';
+import { compileTemplate, replaceKeyByParent } from './agent';
 
 jest.mock('../../app_context');
 
@@ -280,7 +282,7 @@ New lines and \n escaped values.`,
       expect(output).toEqual({
         input: 'log',
         multiline_text: `This is a text with
-New lines and 
+New lines and
 escaped values.`,
       });
     });
@@ -498,7 +500,7 @@ paths:
 describe('encode', () => {
   it('should correctly percent encode a string', () => {
     const streamTemplate = `
-    hosts: 
+    hosts:
       - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
 
     const vars = {
@@ -515,7 +517,7 @@ describe('encode', () => {
 
   it('should correctly encode parts of the URI of the form domain\\username', () => {
     const streamTemplate = `
-    hosts: 
+    hosts:
       - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
 
     const vars = {
@@ -532,7 +534,7 @@ describe('encode', () => {
 
   it('should handle special characters which are not encoded by default', () => {
     const streamTemplate = `
-    hosts: 
+    hosts:
       - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
 
     const vars = {
@@ -546,6 +548,88 @@ describe('encode', () => {
       hosts: [
         'sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost',
       ],
+    });
+  });
+});
+
+describe('replaceKeyByParent', () => {
+  it('appends package policy id to a key in the yaml', () => {
+    const config = {
+      receivers: {
+        httpcheck: {
+          collection_interval: `30s`,
+          targets: [
+            {
+              method: 'GET',
+              endpoints: ['https://elastic.co'],
+            },
+          ],
+        },
+      },
+    };
+
+    const packagePolicyId = '2d4cb55b-f885-47dd-81fd-11ab796c4c76';
+
+    expect(replaceKeyByParent(config, ['receivers'], packagePolicyId)).toEqual({
+      receivers: {
+        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {
+          collection_interval: '30s',
+          targets: [{ endpoints: ['https://elastic.co'], method: 'GET' }],
+        },
+      },
+    });
+  });
+  it('appends package policy ids to multiple keys', () => {
+    const config = {
+      receivers: {
+        httpcheck: {
+          collection_interval: `30s`,
+          targets: [
+            {
+              method: 'GET',
+              endpoints: ['https://elastic.co'],
+            },
+          ],
+        },
+      },
+      service: {
+        pipelines: {
+          logs: {
+            receivers: ['httpcheck'],
+          },
+        },
+      },
+      processors: {
+        httpcheck: {},
+      },
+      extensions: {
+        httpcheck: {},
+      },
+    };
+
+    const packagePolicyId = '2d4cb55b-f885-47dd-81fd-11ab796c4c76';
+    const parentKeys = ['receivers', 'processors', 'extensions'];
+
+    expect(replaceKeyByParent(config, parentKeys, packagePolicyId)).toEqual({
+      receivers: {
+        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {
+          collection_interval: '30s',
+          targets: [{ endpoints: ['https://elastic.co'], method: 'GET' }],
+        },
+      },
+      service: {
+        pipelines: {
+          logs: {
+            receivers: ['httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76'],
+          },
+        },
+      },
+      processors: {
+        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {},
+      },
+      extensions: {
+        'httpcheck/2d4cb55b-f885-47dd-81fd-11ab796c4c76': {},
+      },
     });
   });
 });
