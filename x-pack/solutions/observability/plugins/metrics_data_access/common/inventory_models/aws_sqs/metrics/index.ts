@@ -34,6 +34,13 @@ export const metrics: InventoryMetricsConfig<SQSAggregations> = {
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },
+  getWaffleMapTooltipMetrics: () => [
+    'sqsMessagesVisible',
+    'sqsMessagesDelayed',
+    'sqsMessagesEmpty',
+    'sqsMessagesSent',
+    'sqsOldestMessage',
+  ],
   defaultSnapshot: 'sqsMessagesVisible',
   defaultTimeRangeInSeconds: 14400,
 };

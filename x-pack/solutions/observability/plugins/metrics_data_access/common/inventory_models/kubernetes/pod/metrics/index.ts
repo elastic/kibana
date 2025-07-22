@@ -35,6 +35,7 @@ export const metrics: InventoryMetricsConfig<PodAggregations> = {
     const catalog = new MetricsCatalog(snapshot);
     return catalog;
   },
+  getWaffleMapTooltipMetrics: () => ['cpu', 'memory', 'rx', 'tx'],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

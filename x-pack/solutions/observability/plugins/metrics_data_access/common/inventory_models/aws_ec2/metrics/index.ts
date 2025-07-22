@@ -23,6 +23,7 @@ export const metrics: InventoryMetricsConfig<SQSAggregations> = {
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },
+  getWaffleMapTooltipMetrics: () => ['cpu', 'rx', 'tx'],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };

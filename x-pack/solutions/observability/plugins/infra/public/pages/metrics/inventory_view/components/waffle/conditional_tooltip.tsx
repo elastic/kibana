@@ -12,7 +12,6 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
-import useAsync from 'react-use/lib/useAsync';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
@@ -35,20 +34,12 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const { sourceId } = useSourceContext();
   // prevents auto-refresh from cancelling ongoing requests to fetch the data for the tooltip
   const requestCurrentTime = useRef(currentTime);
+  const model = findInventoryModel(nodeType);
   const { customMetrics } = useWaffleOptionsContext();
   const config = usePluginConfig();
 
-  const inventoryModel = findInventoryModel(nodeType);
-
-  const { value: aggregations } = useAsync(
-    () =>
-      inventoryModel.metrics.getAggregations({
-        schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs',
-      }),
-    [config.featureFlags.hostOtelEnabled, inventoryModel.metrics]
-  );
-
-  const requestMetrics = (Object.keys(aggregations?.getAll() ?? {}) as SnapshotMetricType[])
+  const requestMetrics = model.metrics
+    .getWaffleMapTooltipMetrics({ schema: config.featureFlags.hostOtelEnabled ? 'semconv' : 'ecs' })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
     | {
@@ -59,7 +50,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const query = JSON.stringify({
     bool: {
       filter: {
-        match_phrase: { [inventoryModel.fields.id]: node.id },
+        match_phrase: { [model.fields.id]: node.id },
       },
     },
   });

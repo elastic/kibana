@@ -30,6 +30,13 @@ export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, Hos
     const { charts } = await import('./charts');
     return charts;
   },
+  getWaffleMapTooltipMetrics: (args) => {
+    if (args?.schema === 'semconv') {
+      return ['cpuV2', 'memory', 'txV2', 'rxV2'];
+    }
+
+    return legacyMetrics.concat(['cpuV2', 'memory', 'txV2', 'rxV2']);
+  },
   defaultSnapshot: 'cpuV2',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

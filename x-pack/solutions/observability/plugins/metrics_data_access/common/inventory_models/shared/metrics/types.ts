@@ -78,6 +78,8 @@ export interface BaseInventoryMetricsConfig<TAggregations extends AggregationCon
   defaultSnapshot: keyof TAggregations;
   defaultTimeRangeInSeconds: number;
   legacyMetrics?: SnapshotMetricType[];
+
+  getWaffleMapTooltipMetrics: (args?: { schema?: SchemaTypes }) => SnapshotMetricType[];
   getAggregations: (args?: { schema?: SchemaTypes }) => Promise<AggregationsCatalog<TAggregations>>;
 }
 

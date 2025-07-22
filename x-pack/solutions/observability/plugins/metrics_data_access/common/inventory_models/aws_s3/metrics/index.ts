@@ -34,6 +34,13 @@ export const metrics: InventoryMetricsConfig<S3Aggregations> = {
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },
+  getWaffleMapTooltipMetrics: () => [
+    's3BucketSize',
+    's3NumberOfObjects',
+    's3TotalRequests',
+    's3UploadBytes',
+    's3DownloadBytes',
+  ],
   defaultSnapshot: 's3BucketSize',
   defaultTimeRangeInSeconds: 86400 * 7, // 7 days
 };

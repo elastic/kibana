@@ -34,6 +34,13 @@ export const metrics: InventoryMetricsConfig<RDSAggregations> = {
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },
+  getWaffleMapTooltipMetrics: () => [
+    'cpu',
+    'rdsLatency',
+    'rdsConnections',
+    'rdsQueriesExecuted',
+    'rdsActiveTransactions',
+  ],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };
