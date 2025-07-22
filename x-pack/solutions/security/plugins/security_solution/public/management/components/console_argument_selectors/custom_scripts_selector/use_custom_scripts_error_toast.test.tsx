@@ -10,7 +10,7 @@ import type { KibanaReactNotifications } from '@kbn/kibana-react-plugin/public';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
-import type { CustomScriptsErrorType } from '../../hooks/custom_scripts/use_get_custom_scripts';
+import type { CustomScriptsErrorType } from '../../../hooks/custom_scripts/use_get_custom_scripts';
 
 describe('useCustomScriptsErrorToast', () => {
   const mockToastDanger = jest.fn();

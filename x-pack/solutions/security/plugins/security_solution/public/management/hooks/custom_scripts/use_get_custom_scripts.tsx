@@ -48,10 +48,7 @@ export const useGetCustomScripts = (
             agentType,
           },
         })
-        .then((response) => response.data)
-        .catch((err) => {
-          throw err;
-        });
+        .then((response) => response.data);
     },
   });
 };

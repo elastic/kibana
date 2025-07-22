@@ -683,15 +683,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       for (const machineAction of machineActions.value) {
         const { isPending, isError, message } = this.calculateMachineActionState(machineAction);
 
-        // Aggregate command error messages if present
-        const commandErrors: string[] = [];
-        if (Array.isArray(machineAction.commands)) {
-          for (const cmd of machineAction.commands) {
-            if (Array.isArray(cmd.errors) && cmd.errors.length > 0) {
-              commandErrors.push(...cmd.errors);
-            }
-          }
-        }
+        const commandErrors: string = machineAction.commands?.[0]?.errors?.join('\n') ?? '';
 
         if (!isPending) {
           const pendingActionRequests = actionsByMachineId[machineAction.id] ?? [];
@@ -717,7 +709,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
                 data: { command: actionRequest.EndpointActions.data.command },
                 error: isError
                   ? {
-                      message: commandErrors.length > 0 ? commandErrors[0] : message,
+                      message: commandErrors || message,
                     }
                   : undefined,
                 ...additionalData,

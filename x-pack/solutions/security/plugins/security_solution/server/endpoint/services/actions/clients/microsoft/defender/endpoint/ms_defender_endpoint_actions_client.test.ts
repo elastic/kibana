@@ -1118,7 +1118,7 @@ describe('MS Defender response actions client', () => {
         }
       );
 
-      it('should set error.message to the first command error if present', async () => {
+      it('should set error.message to all command errors joined by newline if present', async () => {
         // Arrange: set up a completed runscript machine action with command errors
         msMachineActionsApiResponse.value[0].status = 'Failed';
         msMachineActionsApiResponse.value[0].commands = [
@@ -1141,7 +1141,7 @@ describe('MS Defender response actions client', () => {
           expect.objectContaining({
             error: {
               message:
-                'Running script on endpoint failed: Error in Download Script phase: One or more arguments are invalid.',
+                'Running script on endpoint failed: Error in Download Script phase: One or more arguments are invalid.\nAnother error',
             },
           })
         );
