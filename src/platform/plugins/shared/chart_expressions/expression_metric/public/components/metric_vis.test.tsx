@@ -310,9 +310,11 @@ describe('MetricVisComponent', function () {
       });
       // for the secondary metric
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
-      expect(
-        screen.getByText(`${secondaryLabel} number-${table.rows[0][minPriceColumnId]}`)
-      ).toBeInTheDocument();
+
+      const secondaryElement = screen.getByTestId('metric-secondary-element');
+      expect(secondaryElement.textContent).toBe(
+        `${secondaryLabel}number-${table.rows[0][minPriceColumnId]}`
+      );
 
       await rerender({
         config: {
@@ -558,10 +560,12 @@ describe('MetricVisComponent', function () {
         },
       });
 
+      let secondaryElements = screen.getAllByTestId('metric-secondary-element');
       for (const row of table.rows) {
-        expect(
-          screen.getByText(new RegExp(`howdy number-${row[minPriceColumnId]}`, 'i'))
-        ).toBeInTheDocument();
+        const regExp = new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i');
+        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
+          true
+        );
       }
 
       // Now remove the prefix and check the secondary label is there
@@ -573,11 +577,14 @@ describe('MetricVisComponent', function () {
         },
       });
 
+      secondaryElements = screen.getAllByTestId('metric-secondary-element');
+
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       for (const row of table.rows) {
-        expect(
-          screen.getByText(new RegExp(`${secondaryLabel} number-${row[minPriceColumnId]}`, 'i'))
-        ).toBeInTheDocument();
+        const regExp = new RegExp(`${secondaryLabel}*number-${row[minPriceColumnId]}`, 'i');
+        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
+          true
+        );
       }
     });
 
