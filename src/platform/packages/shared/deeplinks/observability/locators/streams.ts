@@ -11,7 +11,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 
 export const STREAMS_APP_LOCATOR_ID = 'STREAMS_APP_LOCATOR';
 
-export type StreamsAppLocatorParams = SerializableRecord &
+export type StreamsAppLocatorParams<TPageState = Record<string, unknown>> = SerializableRecord &
   (
     | { [key: string]: never }
     | {
@@ -19,8 +19,8 @@ export type StreamsAppLocatorParams = SerializableRecord &
       }
     | {
         name: string;
-        managementTab: 'enrichment';
-        pageState: Record<string, unknown>;
+        managementTab: 'enrich';
+        pageState: TPageState;
       }
     | {
         name: string;

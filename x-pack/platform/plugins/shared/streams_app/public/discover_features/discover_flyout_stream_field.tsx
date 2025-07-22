@@ -12,24 +12,24 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { useAbortableAsync } from '@kbn/react-hooks';
 import { StreamsAppLocator } from '../../common/locators';
+import { useResolvedDefinitionName } from './use_resolved_definition_name';
 
-export interface DiscoverStreamsLinkProps {
+export interface DiscoverFlyoutStreamFieldProps {
   doc: DataTableRecord;
   streamsRepositoryClient: StreamsRepositoryClient;
   coreApplication: CoreStart['application'];
   locator: StreamsAppLocator;
 }
 
-export function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
+export function DiscoverFlyoutStreamField(props: DiscoverFlyoutStreamFieldProps) {
   return (
     <RedirectAppLinks coreStart={{ application: props.coreApplication }}>
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
           <EuiTitle size="xxxs">
             <span>
-              {i18n.translate('xpack.streams.discoverStreamsLink.title', {
+              {i18n.translate('xpack.streams.discoverFlyoutStreamField.title', {
                 defaultMessage: 'Stream',
               })}
             </span>
@@ -49,66 +49,26 @@ export function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
           justifyContent="flexStart"
           gutterSize="xs"
         >
-          <DiscoverStreamsLinkContent {...props} />
+          <DiscoverFlyoutStreamFieldContent {...props} />
         </EuiFlexGroup>
       </EuiFlexGroup>
     </RedirectAppLinks>
   );
 }
 
-function getFallbackStreamName(flattenedDoc: Record<string, unknown>) {
-  const wiredStreamName = flattenedDoc['stream.name'];
-  if (wiredStreamName) {
-    return String(wiredStreamName);
-  }
-  const dsnsType = flattenedDoc['data_stream.type'];
-  const dsnsDataset = flattenedDoc['data_stream.dataset'];
-  const dsnsNamespace = flattenedDoc['data_stream.namespace'];
-  if (dsnsType && dsnsDataset && dsnsNamespace) {
-    return `${dsnsType}-${dsnsDataset}-${dsnsNamespace}`;
-  }
-  return undefined;
-}
-
-function DiscoverStreamsLinkContent({
+function DiscoverFlyoutStreamFieldContent({
   streamsRepositoryClient,
   doc,
   locator,
-}: DiscoverStreamsLinkProps) {
-  const flattenedDoc = doc.flattened;
-  const index = doc.raw._index;
-  const fallbackStreamName = getFallbackStreamName(flattenedDoc);
-  const { value, loading, error } = useAbortableAsync(
-    async ({ signal }) => {
-      if (!index) {
-        return fallbackStreamName;
-      }
-      const definition = await streamsRepositoryClient.fetch(
-        'GET /internal/streams/_resolve_index',
-        {
-          signal,
-          params: {
-            query: {
-              index,
-            },
-          },
-        }
-      );
-      return definition?.stream?.name;
-    },
-    [streamsRepositoryClient, index, fallbackStreamName]
-  );
+}: DiscoverFlyoutStreamFieldProps) {
+  const { value, loading, error } = useResolvedDefinitionName({
+    streamsRepositoryClient,
+    doc,
+  });
 
-  const empty = <span>-</span>;
-  if (!index && !value) {
-    return empty;
-  }
-  if (loading) {
-    return <EuiLoadingSpinner size="s" />;
-  }
-  if (error || !value) {
-    return empty;
-  }
+  if (loading) return <EuiLoadingSpinner size="s" />;
+
+  if (!value || error) return <span>-</span>;
 
   return <EuiLink href={locator.getRedirectUrl({ name: value })}>{value}</EuiLink>;
 }

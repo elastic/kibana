@@ -8,16 +8,16 @@
 import { STREAMS_APP_LOCATOR_ID, StreamsAppLocatorParams } from '@kbn/deeplinks-observability';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { ENRICHMENT_URL_STATE_KEY } from '../url_schema';
+import { ENRICHMENT_URL_STATE_KEY, EnrichmentUrlState } from '../url_schema';
 
-export type StreamsAppLocator = LocatorPublic<StreamsAppLocatorParams>;
+export type StreamsAppLocator = LocatorPublic<StreamsAppLocatorParams<EnrichmentUrlState>>;
 
 export class StreamsAppLocatorDefinition implements LocatorDefinition<StreamsAppLocatorParams> {
   public readonly id = STREAMS_APP_LOCATOR_ID;
 
   constructor() {}
 
-  public readonly getLocation = async (params: StreamsAppLocatorParams) => {
+  public readonly getLocation = async (params: StreamsAppLocatorParams<EnrichmentUrlState>) => {
     let path = '/';
 
     if (params.name) {
