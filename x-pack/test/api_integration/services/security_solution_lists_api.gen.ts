@@ -33,7 +33,7 @@ import { ReadListRequestQueryInput } from '@kbn/securitysolution-lists-common/ap
 import { ReadListItemRequestQueryInput } from '@kbn/securitysolution-lists-common/api/read_list_item/read_list_item.gen';
 import { UpdateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list/update_list.gen';
 import { UpdateListItemRequestBodyInput } from '@kbn/securitysolution-lists-common/api/update_list_item/update_list_item.gen';
-import { routeWithNamespace } from '../../common/utils/security_solution';
+import { routeWithNamespace } from './helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
