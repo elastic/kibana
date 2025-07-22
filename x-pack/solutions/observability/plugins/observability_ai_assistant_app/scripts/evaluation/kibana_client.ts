@@ -574,7 +574,7 @@ export class KibanaClient {
                       properties: {
                         index: {
                           type: 'number',
-                          description: 'The number of the criterion',
+                          description: 'The index number of the criterion',
                         },
                         score: {
                           type: 'number',
