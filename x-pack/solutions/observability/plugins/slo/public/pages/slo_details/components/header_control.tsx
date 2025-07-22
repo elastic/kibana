@@ -36,6 +36,7 @@ export interface Props {
 export function HeaderControl({ slo }: Props) {
   const { services } = useKibana();
   const {
+    notifications: { toasts },
     application: { navigateToUrl, capabilities },
     http: { basePath },
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
@@ -50,10 +51,12 @@ export function HeaderControl({ slo }: Props) {
     isResettingSlo,
     isEnablingSlo,
     isDisablingSlo,
+    isAddingToCase,
     removeDeleteQueryParam,
     removeResetQueryParam,
     removeEnableQueryParam,
     removeDisableQueryParam,
+    removeAddToCaseQueryParam,
   } = useGetQueryParams();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -97,6 +100,10 @@ export function HeaderControl({ slo }: Props) {
       triggerAction({ type: 'disable', item: slo });
       removeDisableQueryParam();
     }
+    if (isAddingToCase) {
+      triggerAction({ type: 'add_to_case', item: slo });
+      removeAddToCaseQueryParam();
+    }
   });
 
   const onCloseRuleFlyout = () => {
@@ -115,6 +122,7 @@ export function HeaderControl({ slo }: Props) {
     remoteResetUrl,
     remoteEnableUrl,
     remoteDisableUrl,
+    remoteAddToCaseUrl,
   } = useSloActions({
     slo,
     rules,
@@ -191,6 +199,29 @@ export function HeaderControl({ slo }: Props) {
         },
       });
       removeDisableQueryParam();
+    }
+  };
+
+  const handleAddToCase = () => {
+    if (!!remoteAddToCaseUrl) {
+      window.open(remoteAddToCaseUrl, '_blank');
+    } else {
+      triggerAction({
+        type: 'add_to_case',
+        item: slo,
+        onConfirm: () => {
+          toasts.addSuccess(
+            i18n.translate('xpack.slo.sloDetails.headerControl.addedToCase', {
+              defaultMessage: 'SLO added to case successfully',
+            })
+          );
+        },
+        onCancel: () => {
+          setIsPopoverOpen(true);
+        },
+      });
+      setIsPopoverOpen(false);
+      removeAddToCaseQueryParam();
     }
   };
 
@@ -306,7 +337,9 @@ export function HeaderControl({ slo }: Props) {
                   }
                   data-test-subj="sloActionsDisable"
                 >
-                  {i18n.translate('xpack.slo.item.actions.disable', { defaultMessage: 'Disable' })}
+                  {i18n.translate('xpack.slo.sloDetails.headerControl.disable', {
+                    defaultMessage: 'Disable',
+                  })}
                   {showRemoteLinkIcon}
                 </EuiContextMenuItem>
               ) : (
@@ -320,7 +353,9 @@ export function HeaderControl({ slo }: Props) {
                   }
                   data-test-subj="sloActionsEnable"
                 >
-                  {i18n.translate('xpack.slo.item.actions.enable', { defaultMessage: 'Enable' })}
+                  {i18n.translate('xpack.slo.sloDetails.headerControl.enable', {
+                    defaultMessage: 'Enable',
+                  })}
                   {showRemoteLinkIcon}
                 </EuiContextMenuItem>
               ),
@@ -334,7 +369,7 @@ export function HeaderControl({ slo }: Props) {
                   hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
                 }
               >
-                {i18n.translate('xpack.slo.slo.item.actions.clone', {
+                {i18n.translate('xpack.slo.sloDetails.headerControl.clone', {
                   defaultMessage: 'Clone',
                 })}
                 {showRemoteLinkIcon}
@@ -349,7 +384,7 @@ export function HeaderControl({ slo }: Props) {
                   hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
                 }
               >
-                {i18n.translate('xpack.slo.slo.item.actions.delete', {
+                {i18n.translate('xpack.slo.sloDetails.headerControl.delete', {
                   defaultMessage: 'Delete',
                 })}
                 {showRemoteLinkIcon}
@@ -364,8 +399,23 @@ export function HeaderControl({ slo }: Props) {
                   hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
                 }
               >
-                {i18n.translate('xpack.slo.slo.item.actions.reset', {
+                {i18n.translate('xpack.slo.sloDetails.headerControl.reset', {
                   defaultMessage: 'Reset',
+                })}
+                {showRemoteLinkIcon}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="add_to_case"
+                icon="casesApp"
+                disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+                onClick={handleAddToCase}
+                data-test-subj="sloDetailsHeaderControlPopoverAddToCase"
+                toolTipContent={
+                  hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                }
+              >
+                {i18n.translate('xpack.slo.sloDetails.headerControl.addToCase', {
+                  defaultMessage: 'Add to case',
                 })}
                 {showRemoteLinkIcon}
               </EuiContextMenuItem>
@@ -394,12 +444,12 @@ export function HeaderControl({ slo }: Props) {
   );
 }
 
-const NOT_AVAILABLE_FOR_REMOTE = i18n.translate('xpack.slo.item.actions.notAvailable', {
+const NOT_AVAILABLE_FOR_REMOTE = i18n.translate('xpack.slo.sloDetails.headerControl.notAvailable', {
   defaultMessage: 'This action is not available for remote SLOs',
 });
 
 const NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL = i18n.translate(
-  'xpack.slo.item.actions.remoteKibanaUrlUndefined',
+  'xpack.slo.sloDetails.headerControl.remoteKibanaUrlUndefined',
   {
     defaultMessage: 'This action is not available for remote SLOs with undefined kibanaUrl',
   }
