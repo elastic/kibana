@@ -21,6 +21,10 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import type { GraphEdge } from './types';
+import {
+  mapEntityDataToNodeProps,
+  transformEntityTypeToIcon,
+} from './entity_data_to_node_props.mapper';
 
 interface LabelEdges {
   source: string;
@@ -88,12 +92,36 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const { docs, ips, hosts, users, actorIds, action, targetIds, isOriginAlert, isAlert } = record;
+    const {
+      docs,
+      ips,
+      hosts,
+      users,
+      actorIds,
+      action,
+      targetIds,
+      isOriginAlert,
+      actorsDocData,
+      targetsDocData,
+      isAlert,
+    } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
+
+    const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
+      ? castArray(actorsDocData)
+          .filter((actorData) => actorData)
+          .map((actorData) => JSON.parse(actorData))
+      : [];
+
+    const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
+      ? castArray(targetsDocData)
+          .filter((targetData) => targetData)
+          .map((targetData) => JSON.parse(targetData))
+      : [];
+
     const targetIdsArraySafe: string[] = [];
     const unknownTargets: string[] = [];
-
     // Ensure all targets has an id (target can return null from the query)
     targetIdsArray.forEach((id, idx) => {
       if (!id) {
@@ -110,13 +138,13 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
           id,
-          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
           ...determineEntityNodeShape(
             id,
             castArray(ips ?? []),
             castArray(hosts ?? []),
-            castArray(users ?? [])
+            castArray(users ?? []),
+            [...actorsDocDataArray, ...targetsDocDataArray]
           ),
         };
       }
@@ -155,27 +183,55 @@ const determineEntityNodeShape = (
   actorId: string,
   ips: string[],
   hosts: string[],
-  users: string[]
+  users: string[],
+  entitiesData: NodeDocumentDataModel[] = []
 ): {
   shape: EntityNodeDataModel['shape'];
   icon?: string;
 } => {
+  // try to find an exact match by entity id
+  const matchingEntity = entitiesData.find((entity) => entity.id === actorId);
+
+  // Extract entity data from the matching entity's documentsData if available
+  const entityDetailsData = matchingEntity?.entity ?? {};
+
+  // Get mapped properties from the entity if found
+  const mappedProps = entityDetailsData
+    ? mapEntityDataToNodeProps({
+        entityData: entityDetailsData,
+        nodeFieldsMapping: {
+          name: {
+            targetField: 'label',
+          },
+          type: {
+            targetField: 'icon',
+            transform: transformEntityTypeToIcon,
+          },
+        },
+      })
+    : {};
+
+  let nodeProps = { shape: 'hexagon' };
+
   // If actor is a user return ellipse
   if (users.includes(actorId)) {
-    return { shape: 'ellipse', icon: 'user' };
+    nodeProps = { shape: 'ellipse' };
   }
 
   // If actor is a host return hexagon
   if (hosts.includes(actorId)) {
-    return { shape: 'hexagon', icon: 'storage' };
+    nodeProps = { shape: 'hexagon' };
   }
 
   // If actor is an IP return diamond
   if (ips.includes(actorId)) {
-    return { shape: 'diamond', icon: 'globe' };
+    nodeProps = { shape: 'diamond' };
   }
 
-  return { shape: 'hexagon' };
+  nodeProps = { ...nodeProps, ...mappedProps };
+
+  // Ensure shape property is present
+  return nodeProps as { shape: EntityNodeDataModel['shape']; icon?: string };
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
