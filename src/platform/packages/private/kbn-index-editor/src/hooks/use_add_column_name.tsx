@@ -19,33 +19,41 @@ const fieldAlreadyExistsError = (columnName: string) =>
     values: { columnName },
   });
 
-export const useAddColumnName = () => {
+export const useAddColumnName = (initialColumnName = '') => {
   const {
     services: { indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
   const columns = useObservable(indexUpdateService.dataTableColumns$, []);
 
-  const [columnName, setColumnName] = useState('');
+  const [columnName, setColumnName] = useState(initialColumnName);
 
   const validationError = useMemo(() => {
-    if (columns.some((existingColumn) => existingColumn.name === columnName)) {
+    if (
+      columnName !== initialColumnName &&
+      columns.some((existingColumn) => existingColumn.name === columnName)
+    ) {
       return fieldAlreadyExistsError(columnName);
     }
 
     return null;
-  }, [columnName, columns]);
+  }, [columnName, columns, initialColumnName]);
 
-  const saveNewColumn = useCallback(async () => {
-    if (!validationError) {
+  const saveColumn = useCallback(async () => {
+    if (validationError) {
+      return;
+    }
+    if (initialColumnName) {
+      indexUpdateService.editColumn(columnName, initialColumnName);
+    } else {
       indexUpdateService.addNewColumn(columnName);
     }
-  }, [columnName, indexUpdateService, validationError]);
+  }, [columnName, indexUpdateService, initialColumnName, validationError]);
 
   return {
     columnName,
     validationError,
     setColumnName,
-    saveNewColumn,
+    saveColumn,
   };
 };

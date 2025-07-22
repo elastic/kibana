@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy } from 'lodash';
+import { difference, groupBy } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -43,7 +43,6 @@ import {
   firstValueFrom,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { difference } from 'lodash';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -61,13 +60,20 @@ interface ColumnAddition {
   name: string;
 }
 
+interface ColumnUpdate {
+  name: string;
+  previousName?: string;
+}
+
 type Action =
   | { type: 'add'; payload: DocUpdate }
   | { type: 'undo' }
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
   | { type: 'add-column'; payload: ColumnAddition }
+  | { type: 'edit-column'; payload: ColumnUpdate }
+  | { type: 'delete-column'; payload: ColumnUpdate }
   | { type: 'discard-unsaved-columns' }
-  | { type: 'discard-unsaved-values' }
+  | { type: 'discard-unsaved-changes' }
   | { type: 'new-row-added'; payload: Record<string, any> };
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
@@ -125,7 +131,7 @@ export class IndexUpdateService {
         // Clear the buffer after save
         // TODO check for update response
         return [];
-      } else if (action.type === 'discard-unsaved-values') {
+      } else if (action.type === 'discard-unsaved-changes') {
         return [];
       } else {
         return acc;
@@ -198,7 +204,6 @@ export class IndexUpdateService {
             searchable: true,
           });
         });
-
       return (
         dataView.fields
           .concat(unsavedFields)
@@ -385,6 +390,16 @@ export class IndexUpdateService {
             if (action.type === 'add-column') {
               return [...acc, action.payload];
             }
+            if (action.type === 'edit-column') {
+              return acc.map((column) =>
+                column.name === action.payload.previousName
+                  ? { ...column, name: action.payload.name }
+                  : column
+              );
+            }
+            if (action.type === 'delete-column') {
+              return acc.filter((column) => column.name !== action.payload.name);
+            }
             if (action.type === 'saved') {
               action.payload.updates.forEach((update) => {});
               // Filter out columns that were saved with a value from _pendingColumnsToBeSaved$
@@ -519,8 +534,16 @@ export class IndexUpdateService {
     this.actions$.next({ type: 'undo' });
   }
 
-  public addNewColumn(filedName: string) {
-    this.actions$.next({ type: 'add-column', payload: { name: filedName } });
+  public addNewColumn(name: string) {
+    this.actions$.next({ type: 'add-column', payload: { name } });
+  }
+
+  public editColumn(name: string, previousName: string) {
+    this.actions$.next({ type: 'edit-column', payload: { name, previousName } });
+  }
+
+  public deleteColumn(name: string) {
+    this.actions$.next({ type: 'delete-column', payload: { name } });
   }
 
   public setExitAttemptWithUnsavedFields(value: boolean) {
@@ -528,7 +551,7 @@ export class IndexUpdateService {
   }
 
   public discardUnsavedChanges() {
-    this.actions$.next({ type: 'discard-unsaved-values' });
+    this.actions$.next({ type: 'discard-unsaved-changes' });
     this.actions$.next({ type: 'discard-unsaved-columns' });
   }
 
