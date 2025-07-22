@@ -6618,7 +6618,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/no-data-page-plugin@link:src/platform/plugins/private/no_data_page":
+"@kbn/no-data-page-plugin@link:src/platform/plugins/shared/no_data_page":
   version "0.0.0"
   uid ""
 

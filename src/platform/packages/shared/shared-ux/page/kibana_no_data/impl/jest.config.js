@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/shared-ux/page/kibana_no_data'],
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/page/kibana_no_data'],
 };

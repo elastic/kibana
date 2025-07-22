@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/shared-ux/page/analytics_no_data'],
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/page/analytics_no_data'],
 };
