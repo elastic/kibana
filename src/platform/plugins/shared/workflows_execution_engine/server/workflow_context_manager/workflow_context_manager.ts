@@ -109,18 +109,6 @@ export class WorkflowContextManager {
     return this.context.stepResults;
   }
 
-  public shouldCurrentStepRun(): boolean {
-    const currentStepId = this.getCurrentStepId() as string;
-
-    const stepExecution = this.stepExecutions.get(currentStepId);
-
-    if (stepExecution) {
-      return stepExecution.status !== ExecutionStatus.SKIPPED;
-    }
-
-    return true;
-  }
-
   // ======================
   // Workflow Event Logging Methods
   // ======================
