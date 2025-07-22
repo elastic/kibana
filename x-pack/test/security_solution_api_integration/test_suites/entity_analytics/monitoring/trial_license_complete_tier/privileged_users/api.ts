@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should add "csv" source even if the user already has other sources', async () => {
         log.info(`Creating a user via CRUD API`);
-        const { body } = await api.createPrivMonUser({
+        await api.createPrivMonUser({
           body: { user: { name: 'api_user_1' } },
         });
 
@@ -241,7 +241,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not soft delete users which have other sources', async () => {
         log.info(`Creating a user via CRUD API`);
-        const { body } = await api.createPrivMonUser({
+        await api.createPrivMonUser({
           body: { user: { name: 'test_user_3' } },
         });
 
