@@ -9,12 +9,12 @@
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "include": [
     "**/*",
     "../../../../typings/**/*",
-    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
@@ -49,5 +49,6 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
+    "@kbn/test-suites-xpack/security_solution_api_integration"
   ]
 }
