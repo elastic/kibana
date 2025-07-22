@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { generateArchive, parseArchive } from '@kbn/streams-plugin/server/lib/content';
 import { Readable } from 'stream';
 import { ContentPackStream, ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import { Streams, FieldDefinition, RoutingDefinition, isDescendantOf } from '@kbn/streams-schema';
+import { Streams, FieldDefinition, RoutingDefinition } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
