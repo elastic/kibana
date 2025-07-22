@@ -6,17 +6,27 @@
  */
 
 import React from 'react';
-import { ConversationRound } from '@kbn/onechat-common';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Round } from './round';
 import { ConversationContent } from '../conversation_grid';
+import { RoundResponse } from './round_response';
+import { useConversation } from '../../../hooks/use_conversation';
+import { RoundError } from './round_error';
 
 interface ConversationRoundsProps {
-  conversationRounds: ConversationRound[];
+  isResponseLoading: boolean;
+  isResponseError: boolean;
+  responseError: unknown;
 }
 
-export const ConversationRounds: React.FC<ConversationRoundsProps> = ({ conversationRounds }) => {
+export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
+  isResponseLoading,
+  isResponseError,
+  responseError,
+}) => {
+  const { conversation } = useConversation();
+  const rounds = conversation?.rounds ?? [];
   return (
     <ConversationContent>
       <EuiFlexGroup
@@ -26,8 +36,29 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({ conversa
           defaultMessage: 'Conversation messages',
         })}
       >
-        {conversationRounds.map((round, index) => {
-          return <Round key={index} round={round} />;
+        {rounds.map((round, index) => {
+          const isCurrentRound = index === rounds.length - 1;
+          const isLoading = isResponseLoading && isCurrentRound;
+          // TODO: enable showing RoundError once implemented
+          const isError = isResponseError && isCurrentRound && false;
+          return (
+            <Round
+              key={index}
+              // TODO: eventually we will use a RoundInput component when we have more complicated inputs like file attachments
+              input={<EuiText size="s">{round.input.message}</EuiText>}
+              output={
+                isError ? (
+                  <RoundError error={responseError} />
+                ) : (
+                  <RoundResponse
+                    response={round.response}
+                    steps={round.steps}
+                    isLoading={isLoading}
+                  />
+                )
+              }
+            />
+          );
         })}
       </EuiFlexGroup>
     </ConversationContent>

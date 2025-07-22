@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ConversationRound } from '@kbn/onechat-common';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { RoundAnswer } from './round_answer';
 
 interface RoundProps {
-  round: ConversationRound;
+  input: ReactNode;
+  output: ReactNode;
 }
 
-export const Round: React.FC<RoundProps> = ({ round }) => {
-  const { input } = round;
+export const Round: React.FC<RoundProps> = ({ input, output }) => {
   const { euiTheme } = useEuiTheme();
-  const userMessageContainerStyles = css`
+  const inputContainerStyles = css`
     width: 100%;
     align-self: end;
     max-inline-size: 80%;
@@ -29,28 +27,25 @@ export const Round: React.FC<RoundProps> = ({ round }) => {
     container: i18n.translate('xpack.onechat.round.container', {
       defaultMessage: 'Conversation round',
     }),
-    userMessage: i18n.translate('xpack.onechat.round.userMessage', {
-      defaultMessage: 'User message',
-    }),
-    assistantResponse: i18n.translate('xpack.onechat.round.assistantResponse', {
-      defaultMessage: 'Assistant response',
+    userMessage: i18n.translate('xpack.onechat.round.userInput', {
+      defaultMessage: 'User input',
     }),
   };
   return (
     <EuiFlexGroup direction="column" gutterSize="l" aria-label={labels.container}>
-      <EuiPanel
-        css={userMessageContainerStyles}
-        paddingSize="m"
-        hasShadow={false}
-        hasBorder={false}
-        aria-label={labels.userMessage}
-      >
-        <EuiText size="s">{input.message}</EuiText>
-      </EuiPanel>
+      <EuiFlexItem grow={false}>
+        <EuiPanel
+          css={inputContainerStyles}
+          paddingSize="m"
+          hasShadow={false}
+          hasBorder={false}
+          aria-label={labels.userMessage}
+        >
+          {input}
+        </EuiPanel>
+      </EuiFlexItem>
 
-      <EuiPanel hasShadow={false} hasBorder={false} aria-label={labels.assistantResponse}>
-        <RoundAnswer round={round} />
-      </EuiPanel>
+      <EuiFlexItem grow={false}>{output}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

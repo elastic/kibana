@@ -13,42 +13,39 @@ import {
   isMessageChunkEvent,
   isMessageCompleteEvent,
   isOnechatError,
+  isRoundCompleteEvent,
   isToolCallEvent,
   isToolResultEvent,
 } from '@kbn/onechat-common';
 import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
-import { useCallback, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { unstable_batchedUpdates } from 'react-dom';
 import { useConversation } from './use_conversation';
 import { useKibana } from './use_kibana';
 import { useOnechatServices } from './use_onechat_service';
 
-export type ChatStatus = 'ready' | 'loading' | 'error';
-
-interface UseChatProps {
+interface UseSendMessageMutationProps {
   connectorId?: string;
   onError?: (error: OnechatError<OnechatErrorCode>) => void;
 }
 
-export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
+export const useSendMessageMutation = ({
+  connectorId,
+  onError,
+}: UseSendMessageMutationProps = {}) => {
   const { chatService } = useOnechatServices();
   const {
     services: { notifications },
   } = useKibana();
-  const [status, setStatus] = useState<ChatStatus>('ready');
   const { actions, conversationId, conversation } = useConversation();
   const { agent_id: agentId } = conversation ?? {};
+  const [isResponseLoading, setIsResponseLoading] = useState(false);
 
-  const sendMessage = useCallback(
-    (nextMessage: string) => {
-      if (status === 'loading') {
-        return;
-      }
-
-      actions.addConversationRound({ userMessage: nextMessage });
-      setStatus('loading');
-
+  const sendMessage = ({ message }: { message: string }) => {
+    return new Promise<void>((resolve, reject) => {
       const events$ = chatService.chat({
-        input: nextMessage,
+        input: message,
         conversationId,
         agentId,
         connectorId,
@@ -60,9 +57,7 @@ export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
           if (isMessageChunkEvent(event)) {
             actions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
           }
-
-          // full message received - we purge the chunk buffer
-          // and insert the received message into the temporary list
+          // full message received, override chunk buffer
           else if (isMessageCompleteEvent(event)) {
             actions.setAssistantMessage({ assistantMessage: event.data.message_content });
           } else if (isToolCallEvent(event)) {
@@ -77,36 +72,54 @@ export const useChat = ({ connectorId, onError }: UseChatProps = {}) => {
           } else if (isToolResultEvent(event)) {
             const { tool_call_id: toolCallId, result } = event.data;
             actions.setToolCallResult({ result, toolCallId });
+          } else if (isRoundCompleteEvent(event)) {
+            setIsResponseLoading(false);
           } else if (isConversationCreatedEvent(event)) {
             const { conversation_id: id, title } = event.data;
             actions.onConversationCreated({ conversationId: id, title });
           }
         },
         complete: () => {
-          actions.invalidateConversation();
-          setStatus('ready');
+          resolve();
         },
         error: (err) => {
-          actions.invalidateConversation();
-          setStatus('error');
-          if (isOnechatError(err)) {
-            onError?.(err);
-
-            notifications.toasts.addError(err, {
-              title: i18n.translate('xpack.onechat.chat.chatError.title', {
-                defaultMessage: 'Error loading chat response',
-              }),
-              toastMessage: `${err.code} - ${err.message}`,
-            });
-          }
+          reject(err);
         },
       });
+    });
+  };
+
+  const { mutate, isError, error } = useMutation({
+    mutationFn: sendMessage,
+    onMutate: ({ message }) => {
+      // Batch state changes to prevent multiple renders in legacy React
+      // This prevents loading indicator flickering in new round
+      unstable_batchedUpdates(() => {
+        actions.addConversationRound({ userMessage: message });
+        setIsResponseLoading(true);
+      });
     },
-    [chatService, notifications, status, agentId, conversationId, connectorId, onError, actions]
-  );
+    onSettled: () => {
+      actions.invalidateConversation();
+    },
+    onError: (err: unknown) => {
+      if (isOnechatError(err)) {
+        onError?.(err);
+
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.onechat.chat.chatError.title', {
+            defaultMessage: 'Error loading chat response',
+          }),
+          toastMessage: `${err.code} - ${err.message}`,
+        });
+      }
+    },
+  });
 
   return {
-    status,
-    sendMessage,
+    sendMessage: mutate,
+    isResponseLoading,
+    isResponseError: isError,
+    responseError: error,
   };
 };

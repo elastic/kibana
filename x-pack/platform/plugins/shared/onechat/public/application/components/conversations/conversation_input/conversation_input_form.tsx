@@ -9,13 +9,12 @@ import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import { useChat } from '../../../hooks/use_chat';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
 
 interface ConversationInputFormProps {
-  onSubmit: () => void;
+  onSubmit: (message: string) => void;
 }
 
 const fullHeightStyles = css`
@@ -25,18 +24,15 @@ const fullHeightStyles = css`
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const [message, setMessage] = useState<string>('');
   const { euiTheme } = useEuiTheme();
-  const { status, sendMessage } = useChat();
-  const disabled = !message.trim() || status === 'loading';
+  const disabled = !message.trim();
 
   const handleSubmit = useCallback(() => {
     if (disabled) {
       return;
     }
-
-    sendMessage(message);
-    onSubmit();
+    onSubmit(message);
     setMessage('');
-  }, [message, onSubmit, sendMessage, disabled]);
+  }, [message, onSubmit, disabled]);
 
   const contentStyles = css`
     ${fullHeightStyles}

@@ -42,14 +42,7 @@ const createActions = ({
   const isNewConversation = conversationId === newConversationId;
   return {
     invalidateConversation: () => {
-      if (isNewConversation) {
-        // Purge the query cache since we never fetch for conversation id "new"
-        queryClient.removeQueries({ queryKey });
-        // Invalidate all conversations to refresh conversation history
-        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-      } else {
-        queryClient.invalidateQueries({ queryKey });
-      }
+      queryClient.invalidateQueries({ queryKey });
     },
     addConversation: () => {
       setConversation(() => createNewConversation());
@@ -110,16 +103,21 @@ const createActions = ({
       title: string;
     }) => {
       const current = queryClient.getQueryData<Conversation>(queryKey);
-      if (current) {
-        queryClient.setQueryData<Conversation>(
-          queryKeys.conversations.byId(id),
-          produce(current, (draft) => {
-            draft.id = id;
-            draft.title = title;
-          })
-        );
+      if (!current) {
+        throw new Error('Conversation not created');
       }
+      queryClient.setQueryData<Conversation>(
+        queryKeys.conversations.byId(id),
+        produce(current, (draft) => {
+          draft.id = id;
+          draft.title = title;
+        })
+      );
       navigateToConversation({ nextConversationId: id });
+      // Purge the query cache since we never fetch for conversation id "new"
+      queryClient.removeQueries({ queryKey });
+      // Invalidate all conversations to refresh conversation history
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
   };
 };
@@ -147,10 +145,15 @@ export const useConversation = () => {
         queryClient,
         queryKey,
         navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
-          navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+          // Navigate to the new conversation if user is still on the "new" conversation page
+          if (!conversationId) {
+            navigateToOnechatUrl(
+              appPaths.chat.conversation({ conversationId: nextConversationId })
+            );
+          }
         },
       }),
-    [queryClient, queryKey, navigateToOnechatUrl]
+    [queryClient, queryKey, conversationId, navigateToOnechatUrl]
   );
 
   useEffect(() => {
