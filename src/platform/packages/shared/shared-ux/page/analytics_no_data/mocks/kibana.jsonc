@@ -4,5 +4,5 @@
   "owner": "@elastic/appex-sharedux",
   "group": "platform",
   "visibility": "shared",
-  "devOnly": true,
+  "devOnly": true
 }
