@@ -18,9 +18,10 @@ disabled:
   - x-pack/platform/test/functional_basic/apps/transform/config.base.ts
   - x-pack/platform/test/api_integration_basic/config.basic_license.ts
   - x-pack/platform/test/ui_capabilities/common/config.ts
+  - x-pack/platform/test/functional/config.ccs.ts
 
   # QA suites that are run out-of-band
-  - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
+  - x-pack/platform/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
   - x-pack/platform/test/upgrade/config.ts
   - src/platform/test/functional/config.edge.js
   - x-pack/platform/test/functional/config.edge.ts
@@ -39,11 +40,11 @@ disabled:
   - x-pack/platform/test/scalability/config.ts
 
   # Cypress configs, for now these are still run manually
-  - x-pack/test/fleet_cypress/cli_config.ts
-  - x-pack/test/fleet_cypress/cli_config.space_awareness.ts
-  - x-pack/test/fleet_cypress/config.ts
-  - x-pack/test/fleet_cypress/config.space_awareness.ts
-  - x-pack/test/fleet_cypress/visual_config.ts
+  - x-pack/platform/test/fleet_cypress/cli_config.ts
+  - x-pack/platform/test/fleet_cypress/cli_config.space_awareness.ts
+  - x-pack/platform/test/fleet_cypress/config.ts
+  - x-pack/platform/test/fleet_cypress/config.space_awareness.ts
+  - x-pack/platform/test/fleet_cypress/visual_config.ts
 
   # Default http2 config to use for performance journeys
   - x-pack/performance/configs/http2_config.ts
@@ -202,14 +203,14 @@ enabled:
   - x-pack/platform/test/functional/apps/api_keys/config.ts
   - x-pack/platform/test/functional/apps/canvas/config.ts
   - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
-  - x-pack/test/functional/apps/dashboard/group1/config.ts
-  - x-pack/test/functional/apps/dashboard/group2/config.ts
-  - x-pack/test/functional/apps/dashboard/group3/config.ts
+  - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
+  - x-pack/platform/test/functional/apps/dashboard/group2/config.ts
+  - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
-  - x-pack/test/functional/apps/discover/group1/config.ts
-  - x-pack/test/functional/apps/discover/group2/config.ts
-  - x-pack/test/functional/apps/discover/group3/config.ts
+  - x-pack/platform/test/functional/apps/discover/group1/config.ts
+  - x-pack/platform/test/functional/apps/discover/group2/config.ts
+  - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/graph/config.ts
   - x-pack/platform/test/functional/apps/grok_debugger/config.ts
   - x-pack/platform/test/functional/apps/home/config.ts
@@ -230,10 +231,10 @@ enabled:
   - x-pack/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
   - x-pack/platform/test/functional/apps/management/config.ts
-  - x-pack/test/functional/apps/maps/group1/config.ts
-  - x-pack/test/functional/apps/maps/group2/config.ts
-  - x-pack/test/functional/apps/maps/group3/config.ts
-  - x-pack/test/functional/apps/maps/group4/config.ts
+  - x-pack/platform/test/functional/apps/maps/group1/config.ts
+  - x-pack/platform/test/functional/apps/maps/group2/config.ts
+  - x-pack/platform/test/functional/apps/maps/group3/config.ts
+  - x-pack/platform/test/functional/apps/maps/group4/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
@@ -254,7 +255,7 @@ enabled:
   - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/spaces/config.ts
-  - x-pack/test/functional/apps/status_page/config.ts
+  - x-pack/platform/test/functional/apps/status_page/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
   - x-pack/platform/test/functional/apps/transform/actions/config.ts
@@ -273,7 +274,7 @@ enabled:
   - x-pack/platform/test/functional_cloud/saml.config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
-  - x-pack/test/plugin_functional/config.ts
+  - x-pack/platform/test/plugin_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_and_security.config.ts
