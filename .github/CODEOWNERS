@@ -1191,11 +1191,14 @@ x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-secur
 x-pack/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/read_only_objects_test_plugin @elastic/kibana-security
+<<<<<<< HEAD
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 x-pack/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
 >>>>>>> 2c6190bb599 ([CI] Auto-commit changed files from 'node scripts/lint_packages --fix')
+=======
+>>>>>>> 899355b0b98 ([CI] Auto-commit changed files from 'node scripts/generate codeowners')
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
