@@ -7,35 +7,32 @@
 
 // import { termQuery } from '@kbn/observability-plugin/server';
 // import { SERVICE_NAME } from '../../../common/es_fields/apm';
-import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-
+import type { EsClient } from '@kbn/content-management-plugin/server/event_stream/es/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 export async function getAndroidCrashDeobfuscated({
-  apmEventClient,
+  esClient,
   serviceName,
   buildId,
   stacktrace,
 }: {
-  apmEventClient: APMEventClient;
+  esClient: EsClient;
   serviceName: string;
   buildId: string;
   stacktrace: string[];
-}) {
-  // return await apmEventClient.search('get_android_crash_deobfuscated', {
-  //   apm: {
-  //     sources: [
-  //       {
-  //         documentType: ApmDocumentType.ErrorEvent,
-  //         rollupInterval: RollupInterval.None,
-  //       },
-  //     ],
-  //   },
-  //   track_total_hits: false,
-  //   size: 0,
-  //   query: {
-  //     bool: {
-  //       filter: [...termQuery(SERVICE_NAME, serviceName), ...termQuery('buildId', buildId)],
-  //     },
-  //   },
-  // });
-  return '';
+}): Promise<Array<SearchResponse<any, any>>> {
+  const queryPromises: Array<Promise<SearchResponse<any, any>>> = [];
+  for (const line of stacktrace) {
+    queryPromises.push(
+      esClient.search({
+        index: `android-sourcmap-${serviceName}-${buildId}`,
+        query: {
+          bool: {
+            filter: [{ terms: { stackframe: line } }],
+          },
+        },
+        size: 1,
+      })
+    );
+  }
+  return Promise.all(queryPromises);
 }
