@@ -99,6 +99,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { getPageAttachmentType } from './attachments/page/attachment';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
@@ -268,6 +269,13 @@ export class Plugin
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+
+    if (
+      pluginsSetup.cases &&
+      pluginsSetup.observabilityShared.config.unsafe?.investigativeExperienceEnabled
+    ) {
+      pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
+    }
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
