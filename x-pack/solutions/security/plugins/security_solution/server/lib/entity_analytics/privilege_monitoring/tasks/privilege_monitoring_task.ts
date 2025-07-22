@@ -24,14 +24,15 @@ import {
   type LatestTaskStateSchema as PrivilegeMonitoringTaskState,
 } from './state';
 import { getApiKeyManager } from '../auth/api_key';
-import { PrivilegeMonitoringDataClient } from '../privilege_monitoring_data_client';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { PrivilegeMonitoringDataClient } from '../engine/data_client';
+import { DataSourcesService } from '../data_sources/service';
+import { buildFakeScopedRequest } from '../../risk_score/tasks/helpers';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
-  auditLogger?: AuditLogger;
+  auditLogger: AuditLogger;
   taskManager: TaskManagerSetupContract | undefined;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
@@ -92,15 +93,13 @@ export const registerPrivilegeMonitoringTask = ({
       return undefined;
     }
 
-    const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart: core, namespace });
-
     return new PrivilegeMonitoringDataClient({
       logger,
       clusterClient: client.clusterClient,
       namespace,
-      soClient,
       taskManager: taskManagerStart,
-      auditLogger,
+      savedObjects: core.savedObjects,
+      auditLogger: core.security.audit.withoutRequest,
       kibanaVersion,
       telemetry,
       apiKeyManager,
@@ -153,9 +152,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
 const runPrivilegeMonitoringTask = async ({
   isCancelled,
   logger,
-  telemetry,
   taskInstance,
-  experimentalFeatures,
   getPrivilegedUserMonitoringDataClient,
 }: RunParams): Promise<{
   state: PrivilegeMonitoringTaskState;
@@ -179,7 +176,8 @@ const runPrivilegeMonitoringTask = async ({
       logger.error('[Privilege Monitoring] error creating data client.');
       throw Error('No data client was found');
     }
-    await dataClient.plainIndexSync();
+    const dataSourcesService = DataSourcesService(dataClient);
+    await dataSourcesService.plainIndexSync(buildFakeScopedRequest({}));
   } catch (e) {
     logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
   }

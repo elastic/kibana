@@ -138,7 +138,6 @@ import {
   CASE_ATTACHMENT_TYPE_ID,
   THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
 } from '../common/threat_intelligence/constants';
-import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -285,7 +284,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       getStartServices: core.getStartServices,
       taskManager: plugins.taskManager,
       logger: this.logger,
-      auditLogger: plugins.security?.audit.withoutRequest,
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,

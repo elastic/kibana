@@ -18,6 +18,7 @@ import {
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { PrivilegedUsersCrud } from '../../users/privileged_users_crud';
 
 export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -48,7 +49,10 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
             ENABLE_PRIVILEGED_USER_MONITORING_SETTING
           );
           const secSol = await context.securitySolution;
-          await secSol.getPrivilegeMonitoringDataClient().deleteUser(request.params.id);
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const crudService = PrivilegedUsersCrud(dataClient);
+
+          await crudService.delete(request.params.id);
           return response.ok({ body: { aknowledged: true } });
         } catch (e) {
           const error = transformError(e);

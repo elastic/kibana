@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import moment from 'moment';
+
+import type { KibanaRequest } from '@kbn/core/server';
+import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
+import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
+import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import type { PrivilegeMonitoringDataClient } from './data_client';
+import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
+import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
+import {
+  PRIVMON_ENGINE_INITIALIZATION_EVENT,
+  PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
+} from '../../../telemetry/event_based/events';
+import { PrivmonIndexService } from './elasticsearch/indices';
+import { startPrivilegeMonitoringTask } from '../tasks/privilege_monitoring_task';
+import {
+  MonitoringEntitySourceDescriptorClient,
+  PrivilegeMonitoringEngineDescriptorClient,
+  monitoringEntitySourceType,
+} from '../saved_objects';
+import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
+
+export const InitialisationService = (dataClient: PrivilegeMonitoringDataClient) => {
+  const { deps } = dataClient;
+  const { taskManager } = deps;
+  if (!taskManager) {
+    throw new Error('Task Manager is not available');
+  }
+
+  const IndexService = PrivmonIndexService(dataClient);
+
+  const init = async (request: KibanaRequest): Promise<InitMonitoringEngineResponse> => {
+    const soClient = deps.savedObjects.getScopedClient(request, {
+      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
+    });
+
+    const descriptorClient = new PrivilegeMonitoringEngineDescriptorClient({
+      soClient,
+      namespace: deps.namespace,
+    });
+    const monitoringIndexSourceClient = new MonitoringEntitySourceDescriptorClient({
+      soClient,
+      namespace: deps.namespace,
+    });
+
+    const setupStartTime = moment().utc().toISOString();
+
+    dataClient.audit(
+      PrivilegeMonitoringEngineActions.INIT,
+      EngineComponentResourceEnum.privmon_engine,
+      'Initializing privilege monitoring engine'
+    );
+
+    const descriptor = await descriptorClient.init();
+    dataClient.log('debug', `Initialized privileged monitoring engine saved object`);
+    // create default index source for privilege monitoring for each namespace
+    const indexSourceDescriptor = await monitoringIndexSourceClient.create({
+      type: 'index',
+      managed: true,
+      indexPattern: defaultMonitoringUsersIndex(deps.namespace),
+      name: `default-monitoring-index-${deps.namespace}`,
+    });
+    dataClient.log(
+      'debug',
+      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+    );
+    try {
+      dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
+      await IndexService.createIngestPipelineIfDoesNotExist();
+      await IndexService.upsertIndex();
+
+      if (deps.apiKeyManager) {
+        await deps.apiKeyManager.generate();
+      }
+
+      await startPrivilegeMonitoringTask({
+        taskManager,
+        logger: deps.logger,
+        namespace: deps.namespace,
+      });
+
+      const setupEndTime = moment().utc().toISOString();
+      const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
+      deps.telemetry?.reportEvent(PRIVMON_ENGINE_INITIALIZATION_EVENT.eventType, {
+        duration,
+      });
+    } catch (e) {
+      dataClient.log('error', `Error initializing privilege monitoring engine: ${e}`);
+      dataClient.audit(
+        PrivilegeMonitoringEngineActions.INIT,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to initialize privilege monitoring engine',
+        e
+      );
+
+      deps.telemetry?.reportEvent(PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT.eventType, {
+        error: e.message,
+      });
+
+      await descriptorClient.update({
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.ERROR,
+        error: {
+          message: e.message,
+          stack: e.stack,
+          action: 'init',
+        },
+      });
+    }
+
+    return descriptor;
+  };
+  return { init };
+};

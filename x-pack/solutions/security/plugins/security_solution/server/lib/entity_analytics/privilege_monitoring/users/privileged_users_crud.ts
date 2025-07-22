@@ -7,13 +7,14 @@
 
 import { merge } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
+import type { UpdatePrivMonUserRequestBody } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
+import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
 import type {
   CreatePrivMonUserRequestBody,
   CreatePrivMonUserResponse,
-} from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
-import type { PrivilegeMonitoringDataClient } from '../../data_client/dependencies';
-import type { PrivMonUserSource } from '../../types';
+} from '../../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
+import type { PrivilegeMonitoringDataClient } from '../engine/data_client';
+import type { PrivMonUserSource } from '../types';
 
 export const PrivilegedUsersCrud = ({ deps, index }: PrivilegeMonitoringDataClient) => {
   const esClient = deps.clusterClient.asCurrentUser;
@@ -50,8 +51,17 @@ export const PrivilegedUsersCrud = ({ deps, index }: PrivilegeMonitoringDataClie
       : undefined;
   };
 
-  const update = async (id: string): Promise<void> => {
-    await esClient.delete({ index, id });
+  const update = async (
+    id: string,
+    user: UpdatePrivMonUserRequestBody
+  ): Promise<MonitoredUserDoc | undefined> => {
+    await esClient.update<MonitoredUserDoc>({
+      index,
+      refresh: 'wait_for',
+      id,
+      doc: user,
+    });
+    return get(id);
   };
 
   const list = async (kuery?: string): Promise<MonitoredUserDoc[]> => {

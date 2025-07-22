@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
+import { InitialisationService } from '../engine/initialisation';
 
 export const initPrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -52,8 +53,11 @@ export const initPrivilegeMonitoringEngineRoute = (
           ENABLE_PRIVILEGED_USER_MONITORING_SETTING
         );
 
+        const dataClient = secSol.getPrivilegeMonitoringDataClient();
+        const service = InitialisationService(dataClient);
+
         try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().init();
+          const body = await service.init();
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);

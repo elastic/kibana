@@ -8,20 +8,17 @@
 import type {
   AnalyticsServiceSetup,
   IScopedClusterClient,
-  SavedObjectsClientContract,
   AuditLogger,
   Logger,
   AuditEvent,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { EngineComponentResource } from '../../../../../common/api/entity_analytics';
+import type { EngineComponentResource } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/utils';
 import type { ApiKeyManager } from '../auth/api_key';
-import type {
-  PrivilegeMonitoringEngineDescriptorClient,
-  MonitoringEntitySourceDescriptorClient,
-} from '../saved_objects';
+
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { AUDIT_OUTCOME, AUDIT_TYPE, AUDIT_CATEGORY } from '../../audit';
 
@@ -34,19 +31,18 @@ interface PrivilegeMonitoringGlobalDependencies {
   telemetry: AnalyticsServiceSetup;
 
   clusterClient: IScopedClusterClient;
-  soClient: SavedObjectsClientContract;
-  engineClient: PrivilegeMonitoringEngineDescriptorClient;
-  monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient;
+  savedObjects: SavedObjectsServiceStart;
 
   apiKeyManager?: ApiKeyManager;
   taskManager?: TaskManagerStartContract;
 }
 
 /**
- * Entity Analytics Data Clients serve only as wrappers for dependencies and to conform to Kibana plugin architecture.
+ * Privmon data client serves only as a wrapper for plugin/request dependencies and common, global actions
  */
 export class PrivilegeMonitoringDataClient {
   public index: string;
+
   constructor(public readonly deps: PrivilegeMonitoringGlobalDependencies) {
     this.index = getPrivilegedMonitorUsersIndex(deps.namespace);
   }

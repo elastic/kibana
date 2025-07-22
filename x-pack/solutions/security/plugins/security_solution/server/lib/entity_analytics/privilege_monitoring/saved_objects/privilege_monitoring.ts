@@ -95,6 +95,15 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     return attributes;
   }
 
+  async getStatus() {
+    const engineDescriptor = await this.get();
+
+    return {
+      status: engineDescriptor.status,
+      error: engineDescriptor.error,
+    };
+  }
+
   async delete() {
     const id = this.getSavedObjectId();
     return this.deps.soClient.delete(privilegeMonitoringTypeName, id);
