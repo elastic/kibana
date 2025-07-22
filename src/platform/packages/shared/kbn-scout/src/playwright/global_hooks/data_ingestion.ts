@@ -9,17 +9,18 @@
 
 import { FullConfig } from 'playwright/test';
 import {
-  getLogger,
   getEsArchiver,
   createScoutConfig,
   measurePerformanceAsync,
   getEsClient,
   getKbnClient,
 } from '../../common';
+import { ScoutLogger } from '../../common/services/logger';
 import { ScoutTestOptions } from '../types';
+import { getScoutLogLevel } from '../../common/services/logger';
 
 export async function ingestTestDataHook(config: FullConfig, archives: string[]) {
-  const log = getLogger();
+  const log = new ScoutLogger('scout: global hook', getScoutLogLevel());
 
   if (archives.length === 0) {
     log.debug('[setup] no test data to ingest');
