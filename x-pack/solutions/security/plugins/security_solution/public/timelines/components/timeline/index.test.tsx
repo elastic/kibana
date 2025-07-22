@@ -28,8 +28,8 @@ import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 import { defaultRowRenderers } from './body/renderers';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useDataView } from '@kbn/security-solution-plugin/public/data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '@kbn/security-solution-plugin/public/data_view_manager/mocks/mock_data_view';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
