@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('dashboard', function () {
-    loadTestFile(require.resolve('./reporting'));
-    loadTestFile(require.resolve('./drilldowns'));
-    loadTestFile(require.resolve('./share'));
+  describe('Share', function () {
+    loadTestFile(require.resolve('./share_from_custom_space'));
   });
 }
