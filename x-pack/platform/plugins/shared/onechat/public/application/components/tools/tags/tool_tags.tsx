@@ -15,6 +15,7 @@ interface OnechatToolTagsProps {
 
 export const OnechatToolTags: React.FC<OnechatToolTagsProps> = ({ tags }) => {
   const { euiTheme } = useEuiTheme();
+  if (!tags) return null;
   return (
     <EuiBadgeGroup>
       {tags.map((tag) => (

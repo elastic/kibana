@@ -8,9 +8,9 @@
   "plugin": {
     "id": "llmTasks",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": ["xpack", "llmTasks"],
-    "requiredPlugins": ["inference", "productDocBase"],
+    "requiredPlugins": ["inference", "productDocBase", "onechat"],
     "requiredBundles": [],
     "optionalPlugins": [],
     "extraPublicDirs": []

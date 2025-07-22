@@ -26,7 +26,8 @@
       "uiActions",
       "urlForwarding",
       "presentationUtil",
-      "unifiedSearch"
+      "unifiedSearch",
+
     ],
     "optionalPlugins": [
       "home",
@@ -39,7 +40,9 @@
       "serverless",
       "noDataPage",
       "observabilityAIAssistant",
-      "lens"
+      "lens",
+      // "llmTasks",
+      "inference"
     ],
     "requiredBundles": [
       "kibanaReact",

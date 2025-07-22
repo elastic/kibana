@@ -63,7 +63,7 @@ only built-in tools are implemented
 class MyPlugin {
   setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
     onechat.tools.register({
-      id: 'my_tool',
+      id: '.my_tool',
       name: 'My Tool',
       description: 'My very first tool',
       meta: {
@@ -84,9 +84,12 @@ class MyPlugin {
 
 ```ts
 onechat.tools.register({
-  id: 'my_es_tool',
+  id: '.my_es_tool',
   name: 'My Tool',
   description: 'Some example',
+  meta: {
+    tags: ['foo', 'bar'],
+  },
   schema: z.object({
     indexPattern: z.string().describe('Index pattern to filter on'),
   }),
@@ -105,10 +108,13 @@ onechat.tools.register({
 
 ```ts
 onechat.tools.register({
-  id: 'my_es_tool',
+  id: '.my_es_tool',
   name: 'My Tool',
   description: 'Some example',
   schema: z.object({}),
+  meta: {
+    tags: ['foo', 'bar'],
+  },
   handler: async ({}, { events }) => {
     events.emit({
       type: 'my_custom_event',

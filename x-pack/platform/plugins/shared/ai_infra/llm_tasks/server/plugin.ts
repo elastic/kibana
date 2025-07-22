@@ -14,6 +14,7 @@ import type {
   PluginSetupDependencies,
   PluginStartDependencies,
 } from './types';
+import { z } from '@kbn/zod';
 import { retrieveDocumentation } from './tasks';
 
 export class LlmTasksPlugin
@@ -34,6 +35,32 @@ export class LlmTasksPlugin
     coreSetup: CoreSetup<PluginStartDependencies, LlmTasksPluginStart>,
     setupDependencies: PluginSetupDependencies
   ): LlmTasksPluginSetup {
+    //@TODO: remove
+    console.log(`--@@LLM TASKS PLUGIN SETUP`, setupDependencies);
+    setupDependencies.onechat.tools.register({
+      id: '.nl_to_dashboard',
+      name: 'NL to Dashboard',
+      meta: {
+        tags: ['foo', 'bar'],
+      },
+      description: 'Create a dashboard from natural language',
+      schema: z.object({
+        indexPattern: z.string().describe('Index pattern to filter on'),
+      }),
+      handler: async ({ indexPattern }, { modelProvider, esClient, ...rest }) => {
+        //@TODO: remove
+        console.log(`--@@rest`, rest);
+        const indices = await esClient.asCurrentUser.cat.indices({ index: indexPattern });
+
+        const model = await modelProvider.getDefaultModel();
+        console.log(`--@@model`, model.inferenceClient);
+        // const response = await model.inferenceClient.chatComplete(somethingWith(indices));
+
+        return response;
+      },
+    });
+
+
     return {};
   }
 

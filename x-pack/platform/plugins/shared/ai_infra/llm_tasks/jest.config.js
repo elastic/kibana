@@ -8,7 +8,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/ai_infra/llm_tasks/server'],
+  roots: [
+    '<rootDir>/x-pack/platform/plugins/shared/ai_infra/llm_tasks/public',
+    '<rootDir>/x-pack/platform/plugins/shared/ai_infra/llm_tasks/server',
+  ],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
