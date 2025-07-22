@@ -78,3 +78,18 @@
     --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0);
   }
 }
+
+// Styles applied to the span.ffArray__highlight from FieldFormat class that is used to visually distinguish array delimiters when rendering array values as HTML in Kibana field formatters
+.ffArray__highlight {
+  color: $euiColorMediumShade;
+}
+
+// Styles applied to the span.ffSearch__highlight from FieldFormat class that is used to visually distinguish highlighted string values when rendering string values as HTML in Kibana field formatters
+.ffSearch__highlight {
+  text-decoration: dotted underline;
+}
+
+// Styles applied to the span.ffString__emptyValue from FieldFormat class that is used to visually distinguish empty string values when rendering string values as HTML in Kibana field formatters
+.ffString__emptyValue {
+  color: $euiColorDarkShade;
+}
