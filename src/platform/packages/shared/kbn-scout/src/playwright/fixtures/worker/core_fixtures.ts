@@ -65,7 +65,7 @@ export const coreWorkerFixtures = base.extend<
       const loggerContext =
         workersCount === 1 ? 'scout-worker' : `scout-worker-${workerInfo.parallelIndex + 1}`;
       // The log level is resolved inside the ScoutLogger constructor, which checks the argument,
-      // then SCOUT_PW_LOG_LEVEL, then LOG_LEVEL, and finally defaults to 'info'.
+      // then SCOUT_LOG_LEVEL, then LOG_LEVEL, and finally defaults to 'info'.
       use(new ScoutLogger(loggerContext));
     },
     { scope: 'worker' },
