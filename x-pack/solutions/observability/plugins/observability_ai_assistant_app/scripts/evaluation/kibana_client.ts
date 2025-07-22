@@ -633,7 +633,7 @@ export class KibanaClient {
           category: firstSuiteName,
           conversationId,
           messages,
-          passed: scores.every(({ score }) => score >= 1),
+          passed: scores.every(({ score }) => score === 1),
           scores,
           errors,
         };
