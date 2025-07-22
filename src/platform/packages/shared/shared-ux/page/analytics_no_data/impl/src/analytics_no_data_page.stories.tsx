@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-// "link:src/platform/packages/shared/shared-ux/page/kibana_template/mocks",
 import { AnalyticsNoDataPageStorybookMock } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 import type { AnalyticsNoDataPageStorybookParams } from '@kbn/shared-ux-page-analytics-no-data-mocks';
 
