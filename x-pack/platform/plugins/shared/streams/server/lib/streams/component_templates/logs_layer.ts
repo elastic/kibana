@@ -106,7 +106,7 @@ export const baseFields: FieldDefinition = {
   },
 };
 
-export const baseMappings: MappingTypeMapping['properties'] = {
+export const baseMappings: Exclude<MappingTypeMapping['properties'], undefined> = {
   body: {
     type: 'object',
     properties: {
