@@ -76,22 +76,23 @@ function TraceWaterfallComponent() {
     showLegend,
     serviceName,
   } = useTraceWaterfallContext();
+  const [isCalloutVisible, setIsCalloutVisible] = useState(!rootItem);
 
   if (!rootItem) {
-    return (
+    return isCalloutVisible ? (
       <EuiCallOut
         size="s"
         color="warning"
-        iconType="warning"
+        onDismiss={() => setIsCalloutVisible(false)}
         title={i18n.translate(
           'xpack.apm.traceWaterfallComponent.euiCallOut.traceDataIsIncompleteLabel',
           {
             defaultMessage:
-              'The waterfall may appear incomplete or not at all until processing finishes.',
+              'The waterfall visual may be incomplete or missing until processing finishes. Try refreshing the page or adjusting the time range.',
           }
         )}
       />
-    );
+    ) : null;
   }
 
   return (
