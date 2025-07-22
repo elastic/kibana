@@ -12,8 +12,7 @@ import type {
   ESQLUserDefinedColumn,
   ICommandContext,
 } from '../../commands_registry/types';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from '../../parser/constants';
-import { getLastNonWhitespaceChar } from './autocomplete';
+import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { ESQLAstItem } from '../../types';
 import type { SupportedDataType } from '../types';
 /**
@@ -116,8 +115,8 @@ export function isRestartingExpression(text: string) {
 export function unescapeColumnName(columnName: string) {
   // TODO this doesn't cover all escaping scenarios... the best thing to do would be
   // to use the AST column node parts array, but in some cases the AST node isn't available.
-  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
-    return columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
+  if (columnName.startsWith('`') && columnName.endsWith('`')) {
+    return columnName.slice(1, -1).replace(/``/g, '`');
   }
   return columnName;
 }

@@ -19,9 +19,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const platformSecurityUtils = getService('platformSecurityUtils');
 
   describe('Roles', function () {
-    // custom roles are not enabled for observability projects
-    this.tags(['skipSvlOblt']);
-
     describe('as Viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();

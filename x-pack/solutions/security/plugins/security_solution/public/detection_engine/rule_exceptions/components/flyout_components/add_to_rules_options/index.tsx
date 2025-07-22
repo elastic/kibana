@@ -43,7 +43,7 @@ const ExceptionsAddToRulesOptionsComponent: React.FC<ExceptionsAddToRulesOptions
               values={{
                 numRules: possibleRules.length,
                 ruleNames: (
-                  <span style={{ fontWeight: 'bold' }}>
+                  <span css={{ fontWeight: 'bold' }}>
                     {possibleRules.map(({ name }) => name).join(',')}
                   </span>
                 ),
@@ -69,7 +69,7 @@ const ExceptionsAddToRulesOptionsComponent: React.FC<ExceptionsAddToRulesOptions
               defaultMessage="Add to this rule: {ruleName}"
               id="xpack.securitySolution.exceptions.common.addToRuleOptionLabel"
               values={{
-                ruleName: <span style={{ fontWeight: 'bold' }}>{possibleRules[0].name}</span>,
+                ruleName: <span css={{ fontWeight: 'bold' }}>{possibleRules[0].name}</span>,
               }}
             />
           </EuiText>

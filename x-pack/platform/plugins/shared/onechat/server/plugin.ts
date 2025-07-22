@@ -67,7 +67,6 @@ export class OnechatPlugin
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
-        registerProvider: serviceSetups.tools.registerProvider.bind(serviceSetups.tools),
       },
     };
   }
@@ -89,16 +88,8 @@ export class OnechatPlugin
 
     return {
       tools: {
-        registry: tools.registry.asPublicRegistry(),
+        getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
-        asScoped: ({ request }) => {
-          return {
-            registry: tools.registry.asScopedPublicRegistry({ request }),
-            execute: (args) => {
-              return runner.runTool({ ...args, request });
-            },
-          };
-        },
       },
       agents: {
         getScopedClient: (args) => agents.getScopedClient(args),

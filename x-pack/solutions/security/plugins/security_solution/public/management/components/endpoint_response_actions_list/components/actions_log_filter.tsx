@@ -281,7 +281,7 @@ export const ActionsLogFilter = memo(
           {(list, search) => {
             return (
               <div
-                style={{ width: 300 }}
+                css={{ width: 300 }}
                 data-test-subj={getTestId(`${filterName}-filter-popoverList`)}
               >
                 {isSearchable && (

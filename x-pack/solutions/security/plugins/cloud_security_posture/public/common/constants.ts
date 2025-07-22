@@ -209,6 +209,16 @@ export const VULNERABILITY_GROUPING_OPTIONS = {
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
 } as const;
 
+export const FINDINGS_FILTER_OPTIONS = {
+  CLOUD_PROVIDER: 'cloud.provider',
+  NAMESPACE: 'data_stream.namespace',
+  RULE_BENCHMARK_ID: 'rule.benchmark.id',
+  RULE_BENCHMARK_POSTURE_TYPE: 'rule.benchmark.posture_type',
+  RULE_BENCHMARK_VERSION: 'rule.benchmark.version',
+  RESULT_EVALUATION: 'result.evaluation',
+  RULE_SECTION: 'rule.section',
+} as const;
+
 /*
  * ECS schema unique field to describe the event
  * https://www.elastic.co/guide/en/ecs/current/ecs-event.html

@@ -25,6 +25,7 @@ import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import {
   LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY,
   FINDINGS_GROUPING_OPTIONS,
+  FINDINGS_FILTER_OPTIONS,
 } from '../../../common/constants';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 import {
@@ -41,13 +42,13 @@ export const getBenchmarkIdQuery = (
 ): NavFilter => {
   return activeNamespace
     ? {
-        'rule.benchmark.id': benchmark.meta.benchmarkId,
-        'rule.benchmark.version': benchmark.meta.benchmarkVersion,
-        [`${FINDINGS_GROUPING_OPTIONS.NAMESPACE}`]: activeNamespace,
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: benchmark.meta.benchmarkId,
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_VERSION]: benchmark.meta.benchmarkVersion,
+        [FINDINGS_FILTER_OPTIONS.NAMESPACE]: activeNamespace,
       }
     : {
-        'rule.benchmark.id': benchmark.meta.benchmarkId,
-        'rule.benchmark.version': benchmark.meta.benchmarkVersion,
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_ID]: benchmark.meta.benchmarkId,
+        [FINDINGS_FILTER_OPTIONS.RULE_BENCHMARK_VERSION]: benchmark.meta.benchmarkVersion,
       };
 };
 
@@ -81,7 +82,7 @@ export const BenchmarksSection = ({
       {
         ...getPolicyTemplateQuery(dashboardType, activeNamespace),
         ...getBenchmarkIdQuery(benchmark, activeNamespace),
-        'result.evaluation': evaluation,
+        [FINDINGS_FILTER_OPTIONS.RESULT_EVALUATION]: evaluation,
       },
       groupBy
     );
@@ -95,8 +96,8 @@ export const BenchmarksSection = ({
       {
         ...getPolicyTemplateQuery(dashboardType, activeNamespace),
         ...getBenchmarkIdQuery(benchmark, activeNamespace),
-        'rule.section': ruleSection,
-        'result.evaluation': resultEvaluation,
+        [FINDINGS_FILTER_OPTIONS.RULE_SECTION]: ruleSection,
+        [FINDINGS_FILTER_OPTIONS.RESULT_EVALUATION]: resultEvaluation,
       },
       [FINDINGS_GROUPING_OPTIONS.NONE]
     );

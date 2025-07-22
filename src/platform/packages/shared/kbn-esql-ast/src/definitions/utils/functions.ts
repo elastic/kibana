@@ -8,7 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
+import {
+  ESQLControlVariable,
+  ESQLLicenseType,
+  ESQLVariableType,
+  RecommendedField,
+} from '@kbn/esql-types';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
@@ -25,7 +30,7 @@ import { scalarFunctionDefinitions } from '../generated/scalar_functions';
 import { ESQLFieldWithMetadata, ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { buildFunctionDocumentation } from './documentation';
-import { getSafeInsertText, getControlSuggestion } from './autocomplete';
+import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import { ESQLAstItem, ESQLFunction } from '../../types';
 import { removeFinalUnknownIdentiferArg, isParamExpressionType } from './shared';
 import { getTestFunctions } from './test_functions';
@@ -82,7 +87,8 @@ export function getFunctionDefinition(name: string) {
 
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
-  predicates: FunctionFilterPredicates | undefined
+  predicates: FunctionFilterPredicates | undefined,
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
 ): FunctionDefinition[] => {
   if (!predicates) {
     return functions;
@@ -92,6 +98,19 @@ export const filterFunctionDefinitions = (
   return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
     if (ignoreAsSuggestion) {
       return false;
+    }
+    const hasRestrictedSignature = signatures.some((signature) => signature.license);
+    if (!!hasMinimumLicenseRequired && hasRestrictedSignature) {
+      const availableSignatures = signatures.filter((signature) => {
+        if (!signature.license) return true;
+        return hasMinimumLicenseRequired
+          ? hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType)
+          : false;
+      });
+
+      if (availableSignatures.length === 0) {
+        return false;
+      }
     }
 
     if (ignored.includes(name)) {
@@ -109,6 +128,17 @@ export const filterFunctionDefinitions = (
     return true;
   });
 };
+
+export function getAllFunctions(options?: {
+  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+}) {
+  const fns = buildFunctionLookup();
+  if (!options?.type) {
+    return Array.from(fns.values());
+  }
+  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
+  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
+}
 
 export function printArguments(
   {
@@ -222,9 +252,12 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
  * @returns
  */
 export const getFunctionSuggestions = (
-  predicates?: FunctionFilterPredicates
+  predicates?: FunctionFilterPredicates,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ): ISuggestionItem[] => {
-  return filterFunctionDefinitions(allFunctions(), predicates).map(getFunctionSuggestion);
+  return filterFunctionDefinitions(allFunctions(), predicates, hasMinimumLicenseRequired).map(
+    getFunctionSuggestion
+  );
 };
 
 export function checkFunctionInvocationComplete(

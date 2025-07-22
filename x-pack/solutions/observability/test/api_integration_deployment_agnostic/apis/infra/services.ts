@@ -110,9 +110,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       synthtraceApmClient = await synthtrace.createApmSynthtraceEsClient();
+      await synthtraceApmClient.initializePackage({ skipInstallation: false });
     });
     after(async () => {
-      await synthtrace.apmSynthtraceKibanaClient.uninstallApmPackage();
+      await synthtraceApmClient.uninstallPackage();
       await supertestWithAdminScope.destroy();
     });
 
