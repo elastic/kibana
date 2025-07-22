@@ -6,7 +6,7 @@ set -euo pipefail
 
 node scripts/build --all-platforms --debug
 
-DOCKER_FILE="kibana-$KIBANA_PKG_VERSION-SNAPSHOT-docker-image.tar.gz"
+DOCKER_FILE="kibana-$KIBANA_PKG_VERSION-SNAPSHOT-docker-image-amd64.tar.gz"
 
 cd target
 buildkite-agent artifact upload "./$DOCKER_FILE;./*.deb;./*.rpm"
