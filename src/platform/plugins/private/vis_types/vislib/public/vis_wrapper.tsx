@@ -23,6 +23,7 @@ import { VisTypeVislibCoreSetup } from './plugin';
 
 import './index.scss';
 import { getUsageCollectionStart } from './services';
+import { GlobalVislibWrapperStyles } from './vis_wrapper.styles';
 
 type VislibWrapperProps = VislibRenderValue & {
   core: VisTypeVislibCoreSetup;
@@ -110,13 +111,16 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
   }, [handlers.uiState, renderChart]);
 
   return (
-    <EuiResizeObserver onResize={onResize}>
-      {(resizeRef) => (
-        <div className="vislib__wrapper" ref={resizeRef}>
-          <div className="vislib__container" ref={chartDiv} />
-        </div>
-      )}
-    </EuiResizeObserver>
+    <>
+      <GlobalVislibWrapperStyles />
+      <EuiResizeObserver onResize={onResize}>
+        {(resizeRef) => (
+          <div className="vislib__wrapper" ref={resizeRef}>
+            <div className="vislib__container" ref={chartDiv} />
+          </div>
+        )}
+      </EuiResizeObserver>
+    </>
   );
 };
 
