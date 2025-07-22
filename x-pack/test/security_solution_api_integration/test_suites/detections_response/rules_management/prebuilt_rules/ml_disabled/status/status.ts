@@ -13,7 +13,7 @@ import {
   deleteAllPrebuiltRuleAssets,
   getPrebuiltRulesStatus,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { createMlRuleThroughAlertingEndpoint } from '../utils';
 
 export default ({ getService }: FtrProviderContext): void => {

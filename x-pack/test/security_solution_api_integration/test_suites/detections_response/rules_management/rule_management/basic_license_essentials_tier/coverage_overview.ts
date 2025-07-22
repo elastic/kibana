@@ -23,7 +23,7 @@ import {
   createNonSecurityRule,
   deleteAllPrebuiltRuleAssets,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import { getCoverageOverview } from '../../../utils/rules/get_coverage_overview';
 
 export default ({ getService }: FtrProviderContext): void => {

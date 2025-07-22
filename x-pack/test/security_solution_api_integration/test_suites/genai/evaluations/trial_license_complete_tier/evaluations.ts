@@ -22,7 +22,7 @@ import {
   setupKnowledgeBase,
 } from '../../knowledge_base/entries/utils/helpers';
 
-import { routeWithNamespace } from '../../../../../common/utils/security_solution';
+import { routeWithNamespace } from '../../../../config/services/detections_response';
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 import { waitForEvaluationComplete } from './utils';
 

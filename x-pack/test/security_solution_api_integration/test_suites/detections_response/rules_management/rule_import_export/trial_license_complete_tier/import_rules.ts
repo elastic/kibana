@@ -27,8 +27,8 @@ import {
   getCustomQueryRuleParams,
   getThresholdRuleForAlertTesting,
 } from '../../../utils';
-import { createRule } from '../../../../../../common/utils/security_solution';
-import { deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { createRule } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';

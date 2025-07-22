@@ -20,7 +20,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,
