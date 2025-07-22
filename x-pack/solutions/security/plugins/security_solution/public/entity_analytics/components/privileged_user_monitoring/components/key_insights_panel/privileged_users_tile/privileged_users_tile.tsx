@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { getPrivilegedUsersEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
@@ -15,18 +16,12 @@ export const PrivilegedUsersTile: React.FC<{
 }> = ({ spaceId }) => {
   return (
     <KeyInsightsTile
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.privmon.privilegedUsers.title"
-          defaultMessage="Privileged Users"
-        />
-      }
-      label={
-        <FormattedMessage
-          id="xpack.securitySolution.privmon.privilegedUsers.label"
-          defaultMessage="Privileged Users"
-        />
-      }
+      title={i18n.translate('xpack.securitySolution.privmon.activePrivilegedUsers.title', {
+        defaultMessage: 'Privileged Users',
+      })}
+      label={i18n.translate('xpack.securitySolution.privmon.activePrivilegedUsers.label', {
+        defaultMessage: 'Privileged Users',
+      })}
       getEsqlQuery={(namespace: string) => getPrivilegedUsersEsqlCount(namespace)}
       id="privileged-user-monitoring-active-users"
       spaceId={spaceId}

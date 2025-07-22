@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
-import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
@@ -25,10 +25,13 @@ import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
   useDataViewsForPicker,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { TABS_ENABLED } from '../../../../constants';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -211,6 +214,19 @@ export const DiscoverTopNav = ({
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
   );
 
+  const searchDraftUiState = useCurrentTabSelector((state) => state.uiState.searchDraft);
+  const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
+  const onDraftChange = useCallback(
+    (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
+      dispatch(
+        setSearchDraftUiState({
+          searchDraftUiState: newSearchDraftUiState,
+        })
+      );
+    },
+    [dispatch, setSearchDraftUiState]
+  );
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
@@ -248,6 +264,8 @@ export const DiscoverTopNav = ({
           ) : undefined
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
+        draft={searchDraftUiState}
+        onDraftChange={TABS_ENABLED ? onDraftChange : undefined}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
