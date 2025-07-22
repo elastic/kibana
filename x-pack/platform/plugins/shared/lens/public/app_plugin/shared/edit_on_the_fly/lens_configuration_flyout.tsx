@@ -341,6 +341,12 @@ export function LensEditConfigurationFlyout({
               flex: 1;
               flex-direction: column;
             }
+            .euiAccordion-isOpen {
+              .euiAccordion__childWrapper {
+                block-size: auto !important; // Override euiAccordion__childWrapper blockSize
+                flex: 1;
+              }
+            }
             .euiAccordion__childWrapper {
               ${euiScrollBarStyles(euiTheme)}
               overflow-y: auto !important;
@@ -349,11 +355,6 @@ export function LensEditConfigurationFlyout({
               margin-left: -${euiThemeVars.euiFormMaxWidth};
               > * {
                 pointer-events: auto;
-              }
-
-              .euiAccordion-isOpen & {
-                block-size: auto !important;
-                flex: 1;
               }
             }
             .lnsIndexPatternDimensionEditor-advancedOptions {
