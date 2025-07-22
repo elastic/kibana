@@ -19,9 +19,10 @@ import type {
 } from '.';
 import { Graph } from '.';
 
-const meta: Meta<typeof Graph> = {
-  component: Graph,
-  render: ({ nodes, edges, interactive }: GraphData) => {
+type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
+
+const meta = {
+  render: ({ nodes, edges, interactive }: Partial<GraphPropsAndCustomArgs>) => {
     return (
       <ThemeProvider theme={{ darkMode: false }}>
         <Graph
@@ -29,9 +30,9 @@ const meta: Meta<typeof Graph> = {
             height: 100%;
             width: 100%;
           `}
-          nodes={nodes}
-          edges={edges}
-          interactive={interactive}
+          nodes={nodes ?? []}
+          edges={edges ?? []}
+          interactive={interactive ?? false}
         />
       </ThemeProvider>
     );
@@ -44,16 +45,10 @@ const meta: Meta<typeof Graph> = {
     interactive: true,
   },
   decorators: [GlobalStylesStorybookDecorator],
-};
+} satisfies Meta<Partial<GraphPropsAndCustomArgs>>;
 
 export default meta;
 type Story = StoryObj<typeof Graph>;
-
-interface GraphData {
-  nodes: NodeViewModel[];
-  edges: EdgeViewModel[];
-  interactive: boolean;
-}
 
 type EnhancedNodeViewModel =
   | EntityNodeViewModel
@@ -628,6 +623,39 @@ export const GraphLargeStackedEdgeCases: Story = {
           color: 'danger',
           shape: 'label',
         })),
+    ]),
+  },
+};
+
+const VARIANT_STACK_SIZES_NODES = 8;
+
+export const VariantStackSizes: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges([
+      ...(Array(VARIANT_STACK_SIZES_NODES)
+        .fill(0)
+        .map((id, idx) => ({
+          id: String.fromCharCode(97 + idx), // 'a', 'b', 'c', ...
+          label: String.fromCharCode(97 + idx).toUpperCase(),
+          color: 'primary',
+          shape: 'ellipse',
+        })) satisfies EnhancedNodeViewModel[]),
+      ...Array(VARIANT_STACK_SIZES_NODES - 1)
+        .fill(0)
+        .map<EnhancedNodeViewModel[]>((_v, idx) =>
+          Array(idx + 1)
+            .fill(0)
+            .map<EnhancedNodeViewModel>((_, idx2) => ({
+              id: `${String.fromCharCode(97 + idx)}-${String.fromCharCode(97 + idx + 1)}`,
+              source: String.fromCharCode(97 + idx),
+              target: String.fromCharCode(97 + idx + 1),
+              label: `${idx2}`,
+              color: 'primary',
+              shape: 'label',
+            }))
+        )
+        .flat(),
     ]),
   },
 };
