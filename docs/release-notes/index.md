@@ -214,6 +214,7 @@ logging:
 * Updates install snippets to include all platforms [#210249]({{kib-pull}}210249).
 
 **Discover**:
+* Fixes an issue where an {{esql}} query was overwritten when edited while the previous request was still running [#224671]({{kib-pull}}224671).
 * Fixes invalid input highlight in **Data View** flyout [#226822]({{kib-pull}}226822).
 * Fixes an issue causing **Discover** to freeze when dragging & dropping columns with animations disabled [#226592]({{kib-pull}}226592).
 * Fixes row highlighting when reordering columns [#226584]({{kib-pull}}226584).
@@ -228,7 +229,6 @@ logging:
 * Fixed multiple accessibility issues, including adding missing aria labels and column headers, improving keyboard navigation and interactions, and improving focus changes when interacting with **Discover** features [View list of fixes](https://github.com/elastic/kibana/issues?q=state:closed%20label:Project:Accessibility%20label:v9.1.0%20label:Team:DataDiscovery).
 
 **{{esql}} editor**:
-* Fixes an issue where an {{esql}} query was overwritten when edited while the previous request was still running [#224671]({{kib-pull}}224671).
 * Fixes wrong validation on expressions between aggregations [#227989]({{kib-pull}}227989).
 * Hides lookup index hidden indices from autocomplete [#227819]({{kib-pull}}227819).
 * Fixes several issues with `BUCKET` function signatures [#222553]({{kib-pull}}222553).
