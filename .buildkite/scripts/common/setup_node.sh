@@ -36,8 +36,8 @@ if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
   NODE_VARIANT="node-pointer-compression/"
   # Node.js 22.17.1 with pointer compression enabled
   sed -i 's#kibana-ci-proxy-cache/dist#kibana-ci-proxy-cache/node-pointer-compression/dist#' WORKSPACE.bazel
-  sed -i 's#"node-v22.17.1-linux-arm64", "7c656117cb679cb436f12441c08a2557cba31ccc564dfd81e498ef5e078731c3"#"node-v22.17.1-linux-arm64", "a86b4697e38cd500d434e6c94e4d5446e23a8e2826de7e7eafad160af2375aa9"#' WORKSPACE.bazel
-  sed -i 's#"node-v22.17.1-linux-x64", "94d7ee00c843170726cb99e1ac2e3d0fe1767e2c6579208bcb7b743639eb9672"#"node-v22.17.1-linux-x64", "d7990d99dcb165eca7305dd895ddd5b2a490b7c2b624136d2fc83004bc0f2d2d"#' WORKSPACE.bazel
+  sed -i 's#"node-v22.17.1-linux-arm64", "37bb596033e6477b5cec845ab18fd02bc6dc8af846f1ace813a005e91298e9ea"#"node-v22.17.1-linux-arm64", "303d5c5986ba5e587350c1012937dab691906e143294e4e72f6c3ee8c0d2eb4b"#' WORKSPACE.bazel
+  sed -i 's#"node-v22.17.1-linux-x64", "45431ec948e80f63819de4767581e838119bc9a13daa15805b205f447d086bee"#"node-v22.17.1-linux-x64", "3f701a570adc1d58af85393cb154f5bd363225cdd1658d6dd6b93d2bbfe6f33e"#' WORKSPACE.bazel
   echo ' -- Using Node.js variant with pointer compression enabled'
 fi
 nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${NODE_VARIANT}dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
