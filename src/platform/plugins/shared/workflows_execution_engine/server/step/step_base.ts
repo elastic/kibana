@@ -38,13 +38,13 @@ export abstract class StepBase<TStep extends BaseStep> {
   constructor(
     step: TStep,
     contextManager: WorkflowContextManager,
-    connectorExecutor: ConnectorExecutor,
+    connectorExecutor: ConnectorExecutor | undefined,
     templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
   ) {
     this.step = step;
     this.contextManager = contextManager;
     this.templatingEngine = new WorkflowTemplatingEngine(templatingEngineType);
-    this.connectorExecutor = connectorExecutor;
+    this.connectorExecutor = connectorExecutor as any;
   }
 
   public getName(): string {
@@ -55,7 +55,7 @@ export abstract class StepBase<TStep extends BaseStep> {
     const stepName = this.getName();
 
     // Set step context for logging
-    this.contextManager.setCurrentStep(stepName, stepName, this.step.type);
+    // this.contextManager.setCurrentStep(stepName, stepName, this.step.type);
 
     // Log step start
     this.contextManager.logStepStart(stepName);
