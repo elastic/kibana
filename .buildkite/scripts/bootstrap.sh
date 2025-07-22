@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
-if ! yarn kbn bootstrap; then
+if ! (yarn kbn bootstrap || yarn kbn bootstrap); then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 
@@ -15,7 +15,7 @@ if ! yarn kbn bootstrap; then
   rm -rf node_modules
 
   echo "--- yarn install and bootstrap, attempt 2"
-  yarn kbn bootstrap --force-install
+  yarn kbn bootstrap --force-install || yarn kbn bootstrap
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
