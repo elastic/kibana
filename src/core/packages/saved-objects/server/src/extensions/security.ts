@@ -8,6 +8,7 @@
  */
 
 import {
+  SavedObjectAccessControl,
   SavedObjectReferenceWithContext,
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
@@ -68,6 +69,8 @@ export interface AuthorizeObject {
   id: string;
   /** The name of the object */
   name?: string;
+  /** Access control information for the object */
+  accessControl?: SavedObjectAccessControl;
 }
 
 /**
@@ -139,6 +142,31 @@ export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces
    * passed to the repository's update or bulkUpdate method.
    */
   objectNamespace?: string;
+}
+
+/**
+ * The AuthorizeChangeOwnershipObject interface extends AuthorizeObjectWithExistingSpaces
+ * and contains a object namespace override. Used by the authorizeChangeOwnership
+ * method.
+ */
+export interface AuthorizeChangeOwnershipObject extends AuthorizeObjectWithExistingSpaces {
+  /**
+   * The namespace in which to update this object. Populated by options
+   * passed to the repository's changeOwnership method.
+   */
+  objectNamespace?: string;
+}
+
+export interface AuthorizeChangeAccessModeObject extends AuthorizeObjectWithExistingSpaces {
+  /**
+   * The namespace in which to update this object. Populated by options
+   * passed to the repository's changeOwnership method.
+   */
+  objectNamespace?: string;
+}
+export interface AuthorizeBulkChangeOwnershipParams extends AuthorizeParams {
+  /** The objects to authorize */
+  objects: AuthorizeChangeOwnershipObject[];
 }
 
 /**
@@ -253,6 +281,20 @@ export interface AuthorizeFindParams {
  * It is identical to AuthorizeFindParams.
  */
 export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
+
+/**
+ * The AuthorizeChangeOwnershipParams interface extends AuthorizeParams and is
+ * used for the AuthorizeeChangeAccessControl method of the ISavedObjectsSecurityExtension.
+ */
+export interface AuthorizeChangeOwnershipParams extends AuthorizeParams {
+  /** The objects to authorize */
+  objects: AuthorizeChangeOwnershipObject[];
+}
+
+export interface AuthorizeChangeAccessModeParams extends AuthorizeParams {
+  /** The objects to authorize */
+  objects: AuthorizeChangeAccessModeObject[];
+}
 
 /**
  * The AuthorizeAndRedactMultiNamespaceReferencesParams interface extends
@@ -433,6 +475,17 @@ export interface ISavedObjectsSecurityExtension {
    */
   authorizeOpenPointInTime: <A extends string>(
     params: AuthorizeOpenPointInTimeParams
+  ) => Promise<CheckAuthorizationResult<A>>;
+
+  /**
+   * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
+   * @param params the namespace and object to authorize for changing ownership
+   * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
+   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeChangeAccessControl: <A extends string>(
+    params: AuthorizeChangeAccessModeParams,
+    operation: 'changeAccessMode' | 'changeOwnership'
   ) => Promise<CheckAuthorizationResult<A>>;
 
   /**

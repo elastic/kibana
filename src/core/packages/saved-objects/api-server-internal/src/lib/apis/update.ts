@@ -110,9 +110,17 @@ export const executeUpdate = async <T>(
   });
 
   const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
+  const accessControl = preflightDocNSResult.rawDocSource?._source.accessControl;
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
-    object: { type, id, existingNamespaces },
+    object: {
+      type,
+      id,
+      existingNamespaces,
+      ...(accessControl && {
+        accessControl,
+      }),
+    },
   });
 
   // validate if an update (directly update or create the object instead) can be done, based on if the doc exists or not
