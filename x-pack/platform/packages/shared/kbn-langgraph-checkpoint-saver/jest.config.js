@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/packages/kbn_langgraph_checkpointer',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/packages/kbn_langgraph_checkpoint_saver',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver/server/**/*.{ts}',

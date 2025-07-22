@@ -1,6 +1,6 @@
-# @kbn/langgraph-checkpointer
+# @kbn/langgraph-checkpoint-saver
 
-Contains a LangGraph checkpointer backed by a Elasticsearch database.
+Contains a LangGraph checkpoint saver backed by a Elasticsearch database.
 
 The package does not expose `index.ts` at its root, instead there's a `server` directory you should deep-import from.
 
