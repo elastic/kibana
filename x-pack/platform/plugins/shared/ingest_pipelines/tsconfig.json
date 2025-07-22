@@ -40,7 +40,8 @@
     "@kbn/core-http-browser",
     "@kbn/core-plugins-server",
     "@kbn/delete-managed-asset-callout",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/ingest-pipelines-shared"
   ],
   "exclude": [
     "target/**/*",
