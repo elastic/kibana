@@ -81,6 +81,8 @@ export async function getFullAgentPolicy(
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
   logger.debug(
     `Getting full policy for agent policy [${id}] using so scoped to [${soClient.getCurrentNamespace()}]`
   );
@@ -156,7 +158,10 @@ export async function getFullAgentPolicy(
     agentPolicy.global_data_tags
   );
 
-  const otelcolConfig = generateOtelcolConfig(agentInputs);
+  let otelcolConfig;
+  if (experimentalFeature.enableOtelInputIntegrations) {
+    otelcolConfig = generateOtelcolConfig(agentInputs);
+  }
 
   const inputs = agentInputs
     // filter out the otelcol inputs, they will be added at the root of the policy
@@ -212,7 +217,7 @@ export async function getFullAgentPolicy(
       }, {}),
     },
     inputs,
-    ...otelcolConfig,
+    ...(otelcolConfig ? otelcolConfig : {}),
     secret_references: [
       ...outputSecretReferences,
       ...fleetserverHostSecretReferences,
