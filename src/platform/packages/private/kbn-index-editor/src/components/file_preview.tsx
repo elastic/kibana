@@ -70,7 +70,7 @@ export const FilesPreview: FC = () => {
         filesStatus.map((fileStatus, index) => {
           if (fileStatus.data) {
             return previewDocs(
-              fileStatus.data.slice(1, FILE_PREVIEW_LIMIT + 1),
+              fileStatus.data,
               fileStatus.results?.ingest_pipeline!,
               FILE_PREVIEW_LIMIT
             );
