@@ -10,13 +10,14 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiMarkdownEditor,
   EuiMarkdownFormat,
-  EuiToolTip,
+  UseEuiTheme,
+  euiCanAnimate,
   getDefaultEuiMarkdownPlugins,
   useEuiTheme,
 } from '@elastic/eui';
@@ -37,10 +38,29 @@ import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
   content: '',
 };
+
+const editorStyles = css`
+  width: 100%;
+  block-size: calc(100% - 40px);
+  [data-test-subj='markdown_editor_preview_button'] {
+    display: none;
+  }
+  .euiMarkdownEditorFooter {
+    display: none;
+  }
+`;
+
+const dashboardMarkdownEditorAriaLabel = () => i18n.translate(
+  'embeddableExamples.euiMarkdownEditor.embeddableAriaLabel',
+  {
+    defaultMessage: 'Dashboard markdown editor',
+  }
+)
 
 const markdownComparators: StateComparators<MarkdownEditorState> = { content: 'referenceEquality' };
 
@@ -59,6 +79,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       defaultMarkdownState
     );
     const isEditing$ = new BehaviorSubject<boolean>(false);
+    const isPreview$ = new BehaviorSubject<boolean>(false);
 
     /**
      * if this embeddable had a difference between its runtime and serialized state, we could define and run a
@@ -108,11 +129,54 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       ...titleManager.api,
       serializeState,
       onEdit: async () => {
-        isEditing$.next(!isEditing$.getValue());
+        isEditing$.next(true);
         parentApi.focusedPanelId$.next(api.uuid);
       },
       isEditingEnabled: () => true,
       getTypeDisplayName: () => 'Markdown',
+      OverridenHoverActionsComponent: () => {
+        if (!isEditing$.getValue()) {
+          return;
+        } else {
+          return () => {
+            const isPreview = useStateFromPublishingSubject(isPreview$);
+            const toggleButtonsCompressed = [
+              {
+                id: `edit__0`,
+                label: 'Editor',
+              },
+              {
+                id: `preview__0`,
+                label: 'Preview',
+              },
+            ];
+            return (
+              <EuiButtonGroup
+                legend="This is a basic group"
+                options={toggleButtonsCompressed}
+                idSelected={isPreview ? 'preview__0' : 'edit__0'}
+                onChange={(id) => {
+                  isPreview$.next(id === 'preview__0');
+                }}
+                buttonSize="compressed"
+                type="single"
+                css={{
+                  background: 'none',
+                  padding: 0,
+                  marginBottom: '4px',
+                  '*': {
+                    border: 'none !important',
+                  },
+                  button: {
+                    marginBottom: 0,
+                    marginTop: 0,
+                  },
+                }}
+              />
+            );
+          };
+        }
+      },
     });
 
     return {
@@ -120,122 +184,159 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       Component: () => {
         // get state for rendering
         const content = useStateFromPublishingSubject(markdownStateManager.api.content$);
+        const [value, onChange] = React.useState(content ?? '');
         const viewMode = useStateFromPublishingSubject(
           getViewModeSubject(api) ?? new BehaviorSubject('view')
         );
         const isEditing = useStateFromPublishingSubject(isEditing$);
-        console.log('isEditing', isEditing);
+        const isPreview = useStateFromPublishingSubject(isPreview$);
+        
         const excludingPlugins = Array<'lineBreaks' | 'linkValidator' | 'tooltip'>();
 
         const { euiTheme } = useEuiTheme();
-        const { parsingPlugins, processingPlugins, uiPlugins } = getDefaultEuiMarkdownPlugins({
+        const { processingPlugins } = getDefaultEuiMarkdownPlugins({
           exclude: excludingPlugins,
         });
         // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
         processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
-        processingPlugins[1][1].components.img = (props) => <img {...props} style={{maxWidth: '100%'}}/>
 
-        console.log('CHECK', processingPlugins[1][1].components);
+        const onCancel = () => {
+          isEditing$.next(false);
+          isPreview$.next(false);
+          parentApi.focusedPanelId$.next();
+        };
 
-        // const markdownRef = React.useRef(null);
+        const onSave = () => {
+          markdownStateManager.api.setContent(value);
+          isEditing$.next(false);
+          isPreview$.next(false);
+          parentApi.focusedPanelId$.next();
+        };
 
-        const [value, onChange] = React.useState(content ?? '');
+        const markdownStyles = {
+          formatContainer: css({
+            padding: euiTheme.size.base,
+            overflow: 'scroll',
+            width: '100%',
+            img: {
+              maxInlineSize: '100%',
+            }
+          })
+        }
 
-        //  className="embPanel__hoverActions"
+        const styles = useMemoCss(markdownStyles);
 
-        return viewMode === 'edit' && isEditing$.getValue() ? (
-          <div css={css({width: '100%'})}>
+        if (viewMode === 'view' || !isEditing) {
+          return (
+            <div
+            css={styles.formatContainer}
+          >
+            <EuiMarkdownFormat
+              processingPluginList={processingPlugins}
+            >
+              {content ?? ''}
+            </EuiMarkdownFormat>
+            </div>
+          );
+        }
+
+        return !isPreview ? (
+          <div css={css({ width: '100%' })}>
             <EuiMarkdownEditor
-              // ref={markdownRef}
-              css={css`
-                width: 100%;
-                block-size: calc(100% - 40px);
-                [data-test-subj='markdown_editor_preview_button'] {
-                  display: none;
-                };
-                .euiMarkdownEditorFooter {
-                  display: none;
-                };
-              `}
+              css={editorStyles}
               toolbarProps={{
-                right: <div>TODO</div>
+                right: <div>TODO</div>,
               }}
               value={value}
               onChange={(v) => onChange(v)}
-              aria-label={i18n.translate(
-                'embeddableExamples.euiMarkdownEditor.embeddableAriaLabel',
-                {
-                  defaultMessage: 'Dashboard markdown editor',
-                }
-              )}
+              aria-label={dashboardMarkdownEditorAriaLabel}
               processingPluginList={processingPlugins}
               height="full"
-              uiPlugins={uiPlugins}
               showFooter="false"
             />
-
-            <EuiFlexGroup
-              responsive={false}
-              gutterSize="xs"
-              justifyContent='flexEnd'
-              css={css`
-                padding: 8px;
-                border-radius-bottom: 8px;
-                width: 100%;
-                border-top: ${euiTheme.colors.borderBasePlain} 1px solid;
-              `}
-            >
-               <EuiFlexItem grow={false}>
-             
-                  <EuiButtonEmpty
-                    color="primary"
-                    // display="base"
-                    size="xs"
-                    // iconSize="m"
-                    // iconType={'cross'}
-                    aria-label="Discard"
-                    onClick={() => {
-                      // markdownStateManager.api.setContent(value);
-                      isEditing$.next(false);
-                      parentApi.focusedPanelId$.next();
-                    }}
-                  >Discard
-                  </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem  grow={false}>
-             
-                  <EuiButton
-                  size="xs"
-                    iconType={'check'}
-                    color="primary"
-                    display="fill"
-                    fill
-                    aria-label="Apply"
-                    onClick={() => {
-                      markdownStateManager.api.setContent(value);
-                      isEditing$.next(false);
-                      parentApi.focusedPanelId$.next();
-                    }}
-                  >Apply
-                  </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EditingFooter onCancel={onCancel} onSave={onSave} />
           </div>
         ) : (
-          <EuiMarkdownFormat
+          <div
             css={css`
-              padding: ${euiTheme.size.m};
+              width: 100%;
               overflow: scroll;
-              img {
-                max-inline-size: 100%;
-              }
             `}
           >
-            {content ?? ''}
-          </EuiMarkdownFormat>
+            <EuiMarkdownFormat
+              processingPluginList={processingPlugins}
+              css={css`
+                padding: ${euiTheme.size.base};
+                img {
+                  max-inline-size: 100%;
+                }
+              `}
+            >
+              {value ?? content ?? ''}
+            </EuiMarkdownFormat>
+            <EditingFooter
+              onCancel={onCancel}
+              onSave={onSave}
+              isPreview
+            />
+          </div>
         );
       },
     };
   },
+};
+
+const footerStyles = {
+  footer: ({euiTheme}: UseEuiTheme) => css`
+  padding: 8px;
+  border-radius-bottom: 8px;
+  width: 100%;
+  border-top: ${euiTheme.colors.borderBasePlain} 1px solid;
+
+ 
+  position: absolute;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+`,
+previewFooter: ({euiTheme}: UseEuiTheme) => css`
+   opacity: 0;
+   ${euiCanAnimate} {
+    transition: opacity ${euiTheme.animation.slow} ease-in;
+  }
+  .dshDashboardGrid__item:hover & {
+    opacity: 1;
+  }
+`,
+}
+
+const EditingFooter = ({ onCancel, onSave, isPreview }: { onCancel: () => void; onSave: () => void, isPreview?: boolean }) => {
+  const styles = useMemoCss(footerStyles);
+  return (
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="xs"
+      justifyContent="flexEnd"
+      css={[styles.footer, isPreview && styles.previewFooter]}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty color="primary" size="xs" aria-label="Discard" onClick={onCancel}>
+          Discard
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="xs"
+          iconType={'check'}
+          color="primary"
+          display="fill"
+          fill
+          aria-label="Apply"
+          onClick={onSave}
+        >
+          Apply
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };

@@ -53,6 +53,7 @@ import {
 import { AnyApiAction } from '../../panel_actions/types';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { useHoverActionStyles } from './use_hover_actions_styles';
+import { PresentationPanelEditActions } from './presentation_panel_edit_actions';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -109,7 +110,22 @@ const createClickHandler =
     action.execute(context);
   };
 
-export const PresentationPanelHoverActions = ({
+  export const PresentationPanelHoverActions = (props) => {
+    console.log('TODO: make this update when focusedPanelId is a panel')
+    const [focusedPanelId] = useBatchedOptionalPublishingSubjects(props.api?.parentApi?.focusedPanelId$)
+
+    const CustomComponent = props.api?.OverridenHoverActionsComponent?.()
+  
+    if (CustomComponent){
+      console.log('PresentationPanelEditActions')
+      return  <PresentationPanelEditActions focusedPanelId={focusedPanelId} {...props} overridenHoverActions={<CustomComponent/>}/>
+    }
+    return (
+    <InnerPresentationPanelHoverActions {...props} />
+  )
+}
+
+export const InnerPresentationPanelHoverActions = ({
   api,
   index,
   getActions,
@@ -140,6 +156,7 @@ export const PresentationPanelHoverActions = ({
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
+  console.log('bla')
 
   const [defaultTitle, title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
     useBatchedOptionalPublishingSubjects(
