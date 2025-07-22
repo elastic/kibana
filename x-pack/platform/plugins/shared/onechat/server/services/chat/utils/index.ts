@@ -7,3 +7,4 @@
 
 export { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 export { generateConversationTitle } from './generate_title';
+export { handleCancellation } from './handle_cancellation';

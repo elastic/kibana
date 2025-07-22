@@ -43,6 +43,7 @@ import {
   createConversationCreatedEvent,
   createConversationUpdatedEvent,
   generateConversationTitle,
+  handleCancellation,
 } from './utils';
 
 interface ChatServiceOptions {
@@ -80,6 +81,11 @@ export interface ChatConverseParams {
    * If empty, will create a new conversation instead.
    */
   conversationId?: string;
+  /**
+   * Optional abort signal to handle cancellation.
+   * Canceled rounds will not be persisted.
+   */
+  abortSignal?: AbortSignal;
   /**
    * Next user input to start the round.
    */
@@ -121,6 +127,7 @@ class ChatServiceImpl implements ChatService {
     conversationId,
     connectorId,
     request,
+    abortSignal,
     nextInput,
   }: ChatConverseParams): Observable<ChatEvent> {
     const isNewConversation = !conversationId;
@@ -165,6 +172,7 @@ class ChatServiceImpl implements ChatService {
             mode,
             conversation$,
             nextInput,
+            abortSignal,
             agentService: this.agentService,
           });
 
@@ -193,6 +201,7 @@ class ChatServiceImpl implements ChatService {
               });
 
           return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
+            handleCancellation(abortSignal),
             catchError((err) => {
               this.logger.error(`Error executing agent: ${err.stack}`);
               return throwError(() => {
@@ -311,6 +320,7 @@ const getExecutionEvents$ = ({
   conversation$,
   mode,
   nextInput,
+  abortSignal,
 }: {
   agentId: string;
   request: KibanaRequest;
@@ -318,6 +328,7 @@ const getExecutionEvents$ = ({
   conversation$: Observable<Conversation>;
   mode: AgentMode;
   nextInput: RoundInput;
+  abortSignal?: AbortSignal;
 }): Observable<ChatAgentEvent> => {
   return conversation$.pipe(
     switchMap((conversation) => {
@@ -326,6 +337,7 @@ const getExecutionEvents$ = ({
           .execute({
             request,
             agentId,
+            abortSignal,
             agentParams: {
               agentMode: mode,
               nextInput,

@@ -16,6 +16,7 @@ export enum OnechatErrorCode {
   toolNotFound = 'toolNotFound',
   agentNotFound = 'agentNotFound',
   conversationNotFound = 'conversationNotFound',
+  requestAborted = 'requestAborted',
 }
 
 const OnechatError = ServerSentEventError;
@@ -163,6 +164,29 @@ export const createConversationNotFoundError = ({
     { ...meta, conversationId, statusCode: 404 }
   );
 };
+
+////
+
+/**
+ * Represents an internal error
+ */
+export type OnechatRequestAbortedError = OnechatError<OnechatErrorCode.requestAborted>;
+
+/**
+ * Checks if the given error is a {@link OnechatRequestAbortedError}
+ */
+export const isRequestAbortedError = (err: unknown): err is OnechatRequestAbortedError => {
+  return isOnechatError(err) && err.code === OnechatErrorCode.requestAborted;
+};
+
+export const createRequestAbortedError = (
+  message: string,
+  meta?: Record<string, any>
+): OnechatRequestAbortedError => {
+  return new OnechatError(OnechatErrorCode.requestAborted, message, meta ?? {});
+};
+
+////
 
 /**
  * Global utility exposing all error utilities from a single export.
