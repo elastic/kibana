@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import type { EuiContextMenuItemProps } from '@elastic/eui';
+import type { MouseEventHandler } from 'react';
 import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { NavigateToAppOptions } from '@kbn/core/public';
@@ -60,6 +61,7 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     textTruncate,
     hoverInfo,
     children,
+    href,
     isNavigationDisabled = false,
     ...otherMenuItemProps
   }) => {
@@ -81,6 +83,21 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
         <StyledEuiFlexItem className={cssClassNames}>{hoverInfo}</StyledEuiFlexItem>
       ) : null;
     }, [hoverInfo]);
+
+    const handleItemClick = useCallback<MouseEventHandler>(
+      (ev) => {
+        if (isNavigationDisabled) {
+          return;
+        }
+
+        if (navigateAppId) {
+          handleOnClickViaNavigateToApp(ev);
+        } else if (onClick) {
+          onClick(ev);
+        }
+      },
+      [handleOnClickViaNavigateToApp, isNavigationDisabled, navigateAppId, onClick]
+    );
 
     const content = textTruncate ? (
       <>
@@ -106,10 +123,8 @@ export const ContextMenuItemNavByRouter = memo<ContextMenuItemNavByRouterProps>(
     return (
       <StyledEuiContextMenuItem
         {...otherMenuItemProps}
-        onClick={
-          isNavigationDisabled ? undefined : navigateAppId ? handleOnClickViaNavigateToApp : onClick
-        }
-        {...(isNavigationDisabled ? { href: '' } : {})}
+        onClick={handleItemClick}
+        href={isNavigationDisabled ? href : undefined}
       >
         <EuiFlexGroup alignItems="center" gutterSize="none">
           {content}
