@@ -19,10 +19,10 @@ export const ActivePrivilegedUsersTile: React.FC<{
   return (
     <KeyInsightsTile
       title={i18n.translate('xpack.securitySolution.privmon.activePrivilegedUsers.title', {
-        defaultMessage: 'Active Privileged Users',
+        defaultMessage: 'Active privileged users',
       })}
       label={i18n.translate('xpack.securitySolution.privmon.activePrivilegedUsers.label', {
-        defaultMessage: 'Active Privileged Users',
+        defaultMessage: 'Active privileged users',
       })}
       getEsqlQuery={(namespace: string) =>
         getActivePrivilegedUsersEsqlCount(namespace, sourcerDataView)
