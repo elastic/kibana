@@ -47,7 +47,7 @@ const apmAgentVariablesMap: Record<string, Variables> = {
   js: rumVariables,
 };
 
-interface LineNumbers {
+export interface LineNumbers {
   [key: string]: string | number | object;
 }
 

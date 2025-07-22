@@ -6,17 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  copyToClipboard,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { OpenTelemetryInstructions } from './opentelemetry_instructions';
 import {
   getApmAgentCommands,
@@ -25,6 +15,7 @@ import {
   getApmAgentHighlightLang,
 } from './commands/get_apm_agent_commands';
 import { AgentConfigurationTable } from './agent_config_table';
+import { CommandsInstructionsCodeblock } from './commands_instructions_codeblock';
 
 const SECRET_TOKEN_COMMAND_PLACEHOLDER = '<SECRET_TOKEN>';
 
@@ -81,52 +72,13 @@ export function AgentConfigInstructions({
         data={{ apmServerUrl, secretToken, ...defaultValues }}
       />
       <EuiSpacer />
-      <EuiCallOut
-        title={i18n.translate('xpack.apm.onboarding.agentConfigInstructions.callout.title', {
-          defaultMessage: `The command below doesn't show secrets values`,
-        })}
-        color="warning"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate('xpack.apm.onboarding.agentConfigInstructions.callout.body', {
-            defaultMessage: 'Copy to clipboard to get the full command with secrets',
-          })}
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="s" />
-      <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
-        <EuiFlexGroup direction="row">
-          <EuiFlexItem>
-            <EuiCodeBlock
-              copyAriaLabel={i18n.translate(
-                'xpack.apm.tutorial.apmAgents.agentConfigurationInstructions.copyAriaLabel',
-                {
-                  defaultMessage: 'Copy {variantId} agent configuration code',
-                  values: { variantId },
-                }
-              )}
-              language={highlightLang || 'bash'}
-              data-test-subj="commands"
-              lineNumbers={lineNumbers}
-            >
-              {commands}
-            </EuiCodeBlock>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="apmAgentConfigInstructionsButton"
-              aria-label={i18n.translate('xpack.apm.agentConfigInstructions.button.ariaLabel', {
-                defaultMessage: 'Copy commands',
-              })}
-              iconType="copyClipboard"
-              onClick={() => {
-                copyToClipboard(commandsWithSecrets);
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <CommandsInstructionsCodeblock
+        variantId={variantId}
+        lineNumbers={lineNumbers}
+        highlightLang={highlightLang}
+        commands={commands}
+        commandsWithSecrets={commandsWithSecrets}
+      />
     </>
   );
 }
