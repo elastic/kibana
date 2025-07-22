@@ -21,6 +21,7 @@ export interface UseBasicDataFromDetailsDataResult {
   ruleDescription: string;
   ruleId: string;
   ruleName: string;
+  ruleRuleId: string;
   timestamp: string;
   userName: string;
 }
@@ -77,6 +78,11 @@ export const useBasicDataFromDetailsData = (
     [data]
   );
 
+  const ruleRuleId = useMemo(
+    () => getAlertDetailsFieldValue({ category: 'signal', field: 'signal.rule.rule_id' }, data),
+    [data]
+  );
+
   const timestamp = useMemo(
     () => getAlertDetailsFieldValue({ category: 'base', field: '@timestamp' }, data),
     [data]
@@ -99,6 +105,7 @@ export const useBasicDataFromDetailsData = (
       ruleDescription,
       ruleId,
       ruleName,
+      ruleRuleId,
       timestamp,
       userName,
     }),
@@ -113,6 +120,7 @@ export const useBasicDataFromDetailsData = (
       ruleDescription,
       ruleId,
       ruleName,
+      ruleRuleId,
       timestamp,
       userName,
     ]
