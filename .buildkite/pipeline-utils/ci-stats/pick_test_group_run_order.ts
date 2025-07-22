@@ -590,7 +590,6 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     [
       {
         group: 'Scout Configs',
-        key: 'scout-configs',
         depends_on: ['build'],
         steps: scoutGroups.map(
           ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
