@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Ingest pipelines', () => {
     loadTestFile(require.resolve('./databases'));
     loadTestFile(require.resolve('./parse_csv'));
+    loadTestFile(require.resolve('./structure_tree'));
   });
 }

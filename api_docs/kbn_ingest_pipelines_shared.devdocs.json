@@ -57,9 +57,94 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ingest-pipelines-shared",
+        "id": "def-common.PipelineTreeNode",
+        "type": "Interface",
+        "tags": [],
+        "label": "PipelineTreeNode",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineTreeNode.pipelineName",
+            "type": "string",
+            "tags": [],
+            "label": "pipelineName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineTreeNode.isManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isManaged",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineTreeNode.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ingest-pipelines-shared",
+            "id": "def-common.PipelineTreeNode.children",
+            "type": "Array",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ingest-pipelines-shared",
+                "scope": "common",
+                "docId": "kibKbnIngestPipelinesSharedPluginApi",
+                "section": "def-common.PipelineTreeNode",
+                "text": "PipelineTreeNode"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ingest-pipelines-shared",
+        "id": "def-common.MAX_TREE_LEVEL",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_TREE_LEVEL",
+        "description": [],
+        "signature": [
+          "5"
+        ],
+        "path": "x-pack/platform/packages/shared/ingest-pipelines/src/components/pipeline_structure_tree/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
