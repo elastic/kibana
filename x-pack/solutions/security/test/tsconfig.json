@@ -48,6 +48,5 @@
     "@kbn/core-saved-objects-server",
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
-    "@kbn/test-suites-xpack/security_solution_api_integration",
   ]
 }
