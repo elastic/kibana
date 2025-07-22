@@ -20,9 +20,6 @@ import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/functio
 import { CanvasElementProvider } from '@kbn/test-suites-xpack-platform/functional/services/canvas_element';
 import { TransformProvider } from '@kbn/test-suites-xpack-platform/functional/services/transform';
 import { ReportingFunctionalProvider } from '@kbn/test-suites-xpack-platform/reporting_functional/services';
-import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
-import { services as commonServices } from '../../common/services';
-
 import {
   MonitoringNoDataProvider,
   MonitoringClusterListProvider,
@@ -54,7 +51,10 @@ import {
   MonitoringEnterpriseSearchOverviewProvider,
   MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
-} from './monitoring';
+} from '@kbn/test-suites-xpack-platform/functional/services/monitoring';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
+import { services as commonServices } from '../../common/services';
+
 // @ts-ignore not ts yet
 import { PipelineListProvider } from './pipeline_list';
 // @ts-ignore not ts yet

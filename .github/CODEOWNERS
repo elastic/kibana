@@ -1513,8 +1513,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/monitoring_api_integration @elastic/stack-monitoring
 /x-pack/platform/test/functional/page_objects/monitoring_page.ts @elastic/stack-monitoring
 /x-pack/test/functional/es_archives/monitoring @elastic/stack-monitoring
-/x-pack/test/functional/services/monitoring @elastic/stack-monitoring
-/x-pack/test/functional/apps/monitoring @elastic/stack-monitoring
+/x-pack/platform/test/functional/services/monitoring @elastic/stack-monitoring
+/x-pack/platform/test/functional/apps/monitoring @elastic/stack-monitoring
 /x-pack/platform/test/api_integration/apis/monitoring @elastic/stack-monitoring
 /x-pack/platform/test/api_integration/apis/monitoring_collection @elastic/stack-monitoring
 /x-pack/test/accessibility/apps/group1/kibana_overview.ts @elastic/stack-monitoring
