@@ -7,7 +7,7 @@
 
 import { DataTableRecord } from '@kbn/discover-utils';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { EuiLoadingSpinner, EuiLink, EuiIcon, EuiText, EuiFlexGroup } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiLink, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';

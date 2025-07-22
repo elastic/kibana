@@ -6,8 +6,6 @@
  */
 
 import { StreamsAppLocatorDefinition } from './streams_locator';
-import { ENRICHMENT_URL_STATE_KEY, EnrichmentUrlState } from '../url_schema';
-import { StreamsAppLocatorParams } from '@kbn/deeplinks-observability';
 
 describe('StreamsAppLocatorDefinition', () => {
   let locator: StreamsAppLocatorDefinition;
