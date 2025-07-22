@@ -98,17 +98,14 @@ describe('SavedObjects Internal Client Integration', () => {
         description: 'Created by internal client',
       };
 
-      // Create
       const created = await internalClient.create(type, attributes, { id });
       expect(created.id).toBe(id);
       expect(created.attributes).toEqual(attributes);
 
-      // Read
       const retrieved = await internalClient.get(type, id);
       expect(retrieved.id).toBe(id);
       expect(retrieved.attributes).toEqual(attributes);
 
-      // Update
       const updatedAttributes = {
         title: 'Updated Title',
         description: 'Updated by internal client',
@@ -116,10 +113,8 @@ describe('SavedObjects Internal Client Integration', () => {
       const updated = await internalClient.update(type, id, updatedAttributes);
       expect(updated.attributes).toMatchObject(updatedAttributes);
 
-      // Delete
       await internalClient.delete(type, id);
 
-      // Verify deletion
       await expect(internalClient.get(type, id)).rejects.toThrow();
     });
 
@@ -134,7 +129,6 @@ describe('SavedObjects Internal Client Integration', () => {
       expect(created.id).toBeDefined();
       expect(created.attributes).toEqual(attributes);
 
-      // Clean up
       await internalClient.delete(type, created.id);
     });
 
@@ -143,11 +137,9 @@ describe('SavedObjects Internal Client Integration', () => {
       const attributes1 = { title: 'Find Test 1', description: 'First object' };
       const attributes2 = { title: 'Find Test 2', description: 'Second object' };
 
-      // Create test objects
       const obj1 = await internalClient.create(type, attributes1);
       const obj2 = await internalClient.create(type, attributes2);
 
-      // Find objects
       const findResult = await internalClient.find({
         type,
         search: 'Find Test',
@@ -159,7 +151,6 @@ describe('SavedObjects Internal Client Integration', () => {
       expect(foundIds).toContain(obj1.id);
       expect(foundIds).toContain(obj2.id);
 
-      // Clean up
       await internalClient.delete(type, obj1.id);
       await internalClient.delete(type, obj2.id);
     });
@@ -170,13 +161,10 @@ describe('SavedObjects Internal Client Integration', () => {
 
       const created = await internalClient.create(type, attributes);
 
-      // Update should work without user context
       const updatedAttributes = { description: 'Updated without user context' };
       const updated = await internalClient.update(type, created.id, updatedAttributes);
 
       expect(updated.attributes.description).toBe('Updated without user context');
-
-      // Clean up
       await internalClient.delete(type, created.id);
     });
 
@@ -186,10 +174,8 @@ describe('SavedObjects Internal Client Integration', () => {
 
       const created = await internalClient.create(type, attributes);
 
-      // Delete should work with internal access
       await expect(internalClient.delete(type, created.id)).resolves.not.toThrow();
 
-      // Verify object is deleted
       await expect(internalClient.get(type, created.id)).rejects.toThrow();
     });
   });
@@ -202,7 +188,6 @@ describe('SavedObjects Internal Client Integration', () => {
         internal_data: 'system internal information',
       };
 
-      // Create internal client with hidden types access
       const clientWithHiddenTypes = start.savedObjects.getInternalClient({
         includedHiddenTypes: [hiddenType],
       });
@@ -210,11 +195,9 @@ describe('SavedObjects Internal Client Integration', () => {
       const created = await clientWithHiddenTypes.create(hiddenType, attributes);
       expect(created.attributes).toEqual(attributes);
 
-      // Verify we can retrieve the hidden object
       const retrieved = await clientWithHiddenTypes.get(hiddenType, created.id);
       expect(retrieved.attributes).toEqual(attributes);
 
-      // Clean up
       await clientWithHiddenTypes.delete(hiddenType, created.id);
     });
 
@@ -222,7 +205,6 @@ describe('SavedObjects Internal Client Integration', () => {
       const hiddenType = 'test_hidden_type';
       const attributes = { secret: 'should not be accessible' };
 
-      // Try to create hidden type without including it
       await expect(internalClient.create(hiddenType, attributes)).rejects.toThrow();
     });
 
@@ -235,7 +217,6 @@ describe('SavedObjects Internal Client Integration', () => {
       const hiddenAttrs = { secret: 'hidden data', internal_data: 'internal' };
       const restrictedAttrs = { restricted_field: 'restricted data' };
 
-      // Create objects of both hidden types
       const hiddenObj = await clientWithMultipleHidden.create('test_hidden_type', hiddenAttrs);
       const restrictedObj = await clientWithMultipleHidden.create(
         'test_restricted_type',
@@ -245,7 +226,6 @@ describe('SavedObjects Internal Client Integration', () => {
       expect(hiddenObj.attributes).toEqual(hiddenAttrs);
       expect(restrictedObj.attributes).toEqual(restrictedAttrs);
 
-      // Clean up
       await clientWithMultipleHidden.delete('test_hidden_type', hiddenObj.id);
       await clientWithMultipleHidden.delete('test_restricted_type', restrictedObj.id);
     });
@@ -253,20 +233,16 @@ describe('SavedObjects Internal Client Integration', () => {
 
   describe('Extension Functionality', () => {
     it('excludes security extension automatically', async () => {
-      // The internal client should work without any security context
       const type = 'test_public_type';
       const attributes = { title: 'Security Test', description: 'No security filtering' };
 
-      // This should work without security extension
       const created = await internalClient.create(type, attributes);
       expect(created.id).toBeDefined();
 
-      // Clean up
       await internalClient.delete(type, created.id);
     });
 
     it('respects custom extension exclusions', async () => {
-      // Test that we can exclude specific extensions
       const clientWithExclusions = start.savedObjects.getInternalClient({
         excludedExtensions: ['customExtension'],
       });
@@ -277,12 +253,10 @@ describe('SavedObjects Internal Client Integration', () => {
       const created = await clientWithExclusions.create(type, attributes);
       expect(created.id).toBeDefined();
 
-      // Clean up
       await clientWithExclusions.delete(type, created.id);
     });
 
     it('handles extension factories gracefully when undefined', async () => {
-      // Test that client works even when extension factories are not available
       const type = 'test_public_type';
       const attributes = {
         title: 'No Extensions Test',
@@ -292,20 +266,17 @@ describe('SavedObjects Internal Client Integration', () => {
       const created = await internalClient.create(type, attributes);
       expect(created.id).toBeDefined();
 
-      // Clean up
       await internalClient.delete(type, created.id);
     });
   });
 
   describe('Security Validation', () => {
     it('bypasses user-based security filtering', async () => {
-      // Internal client should bypass any user-based security
       const type = 'test_public_type';
       const attributes = { title: 'Security Bypass Test', description: 'Should bypass security' };
 
       const created = await internalClient.create(type, attributes);
 
-      // Should be able to find without security restrictions
       const findResult = await internalClient.find({
         type,
         search: 'Security Bypass Test',
@@ -315,7 +286,6 @@ describe('SavedObjects Internal Client Integration', () => {
       const found = findResult.saved_objects.find((obj) => obj.id === created.id);
       expect(found).toBeDefined();
 
-      // Clean up
       await internalClient.delete(type, created.id);
     });
 
@@ -327,15 +297,12 @@ describe('SavedObjects Internal Client Integration', () => {
         includedHiddenTypes: [restrictedType],
       });
 
-      // Should be able to create restricted objects with internal client
       const created = await clientWithRestricted.create(restrictedType, attributes);
       expect(created.attributes).toEqual(attributes);
 
-      // Should be able to access without restrictions
       const retrieved = await clientWithRestricted.get(restrictedType, created.id);
       expect(retrieved.attributes).toEqual(attributes);
 
-      // Clean up
       await clientWithRestricted.delete(restrictedType, created.id);
     });
 
@@ -343,7 +310,6 @@ describe('SavedObjects Internal Client Integration', () => {
       const type = 'test_public_type';
       const attributes = { title: 'System Privileges Test', description: 'System level operation' };
 
-      // Create, update, and delete should all work with system privileges
       const created = await internalClient.create(type, attributes);
 
       const updated = await internalClient.update(type, created.id, {
@@ -351,7 +317,6 @@ describe('SavedObjects Internal Client Integration', () => {
       });
       expect(updated.attributes.description).toBe('Updated with system privileges');
 
-      // System should be able to delete any object it created
       await expect(internalClient.delete(type, created.id)).resolves.not.toThrow();
     });
   });
@@ -366,7 +331,6 @@ describe('SavedObjects Internal Client Integration', () => {
     });
 
     it('handles invalid parameters gracefully', async () => {
-      // Test with invalid options
       const clientWithInvalidOptions = start.savedObjects.getInternalClient({
         includedHiddenTypes: null as any,
         excludedExtensions: undefined as any,
@@ -375,11 +339,9 @@ describe('SavedObjects Internal Client Integration', () => {
       const type = 'test_public_type';
       const attributes = { title: 'Invalid Options Test', description: 'Should still work' };
 
-      // Should still work despite invalid options
       const created = await clientWithInvalidOptions.create(type, attributes);
       expect(created.id).toBeDefined();
 
-      // Clean up
       await clientWithInvalidOptions.delete(type, created.id);
     });
 
@@ -390,20 +352,17 @@ describe('SavedObjects Internal Client Integration', () => {
         description: 'Testing operation consistency',
       };
 
-      // Create multiple objects and ensure consistency
       const objects = await Promise.all([
         internalClient.create(type, { ...attributes, title: 'Consistency Test 1' }),
         internalClient.create(type, { ...attributes, title: 'Consistency Test 2' }),
         internalClient.create(type, { ...attributes, title: 'Consistency Test 3' }),
       ]);
 
-      // All should be created successfully
       expect(objects).toHaveLength(3);
       objects.forEach((obj) => {
         expect(obj.id).toBeDefined();
       });
 
-      // Clean up all objects
       await Promise.all(objects.map((obj) => internalClient.delete(type, obj.id)));
     });
   });

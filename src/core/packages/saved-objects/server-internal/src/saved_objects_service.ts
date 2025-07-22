@@ -369,7 +369,6 @@ export class SavedObjectsService
     return {
       getScopedClient: clientProvider.getClient.bind(clientProvider),
       getInternalClient: ({ includedHiddenTypes, excludedExtensions = [] } = {}) => {
-        // Ensure arrays are properly handled
         const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
         const extensions = this.getInternalExtensions(safeExcludedExtensions);
         const repository = repositoryFactory.createInternalRepository(
