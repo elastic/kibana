@@ -61,28 +61,11 @@ export const SearchIndex: React.FC = () => {
 
   const { indexName } = useValues(IndexNameLogic);
 
-  /**
-   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
-   * This needs to be checked for any of the 3 registered search guideIds
-   * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
-   */
   const {
     config,
-    guidedOnboarding,
     productFeatures: { hasDefaultIngestPipeline },
     updateSideNavDefinition,
   } = useValues(KibanaLogic);
-
-  useEffect(() => {
-    const subscription = guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$('databaseSearch', 'add_data')
-      .subscribe((isStepActive) => {
-        if (isStepActive && index?.count) {
-          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
-        }
-      });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboarding, index?.count]);
 
   useEffect(() => {
     return () => {

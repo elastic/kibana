@@ -42,7 +42,7 @@ export function openCustomizePanelFlyout({
     },
     flyoutProps: {
       'data-test-subj': 'customizePanel',
+      focusedPanelId: apiHasUniqueId(api) ? api.uuid : undefined,
     },
-    uuid: apiHasUniqueId(api) ? api.uuid : undefined,
   });
 }
