@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { Toolbar } from '.';
-import * as i18n from '../translations';
+import { SELECTED_FIELDS } from '../../context_editor/translations';
 
 const selected = ['event.action', 'event.category', 'user.name'];
 
@@ -32,7 +32,7 @@ describe('Toolbar', () => {
     const { getByText } = render(<Toolbar {...defaultProps} selectedFields={selected} />);
 
     const selectedCount = selected.length;
-    const selectedFieldsText = getByText(i18n.SELECTED_FIELDS(selectedCount));
+    const selectedFieldsText = getByText(SELECTED_FIELDS(selectedCount));
 
     expect(selectedFieldsText).toBeInTheDocument();
   });
@@ -51,14 +51,5 @@ describe('Toolbar', () => {
     const bulkActionsButton = getByTestId('bulkActionsButton');
 
     expect(bulkActionsButton).not.toBeDisabled();
-  });
-
-  it('calls onSelectAll when the Select All Fields button is clicked', () => {
-    const { getByText } = render(<Toolbar {...defaultProps} />);
-    const selectAllButton = getByText(i18n.SELECT_ALL_FIELDS(defaultProps.totalFields));
-
-    fireEvent.click(selectAllButton);
-
-    expect(defaultProps.onSelectAll).toHaveBeenCalled();
   });
 });
