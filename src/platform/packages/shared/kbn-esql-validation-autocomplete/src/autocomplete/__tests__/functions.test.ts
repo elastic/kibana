@@ -208,91 +208,231 @@ describe('functions arg suggestions', () => {
     expect(nonConstantOnlySuggestions.every((s) => !isColumn(s))).toBe(false);
   });
 
-  it('filters aggregation functions based on basic license', async () => {
-    const { suggest } = await setup();
-    const callbacks = createCustomCallbackMocks();
-
-    const basicLicenseCallbacks = {
-      ...callbacks,
-      getLicense: jest.fn(async () =>
-        Promise.resolve({
-          hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
-        })
-      ),
-    };
-
-    const basicSuggestions = await suggest('FROM index | STATS agg = /', {
-      callbacks: basicLicenseCallbacks,
+  describe('license filtering', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.GROUPING,
+          name: 'platinum_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'keyword',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'keyword',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'text',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'keyword',
+            },
+          ],
+          locationsAvailable: [Location.STATS],
+          license: 'PLATINUM',
+        },
+        {
+          type: FunctionDefinitionTypes.AGG,
+          name: 'platinum_partial_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_point',
+                  optional: false,
+                },
+              ],
+              returnType: 'cartesian_shape',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_shape',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'cartesian_shape',
+            },
+          ],
+          locationsAvailable: [Location.STATS],
+        },
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'inner_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_point',
+                  optional: false,
+                },
+              ],
+              returnType: 'cartesian_point',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'keyword',
+                  optional: false,
+                },
+              ],
+              returnType: 'cartesian_point',
+            },
+          ],
+          locationsAvailable: [Location.STATS],
+        },
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'inner_platinum_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_point',
+                  optional: false,
+                },
+              ],
+              returnType: 'cartesian_shape',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_shape',
+                  optional: false,
+                },
+              ],
+              returnType: 'cartesian_shape',
+            },
+          ],
+          locationsAvailable: [Location.STATS],
+          license: 'PLATINUM',
+        },
+      ]);
     });
 
-    // Should include basic function but not platinum function
-    expect(basicSuggestions.some((s) => s.text.includes('CATEGORIZE'))).toBe(false);
-    expect(basicSuggestions.some((s) => s.text.includes('ST_EXTENT_AGG'))).toBe(true);
-  });
+    it('filters aggregation functions based on basic license', async () => {
+      const { suggest } = await setup();
+      const callbacks = createCustomCallbackMocks();
 
-  it('shows all aggregation functions with platinum license', async () => {
-    const { suggest } = await setup();
-    const callbacks = createCustomCallbackMocks();
+      const basicLicenseCallbacks = {
+        ...callbacks,
+        getLicense: jest.fn(async () =>
+          Promise.resolve({
+            hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
+          })
+        ),
+      };
 
-    const platinumLicenseCallbacks = {
-      ...callbacks,
-      getLicense: jest.fn(async () =>
-        Promise.resolve({
-          hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
-        })
-      ),
-    };
+      const basicSuggestions = await suggest('FROM index | STATS agg = /', {
+        callbacks: basicLicenseCallbacks,
+      });
 
-    const platinumSuggestions = await suggest('FROM index | STATS agg = /', {
-      callbacks: platinumLicenseCallbacks,
+      // Should include basic function but not platinum function
+      expect(basicSuggestions.some((s) => s.text.includes('PLATINUM_FUNCTION_MOCK'))).toBe(false);
+      expect(basicSuggestions.some((s) => s.text.includes('PLATINUM_PARTIAL_FUNCTION_MOCK'))).toBe(
+        true
+      );
     });
 
-    // Should include all functions
-    expect(platinumSuggestions.some((s) => s.text.includes('CATEGORIZE'))).toBe(true);
-    expect(platinumSuggestions.some((s) => s.text.includes('ST_EXTENT_AGG'))).toBe(true);
-  });
+    it('shows all aggregation functions with platinum license', async () => {
+      const { suggest } = await setup();
+      const callbacks = createCustomCallbackMocks();
 
-  it('filters scalar functions inside ST_EXTENT_AGG with basic license', async () => {
-    const { suggest } = await setup();
-    const callbacks = createCustomCallbackMocks();
+      const platinumLicenseCallbacks = {
+        ...callbacks,
+        getLicense: jest.fn(async () =>
+          Promise.resolve({
+            hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
+          })
+        ),
+      };
 
-    const basicLicenseCallbacks = {
-      ...callbacks,
-      getLicense: jest.fn(async () =>
-        Promise.resolve({
-          hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
-        })
-      ),
-    };
+      const platinumSuggestions = await suggest('FROM index | STATS agg = /', {
+        callbacks: platinumLicenseCallbacks,
+      });
 
-    const partialSuggestions = await suggest('FROM index | STATS agg = ST_EXTENT_AGG( /', {
-      callbacks: basicLicenseCallbacks,
+      // Should include all functions
+      expect(platinumSuggestions.some((s) => s.text.includes('PLATINUM_FUNCTION_MOCK'))).toBe(true);
+      expect(
+        platinumSuggestions.some((s) => s.text.includes('PLATINUM_PARTIAL_FUNCTION_MOCK'))
+      ).toBe(true);
     });
 
-    // Should include basic function but not platinum function
-    expect(partialSuggestions.some((s) => s.text.includes('TO_CARTESIANPOINT'))).toBe(true);
-    expect(partialSuggestions.some((s) => s.text.includes('TO_CARTESIANSHAPE'))).toBe(false);
-  });
+    it('filters scalar functions inside PLATINUM_PARTIAL_FUNCTION_MOCK with basic license', async () => {
+      const { suggest } = await setup();
+      const callbacks = createCustomCallbackMocks();
 
-  it('shows all scalar functions inside ST_EXTENT_AGG with platinum license', async () => {
-    const { suggest } = await setup();
-    const callbacks = createCustomCallbackMocks();
+      const basicLicenseCallbacks = {
+        ...callbacks,
+        getLicense: jest.fn(async () =>
+          Promise.resolve({
+            hasAtLeast: (license: string) => license.toLowerCase() !== 'platinum',
+          })
+        ),
+      };
 
-    const platinumLicenseCallbacks = {
-      ...callbacks,
-      getLicense: jest.fn(async () =>
-        Promise.resolve({
-          hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
-        })
-      ),
-    };
+      const partialSuggestions = await suggest(
+        'FROM index | STATS agg = PLATINUM_PARTIAL_FUNCTION_MOCK( /',
+        {
+          callbacks: basicLicenseCallbacks,
+        }
+      );
 
-    const partialPlatinumSuggestions = await suggest('FROM index | STATS agg = ST_EXTENT_AGG( /', {
-      callbacks: platinumLicenseCallbacks,
+      // Should include basic function but not platinum function
+      expect(partialSuggestions.some((s) => s.text.includes('INNER_FUNCTION_MOCK'))).toBe(true);
+      expect(partialSuggestions.some((s) => s.text.includes('INNER_PLATINUM_FUNCTION_MOCK'))).toBe(
+        false
+      );
     });
 
-    expect(partialPlatinumSuggestions.some((s) => s.text.includes('TO_CARTESIANPOINT'))).toBe(true);
-    expect(partialPlatinumSuggestions.some((s) => s.text.includes('TO_CARTESIANSHAPE'))).toBe(true);
+    it('shows all scalar functions inside PLATINUM_PARTIAL_FUNCTION_MOCK with platinum license', async () => {
+      const { suggest } = await setup();
+      const callbacks = createCustomCallbackMocks();
+
+      const platinumLicenseCallbacks = {
+        ...callbacks,
+        getLicense: jest.fn(async () =>
+          Promise.resolve({
+            hasAtLeast: (license: string) => license.toLowerCase() === 'platinum',
+          })
+        ),
+      };
+
+      const partialPlatinumSuggestions = await suggest(
+        'FROM index | STATS agg = PLATINUM_PARTIAL_FUNCTION_MOCK( /',
+        {
+          callbacks: platinumLicenseCallbacks,
+        }
+      );
+
+      expect(partialPlatinumSuggestions.some((s) => s.text.includes('INNER_FUNCTION_MOCK'))).toBe(
+        true
+      );
+      expect(
+        partialPlatinumSuggestions.some((s) => s.text.includes('INNER_PLATINUM_FUNCTION_MOCK'))
+      ).toBe(true);
+    });
   });
 
   it('treats text and keyword as interchangeable', async () => {
