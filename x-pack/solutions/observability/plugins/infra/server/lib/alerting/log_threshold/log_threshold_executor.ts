@@ -13,6 +13,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_GROUP,
+  ALERT_GROUPING,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -31,7 +32,13 @@ import type {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { getEcsGroups, getGroupByObject, type Group } from '@kbn/alerting-rule-utils';
+import {
+  getEcsGroups,
+  getFormattedGroups,
+  getGroupByObject,
+  unflattenGrouping,
+  type Group,
+} from '@kbn/alerting-rule-utils';
 import { unflattenObject } from '@kbn/object-utils';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
@@ -168,21 +175,28 @@ export const createLogThresholdExecutor =
             relativeViewInAppUrl
           );
 
+          const instances = alertInstanceId.split(',');
+          const flattenGrouping =
+            alertInstanceId !== '*'
+              ? params.groupBy?.reduce<Record<string, string>>(
+                  (resultGroups, groupByItem, index) => {
+                    resultGroups[groupByItem] = instances[index].trim();
+                    return resultGroups;
+                  },
+                  {}
+                )
+              : undefined;
+
+          const groups = getFormattedGroups(flattenGrouping);
+          const grouping = unflattenGrouping(flattenGrouping);
+
           const context = {
             ...actionContext,
             timestamp: startedAt.toISOString(),
             viewInAppUrl,
             alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
+            grouping,
           };
-
-          const instances = alertInstanceId.split(',');
-          const groups =
-            alertInstanceId !== '*'
-              ? params.groupBy?.reduce<Group[]>((resultGroups, groupByItem, index) => {
-                  resultGroups.push({ field: groupByItem, value: instances[index].trim() });
-                  return resultGroups;
-                }, [])
-              : undefined;
 
           const payload = {
             [ALERT_EVALUATION_THRESHOLD]: threshold,
@@ -192,6 +206,7 @@ export const createLogThresholdExecutor =
             [ALERT_GROUP]: groups,
             ...flattenAdditionalContext(rootLevelContext),
             ...getEcsGroups(groups),
+            [ALERT_GROUPING]: grouping,
           };
 
           alertsClient.setAlertData({
@@ -919,6 +934,7 @@ const processRecoveredAlerts = ({
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
       reason: alertHits?.[ALERT_REASON],
+      grouping: alertHits?.[ALERT_GROUPING],
       ...additionalContext,
     };
 

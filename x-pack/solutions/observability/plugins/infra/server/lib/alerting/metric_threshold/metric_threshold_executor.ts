@@ -10,6 +10,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
+  ALERT_GROUPING,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { castArray, isEqual } from 'lodash';
@@ -29,6 +30,7 @@ import {
   getEcsGroups,
   getFormattedGroupBy,
   getGroupByObject,
+  unflattenGrouping,
   type Group,
 } from '@kbn/alerting-rule-utils';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
@@ -102,16 +104,14 @@ type MetricThresholdAlertReporter = (params: {
   additionalContext?: AdditionalContext | null;
   evaluationValues?: Array<number | null>;
   groups?: Group[];
+  grouping?: Record<string, any>;
   thresholds?: Array<number | null>;
 }) => void;
 
 // TODO: Refactor the executor code to have better flow-control with better
 // reasoning of different state/conditions for improved maintainability
 export const createMetricThresholdExecutor =
-  (
-    libs: InfraBackendLibs,
-    { alertsLocator, assetDetailsLocator, metricsExplorerLocator }: InfraLocators
-  ) =>
+  (libs: InfraBackendLibs, { assetDetailsLocator, metricsExplorerLocator }: InfraLocators) =>
   async (
     options: RuleExecutorOptions<
       MetricThresholdRuleParams,
@@ -158,6 +158,7 @@ export const createMetricThresholdExecutor =
       evaluationValues,
       groups,
       thresholds,
+      grouping,
     }) => {
       const { uuid } = alertsClient.report({
         id,
@@ -173,10 +174,11 @@ export const createMetricThresholdExecutor =
           [ALERT_GROUP]: groups,
           ...flattenAdditionalContext(additionalContext),
           ...getEcsGroups(groups),
+          [ALERT_GROUPING]: grouping,
         },
         context: {
           ...contextWithoutAlertDetailsUrl,
-          alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, uuid),
+          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
         },
       });
     };
@@ -215,7 +217,7 @@ export const createMetricThresholdExecutor =
           }),
         };
 
-        await alertReporter({
+        alertReporter({
           id: UNGROUPED_FACTORY_KEY,
           reason,
           actionGroup: actionGroupId,
@@ -374,10 +376,18 @@ export const createMetricThresholdExecutor =
         const evaluationValues = getEvaluationValues<Evaluation>(alertResults, group);
         const thresholds = getThresholds<any>(criteria);
         const groups: Group[] = groupByMapping[group];
+        const flattenGrouping = groups
+          ? groups.reduce((acc, { field, value }) => {
+              return { ...acc, [field]: value };
+            }, {} as Record<string, string>)
+          : undefined;
+
+        const grouping = unflattenGrouping(flattenGrouping);
 
         const alertContext = {
           alertState: stateToAlertMessage[nextState],
           group,
+          grouping,
           groupByKeys: groupByKeysObjectMapping[group],
           metric: mapToConditionsLookup(criteria, (c) => {
             if (c.aggType === 'count') {
@@ -425,7 +435,7 @@ export const createMetricThresholdExecutor =
           ...additionalContext,
         };
 
-        await alertReporter({
+        alertReporter({
           id: `${group}`,
           reason,
           actionGroup: actionGroupId,
@@ -434,6 +444,7 @@ export const createMetricThresholdExecutor =
           evaluationValues,
           groups,
           thresholds,
+          grouping,
         });
         scheduledActionsCount++;
       }
@@ -456,7 +467,7 @@ export const createMetricThresholdExecutor =
       const originalActionGroup = getOriginalActionGroup(alertHits);
 
       recoveredAlert.alert.setContext({
-        alertDetailsUrl: await getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+        alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertId,
         groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
@@ -476,6 +487,7 @@ export const createMetricThresholdExecutor =
           additionalContext,
         }),
         reason: alertHits?.[ALERT_REASON],
+        grouping: alertHits?.[ALERT_GROUPING],
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS.id,
