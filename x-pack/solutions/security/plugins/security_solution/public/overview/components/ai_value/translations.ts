@@ -113,3 +113,31 @@ export const TIME_SAVED = i18n.translate('xpack.securitySolution.aiValue.timeSav
 export const TIME_SAVED_DESC = i18n.translate('xpack.securitySolution.aiValue.timeSavedTitle', {
   defaultMessage: 'Time saved',
 });
+
+export const RESPONSE_TIME_TITLE = i18n.translate(
+  'xpack.securitySolution.aiValue.responseTimeTitle',
+  {
+    defaultMessage: 'Response time analysis',
+  }
+);
+
+export const RESPONSE_TIME_DESC = i18n.translate(
+  'xpack.securitySolution.aiValue.responseTimeDesc',
+  {
+    defaultMessage: 'Alert response times with AI assistance',
+  }
+);
+
+export const ALERT_PROCESSING_TITLE = i18n.translate(
+  'xpack.securitySolution.aiValue.alertProcessingTitle',
+  {
+    defaultMessage: 'Alert processing analytics',
+  }
+);
+
+export const ALERT_PROCESSING_DESC = i18n.translate(
+  'xpack.securitySolution.aiValue.alertProcessingDesc',
+  {
+    defaultMessage: 'AI alert handling breakdow ',
+  }
+);

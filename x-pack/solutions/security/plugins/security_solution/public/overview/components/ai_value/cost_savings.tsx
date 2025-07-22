@@ -59,13 +59,13 @@ export const CostSavings: React.FC<Props> = ({
     if (isMobile) {
       return {
         headerSize: '20px',
-        ringSize: '80px',
+        ringSize: '60px',
       };
     }
     if (isMedium) {
       return {
         headerSize: '26px',
-        ringSize: '100px',
+        ringSize: '80px',
       };
     }
     // large sizes

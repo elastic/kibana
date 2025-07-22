@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { AlertProcessing } from './alert_processing';
+import { ResponseTime } from './response_time';
 import { useValueMetrics } from './use_value_metrics';
 import { ThreatsDetected } from './threats_detected';
 import { FilteringRate } from './filtering_rate';
@@ -71,25 +73,8 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
       <EuiSpacer size="l" />
 
       <EuiFlexGrid columns={2} gutterSize="l" responsive={false}>
-        <EuiPanel paddingSize="l">
-          <EuiTitle size="s">
-            <h3>{'Response time analysis'}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          {/* Replace with your EuiChart component */}
-          {/* <ResponseTimeChart />*/}
-          <EuiText size="s">{'3.7m Avg AI response, 25.7m Avg traditional'}</EuiText>
-        </EuiPanel>
-
-        <EuiPanel paddingSize="l">
-          <EuiTitle size="s">
-            <h3>{'Alert processing analytics'}</h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          {/* Replace with EuiChart or pie chart */}
-          {/* <AlertProcessingPie />*/}
-          <EuiText size="s">{'Total alerts processed: 13,890'}</EuiText>
-        </EuiPanel>
+        <ResponseTime from={from} to={to} />
+        <AlertProcessing from={from} to={to} />
       </EuiFlexGrid>
 
       <EuiSpacer size="l" />

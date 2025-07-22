@@ -54,7 +54,6 @@ export const ThreatsDetected: React.FC<Props> = ({
       <EuiStat
         title={formatThousands(attackDiscoveryCount)}
         description={i18n.THREATS_DETECTED_DESC}
-        titleColor="accent"
       />
       <EuiSpacer size="s" />
       <ComparePercentage
