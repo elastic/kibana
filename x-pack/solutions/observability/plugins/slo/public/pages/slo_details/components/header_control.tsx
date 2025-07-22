@@ -37,7 +37,6 @@ export function HeaderControl({ slo }: Props) {
   const { services } = useKibana();
   const {
     observabilityShared,
-    notifications: { toasts },
     application: { navigateToUrl, capabilities },
     http: { basePath },
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
@@ -213,13 +212,6 @@ export function HeaderControl({ slo }: Props) {
       triggerAction({
         type: 'add_to_case',
         item: slo,
-        onConfirm: () => {
-          toasts.addSuccess(
-            i18n.translate('xpack.slo.sloDetails.headerControl.addedToCase', {
-              defaultMessage: 'SLO added to case successfully',
-            })
-          );
-        },
         onCancel: () => {
           setIsPopoverOpen(true);
         },

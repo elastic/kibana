@@ -47,10 +47,10 @@ function Content({ slo, onCancel, onConfirm }: Props) {
 
   const useCasesAddToExistingCaseModal = cases?.hooks?.useCasesAddToExistingCaseModal!;
   const casesModal = useCasesAddToExistingCaseModal({
-    onClose: (theCase) => {
+    onClose: (theCase, isCreateCase) => {
       if (theCase) {
         onConfirm();
-      } else {
+      } else if (!isCreateCase) {
         onCancel();
       }
     },
