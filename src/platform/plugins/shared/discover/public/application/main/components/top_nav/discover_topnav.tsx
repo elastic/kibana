@@ -217,7 +217,7 @@ export const DiscoverTopNav = ({
 
   const searchDraftUiState = useCurrentTabSelector((state) => state.uiState.searchDraft);
   const setSearchDraftUiState = useCurrentTabAction(internalStateActions.setSearchDraftUiState);
-  const onDraftChange = useCallback(
+  const onSearchDraftChange = useCallback(
     (newSearchDraftUiState: UnifiedSearchDraft | undefined) => {
       dispatch(
         setSearchDraftUiState({
@@ -230,7 +230,7 @@ export const DiscoverTopNav = ({
 
   const esqlEditorUiState = useCurrentTabSelector((state) => state.uiState.esqlEditor);
   const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
-  const onInitialStateChange = useCallback(
+  const onEsqlEditorInitialStateChange = useCallback(
     (newEsqlEditorUiState: Partial<ESQLEditorRestorableState>) => {
       dispatch(
         setEsqlEditorUiState({
@@ -279,9 +279,9 @@ export const DiscoverTopNav = ({
         }
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
-        onDraftChange={TABS_ENABLED ? onDraftChange : undefined}
+        onDraftChange={TABS_ENABLED ? onSearchDraftChange : undefined}
         esqlEditorInitialState={esqlEditorUiState}
-        onEsqlEditorInitialStateChange={onInitialStateChange}
+        onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />
