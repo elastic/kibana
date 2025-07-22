@@ -17,7 +17,7 @@ import { createSearchUsageCollectorMock } from '../../../../collectors/mocks';
 import { SearchSessionsMgmtTable } from './table';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { SessionsClient } from '../../../sessions_client';
-import { getUiSessionMocks } from '../../__mocks__/uiSession.mock';
+import { getUiSessionMocks } from '../../__mocks__';
 import { UISession } from '../../types';
 import { ACTION } from '../actions';
 
