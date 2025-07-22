@@ -39,7 +39,6 @@ const timelionExpressionInputStyles = {
       [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
         flex: 'auto',
         height: ` calc(${euiThemeContext.euiTheme.size.base} * 15)`,
-        maxHeight: `calc(${euiThemeContext.euiTheme.size.base} * 15)`,
       },
     }),
   absolute: css({
