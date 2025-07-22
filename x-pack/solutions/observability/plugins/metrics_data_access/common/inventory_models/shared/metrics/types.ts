@@ -53,7 +53,6 @@ export type ResolvedMetricMap<T extends MetricConfigMap> = {
 };
 
 /** catalog types */
-
 export interface BaseMetricsCatalog<TConfigMap extends MetricConfigMap = MetricConfigMap> {
   get<K extends keyof ResolvedMetricMap<TConfigMap>>(key: K): ResolvedMetricMap<TConfigMap>[K];
 
@@ -72,7 +71,6 @@ export type LensMetricChartConfig = Record<
 >;
 
 /** inventory types */
-
 export interface BaseInventoryMetricsConfig<TAggregations extends AggregationConfigMap> {
   tsvb?: Record<string, TSVBMetricModelCreator>;
   defaultSnapshot: SnapshotMetricType;
@@ -81,10 +79,9 @@ export interface BaseInventoryMetricsConfig<TAggregations extends AggregationCon
 }
 
 export interface InventoryMetricsConfigWithLens<
-  TAggregations extends AggregationConfigMap,
   TFormulas extends FormulasConfigMap,
   TCharts extends LensMetricChartConfig
-> extends BaseInventoryMetricsConfig<TAggregations> {
+> {
   getFormulas: (args?: { schema?: SchemaTypes }) => Promise<FormulasCatalog<TFormulas>>;
   getCharts: () => Promise<TCharts>;
 }
@@ -93,8 +90,9 @@ export type InventoryMetricsConfig<
   TAggregations extends AggregationConfigMap = AggregationConfigMap,
   TFormulas extends FormulasConfigMap | undefined = undefined,
   TCharts extends LensMetricChartConfig | undefined = undefined
-> = TFormulas extends undefined
-  ? BaseInventoryMetricsConfig<TAggregations>
-  : TCharts extends undefined
-  ? BaseInventoryMetricsConfig<TAggregations>
-  : InventoryMetricsConfigWithLens<TAggregations, NonNullable<TFormulas>, NonNullable<TCharts>>;
+> = BaseInventoryMetricsConfig<TAggregations> &
+  (TFormulas extends undefined
+    ? {}
+    : TCharts extends undefined
+    ? {}
+    : InventoryMetricsConfigWithLens<NonNullable<TFormulas>, NonNullable<TCharts>>);
