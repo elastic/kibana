@@ -27,26 +27,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const renderService = getService('renderable');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const getSpacePrefix = (spaceId: string) => {
     return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
   };
 
   const checkIfDashboardRendered = async (spaceId: string) => {
-    await PageObjects.common.navigateToUrl('dashboard', undefined, {
-      basePath: getSpacePrefix(spaceId),
-      shouldUseHashForSubUrl: false,
-    });
-    await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
-    // dashboard should load properly
-    await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
-    // count of panels rendered completely
-    await renderService.waitForRender(8);
-    // There should be 0 error embeddables on the dashboard
-    await PageObjects.dashboard.verifyNoRenderErrors();
+    retry.tryWithRetries(
+      'Retry asserting that dashboard renders correctly',
+      async () => {
+        await PageObjects.common.navigateToUrl('dashboard', undefined, {
+          basePath: getSpacePrefix(spaceId),
+          shouldUseHashForSubUrl: false,
+        });
+        await PageObjects.dashboard.loadSavedDashboard('multi_space_import_8.0.0_export');
+        // dashboard should load properly
+        await PageObjects.dashboard.expectOnDashboard('multi_space_import_8.0.0_export');
+
+        // count of panels rendered completely
+        await renderService.waitForRender(8);
+        // There should be 0 error embeddables on the dashboard
+        await PageObjects.dashboard.verifyNoRenderErrors();
+      },
+      { retryCount: 2 }
+    );
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/228143
-  describe.skip('should be able to handle multi-space imports correctly', function () {
+  describe('should be able to handle multi-space imports correctly', function () {
     before(async function () {
       await spacesService.create({
         id: 'another_space',
