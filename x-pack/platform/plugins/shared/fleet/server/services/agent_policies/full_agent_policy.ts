@@ -884,6 +884,8 @@ function generateOtelcolConfig(inputs: FullAgentPolicyInput[]) {
           ...(inputStream?.service ? { service: inputStream.service } : {}),
           ...(inputStream?.extensions ? { service: inputStream.extensions } : {}),
           ...(inputStream?.processors ? { service: inputStream.processors } : {}),
+          ...(inputStream?.connectors ? { service: inputStream.connectors } : {}),
+          ...(inputStream?.exporters ? { service: inputStream.exporters } : {}),
         };
       });
 
