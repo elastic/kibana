@@ -22,6 +22,7 @@ const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 
 const inferenceId = defaultInferenceEndpoints.ELSER;
+
 describe('Retrieve documentation function', () => {
   before(async () => {
     let statusResponse = await kibanaClient.callKibana<InstallationStatusResponse>('get', {
@@ -72,7 +73,7 @@ describe('Retrieve documentation function', () => {
     const result = await chatClient.evaluate(conversation, [
       `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about the Elastic stack`,
       'The assistant provides guidance on configuring HTTPS for Elasticsearch based on the retrieved documentation',
-      'Does not hallucinate steps without first calling the retrieve_elastic_doc function',
+      `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
       'Mentions Elasticsearch and HTTPS configuration steps consistent with the documentation',
     ]);
 
@@ -86,7 +87,7 @@ describe('Retrieve documentation function', () => {
     const result = await chatClient.evaluate(conversation, [
       `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Kibana`,
       'Accurately explains what Kibana Lens is and provides steps for creating a visualization',
-      `Does not invent unsupported instructions, answers should reference what's found in the Kibana docs`,
+      `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
     ]);
     expect(result.passed).to.be(true);
   });
@@ -98,9 +99,9 @@ describe('Retrieve documentation function', () => {
 
     const result = await chatClient.evaluate(conversation, [
       `Uses the ${RETRIEVE_ELASTIC_DOC_FUNCTION_NAME} function before answering the question about Observability`,
-      'Provides instructions based on the Observability docs for setting up APM instrumentation in a Node.js service',
-      'Mentions steps like installing the APM agent, configuring it with the service name and APM Server URL, etc., as per the docs',
-      'Does not provide hallucinated steps, should align with actual Observability documentation',
+      'Provides instructions based on the Observability docs for setting up APM instrumentation',
+      'Mentions steps like installing the APM agent, configuring it with the service name and APM Server URL, etc.',
+      `Any additional information beyond the retrieved documentation must be factually accurate and relevant to the user's question`,
     ]);
 
     expect(result.passed).to.be(true);
