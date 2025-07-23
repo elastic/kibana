@@ -7,10 +7,9 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useState } from 'react';
-import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { RuleMigrationDataInputContextProvider } from './context';
 import { MigrationDataInputFlyout } from './data_input_flyout';
-import { MigrationDataInputContextProvider } from '../../../common/components/migration_data_input_flyout_context';
 
 interface RuleMigrationDataInputWrapperProps {
   onFlyoutClosed: () => void;
@@ -18,35 +17,29 @@ interface RuleMigrationDataInputWrapperProps {
 export const RuleMigrationDataInputWrapper = React.memo<
   PropsWithChildren<RuleMigrationDataInputWrapperProps>
 >(({ children, onFlyoutClosed }) => {
-  const { isOpen: isFlyoutOpen, open: openFlyout, close: closeFlyout } = useIsOpenState(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>();
   const [flyoutMigrationStats, setFlyoutMigrationStats] = useState<
     RuleMigrationTaskStats | undefined
   >();
 
-  const closeFlyoutHandler = useCallback(() => {
-    closeFlyout();
+  const closeFlyout = useCallback(() => {
+    setIsFlyoutOpen(false);
     setFlyoutMigrationStats(undefined);
     onFlyoutClosed?.();
-  }, [closeFlyout, onFlyoutClosed]);
+  }, [onFlyoutClosed]);
 
-  const openFlyoutHandler = useCallback(
-    (migrationStats?: RuleMigrationTaskStats) => {
-      setFlyoutMigrationStats(migrationStats);
-      openFlyout();
-    },
-    [openFlyout]
-  );
+  const openFlyout = useCallback((migrationStats?: RuleMigrationTaskStats) => {
+    setFlyoutMigrationStats(migrationStats);
+    setIsFlyoutOpen(true);
+  }, []);
 
   return (
-    <MigrationDataInputContextProvider
-      openFlyout={openFlyoutHandler}
-      closeFlyout={closeFlyoutHandler}
-    >
+    <RuleMigrationDataInputContextProvider openFlyout={openFlyout} closeFlyout={closeFlyout}>
       {children}
       {isFlyoutOpen && (
         <MigrationDataInputFlyout onClose={closeFlyout} migrationStats={flyoutMigrationStats} />
       )}
-    </MigrationDataInputContextProvider>
+    </RuleMigrationDataInputContextProvider>
   );
 });
 RuleMigrationDataInputWrapper.displayName = 'RuleMigrationDataInputWrapper';

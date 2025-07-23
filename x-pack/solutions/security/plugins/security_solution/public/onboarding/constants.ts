@@ -27,5 +27,4 @@ export enum OnboardingCardId {
   siemMigrationsAiConnectors = 'ai_connectors',
   siemMigrationsRules = 'migrate_rules',
   siemMigrationIntegrations = 'migration_integrations',
-  siemMigrationDashboards = 'migrate_dashboards',
 }

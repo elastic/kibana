@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { asyncReducer, initialState } from '../../../common/utils/api_request_reducer';
+import { reducer, initialState } from './common/api_request_reducer';
 
 export const RULES_DATA_INPUT_CREATE_MIGRATION_SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title',
@@ -26,17 +26,17 @@ export const RULES_DATA_INPUT_CREATE_MIGRATION_ERROR = i18n.translate(
   { defaultMessage: 'Failed to upload rules file' }
 );
 
-export type CreateRuleMigration = (
+export type CreateMigration = (
   migrationName: string,
   rules: CreateRuleMigrationRulesRequestBody
 ) => void;
 export type OnSuccess = (migrationStats: RuleMigrationTaskStats) => void;
 
-export const useCreateRuleMigration = (onSuccess: OnSuccess) => {
+export const useCreateMigration = (onSuccess: OnSuccess) => {
   const { siemMigrations, notifications } = useKibana().services;
-  const [state, dispatch] = useReducer(asyncReducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const createRuleMigration = useCallback<CreateRuleMigration>(
+  const createMigration = useCallback<CreateMigration>(
     (migrationName, rules) => {
       (async () => {
         try {
@@ -62,5 +62,5 @@ export const useCreateRuleMigration = (onSuccess: OnSuccess) => {
     [siemMigrations.rules, notifications.toasts, onSuccess]
   );
 
-  return { isLoading: state.loading, error: state.error, createRuleMigration };
+  return { isLoading: state.loading, error: state.error, createMigration };
 };

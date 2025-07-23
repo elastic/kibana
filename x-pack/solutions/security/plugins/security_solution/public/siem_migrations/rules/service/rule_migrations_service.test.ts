@@ -30,13 +30,13 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
+import { getMissingCapabilities } from './capabilities';
 import * as i18n from './translations';
 import {
   TASK_STATS_POLLING_SLEEP_SECONDS,
   SiemRulesMigrationsService,
 } from './rule_migrations_service';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { getMissingCapabilities } from '../../common/service/capabilities';
 
 // --- Mocks for external modules ---
 
@@ -52,7 +52,7 @@ jest.mock('../api', () => ({
   addRulesToMigration: jest.fn(),
 }));
 
-jest.mock('../../common/service/capabilities', () => ({
+jest.mock('./capabilities', () => ({
   getMissingCapabilities: jest.fn(() => []),
 }));
 
@@ -68,15 +68,15 @@ jest.mock('../../../common/hooks/use_license', () => ({
   },
 }));
 
-jest.mock('../../common/service/notifications/success_notification', () => ({
+jest.mock('./notifications/success_notification', () => ({
   getSuccessToast: jest.fn().mockReturnValue({ title: 'Success' }),
 }));
 
-jest.mock('../../common/service/notifications/no_connector_notification', () => ({
+jest.mock('./notifications/no_connector_notification', () => ({
   getNoConnectorToast: jest.fn().mockReturnValue({ title: 'No Connector' }),
 }));
 
-jest.mock('../../common/service/notifications/missing_capabilities_notification', () => ({
+jest.mock('./notifications/missing_capabilities_notification', () => ({
   getMissingCapabilitiesToast: jest.fn().mockReturnValue({ title: 'Missing Capabilities' }),
 }));
 
