@@ -34,7 +34,7 @@ export function buildHelmCommand({
 
   return `
     helm repo add elastic https://helm.elastic.co/ && \
-    helm install elastic-agent elastic/elastic-agent --version ${elasticAgentVersionInfo.agentVersion} \
+    helm install elastic-agent elastic/elastic-agent --version ${elasticAgentVersionInfo.agentBaseVersion} \
       -n kube-system \
       --set outputs.default.url=${escapedElasticsearchUrl} \
       --set kubernetes.onboardingID=${onboardingId} \
