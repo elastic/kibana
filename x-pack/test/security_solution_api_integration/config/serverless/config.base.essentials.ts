@@ -5,13 +5,15 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
+import { services } from './services';
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
 }
-import { services } from './services';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -45,6 +47,15 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       mochaOpts: {
         ...svlSharedConfig.get('mochaOpts'),
         grep: '/^(?!.*@skipInServerless).*@serverless.*/',
+        rootHooks: {
+          // Some of the Rule Management API endpoints install prebuilt rules package under the hood.
+          // Prebuilt rules package installation has been known to be flakiness reason since
+          // EPR might be unavailable or the network may have faults.
+          // Real prebuilt rules package installation is prevented by
+          // installing a lightweight mock package.
+          beforeAll: ({ getService }: FtrProviderContext) =>
+            installMockPrebuiltRulesPackage({ getService }),
+        },
       },
     };
   };
