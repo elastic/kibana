@@ -26,7 +26,7 @@ describe('Applications deep links', () => {
         // scroll to the center & bottom because results are not rendering otherwise
         scrollToPositionResults('center');
         cy.contains('Applications / Traces');
-        cy.contains('Applications / Service Map');
+        cy.contains('Applications / Service map');
         scrollToPositionResults('bottom');
         cy.contains('Applications / Dependencies');
         cy.contains('Applications / Settings');
@@ -47,9 +47,9 @@ describe('Applications deep links', () => {
         assertDeepLink(keyword, 'Applications / Traces', '/apm/traces', 'center');
       });
 
-      it('navigates to Service Map page', () => {
+      it('navigates to Service map page', () => {
         cy.visitKibana('/');
-        assertDeepLink(keyword, 'Applications / Service Map', '/apm/service-map', 'center');
+        assertDeepLink(keyword, 'Applications / Service map', '/apm/service-map', 'center');
       });
 
       it('navigates to Dependencies page', () => {

@@ -193,10 +193,10 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [apmEnableServiceMapApiV2]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableServiceMapApiV2', {
-      defaultMessage: 'Service Map API v2',
+      defaultMessage: 'Service map API v2',
     }),
     description: i18n.translate('xpack.observability.apmEnableServiceMapApiV2Description', {
-      defaultMessage: 'Enables the usage of the new Service Map API v2.',
+      defaultMessage: 'Enables the usage of the new Service map API v2.',
     }),
     schema: schema.boolean(),
     value: false,

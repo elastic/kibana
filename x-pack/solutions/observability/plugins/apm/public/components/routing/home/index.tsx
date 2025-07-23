@@ -96,7 +96,7 @@ export const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInve
   defaultMessage: 'Services',
 });
 export const ServiceMapTitle = i18n.translate('xpack.apm.views.serviceMap.title', {
-  defaultMessage: 'Service Map',
+  defaultMessage: 'Service map',
 });
 
 export const DependenciesOperationsTitle = i18n.translate(

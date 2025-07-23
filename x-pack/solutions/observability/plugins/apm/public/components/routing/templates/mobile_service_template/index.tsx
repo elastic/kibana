@@ -199,7 +199,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
-        defaultMessage: 'Service Map',
+        defaultMessage: 'Service map',
       }),
     },
     {
