@@ -84,7 +84,7 @@ export const bulkUpsertBatch =
         ] as any;
         /* eslint-disable @typescript-eslint/no-explicit-any */
       }) as any,
-      refresh: true,
+      refresh: 'wait_for',
     });
     const stats = res.items.reduce(
       (acc, item, i) => {
