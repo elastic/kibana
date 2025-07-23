@@ -13,19 +13,23 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import {
+  ContentManagementServerSetup,
+  ContentStorage,
+} from '@kbn/content-management-plugin/server';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import { TypeOf } from '@kbn/config-schema';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
   TASK_ID,
 } from './usage/dashboard_telemetry_collection_task';
 import { getUISettings } from './ui_settings';
-import { DashboardStorage } from './content_management';
+import { DashboardItem, DashboardStorage } from './content_management';
 import { capabilitiesProvider } from './capabilities_provider';
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
@@ -35,6 +39,7 @@ import { dashboardPersistableStateServiceFactory } from './dashboard_container/d
 import { registerAPIRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
+import { dashboardCreateResultDataSchema } from './content_management/v1/cm_services';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -73,7 +78,9 @@ export class DashboardPlugin
     );
 
     void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
-      const { contentClient } = plugins.contentManagement.register({
+      const { contentClient } = plugins.contentManagement.register<
+        ContentStorage<TypeOf<typeof dashboardCreateResultDataSchema>>
+      >({
         id: CONTENT_ID,
         storage: new DashboardStorage({
           throwOnResultValidationError: this.initializerContext.env.mode.dev,

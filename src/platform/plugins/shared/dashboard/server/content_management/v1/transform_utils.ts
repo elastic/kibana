@@ -18,7 +18,7 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-type SavedObjectToItemReturn<T> =
+export type SavedObjectToItemReturn<T> =
   | {
       item: T;
       error: null;
@@ -70,26 +70,45 @@ export function savedObjectToItem(
     );
     const references = transformReferencesOut(savedObject.references ?? []);
 
+    const attributesOut = allowedAttributes
+      ? pick(dashboardState, allowedAttributes)
+      : dashboardState;
+
+    if (error) {
+      return {
+        item: {
+          error,
+        },
+        error: null,
+      };
+    }
+
     return {
       item: {
-        id,
-        type,
-        updatedAt,
-        updatedBy,
-        createdAt,
-        createdBy,
-        attributes: allowedAttributes ? pick(dashboardState, allowedAttributes) : dashboardState,
-        error,
-        namespaces,
-        references: allowedReferences
-          ? references?.filter((reference) => allowedReferences.includes(reference.type))
-          : references,
-        version,
-        managed,
+        data: {
+          ...attributesOut,
+          references: allowedReferences
+            ? references?.filter((reference) => allowedReferences.includes(reference.type))
+            : references,
+          spaces: namespaces,
+          version,
+        },
+        meta: {
+          id,
+          type,
+          updatedAt,
+          updatedBy,
+          createdAt,
+          createdBy,
+          ...(managed ? { managed } : {}),
+        },
       },
       error: null,
     };
   } catch (e) {
-    return { item: null, error: e };
+    return {
+      item: null,
+      error: e,
+    };
   }
 }

@@ -49,11 +49,15 @@ export const transformDashboardIn = async ({
           })
         : incomingReferences;
 
+    console.log('transformDashboardIn tagReferences------', JSON.stringify(tagReferences, null, 2));
+
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } =
       dashboardState;
     const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
-    const attributes = {
+    console.log('transformDashboardIn panelsJSON------', JSON.stringify(panelsJSON, null, 2));
+
+    const attributes: DashboardSavedObjectAttributes = {
       ...rest,
       ...(controlGroupInput && {
         controlGroupInput: transformControlGroupIn(controlGroupInput),

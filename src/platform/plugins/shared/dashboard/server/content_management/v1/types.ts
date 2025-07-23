@@ -10,26 +10,29 @@
 import { TypeOf } from '@kbn/config-schema';
 import {
   CreateIn,
+  CreateResult,
   GetIn,
+  GetResult,
   SearchIn,
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { WithRequiredProperty } from '@kbn/utility-types';
 import {
   dashboardItemSchema,
   panelGridDataSchema,
   panelSchema,
   sectionSchema,
-  dashboardAttributesSchema,
   dashboardCreateOptionsSchema,
   dashboardCreateResultSchema,
-  dashboardGetResultSchema,
   dashboardSearchOptionsSchema,
   dashboardSearchResultsSchema,
   dashboardUpdateOptionsSchema,
   optionsSchema,
+  dashboardAttributesSchemaRequest,
+  dashboardGetResultMetaSchema,
+  dashboardCreateResultDataSchema,
+  dashboardCreateResultMetaSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
@@ -44,29 +47,41 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
 };
 export type DashboardSection = TypeOf<typeof sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
-export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
+export type DashboardAttributes = Omit<
+  TypeOf<typeof dashboardAttributesSchemaRequest>,
+  'panels'
+> & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
 
 export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
-export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
-  attributes: Partial<DashboardAttributes>;
-  references: SavedObjectReference[] | undefined;
-};
+export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'>;
 
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
-export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;
+export type DashboardGetOut = GetResult<
+  TypeOf<typeof dashboardItemSchema>,
+  TypeOf<typeof dashboardGetResultMetaSchema>
+>;
 
 export type DashboardCreateIn = CreateIn<typeof CONTENT_ID, DashboardAttributes>;
-export type DashboardCreateOut = TypeOf<typeof dashboardCreateResultSchema>;
+export type DashboardCreateOut = CreateResult<
+  TypeOf<typeof dashboardCreateResultDataSchema>,
+  TypeOf<typeof dashboardCreateResultMetaSchema>
+>;
 export type DashboardCreateOptions = TypeOf<typeof dashboardCreateOptionsSchema>;
 
 export type DashboardUpdateIn = UpdateIn<typeof CONTENT_ID, Partial<DashboardAttributes>>;
-export type DashboardUpdateOut = TypeOf<typeof dashboardCreateResultSchema>;
+export type DashboardUpdateOut = CreateResult<
+  TypeOf<typeof dashboardCreateResultDataSchema>,
+  TypeOf<typeof dashboardCreateResultMetaSchema>
+>;
 export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>;
 
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
-export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardSearchResultsSchema>>;
+export type DashboardSearchOut = SearchResult<
+  TypeOf<typeof dashboardCreateResultDataSchema>,
+  TypeOf<typeof dashboardCreateResultMetaSchema>
+>;
