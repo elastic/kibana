@@ -81,7 +81,7 @@ export const useDeleteToolModal = ({
   }, []);
 
   return {
-    isModalOpen,
+    isOpen: isModalOpen,
     isLoading,
     toolId: deleteToolId,
     deleteTool,

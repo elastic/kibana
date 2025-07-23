@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ToolType } from '@kbn/onechat-common';
+import { EsqlToolDefinitionWithSchema, isEsqlTool } from '@kbn/onechat-common/tools/esql';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { CreateToolPayload } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 
@@ -37,26 +37,10 @@ export const useBaseTools = () => {
 export const useEsqlTools = () => {
   const { tools, ...rest } = useOnechatTools();
 
-  const esqlTools = useMemo(() => tools.filter((tool) => tool.type === ToolType.esql), [tools]);
+  const esqlTools = useMemo(
+    // inferred type predicates are implemented in Typescript 5.5
+    () => tools.filter(isEsqlTool) as EsqlToolDefinitionWithSchema[],
+    [tools]
+  );
   return { tools: esqlTools, ...rest };
-};
-
-export const useCreateTool = ({
-  onSuccess,
-  onError,
-}: {
-  onSuccess?: (tool: ToolDefinitionWithSchema) => void;
-  onError?: (error: Error) => void;
-}) => {
-  const queryClient = useQueryClient();
-  const { toolsService } = useOnechatServices();
-
-  const { mutateAsync, isLoading } = useMutation({
-    mutationFn: (tool: CreateToolPayload) => toolsService.create(tool),
-    onSuccess,
-    onError,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.tools.all }),
-  });
-
-  return { createTool: mutateAsync, isLoading };
 };

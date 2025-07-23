@@ -21,14 +21,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React, { useCallback, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useCreateTool } from '../../../hooks/tools/use_tools';
-import { transformEsqlFormData } from '../../../utils/transform_esql_form_data';
+import { transformEsqlToolToFormData } from '../../../utils/transform_esql_form_data';
 import { OnechatEsqlToolForm } from './form/esql_tool_form';
-import { useEsqlToolFormValidationResolver } from './form/validation/esql_tool_form_validation';
 import { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
+import { useEsqlToolFormValidationResolver } from './form/validation/esql_tool_form_validation';
 
 const flyoutBodyClass = (euiTheme: EuiThemeComputed) =>
   css`
@@ -63,30 +62,34 @@ const flyoutBodyClass = (euiTheme: EuiThemeComputed) =>
     }
   `;
 
-interface OnechatCreateEsqlToolFlyoutProps {
+interface OnechatEsqlToolFlyoutProps {
   isOpen: boolean;
+  isSaving: boolean;
+  title: string;
+  tool?: EsqlToolDefinitionWithSchema;
   onClose: () => void;
-  onSuccess: (data: ToolDefinitionWithSchema) => void;
-  onError?: (error: Error) => void;
+  saveTool: (data: OnechatEsqlToolFormData) => Promise<void>;
 }
 
-const defaultValues: OnechatEsqlToolFormData = {
+const getDefaultValues = (): OnechatEsqlToolFormData => ({
   name: '',
   description: '',
   esql: '',
   tags: [],
   params: [],
-};
+});
 
-export const OnechatCreateEsqlToolFlyout: React.FC<OnechatCreateEsqlToolFlyoutProps> = ({
+export const OnechatEsqlToolFlyout: React.FC<OnechatEsqlToolFlyoutProps> = ({
+  title,
   isOpen,
+  isSaving,
+  tool,
   onClose,
-  onSuccess,
-  onError,
+  saveTool,
 }) => {
   const resolver = useEsqlToolFormValidationResolver();
   const form = useForm<OnechatEsqlToolFormData>({
-    defaultValues,
+    defaultValues: getDefaultValues(),
     resolver,
     mode: 'onBlur',
   });
@@ -95,31 +98,27 @@ export const OnechatCreateEsqlToolFlyout: React.FC<OnechatCreateEsqlToolFlyoutPr
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
+    reset(tool ? transformEsqlToolToFormData(tool) : getDefaultValues());
+  }, [reset, tool]);
+
+  useEffect(() => {
     if (isSubmitSuccessful) {
-      reset(defaultValues);
+      reset(getDefaultValues());
     }
   }, [isSubmitSuccessful, reset]);
 
-  const newEsqlToolFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'newEsqlToolFlyoutTitle',
+  const esqlToolFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'esqlToolFlyoutTitle',
   });
-  const newEsqlToolFormId = useGeneratedHtmlId({
-    prefix: 'newEsqlToolForm',
+  const esqlToolFormId = useGeneratedHtmlId({
+    prefix: 'esqlToolForm',
   });
 
-  const { createTool, isLoading: isSubmitting } = useCreateTool({
-    onSuccess,
-    onError,
-  });
+  const isSubmitting = isSaving;
 
   const handleClear = useCallback(() => {
-    reset(defaultValues);
+    reset(getDefaultValues());
   }, [reset]);
-
-  const handleSave = useCallback(
-    (data: OnechatEsqlToolFormData) => createTool(transformEsqlFormData(data)),
-    [createTool]
-  );
 
   const handleCloseFlyout = useCallback(() => {
     // Persist form data to memory
@@ -137,11 +136,11 @@ export const OnechatCreateEsqlToolFlyout: React.FC<OnechatCreateEsqlToolFlyoutPr
       type="submit"
       fill
       fullWidth
-      form={newEsqlToolFormId}
+      form={esqlToolFormId}
       disabled={Object.keys(errors).length > 0 || isSubmitting}
       isLoading={isSubmitting}
     >
-      {i18n.translate('xpack.onechat.tools.newEsqlTool.saveButtonLabel', {
+      {i18n.translate('xpack.onechat.tools.esqlToolFlyout.saveButtonLabel', {
         defaultMessage: 'Save',
       })}
     </EuiButton>
@@ -151,21 +150,17 @@ export const OnechatCreateEsqlToolFlyout: React.FC<OnechatCreateEsqlToolFlyoutPr
     <FormProvider {...form}>
       <EuiFlyout
         onClose={handleCloseFlyout}
-        aria-labelledby={newEsqlToolFlyoutTitleId}
+        aria-labelledby={esqlToolFlyoutTitleId}
         size="m"
         maxWidth
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={newEsqlToolFlyoutTitleId}>
-              {i18n.translate('xpack.onechat.tools.newEsqlTool.title', {
-                defaultMessage: 'New ES|QL tool',
-              })}
-            </h2>
+            <h2 id={esqlToolFlyoutTitleId}>{title}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody css={flyoutBodyClass(euiTheme)}>
-          <OnechatEsqlToolForm formId={newEsqlToolFormId} saveTool={handleSave} />
+          <OnechatEsqlToolForm formId={esqlToolFormId} saveTool={saveTool} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup>
