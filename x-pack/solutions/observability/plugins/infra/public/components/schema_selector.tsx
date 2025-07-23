@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
-import { METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV } from '@kbn/infra-plugin/common/constants';
+import { METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV } from '../../common/constants';
 import { SchemaTypes } from '@kbn/infra-plugin/common/http_api/shared/schema_type';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {

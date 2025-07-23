@@ -21,7 +21,7 @@ import {
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
 import { DEFAULT_HOST_LIMIT, LOCAL_STORAGE_HOST_LIMIT_KEY } from '../constants';
-import { METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV } from '@kbn/infra-plugin/common/constants';
+import { METRIC_SCHEMA_SEMCONV, METRIC_SCHEMA_ECS } from '../../../../../common/constants';
 
 const DEFAULT_QUERY = {
   language: 'kuery',

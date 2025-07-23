@@ -20,7 +20,7 @@ import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
-import { METRIC_SCHEMA_SEMCONV } from '@kbn/infra-plugin/common/constants';
+import { METRIC_SCHEMA_SEMCONV } from '../../../../../../common/constants';
 import { SchemaTypes } from '@kbn/infra-plugin/common/http_api/shared/schema_type';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
