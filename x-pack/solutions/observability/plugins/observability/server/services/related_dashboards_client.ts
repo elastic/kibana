@@ -141,9 +141,9 @@ export class RelatedDashboardsClient {
     const scoredDashboards = dashboardScorer.getScores(rankableDashboards);
     console.log('Scored dashboards:', JSON.stringify(scoredDashboards, null, 2));
 
-    // Take the top 5 scored dashboards and map them to SuggestedDashboard format
+    // Take the top scored dashboards and map them to SuggestedDashboard format
     const suggestedDashboards: SuggestedDashboard[] = scoredDashboards
-      .slice(0, 5)
+      .slice(0, 10)
       .map(({ dashboard, score, scoreBreakdown }) => {
         // Get relevant panels from the score breakdown
         const relevantPanels = scoreBreakdown.panelScores

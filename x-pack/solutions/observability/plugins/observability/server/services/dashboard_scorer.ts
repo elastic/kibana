@@ -409,7 +409,8 @@ export class DashboardScorer {
       const dashboardVectorVal = dashboardIndexPatternFreq.get(indexPattern) || 0;
 
       // Calculate this index pattern's contribution to the dot product
-      const fieldContribution = alertVectorVal * dashboardVectorVal;
+      // Apply a 4x discount (0.25 multiplier) to index pattern contributions
+      const fieldContribution = alertVectorVal * dashboardVectorVal * 0.25;
 
       // Only track index patterns that appear in both alert and dashboard
       if (fieldContribution > 0) {
