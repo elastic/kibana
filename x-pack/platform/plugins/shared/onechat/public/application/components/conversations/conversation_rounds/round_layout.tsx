@@ -10,12 +10,12 @@ import { css } from '@emotion/react';
 import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 
-interface RoundProps {
+interface RoundLayoutProps {
   input: ReactNode;
   output: ReactNode;
 }
 
-export const Round: React.FC<RoundProps> = ({ input, output }) => {
+export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, output }) => {
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`
     width: 100%;

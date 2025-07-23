@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Round } from './round';
+import { RoundLayout } from './round_layout';
 import { ConversationContent } from '../conversation_grid';
 import { RoundResponse } from './round_response';
 import { useConversation } from '../../../hooks/use_conversation';
@@ -36,25 +36,21 @@ export const ConversationRounds: React.FC<ConversationRoundsProps> = ({
           defaultMessage: 'Conversation messages',
         })}
       >
-        {rounds.map((round, index) => {
+        {rounds.map(({ input, response, steps }, index) => {
           const isCurrentRound = index === rounds.length - 1;
           const isLoading = isResponseLoading && isCurrentRound;
           // TODO: enable showing RoundError once implemented
           const isError = isResponseError && isCurrentRound && false;
           return (
-            <Round
+            <RoundLayout
               key={index}
               // TODO: eventually we will use a RoundInput component when we have more complicated inputs like file attachments
-              input={<EuiText size="s">{round.input.message}</EuiText>}
+              input={<EuiText size="s">{input.message}</EuiText>}
               output={
                 isError ? (
                   <RoundError error={responseError} />
                 ) : (
-                  <RoundResponse
-                    response={round.response}
-                    steps={round.steps}
-                    isLoading={isLoading}
-                  />
+                  <RoundResponse response={response} steps={steps} isLoading={isLoading} />
                 )
               }
             />
