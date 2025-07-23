@@ -50,7 +50,8 @@ export const reindexHandler = async ({
   reindexOptions,
   security,
   version,
-}: ReindexHandlerArgs): Promise<ReindexOperation> => {
+}: // accept index settings as params
+ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, log, version);
   const reindexService = reindexServiceFactory(

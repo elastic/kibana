@@ -32,7 +32,6 @@ export function registerESDeprecationRoutes({
     versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
-          // savedObjects: { client: savedObjectsClient },
           elasticsearch: { client },
         } = await core;
         const status = await getESUpgradeStatus(client.asCurrentUser, {

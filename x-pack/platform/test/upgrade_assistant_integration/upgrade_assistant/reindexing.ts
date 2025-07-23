@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-// import { generateNewIndexName } from '@kbn/reindex-service-plugin';
+import { generateNewIndexName } from '@kbn/reindex-service-plugin/server';
 import { getIndexState, Version } from '@kbn/upgrade-assistant-pkg-server';
 import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
 import { sortBy } from 'lodash';
@@ -240,8 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });
 
-    // todo
-    it.skip('should reindex a batch in order and report queue state', async () => {
+    it('should reindex a batch in order and report queue state', async () => {
       const assertQueueState = async (
         firstInQueueIndexName: string | undefined,
         queueLength: number
@@ -270,7 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const cleanupReindex = async (indexName: string) => {
         try {
-          // await es.indices.delete({ index: generateNewIndexName(indexName, versionService) });
+          await es.indices.delete({ index: generateNewIndexName(indexName, versionService) });
         } catch (e) {
           try {
             await es.indices.delete({ index: indexName });
