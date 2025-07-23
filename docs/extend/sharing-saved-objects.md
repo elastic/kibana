@@ -11,7 +11,7 @@ From 8.7.0, as a step towards *zero downtime upgrades*, plugins are no longer al
 
 ## Overview [sharing-saved-objects-overview]
 
-[Saved objects](/extend/saved-objects-service.md) (hereinafter "objects") are used to store all sorts of things in {{kib}}, from Dashboards to Index Patterns to Machine Learning Jobs. The effort to make objects shareable can be summarized in a single picture:
+[Saved objects](/extend/saved-objects-service.md) (hereinafter "objects") are used to store all sorts of things in {{kib}}, from Dashboards to Index Patterns to Machine learning Jobs. The effort to make objects shareable can be summarized in a single picture:
 
 ![Sharing Saved Objects overview](images/sharing-saved-objects-overview.png)
 

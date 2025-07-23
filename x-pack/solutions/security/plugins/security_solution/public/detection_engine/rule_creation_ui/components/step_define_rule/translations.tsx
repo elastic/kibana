@@ -158,7 +158,7 @@ export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined)
 export const MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionDisabledLabel',
   {
-    defaultMessage: 'To enable alert suppression, start relevant Machine Learning jobs.',
+    defaultMessage: 'To enable alert suppression, start relevant Machine learning jobs.',
   }
 );
 
@@ -166,7 +166,7 @@ export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionIncompleteLabel',
   {
     defaultMessage:
-      'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.',
+      'This list of fields might be incomplete as some Machine learning jobs are not running. Start all relevant jobs for a complete list.',
   }
 );
 

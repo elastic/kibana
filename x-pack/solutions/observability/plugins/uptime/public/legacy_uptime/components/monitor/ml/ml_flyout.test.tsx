@@ -77,7 +77,7 @@ describe('ML Flyout component', () => {
     expect(queryByText(labels.START_TRAIL)).not.toBeInTheDocument();
   });
 
-  describe("when users don't have Machine Learning privileges", () => {
+  describe("when users don't have Machine learning privileges", () => {
     it('shows an informative callout about the need for ML privileges', async () => {
       const value = { ...defaultContextValue };
 
@@ -93,7 +93,7 @@ describe('ML Flyout component', () => {
       );
 
       expect(
-        queryByText('You must have the Kibana privileges for Machine Learning to use this feature.')
+        queryByText('You must have the Kibana privileges for Machine learning to use this feature.')
       ).toBeInTheDocument();
     });
 

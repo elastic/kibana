@@ -32,7 +32,7 @@ export const PRODUCER_DISPLAY_NAMES = {
     defaultMessage: 'Observability',
   }),
   ml: i18n.translate('responseOpsRuleForm.producerDisplayNames.ml', {
-    defaultMessage: 'Machine Learning',
+    defaultMessage: 'Machine learning',
   }),
   slo: i18n.translate('responseOpsRuleForm.producerDisplayNames.slo', {
     defaultMessage: 'SLOs',

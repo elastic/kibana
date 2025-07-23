@@ -1,7 +1,7 @@
 {
   "name": "@kbn/ml-url-state",
   "description": "Url state management utilities.",
-  "author": "Machine Learning UI",
+  "author": "Machine learning UI",
   "homepage": "https://docs.elastic.dev/kibana-dev-docs/api/kbn-ml-url-state",
   "private": true,
   "version": "1.0.0",

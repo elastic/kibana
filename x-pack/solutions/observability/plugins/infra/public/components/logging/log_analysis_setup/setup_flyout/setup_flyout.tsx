@@ -47,7 +47,7 @@ export const LogAnalysisSetupFlyout: React.FC<{
           <h2 id={FLYOUT_HEADING_ID}>
             <FormattedMessage
               id="xpack.infra.logs.analysis.setupFlyoutTitle"
-              defaultMessage="Anomaly detection with Machine Learning"
+              defaultMessage="Anomaly detection with Machine learning"
             />
           </h2>
         </EuiTitle>
@@ -106,7 +106,7 @@ const LogAnalysisSetupFlyoutSubPage: FC<
         >
           <FormattedMessage
             id="xpack.infra.logs.analysis.setupFlyoutGotoListButtonLabel"
-            defaultMessage="All Machine Learning jobs"
+            defaultMessage="All Machine learning jobs"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>

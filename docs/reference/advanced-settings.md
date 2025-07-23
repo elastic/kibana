@@ -287,7 +287,7 @@ $$$doctable-highlight$$$`doc_table:highlight`
 :   Highlights search results in **Discover** and Discover session panels on dashboards. Highlighting slows requests when working on big documents.
 
 
-### Machine Learning [kibana-ml-settings]
+### Machine learning [kibana-ml-settings]
 
 $$$ml-anomalydetection-results-enabletimedefaults$$$`ml:anomalyDetection:results:enableTimeDefaults`
 :   Use the default time filter in the **Single Metric Viewer** and **Anomaly Explorer**. If this setting is disabled, the results for the full time range are shown.

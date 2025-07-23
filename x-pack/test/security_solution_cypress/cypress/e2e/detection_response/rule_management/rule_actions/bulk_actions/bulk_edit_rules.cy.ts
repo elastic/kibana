@@ -350,7 +350,7 @@ describe(
           selectAllRules();
           clickAddIndexPatternsMenuItem();
 
-          // confirm editing all rules, that are not Machine Learning
+          // confirm editing all rules, that are not Machine learning
           checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
           cy.get(MODAL_CONFIRMATION_BTN).click();
 
@@ -371,7 +371,7 @@ describe(
         selectAllRules();
         clickAddIndexPatternsMenuItem();
 
-        // confirm editing all rules, that are not Machine Learning
+        // confirm editing all rules, that are not Machine learning
         checkMachineLearningRulesCannotBeModified(expectedNumberOfMachineLearningRulesToBeEdited);
 
         // user cancels action and modal disappears
@@ -774,7 +774,7 @@ describe('Detection rules, bulk edit, ES|QL rule type', { tags: ['@ess'] }, () =
         selectAllRules();
         clickAddIndexPatternsMenuItem();
 
-        // confirm editing all rules, that are not Machine Learning
+        // confirm editing all rules, that are not Machine learning
         checkEsqlRulesCannotBeModified(1);
 
         // user cancels action and modal disappears

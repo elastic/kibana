@@ -15,7 +15,7 @@ export function getMLRuleParams(
     type: 'machine_learning',
     machine_learning_job_id: ['some_job_id'],
     name: 'ML Rule',
-    description: 'Machine Learning Rule',
+    description: 'Machine learning Rule',
     anomaly_threshold: 44,
     risk_score: 1,
     rule_id: 'ml-rule-1',

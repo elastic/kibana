@@ -166,7 +166,7 @@
             "version": "7.0.0-alpha1",
             "elasticsearch_version": "7.0.0-alpha1",
             "java_version": "1.8",
-            "description": "Elasticsearch Expanded Pack Plugin - Machine Learning",
+            "description": "Elasticsearch Expanded Pack Plugin - Machine learning",
             "classname": "org.elasticsearch.xpack.ml.MachineLearning",
             "extended_plugins": [
               "x-pack-core"
@@ -507,7 +507,7 @@
             "version": "7.0.0-alpha1",
             "elasticsearch_version": "7.0.0-alpha1",
             "java_version": "1.8",
-            "description": "Elasticsearch Expanded Pack Plugin - Machine Learning",
+            "description": "Elasticsearch Expanded Pack Plugin - Machine learning",
             "classname": "org.elasticsearch.xpack.ml.MachineLearning",
             "extended_plugins": [
               "x-pack-core"

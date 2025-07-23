@@ -1,7 +1,7 @@
 {
   "name": "@kbn/aiops-common",
   "description": "Static utilities for AIOps related efforts.",
-  "author": "Machine Learning UI",
+  "author": "Machine learning UI",
   "homepage": "https://docs.elastic.dev/kibana-dev-docs/api/kbn-aiops-common",
   "private": true,
   "version": "1.0.0",

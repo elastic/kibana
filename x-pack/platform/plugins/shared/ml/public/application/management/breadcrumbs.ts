@@ -12,7 +12,7 @@ export function getJobsListBreadcrumbs() {
   return [
     {
       text: i18n.translate('xpack.ml.management.breadcrumb', {
-        defaultMessage: 'Machine Learning',
+        defaultMessage: 'Machine learning',
       }),
       href: `#${JOBS_LIST_PATH}`,
     },

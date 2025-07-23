@@ -30,7 +30,7 @@ export const createIndexPipelineDefinitions = async (
   let result: Record<string, IngestPipeline | undefined> = {};
   try {
     const mlPipeline = {
-      description: `Machine Learning Inference pipeline for the '${indexName}' index`,
+      description: `Machine learning Inference pipeline for the '${indexName}' index`,
       id: getInferencePipelineNameFromIndexName(indexName),
       processors: [],
       version: 1,

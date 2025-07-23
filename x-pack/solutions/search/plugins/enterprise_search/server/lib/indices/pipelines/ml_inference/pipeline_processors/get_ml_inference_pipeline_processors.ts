@@ -202,7 +202,7 @@ export const fetchMlInferencePipelineProcessors = async (
   indexName: string
 ): Promise<InferencePipeline[]> => {
   if (!trainedModelsProvider) {
-    throw new Error('Machine Learning is not enabled');
+    throw new Error('Machine learning is not enabled');
   }
 
   const allMlPipelines = await fetchMlInferencePipelines(client);

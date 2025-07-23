@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        describe('Machine Learning Rule First Step', () => {
+        describe('Machine learning Rule First Step', () => {
           it('default view meets a11y requirements', async () => {
             await detections.selectMLRule();
             await a11y.testAppSnapshot();

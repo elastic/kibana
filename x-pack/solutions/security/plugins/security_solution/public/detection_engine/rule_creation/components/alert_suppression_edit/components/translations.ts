@@ -66,7 +66,7 @@ export const ALERT_SUPPRESSION_NOT_SUPPORTED_FOR_EQL_SEQUENCE = i18n.translate(
 export const MACHINE_LEARNING_SUPPRESSION_FIELDS_LOADING = i18n.translate(
   'xpack.securitySolution.ruleManagement.ruleFields.alertSuppression.machineLearningSuppressionFieldsLoading',
   {
-    defaultMessage: 'Machine Learning suppression fields are loading',
+    defaultMessage: 'Machine learning suppression fields are loading',
   }
 );
 
@@ -74,7 +74,7 @@ export const MACHINE_LEARNING_NO_SUPPRESSION_FIELDS = i18n.translate(
   'xpack.securitySolution.ruleManagement.ruleFields.alertSuppression.machineLearningNoSuppressionFields',
   {
     defaultMessage:
-      'Unable to load machine Learning suppression fields, start relevant Machine Learning jobs.',
+      'Unable to load machine Learning suppression fields, start relevant Machine learning jobs.',
   }
 );
 
@@ -89,6 +89,6 @@ export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
   'xpack.securitySolution.ruleManagement.ruleFields.alertSuppression.machineLearningSuppressionIncomplete',
   {
     defaultMessage:
-      'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.',
+      'This list of fields might be incomplete as some Machine learning jobs are not running. Start all relevant jobs for a complete list.',
   }
 );

@@ -184,7 +184,7 @@ export const createNavigationTree = ({
             id: 'machine_learning-landing',
             renderAs: 'panelOpener',
             title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
-              defaultMessage: 'Machine Learning',
+              defaultMessage: 'Machine learning',
             }),
             children: [
               {
@@ -381,7 +381,7 @@ export const createNavigationTree = ({
                     ],
                   },
                   {
-                    title: 'Machine Learning',
+                    title: 'Machine learning',
                     children: [
                       { link: 'management:overview' },
                       { link: 'management:anomaly_detection' },

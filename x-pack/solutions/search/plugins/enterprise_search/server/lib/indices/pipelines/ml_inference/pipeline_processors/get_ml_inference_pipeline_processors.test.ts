@@ -726,7 +726,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
     jest.clearAllMocks();
   });
 
-  describe('when Machine Learning is disabled in the current space', () => {
+  describe('when Machine learning is disabled in the current space', () => {
     it('should throw an error', async () => {
       await expect(() =>
         fetchMlInferencePipelineProcessors(
@@ -734,7 +734,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
           undefined,
           'some-index'
         )
-      ).rejects.toThrowError('Machine Learning is not enabled');
+      ).rejects.toThrowError('Machine learning is not enabled');
     });
   });
 

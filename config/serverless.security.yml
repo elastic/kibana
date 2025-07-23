@@ -20,7 +20,7 @@ xpack.features.overrides:
   visualize_v2.hidden: true
   maps.hidden: true
   maps_v2.hidden: true
-  ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
+  ### Machine learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
     order: 1101

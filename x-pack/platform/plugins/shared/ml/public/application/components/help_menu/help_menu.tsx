@@ -24,7 +24,7 @@ export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink, appName }) => 
       appName:
         appName ??
         i18n.translate('xpack.ml.chrome.help.appName', {
-          defaultMessage: 'Machine Learning',
+          defaultMessage: 'Machine learning',
         }),
       links: [
         {

@@ -40,7 +40,7 @@ export const sectionsMock = [
       },
       {
         id: 'jobsListLink',
-        title: 'Machine Learning',
+        title: 'Machine learning',
         enabled: true,
         basePath: '/app/management/ingest/pipelines_logstash',
       },

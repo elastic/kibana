@@ -342,7 +342,7 @@ export const MINIMUM_ML_LICENSE = 'platinum' as const;
 export const MINIMUM_RULE_CUSTOMIZATION_LICENSE = 'enterprise' as const;
 
 /**
- Machine Learning constants
+ Machine learning constants
  */
 export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;

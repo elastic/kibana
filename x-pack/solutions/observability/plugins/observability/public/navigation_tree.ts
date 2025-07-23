@@ -231,7 +231,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             id: 'machine_learning-landing',
             renderAs: 'panelOpener',
             title: i18n.translate('xpack.observability.obltNav.machineLearning', {
-              defaultMessage: 'Machine Learning',
+              defaultMessage: 'Machine learning',
             }),
             children: [
               {
@@ -418,7 +418,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                     ],
                   },
                   {
-                    title: 'Machine Learning',
+                    title: 'Machine learning',
                     children: [
                       { link: 'management:overview' },
                       { link: 'management:anomaly_detection' },

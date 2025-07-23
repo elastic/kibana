@@ -15,7 +15,7 @@ category:
 ---
 
 ## Using LLMs to summarize user sessions
-With the introduction of the [AI Assistant](https://www.elastic.co/guide/en/security/current/security-assistant.html) into the Security Solution in 8.8, the Security Machine Learning team at Elastic has been exploring how to optimize Security operations with LLMs like GPT-4. User session summarization seemed like the perfect use case to start experimenting with for several reasons:
+With the introduction of the [AI Assistant](https://www.elastic.co/guide/en/security/current/security-assistant.html) into the Security Solution in 8.8, the Security Machine learning team at Elastic has been exploring how to optimize Security operations with LLMs like GPT-4. User session summarization seemed like the perfect use case to start experimenting with for several reasons:
  - User session summaries can help analysts quickly decide whether a particular session's activity is worth investigating or not
  - Given the diversity of data that LLMs like GPT-4 are trained on, it is not hard to imagine that they have already been trained on [man pages](https://en.wikipedia.org/wiki/Man_page), and other open Security content, which can provide useful context for session investigation
  - Session summaries could potentially serve as a good supplement to the [Session View](https://www.elastic.co/guide/en/security/current/session-view.html) tool, which is available in the Elastic Security Solution as of 8.2.

@@ -30,7 +30,7 @@ export function MachineLearningNavigationProvider({
 
     async navigateToMlViaAppsMenu() {
       await retry.tryForTime(60 * 1000, async () => {
-        await appsMenu.clickLink('Machine Learning');
+        await appsMenu.clickLink('Machine learning');
         await testSubjects.existOrFail('mlApp', { timeout: 2000 });
       });
     },
@@ -356,7 +356,7 @@ export function MachineLearningNavigationProvider({
 
     async assertKibanaNavMLEntryExists() {
       const navArea = await testSubjects.find('collapsibleNav');
-      const mlNavLink = await navArea.findAllByCssSelector('[title="Machine Learning"]');
+      const mlNavLink = await navArea.findAllByCssSelector('[title="Machine learning"]');
       if (mlNavLink.length === 0) {
         throw new Error(`expected ML link in nav menu to exist`);
       }
@@ -364,7 +364,7 @@ export function MachineLearningNavigationProvider({
 
     async assertKibanaNavMLEntryNotExists() {
       const navArea = await testSubjects.find('collapsibleNav');
-      const mlNavLink = await navArea.findAllByCssSelector('[title="Machine Learning"]');
+      const mlNavLink = await navArea.findAllByCssSelector('[title="Machine learning"]');
       if (mlNavLink.length !== 0) {
         throw new Error(`expected ML link in nav menu to not exist`);
       }

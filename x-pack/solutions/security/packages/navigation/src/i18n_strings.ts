@@ -63,7 +63,7 @@ export const i18nStrings = {
   },
   ml: {
     title: i18n.translate('securitySolutionPackages.navLinks.ml', {
-      defaultMessage: 'Machine Learning',
+      defaultMessage: 'Machine learning',
     }),
     overview: i18n.translate('securitySolutionPackages.navLinks.ml.overview', {
       defaultMessage: 'Overview',

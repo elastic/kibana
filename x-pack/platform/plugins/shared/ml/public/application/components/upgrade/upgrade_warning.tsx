@@ -32,7 +32,7 @@ export const UpgradeWarning: FC = () => {
           <p>
             <FormattedMessage
               id="xpack.ml.upgrade.upgradeWarning.upgradeInProgressWarningDescription"
-              defaultMessage="Indices related to Machine Learning are currently being upgraded."
+              defaultMessage="Indices related to Machine learning are currently being upgraded."
             />
             <br />
             <FormattedMessage

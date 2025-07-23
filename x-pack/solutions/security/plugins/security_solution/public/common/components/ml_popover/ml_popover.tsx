@@ -166,7 +166,7 @@ export const MlPopover = React.memo(() => {
               >
                 <p>
                   <FormattedMessage
-                    defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
+                    defaultMessage="We could not find any data, see {mlDocs} for more information on Machine learning job requirements."
                     id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
                     values={{
                       mlDocs: (

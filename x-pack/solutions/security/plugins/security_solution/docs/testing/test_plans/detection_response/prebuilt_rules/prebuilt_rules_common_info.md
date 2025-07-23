@@ -189,14 +189,14 @@ These are the fields of prebuilt rules that users should be able to customize:
 | Threat Match     | Indicator prefix override | `threat_indicator_path`   |
 | Threshold        | Custom query              | `kql_query`               |
 | Threshold        | Threshold config          | `threshold`               |
-| Machine Learning | Machine Learning job      | `machine_learning_job_id` |
-| Machine Learning | Anomaly score threshold   | `anomaly_threshold`       |
+| Machine learning | Machine learning job      | `machine_learning_job_id` |
+| Machine learning | Anomaly score threshold   | `anomaly_threshold`       |
 | New Terms        | Custom query              | `kql_query`               |
 | New Terms        | Fields                    | `new_terms_fields`        |
 | New Terms        | History Window Size       | `history_window_start`    |
 
 - `*` Building block field is used to mark alerts as building block alerts.
-- `**` Data Source represents index patterns or a data view. Machine Learning rules don't have data_source field.
+- `**` Data Source represents index patterns or a data view. Machine learning rules don't have data_source field.
 
 ### Non-customizable rule fields
 

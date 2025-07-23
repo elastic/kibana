@@ -1810,7 +1810,7 @@ The **Rule Edit Page** is currently split into four tabs:
 
 | Tab            | Contains fields|
 | -------------- | -------------- |
-| **Definition** | - Rule type (cannot be changed)<br>- Data Source<br>- Query<br>- Machine Learning job (ML rules only)<br>- Anomaly score threshold (ML rules only)<br>- Group by (threshold rules only)<br>- Count (cardinality) (threshold rules only)<br>- Indicator index patterns (indicator match rules only)<br>- Indicator index query (indicator match rules only)<br>- Indicator mapping (indicator match rules only)<br>- New terms fields (new term rules only)<br>- History window size (new terms rules only)<br>- Alert Suppression (for custom query and threshold rules only)<br>- Timeline Template |
+| **Definition** | - Rule type (cannot be changed)<br>- Data Source<br>- Query<br>- Machine learning job (ML rules only)<br>- Anomaly score threshold (ML rules only)<br>- Group by (threshold rules only)<br>- Count (cardinality) (threshold rules only)<br>- Indicator index patterns (indicator match rules only)<br>- Indicator index query (indicator match rules only)<br>- Indicator mapping (indicator match rules only)<br>- New terms fields (new term rules only)<br>- History window size (new terms rules only)<br>- Alert Suppression (for custom query and threshold rules only)<br>- Timeline Template |
 | **About**      | - Name<br>- Description<br>- Severity<br>- Severity override<br>- Risk score<br>- Risk score override<br>- Tags<br>- Reference URLs<br>- False positive examples<br>- MITRE ATT&CK™ threats<br>- Custom highlighted fields<br>- Investigation guide<br>- Author<br>- License<br>- Elastic Endpoint exceptions<br>- Building block<br>- Rule name override<br>- Timestamp override|
 | **Schedule**   | - Interval<br>- Lookback time|
 | **Actions**    | - Actions<br>- Response actions (custom query rules only)|
@@ -1855,7 +1855,7 @@ As explained above, the UI validates that the five actions listed above are only
 - The Bulk Actions UI should now allow users to edit prebuilt rules.
 - All bulk actions listed above should now be applicable to prebuilt rules (This means that the changes in the API for the validation done in `dryRun` mode should not remove the rules from the payload anymore).
 
-> The `dryRun` mode request will still be necessary since we perform other checks that can still prevent prebuilt rules from being edited. For example, Machine Learning and ES|QL rules cannot be bulk edited to add or delete index patterns, since they don't have that field in their schema.
+> The `dryRun` mode request will still be necessary since we perform other checks that can still prevent prebuilt rules from being edited. For example, Machine learning and ES|QL rules cannot be bulk edited to add or delete index patterns, since they don't have that field in their schema.
 
 #### Via the Rules Details Page
 

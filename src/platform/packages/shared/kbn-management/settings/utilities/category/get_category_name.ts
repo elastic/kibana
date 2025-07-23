@@ -37,7 +37,7 @@ const names: Record<string, string> = {
   [MACHINE_LEARNING_CATEGORY]: i18n.translate(
     'management.settings.categoryNames.machineLearningLabel',
     {
-      defaultMessage: 'Machine Learning',
+      defaultMessage: 'Machine learning',
     }
   ),
   [OBSERVABILITY_CATEGORY]: i18n.translate('management.settings.categoryNames.observabilityLabel', {

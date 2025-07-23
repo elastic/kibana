@@ -6,7 +6,7 @@
  */
 
 /*
- * React component for rendering a list of Machine Learning influencers.
+ * React component for rendering a list of Machine learning influencers.
  */
 
 import type { FC } from 'react';

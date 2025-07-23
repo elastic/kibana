@@ -23,7 +23,7 @@ When we want to enable ML model snapshot deprecation warnings again we need to c
 There are three sources of deprecation information:
 
 * [**Elasticsearch Deprecation Info API.**](https://www.elastic.co/guide/en/elasticsearch/reference/main/migration-api-deprecation.html)
-This is information about Elasticsearch cluster, node, Machine Learning, and index-level settings that use deprecated features that will be removed or changed in the next major version. ES server engineers are responsible for adding deprecations to the Deprecation Info API.
+This is information about Elasticsearch cluster, node, Machine learning, and index-level settings that use deprecated features that will be removed or changed in the next major version. ES server engineers are responsible for adding deprecations to the Deprecation Info API.
 * [**Elasticsearch deprecation logs.**](https://www.elastic.co/guide/en/elasticsearch/reference/current/logging.html#deprecation-logging)
 These surface runtime deprecations, e.g. a Painless script that uses a deprecated accessor or a
 request to a deprecated API. These are also generally surfaced as deprecation headers within the
@@ -55,7 +55,7 @@ Elasticsearch deprecations can be handled in a number of ways:
 
 Reindexing at the moment includes some logic that is specific to the [8.0 upgrade](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/index_settings.ts). End users could get into a bad situation if this is enabled before this logic is fixed.
 * **Removing settings.** Some index and cluser settings are deprecated and need to be removed. The Upgrade Assistant provides a way to auto-resolve these settings via a "Remove deprecated settings" button. Migrating system indices should only be enabled for major version upgrades. This is controlled by the config `featureSet.migrateSystemIndices` which hides the second step from the UA UI for migrating system indices.
-* **Upgrading or deleting snapshots**. This is specific to Machine Learning. If a user has old Machine Learning job model snapshots, they will need to be upgraded or deleted. The Upgrade Assistant provides a way to resolve this automatically for the user ([#100066](https://github.com/elastic/kibana/pull/100066)).
+* **Upgrading or deleting snapshots**. This is specific to Machine learning. If a user has old Machine learning job model snapshots, they will need to be upgraded or deleted. The Upgrade Assistant provides a way to resolve this automatically for the user ([#100066](https://github.com/elastic/kibana/pull/100066)).
 Deprecations related to ML snapshots are only enabled during `x.last` version of the stack. This is controlled by the `featureSet.mlSnapshots` config. When we want to enable ML model snapshot deprecation warnings again we need to change the constant `MachineLearningField.MIN_CHECKED_SUPPORTED_SNAPSHOT_VERSION` to something higher than `7.0.0` in the Elasticsearch code.
 * **Following the docs.** The Deprecation Info API provides links to the deprecation docs. Users
 will follow these docs to address the problem and make these warnings or errors disappear in the
@@ -113,7 +113,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   Similar to the reindex action, the ML action requires setting up a cluster on the previous major version. It also requires the trial license to be enabled. Then, you will need to create a few ML jobs in order to trigger snapshots.
 
   - Add the Kibana sample data.
-  - Navigate to Machine Learning > Create new job.
+  - Navigate to Machine learning > Create new job.
   - Select `kibana_sample_data_flights` index.
   - Select "Single metric job".
   - Add an aggregation, field, and job ID. Change the time range to "Absolute" and select a subset of time.
@@ -356,7 +356,7 @@ The Upgrade Assistant tracks several triggered events in the UI, using Kibana Us
 **ES deprecations page**
 - Component loaded
 - Click events for starting and stopping reindex tasks
-- Click events for upgrading or deleting a Machine Learning snapshot
+- Click events for upgrading or deleting a Machine learning snapshot
 - Click event for deleting a deprecated index setting
 
 **Kibana deprecations page**

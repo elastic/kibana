@@ -25,7 +25,7 @@ export type MlNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, Navigation
 export const defaultNavigation: MlNodeDefinition = {
   id: 'rootNav:ml',
   title: i18n.translate('defaultNavigation.ml.machineLearning', {
-    defaultMessage: 'Machine Learning',
+    defaultMessage: 'Machine learning',
   }),
   icon: 'machineLearningApp',
   children: [

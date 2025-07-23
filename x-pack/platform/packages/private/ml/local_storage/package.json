@@ -1,7 +1,7 @@
 {
   "name": "@kbn/ml-local-storage",
   "description": "Utilities to combine url state management with local storage.",
-  "author": "Machine Learning UI",
+  "author": "Machine learning UI",
   "homepage": "https://docs.elastic.dev/kibana-dev-docs/api/kbn-ml-local-storage",
   "private": true,
   "version": "1.0.0",

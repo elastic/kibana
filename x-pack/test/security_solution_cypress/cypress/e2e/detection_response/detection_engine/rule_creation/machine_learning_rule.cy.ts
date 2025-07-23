@@ -22,7 +22,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { forceStopAndCloseJob } from '../../../../support/machine_learning';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
-describe('Machine Learning - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
+describe('Machine learning - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     const machineLearningJobIds = ([] as string[]).concat(
       getMachineLearningRule().machine_learning_job_id

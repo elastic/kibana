@@ -34,7 +34,7 @@ export const MLConfigurationPanel = ({
         <h3>
           <FormattedMessage
             id="xpack.infra.sourceConfiguration.mlSectionTitle"
-            defaultMessage="Machine Learning"
+            defaultMessage="Machine learning"
           />
         </h3>
       </EuiTitle>

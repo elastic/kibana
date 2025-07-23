@@ -130,7 +130,7 @@ export const FlyoutHome = (props: Props) => {
               <EuiTitle size="s">
                 <h2>
                   <FormattedMessage
-                    defaultMessage="Machine Learning anomaly detection"
+                    defaultMessage="Machine learning anomaly detection"
                     id="xpack.infra.ml.anomalyFlyout.flyoutHeader"
                   />
                 </h2>

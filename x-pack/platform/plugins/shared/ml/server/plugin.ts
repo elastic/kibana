@@ -129,7 +129,7 @@ export class MlServerPlugin
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
-        defaultMessage: 'Machine Learning',
+        defaultMessage: 'Machine learning',
       }),
       order: 500,
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -138,7 +138,7 @@ export class MlServerPlugin
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       privilegesTooltip: i18n.translate('xpack.ml.featureRegistry.privilegesTooltip', {
         defaultMessage:
-          'Granting All or Read feature privilege for Machine Learning will also grant the equivalent feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved Discover sessions and visualizations as well as machine learning job, trained model and module saved objects.',
+          'Granting All or Read feature privilege for Machine learning will also grant the equivalent feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved Discover sessions and visualizations as well as machine learning job, trained model and module saved objects.',
       }),
       management: {
         insightsAndAlerting: ['jobsListLink', 'triggersActions'],

@@ -96,7 +96,7 @@ export const LogAnalysisModuleListCard: React.FC<{
             >
               <FormattedMessage
                 id="xpack.infra.logs.analysis.viewInMlButtonLabel"
-                defaultMessage="View in Machine Learning"
+                defaultMessage="View in Machine learning"
               />
             </EuiButtonEmpty>
           </>

@@ -22,7 +22,7 @@ export const createMlAlertType = (
 ): SecurityAlertType<MachineLearningRuleParams, { isLoggedRequestsEnabled?: boolean }> => {
   return {
     id: ML_RULE_TYPE_ID,
-    name: 'Machine Learning Rule',
+    name: 'Machine learning Rule',
     validate: {
       params: {
         validate: (object: unknown) => {

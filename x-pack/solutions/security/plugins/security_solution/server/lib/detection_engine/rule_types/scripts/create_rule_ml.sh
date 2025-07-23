@@ -16,7 +16,7 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
   "params":{
      "anomalyThreshold": 23,
      "author": [],
-     "description": "Basic Machine Learning Rule",
+     "description": "Basic Machine learning Rule",
      "exceptionsList": [],
      "falsePositives": [],
      "from": "now-45m",
@@ -47,7 +47,7 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
       "persistence"
    ],
    "notifyWhen":"onActionGroupChange",
-   "name":"Basic Machine Learning Rule"
+   "name":"Basic Machine learning Rule"
 }'
 
 

@@ -218,7 +218,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
               showMLNavMenu
                 ? {
                     name: i18n.translate('xpack.ml.plugin.title', {
-                      defaultMessage: 'Machine Learning',
+                      defaultMessage: 'Machine learning',
                     }),
                     icon: 'machineLearningApp',
                     items: sideNavItems,

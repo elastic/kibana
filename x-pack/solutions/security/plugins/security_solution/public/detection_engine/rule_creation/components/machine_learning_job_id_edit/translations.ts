@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 export const MACHINE_LEARNING_JOB_ID_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel',
   {
-    defaultMessage: 'Machine Learning job',
+    defaultMessage: 'Machine learning job',
   }
 );
 
 export const MACHINE_LEARNING_JOB_ID_EMPTY_FIELD_VALIDATION_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningJobIdRequired',
   {
-    defaultMessage: 'A Machine Learning job is required.',
+    defaultMessage: 'A Machine learning job is required.',
   }
 );

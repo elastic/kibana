@@ -185,7 +185,7 @@ export const JobsListPage: FC<Props> = ({
                     pageTitle={
                       <FormattedMessage
                         id="xpack.ml.management.jobsList.jobsListTitle"
-                        defaultMessage="Machine Learning"
+                        defaultMessage="Machine learning"
                       />
                     }
                     description={

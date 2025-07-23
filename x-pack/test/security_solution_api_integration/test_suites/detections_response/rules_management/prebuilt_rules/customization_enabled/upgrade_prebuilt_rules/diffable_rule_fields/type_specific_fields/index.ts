@@ -54,7 +54,7 @@ export default (context: FtrProviderContext): void => {
     // Threshold rule type
     thresholdField(context);
 
-    // Machine Learning rule type
+    // Machine learning rule type
     machineLearningJobIdField(context);
     anomalyThresholdField(context);
 

@@ -4,7 +4,7 @@ get:
   description: >
     You must have `read` privileges for the **Management > Stack Rules** feature
     or for at least one of the **Analytics > Discover**,
-    **Analytics > Machine Learning**, **Observability**, or **Security** features.
+    **Analytics > Machine learning**, **Observability**, or **Security** features.
   tags:
     - alerting
   responses:

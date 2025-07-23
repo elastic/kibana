@@ -14,7 +14,7 @@ export const registerHomeFeature = (home: HomePublicPluginSetup) => {
   home.featureCatalogue.register({
     id: PLUGIN_ID,
     title: i18n.translate('xpack.ml.machineLearningTitle', {
-      defaultMessage: 'Machine Learning',
+      defaultMessage: 'Machine learning',
     }),
     subtitle: i18n.translate('xpack.ml.machineLearningSubtitle', {
       defaultMessage: 'Model, predict, and detect.',

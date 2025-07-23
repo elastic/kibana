@@ -108,7 +108,7 @@ export const defaultNavigation: ManagementNodeDefinition = {
               link: 'management:triggersActionsConnectors',
             },
             {
-              // Machine Learning
+              // Machine learning
               link: 'management:jobsListLink',
             },
           ],

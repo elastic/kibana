@@ -17,7 +17,7 @@ paths:
       summary: Sync saved objects in the default space
       description: >
         Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space.
-        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+        You must have `all` privileges for the **Machine learning** feature in the **Analytics** section of the Kibana feature privileges.
         This API runs automatically when you start Kibana and periodically thereafter.
       operationId: mlSync
       tags:
@@ -46,7 +46,7 @@ paths:
     #   summary: Sync saved objects
     #   description: >
     #     Synchronizes Kibana saved objects for machine learning jobs and trained models.
-    #     You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+    #     You must have `all` privileges for the **Machine learning** feature in the **Analytics** section of the Kibana feature privileges.
     #     This API runs automatically when you start Kibana and periodically thereafter.
     #   operationId: mlSyncWithSpaceId
     #   tags:

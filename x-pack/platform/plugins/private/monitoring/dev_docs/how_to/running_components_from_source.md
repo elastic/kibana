@@ -142,7 +142,7 @@ You can `POST` some additional documents to the secondary cluster ensure you hav
 
 The [CCR Tutorial](https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-getting-started-tutorial.html) has more details. Note that you can skip the role updates since we're just using the `elastic` user on both clusters.
 
-### Machine Learning configuration
+### Machine learning configuration
 
 Note: You might want to skip to the Beats section first to gather data to run the ML job on.
 

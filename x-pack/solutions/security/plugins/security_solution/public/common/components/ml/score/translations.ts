@@ -25,7 +25,7 @@ export const ANOMALY_JOB = i18n.translate('xpack.securitySolution.ml.score.anoma
 export const VIEW_IN_MACHINE_LEARNING = i18n.translate(
   'xpack.securitySolution.ml.score.viewInMachineLearningLink',
   {
-    defaultMessage: 'View in Machine Learning',
+    defaultMessage: 'View in Machine learning',
   }
 );
 

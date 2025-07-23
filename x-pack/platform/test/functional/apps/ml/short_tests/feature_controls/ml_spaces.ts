@@ -28,12 +28,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space');
       });
 
-      it('shows Machine Learning navlink', async () => {
+      it('shows Machine learning navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Machine Learning');
+        expect(navLinks).to.contain('Machine learning');
       });
 
       it(`can navigate to app`, async () => {
@@ -58,12 +58,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await spacesService.delete('custom_space');
       });
 
-      it(`doesn't show Machine Learning navlink`, async () => {
+      it(`doesn't show Machine learning navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).not.to.contain('Machine Learning');
+        expect(navLinks).not.to.contain('Machine learning');
       });
 
       it(`navigating to app returns a 404`, async () => {

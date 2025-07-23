@@ -292,7 +292,7 @@ export class ValidateJobUI extends Component {
                         <EuiLink href={jobTipsUrl} target="_blank">
                           <FormattedMessage
                             id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
-                            defaultMessage="Machine Learning Job Tips"
+                            defaultMessage="Machine learning Job Tips"
                           />
                         </EuiLink>
                       ),

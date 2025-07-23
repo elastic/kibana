@@ -32,7 +32,7 @@ const moduleName = i18n.translate('xpack.infra.logs.analysis.logEntryRateModuleN
 const moduleDescription = i18n.translate(
   'xpack.infra.logs.analysis.logEntryRateModuleDescription',
   {
-    defaultMessage: 'Use Machine Learning to automatically detect anomalous log entry rates.',
+    defaultMessage: 'Use Machine learning to automatically detect anomalous log entry rates.',
   }
 );
 

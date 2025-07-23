@@ -7,7 +7,7 @@
 
 /*
  * React component for rendering a chart of anomalies in the raw data in
- * the Machine Learning Explorer dashboard.
+ * the Machine learning Explorer dashboard.
  */
 
 import PropTypes from 'prop-types';

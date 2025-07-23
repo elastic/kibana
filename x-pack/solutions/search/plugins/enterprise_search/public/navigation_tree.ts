@@ -275,7 +275,7 @@ export const getNavigationTreeDefinition = ({
                         },
                         {
                           children: [{ link: 'management:trained_models' }],
-                          title: 'Machine Learning',
+                          title: 'Machine learning',
                         },
                         {
                           children: [

@@ -11,7 +11,7 @@ export const PLUGIN_ID = 'ml';
 export const PLUGIN_ICON = 'machineLearningApp';
 export const PLUGIN_ICON_SOLUTION = 'logoKibana';
 export const ML_APP_NAME = i18n.translate('xpack.ml.navMenu.mlAppNameText', {
-  defaultMessage: 'Machine Learning and Analytics',
+  defaultMessage: 'Machine learning and Analytics',
 });
 export const ML_APP_ROUTE = '/app/ml';
 export const ML_MANAGEMENT_APP_ROUTE = '/app/management/ml';

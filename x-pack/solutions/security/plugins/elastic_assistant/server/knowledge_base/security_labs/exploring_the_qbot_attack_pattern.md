@@ -279,7 +279,7 @@ $ cat qbot.json | jq -c '.[]' > qbot.ndjson
 
 Now that we have an NDJSON file, we can upload that into Elasticsearch through Kibana (or with Filebeat or the Elastic Agent). To do this, we’ll use the [Elastic Container Project](https://github.com/peasead/elastic-container) to spin up an entire Elastic Stack in Docker to do our analysis.
 
-Once the containers have spun up, navigate to the Data Visualizer from within the Machine Learning menu. Select the NDJSON file that you created previously, and click the blue Import button.
+Once the containers have spun up, navigate to the Data Visualizer from within the Machine learning menu. Select the NDJSON file that you created previously, and click the blue Import button.
 
 Provide an index name and then click on the Advanced tab. Under the Mappings settings, change **loc** to **geo_point** and then click the blue Import button.
 

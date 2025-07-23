@@ -77,7 +77,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
             <p>
               <FormattedMessage
                 id="xpack.uptime.ml.enableAnomalyDetectionPanel.insufficient_permissions_add_job"
-                defaultMessage="You must have the Kibana privileges for Machine Learning to use this feature."
+                defaultMessage="You must have the Kibana privileges for Machine learning to use this feature."
               />
             </p>
           </EuiCallOut>

@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           text: 'Visualize library',
         });
 
-        // check Machine Learning section
+        // check Machine learning section
         await solutionNavigation.sidenav.openPanel('machine_learning-landing');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('machine_learning-landing');

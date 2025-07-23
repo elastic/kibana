@@ -139,7 +139,7 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
                 {i18n.translate(
                   'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
                   {
-                    defaultMessage: 'Machine Learning',
+                    defaultMessage: 'Machine learning',
                   }
                 )}
               </MLManageJobsLink>
@@ -167,7 +167,7 @@ export function JobsList({ data, status, onAddEnvironments, setupState, onUpdate
                     }),
                     text: i18n.translate('xpack.apm.jobsList.updateCompletedToastText', {
                       defaultMessage:
-                        'Your new anomaly detection jobs have been created successfully. You will start to see anomaly detection results in the app within minutes. The old jobs have been closed but the results are still available within Machine Learning.',
+                        'Your new anomaly detection jobs have been created successfully. You will start to see anomaly detection results in the app within minutes. The old jobs have been closed but the results are still available within Machine learning.',
                     }),
                   });
                   onUpdateComplete();

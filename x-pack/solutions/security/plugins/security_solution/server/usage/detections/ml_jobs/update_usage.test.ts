@@ -8,7 +8,7 @@
 import { getInitialMlJobUsage } from './get_initial_usage';
 import { updateMlJobUsage } from './update_usage';
 
-describe('Security Machine Learning usage metrics', () => {
+describe('Security Machine learning usage metrics', () => {
   describe('Updates metrics with job information', () => {
     it('Should update ML total for elastic rules', async () => {
       const initialUsage = getInitialMlJobUsage();

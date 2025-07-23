@@ -5,7 +5,7 @@ get:
     You must have `read` privileges for the appropriate Kibana features,
     depending on the `consumer` and `rule_type_id` of the rules you're seeking.
     For example, you must have privileges for the **Management > Stack rules**
-    feature, **Analytics > Discover** and **Machine Learning** features,
+    feature, **Analytics > Discover** and **Machine learning** features,
     **Observability** features, or **Security** features. To find rules
     associated with the **Stack Monitoring** feature, use the `monitoring_user`
     built-in role.

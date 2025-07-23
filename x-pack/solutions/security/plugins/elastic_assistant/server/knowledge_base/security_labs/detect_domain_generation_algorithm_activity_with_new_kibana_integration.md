@@ -47,7 +47,7 @@ Once installation is complete, you can navigate to **Stack Management > Ingest P
 
 ![](/assets/images/detect-domain-generation-algorithm-activity-with-new-kibana-integration/blog-elastic-DGA-3.png)
 
-Similarly, the installed DGA model can now be seen in **Machine Learning > Model Management > Trained Models**.
+Similarly, the installed DGA model can now be seen in **Machine learning > Model Management > Trained Models**.
 
 ![](/assets/images/detect-domain-generation-algorithm-activity-with-new-kibana-integration/blog-elastic-DGA-4.jpg)
 
@@ -96,7 +96,7 @@ If you want an immediate way to test that the ingest pipeline is working as expe
 
 The package includes a pre-configured anomaly detection job. This machine learning (ML) job examines the DGA scores produced by the supervised DGA model and looks for anomalous patterns of unusually high scores for a particular source IP address. These events are assigned an anomaly score.
 
-To run this job on your enriched data, go to **Machine Learning > Anomaly Detection**. When you create a job using the job wizard, you should see an option to Use preconfigured jobswith a card for DGA. After selecting the card, you will see the pre-configured anomaly detection job that can be run. Note this job is only useful for indices that have been enriched by the ingest pipeline.
+To run this job on your enriched data, go to **Machine learning > Anomaly Detection**. When you create a job using the job wizard, you should see an option to Use preconfigured jobswith a card for DGA. After selecting the card, you will see the pre-configured anomaly detection job that can be run. Note this job is only useful for indices that have been enriched by the ingest pipeline.
 
 ### Step 4: Enabling the rules
 

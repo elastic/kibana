@@ -20,7 +20,7 @@ export const getMlInferencePipelines = async (
   trainedModelsProvider: MlTrainedModels | undefined
 ): Promise<Record<string, IngestPipeline>> => {
   if (!trainedModelsProvider) {
-    throw new Error('Machine Learning is not enabled');
+    throw new Error('Machine learning is not enabled');
   }
 
   // Fetch all ML inference pipelines and trained models that are accessible in the current

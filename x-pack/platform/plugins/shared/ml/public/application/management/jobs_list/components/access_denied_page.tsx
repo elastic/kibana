@@ -26,7 +26,7 @@ export const AccessDeniedPage = () => (
       <p>
         <FormattedMessage
           id="xpack.ml.management.jobsList.noGrantedPrivilegesDescription"
-          defaultMessage="You don’t have permission to manage Machine Learning jobs. Access to the plugin requires the Machine Learning feature to be visible in this space."
+          defaultMessage="You don’t have permission to manage Machine learning jobs. Access to the plugin requires the Machine learning feature to be visible in this space."
         />
       </p>
     }

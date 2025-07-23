@@ -3,7 +3,7 @@ post:
   operationId: createRule
   description: >
     To create a rule, you must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule you're creating.
-    For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability** features, or **Security** features.
+    For example, you must have privileges for the **Management > Stack rules** feature, **Analytics > Discover** and **Machine learning** features, **Observability** features, or **Security** features.
     If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.
     This API supports both key- and token-based authentication.
     To use key-based authentication, create an API key in Kibana and use it in the header of the API call.

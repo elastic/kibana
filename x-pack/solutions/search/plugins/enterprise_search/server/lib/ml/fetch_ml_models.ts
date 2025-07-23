@@ -46,7 +46,7 @@ export const fetchMlModels = async (
   log: Logger
 ): Promise<MlModel[]> => {
   if (!trainedModelsProvider) {
-    throw new Error('Machine Learning is not enabled');
+    throw new Error('Machine learning is not enabled');
   }
 
   // Set the compatible ELSER and E5 model IDs based on platform architecture

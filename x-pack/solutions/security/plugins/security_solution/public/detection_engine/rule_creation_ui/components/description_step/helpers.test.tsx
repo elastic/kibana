@@ -477,7 +477,7 @@ describe('helpers', () => {
     it('returns a humanized description for a machine_learning type', () => {
       const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'machine_learning');
 
-      expect(result.description).toEqual('Machine Learning');
+      expect(result.description).toEqual('Machine learning');
     });
 
     it('returns the label for a query type', () => {

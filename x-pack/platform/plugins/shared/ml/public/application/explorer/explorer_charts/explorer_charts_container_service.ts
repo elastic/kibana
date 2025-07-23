@@ -7,7 +7,7 @@
 
 /*
  * Service for the container for the anomaly charts in the
- * Machine Learning Explorer dashboard.
+ * Machine learning Explorer dashboard.
  * The service processes the data required to draw each of the charts
  * and manages the layout of the charts in the containing div.
  */

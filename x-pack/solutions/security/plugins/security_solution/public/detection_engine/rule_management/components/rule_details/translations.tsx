@@ -278,7 +278,7 @@ export const THRESHOLD_FIELD_LABEL = i18n.translate(
 export const MACHINE_LEARNING_JOB_ID_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.machineLearningJobIdFieldLabel',
   {
-    defaultMessage: 'Machine Learning job',
+    defaultMessage: 'Machine learning job',
   }
 );
 

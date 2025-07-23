@@ -25,7 +25,7 @@ export const DEPRECATION_TYPE_MAP: Record<EnrichedDeprecationInfo['type'], strin
     defaultMessage: 'Node',
   }),
   ml_settings: i18n.translate('xpack.upgradeAssistant.esDeprecations.mlDeprecationTypeLabel', {
-    defaultMessage: 'Machine Learning',
+    defaultMessage: 'Machine learning',
   }),
   health_indicator: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.healthIndicatorTypeLabel',

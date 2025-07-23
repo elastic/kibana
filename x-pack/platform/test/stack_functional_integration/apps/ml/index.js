@@ -6,7 +6,7 @@
  */
 
 export default ({ loadTestFile }) => {
-  describe('Machine Learning', function () {
+  describe('Machine learning', function () {
     loadTestFile(require.resolve('./ml_smoke_test'));
   });
 };
