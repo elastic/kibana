@@ -109,12 +109,18 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function waitForAlertDocs(
     index: string,
+    ruleId: string,
     count: number = 1
   ): Promise<Array<SearchHit<AlertDoc>>> {
     return await retry.try(async () => {
       const searchResult = await es.search<AlertDoc>({
         index,
         size: count,
+        query: {
+          bool: {
+            must: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
+          },
+        },
       });
 
       const docs = searchResult.hits.hits as Array<SearchHit<AlertDoc>>;
@@ -205,7 +211,6 @@ export default ({ getService }: FtrProviderContext) => {
     let securityRuleId: string;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
       await supertest
         .post(`/api/sample_data/logs`)
         .set('kbn-xsrf', 'true')
@@ -226,8 +231,8 @@ export default ({ getService }: FtrProviderContext) => {
         }
       });
 
-      await waitForAlertDocs('.alerts-security*', 1);
-      await waitForAlertDocs('.alerts-stack*', 1);
+      await waitForAlertDocs('*.alerts-security.*', securityRuleId, 1);
+      await waitForAlertDocs('*.alerts-stack.*', stackRuleId, 1);
     });
 
     after(async () => {
