@@ -617,10 +617,10 @@ export function alertingServiceProvider(
           const formatter =
             formatters.fieldFormatters[h._source.field_name] ?? formatters.numberFormatter;
 
-          const processedSource = processSourceWithEscapeLinkLike(h._source);
+          const escapedRecordSource = processSourceWithEscapeLinkLike(h._source);
 
           return {
-            ...processedSource,
+            ...escapedRecordSource,
             typical: typical?.map((t) => formatter(t)),
             actual: actual?.map((a) => formatter(a)),
             score: Math.floor(
@@ -630,10 +630,10 @@ export function alertingServiceProvider(
           };
         }) as RecordAnomalyAlertDoc[],
         topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
-          const processedSource = processSourceWithEscapeLinkLike(h._source);
+          const escapedInfluencerSource = processSourceWithEscapeLinkLike(h._source);
 
           return {
-            ...processedSource,
+            ...escapedInfluencerSource,
             score: Math.floor(
               h._source[getScoreFields(ML_ANOMALY_RESULT_TYPE.INFLUENCER, useInitialScore)]
             ),
