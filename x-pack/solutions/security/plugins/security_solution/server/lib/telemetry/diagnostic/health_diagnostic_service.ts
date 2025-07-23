@@ -100,6 +100,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient, this.logger);
     this.analytics = start.analytics;
+    this._esClient = start.esClient;
 
     await this.scheduleTask(start.taskManager);
   }
@@ -247,24 +248,16 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private async scheduleTask(taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.info('About to schedule task');
 
-    try {
-      await taskManager.ensureScheduled({
-        id: TASK_ID,
-        taskType: TASK_TYPE,
-        schedule: { interval: INTERVAL },
-        params: {},
-        state: { lastExecutionByQuery: {} },
-        scope: ['securitySolution'],
-      });
+    await taskManager.ensureScheduled({
+      id: TASK_ID,
+      taskType: TASK_TYPE,
+      schedule: { interval: INTERVAL },
+      params: {},
+      state: { lastExecutionByQuery: {} },
+      scope: ['securitySolution'],
+    });
 
-      this.logger.info('Task scheduled');
-    } catch (error) {
-      this.logger.error('Error scheduling task', {
-        error,
-        taskId: TASK_ID,
-        taskType: TASK_TYPE,
-      });
-    }
+    this.logger.info('Task scheduled');
   }
 
   private buildCircuitBreakers(): CircuitBreaker[] {
@@ -318,7 +311,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         for (let i = 0; i < keys.length; i++) {
           const key = keys[i];
 
-          if (!(key in src)) break;
+          if (!Object.hasOwn(src, key)) break;
 
           if (i === keys.length - 1) {
             const value = src[key];
@@ -338,8 +331,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         const docs = doc as unknown[];
         const result = await Promise.all(
           docs.map((d) => {
-            const a = applyFilterToDoc(d);
-            return a;
+            return applyFilterToDoc(d);
           })
         );
         filteredResult.push(result);
