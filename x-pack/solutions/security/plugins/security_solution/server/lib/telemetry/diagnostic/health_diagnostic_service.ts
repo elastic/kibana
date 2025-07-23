@@ -138,8 +138,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       const queryStats: HealthDiagnosticQueryStats = {
         name: query.name,
         started: toDate.toISOString(),
-        finished: new Date().toISOString(),
         traceId: randomUUID(),
+        finished: new Date().toISOString(),
         numDocs: 0,
         passed: false,
         fieldNames: [],
@@ -150,6 +150,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
         queryStats.numDocs += data.length;
         queryStats.fieldNames = fieldNames(data);
+        queryStats.finished = new Date().toISOString();
         const queryResult: HealthDiagnosticQueryResult = {
           name: query.name,
           queryId: query.id,
