@@ -6,9 +6,11 @@
  */
 
 import { mount } from 'enzyme';
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiSuperSelect } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import userEvent from '@testing-library/user-event';
 
 import { EntryItem } from './entry_item';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -139,9 +141,53 @@ describe('EntryItem', () => {
     );
   });
 
-  test('it invokes "onChange" with negate=false when MATCH option selected', () => {
+  test('displays field values and MATCHES select', async () => {
     const mockOnChange = jest.fn();
-    const wrapper = mount(
+
+    render(
+      <EntryItem
+        entry={{
+          id: '123',
+          field: getField('ip'),
+          type: 'mapping',
+          value: getField('ip'),
+          entryIndex: 1,
+        }}
+        indexPattern={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        showLabel={false}
+        onChange={mockOnChange}
+      />
+    );
+
+    const matchSelect = within(screen.getByTestId('entryItemMatchInputFormRow')).getByRole(
+      'button'
+    );
+
+    const comboboxes = screen.getAllByRole('combobox');
+
+    expect(comboboxes).toHaveLength(2);
+    expect(comboboxes[0]).toHaveValue('ip');
+    expect(comboboxes[1]).toHaveValue('ip');
+    expect(matchSelect).toHaveTextContent('MATCHES');
+  });
+
+  test('displays field values and DOES NOT MATCH select', async () => {
+    const mockOnChange = jest.fn();
+
+    render(
       <EntryItem
         entry={{
           id: '123',
@@ -170,28 +216,26 @@ describe('EntryItem', () => {
       />
     );
 
-    (
-      wrapper.find(EuiSuperSelect).at(0).props() as unknown as {
-        onChange: (option: string) => void;
-      }
-    ).onChange('MATCH');
-
-    expect(mockOnChange).toHaveBeenCalledWith(
-      { id: '123', field: 'ip', type: 'mapping', value: 'ip', negate: false },
-      1
+    const matchSelect = within(screen.getByTestId('entryItemMatchInputFormRow')).getByRole(
+      'button'
     );
+
+    expect(matchSelect).toHaveTextContent('DOES NOT MATCH');
   });
 
-  test('it invokes "onChange" with negate=true when DOES_NOT_MATCH option selected', () => {
+  test('displays DOES NOT MATCH select option as disabled if doesNotMatchDisabled=true', async () => {
     const mockOnChange = jest.fn();
-    const wrapper = mount(
+
+    render(
       <EntryItem
+        doesNotMatchDisabled
         entry={{
           id: '123',
           field: getField('ip'),
           type: 'mapping',
           value: getField('ip'),
-          entryIndex: 1,
+          entryIndex: 0,
+          negate: true,
         }}
         indexPattern={
           {
@@ -212,11 +256,56 @@ describe('EntryItem', () => {
       />
     );
 
-    (
-      wrapper.find(EuiSuperSelect).at(0).props() as unknown as {
-        onChange: (option: string) => void;
-      }
-    ).onChange('DOES_NOT_MATCH');
+    const matchSelect = within(screen.getByTestId('entryItemMatchInputFormRow')).getByRole(
+      'button'
+    );
+
+    await userEvent.click(matchSelect);
+    const option = screen.getByRole('option', { name: 'DOES NOT MATCH' });
+
+    expect(option).toBeDisabled();
+  });
+
+  test('invokes onChange when MATCHES clause changed to DOES NOT MATCH', async () => {
+    const mockOnChange = jest.fn();
+
+    render(
+      <EntryItem
+        entry={{
+          id: '123',
+          field: getField('ip'),
+          type: 'mapping',
+          value: getField('ip'),
+          entryIndex: 1,
+          negate: false,
+        }}
+        indexPattern={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        showLabel={false}
+        onChange={mockOnChange}
+      />
+    );
+
+    const matchSelect = within(screen.getByTestId('entryItemMatchInputFormRow')).getByRole(
+      'button'
+    );
+
+    await userEvent.click(matchSelect);
+    const option = screen.getByRole('option', { name: 'DOES NOT MATCH' });
+
+    await userEvent.click(option);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { id: '123', field: 'ip', type: 'mapping', value: 'ip', negate: true },
