@@ -85,7 +85,8 @@ export const OtelKubernetesPanel: React.FC = () => {
 
   const elasticEndpointVarName = isServerless ? 'elastic_otlp_endpoint' : 'elastic_endpoint';
   const valuesFileSubfolder = isServerless ? '/managed_otlp' : '';
-  const valuesFileName = metricsOnboardingEnabled ? 'values.yaml' : 'logs-values.yaml';
+  const valuesFileName =
+    !isServerless || metricsOnboardingEnabled ? 'values.yaml' : 'logs-values.yaml';
 
   const otelKubeStackValuesFileUrl = data
     ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack${valuesFileSubfolder}/${valuesFileName}`
