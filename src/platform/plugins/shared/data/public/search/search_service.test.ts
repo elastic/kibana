@@ -69,6 +69,8 @@ describe('Search service', () => {
     it('exposes proper contract', async () => {
       expect(data).toHaveProperty('aggs');
       expect(data).toHaveProperty('search');
+      expect(data).toHaveProperty('showSearchSessionsFlyout');
+      expect(data).toHaveProperty('showWarnings');
       expect(data).toHaveProperty('showError');
       expect(data).toHaveProperty('searchSource');
       expect(data).toHaveProperty('sessionsClient');

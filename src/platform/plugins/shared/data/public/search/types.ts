@@ -13,6 +13,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { WarningHandlerCallback } from '@kbn/search-response-warnings';
 import type { ISearchGeneric } from '@kbn/search-types';
+import { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import { ISearchStartSearchSource } from '../../common/search';
 import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
 import { SearchUsageCollector } from './collectors';
@@ -67,6 +68,11 @@ export interface ISearchStart {
    * @param cb WarningHandlerCallback - optional callback to intercept warnings
    */
   showWarnings: (adapter: RequestAdapter, cb?: WarningHandlerCallback) => void;
+  /**
+   * Shows a flyout with a table to manage search sessions.
+   * @param params locators - the locators to use for generating URLs
+   */
+  showSearchSessionsFlyout: (params: { locators: LocatorClient }) => void;
   /**
    * high level search
    * {@link ISearchStartSearchSource}
