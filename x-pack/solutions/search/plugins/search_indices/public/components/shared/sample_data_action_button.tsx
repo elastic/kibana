@@ -125,7 +125,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
       iconSide="left"
       iconType="download"
       size="s"
-      data-test-subj="instalSampleBtn"
+      data-test-subj="installSampleBtn"
       isLoading={isLoading}
       onClick={onIngestSampleData}
     >

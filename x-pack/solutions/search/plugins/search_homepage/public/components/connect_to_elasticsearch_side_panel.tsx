@@ -58,6 +58,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           hasBorder
           textAlign="left"
           titleSize="xs"
+          data-test-subj="sampleDataSection"
           title={
             <FormattedMessage
               id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
