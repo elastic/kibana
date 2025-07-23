@@ -110,7 +110,6 @@ image::images/cleanup_alerts.png[Alerts history clean-up available in Technical 
 Maintenance windows now have public HTTP APIs, enabling programmatic management. You can leverage these APIs to perform Create, Read, Update, and Delete (CRUD) operations on maintenance windows, giving you greater control.
 
 [discrete]
-==== Cases analytics index
 
 You can now explore Cases data in dashboards and Discover. You can use the new Cases analytics index to build dashboards and visualizations of Cases activities and trends. These data points offer improved visibility into incident management efficiency in Kibana for operation managers.
 
