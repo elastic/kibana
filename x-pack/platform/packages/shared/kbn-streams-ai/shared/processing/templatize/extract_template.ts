@@ -6,7 +6,6 @@
  */
 
 import { partition, pull } from 'lodash';
-import { formatRoot } from './format_root';
 import { maskCapturingBrackets } from './mask_capturing_brackets';
 import { maskQuotes } from './mask_quotes';
 import { FIRST_PASS_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './pattern_precedence';
@@ -139,30 +138,51 @@ function tokenizeLines(
   },
   splitChars?: string[][]
 ) {
+  const delimiterValue = delimiter === '\\s' || delimiter === '\\s+' ? ' ' : delimiter;
+
   return maskedMessages.map(({ literals, masked }, index) => {
     const original = messages[index];
 
     // split log line on likely delimiter
-    const columns = masked.split(createDelimiterRegex(delimiter)).map((column, idx) => {
+    const result = masked.split(createDelimiterRegex(delimiter)).map((column, idx) => {
       // tokenize before restoring masked values
-      const tokens = tokenize(column.trim(), literals, splitChars?.[idx] ?? TOKEN_SPLIT_CHARS);
+      const tokens = tokenize(
+        column.trim(),
+        literals,
+        splitChars ? splitChars[idx] : TOKEN_SPLIT_CHARS
+      );
+      return {
+        column,
+        tokens,
+        values: tokens.map((token) => restoreMaskedPatterns(token, literals)),
+      };
+    });
 
-      const result = {
+    const columns = result.map(({ column, values, tokens }, i) => {
+      return {
         value: column,
-        tokens: tokens.map((token) => {
-          const value = restoreMaskedPatterns(token, literals);
+        tokens: tokens.map((token, k) => {
+          const value: string = values[k];
+          const nextValue: string | undefined = values[k + 1];
+          const isLastTokenInColumn = k === tokens.length - 1;
+          const isLastTokenAcrossAllColumns = isLastTokenInColumn && i === result.length - 1;
 
-          // find all patterns that (completely) match this token
-          const patterns = findMatchingPatterns(value);
-
+          // find all patterns that (completely) match this token (without bleeding into the next token or column)
+          const { patterns, excludedPatterns } = findMatchingPatterns(
+            value,
+            isLastTokenAcrossAllColumns
+              ? undefined
+              : isLastTokenInColumn
+              ? delimiterValue
+              : nextValue
+          );
           return {
             value,
             patterns,
+            excludedPatterns,
           };
         }),
       };
-
-      return result;
     });
 
     return {
@@ -182,6 +202,7 @@ function findConsistentSplitChars(
       tokens: Array<{
         value: string;
         patterns: number[];
+        excludedPatterns: number[];
       }>;
     }>;
   }>
@@ -240,15 +261,8 @@ function findConsistentSplitChars(
 export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
   if (!messages.length) {
     return {
-      root: {
-        values: {},
-        formatted: {
-          display: '',
-          grok: '',
-        },
-        columns: [],
-        delimiter: '',
-      },
+      roots: [],
+      delimiter: '',
       templates: [],
     };
   }
@@ -299,7 +313,6 @@ export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
       maxLeading = Math.max(maxLeading, column.value.match(LEADING_WHITESPACE)?.[0].length ?? 0);
       maxTrailing = Math.max(maxTrailing, column.value.match(TRAILING_WHITESPACE)?.[0].length ?? 0);
     });
-
     // Use the normalize_tokens module to handle the token normalization
     return normalizeTokensForColumn(tokenLists, maxLeading, maxTrailing);
   });
@@ -310,6 +323,7 @@ export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
       tokens: [
         {
           patterns: [PATTERN_PRECEDENCE.indexOf('GREEDYDATA')],
+          excludedPatterns: [],
           values: [],
         },
       ],
@@ -321,7 +335,8 @@ export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
   }
 
   return {
-    root: formatRoot(roots, delimiter),
+    roots,
+    delimiter,
     templates,
   };
 }

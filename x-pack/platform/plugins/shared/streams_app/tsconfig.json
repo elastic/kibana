@@ -12,7 +12,10 @@
     ".storybook/**/*",
     "test/scout/**/*"
   ],
-  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",

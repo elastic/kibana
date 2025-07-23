@@ -9,6 +9,13 @@ import { FlattenRecord } from '@kbn/streams-schema';
 import { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
+import {
+  getUsefulTokens,
+  getReviewFields,
+  getGrokProcessor,
+} from '@kbn/streams-ai/shared/processing/templatize/format_root'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import { syncExtractTemplate } from '@kbn/streams-ai/shared/processing/templatize/extract_template'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import { get } from 'lodash';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { showErrorToast } from '../../../../../hooks/use_streams_app_fetch';
 import {
@@ -75,34 +82,43 @@ export function useGrokPatternSuggestion() {
         });
       }
 
+      const messages = samples.reduce<string[]>((acc, sample) => {
+        const value = get(sample, params.fieldName);
+        if (typeof value === 'string') {
+          acc.push(value);
+        }
+        return acc;
+      }, []);
+
       const finishTrackingAndReport = telemetryClient.startTrackingAIGrokSuggestionLatency({
         name: params.streamName,
         field: params.fieldName,
         connector_id: params.connectorId,
       });
 
+      const { roots, delimiter } = syncExtractTemplate(messages);
+      const { usefulTokens, usefulColumns } = getUsefulTokens(roots, delimiter);
+      const reviewFields = getReviewFields(usefulColumns, 10);
+
       return streamsRepositoryClient
-        .fetch('POST /internal/streams/{name}/processing/_suggestions', {
+        .fetch('POST /internal/streams/{name}/processing/_suggestions/grok', {
           signal: abortController.signal,
           params: {
             path: { name: params.streamName },
             body: {
-              field: params.fieldName,
-              connectorId: params.connectorId,
-              samples,
+              connector_id: params.connectorId,
+              sample_messages: messages.slice(0, 10),
+              review_fields: reviewFields,
             },
           },
         })
         .then(
           (response) => {
-            finishTrackingAndReport(
-              response.length || 0,
-              response.map(
-                ({ simulationResult }) =>
-                  simulationResult.processors_metrics['grok-processor'].parsed_rate
-              )
-            );
-            return response;
+            const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, response);
+
+            finishTrackingAndReport(1, [1]);
+
+            return grokProcessor;
           },
           (error: Error) => {
             showErrorToast(notifications, error);

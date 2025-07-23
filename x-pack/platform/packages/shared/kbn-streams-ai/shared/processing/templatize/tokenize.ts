@@ -33,8 +33,9 @@ function processCaptureGroups(token: string, literals: string[]): TokenProcessin
 }
 
 function splitByPattern(tokens: string[]): string[] {
-  const patternRegex = new RegExp(`${GROK_REGEX_MAP.CAPTUREGROUP.partial.source}`);
-  return tokens.flatMap((token) => token.split(patternRegex)).filter(Boolean);
+  return tokens
+    .flatMap((token) => token.split(GROK_REGEX_MAP.CAPTUREGROUP.partial))
+    .filter(Boolean);
 }
 
 // Helper function to escape special characters for use in a RegExp
@@ -85,6 +86,7 @@ export function tokenize(col: string, literals: string[], splitChars: string[]):
       if (GROK_REGEX_MAP.CAPTUREGROUP.complete.test(segment)) {
         return [segment];
       }
+
       // Split the segment by the delimiter, keeping the delimiter, and removing empty strings
       return segment.split(delimiterRegex).filter(Boolean);
     });

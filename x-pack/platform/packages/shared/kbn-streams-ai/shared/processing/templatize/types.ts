@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { NormalizedColumn } from './normalize_tokens';
+
 /** Result of a single token analysis */
 export interface TokenMatch {
   patterns: number[];
@@ -43,7 +45,9 @@ export interface TemplateRoot {
 /** Final API return type */
 export interface ExtractTemplateResult {
   /** Root template common to all messages */
-  root: TemplateRoot;
+  // root: TemplateRoot;
+  roots: NormalizedColumn[];
+  delimiter: string;
   /** One entry per message */
   templates: MessageTemplate[];
 }

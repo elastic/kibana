@@ -62,7 +62,7 @@ export async function prepartitionStreams({
             name: `logs.${filepath.split('.')[0].toLowerCase()}`,
           },
           if: {
-            field: 'filepath',
+            field: 'attributes.filepath',
             operator: 'eq',
             value: filepath,
           },

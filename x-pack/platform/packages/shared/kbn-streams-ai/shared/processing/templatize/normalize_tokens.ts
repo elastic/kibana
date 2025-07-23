@@ -30,6 +30,7 @@ const NOTSPACE_IDX = patternIndex(BuiltinPattern.NOTSPACE);
 export interface Token {
   value: string;
   patterns: number[];
+  excludedPatterns: number[];
 }
 
 export interface TokenizedColumn {
@@ -37,9 +38,11 @@ export interface TokenizedColumn {
   value: string;
 }
 
+// Tokens per line normalizsed into single row
 export interface NormalizedToken {
-  patterns: number[];
   values: string[];
+  patterns: number[];
+  excludedPatterns: number[];
 }
 
 export interface NormalizedColumn {
@@ -50,20 +53,24 @@ export interface NormalizedColumn {
   };
 }
 
-/** Compute the intersection of pattern arrays for the given accessor. */
-const intersectPatternsBy = (
-  lists: Token[][],
-  accessor: (row: Token[]) => Token | undefined
-): number[] => {
+/** Compute the intersection of patterns (and union of exclude patterns) for the given accessor. */
+const intersectPatternsBy = (lists: Token[][], accessor: (row: Token[]) => Token | undefined) => {
   const first = accessor(lists[0]);
-  if (!first) return [DATA_IDX];
-  const common = first.patterns.filter((p) =>
+  if (!first) return { patterns: [DATA_IDX], excludedPatterns: [] };
+  const patterns = first.patterns.filter((p) =>
     lists.every((row) => {
       const tok = accessor(row);
-      return tok ? p < NOTSPACE_IDX && tok.patterns.includes(p) : false;
+      return tok ? tok.patterns.includes(p) : false;
     })
   );
-  return common.length ? common : [DATA_IDX];
+  const excludedPatterns: Set<number> = new Set();
+  lists.forEach((row) => {
+    const tok = accessor(row);
+    if (tok) {
+      tok.excludedPatterns.forEach((p) => excludedPatterns.add(p));
+    }
+  });
+  return { patterns, excludedPatterns: Array.from(excludedPatterns) };
 };
 
 /** Decide if accessor produces a common token across all rows. */
@@ -77,21 +84,23 @@ const isCommonTokenBy = (
     const tok = accessor(row);
     if (!tok) return false;
     const valuesEqual = tok.value === firstTok.value;
-    const patternsOverlap = firstTok.patterns.some(
-      (p) => p < NOTSPACE_IDX && tok.patterns.includes(p)
-    );
+    const patternsOverlap = firstTok.patterns.some((p) => tok.patterns.includes(p));
     return valuesEqual || patternsOverlap;
   });
 };
 
 /** Build NormalizedToken for given accessor (gracefully handles shorter rows). */
 const buildTokenBy = (
-  lists: Token[][],
+  tokensByRow: Token[][],
   accessor: (row: Token[]) => Token | undefined
-): NormalizedToken => ({
-  patterns: intersectPatternsBy(lists, accessor),
-  values: lists.map((row) => accessor(row)?.value ?? ''),
-});
+): NormalizedToken => {
+  const { patterns, excludedPatterns } = intersectPatternsBy(tokensByRow, accessor);
+  return {
+    patterns,
+    excludedPatterns,
+    values: tokensByRow.map((row) => accessor(row)?.value ?? ''),
+  };
+};
 
 /** --------------------------------------------------------------
  *  Public API
@@ -150,7 +159,7 @@ export function normalizeTokensForColumn(
       const idx = leftIdx; // freeze index for this iteration
       const leftAcc = (row: Token[]) => (idx < row.length ? row[idx] : undefined);
       if (isCommonTokenBy(tokenLists, leftAcc)) {
-        prefix.push(buildTokenBy(tokenLists, leftAcc as (row: Token[]) => Token));
+        prefix.push(buildTokenBy(tokenLists, leftAcc));
         leftIdx++;
       } else {
         scanLeft = false;
@@ -175,7 +184,7 @@ export function normalizeTokensForColumn(
       if (wouldCollide) {
         scanRight = false;
       } else if (isCommonTokenBy(tokenLists, rAcc)) {
-        suffix.unshift(buildTokenBy(tokenLists, rAcc as (row: Token[]) => Token));
+        suffix.unshift(buildTokenBy(tokenLists, rAcc));
         rightOff++;
       } else {
         scanRight = false;
@@ -209,7 +218,7 @@ export function normalizeTokensForColumn(
           .join('');
       });
       const pattern = concatenated.every((v) => !v.includes(' ')) ? NOTSPACE_IDX : DATA_IDX;
-      normalized.push({ patterns: [pattern], values: concatenated });
+      normalized.push({ patterns: [pattern], excludedPatterns: [], values: concatenated });
     }
   }
 
@@ -232,7 +241,10 @@ export function normalizeTokensForColumn(
       // Concatenate value‑by‑value
       const mergedValues = prev.values.map((v, i) => v + tok.values[i]);
       // Decide pattern (NOTSPACE if no spaces, otherwise DATA)
-      const pattern = mergedValues.every((v) => !v.includes(' ')) ? NOTSPACE_IDX : DATA_IDX;
+      const pattern =
+        !tok.excludedPatterns.includes(NOTSPACE_IDX) && mergedValues.every((v) => !v.includes(' '))
+          ? NOTSPACE_IDX
+          : DATA_IDX;
       prev.patterns = [pattern];
       prev.values = mergedValues;
     } else {
@@ -243,11 +255,14 @@ export function normalizeTokensForColumn(
   const reevaluated = compacted.map((token): NormalizedToken => {
     const matchingPattern = PATTERN_PRECEDENCE.find((pattern, idx) => {
       return token.values.every((value) => {
-        return GROK_REGEX_MAP[pattern].complete.test(value);
+        return (
+          !token.excludedPatterns.includes(idx) && GROK_REGEX_MAP[pattern].complete.test(value)
+        );
       });
     });
     return {
       patterns: matchingPattern ? [PATTERN_PRECEDENCE.indexOf(matchingPattern)] : [DATA_IDX],
+      excludedPatterns: token.excludedPatterns,
       values: token.values,
     };
   });

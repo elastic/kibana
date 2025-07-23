@@ -38,20 +38,20 @@ export async function withLoghubSynthtrace<T>(
     index: 'logs*',
   });
 
-  const live = execa.command(
-    `node scripts/synthtrace.js sample_logs --live --assume-package-version=9.0.0`,
-    {
-      cwd: REPO_ROOT,
-    }
-  );
+  // const live = execa.command(
+  //   `node scripts/synthtrace.js sample_logs --live --assume-package-version=9.0.0`,
+  //   {
+  //     cwd: REPO_ROOT,
+  //   }
+  // );
 
   return await cb().finally(() => {
     logger.info(`Killing synthtrace with SIGTERM`);
-    live.kill('SIGTERM');
+    // live.kill('SIGTERM');
 
     setTimeout(() => {
       logger.info(`Killing synthtrace forcefully`);
-      live.kill('SIGKILL');
+      // live.kill('SIGKILL');
     }, 10000).unref();
   });
 }

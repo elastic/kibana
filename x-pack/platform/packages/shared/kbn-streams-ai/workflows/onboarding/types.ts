@@ -28,7 +28,7 @@ export interface OnboardingTaskState {
   };
   panels?: SuggestedPanel[];
   dataset: {
-    samples: SearchHit[];
+    samples: Array<SearchHit<any>>;
     analysis: DocumentAnalysis;
     fieldCaps: FieldCapsResponse;
     total: number;

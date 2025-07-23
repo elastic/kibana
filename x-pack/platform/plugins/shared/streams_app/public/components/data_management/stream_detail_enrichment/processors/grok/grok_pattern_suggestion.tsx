@@ -7,8 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiBadge,
-  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -18,10 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { APIReturnType } from '@kbn/streams-plugin/public/api';
-import { ValuesType } from 'utility-types';
 import { GrokCollection, DraftGrokExpression } from '@kbn/grok-ui';
 import { UseFormSetValue, FieldValues, useWatch } from 'react-hook-form';
+import type { GrokProcessorResult } from '@kbn/streams-ai/shared/processing/templatize/format_root';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
@@ -61,21 +58,20 @@ export const GrokPatternAISuggestions = ({
     );
   }, [previewDocuments, fieldValue]);
 
-  if (suggestionsState.value && suggestionsState.value[0]) {
+  if (suggestionsState.value) {
     return (
       <GrokPatternSuggestion
-        suggestion={suggestionsState.value[0]}
+        suggestion={suggestionsState.value}
         onAccept={() => {
-          const [suggestion] = suggestionsState.value ?? [];
-          if (suggestion) {
+          if (suggestionsState.value) {
             setValue(
               'patterns',
-              suggestion.grokProcessor.patterns.map(
+              suggestionsState.value.patterns.map(
                 (value) => new DraftGrokExpression(grokCollection, value)
               ),
               { shouldValidate: true }
             );
-            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions, {
+            setValue('pattern_definitions', suggestionsState.value.pattern_definitions, {
               shouldValidate: true,
             });
           }
@@ -133,7 +129,7 @@ export const GrokPatternAISuggestions = ({
 };
 
 export interface GrokPatternSuggestionProps {
-  suggestion: ValuesType<APIReturnType<'POST /internal/streams/{name}/processing/_suggestions'>>;
+  suggestion: GrokProcessorResult;
   onAccept(): void;
   onDismiss(): void;
 }
@@ -143,7 +139,6 @@ export function GrokPatternSuggestion({
   onAccept,
   onDismiss,
 }: GrokPatternSuggestionProps) {
-  const processorMetrics = suggestion.simulationResult.processors_metrics['grok-processor'];
   return (
     <EuiCallOut
       iconType="sparkles"
@@ -152,7 +147,7 @@ export function GrokPatternSuggestion({
       size="s"
       onDismiss={onDismiss}
     >
-      {suggestion.grokProcessor.patterns.map((pattern, index) => (
+      {suggestion.patterns.map((pattern, index) => (
         <EuiCodeBlock key={pattern} paddingSize="none" language="regex" transparentBackground>
           {pattern}
         </EuiCodeBlock>
@@ -164,32 +159,6 @@ export function GrokPatternSuggestion({
         alignItems="flexStart"
         direction="column"
       >
-        <EuiFlexItem grow={false}>
-          <EuiBadgeGroup>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.matchRateBadge',
-                {
-                  defaultMessage: '{percentage}% Matched',
-                  values: {
-                    percentage: (processorMetrics.parsed_rate * 100).toFixed(),
-                  },
-                }
-              )}
-            </EuiBadge>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.fieldCountBadge',
-                {
-                  defaultMessage: '{count} Fields',
-                  values: {
-                    count: processorMetrics.detected_fields.length,
-                  },
-                }
-              )}
-            </EuiBadge>
-          </EuiBadgeGroup>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="check" onClick={onAccept} color="primary" size="s">
             {i18n.translate(
