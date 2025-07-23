@@ -63,17 +63,31 @@ export function createAddAnomalyChartsPanelAction(
         const { resolveEmbeddableAnomalyChartsUserInput } = await import(
           '../embeddables/anomaly_charts/anomaly_charts_setup_flyout'
         );
-        const initialState = await resolveEmbeddableAnomalyChartsUserInput(
+
+        resolveEmbeddableAnomalyChartsUserInput(
           coreStart,
           pluginStart,
           context.embeddable,
-          context.embeddable.uuid
+          context.embeddable.uuid,
+          (initialState) => {
+            presentationContainerParent.addNewPanel({
+              panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+              serializedState: { rawState: initialState },
+            });
+          }
         );
 
-        presentationContainerParent.addNewPanel({
-          panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-          serializedState: { rawState: initialState },
-        });
+        // const initialState = await resolveEmbeddableAnomalyChartsUserInput(
+        //   coreStart,
+        //   pluginStart,
+        //   context.embeddable,
+        //   context.embeddable.uuid
+        // );
+
+        // presentationContainerParent.addNewPanel({
+        //   panelType: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+        //   serializedState: { rawState: initialState },
+        // });
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error(e);
