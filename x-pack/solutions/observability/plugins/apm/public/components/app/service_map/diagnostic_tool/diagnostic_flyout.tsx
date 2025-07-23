@@ -29,6 +29,7 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
+import type { DiagnosticFormState } from './types';
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
@@ -45,28 +46,21 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [diagnosticResult, setDiagnosticResult] = useState();
+  const [data, setData] = useState();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Smart storage for field-value selections
-  const [diagnosticSelections, setDiagnosticSelections] = useState<{
-    fields: Record<string, string>;
-    traceId?: string;
-    isValid: boolean;
-  }>({
-    fields: {},
+  const [form, setForm] = useState<DiagnosticFormState>({
+    sourceNode: null,
+    destinationNode: null,
+    traceId: '',
     isValid: false,
   });
 
-  // Callback to receive updates from DiagnoseMissingConnectionPanel
   const handleSelectionUpdate = React.useCallback(
-    (fields: Record<string, string>, traceId?: string) => {
-      console.log('fields', fields);
-      const isValid =
-        Object.keys(fields).length > 0 &&
-        Object.values(fields).every((value) => value.trim() !== '');
-      setDiagnosticSelections({
-        fields,
+    ({ sourceNode, destinationNode, traceId, isValid }: DiagnosticFormState) => {
+      setForm({
+        sourceNode,
+        destinationNode,
         traceId,
         isValid,
       });
@@ -74,31 +68,37 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
     []
   );
 
-  console.log('diagnosticSelections', diagnosticSelections);
-
   const handleRunDiagnostic = async () => {
     setIsLoading(true);
 
-    if (start && end && selectedNode?.id) {
-      const response = await callApmApi('GET /internal/apm/diagnostics/service-map/{nodeName}', {
+    if (
+      start &&
+      end &&
+      selectedNode?.id &&
+      form.sourceNode &&
+      form.destinationNode &&
+      form.traceId
+    ) {
+      console.log('form in front', form);
+      const response = await callApmApi('POST /internal/apm/diagnostics/service-map/', {
         params: {
-          path: {
-            nodeName: selectedNode.id,
-          },
-          query: {
+          body: {
             start,
             end,
+            destinationNode: form.destinationNode,
+            sourceNode: form.sourceNode,
+            traceId: form.traceId,
           },
         },
       });
 
-      setDiagnosticResult(response);
+      setData(response);
       setIsLoading(false);
     }
   };
 
   if (!isOpen) return null;
-  if (isEmpty(selectedNode)) return onClose();
+  // if (isEmpty(selectedNode)) return onClose();
 
   return (
     <EuiFlyoutResizable
@@ -136,8 +136,8 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
 
         {isLoading ? (
           <EuiLoadingSpinner size="xl" />
-        ) : diagnosticResult ? (
-          diagnosticResult?.response?.exitSpans?.length > 0 ? (
+        ) : data ? (
+          data?.response?.exitSpans?.length > 0 ? (
             <>
               <EuiTitle size="xs">
                 <h3>
@@ -150,7 +150,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <HighlightedExitSpansTable items={diagnosticResult?.response?.exitSpans} />
+              <HighlightedExitSpansTable items={data?.response?.exitSpans} />
             </>
           ) : (
             <>
@@ -178,7 +178,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
           <EuiButton
-            disabled={!diagnosticSelections.isValid}
+            disabled={!form.isValid}
             data-test-subj="apmDiagnosticRunButton"
             onClick={handleRunDiagnostic}
           >
@@ -189,7 +189,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
           <EuiButton
             data-test-subj="diagnosticFlyoutDownloadReportButton"
             iconType="download"
-            isDisabled={false}
+            isDisabled={!form.isValid}
             onClick={() =>
               downloadJson({
                 fileName: `diagnostic-tool-apm-service-map-${moment(Date.now()).format(

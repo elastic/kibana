@@ -86,40 +86,51 @@ export type DiagnosticsBundle = Promise<{
 }>;
 
 const getServiceMapDiagnosticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/diagnostics/service-map/{nodeName}',
   security: { authz: { requiredPrivileges: ['apm'] } },
+  endpoint: 'POST /internal/apm/diagnostics/service-map/',
   params: t.type({
-    path: t.type({
-      nodeName: t.string,
-    }),
-    // query: t.type({ rangeRt, destinationNode: t.string, traceId: t.string }),
-    query: rangeRt,
+    body: t.intersection([
+      rangeRt,
+      t.type({
+        sourceNode: t.record(t.string, t.string),
+        destinationNode: t.record(t.string, t.string),
+        traceId: t.string,
+      }),
+    ]),
   }),
   handler: async (resources) => {
-    const { start, end, destinationNode, traceId } = resources.params.query;
-    const { nodeName } = resources.params.path;
+    const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
     const apmEventClient = await getApmEventClient(resources);
 
-    const exitSpans = await getExitSpansFromNode({
-      apmEventClient,
-      start,
-      end,
-      serviceName: nodeName,
-    });
+    // Convert sourceNode object to KQL query string
+    const sourceNodeKql = Object.entries(sourceNode)
+      .map(([field, value]) => `${field}:"${value}"`)
+      .join(' AND ');
+    
+    // Extract the destination resource from destinationNode object for getDestinationParentIds
+    const destinationResource = destinationNode['span.destination.service.resource'] || Object.values(destinationNode)[0];
 
-    const { sourceSpanIdsRawResponse, spanIds } = await getSourceSpanIds({
-      apmEventClient,
-      start,
-      end,
-      serviceName: nodeName,
-    });
+    const [exitSpans, sourceSpanIds] = await Promise.all([
+      getExitSpansFromNode({
+        apmEventClient,
+        start,
+        end,
+        sourceNode: sourceNodeKql,
+      }),
+      getSourceSpanIds({
+        apmEventClient,
+        start,
+        end,
+        sourceNode: sourceNodeKql,
+      }),
+    ]);
 
     const destinationParentIds = await getDestinationParentIds({
       apmEventClient,
       start,
       end,
-      ids: spanIds,
-      destinationNode,
+      ids: sourceSpanIds.spanIds,
+      destinationNode: destinationResource,
     });
 
     return {

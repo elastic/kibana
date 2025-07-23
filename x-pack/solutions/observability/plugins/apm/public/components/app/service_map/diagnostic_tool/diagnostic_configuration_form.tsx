@@ -27,10 +27,11 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
 } from '../../../../../common/es_fields/apm';
+import type { DiagnosticFormState } from './types';
 
 interface DiagnosticConfigurationFormProps {
   selectedNode: cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined;
-  onSelectionUpdate: (fields: Record<string, string>, traceId?: string) => void;
+  onSelectionUpdate: (params: DiagnosticFormState) => void;
 }
 
 export function DiagnosticConfigurationForm({
@@ -57,16 +58,19 @@ export function DiagnosticConfigurationForm({
     return array.map((item, i) => (i === index ? value : item));
   };
 
-  // Update parent component when selections change
   React.useEffect(() => {
-    const fields: Record<string, string> = {};
-    selectedFields.forEach((field, index) => {
-      if (field && selectedValues[index]) {
-        fields[field] = selectedValues[index];
-      }
-    });
+    const sourceNode =
+      selectedFields[0] && selectedValues[0] ? { [selectedFields[0]]: selectedValues[0] } : null;
 
-    onSelectionUpdate(fields, traceId);
+    const destinationNode =
+      selectedFields[1] && selectedValues[1] ? { [selectedFields[1]]: selectedValues[1] } : null;
+
+    onSelectionUpdate({
+      sourceNode,
+      destinationNode,
+      traceId,
+      isValid: !isEmpty(selectedValues[0]) && !isEmpty(selectedValues[1]) && !isEmpty(traceId),
+    });
   }, [selectedFields, selectedValues, traceId, onSelectionUpdate]);
 
   const onChangeField = (fieldName: string, index: number) => {
@@ -187,6 +191,7 @@ export function DiagnosticConfigurationForm({
             <SuggestionsSelect
               fieldName="trace.id"
               onChange={(value) => setTraceId(value)}
+              isInvalid={isEmpty(traceId)}
               placeholder={i18n.translate(
                 'xpack.apm.serviceMap.diagnoseMissingConnection.traceIdPlaceholder',
                 {

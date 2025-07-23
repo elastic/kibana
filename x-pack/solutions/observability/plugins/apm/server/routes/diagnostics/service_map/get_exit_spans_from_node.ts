@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { termQuery, rangeQuery, existsQuery, termsQuery } from '@kbn/observability-plugin/server';
+import {
+  termQuery,
+  rangeQuery,
+  existsQuery,
+  termsQuery,
+  kqlQuery,
+} from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SERVICE_NAME,
@@ -15,6 +21,7 @@ import {
 } from '@kbn/apm-types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { SPAN_DESTINATION_SERVICE_RESOURCE_FIELD } from '@kbn/discover-utils';
+import { kueryRt } from '../../default_api_types';
 
 /**
  * Fetch exit spans for a given service, grouped by destination resource, with a sample doc for each.
@@ -26,12 +33,12 @@ export async function getExitSpansFromNode({
   apmEventClient,
   start,
   end,
-  serviceName,
+  sourceNode,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  serviceName: string;
+  sourceNode: string;
 }) {
   const response = await apmEventClient.search('diagnostics_get_exit_spans_from_node', {
     apm: {
@@ -41,7 +48,7 @@ export async function getExitSpansFromNode({
     size: 0,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
+        filter: [...rangeQuery(start, end), kqlQuery(sourceNode)],
       },
     },
     aggs: {
@@ -100,18 +107,18 @@ export async function getExitSpansFromNode({
  * Fetch exit spans for a given service, grouped by destination resource, with a sample doc for each.
  * @param start Start time (epoch ms)
  * @param end End time (epoch ms)
- * @param serviceName Service name to filter on
+ * @param sourceNode Service name to filter on
  */
 export async function getSourceSpanIds({
   apmEventClient,
   start,
   end,
-  serviceName,
+  sourceNode,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-  serviceName: string;
+  sourceNode: string;
 }) {
   const response = await apmEventClient.search('diagnostics_get_source_span_ids', {
     apm: {
@@ -121,11 +128,7 @@ export async function getSourceSpanIds({
     size: 0,
     query: {
       bool: {
-        filter: [
-          ...rangeQuery(start, end),
-          ...termQuery(SERVICE_NAME, serviceName),
-          ...existsQuery(SPAN_ID),
-        ],
+        filter: [...rangeQuery(start, end), ...existsQuery(SPAN_ID)],
       },
     },
     aggs: {
