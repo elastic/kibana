@@ -83,7 +83,7 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
 
       <EuiFlexGrid columns={2} gutterSize="l" responsive={false}>
         <ResponseTime from={from} to={to} />
-        <AlertProcessing from={from} to={to} />
+        <AlertProcessing attackAlertIds={attackAlertIds} from={from} to={to} />
       </EuiFlexGrid>
 
       <EuiSpacer size="l" />
