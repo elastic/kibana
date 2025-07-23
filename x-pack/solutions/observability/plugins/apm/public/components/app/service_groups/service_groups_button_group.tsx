@@ -38,7 +38,6 @@ export function ServiceGroupsButtonGroup({
   selectedNavButton: SelectedNavButton;
 }) {
   const history = useHistory();
-
   return (
     <EuiButtonGroup
       color="primary"
