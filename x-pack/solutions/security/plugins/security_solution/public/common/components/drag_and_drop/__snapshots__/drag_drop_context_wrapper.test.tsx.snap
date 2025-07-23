@@ -313,6 +313,18 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
       },
       "host": Object {
         "fields": Object {
+          "host.id": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "format": Object {
+              "id": "string",
+            },
+            "name": "host.id",
+            "searchable": true,
+            "type": "string",
+          },
           "host.name": Object {
             "aggregatable": true,
             "esTypes": Array [
@@ -380,6 +392,42 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
       },
       "source": Object {
         "fields": Object {
+          "source.as.number": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "long",
+            ],
+            "name": "source.as.number",
+            "searchable": true,
+            "type": "number",
+          },
+          "source.as.organization.name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "source.as.organization.name",
+            "searchable": true,
+            "type": "string",
+          },
+          "source.geo.city_name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "source.geo.city_name",
+            "searchable": true,
+            "type": "string",
+          },
+          "source.geo.region_name": Object {
+            "aggregatable": true,
+            "esTypes": Array [
+              "keyword",
+            ],
+            "name": "source.geo.region_name",
+            "searchable": true,
+            "type": "string",
+          },
           "source.ip": Object {
             "aggregatable": true,
             "esTypes": Array [
