@@ -86,8 +86,7 @@ export const SettingLockedCard = React.memo<SettingLockedCardProps>(
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.policy.details.lockedCardUpgradeMessage"
-                    defaultMessage="To turn on this protection, you must upgrade your license to {licenseType}, start a
-              free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
+                    defaultMessage="To turn on this protection, you must upgrade your license to {licenseType}, start a free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
                     values={{
                       licenseType: licenseDisplayName,
                       cloudDeploymentLink: (

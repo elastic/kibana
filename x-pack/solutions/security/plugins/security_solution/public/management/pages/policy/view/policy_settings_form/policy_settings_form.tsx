@@ -28,7 +28,7 @@ import type { PolicyFormComponentCommonProps } from './types';
 import { AdvancedSection } from './components/advanced_section';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useGetDeviceControlUpsellComponent } from './hooks/use_get_device_control_component';
-import { DeviceControlCard } from './components/cards/usb_device_protection_card';
+import { DeviceControlCard } from './components/cards/device_control_card';
 
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
