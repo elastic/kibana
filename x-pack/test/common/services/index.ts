@@ -7,14 +7,10 @@
 
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { SpacesServiceProvider } from './spaces';
-import { SearchSecureService } from './search_secure';
-import { SynthtraceClientProvider } from './synthtrace';
+import { SpacesServiceProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/spaces';
 
 export const services = {
   ...commonFunctionalServices,
   supertest: kibanaApiIntegrationServices.supertest,
   spaces: SpacesServiceProvider,
-  secureSearch: SearchSecureService,
-  synthtrace: SynthtraceClientProvider,
 };

@@ -1484,7 +1484,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-ux-logs-team
 
 # Infra Monitoring tests
-/x-pack/test/common/services/synthtrace.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/api_integration/services/index.ts @elastic/obs-ux-infra_services-team
@@ -1538,7 +1537,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
-/x-pack/test/common/services/ingest_manager.ts @elastic/fleet # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859018893
+/x-pack/platform/test/api_integration/services/ingest_manager.ts @elastic/fleet # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859018893
 /x-pack/test/functional/es_archives/fleet @elastic/fleet
 /x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/solutions/security/test/fleet_api_integration @elastic/fleet
@@ -2104,7 +2103,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/account_settings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/apps/user_profiles @elastic/kibana-security
-/x-pack/test/common/services/spaces.ts @elastic/kibana-security
 /x-pack/test/api_integration/config_security_*.ts @elastic/kibana-security
 /x-pack/platform/test/functional/apps/api_keys @elastic/kibana-security
 /x-pack/platform/test/ftr_apis/security_and_spaces @elastic/kibana-security
@@ -2371,7 +2369,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 # Security Solution
 /x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space @elastic/security-solution # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/tests/timeline_migrations.ts#L58
 /x-pack/test/functional/es_archives/packetbeat @elastic/security-solution
-/x-pack/test/common/services/ingest_manager.ts @elastic/security-solution # Assigned per blame
 /x-pack/test/security_solution_ftr @elastic/security-solution
 /x-pack/test/functional/es_archives/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040

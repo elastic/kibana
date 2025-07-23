@@ -6,8 +6,8 @@
  */
 
 import { KibanaEBTServerProvider } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
+import { SpacesServiceProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/spaces';
 import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
-import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { services as essServices } from '../../../api_integration/services';
 
 export const services = {
