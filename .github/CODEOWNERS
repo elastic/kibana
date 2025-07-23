@@ -1137,7 +1137,6 @@ x-pack/solutions/security/test
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/test
 x-pack/test_serverless
-x-pack/test/spaces_api_integration/common/plugins/read_only_objects_test_plugin @elastic/kibana-security
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
