@@ -8,7 +8,7 @@
 import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from './use_navigation';
@@ -123,6 +123,7 @@ const createActions = ({
 };
 
 export const useConversation = () => {
+  const shouldAllowConversationRedirectRef = useRef(true);
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
@@ -139,6 +140,13 @@ export const useConversation = () => {
   });
   const { navigateToOnechatUrl } = useNavigation();
 
+  useEffect(() => {
+    return () => {
+      // On unmount disable conversation redirect
+      shouldAllowConversationRedirectRef.current = false;
+    };
+  }, []);
+
   const actions = useMemo(
     () =>
       createActions({
@@ -146,7 +154,7 @@ export const useConversation = () => {
         queryKey,
         navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
           // Navigate to the new conversation if user is still on the "new" conversation page
-          if (!conversationId) {
+          if (!conversationId && shouldAllowConversationRedirectRef.current) {
             navigateToOnechatUrl(
               appPaths.chat.conversation({ conversationId: nextConversationId })
             );
