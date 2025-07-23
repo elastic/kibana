@@ -341,6 +341,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
 
     if (savedQueryMeta.shouldIncludeFilters) {
       savedQueryAttributes.filters = this.props.filters;
+    } else {
+      savedQueryAttributes.filters = [];
     }
 
     const timeFilter = this.getTimeFilter();
