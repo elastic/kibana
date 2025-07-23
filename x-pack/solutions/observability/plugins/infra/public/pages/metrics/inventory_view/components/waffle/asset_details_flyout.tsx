@@ -12,9 +12,9 @@ import { AssetDetails } from '../../../../../components/asset_details';
 import { getAssetDetailsFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 interface Props {
-  assetName?: string;
-  assetId: string;
-  assetType: InventoryItemType;
+  entityName?: string;
+  entityId: string;
+  entityType: InventoryItemType;
   closeFlyout: () => void;
   currentTime: number;
   options?: Pick<InfraWaffleMapOptions, 'groupBy' | 'metric'>;
@@ -25,9 +25,9 @@ interface Props {
 const ONE_HOUR = 60 * 60 * 1000;
 
 export const AssetDetailsFlyout = ({
-  assetName,
-  assetId,
-  assetType,
+  entityName,
+  entityId,
+  entityType,
   closeFlyout,
   currentTime,
   options,
@@ -49,9 +49,9 @@ export const AssetDetailsFlyout = ({
 
   return (
     <AssetDetails
-      assetId={assetId}
-      assetName={assetName}
-      assetType={assetType}
+      entityId={entityId}
+      entityName={entityName}
+      entityType={entityType}
       overrides={{
         metadata: {
           showActionsColumn: false,
@@ -60,7 +60,7 @@ export const AssetDetailsFlyout = ({
           options,
         },
       }}
-      tabs={getAssetDetailsFlyoutTabs(assetType)}
+      tabs={getAssetDetailsFlyoutTabs(entityType)}
       links={['nodeDetails']}
       renderMode={{
         mode: 'flyout',

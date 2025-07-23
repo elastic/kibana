@@ -26,7 +26,6 @@ const createAlertsClientMock = () => {
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
     getAlertFields: jest.fn(),
-    getRuleTypeIds: jest.fn(),
   };
   return mocked;
 };

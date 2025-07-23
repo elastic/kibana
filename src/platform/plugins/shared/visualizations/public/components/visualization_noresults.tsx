@@ -10,6 +10,7 @@
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { visContainerStyle } from '../vis.styles';
 
 interface VisualizationNoResultsProps {
   onInit?: () => void;
@@ -18,7 +19,7 @@ interface VisualizationNoResultsProps {
 export class VisualizationNoResults extends React.Component<VisualizationNoResultsProps> {
   public render() {
     return (
-      <div data-test-subj="visNoResult" className="visError">
+      <div data-test-subj="visNoResult" className="visError" css={visContainerStyle}>
         <EuiEmptyPrompt
           iconType="visualizeApp"
           iconColor="default"
