@@ -10,8 +10,6 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { Logger } from '@kbn/core/server';
 
-import { load, dump } from 'js-yaml';
-
 import { appContextService } from '../..';
 
 import { compileTemplate, replaceKeyByParent } from './agent';
@@ -22,6 +20,10 @@ const mockedAppContextService = appContextService as jest.Mocked<typeof appConte
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+
+mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+  enableOtelIntegrations: false,
+} as any);
 
 let mockedLogger: jest.Mocked<Logger>;
 

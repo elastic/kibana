@@ -9,7 +9,7 @@ import Handlebars from '@kbn/handlebars';
 import { load, dump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
-import type { OTelCollectorConfig, PackagePolicyConfigRecord } from '../../../../common/types';
+import type { PackagePolicyConfigRecord } from '../../../../common/types';
 import { PackagePolicyValidationError } from '../../../../common/errors';
 import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
