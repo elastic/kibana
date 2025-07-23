@@ -13,5 +13,3 @@ export function plugin() {
   return new SearchIndicesPlugin();
 }
 export type { SearchIndicesPluginSetup, SearchIndicesPluginStart } from './types';
-export { useIngestSampleData } from './hooks/use_ingest_data';
-export { SampleDataActionButton } from './components/shared/sample_data_action_button';
