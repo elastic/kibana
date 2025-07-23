@@ -762,10 +762,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       )
       .catch(() => {});
 
-    if (this.config.cdnUrl && this.config.publicKey) {
+    if (this.config.cdn.url && this.config.cdn.publicKey) {
       const cdnConfig: CdnConfig = {
-        url: this.config.cdnUrl,
-        pubKey: this.config.publicKey,
+        url: this.config.cdn.url,
+        pubKey: this.config.cdn.publicKey,
       };
       this.logger.info('Starting artifact service with custom CDN config');
       artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => {});
