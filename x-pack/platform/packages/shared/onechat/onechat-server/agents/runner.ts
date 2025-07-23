@@ -33,7 +33,7 @@ export interface RunAgentParams {
    */
   onEvent?: RunAgentOnEventFn;
   /**
-   * Optional abort signal to interrupt the round.
+   * Optional signal to abort the execution of the agent.
    */
   abortSignal?: AbortSignal;
   /**
