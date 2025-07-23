@@ -111,7 +111,6 @@ Maintenance windows now have public HTTP APIs, enabling programmatic management.
 
 [discrete]
 
-You can now explore Cases data in dashboards and Discover. You can use the new Cases analytics index to build dashboards and visualizations of Cases activities and trends. These data points offer improved visibility into incident management efficiency in Kibana for operation managers.
 
 [discrete]
 ==== ES|QL rule type ungrouped alerts
