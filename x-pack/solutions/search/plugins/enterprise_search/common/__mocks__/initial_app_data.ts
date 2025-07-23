@@ -6,7 +6,7 @@
  */
 
 export const DEFAULT_INITIAL_APP_DATA = {
-  kibanaVersion: '9.0.4',
+  kibanaVersion: '9.0.5',
   features: {
     hasConnectors: true,
     hasDefaultIngestPipeline: true,
