@@ -882,7 +882,7 @@ function generateEsResponse(
                     ],
                   },
                 },
-              } as unknown as EvaluationBucket
+              } as EvaluationBucket
             );
           })
           .filter((bucket: any) =>
