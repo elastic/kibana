@@ -719,6 +719,28 @@ const OutputSelectRadioGroup: React.FC<{
           data-test-subj={dataTestSubj}
         >
           <EuiText size="s">{description(isDSLInputMode, fieldName)}</EuiText>
+          {/**
+           * Add a click target to allow the user to click anywhere on the EuiCheckableCard to select an output
+           * option, instead of having to target the radio button or the title label.
+           * EuiCheckableCard does not make the whole body clickable to allow for interactive children
+           * https://github.com/elastic/eui/issues/8900
+           * Overlay the inner card panel with an invisible clickable div; disable a11y linting rule
+           * because the radio group is already the a11y target, and clickable div is purely a
+           * workaround for mouse interaction
+           */}
+          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+          <div
+            onClick={() => onChangeOutput(id)}
+            data-test-subj="output-select-click-target"
+            css={css`
+              cursor: pointer;
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+            `}
+          />
         </EuiCheckableCard>
         <EuiSpacer size="s" />
       </>
