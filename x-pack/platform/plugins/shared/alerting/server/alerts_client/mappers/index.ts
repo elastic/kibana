@@ -6,8 +6,9 @@
  */
 
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
+import type { AlertsResult } from '../types';
 import { mappers } from './mappers';
-import type { AlertMapperFn, AlertsResult, MapperContext } from './types';
+import type { AlertMapperFn, MapperContext } from './types';
 
 function asyncPipe<S extends State, C extends Context, G extends string, R extends string>(
   ...fns: AlertMapperFn[]

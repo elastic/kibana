@@ -31,6 +31,7 @@ import type {
   AlertingEventLogger,
 } from '../../lib/alerting_event_logger/alerting_event_logger';
 import type { RuleTaskInstance, TaskRunnerContext } from '../types';
+import type { AlertsResult } from '../../alerts_client/types';
 
 export type ActionSchedulerRule<Params extends RuleTypeParams> = Omit<
   SanitizedRule<Params>,
@@ -46,6 +47,20 @@ export interface ActionSchedulerOptions<
   RecoveryActionGroupId extends string,
   AlertData extends RuleAlertData
 > {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
+  alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
+  apiKey: RawRule['apiKey'];
+  apiKeyId?: string;
+  canGetSummarizedAlerts?: boolean;
+  executionId: string;
+  logger: Logger;
+  previousStartedAt: Date | null;
+  priority?: TaskPriority;
+  rule: ActionSchedulerRule<Params>;
+  ruleConsumer: string;
+  ruleLabel: string;
+  ruleRunMetricsStore: RuleRunMetricsStore;
   ruleType: NormalizedRuleType<
     Params,
     ExtractedParams,
@@ -56,21 +71,9 @@ export interface ActionSchedulerOptions<
     RecoveryActionGroupId,
     AlertData
   >;
-  logger: Logger;
-  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
-  rule: ActionSchedulerRule<Params>;
-  taskRunnerContext: TaskRunnerContext;
   taskInstance: RuleTaskInstance;
-  ruleRunMetricsStore: RuleRunMetricsStore;
-  apiKeyId?: string;
-  apiKey: RawRule['apiKey'];
-  ruleConsumer: string;
-  executionId: string;
-  ruleLabel: string;
-  previousStartedAt: Date | null;
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
-  priority?: TaskPriority;
+  taskRunnerContext: TaskRunnerContext;
+  throttledSummaryActions?: ThrottledActions;
 }
 
 export type Executable<
@@ -115,7 +118,7 @@ export interface IActionScheduler<
 > {
   get priority(): number;
   getActionsToSchedule(
-    opts: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
+    alerts: AlertsResult<State, Context, ActionGroupIds>
   ): Promise<ActionsToSchedule[]>;
 }
 
@@ -153,3 +156,7 @@ export interface AddSummarizedAlertsOpts<
   alert: Alert<AlertInstanceState, AlertInstanceContext, ActionGroupIds | RecoveryActionGroupId>;
   summarizedAlerts: CombinedSummarizedAlerts | null;
 }
+
+export type RuleActionWithSummary = RuleAction & {
+  summarizedAlerts?: CombinedSummarizedAlerts;
+};

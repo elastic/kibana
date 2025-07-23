@@ -75,13 +75,14 @@ export interface IAlertsClient<
   hasReachedAlertLimit(): boolean;
   checkLimitUsage(): void;
   processAlerts(shouldLogAlerts: boolean): void;
+  getMappedAlerts(): AlertsResult<S, C, G>;
   getProcessedAlerts(
     type: 'new' | 'active' | 'trackedActiveAlerts'
   ): Record<string, LegacyAlert<S, C, G>> | {};
   getProcessedAlerts(
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<S, C, R>> | {};
-  persistAlerts(): Promise<{ alertIds: string[]; maintenanceWindowIds: string[] } | null>;
+  persistAlerts(shouldLogAlerts: boolean): Promise<void>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
@@ -267,3 +268,27 @@ export type ScopedQueryAggregationResult = Record<
     };
   }
 >;
+
+export enum AlertCategory {
+  New, // alerts that are newly created in the current run
+  Ongoing, // alerts that were active in the previous run and are still active in the current run
+  Recovered, // alerts that were active in the previous run and are now recovered in the current run
+  OngoingRecovered, // alerts that were recovered in the previous run and still recovered in the current run; we track these for a certain number of runs for flapping purposes
+}
+export interface CategorizedAlert<S extends State, C extends Context, G extends string> {
+  alert: LegacyAlert<S, C, G>;
+  category: AlertCategory;
+}
+export type AlertsResult<S extends State, C extends Context, G extends string> = Array<
+  CategorizedAlert<S, C, G>
+>;
+
+export const filterFor = <S extends State, C extends Context, G extends string>(
+  alerts: AlertsResult<S, C, G>,
+  category: AlertCategory
+) => alerts.filter(({ category: cat }) => category === cat);
+
+export const filterOut = <S extends State, C extends Context, G extends string>(
+  alerts: AlertsResult<S, C, G>,
+  category: AlertCategory
+) => alerts.filter(({ category: cat }) => category !== cat);

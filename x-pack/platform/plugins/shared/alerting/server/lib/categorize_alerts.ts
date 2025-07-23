@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import type { Alert } from '../alert';
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../types';
-import { AlertCategory, type AlertsResult } from '../alerts_client/mappers/types';
+import { AlertCategory, type AlertsResult } from '../alerts_client/types';
 
 interface CategorizeAlertsOpts<S extends State, C extends Context, G extends string> {
   alerts: Map<string, Alert<S, C, G>>;

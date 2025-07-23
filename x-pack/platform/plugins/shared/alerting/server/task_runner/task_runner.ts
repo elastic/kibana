@@ -22,7 +22,7 @@ import type {
   TaskRunnerContext,
 } from './types';
 import { getExecutorServices } from './get_executor_services';
-import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
+import { getNextRun, ruleExecutionStatusToRaw } from '../lib';
 import type {
   IntervalSchedule,
   RawRuleExecutionStatus,
@@ -385,20 +385,20 @@ export class TaskRunner<
     }
 
     const actionScheduler = new ActionScheduler({
-      rule,
-      ruleType: this.ruleType,
-      logger: this.logger,
-      taskRunnerContext: this.context,
-      taskInstance: this.taskInstance,
-      ruleRunMetricsStore,
-      apiKey,
-      ruleConsumer: this.ruleConsumer!,
-      executionId: this.executionId,
-      ruleLabel,
-      previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
-      alertingEventLogger: this.alertingEventLogger,
       actionsClient,
+      alertingEventLogger: this.alertingEventLogger,
       alertsClient,
+      apiKey,
+      executionId: this.executionId,
+      logger: this.logger,
+      previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
+      rule,
+      ruleConsumer: this.ruleConsumer!,
+      ruleLabel,
+      ruleRunMetricsStore,
+      ruleType: this.ruleType,
+      taskInstance: this.taskInstance,
+      taskRunnerContext: this.context,
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
@@ -406,18 +406,13 @@ export class TaskRunner<
     await this.timer.runWithTimer(
       TaskRunnerTimerSpan.TriggerActions,
       async () => {
-        if (isRuleSnoozed(rule)) {
-          this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
-        } else if (!this.shouldLogAndScheduleActionsForAlerts()) {
+        if (!this.shouldLogAndScheduleActionsForAlerts()) {
           this.logger.debug(
             `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
           );
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
-          actionSchedulerResult = await actionScheduler.run({
-            activeAlerts: alertsClient.getProcessedAlerts('active'),
-            recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
-          });
+          actionSchedulerResult = await actionScheduler.run(alertsClient.getMappedAlerts());
         }
       },
       'alerting:schedule-actions'

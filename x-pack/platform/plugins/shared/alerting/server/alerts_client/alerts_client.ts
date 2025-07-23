@@ -43,7 +43,7 @@ import { LegacyAlertsClient } from './legacy_alerts_client';
 import type { IIndexPatternString } from '../alerts_service/resource_installer_utils';
 import { getIndexTemplateAndPattern } from '../alerts_service/resource_installer_utils';
 import type { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, SearchResult } from './types';
+import type { AlertRule, AlertsResult, SearchResult } from './types';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -384,20 +384,42 @@ export class AlertsClient<
     await this.legacyAlertsClient.processAlerts(shouldLogAlerts);
   }
 
+  public getMappedAlerts(): AlertsResult<LegacyState, LegacyContext, ActionGroupIds> {
+    return this.legacyAlertsClient.getMappedAlerts();
+  }
+
   public getProcessedAlerts(
     type: 'new' | 'active' | 'trackedActiveAlerts' | 'recovered' | 'trackedRecoveredAlerts'
   ) {
     return this.legacyAlertsClient.getProcessedAlerts(type);
   }
 
-  public async persistAlerts(): Promise<AlertsAffectedByMaintenanceWindows> {
+  public async persistAlerts(shouldLogAlerts: boolean): Promise<void> {
+    if (!shouldLogAlerts) {
+      this.options.logger.debug(
+        `skipping persisting alerts for rule ${this.ruleType.id}:${this.options.rule.id}: '${this.options.rule.name}': rule execution has been cancelled.`
+      );
+      return;
+    }
+
     // Persist alerts first
     await this.persistAlertsHelper();
     try {
-      return await this.updatePersistedAlertsWithMaintenanceWindowIds();
+      const alertsAffectedByMaintenanceWindows =
+        await this.updatePersistedAlertsWithMaintenanceWindowIds();
+
+      // Set the event log MW ids again, this time including the ids that matched alerts with
+      // scoped query
+      if (
+        alertsAffectedByMaintenanceWindows?.maintenanceWindowIds &&
+        alertsAffectedByMaintenanceWindows?.maintenanceWindowIds.length > 0
+      ) {
+        this.options.alertingEventLogger.setMaintenanceWindowIds(
+          alertsAffectedByMaintenanceWindows.maintenanceWindowIds
+        );
+      }
     } catch (err) {
       this.options.logger.error('Error updating maintenance window IDs:', err);
-      return { alertIds: [], maintenanceWindowIds: [] };
     }
   }
 

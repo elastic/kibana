@@ -9,23 +9,7 @@ import type { Alert } from '../../alert/alert';
 import type { RulesSettingsFlappingProperties } from '../../types';
 import type { LegacyAlertsClientParams } from '../legacy_alerts_client';
 import type { AlertInstanceState as State, AlertInstanceContext as Context } from '../../types';
-
-export enum AlertCategory {
-  New, // alerts that are newly created in the current run
-  Ongoing, // alerts that were active in the previous run and are still active in the current run
-  Recovered, // alerts that were active in the previous run and are now recovered in the current run
-  OngoingRecovered, // alerts that were recovered in the previous run and still recovered in the current run; we track these for a certain number of runs for flapping purposes
-}
-
-export const filterFor = <S extends State, C extends Context, G extends string>(
-  alerts: AlertsResult<S, C, G>,
-  category: AlertCategory
-) => alerts.filter(({ category: cat }) => category === cat);
-
-export const filterOut = <S extends State, C extends Context, G extends string>(
-  alerts: AlertsResult<S, C, G>,
-  category: AlertCategory
-) => alerts.filter(({ category: cat }) => category !== cat);
+import type { AlertsResult } from '../types';
 
 export type AlertMapperFn = <
   S extends State,
@@ -35,14 +19,6 @@ export type AlertMapperFn = <
 >(
   opts: MapperOpts<S, C, G, R>
 ) => Promise<AlertsResult<S, C, G>>;
-
-export interface CategorizedAlert<S extends State, C extends Context, G extends string> {
-  alert: Alert<S, C, G>;
-  category: AlertCategory;
-}
-export type AlertsResult<S extends State, C extends Context, G extends string> = Array<
-  CategorizedAlert<S, C, G>
->;
 
 export interface MapperContext<
   S extends State,

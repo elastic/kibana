@@ -16,12 +16,7 @@ import {
   getSummarizedAlerts,
   shouldScheduleAction,
 } from '../lib';
-import type {
-  ActionSchedulerOptions,
-  ActionsToSchedule,
-  GetActionsToScheduleOpts,
-  IActionScheduler,
-} from '../types';
+import type { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from '../types';
 
 export class SystemActionScheduler<
   Params extends RuleTypeParams,
@@ -48,20 +43,15 @@ export class SystemActionScheduler<
       AlertData
     >
   ) {
-    const canGetSummarizedAlerts =
-      !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
-
     // only process system actions when rule type supports summarized alerts
-    this.actions = canGetSummarizedAlerts ? context.rule.systemActions ?? [] : [];
+    this.actions = context.canGetSummarizedAlerts ? context.rule.systemActions ?? [] : [];
   }
 
   public get priority(): number {
     return 1;
   }
 
-  public async getActionsToSchedule(
-    _: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
-  ): Promise<ActionsToSchedule[]> {
+  public async getActionsToSchedule(): Promise<ActionsToSchedule[]> {
     const executables: Array<{
       action: RuleSystemAction;
       summarizedAlerts: CombinedSummarizedAlerts;
