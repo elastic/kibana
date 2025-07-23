@@ -41,6 +41,7 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
+import { forceHiddenTimeline } from '../../common/utils/timeline/force_hidden_timeline';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -180,25 +181,9 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
   // Hide the timeline bottom bar when the page is in onboarding or initializing state
   useEffect(() => {
-    let element: HTMLElement | null;
-    const timeout = setTimeout(() => {
-      // Use a timeout to ensure the element is available in the DOM
-      element = document.querySelector('[data-test-subj="timeline-bottom-bar-container"]');
-      if (element) {
-        const hideTimeline = ['onboarding', 'initializingEngine'].includes(state.type);
-        if (hideTimeline) {
-          element.style.display = 'none';
-        } else {
-          element.style.removeProperty('display');
-        }
-      }
-    });
-    return () => {
-      clearTimeout(timeout);
-      if (element) {
-        element.style.removeProperty('display');
-      }
-    };
+    const hideTimeline = ['onboarding', 'initializingEngine'].includes(state.type);
+    const cleanup = forceHiddenTimeline(hideTimeline);
+    return cleanup;
   }, [state.type]);
 
   const fullHeightCSS = css`
