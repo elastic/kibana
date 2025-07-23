@@ -16,5 +16,11 @@ export function generateLatestBackfillProcessors(definition: EntityDefinition) {
         value: `${generateLatestBackfillIndexName(definition)}`,
       },
     },
+    {
+      set: {
+        field: 'synthetic_ingest_ts',
+        value: '{{_ingest.timestamp}}',
+      },
+    },
   ];
 }
