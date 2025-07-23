@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KeyboardEvent, RefObject, useCallback, useEffect } from 'react';
+import { RefObject, useCallback, useEffect } from 'react';
 
 import { getFocusableElements } from './get_focusable_elements';
 
@@ -21,7 +21,7 @@ export const useRovingIndex = (ref: RefObject<HTMLElement> | null) => {
   }, [elements]);
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLElement>) => {
+    (e: KeyboardEvent) => {
       switch (e.key) {
         case 'ArrowDown': {
           if (elements.length > 0) {
