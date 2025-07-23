@@ -61,7 +61,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   // TODO: allow external configuration
   private readonly circuitBreakersConfig = {
     rssGrowth: {
-      maxRssGrowthPercent: 0.2,
+      maxRssGrowthPercent: 20,
       validationIntervalMs: 200,
     },
     timeout: {

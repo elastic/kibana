@@ -22,8 +22,8 @@ export class RssGrowthCircuitBreaker implements CircuitBreaker {
       validationIntervalMs: number;
     }
   ) {
-    if (config.maxRssGrowthPercent < 0 || config.maxRssGrowthPercent > 1) {
-      throw new Error('maxRssGrowthPercent must be between 0 and 1');
+    if (config.maxRssGrowthPercent < 0 || config.maxRssGrowthPercent > 100) {
+      throw new Error('maxRssGrowthPercent must be between 0 and 100');
     }
 
     this.initialRss = process.memoryUsage().rss;
@@ -33,16 +33,16 @@ export class RssGrowthCircuitBreaker implements CircuitBreaker {
 
   async validate(): Promise<CircuitBreakerResult> {
     const currentRss = process.memoryUsage().rss;
-    const percentGrowth = (currentRss - this.initialRss) / this.initialRss;
+    const percentGrowth = ((currentRss - this.initialRss) / this.initialRss) * 100;
 
     this.maxRss = Math.max(this.maxRss, currentRss);
     this.maxPercentGrowth = Math.max(this.maxPercentGrowth, percentGrowth);
 
     if (percentGrowth > this.config.maxRssGrowthPercent) {
       return failure(
-        `RSS growth exceeded: ${(percentGrowth * 100).toFixed(2)}% - max allowed: ${(
-          this.config.maxRssGrowthPercent * 100
-        ).toFixed(2)}%`
+        `RSS growth exceeded: ${percentGrowth.toFixed(2)}% - max allowed: ${
+          this.config.maxRssGrowthPercent
+        }%`
       );
     }
     return success();

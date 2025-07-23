@@ -27,7 +27,11 @@ export class ElasticsearchCircuitBreaker implements CircuitBreaker {
       validationIntervalMs: number;
     },
     private readonly client: ElasticsearchClient
-  ) {}
+  ) {
+    if (config.maxJvmHeapUsedPercent < 0 || config.maxJvmHeapUsedPercent > 100) {
+      throw new Error('maxJvmHeapUsedPercent must be between 0 and 100');
+    }
+  }
 
   async validate(): Promise<CircuitBreakerResult> {
     try {
