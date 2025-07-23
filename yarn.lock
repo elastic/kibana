@@ -23089,10 +23089,10 @@ jiti@^1.20.0:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-1.21.6.tgz#6c7f7398dd4b3142767f9a168af2f317a428d268"
   integrity sha512-2yTgeWTWzMWkHu6Jp9NKgePDaYHbntiwvYuuJLbbN9vl7DC9DvXKOB2BC3ZZ92D3cvV/aflH0osDfwpHepQ53w==
 
-joi-to-json@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.3.0.tgz#c56131ecf8a772fce89fd98b7f81d7b0fac31dbc"
-  integrity sha512-j6wV/liW2CmPJBJCAsRHegS91JV2QQtg2J/Z/67VfdSvuE65njCx6DrYZY1cw0BXwlxHewpVtiDnY8W0aaNr+A==
+joi-to-json@^4.3.2:
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.3.2.tgz#b2fba0bd4a1073893238098165ba59207fabcb36"
+  integrity sha512-ZGfdMpCwM2NNgcddh3q2SGtwmIQ5dU5iJJkccUYxZDRMDCO8CJ8VCnND7SkbnvID4YF5dDTM55ElsTGuktUs6Q==
   dependencies:
     combinations "^1.0.0"
     lodash "^4.17.21"
