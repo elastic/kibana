@@ -9,6 +9,7 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import * as i18n from './translations';
 import { getThreatsDetectedTrendLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/threats_detected_trend';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
@@ -22,7 +23,8 @@ const ThreatsDetectedTrendComponent: React.FC<Props> = ({ from, to }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
-  const extra = <p>{'hello world'}</p>;
+
+  const spaceId = useSpaceId();
   return (
     <div
       css={css`
@@ -40,7 +42,9 @@ const ThreatsDetectedTrendComponent: React.FC<Props> = ({ from, to }) => {
     >
       <VisualizationEmbeddable
         data-test-subj="embeddable-metric-trend"
-        getLensAttributes={(args) => getThreatsDetectedTrendLensAttributes({ ...args, extra })}
+        getLensAttributes={(args) =>
+          getThreatsDetectedTrendLensAttributes({ ...args, spaceId: spaceId ?? 'default' })
+        }
         timerange={{ from, to }}
         id={`${ID}-area-embeddable`}
         inspectTitle={i18n.THREATS_DETECTED}

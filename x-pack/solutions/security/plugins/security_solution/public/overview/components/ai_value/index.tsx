@@ -21,9 +21,12 @@ interface Props {
 }
 
 export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
+  const minutesPerAlert = 8;
+  const analystHourlyRate = 75;
   const { attackAlertIds, isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
     from,
     to,
+    minutesPerAlert,
   });
   //
   // const hoursSaved = getTimeSavedHours(data.filteredAlerts);
@@ -41,6 +44,8 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
   return isLoading ? null : (
     <>
       <CostSavings
+        minutesPerAlert={minutesPerAlert}
+        analystHourlyRate={analystHourlyRate}
         attackAlertIds={attackAlertIds}
         filteredAlerts={valueMetrics.filteredAlerts}
         filteredAlertsCompare={valueMetricsCompare.filteredAlerts}
@@ -65,6 +70,8 @@ export const AIValueMetrics: React.FC<Props> = ({ from, to }) => {
           to={to}
         />
         <TimeSaved
+          minutesPerAlert={minutesPerAlert}
+          attackAlertIds={attackAlertIds}
           hoursSaved={valueMetrics.hoursSaved}
           hoursSavedCompare={valueMetricsCompare.hoursSaved}
           from={from}

@@ -13,12 +13,12 @@ export type MyGetLensAttributes = (params: {
   euiTheme: EuiThemeComputed;
   extraOptions?: ExtraOptions;
   esql?: string;
-  totalAlerts: number;
+  minutesPerAlert: number;
 }) => LensAttributes;
 
-export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
+export const getTimeSavedTrendLensAttributes: MyGetLensAttributes = ({
   extraOptions,
-  totalAlerts,
+  minutesPerAlert,
 }) => {
   return {
     description: '',
@@ -27,15 +27,15 @@ export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
       datasourceStates: {
         formBased: {
           layers: {
-            '3c03ff91-8a1b-4696-acd1-6f9c768ed1a3': {
+            '25539c1e-d5aa-4069-8c0c-de2c69bdd532': {
               columnOrder: [
-                'dfc3d179-e3d2-4aaa-b4c1-175caa164e34',
-                'f66b5c37-c534-428d-994f-01ad5f59d981',
-                'f66b5c37-c534-428d-994f-01ad5f59d981X0',
-                'f66b5c37-c534-428d-994f-01ad5f59d981X1',
+                '601ecdf7-dc29-4b67-a1b2-e47ae1e73674',
+                'ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6',
+                'ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6X0',
+                'ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6X1',
               ],
               columns: {
-                'dfc3d179-e3d2-4aaa-b4c1-175caa164e34': {
+                '601ecdf7-dc29-4b67-a1b2-e47ae1e73674': {
                   dataType: 'date',
                   isBucketed: true,
                   label: '@timestamp',
@@ -43,44 +43,51 @@ export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
                   params: { dropPartials: false, includeEmptyRows: true, interval: 'auto' },
                   sourceField: '@timestamp',
                 },
-                'f66b5c37-c534-428d-994f-01ad5f59d981': {
+                'ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6': {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: 'Alert filtering rate',
+                  label: 'Analyst time saved',
                   operationType: 'formula',
                   params: {
-                    format: { id: 'percent', params: { decimals: 2 } },
-                    formula: `count()/${totalAlerts}`,
+                    format: { id: 'number', params: { decimals: 0 } },
+                    formula: `(count()*${minutesPerAlert}/60)`,
                     isFormulaBroken: false,
                   },
-                  references: ['f66b5c37-c534-428d-994f-01ad5f59d981X1'],
+                  references: ['ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6X1'],
                 },
-                'f66b5c37-c534-428d-994f-01ad5f59d981X0': {
+                'ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6X0': {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: 'Part of Alert filtering rate',
+                  label: 'Part of Analyst time saved',
                   operationType: 'count',
                   params: { emptyAsNull: false },
                   sourceField: '___records___',
                 },
-                'f66b5c37-c534-428d-994f-01ad5f59d981X1': {
+                'ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6X1': {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: 'Part of Alert filtering rate',
+                  label: 'Part of Analyst time saved',
                   operationType: 'math',
                   params: {
                     tinymathAst: {
-                      args: ['f66b5c37-c534-428d-994f-01ad5f59d981X0', totalAlerts],
-                      location: { max: 12, min: 0 },
+                      args: [
+                        {
+                          args: ['ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6X0', 8],
+                          name: 'multiply',
+                          type: 'function',
+                        },
+                        60,
+                      ],
+                      location: { max: 14, min: 0 },
                       name: 'divide',
-                      text: `count()/${totalAlerts}`,
+                      text: `(count()*${minutesPerAlert}/60)`,
                       type: 'function',
                     },
                   },
-                  references: ['f66b5c37-c534-428d-994f-01ad5f59d981X0'],
+                  references: ['ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6X0'],
                 },
               },
               ignoreGlobalFilters: false,
@@ -95,11 +102,11 @@ export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: 'Alert filtering rate',
+                  label: 'Analyst time saved',
                   operationType: 'formula',
                   params: {
-                    format: { id: 'percent', params: { decimals: 2 } },
-                    formula: `count()/${totalAlerts}`,
+                    format: { id: 'number', params: { decimals: 0 } },
+                    formula: `(count()*${minutesPerAlert}/60)`,
                     isFormulaBroken: false,
                   },
                   references: ['countColumnX1'],
@@ -108,7 +115,7 @@ export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: `Part of count()/${totalAlerts}`,
+                  label: `Part of (count()*${minutesPerAlert}/60)`,
                   operationType: 'count',
                   params: { emptyAsNull: false },
                   sourceField: '___records___',
@@ -117,14 +124,17 @@ export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: `Part of count()/${totalAlerts}`,
+                  label: `Part of (count()*${minutesPerAlert}/60)`,
                   operationType: 'math',
                   params: {
                     tinymathAst: {
-                      args: ['countColumnX0', totalAlerts],
-                      location: { max: 12, min: 0 },
+                      args: [
+                        { args: ['countColumnX0', 8], name: 'multiply', type: 'function' },
+                        60,
+                      ],
+                      location: { max: 14, min: 0 },
                       name: 'divide',
-                      text: `count()/${totalAlerts}`,
+                      text: `(count()*${minutesPerAlert}/60)`,
                       type: 'function',
                     },
                   },
@@ -138,9 +148,9 @@ export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
       },
       filters: extraOptions?.filters ?? [],
       internalReferences: [],
-      query: { language: 'kuery', query: '_id :*' },
+      query: { language: 'kuery', query: '_id:*' },
       visualization: {
-        icon: 'visLine',
+        icon: 'clock',
         iconAlign: 'right',
         valuesTextAlign: 'left',
         layerId: 'unifiedHistogram',
@@ -148,13 +158,13 @@ export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
         metricAccessor: 'count_column',
         secondaryTrend: { type: 'none' },
         showBar: false,
-        trendlineLayerId: '3c03ff91-8a1b-4696-acd1-6f9c768ed1a3',
+        trendlineLayerId: '25539c1e-d5aa-4069-8c0c-de2c69bdd532',
         trendlineLayerType: 'metricTrendline',
-        trendlineMetricAccessor: 'f66b5c37-c534-428d-994f-01ad5f59d981',
-        trendlineTimeAccessor: 'dfc3d179-e3d2-4aaa-b4c1-175caa164e34',
+        trendlineMetricAccessor: 'ab6bc2be-ea63-49a4-a3e5-0ce87bc3faa6',
+        trendlineTimeAccessor: '601ecdf7-dc29-4b67-a1b2-e47ae1e73674',
       },
     },
-    title: 'Alert filtering rate',
+    title: 'Analyst time saved',
     visualizationType: 'lnsMetric',
     references: [
       {
@@ -164,7 +174,7 @@ export const getAlertFilteringTrendLensAttributes: MyGetLensAttributes = ({
       },
       {
         id: '{dataViewId}',
-        name: 'indexpattern-datasource-layer-3c03ff91-8a1b-4696-acd1-6f9c768ed1a3',
+        name: 'indexpattern-datasource-layer-25539c1e-d5aa-4069-8c0c-de2c69bdd532',
         type: 'index-pattern',
       },
     ],

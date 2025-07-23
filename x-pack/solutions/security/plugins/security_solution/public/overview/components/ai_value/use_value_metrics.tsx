@@ -21,6 +21,7 @@ import { useSignalIndex } from '../../../detections/containers/detection_engine/
 interface Props {
   from: string;
   to: string;
+  minutesPerAlert: number;
 }
 interface UseValueMetrics {
   attackAlertIds: string[];
@@ -29,7 +30,7 @@ interface UseValueMetrics {
   valueMetricsCompare: ValueMetrics;
 }
 
-export const useValueMetrics = ({ from, to }: Props): UseValueMetrics => {
+export const useValueMetrics = ({ from, to, minutesPerAlert }: Props): UseValueMetrics => {
   const { http } = useKibana().services;
   const { assistantAvailability } = useAssistantContext();
   const { signalIndexName } = useSignalIndex();
@@ -80,8 +81,9 @@ export const useValueMetrics = ({ from, to }: Props): UseValueMetrics => {
         attackDiscoveryCount: data?.total ?? 0,
         totalAlerts: alertCount,
         attackAlertsCount: data?.unique_alert_ids_count ?? 0,
+        minutesPerAlert,
       }),
-    [alertCount, data?.total, data?.unique_alert_ids_count]
+    [alertCount, data?.total, data?.unique_alert_ids_count, minutesPerAlert]
   );
   const valueMetricsCompare = useMemo(
     () =>
@@ -89,8 +91,14 @@ export const useValueMetrics = ({ from, to }: Props): UseValueMetrics => {
         attackDiscoveryCount: compareAdData?.total ?? 0,
         totalAlerts: alertCountCompare,
         attackAlertsCount: compareAdData?.unique_alert_ids_count ?? 0,
+        minutesPerAlert,
       }),
-    [alertCountCompare, compareAdData?.total, compareAdData?.unique_alert_ids_count]
+    [
+      alertCountCompare,
+      compareAdData?.total,
+      compareAdData?.unique_alert_ids_count,
+      minutesPerAlert,
+    ]
   );
 
   return {

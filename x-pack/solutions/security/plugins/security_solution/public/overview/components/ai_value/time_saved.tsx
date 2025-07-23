@@ -6,49 +6,47 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiStat,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { formatThousandsDecimal } from './metrics';
 import { ComparePercentage } from './compare_percentage';
 import { getTimeRangeAsDays } from './utils';
 import * as i18n from './translations';
+import { TimeSavedTrend } from './time_saved_trend';
 
 interface Props {
+  attackAlertIds: string[];
   hoursSaved: number;
   hoursSavedCompare: number;
   from: string;
   to: string;
+  minutesPerAlert: number;
 }
 
-export const TimeSaved: React.FC<Props> = ({ hoursSaved, hoursSavedCompare, from, to }) => {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+export const TimeSaved: React.FC<Props> = ({
+  minutesPerAlert,
+  attackAlertIds,
+  hoursSaved,
+  hoursSavedCompare,
+  from,
+  to,
+}) => {
   return (
-    <EuiPanel paddingSize="l">
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h3>{i18n.TIME_SAVED}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="clock" color={colors.vis.euiColorVis2} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiStat title={formatThousandsDecimal(hoursSaved)} description={i18n.TIME_SAVED_DESC} />
-      <EuiSpacer size="s" />
+    <EuiPanel
+      paddingSize="none"
+      css={css`
+        min-height: 160px;
+      `}
+    >
+      <TimeSavedTrend
+        attackAlertIds={attackAlertIds}
+        minutesPerAlert={minutesPerAlert}
+        from={from}
+        to={to}
+      />
       <ComparePercentage
+        description={i18n.TIME_SAVED_DESC}
+        positionForLens
         currentCount={hoursSaved}
         previousCount={hoursSavedCompare}
         stat={formatThousandsDecimal(hoursSavedCompare)}

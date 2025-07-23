@@ -27,6 +27,8 @@ import { ComparePercentage } from './compare_percentage';
 import * as i18n from './translations';
 interface Props {
   attackAlertIds: string[];
+  minutesPerAlert: number;
+  analystHourlyRate: number;
   filteredAlerts: number;
   filteredAlertsCompare: number;
   from: string;
@@ -39,18 +41,24 @@ export const CostSavings: React.FC<Props> = ({
   filteredAlertsCompare,
   from,
   to,
+  minutesPerAlert,
+  analystHourlyRate,
 }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
 
   const costSavings = useMemo(
-    () => formatDollars(getCostSavings(filteredAlerts)),
-    [filteredAlerts]
+    () =>
+      formatDollars(getCostSavings({ alerts: filteredAlerts, analystHourlyRate, minutesPerAlert })),
+    [filteredAlerts, minutesPerAlert, analystHourlyRate]
   );
   const costSavingsCompare = useMemo(
-    () => formatDollars(getCostSavings(filteredAlertsCompare)),
-    [filteredAlertsCompare]
+    () =>
+      formatDollars(
+        getCostSavings({ alerts: filteredAlertsCompare, analystHourlyRate, minutesPerAlert })
+      ),
+    [filteredAlertsCompare, minutesPerAlert, analystHourlyRate]
   );
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isMedium = useIsWithinBreakpoints(['m', 'l']);

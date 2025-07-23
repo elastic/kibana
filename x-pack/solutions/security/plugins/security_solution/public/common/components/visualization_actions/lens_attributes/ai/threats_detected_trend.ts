@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import type { GetLensAttributes, LensAttributes } from '../../types';
+import type { EuiThemeComputed } from '@elastic/eui';
+import type { ExtraOptions, LensAttributes } from '../../types';
 
-export const getThreatsDetectedTrendLensAttributes: GetLensAttributes = () => {
+export type MyGetLensAttributes = (params: {
+  stackByField?: string;
+  euiTheme: EuiThemeComputed;
+  extraOptions?: ExtraOptions;
+  esql?: string;
+  spaceId: string;
+}) => LensAttributes;
+
+export const getThreatsDetectedTrendLensAttributes: MyGetLensAttributes = ({ spaceId }) => {
   return {
     description: '',
     state: {
@@ -18,12 +27,11 @@ export const getThreatsDetectedTrendLensAttributes: GetLensAttributes = () => {
           fieldAttrs: {},
           fieldFormats: {},
           id: '99d292f8-524f-4aad-9e37-81c17f8331fb',
-          name: '.alerts-security.attack.discovery.alerts-*,.adhoc.alerts-security.attack.discovery.alerts-*',
+          name: `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*`,
           runtimeFieldMap: {},
           sourceFilters: [],
           timeFieldName: '@timestamp',
-          title:
-            '.alerts-security.attack.discovery.alerts-*,.adhoc.alerts-security.attack.discovery.alerts-*',
+          title: `.alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}*`,
         },
       },
       datasourceStates: {

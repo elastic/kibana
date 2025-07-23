@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { formatPercent } from './metrics';
 import { ComparePercentage } from './compare_percentage';
 import { getTimeRangeAsDays } from './utils';
@@ -30,12 +31,13 @@ export const FilteringRate: React.FC<Props> = ({
   to,
   totalAlerts,
 }) => {
-  console.log('AlertFilteringTrendComponent', {
-    filteredAlertsPerc,
-    totalAlerts,
-  });
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel
+      paddingSize="none"
+      css={css`
+        min-height: 160px;
+      `}
+    >
       <AlertFilteringTrend
         attackAlertIds={attackAlertIds}
         totalAlerts={totalAlerts}

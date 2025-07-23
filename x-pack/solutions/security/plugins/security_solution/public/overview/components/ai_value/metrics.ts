@@ -5,8 +5,6 @@
  * 2.0.
  */
 import { formatNumber } from '@elastic/eui';
-export const MINUTES_SAVED_PER_ALERT = 8;
-export const HOURLY_ANALYST_RATE = 70;
 
 // Define AlertData type if not already imported
 export interface AlertData {
@@ -24,26 +22,36 @@ export const getValueMetrics = ({
   attackDiscoveryCount,
   totalAlerts,
   attackAlertsCount,
+  minutesPerAlert,
 }: {
   attackDiscoveryCount: number;
   totalAlerts: number;
   attackAlertsCount: number;
+  minutesPerAlert: number;
 }): ValueMetrics => ({
   attackDiscoveryCount,
   filteredAlerts: totalAlerts - attackAlertsCount,
   filteredAlertsPerc: ((totalAlerts - attackAlertsCount) / totalAlerts) * 100,
-  hoursSaved: getTimeSavedHours(totalAlerts - attackAlertsCount),
+  hoursSaved: getTimeSavedHours(totalAlerts - attackAlertsCount, minutesPerAlert),
   totalAlerts,
 });
 
-export const getTimeSavedHours = (filteredAlerts: number): number => {
-  const totalMinutesSaved = filteredAlerts * MINUTES_SAVED_PER_ALERT;
+export const getTimeSavedHours = (alerts: number, minutesPerAlert: number): number => {
+  const totalMinutesSaved = alerts * minutesPerAlert;
   return totalMinutesSaved / 60;
 };
 
-export const getCostSavings = (filteredAlerts: number): number => {
-  const hoursSaved = getTimeSavedHours(filteredAlerts);
-  return hoursSaved * HOURLY_ANALYST_RATE;
+export const getCostSavings = ({
+  alerts,
+  minutesPerAlert,
+  analystHourlyRate,
+}: {
+  alerts: number;
+  minutesPerAlert: number;
+  analystHourlyRate: number;
+}): number => {
+  const hoursSaved = getTimeSavedHours(alerts, minutesPerAlert);
+  return hoursSaved * analystHourlyRate;
 };
 
 export const getAlertStats = (alertData: AlertData) => {

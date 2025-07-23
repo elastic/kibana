@@ -111,7 +111,7 @@ export const TIME_SAVED = i18n.translate('xpack.securitySolution.aiValue.timeSav
 });
 
 export const TIME_SAVED_DESC = i18n.translate('xpack.securitySolution.aiValue.timeSavedTitle', {
-  defaultMessage: 'Time saved',
+  defaultMessage: 'Time saved in hours',
 });
 
 export const RESPONSE_TIME_TITLE = i18n.translate(

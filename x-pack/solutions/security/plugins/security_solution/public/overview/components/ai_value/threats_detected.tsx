@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ThreatsDetectedTrend } from './threats_detected_trend';
 import { ComparePercentage } from './compare_percentage';
 import { getTimeRangeAsDays } from './utils';
@@ -26,7 +27,12 @@ export const ThreatsDetected: React.FC<Props> = ({
   to,
 }) => {
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel
+      paddingSize="none"
+      css={css`
+        min-height: 160px;
+      `}
+    >
       <ThreatsDetectedTrend from={from} to={to} />
 
       <ComparePercentage
