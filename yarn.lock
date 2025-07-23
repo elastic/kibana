@@ -6618,7 +6618,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/no-data-page-plugin@link:src/platform/plugins/private/no_data_page":
+"@kbn/no-data-page-plugin@link:src/platform/plugins/shared/no_data_page":
   version "0.0.0"
   uid ""
 
@@ -7670,27 +7670,27 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data-mocks@link:src/platform/packages/private/shared-ux/page/analytics_no_data/mocks":
+"@kbn/shared-ux-page-analytics-no-data-mocks@link:src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data-types@link:src/platform/packages/private/shared-ux/page/analytics_no_data/types":
+"@kbn/shared-ux-page-analytics-no-data-types@link:src/platform/packages/shared/shared-ux/page/analytics_no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-analytics-no-data@link:src/platform/packages/private/shared-ux/page/analytics_no_data/impl":
+"@kbn/shared-ux-page-analytics-no-data@link:src/platform/packages/shared/shared-ux/page/analytics_no_data/impl":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data-mocks@link:src/platform/packages/private/shared-ux/page/kibana_no_data/mocks":
+"@kbn/shared-ux-page-kibana-no-data-mocks@link:src/platform/packages/shared/shared-ux/page/kibana_no_data/mocks":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data-types@link:src/platform/packages/private/shared-ux/page/kibana_no_data/types":
+"@kbn/shared-ux-page-kibana-no-data-types@link:src/platform/packages/shared/shared-ux/page/kibana_no_data/types":
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-page-kibana-no-data@link:src/platform/packages/private/shared-ux/page/kibana_no_data/impl":
+"@kbn/shared-ux-page-kibana-no-data@link:src/platform/packages/shared/shared-ux/page/kibana_no_data/impl":
   version "0.0.0"
   uid ""
 
