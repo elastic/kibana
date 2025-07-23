@@ -20,6 +20,8 @@ import {
   EuiFieldText,
   EuiSelect,
   EuiCallOut,
+  EuiText,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -113,6 +115,18 @@ export const CreateIndexModal = ({
             <EuiSpacer size="m" />
           </>
         )}
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.createIndex.description"
+              defaultMessage="Create an index to store your privileged users. After creating it, make sure to index documents with the {nameField} field using your preferred method."
+              values={{
+                nameField: <EuiCode>{'user.name'}</EuiCode>,
+              }}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
         <EuiFormRow
           label={INDEX_NAME_LABEL}
           fullWidth
