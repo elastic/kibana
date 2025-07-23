@@ -39,13 +39,6 @@ export const PROJECT_ID_LABEL = i18n.translate(
   }
 );
 
-export const OPTIONAL_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.genAi.optionalLabel',
-  {
-    defaultMessage: 'Optional',
-  }
-);
-
 export const API_PROVIDER_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.apiProviderLabel',
   {
