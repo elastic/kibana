@@ -38,7 +38,7 @@ export class LifecycleQuery extends BaseResolverQuery {
   }
 
   private query(nodes: NodeID[]): JsonObject {
-    return {
+    const query = {
       _source: false,
       fields: this.resolverFields,
       size: nodes.length,
@@ -70,15 +70,17 @@ export class LifecycleQuery extends BaseResolverQuery {
               },
             },
             {
-              terms: { 'event.category': ['process'] },
+              terms: { 'event.category': ['process', 'host'] },
             },
             {
-              terms: { 'event.kind': ['event', 'alert'] },
+              terms: { 'event.kind': ['event', 'alert', 'signal'] },
             },
           ],
         },
       },
     };
+    console.log('LifecycleQuery fields being requested:', this.resolverFields);
+    return query;
   }
 
   /**
@@ -94,8 +96,7 @@ export class LifecycleQuery extends BaseResolverQuery {
     }
 
     const esClient = this.isInternalRequest ? client.asInternalUser : client.asCurrentUser;
-
-    const body = await esClient.search({
+    const response = await esClient.search({
       body: this.query(validNodes),
       index: this.indexPatterns,
     });
@@ -109,6 +110,6 @@ export class LifecycleQuery extends BaseResolverQuery {
      * So the schema fields are flattened ('process.parent.entity_id')
      */
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return body.hits.hits.map((hit) => hit.fields);
+    return response.hits.hits.map((hit) => hit.fields);
   }
 }
