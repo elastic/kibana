@@ -33,7 +33,6 @@
     "@kbn/search-api-keys-components",
     "@kbn/logging",
     "@kbn/search-indices",
-    "@kbn/sample-data-ingest",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-shared-ui"
   ],
