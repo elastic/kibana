@@ -16,15 +16,24 @@ import { createExampleDocumentProfileProvider } from './example/example_document
 import { registerProfileProviders } from './register_profile_providers';
 import type { BaseProfileProvider } from '../profile_service';
 
-let mockAllCollectedProfileIds: string[] = [];
+const levels = ['root', 'data-source', 'document'];
+let mockAllCollectedProfiles: Array<{ level: string; profileId: string }> = [];
 
 jest.mock('./register_enabled_profile_providers', () => {
   const real = jest.requireActual('./register_enabled_profile_providers');
   return {
     ...real,
     registerEnabledProfileProviders: jest.fn((params) => {
-      mockAllCollectedProfileIds.push(
-        ...params.providers.map((p: BaseProfileProvider<{}, {}>) => p.profileId)
+      let level = 'unknown';
+      levels.forEach((l) => {
+        if (params.profileService.defaultContext.profileId.includes(l)) {
+          level = l;
+        }
+      });
+      mockAllCollectedProfiles.push(
+        ...params.providers.map((p: BaseProfileProvider<{}, {}>) => {
+          return { level, profileId: p.profileId };
+        })
       );
       return real.registerEnabledProfileProviders(params);
     }),
@@ -37,7 +46,7 @@ const exampleDocumentProfileProvider = createExampleDocumentProfileProvider();
 
 describe('registerProfileProviders', () => {
   beforeEach(() => {
-    mockAllCollectedProfileIds = [];
+    mockAllCollectedProfiles = [];
   });
 
   it('should register enabled experimental profile providers', async () => {
@@ -117,7 +126,7 @@ describe('registerProfileProviders', () => {
   });
 
   it('all profile ids should be unique', async () => {
-    expect(mockAllCollectedProfileIds.length).toBe(0);
+    expect(mockAllCollectedProfiles.length).toBe(0);
 
     const {
       rootProfileServiceMock,
@@ -135,7 +144,39 @@ describe('registerProfileProviders', () => {
       services: profileProviderServices,
     });
 
-    expect(mockAllCollectedProfileIds.length).toBeGreaterThan(0);
-    expect(mockAllCollectedProfileIds).toEqual(uniq(mockAllCollectedProfileIds));
+    expect(mockAllCollectedProfiles.length).toBeGreaterThan(0);
+
+    const allCollectedProfileIds = mockAllCollectedProfiles.map((p) => p.profileId);
+    expect(allCollectedProfileIds).toEqual(uniq(allCollectedProfileIds));
+  });
+
+  it('all profile ids should be named appropriate to their context level', async () => {
+    expect(mockAllCollectedProfiles.length).toBe(0);
+
+    const {
+      rootProfileServiceMock,
+      dataSourceProfileServiceMock,
+      documentProfileServiceMock,
+      profileProviderServices,
+    } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
+    await registerProfileProviders({
+      rootProfileService: rootProfileServiceMock,
+      dataSourceProfileService: dataSourceProfileServiceMock,
+      documentProfileService: documentProfileServiceMock,
+      enabledExperimentalProfileIds: [],
+      services: profileProviderServices,
+    });
+
+    expect(mockAllCollectedProfiles.length).toBeGreaterThan(0);
+
+    mockAllCollectedProfiles.forEach((item) => {
+      expect(item.profileId.length).toBeGreaterThan(0);
+      expect(item.level).not.toBe('unknown');
+      if (levels.some((level) => item.profileId.includes(level))) {
+        expect(item.profileId).toContain(item.level);
+      }
+    });
   });
 });
