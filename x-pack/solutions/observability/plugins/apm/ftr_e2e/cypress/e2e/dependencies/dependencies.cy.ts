@@ -7,6 +7,7 @@
 import { synthtrace } from '../../../synthtrace';
 import { opbeans } from '../../fixtures/synthtrace/opbeans';
 import { checkA11y } from '../../support/commands';
+import { generateDataWithoutDependencies } from './generate_data_without_dependencies';
 import { generateManyDependencies } from './generate_many_dependencies';
 
 const start = '2021-10-10T00:00:00.000Z';
@@ -151,9 +152,15 @@ describe('Dependencies with high volume of data', () => {
   });
 });
 
-describe('Dependencies page with no data', () => {
+describe('Dependencies page with no dependencies', () => {
   before(() => {
-    synthtrace.clean(); // ensure no data
+    synthtrace.clean(); // ensure no dependencies data
+    synthtrace.index(
+      generateDataWithoutDependencies({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
   });
 
   beforeEach(() => {
