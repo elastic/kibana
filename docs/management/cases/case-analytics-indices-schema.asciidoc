@@ -1,7 +1,7 @@
 [[case-analytics-indices-schema]]
-== Case analytics indices schema
+= Case analytics indices schema
 
-=== Cases index
+== Cases index
 
 The `.internal.cases` index contains general data related to cases. This index uses the `.cases` alias.
 
@@ -53,7 +53,7 @@ The `.internal.cases` index contains general data related to cases. This index u
 
 |==============================================
 
-=== Cases attachments index
+== Cases attachments index
 The `.internal.cases-attachments` index contains data related to attachments in cases (alerts and files only). This index uses the `.cases-attachments` alias.
 
 |==============================================
@@ -79,7 +79,7 @@ The `.internal.cases-attachments` index contains data related to attachments in 
 
 |==============================================
 
-=== Cases user comments index
+== Cases user comments index
 
 The `.internal.cases-comments` index contains data related to user comments in cases. This index uses the `.cases-comments` alias.
 
@@ -104,7 +104,7 @@ The `.internal.cases-comments` index contains data related to user comments in c
 
 |==============================================
 
-=== Cases activity index
+== Cases activity index
 
 The `.internal.cases-activity` index contains data related to user activity in cases. This index uses the `.cases-activity` alias.
 
