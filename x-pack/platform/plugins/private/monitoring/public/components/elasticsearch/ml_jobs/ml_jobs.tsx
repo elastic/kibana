@@ -68,7 +68,7 @@ export const ElasticsearchMLJobs = ({
               'xpack.monitoring.elasticsearch.mlJobListing.noJobsDescription',
               {
                 defaultMessage:
-                  'There are no Machine learning Jobs that match your query. Try changing the time range selection.',
+                  'There are no Machine learning jobs that match your query. Try changing the time range selection.',
               }
             )}
             search={{
