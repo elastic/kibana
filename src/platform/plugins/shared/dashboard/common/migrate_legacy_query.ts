@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
+import { has } from 'lodash';
+import type { DashboardQuery } from '../server';
 
-export function cleanFiltersForSerialize(filters?: Filter[]): Filter[] {
-  if (!filters) return [];
-  return filters.map((filter) => {
-    if (filter.meta?.value) delete filter.meta.value;
-    return filter;
-  });
+export function migrateLegacyQuery(
+  query: DashboardQuery | { [key: string]: any } | string
+): DashboardQuery {
+  // Lucene was the only option before, so language-less queries are all lucene
+  if (!has(query, 'language')) {
+    return { query, language: 'lucene' };
+  }
+
+  return query as DashboardQuery;
 }
