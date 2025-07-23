@@ -362,6 +362,7 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
+    expect(esClient.cluster.health).not.toBeCalled();
     expect(esClient.reindex).not.toBeCalled();
     expect(result).toBe(undefined);
 

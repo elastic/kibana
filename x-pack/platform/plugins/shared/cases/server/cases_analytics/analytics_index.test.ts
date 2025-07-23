@@ -349,6 +349,7 @@ describe('AnalyticsIndex', () => {
         { tags: ['cai-index-creation', `${indexName}`] }
       );
       expect(logger.error).not.toBeCalled();
+      expect(nextBackOff).toBeCalledTimes(0);
     });
   });
 });
