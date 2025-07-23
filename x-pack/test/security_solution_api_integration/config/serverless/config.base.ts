@@ -8,8 +8,10 @@ import path from 'path';
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { services } from './services';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+import { services } from './services';
 
 export interface CreateTestConfigOptions {
   testFiles: string[];
@@ -57,6 +59,15 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       mochaOpts: {
         ...svlSharedConfig.get('mochaOpts'),
         grep: '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/',
+        rootHooks: {
+          // Some of the Rule Management API endpoints install prebuilt rules package under the hood.
+          // Prebuilt rules package installation has been known to be flakiness reason since
+          // EPR might be unavailable or the network may have faults.
+          // Real prebuilt rules package installation is prevented by
+          // installing a lightweight mock package.
+          beforeAll: ({ getService }: FtrProviderContext) =>
+            installMockPrebuiltRulesPackage({ getService }),
+        },
       },
     };
   };
