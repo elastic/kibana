@@ -37,36 +37,6 @@ export const getThreatsDetectedTrendLensAttributes: MyGetLensAttributes = ({ spa
       datasourceStates: {
         formBased: {
           layers: {
-            'c17b2286-3a97-4ce3-b27c-02343d0a5d51': {
-              columnOrder: [
-                '9649ca04-06d6-4bb5-a468-0e809cf96895',
-                '960043d1-073e-4501-8b6b-8d46c682c939',
-              ],
-              columns: {
-                '960043d1-073e-4501-8b6b-8d46c682c939': {
-                  customLabel: true,
-                  dataType: 'number',
-                  isBucketed: false,
-                  label: 'Real threats detected',
-                  operationType: 'count',
-                  params: { format: { id: 'number', params: { decimals: 0 } } },
-                  scale: 'ratio',
-                  sourceField: '___records___',
-                },
-                '9649ca04-06d6-4bb5-a468-0e809cf96895': {
-                  dataType: 'date',
-                  isBucketed: true,
-                  label: '@timestamp',
-                  operationType: 'date_histogram',
-                  params: { dropPartials: false, includeEmptyRows: true, interval: 'auto' },
-                  sourceField: '@timestamp',
-                },
-              },
-              ignoreGlobalFilters: false,
-              incompleteColumns: {},
-              linkToLayers: ['unifiedHistogram'],
-              sampling: 1,
-            },
             unifiedHistogram: {
               columnOrder: ['count_column'],
               columns: {
@@ -109,10 +79,6 @@ export const getThreatsDetectedTrendLensAttributes: MyGetLensAttributes = ({ spa
         metricAccessor: 'count_column',
         secondaryTrend: { type: 'none' },
         showBar: false,
-        trendlineLayerId: 'c17b2286-3a97-4ce3-b27c-02343d0a5d51',
-        trendlineLayerType: 'metricTrendline',
-        trendlineMetricAccessor: '960043d1-073e-4501-8b6b-8d46c682c939',
-        trendlineTimeAccessor: '9649ca04-06d6-4bb5-a468-0e809cf96895',
       },
     },
     title: 'Real threats detected',
