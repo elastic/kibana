@@ -44,6 +44,11 @@ export function AlertsOverview() {
     dataViews,
     spaces,
     uiSettings,
+    fieldFormats,
+    application,
+    licensing,
+    cases,
+    settings,
   } = services;
   const {
     query: {
@@ -122,6 +127,16 @@ export function AlertsOverview() {
               ruleTypeIds={APM_ALERTING_RULE_TYPE_IDS}
               consumers={APM_ALERTING_CONSUMERS}
               query={esQuery}
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+                cases,
+                settings,
+              }}
             />
           )}
         </EuiFlexItem>

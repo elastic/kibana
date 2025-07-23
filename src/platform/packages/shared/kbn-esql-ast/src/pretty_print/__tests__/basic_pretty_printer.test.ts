@@ -21,6 +21,12 @@ const reprint = (src: string) => {
   return { text };
 };
 
+const assertReprint = (src: string, expected: string = src) => {
+  const { text } = reprint(src);
+
+  expect(text).toBe(expected);
+};
+
 describe('single line query', () => {
   describe('commands', () => {
     describe('FROM', () => {
@@ -266,14 +272,14 @@ describe('single line query', () => {
       });
     });
 
-    describe('RRF', () => {
+    describe('FUSE', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score
         `);
 
         expect(text).toBe(
-          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
         );
       });
 
@@ -282,12 +288,12 @@ describe('single line query', () => {
   | FORK
     (WHERE semantic_title : "Shakespeare" | SORT _score)
     (WHERE title : "Shakespeare" | SORT _score)
-  | RRF
+  | FUSE
   | KEEP title, _score
           `);
 
         expect(text).toBe(
-          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
         );
       });
     });
@@ -517,36 +523,6 @@ describe('single line query', () => {
           expect(text).toBe('FROM a | WHERE a LIKE "b"');
         });
 
-        test('inserts brackets where necessary due precedence', () => {
-          const { text } = reprint('FROM a | WHERE (1 + 2) * 3');
-
-          expect(text).toBe('FROM a | WHERE (1 + 2) * 3');
-        });
-
-        test('inserts brackets where necessary due precedence - 2', () => {
-          const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4)');
-
-          expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4)');
-        });
-
-        test('inserts brackets where necessary due precedence - 3', () => {
-          const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
-
-          expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
-        });
-
-        test('inserts brackets where necessary due precedence - 4', () => {
-          const { text } = reprint('FROM a | WHERE (1 + (1 + 2)) * ((3 - 4) / (5 + 6 + 7))');
-
-          expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * (3 - 4) / (5 + 6 + 7)');
-        });
-
-        test('inserts brackets where necessary due precedence - 5', () => {
-          const { text } = reprint('FROM a | WHERE (1 + (1 + 2)) * (((3 - 4) / (5 + 6 + 7)) + 1)');
-
-          expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * ((3 - 4) / (5 + 6 + 7) + 1)');
-        });
-
         test('formats WHERE binary-expression', () => {
           const { text } = reprint('FROM a | STATS a WHERE b');
 
@@ -557,6 +533,72 @@ describe('single line query', () => {
           const { text } = reprint('FROM a | STATS a = agg(123) WHERE b == test(c, 123)');
 
           expect(text).toBe('FROM a | STATS a = AGG(123) WHERE b == TEST(c, 123)');
+        });
+
+        describe('grouping', () => {
+          test('inserts brackets where necessary due precedence', () => {
+            const { text } = reprint('FROM a | WHERE (1 + 2) * 3');
+
+            expect(text).toBe('FROM a | WHERE (1 + 2) * 3');
+          });
+
+          test('inserts brackets where necessary due precedence - 2', () => {
+            const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4)');
+
+            expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4)');
+          });
+
+          test('inserts brackets where necessary due precedence - 3', () => {
+            const { text } = reprint('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
+
+            expect(text).toBe('FROM a | WHERE (1 + 2) * (3 - 4) / (5 + 6 + 7)');
+          });
+
+          test('inserts brackets where necessary due precedence - 4', () => {
+            const { text } = reprint('FROM a | WHERE (1 + (1 + 2)) * ((3 - 4) / (5 + 6 + 7))');
+
+            expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * (3 - 4) / (5 + 6 + 7)');
+          });
+
+          test('inserts brackets where necessary due precedence - 5', () => {
+            const { text } = reprint(
+              'FROM a | WHERE (1 + (1 + 2)) * (((3 - 4) / (5 + 6 + 7)) + 1)'
+            );
+
+            expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * ((3 - 4) / (5 + 6 + 7) + 1)');
+          });
+
+          test('AND has higher precedence than OR', () => {
+            assertReprint('FROM a | WHERE b AND (c OR d)');
+            assertReprint('FROM a | WHERE (b AND c) OR d', 'FROM a | WHERE b AND c OR d');
+            assertReprint('FROM a | WHERE b OR c AND d');
+            assertReprint('FROM a | WHERE (b OR c) AND d');
+          });
+
+          test('addition has higher precedence than AND', () => {
+            assertReprint('FROM a | WHERE b + (c AND d)');
+            assertReprint('FROM a | WHERE (b + c) AND d', 'FROM a | WHERE b + c AND d');
+            assertReprint('FROM a | WHERE b AND c + d');
+            assertReprint('FROM a | WHERE (b AND c) + d');
+          });
+
+          test('multiplication (division) has higher precedence than addition (subtraction)', () => {
+            assertReprint('FROM a | WHERE b / (c - d)');
+            assertReprint('FROM a | WHERE b * (c - d)');
+            assertReprint('FROM a | WHERE b * (c + d)');
+            assertReprint('FROM a | WHERE (b / c) - d', 'FROM a | WHERE b / c - d');
+            assertReprint('FROM a | WHERE (b * c) - d', 'FROM a | WHERE b * c - d');
+            assertReprint('FROM a | WHERE (b * c) + d', 'FROM a | WHERE b * c + d');
+            assertReprint('FROM a | WHERE b - c / d');
+            assertReprint('FROM a | WHERE (b - c) / d');
+          });
+
+          test('issue: https://github.com/elastic/kibana/issues/224990', () => {
+            assertReprint('FROM a | WHERE b AND (c OR d)');
+            assertReprint(
+              'FROM kibana_sample_data_logs | WHERE agent.keyword == "meow" AND (geo.dest == "GR" OR geo.dest == "ES")'
+            );
+          });
         });
       });
     });
@@ -790,7 +832,7 @@ describe('multiline query', () => {
     const query = `FROM kibana_sample_data_logs
 | SORT @timestamp
 | EVAL t = NOW()
-| EVAL key = CASE(timestamp < (t - 1 hour) AND timestamp > (t - 2 hour), "Last hour", "Other")
+| EVAL key = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, "Last hour", "Other")
 | STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) BY key, extension.keyword
 | EVAL sum_last_hour = CASE(key == "Last hour", sum), sum_rest = CASE(key == "Other", sum), count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
 | STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) BY key, extension.keyword

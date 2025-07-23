@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttackDiscovery } from '../..';
+import type { AttackDiscovery, Replacements } from '../..';
 import * as i18n from './translations';
 
 export const RECONNAISSANCE = 'Reconnaissance';
@@ -97,3 +97,24 @@ export const getTacticMetadata = (attackDiscovery: AttackDiscovery): TacticMetad
  * This function replaces them with actual newlines
  */
 export const replaceNewlineLiterals = (markdown: string): string => markdown.replace(/\\n/g, '\n');
+
+export const getOriginalAlertIds = ({
+  alertIds,
+  replacements,
+}: {
+  alertIds: AttackDiscovery['alertIds'];
+  replacements?: Replacements;
+}) => {
+  return alertIds.map((alertId) =>
+    replacements != null ? replacements[alertId] ?? alertId : alertId
+  );
+};
+
+export const transformInternalReplacements = (
+  internal: Array<{ value: string; uuid: string }>
+): Record<string, string> => {
+  return internal.reduce<Record<string, string>>(
+    (acc, r) => (r.uuid != null && r.value != null ? { ...acc, [r.uuid]: r.value } : acc),
+    {}
+  );
+};

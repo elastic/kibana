@@ -61,6 +61,49 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.InTableSearchRestorableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "InTableSearchRestorableState",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.InTableSearchRestorableState.searchTerm",
+            "type": "string",
+            "tags": [],
+            "label": "searchTerm",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.InTableSearchRestorableState.activeMatch",
+            "type": "Object",
+            "tags": [],
+            "label": "activeMatch",
+            "description": [],
+            "signature": [
+              "ActiveMatch",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
         "id": "def-public.UseDataGridInTableSearchProps",
         "type": "Interface",
         "tags": [],
@@ -168,6 +211,73 @@
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.initialState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/data-grid-in-table-search",
+                "scope": "public",
+                "docId": "kibKbnDataGridInTableSearchPluginApi",
+                "section": "def-public.InTableSearchRestorableState",
+                "text": "InTableSearchRestorableState"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.onInitialStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onInitialStateChange",
+            "description": [],
+            "signature": [
+              "((initialState: ",
+              {
+                "pluginId": "@kbn/data-grid-in-table-search",
+                "scope": "public",
+                "docId": "kibKbnDataGridInTableSearchPluginApi",
+                "section": "def-public.InTableSearchRestorableState",
+                "text": "InTableSearchRestorableState"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-grid-in-table-search",
+                "id": "def-public.UseDataGridInTableSearchProps.onInitialStateChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialState",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/data-grid-in-table-search",
+                    "scope": "public",
+                    "docId": "kibKbnDataGridInTableSearchPluginApi",
+                    "section": "def-public.InTableSearchRestorableState",
+                    "text": "InTableSearchRestorableState"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -87,7 +87,9 @@
     "@kbn/core-application-browser",
     "@kbn/ai-security-labs-content",
     "@kbn/inference-langchain",
-    "@kbn/security-solution-features"
+    "@kbn/security-solution-features",
+    "@kbn/core-http-server-mocks",
+    "@kbn/inference-common"
   ],
   "exclude": [
     "target/**/*",

@@ -9,7 +9,11 @@
     "build:antlr4:esql": "npm run build:antlr4:esql:lexer && npm run build:antlr4:esql:parser",
     "postbuild:antlr4:esql": "./scripts/postbuild.sh",
     "build:antlr4:esql:parser": "antlr -Dlanguage=TypeScript -lib src/antlr/parser src/antlr/esql_parser.g4",
-    "build:antlr4:esql:lexer": "antlr -Dlanguage=TypeScript -lib src/antlr/lexer src/antlr/esql_lexer.g4"
+    "build:antlr4:esql:lexer": "antlr -Dlanguage=TypeScript -lib src/antlr/lexer src/antlr/esql_lexer.g4",
+    "make:defs": "ts-node --transpileOnly ./scripts/generate_function_definitions.ts",
+    "postmake:defs": "yarn run lint:fix:generated",
+    "lint:fix:generated": "cd ../../../../.. && node ./scripts/eslint --fix ./src/platform/packages/shared/kbn-esql-ast/src/definitions/generated",
+    "test:validation": "cd ../../../../.. && yarn test:jest ./src/platform/packages/shared/kbn-esql-ast/src/validation/validation.test.ts"
   },
   "sideEffects": false
 }

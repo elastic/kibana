@@ -56,6 +56,8 @@ export const getSpanFieldConfiguration = ({
           {({ content }) => (
             <DependencyNameLink
               dependencyName={value as string}
+              spanType={flattenedDoc[SPAN_TYPE_FIELD]}
+              spanSubtype={flattenedDoc[SPAN_SUBTYPE_FIELD]}
               environment={flattenedDoc[SERVICE_ENVIRONMENT_FIELD]}
               formattedDependencyName={content}
             />

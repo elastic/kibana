@@ -51,6 +51,7 @@ import {
   OutputInvalidError,
   AgentlessAgentCreateOverProvisionnedError,
   FleetErrorWithStatusCode,
+  PackageRollbackError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -97,6 +98,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 400;
   }
   if (error instanceof CustomPackagePolicyNotAllowedForAgentlessError) {
+    return 400;
+  }
+  if (error instanceof PackageRollbackError) {
     return 400;
   }
   // Unauthorized

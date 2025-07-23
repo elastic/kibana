@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution'],
+  globals: {
+    Uint8Array: Uint8Array,
+  },
 };

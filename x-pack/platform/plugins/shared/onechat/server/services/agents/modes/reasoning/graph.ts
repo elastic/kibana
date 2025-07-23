@@ -37,10 +37,11 @@ export type StateType = typeof StateAnnotation.State;
 export const createAgentGraph = async ({
   chatModel,
   tools,
+  customInstructions,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
-  systemPrompt?: string;
+  customInstructions?: string;
   logger: Logger;
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
@@ -53,6 +54,7 @@ export const createAgentGraph = async ({
     const response = await model.invoke(
       getReasoningPrompt({
         messages: [...state.initialMessages, ...state.addedMessages],
+        customInstructions,
       })
     );
 
@@ -75,6 +77,7 @@ export const createAgentGraph = async ({
       getActPrompt({
         initialMessages: state.initialMessages,
         addedMessages: state.addedMessages,
+        customInstructions,
       })
     );
     return {

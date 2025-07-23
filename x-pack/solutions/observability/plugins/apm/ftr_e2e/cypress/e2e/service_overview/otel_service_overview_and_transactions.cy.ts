@@ -132,7 +132,7 @@ describe('Service Overview', () => {
 
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
     });
 
     it('shows waterfall and transaction details flyout', () => {
@@ -152,8 +152,8 @@ describe('Service Overview', () => {
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
   });
 
@@ -181,8 +181,8 @@ describe('Service Overview', () => {
       cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
-      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
-      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').should('exist');
+      cy.getByTestSubj('apmUiSharedHttpStatusCodeBadge').contains('OK');
     });
   });
 });

@@ -9,6 +9,7 @@ import type { Plugin as PluginClass } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { StreamsRepositoryClient } from './api';
+import { StreamsPublicConfig } from '../common/config';
 
 export interface StreamsStatus {
   status: 'unknown' | 'enabled' | 'disabled';
@@ -20,6 +21,7 @@ export interface StreamsPluginSetup {}
 export interface StreamsPluginStart {
   streamsRepositoryClient: StreamsRepositoryClient;
   status$: Observable<StreamsStatus>;
+  config$: Observable<StreamsPublicConfig>;
 }
 
 export interface StreamsPluginSetupDependencies {

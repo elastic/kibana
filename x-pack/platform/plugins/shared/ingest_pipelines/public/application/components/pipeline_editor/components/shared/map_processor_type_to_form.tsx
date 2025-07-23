@@ -763,13 +763,22 @@ export const mapProcessorTypeToDescriptor = () => {
       typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.remove', {
         defaultMessage: 'Removes one or more fields.',
       }),
-      getDefaultDescription: ({ field }) =>
-        i18n.translate('xpack.ingestPipelines.processors.defaultDescription.remove', {
+      getDefaultDescription: ({ field, keep }) => {
+        if (keep) {
+          return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.removeKeep', {
+            defaultMessage: 'Keeps only "{keep}"',
+            values: {
+              keep: Array.isArray(keep) ? keep.map((v) => `"${v}"`).join(', ') : keep,
+            },
+          });
+        }
+        return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.remove', {
           defaultMessage: 'Removes "{field}"',
           values: {
             field: Array.isArray(field) ? field.map((v) => `"${v}"`).join(', ') : field,
           },
-        }),
+        });
+      },
     },
     rename: {
       category: processorCategories.DATA_TRANSFORMATION,
