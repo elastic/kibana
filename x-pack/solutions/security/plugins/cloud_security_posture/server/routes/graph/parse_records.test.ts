@@ -211,7 +211,7 @@ describe('parseRecords', () => {
     expect(result.messages).toContain(ApiMessageCode.ReachedNodesLimit);
   });
 
-  it('assigns correct shapes and icons for entity nodes', () => {
+  it('assigns correct tags, shapes and icons for entity nodes', () => {
     const records: GraphEdge[] = [
       {
         action: 'foo',
@@ -229,12 +229,12 @@ describe('parseRecords', () => {
     const result = parseRecords(mockLogger, records);
 
     const userNode = result.nodes.find((n) => n.id === 'user1');
-    expect(userNode).toMatchObject({ shape: 'ellipse', icon: 'user' });
+    expect(userNode).toMatchObject({ shape: 'ellipse', icon: 'user', tag: 'user' });
 
     const hostNode = result.nodes.find((n) => n.id === 'host1');
-    expect(hostNode).toMatchObject({ shape: 'hexagon', icon: 'storage' });
+    expect(hostNode).toMatchObject({ shape: 'hexagon', icon: 'storage', tag: 'host' });
 
     const ipNode = result.nodes.find((n) => n.id === 'ip1');
-    expect(ipNode).toMatchObject({ shape: 'diamond', icon: 'globe' });
+    expect(ipNode).toMatchObject({ shape: 'diamond', icon: 'globe', tag: 'other types' });
   });
 });

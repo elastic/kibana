@@ -38,7 +38,19 @@ export const NODE_HEIGHT = 100;
  * The width of a node label in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_LABEL_WIDTH = 140;
+export const NODE_TAG_WIDTH = 140;
+
+/**
+ * The height of a node tag in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_TAG_HEIGHT = 20;
+
+/**
+ * The width of a node label in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_LABEL_WIDTH = 200;
 
 /**
  * The height of a node label in the graph, in pixels.

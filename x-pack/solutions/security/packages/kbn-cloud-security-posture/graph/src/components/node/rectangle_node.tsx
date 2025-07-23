@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
@@ -20,16 +20,29 @@ import {
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { RectangleHoverShape, RectangleShape } from './shapes/rectangle_shape';
 import { NodeExpandButton } from './node_expand_button';
-import { Label } from './label';
 import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
+import { NodeDetails } from './node_details';
 
 const NODE_SHAPE_WIDTH = 81;
-const NODE_SHAPE_HEIGHT = 80;
+const NODE_SHAPE_HEIGHT = 89;
 
 export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
-    props.data as EntityNodeViewModel;
+  const {
+    id,
+    color,
+    icon,
+    label,
+    tag,
+    count,
+    ips,
+    countryCodes,
+    interactive,
+    expandButtonClick,
+    nodeClick,
+  } = props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
+  const fillColor = useNodeFillColor(color ?? 'primary');
+  const strokeColor = euiTheme.colors[color ?? 'primary'];
   return (
     <>
       <NodeShapeContainer>
@@ -41,20 +54,39 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <RectangleHoverShape stroke={euiTheme.colors[color ?? 'primary']} />
+            <RectangleHoverShape stroke={strokeColor} />
           </NodeShapeOnHoverSvg>
         )}
         <NodeShapeSvg
           width="65"
-          height="64"
-          viewBox="0 0 65 64"
+          height="77"
+          viewBox="0 0 65 77"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <RectangleShape
-            fill={useNodeFillColor(color)}
-            stroke={euiTheme.colors[color ?? 'primary']}
-          />
+          {!!count && count > 0 && (
+            <RectangleShape
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.8) translateY(16px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.3),
+              }}
+            />
+          )}
+          {!!count && count > 0 && (
+            <RectangleShape
+              fill={fillColor}
+              stroke={strokeColor}
+              css={{
+                transform: 'scale(0.9) translateY(7px)',
+                transformOrigin: 'center',
+                stroke: transparentize(strokeColor, 0.5),
+              }}
+            />
+          )}
+          <RectangleShape fill={fillColor} stroke={strokeColor} />
           {icon && <NodeIcon x="8" y="7" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (
@@ -83,7 +115,13 @@ export const RectangleNode = memo<NodeProps>((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <Label text={label ? label : id} />
+      <NodeDetails
+        count={count}
+        tag={tag}
+        label={label ? label : id}
+        ips={ips}
+        countryCodes={countryCodes}
+      />
     </>
   );
 });
