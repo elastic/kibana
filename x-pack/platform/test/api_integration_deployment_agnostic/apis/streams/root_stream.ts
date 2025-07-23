@@ -118,10 +118,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property('message', 'Desired stream state is invalid');
-
-      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
-        'Root stream processing rules cannot be changed'
+      expect(response).to.have.property(
+        'message',
+        'Desired stream state is invalid: Root stream processing rules cannot be changed'
       );
     });
 
