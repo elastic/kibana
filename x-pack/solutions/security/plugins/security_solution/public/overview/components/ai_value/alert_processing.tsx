@@ -39,10 +39,11 @@ export const AlertProcessing: React.FC<Props> = ({
       <EuiText size="s">
         <p>{i18n.ALERT_PROCESSING_DESC}</p>
       </EuiText>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <p>{'Compared to the previous period'}</p>
+            <p>{i18n.COMPARED}</p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -55,7 +56,7 @@ export const AlertProcessing: React.FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <p>{'False positives'}</p>
+            <p>{i18n.FALSE_POSITIVES}</p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -68,11 +69,11 @@ export const AlertProcessing: React.FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            <p>{'Escalated alerts'}</p>
+            <p>{i18n.ESCALATED_ALERTS}</p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <AlertProcessingDonut attackAlertIds={attackAlertIds} from={from} to={to} />
     </EuiPanel>
   );

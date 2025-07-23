@@ -14,7 +14,7 @@ import { getAlertProcessingDonutAttributes } from '../../../common/components/vi
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
-const ChartSize = 240;
+const ChartSize = 300;
 interface Props {
   attackAlertIds: string[];
   from: string;

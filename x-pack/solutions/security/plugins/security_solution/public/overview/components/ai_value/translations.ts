@@ -106,16 +106,25 @@ export const FILTERING_RATE_DESC = i18n.translate(
   }
 );
 
+export const COMPARED = i18n.translate('xpack.securitySolution.aiValue.compared', {
+  defaultMessage: 'Compared to the previous period',
+});
+
+export const FALSE_POSITIVES = i18n.translate('xpack.securitySolution.aiValue.falsePositives', {
+  defaultMessage: 'False positives',
+});
+
+export const ESCALATED_ALERTS = i18n.translate('xpack.securitySolution.aiValue.escalatedAlerts', {
+  defaultMessage: 'Escalated alerts',
+});
+
 export const ESCALATED_RATE = i18n.translate('xpack.securitySolution.aiValue.escalatedRate', {
   defaultMessage: 'Escalated alert rate',
 });
 
-export const ESCALATED_RATE_DESC = i18n.translate(
-  'xpack.securitySolution.aiValue.escalatedRateDesc',
-  {
-    defaultMessage: 'AI-escalated alerts',
-  }
-);
+export const COST_CALCULATIONS = i18n.translate('xpack.securitySolution.aiValue.costCalculations', {
+  defaultMessage: 'Cost calculations: Time saved × average analyst hourly rate: $75/h.',
+});
 
 export const TIME_SAVED = i18n.translate('xpack.securitySolution.aiValue.timeSavedTitle', {
   defaultMessage: 'Analyst time saved',
