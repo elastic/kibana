@@ -8,8 +8,7 @@
 import { isBoom } from '@hapi/boom';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { Logger } from '@kbn/core/server';
-import { Builder } from '@kbn/esql-ast';
-import { StreamQuery } from '@kbn/streams-schema';
+import { StreamQuery, buildEsqlQuery } from '@kbn/streams-schema';
 import { map, partition } from 'lodash';
 import pLimit from 'p-limit';
 import { QueryLink } from '../../../../../common/assets';
@@ -217,7 +216,8 @@ export class QueryClient {
 
   private toCreateRuleParams(query: QueryLink, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
-    const queryLiteral = Builder.expression.literal.string(query.query.kql.query);
+
+    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       data: {
         name: query.query.title,
@@ -226,7 +226,7 @@ export class QueryClient {
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(${queryLiteral.value})`,
+          query: esqlQuery,
         },
         enabled: true,
         tags: ['streams'],
@@ -242,7 +242,7 @@ export class QueryClient {
 
   private toUpdateRuleParams(query: QueryLink, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
-    const queryLiteral = Builder.expression.literal.string(query.query.kql.query);
+    const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {
       id: ruleId,
       data: {
@@ -250,7 +250,7 @@ export class QueryClient {
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: `FROM ${stream},${stream}.* METADATA _id, _source | WHERE KQL(${queryLiteral.value})`,
+          query: esqlQuery,
         },
         tags: ['streams'],
         schedule: {
