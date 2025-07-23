@@ -91,7 +91,7 @@ export const allowedExperimentalValues = Object.freeze({
    * and Fleet must set it runtime mode to spaces by calling the following API:
    * - `POST /internal/fleet/enable_space_awareness`
    */
-  endpointManagementSpaceAwarenessEnabled: false,
+  endpointManagementSpaceAwarenessEnabled: true,
 
   /**
    * Disables new notes
@@ -191,7 +191,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables scheduling gap fills for rules
    */
-  bulkFillRuleGapsEnabled: false,
+  bulkFillRuleGapsEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
