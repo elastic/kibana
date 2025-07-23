@@ -481,8 +481,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           sort$.next(sort);
         },
         selectAll: (keys: string[]) => {
+          const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
           const field = api.field$.getValue();
-          if (keys.length < 1 || !field) {
+          if (keys.length < 1 || (isDSLInputMode && !field)) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
@@ -494,8 +495,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           selectionsManager.api.setSelectedOptions([...selectedOptions, ...newSelections]);
         },
         deselectAll: (keys: string[]) => {
+          const isDSLInputMode = api.input$.getValue() === ControlInputOption.DSL;
           const field = api.field$.getValue();
-          if (keys.length < 1 || !field) {
+          if (keys.length < 1 || (isDSLInputMode && !field)) {
             api.setBlockingError(
               new Error(OptionsListStrings.control.getInvalidSelectionMessage())
             );
