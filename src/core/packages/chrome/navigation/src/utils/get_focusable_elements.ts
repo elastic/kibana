@@ -12,8 +12,8 @@ import { RefObject } from 'react';
 /**
  * Utility function for getting focusable elements
  */
-export const getFocusableElements = (ref: RefObject<HTMLElement>) => {
-  if (!ref.current) return [];
+export const getFocusableElements = (ref: RefObject<HTMLElement> | null) => {
+  if (!ref?.current) return [];
 
   return Array.from(ref.current.querySelectorAll('button, a')).filter(
     (el) => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')
