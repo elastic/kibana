@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
 import { Subscription, map, merge } from 'rxjs';
@@ -107,26 +108,31 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             defaultMessage: 'anomaly charts',
           }),
         onEdit: async () => {
-          try {
-            const { resolveEmbeddableAnomalyChartsUserInput } = await import(
-              './anomaly_charts_setup_flyout'
-            );
-            const result = await resolveEmbeddableAnomalyChartsUserInput(
-              coreStartServices,
-              pluginsStartServices,
-              parentApi,
-              uuid,
-              {
-                ...titleManager.getLatestState(),
-                ...chartsManager.getLatestState(),
-              }
-            );
-            chartsManager.api.updateUserInput(result);
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error(e);
-            return Promise.reject();
-          }
+          openLazyFlyout({
+            core: coreStartServices,
+            parentApi,
+            flyoutProps: {
+              'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              const { ResolveEmbeddableAnomalyChartsUserInput } = await import(
+                './anomaly_charts_setup_flyout'
+              );
+              return (
+                <ResolveEmbeddableAnomalyChartsUserInput
+                  coreStart={coreStartServices}
+                  pluginStart={pluginsStartServices}
+                  onConfirm={(result) => {
+                    chartsManager.api.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  closeFlyout={closeFlyout}
+                  input={{ ...titleManager.getLatestState(), ...chartsManager.getLatestState() }}
+                />
+              );
+            },
+          });
         },
         ...titleManager.api,
         ...timeRangeManager.api,
