@@ -7,23 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiMarkdownEditor,
-  EuiMarkdownFormat,
-  UseEuiTheme,
-  euiCanAnimate,
-  getDefaultEuiMarkdownPlugins,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonGroup, EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   StateComparators,
@@ -32,34 +17,20 @@ import {
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
+  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
+import { MarkdownRenderer } from './components/markdown_renderer';
+import { MarkdownEditor } from './components/markdown_editor';
 
 const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
   content: '',
 };
-
-const editorStyles = css`
-  width: 100%;
-  block-size: calc(100% - 40px);
-  [data-test-subj='markdown_editor_preview_button'] {
-    display: none;
-  }
-  .euiMarkdownEditorFooter {
-    display: none;
-  }
-`;
-
-const dashboardMarkdownEditorAriaLabel = () =>
-  i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableAriaLabel', {
-    defaultMessage: 'Dashboard markdown editor',
-  });
 
 const markdownComparators: StateComparators<MarkdownEditorState> = { content: 'referenceEquality' };
 
@@ -82,7 +53,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const isPreview$ = new BehaviorSubject<boolean>(false);
 
-    const overridesHoverActions$ = new BehaviorSubject<boolean>(false);
+    const overrideHoverActions$ = new BehaviorSubject<boolean>(false);
 
     /**
      * if this embeddable had a difference between its runtime and serialized state, we could define and run a
@@ -132,7 +103,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       ...titleManager.api,
       serializeState,
       onEdit: async ({ isNewPanel } = {}) => {
-        overridesHoverActions$.next(true);
+        overrideHoverActions$.next(true);
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
         if (isNewPanel !== isNewPanel$.getValue()) {
           isNewPanel$.next(isNewPanel);
@@ -142,8 +113,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       },
       isEditingEnabled: () => true,
       getTypeDisplayName: () => 'Markdown',
-      overridesHoverActions$,
-      OverridenHoverActionsComponent: () => {
+      overrideHoverActions$,
+      OverriddenHoverActionsComponent: () => {
         if (!isEditing$.getValue()) {
           return;
         } else {
@@ -192,227 +163,55 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       api,
       Component: () => {
         // get state for rendering
-        const content = useStateFromPublishingSubject(markdownStateManager.api.content$);
-        const [value, onChange] = React.useState(content ?? '');
-        const viewMode = useStateFromPublishingSubject(
+        const [content, isEditing, viewMode] = useBatchedPublishingSubjects(
+          markdownStateManager.api.content$,
+          isEditing$,
           getViewModeSubject(api) ?? new BehaviorSubject('view')
         );
-        const isEditing = useStateFromPublishingSubject(isEditing$);
-
-        const isPreview = useStateFromPublishingSubject(isPreview$);
-
         const excludingPlugins = Array<'lineBreaks' | 'linkValidator' | 'tooltip'>();
-
-        const { euiTheme } = useEuiTheme();
-        const { processingPlugins } = getDefaultEuiMarkdownPlugins({
+        const { processingPlugins: processingPluginList } = getDefaultEuiMarkdownPlugins({
           exclude: excludingPlugins,
         });
+
+        // TODO: should we give user the option to openLinksInNewTab or not?
         // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
-        processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
-
-        const onCancel = () => {
-          isEditing$.next(false);
-          isPreview$.next(false);
-          parentApi.focusedPanelId$.next();
-          console.log('WHAAAT', isNewPanel$.getValue());
-          if (isNewPanel$.getValue() === true) {
-            // remove the embeddable
-            parentApi.removePanel(api.uuid);
-          }
-          overridesHoverActions$.next(false);
-        };
-
-        const onSave = () => {
-          markdownStateManager.api.setContent(value);
-          isEditing$.next(false);
-          isPreview$.next(false);
-          if (isNewPanel$.getValue() === true) {
-            isNewPanel$.next(false);
-          }
-          parentApi.focusedPanelId$.next();
-          overridesHoverActions$.next(false);
-        };
-
-        const markdownStyles = {
-          container: css({
-            width: '100%',
-          }),
-          formatContainer: css({
-            padding: euiTheme.size.base,
-            overflow: 'scroll',
-            width: '100%',
-            img: {
-              maxInlineSize: '100%',
-            },
-          }),
-          editorInvisible: css({
-            opacity: 0,
-            pointerEvents: 'none',
-            userSelect: 'none',
-          })
-        };
-
-        const editorRef = useRef(null);
-        const textAreaScrollRef = useRef(0);
-        useEffect(() => {
-          if (editorRef.current) {
-            const textarea = editorRef.current.textarea;
-            if (!textarea) {
-              return;
-            }
-            textarea.focus();
-            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-            textAreaScrollRef.current = textarea.scrollTop;
-            textarea.addEventListener('scroll', () => {
-              textAreaScrollRef.current = textarea.scrollTop;
-              console.log('it happens')
-            });
-            textarea.scrollTop = textarea.scrollHeight; 
-          }
-        }, []);
-
-        useEffect(() => {
-          if (isPreview) {
-            return;
-          }
-          if (editorRef.current) {
-            const textarea = editorRef.current.textarea;
-            if (!textarea) {
-              return;
-            }
-            // textarea.focus();
-            // textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-            textarea.scrollTop = textAreaScrollRef.current; 
-          }
-        }, [isPreview]);
-
-        const styles = useMemoCss(markdownStyles);
+        processingPluginList[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
         if (viewMode === 'view' || !isEditing) {
           return (
-            <div css={styles.formatContainer}>
-              <EuiMarkdownFormat processingPluginList={processingPlugins}>
-                {content ?? ''}
-              </EuiMarkdownFormat>
-            </div>
+            <MarkdownRenderer processingPluginList={processingPluginList} content={content ?? ''} />
           );
         }
 
-        return !isPreview ? (
-          <div css={[styles.container, isPreview && styles.formatContainer]}>
-            <EuiMarkdownEditor
-              ref={editorRef}
-              css={[editorStyles, isPreview && styles.editorInvisible]}
-              toolbarProps={{
-                right: <div>TODO</div>,
-              }}
-              value={value}
-              onChange={(v) => onChange(v)}
-              aria-label={dashboardMarkdownEditorAriaLabel}
-              processingPluginList={processingPlugins}
-              height="full"
-              showFooter="false"
-            />
-            <EditingFooter onCancel={onCancel} onSave={onSave} />
-            {<>
-               <EuiMarkdownFormat
-               processingPluginList={processingPlugins}
-               css={css`
-                 padding: ${euiTheme.size.base};
-                 img {
-                   max-inline-size: 100%;
-                 }
-               `}
-             >
-               {value ?? content ?? ''}
-             </EuiMarkdownFormat>
-             <EditingFooter onCancel={onCancel} onSave={onSave} isPreview />
-             </>
-            }
-          </div>
-        ) : (
-          <div
-            css={css`
-              width: 100%;
-              overflow: scroll;
-            `}
-          >
-            <EuiMarkdownFormat
-              processingPluginList={processingPlugins}
-              css={css`
-                padding: ${euiTheme.size.base};
-                img {
-                  max-inline-size: 100%;
-                }
-              `}
-            >
-              {value ?? content ?? ''}
-            </EuiMarkdownFormat>
-            <EditingFooter onCancel={onCancel} onSave={onSave} isPreview />
-          </div>
+        return (
+          <MarkdownEditor
+            processingPluginList={processingPluginList}
+            content={content ?? ''}
+            onCancel={() => {
+              isEditing$.next(false);
+              isPreview$.next(false);
+              parentApi.focusedPanelId$.next();
+              console.log('WHAAAT', isNewPanel$.getValue());
+              if (isNewPanel$.getValue() === true) {
+                // remove the embeddable
+                parentApi.removePanel(api.uuid);
+              }
+              overrideHoverActions$.next(false);
+            }}
+            onSave={(value: string) => {
+              markdownStateManager.api.setContent(value);
+              isEditing$.next(false);
+              isPreview$.next(false);
+              if (isNewPanel$.getValue() === true) {
+                isNewPanel$.next(false);
+              }
+              parentApi.focusedPanelId$.next();
+              overrideHoverActions$.next(false);
+            }}
+            isPreview$={isPreview$}
+          />
         );
       },
     };
   },
-};
-
-const footerStyles = {
-  footer: ({ euiTheme }: UseEuiTheme) => css`
-    padding: 8px;
-    border-radius-bottom: 8px;
-    width: 100%;
-    border-top: ${euiTheme.colors.borderBasePlain} 1px solid;
-
-    position: absolute;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
-  `,
-  previewFooter: ({ euiTheme }: UseEuiTheme) => css`
-    opacity: 0;
-    ${euiCanAnimate} {
-      transition: opacity ${euiTheme.animation.slow} ease-in;
-    }
-    .dshDashboardGrid__item:hover & {
-      opacity: 1;
-    }
-  `,
-};
-
-const EditingFooter = ({
-  onCancel,
-  onSave,
-  isPreview,
-}: {
-  onCancel: () => void;
-  onSave: () => void;
-  isPreview?: boolean;
-}) => {
-  const styles = useMemoCss(footerStyles);
-  return (
-    <EuiFlexGroup
-      responsive={false}
-      gutterSize="xs"
-      justifyContent="flexEnd"
-      css={[styles.footer, isPreview && styles.previewFooter]}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty color="primary" size="xs" aria-label="Discard" onClick={onCancel}>
-          Discard
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="xs"
-          iconType={'check'}
-          color="primary"
-          display="fill"
-          fill
-          aria-label="Apply"
-          onClick={onSave}
-        >
-          Apply
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 };

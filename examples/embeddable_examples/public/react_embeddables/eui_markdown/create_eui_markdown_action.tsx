@@ -31,14 +31,16 @@ export const createEuiMarkdownAction = (): ActionDefinition<EmbeddableApiContext
     const newMarkdownEmbeddable = await embeddable.addNewPanel<MarkdownEditorSerializedState>(
       {
         panelType: EUI_MARKDOWN_ID,
-        serializedState: { rawState: { 
-          content: '# hello world!',
-        } },
+        serializedState: {
+          rawState: {
+            content: '# hello world!',
+          },
+        },
       },
       true
     );
 
-    return newMarkdownEmbeddable?.onEdit({ isNewPanel: true})
+    return newMarkdownEmbeddable?.onEdit({ isNewPanel: true });
   },
   getDisplayName: () =>
     i18n.translate('embeddableExamples.euiMarkdownEditor.displayNameAriaLabel', {

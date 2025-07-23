@@ -110,7 +110,7 @@ export const PresentationPanelInternal = <
     [setDragHandles]
   );
 
-  // const Cpmt = api.overridesHoverActions ?? 
+  // const Cpmt = api.overrideHoverActions ?? 
 
   return (
     <PresentationPanelHoverActions

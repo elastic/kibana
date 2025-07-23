@@ -112,9 +112,9 @@ const createClickHandler =
 
   export const PresentationPanelHoverActions = (props) => {
     console.log('TODO: make this update when focusedPanelId is a panel', props.api, props.api?.parentApi)
-    const [overridesHoverActions] = useBatchedOptionalPublishingSubjects(props.api?.overridesHoverActions$)
+    const [overrideHoverActions] = useBatchedOptionalPublishingSubjects(props.api?.overrideHoverActions$)
 
-    const CustomComponent =  props.api?.OverridenHoverActionsComponent?.()
+    const CustomComponent =  props.api?.OverriddenHoverActionsComponent?.()
   
     if (CustomComponent){
       return  <PresentationPanelEditActions {...props} overridenHoverActions={<CustomComponent/>}/>
