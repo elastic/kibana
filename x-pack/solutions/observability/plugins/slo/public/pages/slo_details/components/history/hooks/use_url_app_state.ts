@@ -7,7 +7,7 @@
 
 import DateMath from '@kbn/datemath';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { RecursivePartial } from '@kbn/utility-types';
 import deepmerge from 'deepmerge';
 import moment from 'moment';
@@ -38,7 +38,7 @@ const DEFAULT_STATE: AppState = {
   },
 };
 
-export function useUrlAppState(slo: SLOWithSummaryResponse): {
+export function useUrlAppState(slo: SLOWithSummaryResponse | SLODefinitionResponse): {
   state: AppState;
   updateState: (state: AppState) => void;
 } {
@@ -71,7 +71,7 @@ export function useUrlAppState(slo: SLOWithSummaryResponse): {
   const updateState = (newState: AppState) => {
     setState((prevState) => {
       const updatedState = deepmerge(prevState, newState);
-      urlStateStorage.current?.set(SLO_HISTORY_URL_STORAGE_KEY, serialize(updatedState), {
+      urlStateStorage.current?.set(SLO_HISTORY_URL_STORAGE_KEY, updatedState, {
         replace: true,
       });
 
@@ -85,7 +85,9 @@ export function useUrlAppState(slo: SLOWithSummaryResponse): {
   };
 }
 
-function getDefaultRangeFromSlo(slo: SLOWithSummaryResponse): AppState['range'] {
+function getDefaultRangeFromSlo(
+  slo: SLOWithSummaryResponse | SLODefinitionResponse
+): AppState['range'] {
   if (slo.timeWindow.type === 'calendarAligned') {
     const now = moment();
     const duration = toDuration(slo.timeWindow.duration);
@@ -105,7 +107,7 @@ function getDefaultRangeFromSlo(slo: SLOWithSummaryResponse): AppState['range'] 
 
 function toAppState(
   urlState: RecursivePartial<SerializedAppState>,
-  slo: SLOWithSummaryResponse
+  slo: SLOWithSummaryResponse | SLODefinitionResponse
 ): AppState {
   return {
     ...DEFAULT_STATE,
@@ -116,14 +118,5 @@ function toAppState(
             to: new Date(urlState.range.to),
           }
         : getDefaultRangeFromSlo(slo),
-  };
-}
-
-function serialize(state: AppState): SerializedAppState {
-  return {
-    range: {
-      from: state.range.from.toISOString(),
-      to: state.range.to.toISOString(),
-    },
   };
 }

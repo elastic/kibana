@@ -7,11 +7,12 @@
 
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { encode } from '@kbn/rison';
 import { ALL_VALUE, SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
 import { sloPaths } from '../../../../common';
 import { useKibana } from '../../../hooks/use_kibana';
-import { HISTORY_TAB_ID } from '../../../pages/slo_details/components/slo_details';
+import { useUrlAppState } from '../../../pages/slo_details/components/history/hooks/use_url_app_state';
 
 export interface Props {
   slo: SLOWithSummaryResponse | SLODefinitionResponse;
@@ -44,6 +45,7 @@ function Content({ slo, onCancel, onConfirm }: Props) {
   const {
     services: { cases },
   } = useKibana();
+  const { state } = useUrlAppState(slo);
 
   const useCasesAddToExistingCaseModal = cases?.hooks?.useCasesAddToExistingCaseModal!;
   const casesModal = useCasesAddToExistingCaseModal({
@@ -64,12 +66,11 @@ function Content({ slo, onCancel, onConfirm }: Props) {
             persistableStateAttachmentState: {
               type: 'slo_history',
               url: {
-                pathAndQuery: sloPaths.sloDetails(
-                  slo.id,
-                  'instanceId' in slo ? slo.instanceId : ALL_VALUE,
-                  undefined,
-                  HISTORY_TAB_ID
-                ),
+                pathAndQuery: sloPaths.sloDetailsHistory({
+                  id: slo.id,
+                  instanceId: 'instanceId' in slo ? slo.instanceId : ALL_VALUE,
+                  encodedAppState: encode(state),
+                }),
                 label: slo.name,
                 actionLabel: i18n.translate('xpack.slo.addToCase.caseAttachmentLabel', {
                   defaultMessage: 'Go to SLO history',
@@ -85,7 +86,7 @@ function Content({ slo, onCancel, onConfirm }: Props) {
     });
 
     return () => casesModal.close();
-  }, [casesModal, slo]);
+  }, [casesModal, slo, state]);
 
   return null;
 }
