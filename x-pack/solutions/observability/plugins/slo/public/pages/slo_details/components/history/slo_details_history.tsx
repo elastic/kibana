@@ -27,10 +27,9 @@ import { CalendarPeriodPicker } from './calendar_period_picker';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
-  isAutoRefreshing: boolean;
 }
 
-export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
+export function SloDetailsHistory({ slo }: Props) {
   const { uiSettings } = useKibana().services;
   const { state, updateState } = useUrlAppState(slo);
 
@@ -100,7 +99,7 @@ export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
       <HistoricalDataCharts
         slo={slo}
         hideMetadata={true}
-        isAutoRefreshing={isAutoRefreshing}
+        isAutoRefreshing={false}
         range={state.range}
         onBrushed={onBrushed}
       />
