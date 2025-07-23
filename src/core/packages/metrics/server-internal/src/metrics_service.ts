@@ -123,6 +123,9 @@ export class MetricsService
       this.opsMetricsLogger.debug(message!, meta);
     }
     this.metricsCollector!.reset();
+
+    // eslint-disable-next-line no-console
+    console.log(`*** OPS METRICS ***`, metrics);
     this.metrics$.next(metrics);
   }
 

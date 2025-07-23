@@ -36,6 +36,10 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
     const platform = os.platform();
     const load = os.loadavg();
 
+    const cgroupMetrics = await this.cgroupCollector.collect();
+    // eslint-disable-next-line no-console
+    console.log(`*** CGROUP metrics ***`, cgroupMetrics);
+
     const metrics: OpsOsMetrics = {
       platform,
       platformRelease: `${platform}-${os.release()}`,
@@ -51,7 +55,7 @@ export class OsMetricsCollector implements MetricsCollector<OpsOsMetrics> {
       },
       uptime_in_millis: os.uptime() * 1000,
       ...(await this.getDistroStats(platform)),
-      ...(await this.cgroupCollector.collect()),
+      ...(cgroupMetrics ?? {}),
     };
 
     return metrics;

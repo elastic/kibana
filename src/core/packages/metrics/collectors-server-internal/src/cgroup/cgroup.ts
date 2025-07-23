@@ -44,12 +44,16 @@ export class OsCgroupMetricsCollector implements MetricsCollector<OsCgroupMetric
       }
 
       // "await" to handle any errors here.
-      return await (this.isCgroup2
+      const cgroupResults = await (this.isCgroup2
         ? gatherV2CgroupMetrics(this.cpuAcctPath!)
         : gatherV1CgroupMetrics({
             cpuAcctPath: this.cpuAcctPath!,
             cpuPath: this.cpuPath!,
           }));
+
+      // eslint-disable-next-line no-console
+      console.log(`*** CGROUP RESULTS ***`, cgroupResults);
+      return cgroupResults;
     } catch (err) {
       this.noCgroupPresent = true;
 
