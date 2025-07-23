@@ -25,6 +25,14 @@ import { SvlApiKeysProvider } from './svl_api_keys';
 import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page';
 import { SvlSearchInferenceManagementPageProvider } from './svl_search_inference_management_page';
 import { SvlDataUsagePageProvider } from './svl_data_usage';
+import { AssetDetailsProvider } from './asset_details';
+import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
+import { DatasetQualityPageObject } from './dataset_quality';
+import { InfraHomePageProvider } from './infra_home_page';
+import { InfraHostsViewProvider } from './infra_hosts_view';
+import { InfraLogsPageProvider } from './infra_logs_page';
+import { SearchSynonymsPageProvider } from './search_synonyms_page';
+import { SearchQueryRulesPageProvider } from './search_query_rules_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
@@ -47,4 +55,12 @@ export const pageObjects = {
   svlSearchCreateIndexPage: SvlSearchCreateIndexPageProvider,
   svlSearchInferenceManagementPage: SvlSearchInferenceManagementPageProvider,
   svlDataUsagePage: SvlDataUsagePageProvider,
+  assetDetails: AssetDetailsProvider,
+  observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
+  datasetQuality: DatasetQualityPageObject,
+  infraHome: InfraHomePageProvider,
+  infraHostsView: InfraHostsViewProvider,
+  infraLogs: InfraLogsPageProvider,
+  searchSynonyms: SearchSynonymsPageProvider,
+  searchQueryRules: SearchQueryRulesPageProvider,
 };

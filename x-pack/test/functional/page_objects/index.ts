@@ -37,26 +37,14 @@ import { IndexLifecycleManagementPageProvider } from '@kbn/test-suites-xpack-pla
 import { LogstashPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/logstash_page';
 import { RollupPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/rollup_page';
 import { RemoteClustersPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/remote_clusters_page';
-import { AssetDetailsProvider } from './asset_details';
+import { EmbeddedConsoleProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/embedded_console';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
-import { EmbeddedConsoleProvider } from './embedded_console';
-import { InfraHomePageProvider } from './infra_home_page';
-import { InfraHostsViewProvider } from './infra_hosts_view';
-import { InfraLogsPageProvider } from './infra_logs_page';
-import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
-import { DatasetQualityPageObject } from './dataset_quality';
-import { UptimePageObject } from './uptime_page';
-import { SearchPlaygroundPageProvider } from './search_playground_page';
-import { SearchSynonymsPageProvider } from './search_synonyms_page';
-import { SearchQueryRulesPageProvider } from './search_query_rules_page';
-import { SearchStartProvider } from './search_start';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
 export const pageObjects = {
   ...kibanaFunctionalPageObjects,
   apiKeys: ApiKeysPageProvider,
-  assetDetails: AssetDetailsProvider,
   banners: BannersPageObject,
   canvas: CanvasPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
@@ -67,9 +55,6 @@ export const pageObjects = {
   grokDebugger: GrokDebuggerPageObject,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
-  infraHome: InfraHomePageProvider,
-  infraHostsView: InfraHostsViewProvider,
-  infraLogs: InfraLogsPageProvider,
   ingestPipelines: IngestPipelinesPageProvider,
   lens: LensPageProvider,
   licenseManagement: LicenseManagementPageProvider,
@@ -78,24 +63,17 @@ export const pageObjects = {
   maps: GisPageObject,
   monitoring: MonitoringPageObject,
   navigationalSearch: NavigationalSearchPageObject,
-  observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
-  datasetQuality: DatasetQualityPageObject,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
-  searchStart: SearchStartProvider,
   searchProfiler: SearchProfilerPageProvider,
-  searchPlayground: SearchPlaygroundPageProvider,
-  searchSynonyms: SearchSynonymsPageProvider,
-  searchQueryRules: SearchQueryRulesPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
   snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
   tagManagement: TagManagementPageObject,
   upgradeAssistant: UpgradeAssistantFlyoutObject,
-  uptime: UptimePageObject,
   userProfiles: UserProfilePageProvider,
   watcher: WatcherPageObject,
 };
