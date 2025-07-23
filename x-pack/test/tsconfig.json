@@ -28,7 +28,6 @@
   ],
   "kbn_references": [
     "@kbn/test-suites-src",
-    "@kbn/telemetry-collection-manager-plugin",
     "@kbn/alerting-plugin",
     "@kbn/fleet-plugin",
     "@kbn/ml-plugin",
