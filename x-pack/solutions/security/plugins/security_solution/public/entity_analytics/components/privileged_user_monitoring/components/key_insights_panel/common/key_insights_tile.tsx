@@ -22,15 +22,9 @@ const LENS_VISUALIZATION_HEIGHT = 150;
 const LENS_VISUALIZATION_MIN_WIDTH = 220;
 
 interface KeyInsightsTileProps {
-<<<<<<< HEAD
-  title: ReactElement;
-  label: ReactElement;
-  getEsqlQuery: (namespace: string) => EsqlQueryOrInvalidFields;
-=======
   title: string;
   label: string;
-  getEsqlQuery: (namespace: string) => string;
->>>>>>> kibana/main
+  getEsqlQuery: (namespace: string) => EsqlQueryOrInvalidFields;
   id: string;
   inspectTitle: ReactElement;
   spaceId?: string;
@@ -51,11 +45,6 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // Use prop spaceId if provided, otherwise use hook spaceId, fallback to 'default'
   const effectiveSpaceId = propSpaceId || hookSpaceId || 'default';
 
-<<<<<<< HEAD
-  // Extract the defaultMessage from FormattedMessage elements
-  const titleString = title.props.defaultMessage;
-  const labelString = label.props.defaultMessage;
-=======
   const lensAttributes = createKeyInsightsPanelLensAttributes({
     title,
     label,
@@ -63,7 +52,6 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     dataViewId: 'default-dataview',
     filterQuery,
   });
->>>>>>> kibana/main
 
   const visualizationResponse = useVisualizationResponse({
     visualizationId: id,
