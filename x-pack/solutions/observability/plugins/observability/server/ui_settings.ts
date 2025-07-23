@@ -174,7 +174,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
   [apmEnableServiceInventoryTableSearchBar]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableServiceInventoryTableSearchBar', {
-      defaultMessage: 'Service Inventory instant table search',
+      defaultMessage: 'Service inventory instant table search',
     }),
     description: i18n.translate(
       'xpack.observability.apmEnableServiceInventoryTableSearchBarDescription',

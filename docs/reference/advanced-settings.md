@@ -356,7 +356,7 @@ $$$observability-enable-inspect-es-queries$$$`observability:enableInspectEsQueri
 :   When enabled, allows you to inspect {{es}} queries in API responses.
 
 $$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups`
-:   [preview] When enabled, allows users to create Service Groups from the APM Service Inventory page.
+:   [preview] When enabled, allows users to create Service Groups from the APM Service inventory page.
 
 $$$observability-profiling-per-vcpu-watt-x86$$$`observability:profilingPervCPUWattX86`
 :   The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.

@@ -7,7 +7,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
-test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceInventoryPage } }) => {
     await browserAuth.loginAsViewer();
     await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(

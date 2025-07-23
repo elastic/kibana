@@ -21,7 +21,7 @@ describe('Applications deep links', () => {
         cy.getByTestSubj('nav-search-input').should('be.visible').type(keyword, { force: true });
 
         cy.contains('Applications');
-        cy.contains('Applications / Service Inventory');
+        cy.contains('Applications / Service inventory');
         cy.contains('Applications / Service groups');
         // scroll to the center & bottom because results are not rendering otherwise
         scrollToPositionResults('center');
@@ -32,9 +32,9 @@ describe('Applications deep links', () => {
         cy.contains('Applications / Settings');
       });
 
-      it('navigates to Service Inventory page', () => {
+      it('navigates to Service inventory page', () => {
         cy.visitKibana('/');
-        assertDeepLink(keyword, 'Applications / Service Inventory', '/apm/services');
+        assertDeepLink(keyword, 'Applications / Service inventory', '/apm/services');
       });
 
       it('navigates to Service groups page', () => {

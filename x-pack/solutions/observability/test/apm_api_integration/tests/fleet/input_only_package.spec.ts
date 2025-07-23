@@ -168,7 +168,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
           await scopedSynthtraceEsClient.index(scenario.events);
         });
 
-        it('the events can be seen on the Service Inventory Page', async () => {
+        it('the events can be seen on the Service inventory Page', async () => {
           const apmServices = await getApmServices(
             apmApiClient,
             scenario.start,
