@@ -114,22 +114,20 @@ export function fetchAndValidate$({
         selectedOptions,
       ]) => {
         let request: OptionsListRequest | GetESQLSingleColumnValuesParams;
+        const isESQLInputMode = input === ControlInputOption.ESQL;
         if (input === ControlInputOption.STATIC) {
           const suggestions =
             staticValues
               // Static searchTechnique is always 'wildcard'
-              ?.filter((value) => !searchString || value.includes(searchString))
-              .sort((a, b) => {
-                if (!sort || a === b) return 0;
-                if (sort.direction === 'asc') return a > b ? 1 : -1;
-                return b > a ? 1 : -1;
-              })
+              ?.filter(
+                (value) => !searchString || value.toLowerCase().includes(searchString.toLowerCase())
+              )
               .map((value) => ({ value })) ?? [];
           return {
             suggestions,
             totalCardinality: suggestions.length,
           };
-        } else if (input === ControlInputOption.ESQL) {
+        } else if (isESQLInputMode) {
           if (!esqlQuery) return { suggestions: [] };
           request = { query: esqlQuery, timeRange: controlFetchContext.timeRange };
         } else {
@@ -162,7 +160,19 @@ export function fetchAndValidate$({
         const newAbortController = new AbortController();
         abortController = newAbortController;
         try {
-          return await requestCache.runFetchRequest(request, newAbortController.signal);
+          const result = await requestCache.runFetchRequest(request, newAbortController.signal);
+          if (isESQLInputMode && searchString && OptionsListFetchCache.isSuccessResponse(result)) {
+            // Run client-side search on ES|QL results
+            // TODO: Add a named parameter to handle this natively in the ES|QL query
+            return {
+              ...result,
+              suggestions: result.suggestions.filter(({ value }) =>
+                // ES|QL searchTechnique is always 'wildcard'
+                String(value).toLowerCase().includes(searchString.toLowerCase())
+              ),
+            };
+          }
+          return result;
         } catch (error) {
           return { error };
         }

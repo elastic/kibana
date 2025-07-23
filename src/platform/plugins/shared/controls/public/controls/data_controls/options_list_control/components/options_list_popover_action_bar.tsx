@@ -109,7 +109,7 @@ export const OptionsListPopoverActionBar = ({
   );
 
   const compatibleSearchTechniques = useMemo(() => {
-    if (inputMode === ControlInputOption.STATIC) return ['wildcard' as OptionsListSearchTechnique];
+    if (inputMode !== ControlInputOption.DSL) return ['wildcard' as OptionsListSearchTechnique];
     if (!field) return [];
     return getCompatibleSearchTechniques(field.type);
   }, [field, inputMode]);

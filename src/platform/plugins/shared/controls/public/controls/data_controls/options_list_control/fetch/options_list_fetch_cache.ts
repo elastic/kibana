@@ -41,6 +41,10 @@ const isDSLRequest = (request: unknown): request is OptionsListRequest => {
 export class OptionsListFetchCache {
   private cache: LRUCache<string, OptionsListSuccessResponse>;
 
+  static isSuccessResponse = (
+    response: OptionsListResponse
+  ): response is OptionsListSuccessResponse => Object.hasOwn(response, 'suggestions');
+
   constructor() {
     this.cache = new LRUCache<string, OptionsListSuccessResponse>({
       max: REQUEST_CACHE_SIZE,

@@ -39,8 +39,7 @@ export const initializeEditorStateManager = ({
 }: EditorState & Pick<OptionsListControlState, 'output' | 'input'>) => {
   const state = {
     ...initialState,
-    searchTechnique:
-      input === ControlInputOption.STATIC ? 'wildcard' : initialState.searchTechnique,
+    searchTechnique: input !== ControlInputOption.DSL ? 'wildcard' : initialState.searchTechnique,
     singleSelect: output === ControlOutputOption.ESQL || initialState.singleSelect,
   };
   return initializeStateManager<EditorState>(state, defaultEditorState, editorComparators);

@@ -536,7 +536,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           }, []);
 
           const outputMode = useStateFromPublishingSubject(dataControlManager.api.output$);
+          const inputMode = useStateFromPublishingSubject(dataControlManager.api.input$);
           const isESQLOutputMode = outputMode === ControlOutputOption.ESQL;
+          const isESQLInputMode = inputMode === ControlInputOption.ESQL;
+          const isStaticInputMode = inputMode === ControlInputOption.STATIC;
 
           return (
             <OptionsListControlContext.Provider
@@ -547,7 +550,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
                   hideActionBar,
                   hideExclude: isESQLOutputMode || hideExclude,
                   hideExists: isESQLOutputMode || hideExists,
-                  hideSort: isESQLOutputMode || hideSort,
+                  hideSort: isESQLOutputMode || isESQLInputMode || isStaticInputMode || hideSort,
                 },
               }}
             >

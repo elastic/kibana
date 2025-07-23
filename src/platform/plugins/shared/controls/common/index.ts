@@ -34,7 +34,6 @@ export {
   ControlOutputOption,
   DEFAULT_CONTROL_INPUT,
   ControlInputOption,
-  ESQL_COMPATIBLE_CONTROL_TYPES,
 } from './constants';
 
 export { CONTROL_GROUP_TYPE } from './control_group';

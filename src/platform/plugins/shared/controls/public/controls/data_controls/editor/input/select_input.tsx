@@ -19,7 +19,7 @@ import {
   ControlInputOption,
   DefaultDataControlState,
   ControlGroupEditorConfig,
-  ESQL_COMPATIBLE_CONTROL_TYPES,
+  OPTIONS_LIST_CONTROL,
 } from '../../../../../common';
 import { ListOptionsInput } from '../../../../common/list_options_input/list_options_input';
 import { DataControlEditorStrings } from '../../data_control_constants';
@@ -89,8 +89,11 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
         ...editorState,
         staticValues: nextOptions.map(({ text }) => text),
       });
+      if (!selectedControlType && nextOptions.some(({ text }) => !!text)) {
+        setSelectedControlType(OPTIONS_LIST_CONTROL);
+      }
     },
-    [editorState, setEditorState]
+    [setEditorState, editorState, selectedControlType, setSelectedControlType]
   );
 
   const submitESQLQuery = useCallback(
@@ -132,7 +135,7 @@ export const SelectInput = <State extends DefaultDataControlState = DefaultDataC
         setEditorState(nextEditorState);
 
         if (!selectedControlType) {
-          setSelectedControlType(ESQL_COMPATIBLE_CONTROL_TYPES[0]);
+          setSelectedControlType(OPTIONS_LIST_CONTROL);
         }
       } else {
         setPreviewOptions([]);

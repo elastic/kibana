@@ -82,7 +82,7 @@ export const OptionsListEditorOptions = ({
   );
 
   const isESQLOutputMode = useMemo(() => output === ControlOutputOption.ESQL, [output]);
-  const isStaticInputMode = useMemo(() => input === ControlInputOption.STATIC, [input]);
+  const isDSLInputMode = useMemo(() => input === ControlInputOption.DSL, [input]);
 
   const [singleSelect, setSingleSelect] = useState<boolean>(
     isESQLOutputMode || (initialState.singleSelect ?? false)
@@ -95,9 +95,9 @@ export const OptionsListEditorOptions = ({
   );
 
   const compatibleSearchTechniques = useMemo(() => {
-    if (isStaticInputMode) return ['wildcard' as OptionsListSearchTechnique];
+    if (!isDSLInputMode) return ['wildcard' as OptionsListSearchTechnique];
     return getCompatibleSearchTechniques(field.type);
-  }, [field.type, isStaticInputMode]);
+  }, [field.type, isDSLInputMode]);
 
   const searchOptions = useMemo(() => {
     return allSearchOptions.filter((searchOption) => {
