@@ -1,14 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-      ".alerts-security.alerts-default": {
-        "is_write_index": true
-      },
-      ".siem-signals-default": {
-        "is_write_index": false
-      }
-    },
+    "aliases": {},
     "index": ".internal.alerts-security.alerts-default-000001",
     "mappings": {
       "_meta": {
@@ -8649,10 +8642,6 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "hidden": "true",
-        "lifecycle": {
-          "name": ".alerts-ilm-policy",
-          "rollover_alias": ".alerts-security.alerts-default"
-        },
         "mapping": {
           "ignore_malformed": "true",
           "total_fields": {

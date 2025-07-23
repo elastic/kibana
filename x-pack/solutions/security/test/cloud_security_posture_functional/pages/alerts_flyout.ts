@@ -161,6 +161,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     it('expanded flyout - show alert details', async () => {
+      // Setting the timerange to fit the data and open the flyout for a specific alert
+      await alertsPage.navigateToAlertsPage(
+        `${alertsPage.getAbsoluteTimerangeFilter(
+          '2024-09-01T00:00:00.000Z',
+          '2024-09-02T00:00:00.000Z'
+        )}&${alertsPage.getFlyoutFilter(
+          '589e086d7ceec7d4b353340578bd607e96fbac7eab9e2926f110990be15122f1'
+        )}`
+      );
+      await alertsPage.waitForListToHaveAlerts();
+
       await alertsPage.flyout.expandVisualizations();
       await alertsPage.flyout.assertGraphPreviewVisible();
       await alertsPage.flyout.assertGraphNodesNumber(3);
