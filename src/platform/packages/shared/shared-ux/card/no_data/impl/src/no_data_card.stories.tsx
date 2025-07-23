@@ -17,6 +17,10 @@ import { NoDataCardProvider } from './services';
 
 import mdx from '../README.mdx';
 
+const mock = new NoDataCardStorybookMock();
+const argTypes = mock.getArgumentTypes();
+const args = mock.getArguments();
+
 export default {
   title: 'No Data/Card',
   description: 'A solution-specific wrapper around `EuiCard`, to be used on `NoData` page',
@@ -25,10 +29,8 @@ export default {
       page: mdx,
     },
   },
+  args,
 };
-
-const mock = new NoDataCardStorybookMock();
-const argTypes = mock.getArgumentTypes();
 
 export const Card = {
   render: (params: NoDataCardStorybookParams) => {
