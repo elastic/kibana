@@ -566,6 +566,7 @@ export class IndexUpdateService {
     this._rows$.complete();
     this._totalHits$.complete();
     this._actions$.complete();
+    this._pendingColumnsToBeSaved$.complete();
   }
 
   public async createIndex() {
