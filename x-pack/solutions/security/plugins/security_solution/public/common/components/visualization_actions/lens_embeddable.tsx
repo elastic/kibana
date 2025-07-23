@@ -79,7 +79,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const lensComponentStyle = useMemo(
     () => ({
       height: wrapperHeight ?? '100%',
-      minWidth: '100px',
       width: wrapperWidth ?? '100%',
     }),
     [wrapperHeight, wrapperWidth]
@@ -259,6 +258,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             searchSessionId={searchSessionId}
             showInspector={false}
             style={lensComponentStyle}
+            css={{ minWidth: '100px' }}
             syncCursor={false}
             syncTooltips={false}
             timeRange={timerange}

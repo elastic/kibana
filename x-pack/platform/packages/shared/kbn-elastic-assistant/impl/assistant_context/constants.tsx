@@ -30,6 +30,8 @@ export const CONVERSATION_TABLE_SESSION_STORAGE_KEY = 'conversationTable';
 export const QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY = 'quickPromptTable';
 export const SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY = 'systemPromptTable';
 export const ANONYMIZATION_TABLE_SESSION_STORAGE_KEY = 'anonymizationTable';
+export const ANONYMIZATION_PROMPT_CONTEXT_TABLE_SESSION_STORAGE_KEY =
+  'anonymizationPromptContextTable';
 
 /** The default `n` latest alerts, ordered by risk score, sent as context to the assistant */
 export const DEFAULT_LATEST_ALERTS = 100;

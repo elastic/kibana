@@ -8,7 +8,7 @@
 import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es-query';
 import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
-import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
+import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { StartDependencies } from '../../../plugin';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
@@ -73,7 +73,6 @@ describe('.execute() & getHref', () => {
   ) {
     const navigateToApp = jest.fn();
     const getUrlForApp = jest.fn((app, opt) => `${app}/${opt.path}`);
-    const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
     const definition = new DashboardAppLocatorDefinition({
       useHashedUrl: false,
       getDashboardFilterFields: async () => [],
@@ -86,11 +85,9 @@ describe('.execute() & getHref', () => {
             navigateToApp,
             getUrlForApp,
           },
-          savedObjects: {
-            client: savedObjectsClient,
-          },
         },
         plugins: {
+          dashboard: dashboardPluginMock.createStartContract(),
           uiActionsEnhanced: {},
           share: {
             url: {
@@ -106,7 +103,7 @@ describe('.execute() & getHref', () => {
         },
         self: {},
       })) as unknown as StartServicesGetter<
-        Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'share'>
+        Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'share' | 'dashboard'>
       >,
     });
 

@@ -12,6 +12,7 @@ import {
   EuiSwitch,
   EuiTextArea,
   EuiComboBox,
+  EuiFieldPassword,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -97,6 +98,10 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
       const comboOptions = Array.isArray(value) ? value.map((label) => ({ label })) : [];
       return (
         <EuiComboBox
+          aria-label={i18n.translate(
+            'xpack.apm.formRowSetting.selectorcreateoptionsComboBox.ariaLabel',
+            { defaultMessage: 'Select or create options' }
+          )}
           data-test-subj={row.dataTestSubj}
           noSuggestions
           placeholder={i18n.translate(
@@ -144,6 +149,19 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
             }}
           />
         </FixedHeightDiv>
+      );
+    }
+    case 'secret': {
+      return (
+        <EuiFieldPassword
+          type="dual"
+          value={value ?? ''}
+          onChange={(e) => {
+            onChange(row.key, e.target.value);
+          }}
+          disabled={isDisabled}
+          data-test-subj={row.dataTestSubj}
+        />
       );
     }
     default:
