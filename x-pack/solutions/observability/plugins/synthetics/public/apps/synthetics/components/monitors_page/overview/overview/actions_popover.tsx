@@ -115,9 +115,8 @@ export function ActionsPopover({
   const locationLabel = monitor.locations[0].label;
 
   const detailUrl = useMonitorDetailLocator({
-    locationId,
     configId: monitor.configId,
-    locationId: locationId ?? monitor.locationId,
+    locationId: locationId ?? monitor.locations[0].id,
     spaces: monitor.spaces,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaces: monitor.spaces });

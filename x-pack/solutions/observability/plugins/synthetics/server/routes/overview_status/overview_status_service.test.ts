@@ -8,7 +8,6 @@ import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { getUptimeESMockClient } from '../../queries/test_helpers';
 
-import * as commonLibs from '../common';
 import * as allLocationsFn from '../../synthetics_service/get_all_locations';
 import { OverviewStatusService, SUMMARIES_PAGE_SIZE } from './overview_status_service';
 import times from 'lodash/times';
@@ -29,35 +28,6 @@ jest.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
   privateLocations: [],
   allLocations,
 });
-
-jest.mock('../../saved_objects/synthetics_monitor/get_all_monitors', () => ({
-  ...jest.requireActual('../../saved_objects/synthetics_monitor/get_all_monitors'),
-  getAllMonitors: jest.fn(),
-}));
-
-jest.spyOn(commonLibs, 'getMonitors').mockResolvedValue({
-  per_page: 10,
-  saved_objects: [
-    {
-      id: 'mon-1',
-      attributes: {
-        enabled: false,
-        locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
-      },
-    },
-    {
-      id: 'mon-2',
-      attributes: {
-        enabled: true,
-        locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
-        schedule: {
-          number: '10',
-          unit: 'm',
-        },
-      },
-    },
-  ],
-} as any);
 
 describe('current status route', () => {
   const testMonitors = [
@@ -196,12 +166,13 @@ describe('current status route', () => {
                   "status": "up",
                 },
               ],
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "overallStatus": "up",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": undefined,
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -227,12 +198,13 @@ describe('current status route', () => {
                   "status": "down",
                 },
               ],
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "overallStatus": "down",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": undefined,
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -351,12 +323,13 @@ describe('current status route', () => {
                   "status": "up",
                 },
               ],
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "overallStatus": "up",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": undefined,
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -382,12 +355,13 @@ describe('current status route', () => {
                   "status": "down",
                 },
               ],
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "overallStatus": "down",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": undefined,
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -447,12 +421,13 @@ describe('current status route', () => {
                   "status": "pending",
                 },
               ],
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id1",
               "name": "test monitor 1",
               "overallStatus": "pending",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": undefined,
               "tags": Array [
                 "tag-1",
                 "tag-2",
@@ -478,12 +453,13 @@ describe('current status route', () => {
                   "status": "pending",
                 },
               ],
+              "maintenanceWindows": undefined,
               "monitorQueryId": "id2",
               "name": "test monitor 2",
               "overallStatus": "pending",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": undefined,
               "tags": Array [
                 "tag-1",
                 "tag-2",
