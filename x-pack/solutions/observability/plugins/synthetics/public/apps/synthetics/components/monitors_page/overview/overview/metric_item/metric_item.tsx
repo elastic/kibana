@@ -129,7 +129,7 @@ export const MetricItem = ({
         },
       })}
       // this is the ID the Chart child will expect in its `aria-labelledby` attribute
-      id={`echMetric-${monitor.configId}-${monitor.locationId}-metric-chart-0-0-trend-title_echMetric-${monitor.configId}-${monitor.locationId}-metric-chart-0-0-trend-description`}
+      id={`echMetric-${monitor.configId}-${locationId}-metric-chart-0-0-trend-title_echMetric-${monitor.configId}-${locationId}-metric-chart-0-0-trend-description`}
       style={style ?? { height: METRIC_ITEM_HEIGHT }}
     >
       <EuiPanel
@@ -160,7 +160,7 @@ export const MetricItem = ({
         `}
         title={moment(timestamp).format('LLL')}
       >
-        <Chart id={`${monitor.configId}-${monitor.locationId}-metric-chart`}>
+        <Chart id={`${monitor.configId}-${locationId}-metric-chart`}>
           <Settings
             onElementClick={() => {
               if (testInProgress) {
@@ -176,7 +176,6 @@ export const MetricItem = ({
                   configId: monitor.configId,
                   id: monitor.configId,
                   location: locationName,
-                  locationId: monitor.locationId,
                   spaces: monitor.spaces,
                 });
               }
