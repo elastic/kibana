@@ -88,7 +88,10 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   const columns = buildPrivilegedUsersTableColumns(openUserFlyout, euiTheme);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const privilegedUsersTableQuery = getPrivilegedUsersQuery(spaceId);
+  const privilegedUsersTableQuery = getPrivilegedUsersQuery(
+    spaceId,
+    currentPage * DEFAULT_PAGE_SIZE + 1 // we add 1 so that we know if there are more results to show
+  );
 
   const { filterQuery: filterQueryWithoutTimerange } = useGlobalFilterQuery();
 
