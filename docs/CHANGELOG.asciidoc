@@ -137,7 +137,6 @@ There are no deprecations in this version.
 
 Alerting::
 * Adds the ability to schedule reports on a recurring basis and view previously scheduled reports ({kibana-pull}224849[#224849], {kibana-pull}221028[#221028]).
-* Adds four dedicated case analytics indices that allow users to build dashboards and metrics using case data. These indices are automatically created when {kib} starts up and are updated periodically with cases, comments, attachments, and activity data ({kibana-pull}223405[#223405]).
 * Adds the `xpack.actions.email.services.enabled` {kib} setting, which allows you to enable or disable email services for email connectors ({kibana-pull}223363[#223363]).
 * Adds the `xpack.actions.webhook.ssl.pfx.enabled` {kib} setting, which allows you to disable Webhook connector PFX file support for SSL client authentication ({kibana-pull}222507[#222507]).
 * Adds the `xpack.actions.email.services.ses.host` {kib} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {kib} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors ({kibana-pull}221389[#221389]).
