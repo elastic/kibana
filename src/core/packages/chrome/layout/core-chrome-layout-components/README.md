@@ -26,7 +26,6 @@ Available slots:
 - `header`
 - `footer`
 - `navigation`
-- `navigationPanel`
 - `sidebar`
 - `sidebarPanel`
 - `banner`
@@ -47,7 +46,6 @@ import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layou
     headerHeight: 48,
     footerHeight: 24,
     navigationWidth: 200,
-    navigationPanelWidth: 240,
     sidebarWidth: 300,
     sidebarPanelWidth: 280,
     applicationTopBarHeight: 40,
@@ -58,7 +56,6 @@ import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layou
     header={<MyHeader />}
     footer={<MyFooter />}
     navigation={<MyNav />}
-    navigationPanel={<MyNavPanel />}
     sidebar={<MySidebar />}
     sidebarPanel={<MySidebarPanel />}
     banner={<MyBanner />}
@@ -87,7 +84,7 @@ This package exposes layout dimensions and positions as global CSS variables (cu
 - **Footer**
   - `--kbn-layout--footer-[height|top|bottom|left|width]`
 - **Navigation**
-  - `--kbn-layout--navigation-[top|bottom|height|width|panel-width]`
+  - `--kbn-layout--navigation-[top|bottom|height|width]`
 - **Sidebar**
   - `--kbn-layout--sidebar-[top|bottom|height|width|panel-width]`
 - **Application**

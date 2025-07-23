@@ -62,7 +62,8 @@
     "@kbn/core-user-profile-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-user-profile-common",
-    "@kbn/core-theme-browser-internal"
+    "@kbn/core-theme-browser-internal",
+    "@kbn/core-chrome-layout-components"
   ],
   "exclude": [
     "target/**/*",
