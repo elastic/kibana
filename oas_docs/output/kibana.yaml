@@ -21884,6 +21884,9 @@ paths:
                               - monitoring
                               - download
                               - features
+                          connectors: {}
+                          exporters: {}
+                          extensions: {}
                           fleet:
                             anyOf:
                               - additionalProperties: false
@@ -22076,6 +22079,8 @@ paths:
                                 - type
                                 - proxy_headers
                             type: object
+                          processors: {}
+                          receivers: {}
                           revision:
                             type: number
                           secret_references:
@@ -22088,6 +22093,7 @@ paths:
                               required:
                                 - id
                             type: array
+                          service: {}
                           signed:
                             additionalProperties: false
                             type: object
@@ -22103,6 +22109,12 @@ paths:
                           - id
                           - outputs
                           - inputs
+                          - extensions
+                          - receivers
+                          - processors
+                          - service
+                          - connectors
+                          - exporters
                 required:
                   - item
         '400':
