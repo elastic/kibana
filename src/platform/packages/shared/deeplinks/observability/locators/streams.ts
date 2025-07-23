@@ -7,24 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-
 export const STREAMS_APP_LOCATOR_ID = 'STREAMS_APP_LOCATOR';
-
-export type StreamsAppLocatorParams<TPageState = Record<string, unknown>> = SerializableRecord &
-  (
-    | { [key: string]: never }
-    | {
-        name: string;
-      }
-    | {
-        name: string;
-        managementTab: 'enrich';
-        pageState: TPageState;
-      }
-    | {
-        name: string;
-        managementTab: string;
-        pageState: never;
-      }
-  );
