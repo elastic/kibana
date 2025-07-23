@@ -21,7 +21,6 @@ const workflowTemplateYaml = `workflow:
   enabled: false
   triggers:
     - type: triggers.elastic.manual
-      id: manual-trigger
   steps:
     - name: first-step
       type: console
