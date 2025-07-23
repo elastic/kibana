@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import immer from 'immer';
 import type {
   ProductFeatureKeys,
   ProductFeatureKibanaConfig,
@@ -72,40 +71,36 @@ const securityProductFeaturesConfig: Record<
     // When endpointArtifactManagement PLI is enabled, the replacedBy for the siemV3 feature needs to
     // account for the privileges of the sub-features that are introduced by it.
     baseFeatureConfigModifier: (baseFeatureConfig) => {
-      return immer(baseFeatureConfig, (draft) => {
-        const replacedBy = draft.privileges?.all?.replacedBy;
-        if (!replacedBy) {
-          return;
-        }
+      const replacedBy = baseFeatureConfig.privileges?.all?.replacedBy;
+      if (!replacedBy) {
+        return;
+      }
 
-        const defaultReplacedBy = Array.isArray(replacedBy) ? replacedBy : replacedBy.default;
-        if (defaultReplacedBy) {
-          const v3Default = defaultReplacedBy.find(
-            ({ feature }) => feature === SECURITY_FEATURE_ID_V3 // Only for features that are replaced by siemV3 (siem and siemV2)
-          );
-          if (v3Default) {
-            // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
-            v3Default.privileges = [
-              'minimal_all',
-              'global_artifact_management_all', // Enabling sub-features toggle to show that Global Artifact Management is now provided to the user.
-            ];
-          }
+      if ('default' in replacedBy) {
+        const v3Default = replacedBy.default.find(
+          ({ feature }) => feature === SECURITY_FEATURE_ID_V3 // Only for features that are replaced by siemV3 (siem and siemV2)
+        );
+        if (v3Default) {
+          // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
+          v3Default.privileges = [
+            'minimal_all',
+            'global_artifact_management_all', // Enabling sub-features toggle to show that Global Artifact Management is now provided to the user.
+          ];
         }
+      }
 
-        const minimalReplacedBy = Array.isArray(replacedBy) ? undefined : replacedBy.minimal;
-        if (minimalReplacedBy) {
-          const v3Minimal = minimalReplacedBy.find(
-            ({ feature }) => feature === SECURITY_FEATURE_ID_V3 // Only for features that are replaced by siemV3 (siem and siemV2)
-          );
-          if (v3Minimal) {
-            // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
-            v3Minimal.privileges = [
-              'minimal_all',
-              'global_artifact_management_all', // on ESS, Endpoint Exception ALL is included in siem:MINIMAL_ALL
-            ];
-          }
+      if ('minimal' in replacedBy) {
+        const v3Minimal = replacedBy.minimal.find(
+          ({ feature }) => feature === SECURITY_FEATURE_ID_V3 // Only for features that are replaced by siemV3 (siem and siemV2)
+        );
+        if (v3Minimal) {
+          // Override replaced privileges from `all` to `minimal_all` with additional sub-features privileges
+          v3Minimal.privileges = [
+            'minimal_all',
+            'global_artifact_management_all', // on ESS, Endpoint Exception ALL is included in siem:MINIMAL_ALL
+          ];
         }
-      });
+      }
     },
   },
 };

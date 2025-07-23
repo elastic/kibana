@@ -37,16 +37,14 @@ export type ProductFeatureKibanaConfig<T extends string = string> =
     subFeaturesPrivileges?: SubFeaturesPrivileges[];
 
     /**
-     * Optional function for custom modification of the base feature config.
-     * This can be used to apply specific changes to the base feature config before merging it with
-     * the rest of the product feature configurations.
+     * Optional function to apply custom modifications to the base feature config, for specific ProductFeatures.
+     * The base config received is a clone of the original KibanaFeatureConfig, so it can be mutated safely.
+     * The modifications are applied before applying the rest of the properties of the ProductFeatureConfigs.
      *
-     * @param baseFeatureConfig
-     * @returns modified baseFeatureConfig
+     * @param baseFeatureConfig to be mutated
+     * @returns void
      */
-    baseFeatureConfigModifier?: (
-      baseFeatureConfig: BaseKibanaFeatureConfig
-    ) => BaseKibanaFeatureConfig;
+    baseFeatureConfigModifier?: (baseFeatureConfig: BaseKibanaFeatureConfig) => void;
   };
 export type ProductFeaturesConfig<T extends string = string> = Map<
   ProductFeatureKeyType,
