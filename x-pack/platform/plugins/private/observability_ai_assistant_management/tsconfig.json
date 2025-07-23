@@ -32,6 +32,7 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
     "@kbn/test-jest-helpers",
+    "@kbn/inference-common"
   ],
   "exclude": [
     "target/**/*"

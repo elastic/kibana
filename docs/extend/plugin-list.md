@@ -66,7 +66,7 @@ mapped_pages:
 | [mapsEms](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/maps_ems/README.md) | Utility plugin: |
 | [navigation](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/navigation/README.md) | The navigation plugins exports the TopNavMenu component. It also provides a stateful version of it on the start contract. |
 | [newsfeed](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/newsfeed/README.md) | The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout. Content is fetched from the remote (https://feeds.elastic.co) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely. |
-| [noDataPage](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/no_data_page/README.md) | Helps to globally configure the no data page components |
+| [noDataPage](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/no_data_page/README.md) | Helps to globally configure the no data page components |
 | [presentationPanel](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/presentation_panel/README.md) | The Presentation Panel is the point of contact between any React component and any registered UI actions. Components provided to the Presentation Panel should use an imperative handle to expose methods and state. |
 | [presentationUtil](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/presentation_util/README.mdx) | The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas). |
 | [savedObjects](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/saved_objects/README.md) | NOTE: This plugin is deprecated and will be removed in 8.0. See https://github.com/elastic/kibana/issues/46435 for more information. |
@@ -99,6 +99,8 @@ mapped_pages:
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
+| [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | WARNING: Missing or empty README. |
+| [workflowsManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_management/README.md) | This directory contains the foundational structure for the Workflows plugin. |
 
 ## x-pack/plugins [_x_packplugins]
 
@@ -147,7 +149,7 @@ mapped_pages:
 | [globalSearch](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/global_search/README.md) | The GlobalSearch plugin provides an easy way to search for various objects, such as applications or dashboards from the Kibana instance, from both server and client-side plugins |
 | [globalSearchBar](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/global_search_bar/README.md) | The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.) |
 | [globalSearchProviders](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/global_search_providers/README.md) | The globalSearchProviders plugin provides Kibana default search providers for the GlobalSearch plugin. |
-| [graph](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/graph/README.md) | This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests. |
+| [graph](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/graph/README.md) | This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/platform/test/functional/apps/graph contains additional functional tests. |
 | [grokdebugger](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/grokdebugger/README.md) | This plugin helps users define Grok patterns, which are particularly useful for ingesting logs. |
 | [indexLifecycleManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/index_lifecycle_management/README.md) | You can test that the Frozen badge, phase filtering, and lifecycle information is surfaced in Index Management by running this series of requests in Console: |
 | [indexManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/index_management/README.md) | This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page. |

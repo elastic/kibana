@@ -9,6 +9,7 @@ import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
 import expect from '@kbn/expect';
 import { RawKibanaPrivileges } from '@kbn/security-plugin-types-common';
+import { diff } from 'jest-diff';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -139,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         'endpoint_list_read',
         'workflow_insights_all',
         'workflow_insights_read',
+        'global_artifact_management_all',
         'trusted_applications_all',
         'trusted_applications_read',
         'host_isolation_exceptions_all',
@@ -333,18 +335,30 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200)
           .expect((res: any) => {
+            let errorPointerMessage = '';
             // when comparing privileges, the order of the features doesn't matter (but the order of the privileges does)
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
             const success = isEqualWith(res.body, expectedWithoutActions, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
+                let isEqualResponse = false;
+
                 if (key === 'reserved') {
                   // order does not matter for the reserved privilege set.
-                  return isEqual(value.sort(), other.sort());
+                  isEqualResponse = isEqual(value.sort(), other.sort());
+                } else {
+                  // order matters for the rest, as the UI assumes they are returned in a descending order of permissiveness.
+                  isEqualResponse = isEqual(value, other);
                 }
-                // order matters for the rest, as the UI assumes they are returned in a descending order of permissiveness.
-                return isEqual(value, other);
+
+                if (!isEqualResponse) {
+                  errorPointerMessage = `Received value for property [${String(
+                    key
+                  )}] does not match expected value:\n${diff(other, value)}`;
+                }
+
+                return isEqualResponse;
               }
 
               // Lodash types aren't correct, `undefined` should be supported as a return value here and it
@@ -354,9 +368,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             if (!success) {
               throw new Error(
-                `Expected ${util.inspect(res.body)} to equal ${util.inspect(
-                  expectedWithoutActions
-                )}`
+                `${errorPointerMessage ? errorPointerMessage + '\n\n' : ''}Expected ${util.inspect(
+                  res.body
+                )} to equal ${util.inspect(expectedWithoutActions)}`
               );
             }
           })
@@ -442,18 +456,30 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200)
           .expect((res: any) => {
+            let errorPointerMessage = '';
             // when comparing privileges, the order of the features doesn't matter (but the order of the privileges does)
             // supertest uses assert.deepStrictEqual.
             // expect.js doesn't help us here.
             // and lodash's isEqual doesn't know how to compare Sets.
             const success = isEqualWith(res.body, expectedWithoutActions, (value, other, key) => {
               if (Array.isArray(value) && Array.isArray(other)) {
+                let isEqualResponse = false;
+
                 if (key === 'reserved') {
                   // order does not matter for the reserved privilege set.
-                  return isEqual(value.sort(), other.sort());
+                  isEqualResponse = isEqual(value.sort(), other.sort());
+                } else {
+                  // order matters for the rest, as the UI assumes they are returned in a descending order of permissiveness.
+                  isEqualResponse = isEqual(value, other);
                 }
-                // order matters for the rest, as the UI assumes they are returned in a descending order of permissiveness.
-                return isEqual(value, other);
+
+                if (!isEqualResponse) {
+                  errorPointerMessage = `Received value for property [${String(
+                    key
+                  )}] does not match expected value:\n${diff(other, value)}`;
+                }
+
+                return isEqualResponse;
               }
 
               // Lodash types aren't correct, `undefined` should be supported as a return value here and it
@@ -463,9 +489,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             if (!success) {
               throw new Error(
-                `Expected ${util.inspect(res.body)} to equal ${util.inspect(
-                  expectedWithoutActions
-                )}`
+                `${errorPointerMessage ? errorPointerMessage + '\n\n' : ''}Expected ${util.inspect(
+                  res.body
+                )} to equal ${util.inspect(expectedWithoutActions)}`
               );
             }
           })
