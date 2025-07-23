@@ -269,6 +269,7 @@ describe('FORK Autocomplete', () => {
 
         test('lookup join after command name', async () => {
           await forkExpectSuggestions('FROM a | FORK (LOOKUP JOIN ', [
+            '',
             'join_index ',
             'join_index_with_alias ',
             'lookup_index ',

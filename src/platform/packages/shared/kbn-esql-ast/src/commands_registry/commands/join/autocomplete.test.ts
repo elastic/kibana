@@ -102,7 +102,7 @@ describe('JOIN Autocomplete', () => {
 
       expect(createIndexCommandSuggestion).toEqual({
         command: {
-          arguments: [''],
+          arguments: [{ indexName: '' }],
           id: 'esql.lookup_index.create',
           title: 'Click to create',
         },
@@ -131,7 +131,7 @@ describe('JOIN Autocomplete', () => {
 
       expect(createIndexCommandSuggestion).toEqual({
         command: {
-          arguments: ['new_join_index'],
+          arguments: [{ indexName: 'new_join_index' }],
           id: 'esql.lookup_index.create',
           title: 'Click to create',
         },

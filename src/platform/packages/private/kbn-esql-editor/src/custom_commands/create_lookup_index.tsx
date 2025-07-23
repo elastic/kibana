@@ -18,6 +18,7 @@ import { type ESQLSource } from '@kbn/esql-ast';
 import { Parser } from '@kbn/esql-ast/src/parser/parser';
 import { memoize } from 'lodash';
 import { IndexAutocompleteItem } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import type { ESQLEditorDeps } from '../types';
 
 /**
@@ -81,21 +82,11 @@ export const useLookupIndexCommand = (
 
   const lookupIndexBadgeStyle = css`
     .${lookupIndexBaseBadgeClassName} {
-      cursor: pointer;
-      display: inline-block;
-      vertical-align: middle;
-      padding-block: 0px;
-      padding-inline: 2px;
-      max-inline-size: 100%;
-      font-size: 0.8571rem;
-      line-height: 18px;
-      font-weight: 500;
       white-space: nowrap;
       text-decoration: none;
-      border-radius: 3px;
+      border-radius: ${euiTheme.border.radius.small};
       text-align: start;
-      border-width: 1px;
-      border-style: solid;
+      border-width: ${euiTheme.border.thin};
       color: ${euiTheme.colors.text};
     }
     .${lookupIndexAddBadgeClassName} {
@@ -165,9 +156,13 @@ export const useLookupIndexCommand = (
     [onFlyoutClose, uiActions]
   );
 
-  monaco.editor.registerCommand('esql.lookup_index.create', async (_, indexName) => {
-    await openFlyout(indexName, false);
-  });
+  monaco.editor.registerCommand(
+    'esql.lookup_index.create',
+    async (_, args: { indexName: string; doesIndexExist?: boolean }) => {
+      const { indexName, doesIndexExist } = args;
+      await openFlyout(indexName, doesIndexExist);
+    }
+  );
 
   const getLookupIndicesMemoized = useMemo(
     () => memoize(getLookupIndices ?? (() => Promise.resolve({ indices: [] }))),
@@ -208,6 +203,21 @@ export const useLookupIndexCommand = (
               options: {
                 isWholeLine: false,
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                hoverMessage: {
+                  value: `[${
+                    isExistingIndex
+                      ? i18n.translate('esqlEditor.lookupIndex.edit', {
+                          defaultMessage: 'Edit lookup index',
+                        })
+                      : i18n.translate('esqlEditor.lookupIndex.create', {
+                          defaultMessage: 'Create lookup index',
+                        })
+                  }](command:esql.lookup_index.create?${encodeURIComponent(
+                    JSON.stringify({ indexName: lookupIndex, doesIndexExist: isExistingIndex })
+                  )})`,
+                  isTrusted: true,
+                },
+
                 inlineClassName:
                   lookupIndexBaseBadgeClassName +
                   ' ' +
