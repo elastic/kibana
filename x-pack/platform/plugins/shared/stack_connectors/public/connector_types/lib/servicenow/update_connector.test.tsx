@@ -11,7 +11,8 @@ import userEvent from '@testing-library/user-event';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Props, UpdateConnector } from './update_connector';
 import { act } from 'react-dom/test-utils';
-import { render, act as reactAct, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { AuthFormTestProvider } from '../test_utils';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
@@ -30,8 +31,7 @@ const mountUpdateConnector = (props: Partial<Props> = {}, isOAuth: boolean = fal
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/209007
-describe.skip('UpdateConnector renders', () => {
+describe('UpdateConnector renders', () => {
   it('should render update connector fields', () => {
     const wrapper = mountUpdateConnector();
 
@@ -220,35 +220,46 @@ describe.skip('UpdateConnector renders', () => {
   it('should confirm the update when submit button clicked', async () => {
     const onConfirm = jest.fn();
 
-    const { getByTestId } = render(
-      <I18nProvider>
-        <UpdateConnector
-          actionTypeId=".servicenow"
-          isOAuth={false}
-          updateErrorMessage={null}
-          readOnly={false}
-          isLoading={false}
-          onConfirm={onConfirm}
-          onCancel={() => {}}
-        />
-      </I18nProvider>
+    render(
+      <AuthFormTestProvider onSubmit={onConfirm}>
+        <I18nProvider>
+          <UpdateConnector
+            actionTypeId=".servicenow"
+            isOAuth={false}
+            updateErrorMessage={null}
+            readOnly={false}
+            isLoading={false}
+            onConfirm={onConfirm}
+            onCancel={() => {}}
+          />
+        </I18nProvider>
+      </AuthFormTestProvider>
     );
 
     expect(onConfirm).not.toHaveBeenCalled();
 
-    await reactAct(async () => {
-      const urlInput = getByTestId('credentialsApiUrlFromInput');
-      const usernameInput = getByTestId('connector-servicenow-username-form-input');
-      const passwordInput = getByTestId('connector-servicenow-password-form-input');
+    const urlInput = await screen.findByTestId('credentialsApiUrlFromInput');
+    const usernameInput = await screen.findByTestId('connector-servicenow-username-form-input');
+    const passwordInput = await screen.findByTestId('connector-servicenow-password-form-input');
 
-      await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
-      await userEvent.type(usernameInput, 'user', { delay: 100 });
-      await userEvent.type(passwordInput, 'pass', { delay: 100 });
-      await userEvent.click(getByTestId('snUpdateInstallationSubmit'));
-    });
+    userEvent.clear(urlInput);
+    userEvent.click(urlInput);
+    await userEvent.paste('https://example.com');
+
+    userEvent.clear(usernameInput);
+    userEvent.click(usernameInput);
+    await userEvent.paste('user');
+
+    userEvent.clear(passwordInput);
+    userEvent.click(passwordInput);
+    await userEvent.paste('pass');
+
+    const submitButton = await screen.findByTestId('snUpdateInstallationSubmit');
+
+    await userEvent.click(submitButton);
 
     // Wait for click event to be processed
-    await waitFor(() => expect(onConfirm).toHaveBeenCalled(), { timeout: 3000 });
+    await waitFor(() => expect(onConfirm).toHaveBeenCalled());
 
     expect(onConfirm).toHaveBeenCalledWith({
       config: {
