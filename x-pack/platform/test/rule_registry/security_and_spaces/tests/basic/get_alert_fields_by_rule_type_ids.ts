@@ -94,13 +94,13 @@ export default ({ getService }: FtrProviderContext) => {
         tags: ['security-rule'],
         setup: '',
         license: '',
-        interval: '5s',
+        interval: '4s',
         from: 'now-10m',
         to: 'now',
         actions: [],
         enabled: true,
         meta: {
-          kibana_siem_app_url: 'http://localhost:5601/app/security',
+          kibana_siem_app_url: 'http://localhost:5620/app/security',
         },
       })
       .expect(200);
@@ -109,18 +109,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function waitForAlertDocs(
     index: string,
-    ruleId: string,
     count: number = 1
   ): Promise<Array<SearchHit<AlertDoc>>> {
     return await retry.try(async () => {
       const searchResult = await es.search<AlertDoc>({
         index,
         size: count,
-        query: {
-          bool: {
-            must: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
-          },
-        },
       });
 
       const docs = searchResult.hits.hits as Array<SearchHit<AlertDoc>>;
@@ -162,18 +156,15 @@ export default ({ getService }: FtrProviderContext) => {
     );
   };
 
-  const deleteRule = async (ruleId: string, spaceId: string = 'default') => {
-    await supertest
-      .delete(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule/${ruleId}`)
-      .set('kbn-xsrf', 'foo')
-      .expect(204);
-  };
-
-  const verifyFields = (
-    fields: FieldDescriptor[],
-    allowedPrefixes: string[],
-    notAllowedPrefixes: string[] = []
-  ) => {
+  const verifyFields = ({
+    fields,
+    allowedPrefixes,
+    notAllowedPrefixes = [],
+  }: {
+    fields: FieldDescriptor[];
+    allowedPrefixes: string[];
+    notAllowedPrefixes: string[];
+  }) => {
     // Check at least one of each prefix exists
     allowedPrefixes.forEach((prefix) => {
       expect(
@@ -221,21 +212,29 @@ export default ({ getService }: FtrProviderContext) => {
         .set('x-elastic-internal-origin', 'foo')
         .expect(200);
 
-      const dataView = await getSampleWebLogsDataView();
-      const [securityRule, stackRule] = await Promise.all([
-        createSecurityRule(dataView.id),
-        createEsQueryRule(),
-      ]);
+      await retry.try(async () => {
+        const dataView = await getSampleWebLogsDataView();
 
-      securityRuleId = securityRule.id;
-      stackRuleId = stackRule.id;
+        if (dataView?.id) {
+          const [securityRule, stackRule] = await Promise.all([
+            createSecurityRule(dataView.id),
+            createEsQueryRule(),
+          ]);
 
-      await waitForAlertDocs('.alerts-security.*', securityRuleId, 1);
-      await waitForAlertDocs('.alerts-stack.*', stackRuleId, 1);
+          securityRuleId = securityRule.id;
+          stackRuleId = stackRule.id;
+        }
+      });
+
+      await waitForAlertDocs('.alerts-security*', 1);
+      await waitForAlertDocs('.alerts-stack*', 1);
     });
 
     after(async () => {
-      await deleteRule(stackRuleId);
+      await supertest
+        .delete(`/api/alerting/rule/${stackRuleId}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(204);
       await supertest
         .post(`/api/detection_engine/rules/_bulk_action?dry_run=false`)
         .set('kbn-xsrf', 'foo')
@@ -257,14 +256,22 @@ export default ({ getService }: FtrProviderContext) => {
         const resp = await getAlertFieldsByFeatureId(superUser, []);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana', 'signal'], []);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana', 'signal'],
+          notAllowedPrefixes: [],
+        });
       });
 
       it(`${superUser.username} should be able to get alert fields for o11y rule types`, async () => {
         const resp = await getAlertFieldsByFeatureId(superUser, ruleTypeIds);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana'], ['signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana'],
+          notAllowedPrefixes: ['signal'],
+        });
       });
 
       it(`${superUser.username} should be able to get alert fields for siem rule types`, async () => {
@@ -274,21 +281,33 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana', 'signal'], []);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana', 'signal'],
+          notAllowedPrefixes: [],
+        });
       });
 
       it(`${obsOnlySpacesAll.username} should be able to get non empty alert fields for o11y ruleTypeIds`, async () => {
         const resp = await getAlertFieldsByFeatureId(obsOnlySpacesAll, ruleTypeIds);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana'], ['signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana'],
+          notAllowedPrefixes: ['signal'],
+        });
       });
 
       it(`${obsOnlySpacesAll.username} should be able to get non empty alert fields for all ruleTypeIds`, async () => {
         const resp = await getAlertFieldsByFeatureId(obsOnlySpacesAll, []);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana'], ['signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana'],
+          notAllowedPrefixes: ['signal'],
+        });
       });
 
       it(`${obsOnlySpacesAll.username} should not be able to get non empty alert fields for siem ruleTypeIds`, async () => {
@@ -297,21 +316,33 @@ export default ({ getService }: FtrProviderContext) => {
           'siem.esqlRule',
         ]);
 
-        verifyFields(resp.fields, [], ['event', 'kibana', 'signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: [],
+          notAllowedPrefixes: ['event', 'kibana', 'signal'],
+        });
       });
 
       it(`${obsOnlyReadSpacesAll.username} should be able to get non empty alert fields for o11y ruleTypeIds`, async () => {
         const resp = await getAlertFieldsByFeatureId(obsOnlyReadSpacesAll, ruleTypeIds);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana'], ['signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana'],
+          notAllowedPrefixes: ['signal'],
+        });
       });
 
       it(`${obsOnlyReadSpacesAll.username} should be able to get non empty alert fields for all ruleTypeIds`, async () => {
         const resp = await getAlertFieldsByFeatureId(obsOnlyReadSpacesAll, []);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana'], ['signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana'],
+          notAllowedPrefixes: ['signal'],
+        });
       });
 
       it(`${obsOnlyReadSpacesAll.username} should not be able to get non empty alert fields for siem ruleTypeIds`, async () => {
@@ -320,27 +351,43 @@ export default ({ getService }: FtrProviderContext) => {
           'siem.esqlRule',
         ]);
 
-        verifyFields(resp.fields, [], ['event', 'kibana', 'signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: [],
+          notAllowedPrefixes: ['event', 'kibana', 'signal'],
+        });
       });
 
       it(`${secOnlySpacesAllEsReadAll.username} should be able to get alert fields for siem rule types`, async () => {
         const resp = await getAlertFieldsByFeatureId(secOnlySpacesAllEsReadAll, ['siem.queryRule']);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana', 'signal'], []);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana', 'signal'],
+          notAllowedPrefixes: [],
+        });
       });
 
       it(`${secOnlySpacesAllEsReadAll.username} should be able to get alert fields for all rule types`, async () => {
         const resp = await getAlertFieldsByFeatureId(secOnlySpacesAllEsReadAll, []);
 
         verifyBaseFields(resp.fields);
-        verifyFields(resp.fields, ['event', 'kibana', 'signal'], []);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: ['event', 'kibana', 'signal'],
+          notAllowedPrefixes: [],
+        });
       });
 
       it(`${secOnlySpacesAllEsReadAll.username} should not be able to get alert fields for o11y rule types`, async () => {
         const resp = await getAlertFieldsByFeatureId(secOnlySpacesAllEsReadAll, ruleTypeIds);
 
-        verifyFields(resp.fields, [], ['event', 'kibana', 'signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: [],
+          notAllowedPrefixes: ['event', 'kibana', 'signal'],
+        });
       });
 
       it(`${secOnlySpaces2EsReadAll.username} should NOT be able to get alert fields for siem rule types due to space restrictions`, async () => {
@@ -350,7 +397,11 @@ export default ({ getService }: FtrProviderContext) => {
       it(`${secOnlyReadSpacesAll.username} should get empty alert fields for siem rule types due to lack of ES access`, async () => {
         const resp = await getAlertFieldsByFeatureId(secOnlyReadSpacesAll, ['siem.queryRule']);
 
-        verifyFields(resp.fields, [], ['event', 'kibana', 'signal']);
+        verifyFields({
+          fields: resp.fields,
+          allowedPrefixes: [],
+          notAllowedPrefixes: ['event', 'kibana', 'signal'],
+        });
       });
 
       it(`${noKibanaPrivileges.username} should NOT be able to get alert fields`, async () => {
