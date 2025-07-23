@@ -33,8 +33,6 @@ export function getTableColumns({
   previewDocsFilter: PreviewDocsFilterOption;
   allColumns: string[];
 }) {
-  if (!currentProcessorSourceField) return [];
-
   if (!currentProcessorSourceField || !allColumns.includes(currentProcessorSourceField)) {
     return [];
   }

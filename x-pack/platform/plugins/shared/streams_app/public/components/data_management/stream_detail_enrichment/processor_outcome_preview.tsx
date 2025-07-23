@@ -257,20 +257,19 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     : undefined;
   const validGrokField = grokField && allColumns.includes(grokField) ? grokField : undefined;
 
+  const validCurrentProcessorSourceField =
+    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
+      ? currentProcessorSourceField
+      : undefined;
+
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
-      currentProcessorSourceField,
+      currentProcessorSourceField: validCurrentProcessorSourceField,
       detectedFields,
       previewDocsFilter,
       allColumns,
     });
-    // /**
-    //  * If we are in Grok mode and the field matches an existing field,
-    //  * we exclude the detected fields and only use the Grok field since it is highlighting extracted values
-    //  */
-    // if (validGrokField) {
-    //   cols = [validGrokField];
-    // }
+
     if (cols.length === 0) {
       // If no columns are detected, we fall back to all fields from the preview documents
       cols = allColumns;
@@ -289,9 +288,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     detectedFields,
     explicitlyDisabledPreviewColumns,
     explicitlyEnabledPreviewColumns,
-    // validGrokField,
     previewDocsFilter,
-    currentProcessorSourceField,
+    validCurrentProcessorSourceField,
   ]);
 
   /**
@@ -419,10 +417,6 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       docViewsRegistry.disableById(DOC_VIEW_DIFF_ID);
     }
   }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
-
-  if (isEmpty(previewDocuments)) {
-    return <NoPreviewDocumentsEmptyPrompt />;
-  }
 
   return (
     <>
