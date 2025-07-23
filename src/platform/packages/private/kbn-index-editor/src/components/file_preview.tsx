@@ -69,7 +69,11 @@ export const FilesPreview: FC = () => {
       const previewResults = await Promise.allSettled(
         filesStatus.map((fileStatus, index) => {
           if (fileStatus.data) {
-            return previewDocs(fileStatus.data, fileStatus.results?.ingest_pipeline!, 10);
+            return previewDocs(
+              fileStatus.data,
+              fileStatus.results?.ingest_pipeline!,
+              FILE_PREVIEW_LIMIT
+            );
           }
         })
       );
@@ -148,21 +152,23 @@ export const FilesPreview: FC = () => {
     }
   }, [data.dataViews, filesStatus, isMounted, previewDocs]);
 
-  useEffect(() => {
-    // don't fetch preview if importing is in progress
-    if (uploadStatus.overallImportStatus === STATUS.STARTED) {
-      return;
-    }
+  useEffect(
+    function fetchFilePreviewAfterAnalysis() {
+      // don't fetch preview if importing is in progress
+      if (uploadStatus.overallImportStatus === STATUS.STARTED) {
+        return;
+      }
 
-    // wait for all files to be analyzed before fetching previews
-    if (filesStatus.length > 0 && filesStatus.every((f) => f.analysisStatus === STATUS.COMPLETED)) {
-      fetchFilePreview();
-    }
-
-    return () => {
-      // clean up ad hoc data views
-    };
-  }, [fetchFilePreview, filesStatus, uploadStatus.overallImportStatus]);
+      // wait for all files to be analyzed before fetching previews
+      if (
+        filesStatus.length > 0 &&
+        filesStatus.every((f) => f.analysisStatus === STATUS.COMPLETED)
+      ) {
+        fetchFilePreview();
+      }
+    },
+    [fetchFilePreview, filesStatus, uploadStatus.overallImportStatus]
+  );
 
   if (!filePreviewItems.length) return null;
 

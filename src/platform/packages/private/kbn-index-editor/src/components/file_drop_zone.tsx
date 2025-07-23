@@ -155,7 +155,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   return (
     <FileSelectorContext.Provider value={{ onFileSelectorClick }}>
-      <div {...getRootProps()}>
+      <div {...getRootProps({ css: { height: '100%' } })}>
         {isDragActive ? <div css={overlayDraggingFile} /> : null}
         {showLoadingOverlay ? loadingIndicator : null}
         <input {...getInputProps()} />

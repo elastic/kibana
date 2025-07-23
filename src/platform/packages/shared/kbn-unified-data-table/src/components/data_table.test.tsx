@@ -431,6 +431,7 @@ describe('UnifiedDataTable', () => {
             dataViewId: 'the-data-view-id',
             someKey: 'someValue',
           },
+          disableCellActions: false,
         });
       },
       EXTENDED_JEST_TIMEOUT
@@ -457,6 +458,7 @@ describe('UnifiedDataTable', () => {
             dataViewId: 'the-data-view-id',
             someKey: 'someValue',
           },
+          disableCellActions: false,
         });
       },
       EXTENDED_JEST_TIMEOUT
