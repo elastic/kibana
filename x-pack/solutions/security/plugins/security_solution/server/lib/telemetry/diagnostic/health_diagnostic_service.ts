@@ -38,7 +38,7 @@ import {
 } from '../event_based/events';
 import { artifactService } from '../artifact';
 import { newTelemetryLogger } from '../helpers';
-import { RssGrouthCircuitBreaker } from './circuit_breakers/rss_grouth_circuit_breaker';
+import { RssGrowthCircuitBreaker } from './circuit_breakers/rss_growth_circuit_breaker';
 import { TimeoutCircuitBreaker } from './circuit_breakers/timeout_circuit_breaker';
 import { EventLoopUtilizationCircuitBreaker } from './circuit_breakers/event_loop_utilization_circuit_breaker';
 import { EventLoopDelayCircuitBreaker } from './circuit_breakers/event_loop_delay_circuit_breaker';
@@ -100,7 +100,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient, this.logger);
     this.analytics = start.analytics;
-    this._esClient = start?.esClient;
 
     await this.scheduleTask(start.taskManager);
   }
@@ -269,7 +268,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
   private buildCircuitBreakers(): CircuitBreaker[] {
     return [
-      new RssGrouthCircuitBreaker(this.circuitBreakersConfig.rssGrowth),
+      new RssGrowthCircuitBreaker(this.circuitBreakersConfig.rssGrowth),
       new TimeoutCircuitBreaker(this.circuitBreakersConfig.timeout),
       new EventLoopUtilizationCircuitBreaker(this.circuitBreakersConfig.eventLoopUtilization),
       new EventLoopDelayCircuitBreaker(this.circuitBreakersConfig.eventLoopDelay),

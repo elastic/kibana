@@ -11,7 +11,7 @@ import type {
 } from '../health_diagnostic_circuit_breakers.types';
 import { failure, success } from './utils';
 
-export class RssGrouthCircuitBreaker implements CircuitBreaker {
+export class RssGrowthCircuitBreaker implements CircuitBreaker {
   private readonly initialRss: number;
   private maxRss: number;
   private maxPercentGrowth: number;
