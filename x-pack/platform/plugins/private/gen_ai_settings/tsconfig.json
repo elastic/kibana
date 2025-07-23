@@ -12,7 +12,9 @@
     "@kbn/i18n-react",
     "@kbn/spaces-utils",
     "@kbn/spaces-plugin",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/config-schema",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": ["target/**/*"]
 }
