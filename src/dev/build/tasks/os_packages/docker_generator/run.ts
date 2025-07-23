@@ -51,7 +51,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:350eea0e8b97e1332f3bfa20866a4a9af0be6daebea8c3fd3ea954a8662bb585';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:1c4caa90ee9cf26c9143e44074f50ba9bb17636823bde4397751a5e0d846bfd6';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
@@ -83,7 +83,7 @@ export async function runDockerGenerator(
   const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
-  const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
+  const imageArchitecture = flags.architecture === 'aarch64' ? '-arm64' : '-amd64';
   const dockerTargetFilename = config.resolveFromTarget(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
