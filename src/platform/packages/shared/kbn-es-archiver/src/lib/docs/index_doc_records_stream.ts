@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import agent from 'elastic-apm-node';
 import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
@@ -31,7 +32,7 @@ export function createIndexDocRecordsStream(
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
 
-    await client.helpers.bulk(
+    const bulkStats = await client.helpers.bulk(
       {
         retries: 5,
         concurrency: performance?.concurrency || DEFAULT_PERFORMANCE_OPTIONS.concurrency,
@@ -60,6 +61,8 @@ export function createIndexDocRecordsStream(
         headers: ES_CLIENT_HEADERS,
       }
     );
+
+    agent.currentSpan?.setLabel('es_archiver_bulk_stats', JSON.stringify(bulkStats));
 
     if (errors.length) {
       throw new AggregateError(errors);
