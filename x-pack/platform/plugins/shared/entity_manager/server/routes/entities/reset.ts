@@ -14,8 +14,8 @@ import { readEntityDefinition } from '../../lib/entities/read_entity_definition'
 
 import { deleteIngestPipelines } from '../../lib/entities/delete_ingest_pipeline';
 import { deleteIndices } from '../../lib/entities/delete_index';
-import { createAndInstallIngestPipelines } from '../../lib/entities/create_and_install_ingest_pipeline';
-import { createAndInstallTransforms } from '../../lib/entities/create_and_install_transform';
+import { createAndInstallIngestPipelines, createAndInstallBackfillIngestPipelines } from '../../lib/entities/create_and_install_ingest_pipeline';
+import { createAndInstallBackfillTransforms, createAndInstallTransforms, createAndInstallBackfillTransforms } from '../../lib/entities/create_and_install_transform';
 import { startTransforms } from '../../lib/entities/start_transforms';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
 
@@ -51,7 +51,9 @@ export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
 
       // Recreate everything
       await createAndInstallIngestPipelines(esClient, definition, logger);
+      await createAndInstallBackfillIngestPipelines(esClient, definition, logger);
       await createAndInstallTransforms(esClient, definition, logger);
+      await createAndInstallBackfillTransforms(esClient, definition, logger);
       await startTransforms(esClient, definition, logger);
 
       return response.ok({ body: { acknowledged: true } });
