@@ -577,11 +577,17 @@ export class KnowledgeBaseService {
         });
         if (productDocStatus.status !== 'installed') {
           logger.info(`Installing product document with inference ID: ${nextInferenceId}.`);
-          void productDoc.install({
-            force: false,
-            wait: true,
-            inferenceId: nextInferenceId,
-          });
+          productDoc
+            .install({
+              force: false,
+              wait: true,
+              inferenceId: nextInferenceId,
+            })
+            .catch((e) => {
+              logger.error(
+                `Failed to install product documentation with inference ID: ${nextInferenceId}. Error: ${e.message}`
+              );
+            });
         }
 
         await reIndexKnowledgeBaseWithLock({
@@ -592,11 +598,11 @@ export class KnowledgeBaseService {
 
         // If the inference ID switched to a preconfigured inference endpoint, delete the legacy custom inference endpoint if it exists.
         if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
-          void deleteInferenceEndpoint({
+          deleteInferenceEndpoint({
             esClient,
             logger,
             inferenceId: LEGACY_CUSTOM_INFERENCE_ID,
-          });
+          }).catch(() => {});
         }
       })
       .catch((e) => {
