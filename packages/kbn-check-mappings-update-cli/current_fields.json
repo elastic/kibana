@@ -1285,5 +1285,15 @@
     "type",
     "updated_at"
   ],
+  "workflow": [
+    "createdBy",
+    "definition",
+    "description",
+    "lastUpdatedBy",
+    "name",
+    "status",
+    "tags",
+    "yaml"
+  ],
   "workplace_search_telemetry": []
 }
