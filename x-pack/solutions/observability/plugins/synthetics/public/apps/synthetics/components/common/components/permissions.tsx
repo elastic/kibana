@@ -34,12 +34,14 @@ export const NoPermissionsTooltip = ({
   canEditSynthetics = true,
   canUsePublicLocations = true,
   canManagePrivateLocations = true,
+  content,
   children,
 }: {
   canEditSynthetics?: boolean;
   canUsePublicLocations?: boolean;
   canManagePrivateLocations?: boolean;
   children: ReactNode;
+  content?: ReactNode;
 }) => {
   const { isServiceAllowed } = useEnablement();
 
@@ -60,6 +62,14 @@ export const NoPermissionsTooltip = ({
   if (disabledMessage) {
     return (
       <EuiToolTip content={disabledMessage}>
+        <span>{children}</span>
+      </EuiToolTip>
+    );
+  }
+
+  if (content) {
+    return (
+      <EuiToolTip content={content}>
         <span>{children}</span>
       </EuiToolTip>
     );
