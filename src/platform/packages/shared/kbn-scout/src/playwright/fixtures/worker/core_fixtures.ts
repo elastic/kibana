@@ -10,7 +10,6 @@
 import { test as base } from '@playwright/test';
 import { KbnClient, SamlSessionManager } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
-import { Flags } from '@kbn/dev-cli-runner';
 import {
   createKbnUrl,
   getEsClient,
@@ -56,7 +55,6 @@ export const coreWorkerFixtures = base.extend<
     esClient: Client;
     kbnClient: KbnClient;
     samlAuth: SamlAuth;
-    flags: Flags;
   }
 >({
   // Provides a scoped logger instance for each worker to use in fixtures and tests.
