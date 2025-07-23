@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ai-client-tools-plugin",
+  "owner": "@elastic/appex-ai-infra",
+  // all packages under 'ai_infra' will be used across solutions
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "aiClientTools",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "aiClientTools"],
+    "requiredPlugins": ["licensing", "taskManager"],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

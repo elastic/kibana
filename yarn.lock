@@ -3906,6 +3906,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ai-client-tools-plugin@link:x-pack/platform/plugins/shared/ai_infra/ai_client_tools":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-security-labs-content@link:x-pack/solutions/security/packages/ai-security-labs-content":
   version "0.0.0"
   uid ""

@@ -24,6 +24,8 @@
       "@kbn/ai-assistant-icon/*": ["x-pack/platform/packages/shared/ai-assistant/icon/*"],
       "@kbn/ai-assistant-management-plugin": ["src/platform/plugins/shared/ai_assistant_management/selection"],
       "@kbn/ai-assistant-management-plugin/*": ["src/platform/plugins/shared/ai_assistant_management/selection/*"],
+      "@kbn/ai-client-tools-plugin": ["x-pack/platform/plugins/shared/ai_infra/ai_client_tools"],
+      "@kbn/ai-client-tools-plugin/*": ["x-pack/platform/plugins/shared/ai_infra/ai_client_tools/*"],
       "@kbn/ai-security-labs-content": ["x-pack/solutions/security/packages/ai-security-labs-content"],
       "@kbn/ai-security-labs-content/*": ["x-pack/solutions/security/packages/ai-security-labs-content/*"],
       "@kbn/ai-tools-cli": ["x-pack/platform/packages/shared/kbn-ai-tools-cli"],
