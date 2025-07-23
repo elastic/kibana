@@ -7,7 +7,6 @@
 import { synthtrace } from '../../../synthtrace';
 import { opbeans } from '../../fixtures/synthtrace/opbeans';
 import { checkA11y } from '../../support/commands';
-import { generateDataWithoutDependencies } from './generate_data_without_dependencies';
 import { generateManyDependencies } from './generate_many_dependencies';
 
 const start = '2021-10-10T00:00:00.000Z';
@@ -139,6 +138,18 @@ describe('Dependencies with high volume of data', () => {
     cy.contains('nav', 'Page 1 of 60');
   });
 
+  it('shows empty message when no dependencies are present', () => {
+    cy.visitKibana(
+      `/app/apm/dependencies/inventory?${new URLSearchParams({
+        rangeFrom: new Date().toISOString(),
+        rangeTo: new Date().toISOString(),
+      })}`
+    );
+    cy.getByTestSubj('dependenciesTable');
+    cy.contains('No dependencies found');
+    cy.contains('Try another time range or reset the search filter');
+  });
+
   it('shows service dependencies', () => {
     cy.visitKibana(
       `/app/apm/services/synth-java-0/dependencies?${new URLSearchParams({
@@ -149,28 +160,5 @@ describe('Dependencies with high volume of data', () => {
     cy.getByTestSubj('serviceDependenciesBreakdownChart').get('canvas');
     cy.getByTestSubj('dependenciesTable');
     cy.contains('nav', 'Page 1 of 100');
-  });
-});
-
-describe('Dependencies page with no dependencies', () => {
-  before(() => {
-    synthtrace.clean(); // ensure no dependencies data
-    synthtrace.index(
-      generateDataWithoutDependencies({
-        from: new Date(start).getTime(),
-        to: new Date(end).getTime(),
-      })
-    );
-  });
-
-  beforeEach(() => {
-    cy.loginAsViewerUser();
-  });
-
-  it('shows empty message when no dependencies are present', () => {
-    cy.visitKibana(`/app/apm/dependencies/inventory?${new URLSearchParams(timeRange)}`);
-    cy.getByTestSubj('dependenciesTable');
-    cy.contains('No dependencies found');
-    cy.contains('Try another time range or reset the search filter');
   });
 });
