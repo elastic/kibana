@@ -21,10 +21,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import React, { useState } from 'react';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { UISession } from '../../types';
+import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import { UISession } from '../../../types';
 import { getAction } from './get_action';
-import { ACTION, OnActionComplete } from './types';
+import { OnActionComplete } from './types';
 
 interface PopoverActionItemsProps {
   session: UISession;
@@ -75,7 +75,7 @@ export const PopoverActionsMenu = ({
 
       // add a line above the delete action (when there are multiple)
       // NOTE: Delete action MUST be the final action[] item
-      if (actions.length > 1 && actionType === ACTION.DELETE) {
+      if (actions.length > 1 && actionType === 'delete') {
         itemSet.push({ isSeparator: true, key: 'separadorable' });
       }
 
