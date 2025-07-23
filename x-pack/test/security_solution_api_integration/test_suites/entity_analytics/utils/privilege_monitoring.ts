@@ -4,17 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/* eslint-disable no-console */
+
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 
-export const privilegeMonitoringRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SupertestWithoutAuthProviderType
-) => ({
-  privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
-    await supertestWithoutAuth
-      .get('/api/entity_analytics/monitoring/privileges/privileges')
-      .auth(username, password)
+export const privilegeMonitoringRouteHelpersFactory = (
+  supertest: SupertestWithoutAuthProviderType
+) => {
+  const setHeaders = (req: any) =>
+    req
       .set('elastic-api-version', API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'true');
@@ -57,19 +58,10 @@ export const privilegeMonitoringRouteHelpersFactoryNoAuth = (
       );
     },
 
-    deleteIndexSource: async (sourceId: string, { ignore404 = false } = {}) => {
-      const res = await setHeaders(
-        supertest.delete(`/api/entity_analytics/monitoring/entity_source/${sourceId}`)
-      ).catch((err: { status: number }) => {
-        if (ignore404 && err.status === 404) return { status: 404 };
-        throw err;
-      });
-
-      if (!ignore404 && res.status !== 200) {
-        throw new Error(`Expected 200 OK, got ${res.status}`);
-      }
-
-      return res;
+    deleteEngine: async (data?: boolean) => {
+      return await setHeaders(
+        supertest.delete('/api/entity_analytics/monitoring/engine/delete').query({ data })
+      ).expect(200);
     },
   };
 };

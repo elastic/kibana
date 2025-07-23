@@ -11,7 +11,7 @@ export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_analytics:monitoring:privileges:engine';
 export const VERSION = '1.0.0';
 export const TIMEOUT = '10m';
-export const INTERVAL = this.opts.config.privileges.developer.syncInterval; // 10 minutes in seconds (default)
+export const INTERVAL = '10m'; // this.opts.config.privileges.developer.syncInterval; 10 minutes in seconds (default)-- SEE WHY THIS DOES NOT WORK PLS
 
 export const PRIVILEGE_MONITORING_ENGINE_STATUS = {
   // TODO Make the engine initialization async before uncommenting these lines

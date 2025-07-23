@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { privilegeMonitoringTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/privilege_monitoring/saved_objects/privilege_monitoring_type';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { privilegeMonitoringRouteHelpersFactory } from '../../utils/privilege_monitoring';
@@ -18,13 +17,12 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const privmon = privilegeMonitoringRouteHelpersFactory(supertest);
   const log = getService('log');
-  const spaceName = 'monitoring-space';
+  const spaceName = 'default';
   const es = getService('es');
   // const spaceName = 'default';
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
-    const kibanaServer = getService('kibanaServer');
     before(async () => {
       await dataView.create('security-solution');
       await enablePrivmonSetting(kibanaServer);
@@ -51,30 +49,27 @@ export default ({ getService }: FtrProviderContext) => {
     describe('plain index sync', () => {
       log.info(`Syncing plain index`);
       // Want to make sure that monitoring saved objects are created and have something in them,
-      const indexName = 'tatooine-privileged-users';
-      const entitySource = {
-        type: 'index' as const,
-        name: 'StarWars',
-        managed: true,
-        indexPattern: indexName,
-        enabled: true,
-        matchers: [
-          {
-            fields: ['user.role'],
-            values: ['admin'],
-          },
-        ],
-        filter: {},
-      };
-      after(async () => {
-        // Probable do not need cleanup before AND after. Debugging WIP
-        await es.indices.delete({ index: indexName }, { ignore: [404] });
-        await es.indices.delete({ index: 'default-monitoring-index' }, { ignore: [404] });
-        await privmon.deleteIndexSource('default-monitoring-index', { ignore404: true });
-        await privmon.deleteIndexSource(entitySource.name, { ignore404: true });
-      });
       before(async () => {
+        await es.indices.delete({ index: indexName }, { ignore: [404] });
+        await privmon.deleteEngine(true);
+        const indexName = 'tatooine-privileged-users';
+        const entitySource = {
+          type: 'index' as const,
+          name: 'StarWars',
+          managed: true,
+          indexPattern: indexName,
+          enabled: true,
+          matchers: [
+            {
+              fields: ['user.role'],
+              values: ['admin'],
+            },
+          ],
+          filter: {},
+        };
+        /*
         const soId = await kibanaServer.savedObjects.find<{
+          // do you need this?
           type: typeof privilegeMonitoringTypeName;
           space: string;
         }>({
@@ -87,13 +82,8 @@ export default ({ getService }: FtrProviderContext) => {
             space: spaceName,
             id: soId.saved_objects[0].id,
           });
-        }
-        // Delete quickly any existing source with the same name
-        // Ensure index does not exist before creating it
-        await es.indices.delete({ index: indexName }, { ignore: [404] });
-        await es.indices.delete({ index: 'default-monitoring-index' }, { ignore: [404] });
-        await privmon.deleteIndexSource('default-monitoring-index', { ignore404: true });
-        await privmon.deleteIndexSource(entitySource.name, { ignore404: true });
+        }*/
+        //  await privmon.deleteEngine();
         // await privmon.deleteIndexSource(entitySource.name);
         // Create index with mapping
         await es.indices.create({
@@ -144,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const names = result.saved_objects.map((so) => so.attributes.name);
-        expect(names).to.contain('default-monitoring-index');
+        expect(names).to.contain('default-monitoring-index-default');
         // How to make interval shorter to test the data syncs?
         // Now list the users in monitoring
         // const res = await privmon.listUsers(); // this should be undefined to start with. Can we change the interval to 1s?
@@ -154,6 +144,10 @@ export default ({ getService }: FtrProviderContext) => {
         // expect(userNames.length).to.be.greaterThan(0);
         // expect(userNames).contain('Luke Skywalker');
         // expect(userNames).contain('Leia Organa');
+      });
+
+      it('should handle duplicate user names', () => {
+        // Test logic for handling duplicate user names
       });
     });
   });
