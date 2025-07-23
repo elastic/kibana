@@ -147,6 +147,11 @@ export class IndexUpdateService {
             }
             return docUpdate;
           });
+        case 'delete-column':
+          // if a column has been deleted, we need to delete the values added to it.
+          return acc.filter((docUpdate) => {
+            return !docUpdate.value[action.payload.name];
+          });
         default:
           return acc;
       }
