@@ -11,7 +11,6 @@ import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useStat
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import './data_table.scss';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   EuiDataGridSorting,
