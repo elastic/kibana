@@ -78,7 +78,7 @@ export const KnowledgeBaseInstallationStatusPanel = ({
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
 }) => {
-  switch (knowledgeBase.status.value?.kbState) {
+  switch (knowledgeBase.status.value?.inferenceModelState) {
     case KnowledgeBaseState.NOT_INSTALLED:
       return (
         <EuiFlexItem grow={false}>

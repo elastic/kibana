@@ -47,7 +47,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   // 1. The model is currently being deployed to ML nodes
   // 2. The knowledge base is being reindexed (e.g., during model updates)
   if (
-    statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL ||
+    statusRequest.value?.inferenceModelState === KnowledgeBaseState.DEPLOYING_MODEL ||
     statusRequest.value?.isReIndexing ||
     statusRequest.value?.productDocStatus === 'installing'
   ) {
@@ -59,7 +59,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     // 1. The knowledge base is not in READY state yet
     // 2. We're installing a specific model but its ID doesn't match the current model
     if (
-      statusRequest.value?.kbState !== KnowledgeBaseState.READY ||
+      statusRequest.value?.inferenceModelState !== KnowledgeBaseState.READY ||
       (installingInferenceId !== undefined &&
         statusRequest.value?.currentInferenceId !== installingInferenceId)
     ) {
@@ -71,7 +71,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     // Only reset installation state when the KB is ready and the endpoint model matches what we're installing
     if (
       installingInferenceId &&
-      statusRequest.value?.kbState === KnowledgeBaseState.READY &&
+      statusRequest.value?.inferenceModelState === KnowledgeBaseState.READY &&
       statusRequest.value?.currentInferenceId === installingInferenceId
     ) {
       setInstallingInferenceId(undefined);
@@ -80,7 +80,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   useEffect(() => {
     // toggle warming up state to false once KB is ready
-    if (isWarmingUpModel && statusRequest.value?.kbState === KnowledgeBaseState.READY) {
+    if (isWarmingUpModel && statusRequest.value?.inferenceModelState === KnowledgeBaseState.READY) {
       setIsWarmingUpModel(false);
     }
   }, [isWarmingUpModel, statusRequest]);
@@ -158,7 +158,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     const interval = setInterval(statusRequest.refresh, 5000);
 
     if (
-      statusRequest.value?.kbState === KnowledgeBaseState.READY &&
+      statusRequest.value?.inferenceModelState === KnowledgeBaseState.READY &&
       statusRequest.value?.currentInferenceId === installingInferenceId
     ) {
       // done installing

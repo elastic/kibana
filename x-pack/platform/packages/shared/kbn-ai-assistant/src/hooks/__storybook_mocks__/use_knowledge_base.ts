@@ -18,7 +18,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       refresh: () => {},
       error: undefined,
       value: {
-        kbState: KnowledgeBaseState.NOT_INSTALLED,
+        inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
         enabled: true,
         concreteWriteIndex: undefined,
         currentInferenceId: undefined,

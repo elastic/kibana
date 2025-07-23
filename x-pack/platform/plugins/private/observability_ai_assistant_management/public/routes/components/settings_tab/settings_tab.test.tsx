@@ -56,7 +56,7 @@ describe('SettingsTab', () => {
       },
     });
     useKnowledgeBaseMock.mockReturnValue({
-      status: { value: { enabled: true, kbState: KnowledgeBaseState.READY } },
+      status: { value: { enabled: true, inferenceModelState: KnowledgeBaseState.READY } },
       isInstalling: false,
       isPolling: false,
       isWarmingUpModel: false,
@@ -121,7 +121,7 @@ describe('SettingsTab', () => {
 
   it('should show loading state when knowledge base is being updated', () => {
     useKnowledgeBaseMock.mockReturnValue({
-      status: { value: { enabled: true, kbState: KnowledgeBaseState.READY } },
+      status: { value: { enabled: true, inferenceModelState: KnowledgeBaseState.READY } },
       isInstalling: true,
       isPolling: true,
       isWarmingUpModel: false,

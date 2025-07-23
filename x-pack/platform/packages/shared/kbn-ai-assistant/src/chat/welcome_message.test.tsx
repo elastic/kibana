@@ -58,7 +58,7 @@ const createMockKnowledgeBase = (
     value: {
       enabled: true,
       errorMessage: undefined,
-      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
       concreteWriteIndex: undefined,
       currentInferenceId: undefined,
       isReIndexing: false,
@@ -80,7 +80,7 @@ describe('WelcomeMessage', () => {
     const knowledgeBase = createMockKnowledgeBase({
       status: {
         value: {
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: KnowledgeBaseState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
@@ -113,7 +113,7 @@ describe('WelcomeMessage', () => {
     const updatedKnowledgeBase = createMockKnowledgeBase({
       status: {
         value: {
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: KnowledgeBaseState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',

@@ -139,7 +139,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             endpoint: 'GET /internal/observability_ai_assistant/kb/status',
           });
 
-          expect(body.kbState === KnowledgeBaseState.READY).to.be(true);
+          expect(body.inferenceModelState === KnowledgeBaseState.READY).to.be(true);
         });
       });
     });
