@@ -8,7 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
+import {
+  ESQLControlVariable,
+  ESQLLicenseType,
+  ESQLVariableType,
+  RecommendedField,
+} from '@kbn/esql-types';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
@@ -82,7 +87,8 @@ export function getFunctionDefinition(name: string) {
 
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
-  predicates: FunctionFilterPredicates | undefined
+  predicates: FunctionFilterPredicates | undefined,
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
 ): FunctionDefinition[] => {
   if (!predicates) {
     return functions;
@@ -92,6 +98,19 @@ export const filterFunctionDefinitions = (
   return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
     if (ignoreAsSuggestion) {
       return false;
+    }
+    const hasRestrictedSignature = signatures.some((signature) => signature.license);
+    if (!!hasMinimumLicenseRequired && hasRestrictedSignature) {
+      const availableSignatures = signatures.filter((signature) => {
+        if (!signature.license) return true;
+        return hasMinimumLicenseRequired
+          ? hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType)
+          : false;
+      });
+
+      if (availableSignatures.length === 0) {
+        return false;
+      }
     }
 
     if (ignored.includes(name)) {
@@ -233,9 +252,12 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
  * @returns
  */
 export const getFunctionSuggestions = (
-  predicates?: FunctionFilterPredicates
+  predicates?: FunctionFilterPredicates,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ): ISuggestionItem[] => {
-  return filterFunctionDefinitions(allFunctions(), predicates).map(getFunctionSuggestion);
+  return filterFunctionDefinitions(allFunctions(), predicates, hasMinimumLicenseRequired).map(
+    getFunctionSuggestion
+  );
 };
 
 export function checkFunctionInvocationComplete(

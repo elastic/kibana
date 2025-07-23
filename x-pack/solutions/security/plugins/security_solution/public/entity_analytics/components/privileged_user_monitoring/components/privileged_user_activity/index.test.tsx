@@ -28,6 +28,14 @@ jest.mock('../../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));
 
+jest.mock('../../queries/helpers', () => {
+  const originalModule = jest.requireActual('../../queries/helpers');
+  return {
+    ...originalModule,
+    removeInvalidForkBranchesFromESQL: jest.fn((fields, esql) => esql),
+  };
+});
+
 const mockedSourcererDataView = {
   title: 'test-*',
   fields: {},
@@ -65,8 +73,6 @@ describe('UserActivityPrivilegedUsersPanel', () => {
     render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
       wrapper: TestProviders,
     });
-    // select a visualization that doesn't require dataview fields
-    fireEvent.click(screen.getByTestId('account_switches'));
 
     expect(screen.getByTestId('esql-dashboard-panel')).toBeInTheDocument();
   });
@@ -84,8 +90,7 @@ describe('UserActivityPrivilegedUsersPanel', () => {
     render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
       wrapper: TestProviders,
     });
-    // select a visualization that doesn't require dataview fields
-    fireEvent.click(screen.getByTestId('account_switches'));
+
     expect(screen.getByText('View all events')).toBeInTheDocument();
   });
 });

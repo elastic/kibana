@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniq } from 'lodash';
+import { ESQLLicenseType } from '@kbn/esql-types';
 import {
   allStarConstant,
   commaCompleteItem,
@@ -60,6 +61,8 @@ import { comparisonFunctions } from '../../all_operators';
 import { correctQuerySyntax, findAstPosition } from '../ast';
 import { parse } from '../../../parser';
 import { Walker } from '../../../walker';
+import { getSuggestionsToRightOfOperatorExpression } from '../operators';
+import { getExpressionType } from '../expressions';
 
 function checkContentPerDefinition(fn: ESQLFunction, def: FunctionDefinitionTypes): boolean {
   const fnDef = getFunctionDefinition(fn.name);
@@ -138,7 +141,8 @@ export async function getFunctionArgsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   fullText: string,
   offset: number,
-  context?: ICommandContext
+  context?: ICommandContext,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ): Promise<ISuggestionItem[]> {
   const astContext = findAstPosition(commands, offset);
   const node = astContext.node;
@@ -356,15 +360,18 @@ export async function getFunctionArgsSuggestions(
         location = Location.STATS_TIMESERIES;
       }
       suggestions.push(
-        ...getFunctionSuggestions({
-          location,
-          returnTypes: canBeBooleanCondition
-            ? ['any']
-            : (ensureKeywordAndText(
-                getTypesFromParamDefs(typesToSuggestNext)
-              ) as FunctionParameterType[]),
-          ignored: fnToIgnore,
-        }).map((suggestion) => ({
+        ...getFunctionSuggestions(
+          {
+            location,
+            returnTypes: canBeBooleanCondition
+              ? ['any']
+              : (ensureKeywordAndText(
+                  getTypesFromParamDefs(typesToSuggestNext)
+                ) as FunctionParameterType[]),
+            ignored: fnToIgnore,
+          },
+          hasMinimumLicenseRequired
+        ).map((suggestion) => ({
           ...suggestion,
           text: addCommaIf(shouldAddComma, suggestion.text),
         }))
@@ -437,7 +444,8 @@ async function getListArgsSuggestions(
   commands: ESQLCommand[],
   getFieldsByType: GetColumnsByTypeFn,
   fieldsMap: Map<string, ESQLFieldWithMetadata>,
-  offset: number
+  offset: number,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ) {
   const suggestions = [];
   const { command, node } = findAstPosition(commands, offset);
@@ -485,7 +493,8 @@ async function getListArgsSuggestions(
               fields: true,
               userDefinedColumns: anyUserDefinedColumns,
             },
-            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
+            { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] },
+            hasMinimumLicenseRequired
           ))
         );
       }
@@ -515,7 +524,7 @@ export const getInsideFunctionsSuggestions = async (
       }
     },
   });
-  const { node, command } = findAstPosition(ast, cursorPosition ?? 0);
+  const { node, command, containingFunction } = findAstPosition(ast, cursorPosition ?? 0);
   if (!node) {
     return undefined;
   }
@@ -525,6 +534,25 @@ export const getInsideFunctionsSuggestions = async (
     return [];
   }
   if (node.type === 'function') {
+    // For now, we don't suggest for expressions within any function besides CASE
+    // e.g. CASE(field != /)
+    //
+    // So, it is handled as a special branch...
+    if (
+      containingFunction?.name === 'case' &&
+      !Array.isArray(node) &&
+      node?.subtype === 'binary-expression'
+    ) {
+      return await getSuggestionsToRightOfOperatorExpression({
+        queryText: innerText,
+        location: getLocationFromCommandOrOptionName(command.name),
+        rootOperator: node,
+        getExpressionType: (expression) =>
+          getExpressionType(expression, context?.fields, context?.userDefinedColumns),
+        getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+      });
+    }
     if (['in', 'not in'].includes(node.name)) {
       // // command ... a in ( <here> )
       // return { type: 'list' as const, command, node, option, containingFunction };
@@ -533,7 +561,8 @@ export const getInsideFunctionsSuggestions = async (
         ast,
         callbacks?.getByType ?? (() => Promise.resolve([])),
         context?.fields ?? new Map(),
-        cursorPosition ?? 0
+        cursorPosition ?? 0,
+        callbacks?.hasMinimumLicenseRequired
       );
     }
     if (
@@ -547,7 +576,8 @@ export const getInsideFunctionsSuggestions = async (
         callbacks?.getByType ?? (() => Promise.resolve([])),
         query,
         cursorPosition ?? 0,
-        context
+        context,
+        callbacks?.hasMinimumLicenseRequired
       );
     }
   }
