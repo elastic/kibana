@@ -18,5 +18,5 @@ export const getGrantedRightsEsqlCount = (
   const fields = sourcerDataView?.fields ?? {};
   const esqlSource = getGrantedRightsEsqlSource(namespace, indexPattern, fields);
 
-  return map<string, string>((src) => `${src} | STATS COUNT(*)`)(esqlSource);
+  return map<string, string>((src) => `${src} | STATS count = COUNT(*)`)(esqlSource);
 };

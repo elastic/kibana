@@ -18,5 +18,5 @@ export const getAuthenticationsEsqlCount = (
   const fields = sourcerDataView?.fields ?? {};
   const esqlSource = getAuthenticationsEsqlSource(namespace, indexPattern, fields);
 
-  return map<string, string>((src) => `${src} | STATS COUNT(*)`)(esqlSource);
+  return map<string, string>((src) => `${src} | STATS count = COUNT(*)`)(esqlSource);
 };

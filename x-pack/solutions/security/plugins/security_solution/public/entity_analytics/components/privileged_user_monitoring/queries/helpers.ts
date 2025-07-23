@@ -23,6 +23,11 @@ export const getPrivilegedMonitorUsersJoin = (
   | WHERE user.is_privileged == true`;
 
 export type EsqlQueryOrInvalidFields = E.Right<string> | E.Left<string[]>;
+export const getPrivilegeMonitrUsersJoinNoTimestamp = (
+  namespace: string
+) => `| LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
+  | WHERE user.is_privileged == true`;
+
 /**
  * Rewrites que query to remove FORK branches that contain columns not available.
  */

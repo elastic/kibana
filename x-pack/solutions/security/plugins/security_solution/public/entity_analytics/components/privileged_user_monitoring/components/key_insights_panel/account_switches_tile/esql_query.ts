@@ -14,5 +14,5 @@ export const getAccountSwitchesEsqlCount = (namespace: string, sourcerDataView: 
   const fields = sourcerDataView?.fields ?? {};
   const esqlSource = getAccountSwitchesEsqlSource(namespace, indexPattern, fields);
 
-  return map<string, string>((src) => `${src} | STATS COUNT(*)`)(esqlSource);
+  return map<string, string>((src) => `${src} | STATS count = COUNT(*)`)(esqlSource);
 };
