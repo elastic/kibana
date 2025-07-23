@@ -15,9 +15,6 @@ export const ConnectToElasticsearchSidePanel = () => {
   const { application } = useKibana().services;
 
   const { ingestSampleData, isLoading } = useIngestSampleData();
-  const onIngestSampleData = useCallback(() => {
-    ingestSampleData();
-  }, [ingestSampleData]);
 
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
@@ -72,7 +69,7 @@ export const ConnectToElasticsearchSidePanel = () => {
             />
           }
           footer={
-            <SampleDataActionButton isLoading={isLoading} onIngestSampleData={onIngestSampleData} />
+            <SampleDataActionButton isLoading={isLoading} onIngestSampleData={ingestSampleData} />
           }
         />
 
