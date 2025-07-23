@@ -58,7 +58,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
     return null;
   }
 
-  if (isInstalled) {
+  if (isInstalled && indexName) {
     const button = (
       <EuiButtonEmpty
         data-test-subj="viewDataBtn"
@@ -101,9 +101,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
               <EuiContextMenuItem
                 key="index"
                 onClick={() => {
-                  if (indexName) {
-                    navigateToIndexDetails(application, http, indexName);
-                  }
+                  navigateToIndexDetails(application, http, indexName);
                 }}
                 icon="index"
               >
