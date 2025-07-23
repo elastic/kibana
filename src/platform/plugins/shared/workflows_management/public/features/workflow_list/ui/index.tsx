@@ -8,6 +8,7 @@
  */
 
 import { BarSeries, Chart, ScaleType, Settings } from '@elastic/charts';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -23,19 +24,21 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ExecutionStatus, WorkflowListItemDto } from '@kbn/workflows';
-import React, { useCallback, useMemo, useState } from 'react';
+import { ExecutionStatus, WorkflowListItemAction, WorkflowListItemDto } from '@kbn/workflows';
 import { Link } from 'react-router-dom';
 import { useWorkflowActions } from '../../../entities/workflows/model/useWorkflowActions';
 import { useWorkflows } from '../../../entities/workflows/model/useWorkflows';
 
 export function WorkflowList() {
   const { euiTheme } = useEuiTheme();
-  const { notifications } = useKibana().services;
+  const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows();
   const { deleteWorkflows, runWorkflow } = useWorkflowActions();
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
+
+  const canExecuteWorkflow = application?.capabilities.executeWorkflow;
+  const canDeleteWorkflow = application?.capabilities.executeWorkflow;
 
   const deleteSelectedWorkflows = () => {
     if (selectedItems.length === 0) {
@@ -83,6 +86,33 @@ export function WorkflowList() {
     },
     [deleteWorkflows]
   );
+
+  const getAvailableActions = useCallback(() => {
+    const availableActions: WorkflowListItemAction[] = [];
+
+    if (canExecuteWorkflow) {
+      availableActions.push({
+        isPrimary: true,
+        type: 'icon',
+        color: 'primary',
+        name: 'Run',
+        icon: 'play',
+        description: 'Run',
+        onClick: (item: WorkflowListItemDto) => handleRunWorkflow(item),
+      });
+    }
+    if (canDeleteWorkflow) {
+      availableActions.push({
+        type: 'icon',
+        color: 'danger',
+        name: 'Delete',
+        icon: 'trash',
+        description: 'Delete',
+        onClick: (item: WorkflowListItemDto) => handleDeleteWorkflow(item),
+      });
+    }
+    return availableActions;
+  }, [canExecuteWorkflow, canDeleteWorkflow, handleRunWorkflow, handleDeleteWorkflow]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
@@ -188,33 +218,14 @@ export function WorkflowList() {
       },
       {
         name: 'Actions',
-        actions: [
-          {
-            isPrimary: true,
-            type: 'icon',
-            color: 'primary',
-            name: 'Run',
-            icon: 'play',
-            description: 'Run',
-            onClick: (item) => handleRunWorkflow(item),
-          },
-          {
-            type: 'icon',
-            color: 'danger',
-            name: 'Delete',
-            icon: 'trash',
-            description: 'Delete',
-            onClick: (item) => handleDeleteWorkflow(item),
-          },
-        ],
+        actions: getAvailableActions(),
       },
     ],
     [
+      getAvailableActions,
       euiTheme.colors.vis.euiColorVis0,
       euiTheme.colors.vis.euiColorVis1,
       euiTheme.colors.vis.euiColorVis6,
-      handleDeleteWorkflow,
-      handleRunWorkflow,
     ]
   );
 
@@ -238,14 +249,16 @@ export function WorkflowList() {
   return (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiButton
-          color="danger"
-          iconType="trash"
-          onClick={deleteSelectedWorkflows}
-          isDisabled={selectedItems.length === 0}
-        >
-          Delete {selectedItems.length || 'selected'} workflows
-        </EuiButton>
+        {canDeleteWorkflow && (
+          <EuiButton
+            color="danger"
+            iconType="trash"
+            onClick={deleteSelectedWorkflows}
+            isDisabled={selectedItems.length === 0}
+          >
+            Delete {selectedItems.length || 'selected'} workflows
+          </EuiButton>
+        )}
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiBasicTable

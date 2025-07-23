@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WorkflowYaml } from '@kbn/workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
@@ -31,8 +32,11 @@ import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
-  const { data: workflow, isLoading: isLoadingWorkflow, error } = useWorkflowDetail(id);
-
+  const {
+    data: workflow,
+    isLoading: isLoadingWorkflow,
+    error: workflowError,
+  } = useWorkflowDetail(id);
   const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
@@ -125,12 +129,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <WorkflowEditor
-            workflowId={workflow?.id ?? ''}
-            value={workflowYaml}
-            onChange={handleChange}
-            hasChanges={hasChanges}
-          />
+          {workflow && (
+            <WorkflowEditor
+              workflowId={workflow?.id ?? ''}
+              value={workflowYaml}
+              onChange={handleChange}
+              hasChanges={hasChanges}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -146,7 +152,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     return <EuiLoadingSpinner />;
   }
 
-  if (error) {
+  if (workflowError) {
     return <EuiText>Error loading workflow</EuiText>;
   }
 
