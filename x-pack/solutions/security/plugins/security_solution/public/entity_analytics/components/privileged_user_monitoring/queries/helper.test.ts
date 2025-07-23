@@ -8,7 +8,7 @@
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { EsqlQueryOrInvalidFields } from './helpers';
 import { getPrivilegedMonitorUsersJoin, removeInvalidForkBranchesFromESQL } from './helpers';
-import { isLeft, isRight } from 'fp-ts/Either';
+import { isLeft, left, right } from 'fp-ts/Either';
 
 describe('getPrivilegedMonitorUsersJoin', () => {
   it('should return the correct ESQL join string with the given namespace', () => {
@@ -29,13 +29,6 @@ const getRight = (v: EsqlQueryOrInvalidFields) => {
     throw new Error('Error: Expected a right value, but got a left value');
   }
   return v.right;
-};
-
-const getLeft = (v: EsqlQueryOrInvalidFields) => {
-  if (isRight(v)) {
-    throw new Error('Error: Expected a left value, but got a right value');
-  }
-  return v.left;
 };
 
 describe('removeInvalidForkBranchesFromESQL', () => {
@@ -64,7 +57,8 @@ describe('removeInvalidForkBranchesFromESQL', () => {
 
   it('should return the original esql if there is no fork command', () => {
     const esql = 'FROM test-index | EVAL new_field=foo+bar';
-    expect(getRight(removeInvalidForkBranchesFromESQL(fields, esql))).toBe(esql);
+
+    expect(removeInvalidForkBranchesFromESQL(fields, esql)).toEqual(right(esql));
   });
 
   it('should throw if fork command has less than two arguments', () => {
@@ -86,7 +80,7 @@ describe('removeInvalidForkBranchesFromESQL', () => {
     const esql = 'FROM test-index | FORK (WHERE not_a_field IS NULL) (WHERE not_a_field IS NULL)';
     const invalidFields = removeInvalidForkBranchesFromESQL(fields, esql);
 
-    expect(getLeft(invalidFields)).toEqual(['not_a_field']);
+    expect(invalidFields).toEqual(left(['not_a_field']));
   });
 
   it('should remove fork and insert valid branch into root if only one valid branch exists', () => {
@@ -138,7 +132,7 @@ describe('removeInvalidForkBranchesFromESQL', () => {
 
   it('should return the original esql if all branches are valid', () => {
     const esql = 'FROM test-index | FORK (WHERE foo IS NULL) (WHERE bar IS NULL)';
-    expect(getRight(removeInvalidForkBranchesFromESQL(fields, esql))).toBe(esql);
+    expect(removeInvalidForkBranchesFromESQL(fields, esql)).toEqual(right(esql));
   });
 
   it('should remove fork if the invalid field is present inside a SORT command', () => {

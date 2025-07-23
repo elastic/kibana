@@ -6,7 +6,7 @@
  */
 
 import type { Moment } from 'moment';
-import { isLeft, right } from 'fp-ts/Either';
+import { map, right } from 'fp-ts/Either';
 import { CURRENT_TIME, GRANTED_RIGHTS_DATA, PAGE_SIZE } from './constants';
 import type { UserRowData } from './types';
 import type { EsqlQueryOrInvalidFields } from '../../../privileged_user_monitoring/queries/helpers';
@@ -48,22 +48,18 @@ export const generateESQLSource = () => {
 export const generateListESQLQuery =
   (esqlSource: EsqlQueryOrInvalidFields) =>
   (sortField: string | number | symbol, sortDirection: string, currentPage: number) => {
-    if (isLeft(esqlSource)) {
-      return esqlSource; // propagate the error
-    }
-
-    return right(`${esqlSource.right}
+    return map<string, string>(
+      (src) => `${src}
         | SORT ${String(sortField)} ${sortDirection}
-        | LIMIT ${1 + currentPage * PAGE_SIZE}`); // Load one extra item for the pagination
+        | LIMIT ${1 + currentPage * PAGE_SIZE}`
+    )(esqlSource);
   };
 
 export const generateVisualizationESQLQuery =
   (esqlSource: EsqlQueryOrInvalidFields) => (stackByField: string) => {
-    if (isLeft(esqlSource)) {
-      return esqlSource; // propagate the error
-    }
-
-    return right(`${esqlSource.right}
-    | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
-    | STATS results = COUNT(*) by timestamp, ${stackByField}`);
+    return map<string, string>(
+      (src) => `${src}
+        | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
+        | STATS results = COUNT(*) by timestamp, ${stackByField}`
+    )(esqlSource);
   };

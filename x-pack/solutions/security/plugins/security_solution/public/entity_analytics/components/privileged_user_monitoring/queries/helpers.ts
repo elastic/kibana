@@ -79,7 +79,7 @@ export function removeInvalidForkBranchesFromESQL(
       });
     });
 
-    return E.left(Array.from(invalidFields)); // TODO can we throw an error here? or return an empty query?
+    return E.left(Array.from(invalidFields));
   }
 
   // When FORK has only one valid branch we need to remove the fork command from query and add the valid branch back to the root

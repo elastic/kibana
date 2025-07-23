@@ -6,7 +6,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { isLeft, right } from 'fp-ts/Either';
+import { map } from 'fp-ts/Either';
 import { getAuthenticationsEsqlSource } from '../../../queries/authentications_esql_query';
 import type { EsqlQueryOrInvalidFields } from '../../../queries/helpers';
 
@@ -18,10 +18,5 @@ export const getAuthenticationsEsqlCount = (
   const fields = sourcerDataView?.fields ?? {};
   const esqlSource = getAuthenticationsEsqlSource(namespace, indexPattern, fields);
 
-  if (isLeft(esqlSource)) {
-    return esqlSource; // propagate the error
-  }
-
-  return right(`${esqlSource.right}
-    | STATS COUNT(*)`);
+  return map<string, string>((src) => `${src} | STATS COUNT(*)`)(esqlSource);
 };

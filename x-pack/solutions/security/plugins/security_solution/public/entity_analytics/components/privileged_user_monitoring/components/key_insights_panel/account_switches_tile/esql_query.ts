@@ -6,7 +6,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { isLeft, right } from 'fp-ts/Either';
+import { map } from 'fp-ts/Either';
 import { getAccountSwitchesEsqlSource } from '../../../queries/account_switches_esql_query';
 
 export const getAccountSwitchesEsqlCount = (namespace: string, sourcerDataView: DataViewSpec) => {
@@ -14,10 +14,5 @@ export const getAccountSwitchesEsqlCount = (namespace: string, sourcerDataView: 
   const fields = sourcerDataView?.fields ?? {};
   const esqlSource = getAccountSwitchesEsqlSource(namespace, indexPattern, fields);
 
-  if (isLeft(esqlSource)) {
-    return esqlSource; // propagate the error
-  }
-
-  return right(`${esqlSource.right}
-    | STATS COUNT(*)`);
+  return map<string, string>((src) => `${src} | STATS COUNT(*)`)(esqlSource);
 };
