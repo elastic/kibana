@@ -13,7 +13,6 @@ import {
   FieldCategoryKibanaProvider,
   FieldCategoryProvider,
 } from '@kbn/management-settings-components-field-category';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import type { FormServices, FormKibanaDependencies, Services } from './types';
 import { reloadPageToast } from './reload_page_toast';
 
@@ -49,12 +48,25 @@ export const FormKibanaProvider: FC<PropsWithChildren<FormKibanaDependencies>> =
   const { settings, notifications, docLinks, ...startDeps } = deps;
 
   const services: Services = {
-    saveChanges: (changes, scope: UiSettingsScope) => {
-      const scopeClient = scope === 'namespace' ? settings.client : settings.globalClient;
-      const arr = Object.entries(changes).map(([key, value]) =>
-        scopeClient.set(key, value.unsavedValue)
+    saveChanges: async (changes) => {
+      const clientChanges: Array<[string, any]> = [];
+      const globalChanges: Array<[string, any]> = [];
+
+      Object.entries(changes).map(([key, { unsavedValue, scope }]) =>
+        scope === 'namespace'
+          ? clientChanges.push([key, unsavedValue])
+          : globalChanges.push([key, unsavedValue])
       );
-      return Promise.all(arr);
+
+      // We need to do this two promises separately
+      if (clientChanges.length > 0) {
+        await Promise.all(clientChanges.map(([key, value]) => settings.client.set(key, value)));
+      }
+      if (globalChanges.length > 0) {
+        await Promise.all(
+          globalChanges.map(([key, value]) => settings.globalClient.set(key, value))
+        );
+      }
     },
     showError: (message: string) => notifications.toasts.addDanger(message),
     showReloadPagePrompt: () => notifications.toasts.add(reloadPageToast(startDeps)),
