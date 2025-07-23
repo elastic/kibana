@@ -96,18 +96,18 @@ describe(
     });
 
     describe('preview prebuilt rule upgrade', () => {
-      const PREBUILT_RULE_ID = 'test-prebuilt-rule-a';
+      const PREBUILT_RULE_ID = 'test-prebuilt-rule';
       const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
         rule_id: PREBUILT_RULE_ID,
         version: 1,
-        name: 'Prebuilt rule A',
-        description: 'Non-customized prebuilt rule A',
+        name: 'Prebuilt rule',
+        description: 'Non-customized prebuilt rule',
       });
       const NEW_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
         rule_id: PREBUILT_RULE_ID,
         version: 2,
         name: 'New Prebuilt rule A',
-        description: 'New Non-customized prebuilt rule A',
+        description: 'New Non-customized prebuilt rule',
       });
 
       it('previews a prebuilt rule upgrade', () => {
