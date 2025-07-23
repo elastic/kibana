@@ -29,7 +29,6 @@ If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19
 
 **Alerting**:
 * Adds the ability to schedule reports on a recurring basis and view previously scheduled reports [#224849]({{kib-pull}}224849), [#221028]({{kib-pull}}221028).
-* Adds four dedicated case analytics indices that allow users to build dashboards and metrics using case data. These indices are automatically created when {{kib}} starts up and are updated periodically with cases, comments, attachments, and activity data [#223405]({{kib-pull}}223405).
 * Adds the `xpack.actions.email.services.enabled` {{kib}} setting, which allows you to enable or disable email services for email connectors [#223363]({{kib-pull}}223363).
 * Adds the `xpack.actions.webhook.ssl.pfx.enabled` {{kib}} setting, which allows you to disable Webhook connector PFX file support for SSL client authentication [#222507]({{kib-pull}}222507).
 * Adds the `xpack.actions.email.services.ses.host` {{kib}} setting, which lets you specify the SMTP endpoint for an Amazon Simple Email Service (SES) service provider that can be used by email connectors. Also adds the `xpack.actions.email.services.ses.hostport` {{kib}} setting, which allows you to specify the port number for an Amazon SES service provider that can be used by email connectors [#221389]({{kib-pull}}221389). 
