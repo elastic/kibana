@@ -36,8 +36,8 @@ export default ({ getService }: FtrProviderContext) => {
                 index: 'myfakeindex-3',
               });
 
-              logger.info('shards', searchResponse._shards);
-              logger.info('hits.total', searchResponse.hits.total);
+              // eslint-disable-next-line no-console
+              console.log('searchResponse', JSON.stringify(searchResponse, null, 2));
 
               expect(searchResponse.hits.hits).toEqual([
                 expect.objectContaining({
