@@ -121,7 +121,7 @@ export const getAlertProcessingDonutAttributes: MyGetLensAttributes = ({
                     size: 3,
                   },
                   scale: 'ordinal',
-                  sourceField: 'my_field',
+                  sourceField: 'processing_analytics_rtf',
                 },
                 count_column: {
                   dataType: 'number',
@@ -157,13 +157,13 @@ export const getAlertProcessingDonutAttributes: MyGetLensAttributes = ({
           allowHidden: false,
           allowNoIndex: false,
           fieldAttrs: {
-            my_field: {},
+            processing_analytics_rtf: {},
           },
           fieldFormats: {},
           id: 'db828b69-bb21-4b92-bc33-56e3b01da790',
           name: `.alerts-security.alerts-${spaceId}`,
           runtimeFieldMap: {
-            my_field: {
+            processing_analytics_rtf: {
               script: {
                 source: `
         if (${JSON.stringify(attackAlertIds)}.contains(doc['kibana.alert.uuid'].value)) {

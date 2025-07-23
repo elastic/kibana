@@ -9,6 +9,7 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import * as i18n from './translations';
 import { getThreatsDetectedTrendLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/threats_detected_trend';
@@ -48,6 +49,11 @@ const ThreatsDetectedTrendComponent: React.FC<Props> = ({ from, to }) => {
         timerange={{ from, to }}
         id={`${ID}-area-embeddable`}
         inspectTitle={i18n.THREATS_DETECTED}
+        withActions={[
+          VisualizationContextMenuActions.addToExistingCase,
+          VisualizationContextMenuActions.addToNewCase,
+          VisualizationContextMenuActions.inspect,
+        ]}
       />
     </div>
   );

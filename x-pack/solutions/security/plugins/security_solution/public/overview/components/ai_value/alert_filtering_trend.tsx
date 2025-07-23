@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { getAlertFilteringTrendLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_trend';
 import * as i18n from './translations';
@@ -75,6 +76,11 @@ const AlertFilteringTrendComponent: React.FC<Props> = ({
         id={`${ID}-area-embeddable`}
         inspectTitle={i18n.FILTERING_RATE}
         scopeId={SourcererScopeName.detections}
+        withActions={[
+          VisualizationContextMenuActions.addToExistingCase,
+          VisualizationContextMenuActions.addToNewCase,
+          VisualizationContextMenuActions.inspect,
+        ]}
       />
     </div>
   );

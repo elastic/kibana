@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { css } from '@emotion/react';
+import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -21,7 +23,15 @@ interface Props {
 export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to }) => {
   const spaceId = useSpaceId();
   return (
-    <>
+    <div
+      data-test-subj="hellohello"
+      css={css`
+        // hide filtering actions in the legend
+        .echLegendItem__action {
+          display: none;
+        }
+      `}
+    >
       <VisualizationEmbeddable
         applyGlobalQueriesAndFilters={false}
         getLensAttributes={(args) =>
@@ -37,7 +47,12 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
         isDonut={true}
         scopeId={SourcererScopeName.detections}
         timerange={{ from, to }}
+        withActions={[
+          VisualizationContextMenuActions.addToExistingCase,
+          VisualizationContextMenuActions.addToNewCase,
+          VisualizationContextMenuActions.inspect,
+        ]}
       />
-    </>
+    </div>
   );
 };

@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 
+import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { ChartHeight } from '../../../explore/components/stat_items/utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
@@ -53,6 +54,11 @@ const CostSavingsTrendComponent: React.FC<Props> = ({ attackAlertIds, from, to }
       width={'95%'}
       inspectTitle={'Cost Savings Trend'}
       scopeId={SourcererScopeName.detections}
+      withActions={[
+        VisualizationContextMenuActions.addToExistingCase,
+        VisualizationContextMenuActions.addToNewCase,
+        VisualizationContextMenuActions.inspect,
+      ]}
     />
   );
 };
