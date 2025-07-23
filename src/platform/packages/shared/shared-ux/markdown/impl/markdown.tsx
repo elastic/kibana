@@ -79,9 +79,9 @@ export const Markdown = ({
   const { parsingPlugins, processingPlugins, uiPlugins } = getDefaultEuiMarkdownPlugins({
     exclude: excludingPlugins,
   });
- 
+
   // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
-  processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />; //todo
+  processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />; // todo
 
   // Render EuiMarkdownFormat when readOnly set to true
   if (readOnly) {

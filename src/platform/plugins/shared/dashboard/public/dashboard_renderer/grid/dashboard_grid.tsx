@@ -295,7 +295,7 @@ const dashboardGridStyles = {
           },
           '~.kbnGridPanel--resizeHandle': {
             visibility: 'hidden',
-          }
+          },
         },
     }),
 };

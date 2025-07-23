@@ -80,9 +80,11 @@ export function initializeTrackPanel(untilLoaded: (id: string) => Promise<undefi
     scrollToBottom: () => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     },
-    setFocusedPanelId: (id: string | undefined) => {
+    setFocusedPanelId: (id: string | undefined, scrollTo = true) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);
-      setScrollToPanelId(id);
+      if (scrollTo) {
+        setScrollToPanelId(id);
+      }
     },
     setHighlightPanelId: (id: string | undefined) => {
       if (highlightPanelId$.value !== id) highlightPanelId$.next(id);

@@ -37,6 +37,7 @@ import { css } from '@emotion/react';
 import {
   apiCanLockHoverActions,
   EmbeddableApiContext,
+  overridesHoverActions,
   PublishesTitle,
   useBatchedOptionalPublishingSubjects,
   ViewMode,
@@ -110,19 +111,30 @@ const createClickHandler =
     action.execute(context);
   };
 
-  export const PresentationPanelHoverActions = (props) => {
-    console.log('TODO: make this update when focusedPanelId is a panel', props.api, props.api?.parentApi)
-    const [overrideHoverActions] = useBatchedOptionalPublishingSubjects(props.api?.overrideHoverActions$)
-
-    const CustomComponent =  props.api?.OverriddenHoverActionsComponent?.()
-  
-    if (CustomComponent){
-      return  <PresentationPanelEditActions {...props} overridenHoverActions={<CustomComponent/>}/>
-    }
-    return (
-    <InnerPresentationPanelHoverActions {...props} />
-  )
+interface HoverActionsProps {
+  api: DefaultPresentationPanelApi | null;
+  index?: number;
+  getActions: PresentationPanelInternalProps['getActions'];
+  setDragHandle: (id: string, ref: HTMLElement | null) => void;
+  actionPredicate?: (actionId: string) => boolean;
+  children: ReactElement;
+  className?: string;
+  viewMode?: ViewMode;
+  showNotifications?: boolean;
+  showBorder?: boolean;
 }
+
+export const PresentationPanelHoverActions = (props: HoverActionsProps) => {
+  const [overrideHoverActions] = useBatchedOptionalPublishingSubjects(
+    props.api?.overrideHoverActions$
+  );
+
+  if (overridesHoverActions(props.api) && overrideHoverActions) {
+    const CustomComponent = props.api?.OverriddenHoverActionsComponent;
+    return <PresentationPanelEditActions {...props} overridenHoverActions={<CustomComponent />} />;
+  }
+  return <InnerPresentationPanelHoverActions {...props} />;
+};
 
 export const InnerPresentationPanelHoverActions = ({
   api,
@@ -135,18 +147,7 @@ export const InnerPresentationPanelHoverActions = ({
   viewMode,
   showNotifications = true,
   showBorder,
-}: {
-  index?: number;
-  api: DefaultPresentationPanelApi | null;
-  getActions: PresentationPanelInternalProps['getActions'];
-  setDragHandle: (id: string, ref: HTMLElement | null) => void;
-  actionPredicate?: (actionId: string) => boolean;
-  children: ReactElement;
-  className?: string;
-  viewMode?: ViewMode;
-  showNotifications?: boolean;
-  showBorder?: boolean;
-}) => {
+}: HoverActionsProps) => {
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [showNotification, setShowNotification] = useState<boolean>(false);
@@ -155,7 +156,6 @@ export const InnerPresentationPanelHoverActions = ({
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
 
   const { euiTheme } = useEuiTheme();
-  console.log('bla')
 
   const [defaultTitle, title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
     useBatchedOptionalPublishingSubjects(

@@ -20,12 +20,9 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
-import { PresentationPanelEditActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
 import { usePanelErrorCss } from './use_panel_error_css';
-
-
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -56,7 +53,6 @@ export const PresentationPanelInternal = <
     if (apiPublishesViewMode(api)) return api.viewMode$;
     if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode$;
   }, [api]);
-
 
   const [
     dataLoading,
@@ -110,7 +106,7 @@ export const PresentationPanelInternal = <
     [setDragHandles]
   );
 
-  // const Cpmt = api.overrideHoverActions ?? 
+  // const Cpmt = api.overrideHoverActions ??
 
   return (
     <PresentationPanelHoverActions

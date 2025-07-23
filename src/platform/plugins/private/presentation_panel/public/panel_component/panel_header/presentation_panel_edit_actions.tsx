@@ -29,7 +29,6 @@ export const PresentationPanelEditActions = ({
   viewMode?: ViewMode;
   showBorder?: boolean;
 }) => {
-  console.log('PresentationPanelEditActions');
   const [defaultTitle, title] = useBatchedOptionalPublishingSubjects(
     api?.defaultTitle$,
     api?.title$
@@ -53,7 +52,7 @@ export const PresentationPanelEditActions = ({
       )}`}
       css={containerStyles}
     >
-         <div
+      <div
         className={classNames('embPanel__hoverActions')}
         css={[
           hoverActionStyles,
@@ -67,7 +66,6 @@ export const PresentationPanelEditActions = ({
         {overridenHoverActions}
       </div>
       {children}
-   
     </div>
   );
 };

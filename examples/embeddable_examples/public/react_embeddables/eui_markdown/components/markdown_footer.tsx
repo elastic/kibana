@@ -29,8 +29,17 @@ const footerStyles = {
       borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
       position: 'absolute',
       bottom: 0,
-      background: 'rgba(255, 255, 255, 0.9)',
+      '&::before': {
+        content: "''",
+        position: 'absolute',
+        background: euiTheme.colors.backgroundBasePlain,
+        opacity: 0.9,
+        inset: 0,
+      },
     }),
+    flexGroup: {
+      position: 'relative',
+    },
   previewFooter: ({ euiTheme }: UseEuiTheme) =>
     css({
       opacity: 0,
@@ -61,11 +70,14 @@ export const MarkdownFooter = ({
 }) => {
   const styles = useMemoCss(footerStyles);
   return (
+    <div 
+    css={[styles.footer, isPreview && styles.previewFooter]}
+    >
     <EuiFlexGroup
       responsive={false}
       gutterSize="xs"
       justifyContent="flexEnd"
-      css={[styles.footer, isPreview && styles.previewFooter]}
+      css={styles.flexGroup}
     >
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty color="primary" size="xs" onClick={onCancel}>
@@ -78,5 +90,6 @@ export const MarkdownFooter = ({
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
+    </div>
   );
 };

@@ -9,7 +9,12 @@
 
 import { EuiButtonGroup, EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { apiCanAddNewPanel, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import {
+  apiCanAddNewPanel,
+  apiCanFocusPanel,
+  apiIsPresentationContainer,
+  initializeUnsavedChanges,
+} from '@kbn/presentation-containers';
 import {
   StateComparators,
   WithAllKeys,
@@ -18,7 +23,6 @@ import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
@@ -40,7 +44,6 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 > = {
   type: EUI_MARKDOWN_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    console.log('buildEmbeddable', initialState, parentApi, uuid);
     /**
      * Initialize state managers.
      */
@@ -102,60 +105,59 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       ...unsavedChangesApi,
       ...titleManager.api,
       serializeState,
-      onEdit: async ({ isNewPanel } = {}) => {
+      onEdit: async ({ isNewPanel = false } = {}) => {
         overrideHoverActions$.next(true);
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
         if (isNewPanel !== isNewPanel$.getValue()) {
           isNewPanel$.next(isNewPanel);
         }
         isEditing$.next(true);
-        parentApi.focusedPanelId$.next(api.uuid);
+        if (apiCanFocusPanel(parentApi)) {
+          parentApi.setFocusedPanelId(api.uuid, false);
+        }
       },
       isEditingEnabled: () => true,
       getTypeDisplayName: () => 'Markdown',
       overrideHoverActions$,
       OverriddenHoverActionsComponent: () => {
-        if (!isEditing$.getValue()) {
-          return;
-        } else {
-          return () => {
-            const isPreview = useStateFromPublishingSubject(isPreview$);
-            const toggleButtonsCompressed = [
-              {
-                id: `edit__0`,
-                label: 'Editor',
-              },
-              {
-                id: `preview__0`,
-                label: 'Preview',
-              },
-            ];
-            return (
-              <EuiButtonGroup
-                legend="This is a basic group"
-                options={toggleButtonsCompressed}
-                idSelected={isPreview ? 'preview__0' : 'edit__0'}
-                onChange={(id) => {
-                  isPreview$.next(id === 'preview__0');
-                }}
-                buttonSize="compressed"
-                type="single"
-                css={{
-                  background: 'none',
-                  padding: 0,
-                  marginBottom: '4px',
-                  '*': {
-                    border: 'none !important',
-                  },
-                  button: {
-                    marginBottom: 0,
-                    marginTop: 0,
-                  },
-                }}
-              />
-            );
-          };
+        const [isEditing, isPreview] = useBatchedPublishingSubjects(isEditing$, isPreview$);
+        if (!isEditing) {
+          return null;
         }
+        const toggleButtonsCompressed = [
+          {
+            id: `edit__0`,
+            label: 'Editor',
+          },
+          {
+            id: `preview__0`,
+            label: 'Preview',
+          },
+        ];
+        return (
+          <EuiButtonGroup
+            legend="This is a basic group"
+            options={toggleButtonsCompressed}
+            idSelected={isPreview ? 'preview__0' : 'edit__0'}
+            onChange={(id) => {
+              isPreview$.next(id === 'preview__0');
+            }}
+            buttonSize="compressed"
+            type="single"
+            css={{
+              background: 'none',
+              padding: 0,
+              marginBottom: '4px',
+              '*': {
+                border: 'none !important',
+              },
+              button: {
+                marginBottom: 0,
+                marginTop: 0,
+              },
+            }}
+          />
+        );
       },
     });
 
@@ -183,30 +185,31 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           );
         }
 
+        const resetEditingState = () => {
+          isEditing$.next(false);
+          isPreview$.next(false);
+          if (apiCanFocusPanel(parentApi)) {
+            parentApi.setFocusedPanelId();
+          }
+          overrideHoverActions$.next(false);
+        };
+
         return (
           <MarkdownEditor
             processingPluginList={processingPluginList}
             content={content ?? ''}
             onCancel={() => {
-              isEditing$.next(false);
-              isPreview$.next(false);
-              parentApi.focusedPanelId$.next();
-              console.log('WHAAAT', isNewPanel$.getValue());
-              if (isNewPanel$.getValue() === true) {
-                // remove the embeddable
+              if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
                 parentApi.removePanel(api.uuid);
               }
-              overrideHoverActions$.next(false);
+              resetEditingState();
             }}
             onSave={(value: string) => {
               markdownStateManager.api.setContent(value);
-              isEditing$.next(false);
-              isPreview$.next(false);
-              if (isNewPanel$.getValue() === true) {
+              if (isNewPanel$.getValue()) {
                 isNewPanel$.next(false);
               }
-              parentApi.focusedPanelId$.next();
-              overrideHoverActions$.next(false);
+              resetEditingState();
             }}
             isPreview$={isPreview$}
           />

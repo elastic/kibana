@@ -46,6 +46,8 @@ const dashboardMarkdownEditorAriaLabel = () =>
     defaultMessage: 'Dashboard markdown editor',
   });
 
+
+
 export const MarkdownEditor = ({
   processingPluginList,
   content,
@@ -100,7 +102,7 @@ export const MarkdownEditor = ({
       if (caretPosRef.current === null) {
         // Find index of first newline
         const newlineIndex = textarea.value.indexOf('\n');
-        const firstLineEnd = newlineIndex === -1 ? value.length : newlineIndex;
+        const firstLineEnd = newlineIndex === -1 ? textarea.value.length : newlineIndex;
         textarea.setSelectionRange(firstLineEnd, firstLineEnd);
       } else {
         textarea.setSelectionRange(caretPosRef.current, caretPosRef.current);

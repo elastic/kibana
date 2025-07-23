@@ -63,6 +63,10 @@ export {
 } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
+  overridesHoverActions,
+  type OverridesHoverActions,
+} from './interfaces/overrides_hover_actions';
+export {
   hasReadOnlyCapabilities,
   type HasReadOnlyCapabilities,
 } from './interfaces/has_read_only_capabilities';
