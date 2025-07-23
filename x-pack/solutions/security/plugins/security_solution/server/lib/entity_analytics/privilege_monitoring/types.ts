@@ -6,6 +6,7 @@
  */
 
 export type PrivMonUserSource = 'csv' | 'api' | 'index_sync';
+export type SyncIntervalConfig = EntityAnalyticsConfig['monitoring']['privileges']['syncInterval'];
 
 export interface PrivMonBulkUser {
   username: string;

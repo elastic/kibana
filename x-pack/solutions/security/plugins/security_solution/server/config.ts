@@ -184,6 +184,9 @@ export const configSchema = schema.object({
     }),
     monitoring: schema.object({
       privileges: schema.object({
+        developer: schema.object({
+          syncInterval: schema.number({ defaultValue: 600 }), // 10 minutes in seconds
+        }),
         users: schema.object({
           csvUpload: schema.object({
             errorRetries: schema.number({ defaultValue: 1 }),
