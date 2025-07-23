@@ -356,7 +356,7 @@ describe('Fleet cloud preconfiguration', () => {
                 preset: 'balanced',
               },
             },
-            revision: 5,
+            revision: 3,
             secret_references: [],
             signed: data.signed,
           })
