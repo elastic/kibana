@@ -35,7 +35,7 @@ import { expectRulesInTable, goToRuleDetailsOf } from '../../../../tasks/alerts_
 
 describe(
   'Detection rules, Prebuilt Rules Upgrade With Preview (Basic License)',
-  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+  { tags: ['@ess'] },
   () => {
     before(() => {
       installMockPrebuiltRulesPackage();
