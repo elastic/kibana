@@ -62,10 +62,6 @@ const aiTitle = i18n.translate('management.sections.aiTitle', {
   defaultMessage: 'AI',
 });
 
-const aiTip = i18n.translate('management.sections.aiTip', {
-  defaultMessage: 'TODO: 👀',
-});
-
 const stackTitle = i18n.translate('management.sections.stackTitle', {
   defaultMessage: 'Stack',
 });
@@ -119,7 +115,6 @@ export const KibanaSection = {
 export const AISection = {
   id: ManagementSectionId.AI,
   title: aiTitle,
-  tip: aiTip,
   order: 4,
 };
 
