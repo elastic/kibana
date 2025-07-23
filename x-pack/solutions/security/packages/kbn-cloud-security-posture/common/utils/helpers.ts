@@ -21,7 +21,7 @@ interface BuildEntityAlertsQueryParams {
 }
 
 export const defaultErrorMessage = i18n.translate(
-  'sharedPlatformPackages.csp.common.utils.helpers.unknownError',
+  'securitySolutionPackages.csp.common.utils.helpers.unknownError',
   {
     defaultMessage: 'Unknown Error',
   }
