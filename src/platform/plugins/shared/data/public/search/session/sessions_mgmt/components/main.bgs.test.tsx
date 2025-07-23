@@ -46,7 +46,6 @@ const setup = async () => {
   const sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-    locators: mockShareStart.url.locators,
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
   });
@@ -71,6 +70,7 @@ const setup = async () => {
           config={mockConfig}
           kibanaVersion={'8.0.0'}
           searchUsageCollector={mockSearchUsageCollector}
+          share={mockShareStart}
         />
       </LocaleWrapper>
     );

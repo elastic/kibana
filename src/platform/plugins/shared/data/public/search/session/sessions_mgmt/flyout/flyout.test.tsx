@@ -40,7 +40,6 @@ const setup = () => {
     http: mockCoreSetup.http,
   });
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-    locators: mockShareStart.url.locators,
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
   });
@@ -56,6 +55,7 @@ const setup = () => {
         config={mockConfig}
         coreStart={mockCoreStart}
         kibanaVersion={kibanaVersion}
+        locators={mockShareStart.url.locators}
         usageCollector={mockSearchUsageCollector}
       />
     </IntlProvider>
