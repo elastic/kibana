@@ -148,9 +148,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   // We are going to change it to `info` in the future. This change doesn't affect Test Servers logging.
   const logsLevel = pickLevelFromFlags(globalFlags, { default: 'debug' });
 
-  const pwScriptPath = resolve(REPO_ROOT, './scripts/playwright');
+  const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
-    pwScriptPath,
     'test',
     `--config=${pwConfigPath}`,
     `--grep=${pwGrepTag}`,
@@ -158,21 +157,19 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     ...(options.headed ? ['--headed'] : []),
   ];
 
-  log.info(`Running Playwright command: node ${pwCmdArgs.join(' ')}`);
-
   await withProcRunner(log, async (procs) => {
-    const exitCode = await hasTestsInPlaywrightConfig(log, 'node', pwCmdArgs, pwConfigPath);
+    const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
 
     if (exitCode !== 0) {
       process.exit(exitCode);
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwScriptPath, pwCmdArgs, {
+      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, {
         SCOUT_LOG_LEVEL: logsLevel,
       });
     } else {
-      await runPlaywrightTest(procs, pwScriptPath, pwCmdArgs, {
+      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, {
         SCOUT_LOG_LEVEL: logsLevel,
       });
     }
