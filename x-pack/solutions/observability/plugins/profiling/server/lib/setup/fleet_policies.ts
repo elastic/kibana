@@ -68,7 +68,7 @@ export async function createCollectorPackagePolicy({
     enabled: true,
     package: {
       name: packageName,
-      title: 'Universal Profiling Collector',
+      title: 'Universal profiling Collector',
       version,
     },
     name: COLLECTOR_PACKAGE_POLICY_NAME,
@@ -104,7 +104,7 @@ export async function createSymbolizerPackagePolicy({
     enabled: true,
     package: {
       name: packageName,
-      title: 'Universal Profiling Symbolizer',
+      title: 'Universal profiling Symbolizer',
       version,
     },
     name: SYMBOLIZER_PACKAGE_POLICY_NAME,

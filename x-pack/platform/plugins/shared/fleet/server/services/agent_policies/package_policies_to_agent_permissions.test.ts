@@ -144,7 +144,7 @@ packageInfoCache.set('osquery_manager-0.3.0', {
 packageInfoCache.set('profiler_symbolizer-8.8.0-preview', {
   format_version: '2.7.0',
   name: 'profiler_symbolizer',
-  title: 'Universal Profiling Symbolizer',
+  title: 'Universal profiling Symbolizer',
   version: '8.8.0-preview',
   license: 'basic',
   description:
@@ -195,7 +195,7 @@ packageInfoCache.set('profiler_symbolizer-8.8.0-preview', {
 packageInfoCache.set('profiler_collector-8.9.0-preview', {
   format_version: '2.7.0',
   name: 'profiler_collector',
-  title: 'Universal Profiling Collector',
+  title: 'Universal profiling Collector',
   version: '8.9.0-preview',
   license: 'basic',
   description:
@@ -626,7 +626,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
-  it('Returns the Universal Profiling permissions for profiler_symbolizer package', async () => {
+  it('Returns the Universal profiling permissions for profiler_symbolizer package', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-uuid-test-123',
@@ -668,7 +668,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     });
   });
-  it('Returns the Universal Profiling permissions for profiler_collector package', async () => {
+  it('Returns the Universal profiling permissions for profiler_collector package', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-uuid-test-123',

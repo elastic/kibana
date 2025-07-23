@@ -172,7 +172,7 @@ const profilingStatusRoute = createApmServerRoute({
         return { initialized: response.has_setup };
       } catch (e) {
         // If any error happens just return as if profiling has not been initialized
-        logger.warn('Could not check Universal Profiling status');
+        logger.warn('Could not check Universal profiling status');
       }
     }
 

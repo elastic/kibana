@@ -32,7 +32,7 @@ export function ProfilingAppPageTemplate({
   noDataConfig,
   restrictWidth = false,
   pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
-    defaultMessage: 'Universal Profiling',
+    defaultMessage: 'Universal profiling',
   }),
   showBetaBadge = false,
 }: {
@@ -129,7 +129,7 @@ export function ProfilingAppPageTemplate({
               <p>
                 {i18n.translate('xpack.profiling.privilegesWarningDescription', {
                   defaultMessage:
-                    'Due to privileges issues we could not check the Universal Profiling status. If you encounter any issues or if data fails to load, please contact your administrator for assistance.',
+                    'Due to privileges issues we could not check the Universal profiling status. If you encounter any issues or if data fails to load, please contact your administrator for assistance.',
                 })}
               </p>
               <EuiButton

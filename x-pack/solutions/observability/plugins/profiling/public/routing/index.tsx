@@ -41,7 +41,7 @@ const routes = {
     element: (
       <RouteBreadcrumb
         title={i18n.translate('xpack.profiling.breadcrumb.profiling', {
-          defaultMessage: 'Universal Profiling',
+          defaultMessage: 'Universal profiling',
         })}
         href="/"
       >

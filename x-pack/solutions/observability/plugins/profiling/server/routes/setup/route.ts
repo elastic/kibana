@@ -109,14 +109,14 @@ export function registerSetupRoute({
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
         if (isCloudEnabled && type === 'cloud') {
           if (!dependencies.start.fleet) {
-            const msg = `Elastic Fleet is required to set up Universal Profiling on Cloud`;
+            const msg = `Elastic Fleet is required to set up Universal profiling on Cloud`;
             logger.error(msg);
             return response.custom({
               statusCode: 500,
               body: { message: msg },
             });
           }
-          logger.debug('Setting up Universal Profiling on Cloud');
+          logger.debug('Setting up Universal profiling on Cloud');
 
           await setupCloud({
             setupState,
@@ -128,16 +128,16 @@ export function registerSetupRoute({
             },
           });
 
-          logger.debug('[DONE] Setting up Universal Profiling on Cloud');
+          logger.debug('[DONE] Setting up Universal profiling on Cloud');
         } else {
-          logger.debug('Setting up self-managed Universal Profiling');
+          logger.debug('Setting up self-managed Universal profiling');
 
           await setupSelfManaged({
             setupState,
             setupParams: commonSetupParams,
           });
 
-          logger.debug('[DONE] Setting up self-managed Universal Profiling');
+          logger.debug('[DONE] Setting up self-managed Universal profiling');
         }
 
         // Wait until Profiling ES plugin creates all resources
@@ -165,12 +165,12 @@ export function registerSetupRoute({
           error,
           logger,
           response,
-          message: 'Error while setting up Universal Profiling',
+          message: 'Error while setting up Universal profiling',
         });
       }
     }
   );
-  // Show users the instructions on how to set up Universal Profiling agents
+  // Show users the instructions on how to set up Universal profiling agents
   router.get(
     {
       path: paths.SetupDataCollectionInstructions,
@@ -187,7 +187,7 @@ export function registerSetupRoute({
         const isCloudEnabled = dependencies.setup.cloud?.isCloudEnabled;
         if (isCloudEnabled) {
           if (!dependencies.start.fleet) {
-            const msg = `Elastic Fleet is required to set up Universal Profiling on Cloud`;
+            const msg = `Elastic Fleet is required to set up Universal profiling on Cloud`;
             logger.error(msg);
             return response.custom({
               statusCode: 500,
@@ -212,7 +212,7 @@ export function registerSetupRoute({
           error,
           logger,
           response,
-          message: 'Error while fetching Universal Profiling instructions',
+          message: 'Error while fetching Universal profiling instructions',
         });
       }
     }

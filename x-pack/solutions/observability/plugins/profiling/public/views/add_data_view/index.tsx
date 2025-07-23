@@ -93,7 +93,7 @@ export function AddDataView() {
         steps: [
           {
             title: i18n.translate('xpack.profiling.tabs.kubernetesRepositoryStep', {
-              defaultMessage: 'Configure the Universal Profiling Agent Helm repository:',
+              defaultMessage: 'Configure the Universal profiling Agent Helm repository:',
             }),
             content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
@@ -146,7 +146,7 @@ elastic/profiling-agent`}
         steps: [
           {
             title: i18n.translate('xpack.profiling.tabs.dockerRunContainerStep', {
-              defaultMessage: 'Run the Universal Profiling container:',
+              defaultMessage: 'Run the Universal profiling container:',
             }),
             content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
@@ -194,7 +194,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
               {
                 title: i18n.translate('xpack.profiling.tabs.binaryRunHostAgentStep', {
                   defaultMessage:
-                    'Run the Universal Profiling host-agent (requires root privileges):',
+                    'Run the Universal profiling host-agent (requires root privileges):',
                 }),
                 content: (
                   <EuiCodeBlock paddingSize="s" isCopyable>
@@ -248,7 +248,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
           {
             title: i18n.translate('xpack.profiling.tabs.debStartSystemdServiceStep', {
               defaultMessage:
-                'Start the Universal Profiling systemd service (requires root privileges):',
+                'Start the Universal profiling systemd service (requires root privileges):',
             }),
             content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
@@ -307,7 +307,7 @@ EOF`}
           {
             title: i18n.translate('xpack.profiling.tabs.rpmStartSystemdServiceStep', {
               defaultMessage:
-                'Start the Universal Profiling systemd service (requires root privileges):',
+                'Start the Universal profiling systemd service (requires root privileges):',
             }),
             content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
@@ -332,7 +332,7 @@ EOF`}
                 <EuiText>
                   {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1.hint', {
                     defaultMessage:
-                      "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
+                      "You'll need these credentials to set up Universal profiling. Please save them in a secure location, as they will be required in the subsequent step.",
                   })}
                 </EuiText>
                 <EuiSpacer />
@@ -351,7 +351,7 @@ EOF`}
                 <EuiText style={{ fontWeight: 'bold' }} size="s">
                   {i18n.translate(
                     'xpack.profiling.tabs.elasticAgentIntegration.step1.collectionAgentUrl',
-                    { defaultMessage: 'Universal Profiling Collector URL:' }
+                    { defaultMessage: 'Universal profiling Collector URL:' }
                   )}
                 </EuiText>
                 <EuiCodeBlock paddingSize="s" isCopyable>
@@ -374,7 +374,7 @@ EOF`}
                 )}`}
               >
                 {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step2.button', {
-                  defaultMessage: 'Manage Universal Profiling agent in Fleet',
+                  defaultMessage: 'Manage Universal profiling agent in Fleet',
                 })}
               </EuiButton>
             ),
@@ -542,7 +542,7 @@ EOF`}
             title={
               <FormattedMessage
                 id="xpack.profiling.tabs.debWarning"
-                defaultMessage="Due to a {linuxLink} bug which impacts stability, the Universal Profiling agent will not run on unpatched kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running an affected kernel, the Universal Profiling agent dynamically checks for the patch. Refer to {advancedLink} for instructions on overriding this check."
+                defaultMessage="Due to a {linuxLink} bug which impacts stability, the Universal profiling agent will not run on unpatched kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running an affected kernel, the Universal profiling agent dynamically checks for the patch. Refer to {advancedLink} for instructions on overriding this check."
                 values={{
                   versionFrom: (
                     <strong>
@@ -609,7 +609,7 @@ EOF`}
           <EuiSpacer />
           <EuiText>
             {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
-              defaultMessage: 'Select an option below to deploy the Universal Profiling Agent.',
+              defaultMessage: 'Select an option below to deploy the Universal profiling Agent.',
             })}
           </EuiText>
           <EuiSpacer />

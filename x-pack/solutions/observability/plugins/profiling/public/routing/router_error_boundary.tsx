@@ -38,7 +38,7 @@ class ErrorBoundary extends React.Component<{ children?: React.ReactNode }, { er
 
 const pageHeader = {
   pageTitle: i18n.translate('xpack.profiling.universalProfiling', {
-    defaultMessage: 'Universal Profiling',
+    defaultMessage: 'Universal profiling',
   }),
 };
 

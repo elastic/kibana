@@ -35,7 +35,7 @@ export function Functions({ kuery }: Props) {
 
   const profilingLinkLocator = services.observabilityShared.locators.profiling.topNFunctionsLocator;
   const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppTopFunctionsLink', {
-    defaultMessage: 'Go to Universal Profiling Functions',
+    defaultMessage: 'Go to Universal profiling Functions',
   });
   const showFullScreenSelector = renderMode.mode === 'page';
 

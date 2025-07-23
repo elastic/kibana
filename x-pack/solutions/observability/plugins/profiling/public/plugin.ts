@@ -81,7 +81,7 @@ export class ProfilingPlugin
             const sections: NavigationSection[] = [
               {
                 label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
-                  defaultMessage: 'Universal Profiling',
+                  defaultMessage: 'Universal profiling',
                 }),
                 entries: links.map((link) => {
                   return {
@@ -117,7 +117,7 @@ export class ProfilingPlugin
 
     coreSetup.application.register({
       id: OBLT_PROFILING_APP_ID,
-      title: 'Universal Profiling',
+      title: 'Universal profiling',
       euiIconType: 'logoObservability',
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,

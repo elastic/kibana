@@ -335,7 +335,7 @@ $$$observability-default-service-env$$$`observability:apmDefaultServiceEnvironme
 :   Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
 
 $$$observability-profiling-show-error-frames$$$`observability:profilingShowErrorFrames`
-:   Show error frames in the Universal Profiling views to indicate stack unwinding failures.
+:   Show error frames in the Universal profiling views to indicate stack unwinding failures.
 
 $$$observability-apm-enable-table-search-bar$$$`observability:apmEnableTableSearchBar`
 :   [beta] Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
@@ -350,7 +350,7 @@ $$$observability-apm-enable-infra-view$$$`observability:enableInfrastructureView
 :   Enables the Infrastructure view in the APM app.
 
 $$$observability-apm-enable-transaction-profiling$$$`observability:apmEnableTransactionProfiling`
-:   Enable Universal Profiling on Transaction view.
+:   Enable Universal profiling on Transaction view.
 
 $$$observability-enable-inspect-es-queries$$$`observability:enableInspectEsQueries`
 :   When enabled, allows you to inspect {{es}} queries in API responses.

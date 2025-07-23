@@ -108,13 +108,13 @@ export function Settings() {
             description: {
               title: i18n.translate('xpack.profiling.settings.co2.title', {
                 defaultMessage:
-                  'The Universal Profiling host agent can detect if your machine is running on AWS, Azure, or Google Cloud Platform.',
+                  'The Universal profiling host agent can detect if your machine is running on AWS, Azure, or Google Cloud Platform.',
               }),
               subtitle: (
                 <>
                   <FormattedMessage
                     id="xpack.profiling.settings.co2.aws.subtitle"
-                    defaultMessage="For machines running on AWS, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's AWS region and the current AWS data center {pue}."
+                    defaultMessage="For machines running on AWS, Universal profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's AWS region and the current AWS data center {pue}."
                     values={{
                       regionalCarbonIntensityLink: (
                         <EuiLink
@@ -139,7 +139,7 @@ export function Settings() {
                   <EuiSpacer size="xs" />
                   <FormattedMessage
                     id="xpack.profiling.settings.co2.azure.subtitle"
-                    defaultMessage="For machines running on Azure, Universal Profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's Azure region and the current Azure data center {pue}."
+                    defaultMessage="For machines running on Azure, Universal profiling applies the appropriate {regionalCarbonIntensityLink} for your instance's Azure region and the current Azure data center {pue}."
                     values={{
                       regionalCarbonIntensityLink: (
                         <EuiLink
@@ -165,7 +165,7 @@ export function Settings() {
               ),
               text: i18n.translate('xpack.profiling.settings.co2.text', {
                 defaultMessage:
-                  'For all other configurations, Universal Profiling uses the following default configurations. You can update these configurations as needed.',
+                  'For all other configurations, Universal profiling uses the following default configurations. You can update these configurations as needed.',
               }),
             },
             settings: co2Settings,
@@ -178,7 +178,7 @@ export function Settings() {
               title: (
                 <FormattedMessage
                   id="xpack.profiling.settings.cost.title"
-                  defaultMessage="Universal Profiling uses the cost for AWS EC2 instances and Azure VMs using the {awsPriceList} and {azurePriceList} respectively."
+                  defaultMessage="Universal profiling uses the cost for AWS EC2 instances and Azure VMs using the {awsPriceList} and {azurePriceList} respectively."
                   values={{
                     awsPriceList: (
                       <EuiLink
@@ -216,7 +216,7 @@ export function Settings() {
               title: (
                 <FormattedMessage
                   id="xpack.profiling.settings.misc.title"
-                  defaultMessage="Universal Profiling miscellaneous settings."
+                  defaultMessage="Universal profiling miscellaneous settings."
                 />
               ),
             },

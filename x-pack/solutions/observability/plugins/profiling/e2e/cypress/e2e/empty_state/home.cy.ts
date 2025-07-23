@@ -20,8 +20,8 @@ describe('Home page with empty state', () => {
     }).as('getEsResources');
     cy.visitKibana('/app/profiling');
     cy.wait('@getEsResources');
-    cy.contains('Universal Profiling');
-    cy.contains('Set up Universal Profiling');
+    cy.contains('Universal profiling');
+    cy.contains('Set up Universal profiling');
   });
 
   it('shows Add data page after Profiling has been set up', () => {
@@ -95,7 +95,7 @@ describe('Home page with empty state', () => {
     }).as('getEsResources');
     cy.visitKibana('/app/profiling');
     cy.wait('@getEsResources');
-    cy.contains('Set up Universal Profiling').should('be.disabled');
+    cy.contains('Set up Universal profiling').should('be.disabled');
   });
 
   it('shows emabled button for users without privileges', () => {
@@ -109,6 +109,6 @@ describe('Home page with empty state', () => {
     }).as('getEsResources');
     cy.visitKibana('/app/profiling');
     cy.wait('@getEsResources');
-    cy.contains('Set up Universal Profiling').should('not.be.disabled');
+    cy.contains('Set up Universal profiling').should('not.be.disabled');
   });
 });

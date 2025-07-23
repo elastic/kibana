@@ -38,7 +38,7 @@ export async function getSetupState({
   const isCloudEnabled = deps.cloud?.isCloudEnabled;
   if (isCloudEnabled) {
     if (!deps.fleet) {
-      throw new Error('Elastic Fleet is required to set up Universal Profiling on Cloud');
+      throw new Error('Elastic Fleet is required to set up Universal profiling on Cloud');
     }
 
     const setupState = await cloudSetupState({

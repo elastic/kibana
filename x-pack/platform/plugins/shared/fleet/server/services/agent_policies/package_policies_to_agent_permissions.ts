@@ -87,7 +87,7 @@ export function storedPackagePoliciesToAgentPermissions(
 
     const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
 
-    // Special handling for Universal Profiling packages, as it does not use data streams _only_,
+    // Special handling for Universal profiling packages, as it does not use data streams _only_,
     // but also indices that do not adhere to the convention.
     if (
       pkg.name === FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE ||

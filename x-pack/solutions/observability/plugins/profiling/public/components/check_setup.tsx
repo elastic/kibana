@@ -100,7 +100,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           docsLink: `${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-get-started.html`,
           logo: 'logoObservability',
           pageTitle: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
-            defaultMessage: 'Universal Profiling',
+            defaultMessage: 'Universal profiling',
           }),
           action: {
             elasticAgent: {
@@ -108,7 +108,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                 <EuiFlexGrid gutterSize="s">
                   <EuiText>
                     {i18n.translate('xpack.profiling.noDataConfig.action.title', {
-                      defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
+                      defaultMessage: `Universal profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
                 Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.`,
                     })}
                   </EuiText>
@@ -119,7 +119,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                       'xpack.profiling.noDataConfig.action.permissionsWarning',
                       {
                         defaultMessage:
-                          'To setup Universal Profiling, you must be logged in as a superuser.',
+                          'To setup Universal profiling, you must be logged in as a superuser.',
                       }
                     )}
                   />
@@ -195,10 +195,10 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                   >
                     {!postSetupLoading
                       ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
-                          defaultMessage: 'Set up Universal Profiling',
+                          defaultMessage: 'Set up Universal profiling',
                         })
                       : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
-                          defaultMessage: 'Setting up Universal Profiling...',
+                          defaultMessage: 'Setting up Universal profiling...',
                         })}
                   </EuiButton>
                 </EuiToolTip>
@@ -206,7 +206,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
             },
           },
           solution: i18n.translate('xpack.profiling.noDataConfig.solutionName', {
-            defaultMessage: 'Universal Profiling',
+            defaultMessage: 'Universal profiling',
           }),
         }}
         hideSearchBar

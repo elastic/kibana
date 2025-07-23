@@ -40,7 +40,7 @@ describe('Settings page', () => {
     cy.contains('AWS EDP discount rate (%)');
     cy.contains('Cost per vCPU per hour ($)');
     cy.contains('Azure discount rate (%)');
-    cy.contains('Show error frames in the Universal Profiling views');
+    cy.contains('Show error frames in the Universal profiling views');
   });
 
   it('updates values', () => {

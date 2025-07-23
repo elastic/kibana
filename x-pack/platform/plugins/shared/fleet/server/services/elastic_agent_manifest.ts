@@ -74,9 +74,9 @@ spec:
               value: "false"
           securityContext:
             runAsUser: 0
-            # The following capabilities are needed for Universal Profiling.
+            # The following capabilities are needed for Universal profiling.
             # More fine graded capabilities are only available for newer Linux kernels.
-            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+            # If you are using the Universal profiling integration, please uncomment these lines before applying.
             #procMount: "Unmasked"
             #privileged: true
             #capabilities:
@@ -144,7 +144,7 @@ spec:
         - name: var-lib
           hostPath:
             path: /var/lib
-        # Needed for Universal Profiling
+        # Needed for Universal profiling
         # If you are not using this integration, then these volumes and the corresponding
         # mounts can be removed.
         - name: sys-kernel-debug
@@ -379,9 +379,9 @@ spec:
               value: "false"
           securityContext:
             runAsUser: 0
-            # The following capabilities are needed for Universal Profiling.
+            # The following capabilities are needed for Universal profiling.
             # More fine graded capabilities are only available for newer Linux kernels.
-            # If you are using the Universal Profiling integration, please uncomment these lines before applying.
+            # If you are using the Universal profiling integration, please uncomment these lines before applying.
             #procMount: "Unmasked"
             #privileged: true
             #capabilities:
@@ -447,7 +447,7 @@ spec:
           hostPath:
             path: /etc/machine-id
             type: File
-        # Needed for Universal Profiling
+        # Needed for Universal profiling
         # If you are not using this integration, then these volumes and the corresponding
         # mounts can be removed.
         - name: sys-kernel-debug
