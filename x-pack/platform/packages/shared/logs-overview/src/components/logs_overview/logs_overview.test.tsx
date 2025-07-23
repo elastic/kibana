@@ -16,6 +16,7 @@ import { logsDataAccessPluginMock } from '@kbn/logs-data-access-plugin/public/mo
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { type LogCategoriesDependencies } from '../log_categories';
 import { type LogEventsDependencies } from '../log_events';
@@ -104,6 +105,24 @@ describe('LogsOverview', () => {
       );
 
       expect(await findByTestId('logsOverviewGroupingSelector')).toBeInTheDocument();
+    });
+
+    it('allows switching to the pattern view and back', async () => {
+      const { findByTestId } = renderWithKibanaRenderContext(
+        <LogsOverview {...defaultProps} featureFlags={{ isPatternsEnabled: true }} />
+      );
+
+      // Select the pattern view option
+      await userEvent.click(await findByTestId('logsOverviewGroupingSelector'));
+      await userEvent.click(await findByTestId('logsOverviewGroupingSelectorCategories'));
+
+      expect(await findByTestId('logsOverviewLogCategories')).toBeInTheDocument();
+
+      // Switch back to the log events view
+      await userEvent.click(await findByTestId('logsOverviewGroupingSelector'));
+      await userEvent.click(await findByTestId('logsOverviewGroupingSelectorNone'));
+
+      expect(await findByTestId('embeddedSavedSearchMock')).toBeInTheDocument();
     });
   });
 

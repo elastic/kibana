@@ -178,7 +178,12 @@ export const LogCategoriesContent = React.memo<LogCategoriesContentProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="m" style={{ height }}>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        style={{ height }}
+        data-test-subj="logsOverviewLogCategories"
+      >
         <EuiFlexItem grow={false}>
           <LogCategoriesControlBar
             dependencies={dependencies}
