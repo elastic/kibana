@@ -83,7 +83,13 @@ export const MarkdownFooter = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size={'xs' as 's'} iconType={'check'} color="primary" fill onClick={onSave}>
+          <EuiButton
+            size={'xs' as 's'}
+            color="primary"
+            fill
+            onClick={onSave}
+            css={css({ minInlineSize: 'initial' })}
+          >
             {markdownFooterStrings.applyButton}
           </EuiButton>
         </EuiFlexItem>
