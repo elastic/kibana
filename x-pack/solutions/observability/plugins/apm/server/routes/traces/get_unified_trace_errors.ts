@@ -7,14 +7,13 @@
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { existsQuery, termQuery } from '@kbn/observability-plugin/server';
+import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
   SPAN_ID,
   TRACE_ID,
   OTEL_EVENT_NAME,
-  AT_TIMESTAMP,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getApmTraceError } from './get_trace_items';
@@ -67,10 +66,7 @@ async function getUnprocessedOtelErrors({
   const response = await logsClient.search({
     query: {
       bool: {
-        filter: [
-          { range: { [AT_TIMESTAMP]: { gte: start, lte: end } } },
-          { term: { [TRACE_ID]: traceId } },
-        ],
+        filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
         should: [
           ...termQuery(OTEL_EVENT_NAME, 'exception'),
           ...existsQuery(EXCEPTION_TYPE),
