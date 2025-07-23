@@ -29,6 +29,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_GROUP,
+  ALERT_GROUPING,
   ALERT_REASON,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -346,6 +347,10 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'foo' } },
+            client: { geo: { continent_name: 'asia' } },
+          },
         },
         {
           instanceId: 'bar,asia',
@@ -353,6 +358,10 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'bar' } },
+            client: { geo: { continent_name: 'asia' } },
+          },
         },
       ];
       esClientMock.search.mockResolvedValueOnce(
@@ -410,6 +419,10 @@ describe('BurnRateRuleExecutor', () => {
               value: 'asia',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'foo' } },
+            client: { geo: { continent_name: 'asia' } },
+          },
           'client.geo.continent_name': 'asia',
         },
       });
@@ -437,6 +450,10 @@ describe('BurnRateRuleExecutor', () => {
               value: 'asia',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'bar' } },
+            client: { geo: { continent_name: 'asia' } },
+          },
           'client.geo.continent_name': 'asia',
         },
       });
@@ -466,7 +483,10 @@ describe('BurnRateRuleExecutor', () => {
     });
 
     it('schedules a suppressed alert when both windows of first window definition burn rate have reached the threshold but the dependency matches', async () => {
-      const slo = createSLO({ objective: { target: 0.9 }, groupBy: ['group.by.field'] });
+      const slo = createSLO({
+        objective: { target: 0.9 },
+        groupBy: ['group.by.field'],
+      });
       const dependencyRuleParams = someRuleParamsWithWindows({ sloId: slo.id });
       const ruleParams = someRuleParamsWithWindows({
         sloId: slo.id,
@@ -480,6 +500,9 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 2.1, longWindowBurnRate: 2.3 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'foo' } },
+          },
         },
         {
           instanceId: 'bar',
@@ -487,6 +510,9 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 2.2, longWindowBurnRate: 2.5 },
             { shortWindowBurnRate: 0.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'bar' } },
+          },
         },
       ];
       esClientMock.search.mockResolvedValueOnce(
@@ -554,6 +580,9 @@ describe('BurnRateRuleExecutor', () => {
               value: 'foo',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'foo' } },
+          },
         },
       });
       expect(servicesMock.alertsClient?.report).toBeCalledWith({
@@ -576,6 +605,9 @@ describe('BurnRateRuleExecutor', () => {
               value: 'bar',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'bar' } },
+          },
         },
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(1, {
@@ -587,6 +619,9 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-foo',
+          grouping: {
+            group: { by: { field: 'foo' } },
+          },
         }),
       });
       expect(servicesMock.alertsClient?.setAlertData).toHaveBeenNthCalledWith(2, {
@@ -598,6 +633,9 @@ describe('BurnRateRuleExecutor', () => {
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
           alertDetailsUrl: 'https://kibana.dev/s/irrelevant/app/observability/alerts/uuid-bar',
+          grouping: {
+            group: { by: { field: 'bar' } },
+          },
         }),
       });
     });
@@ -613,6 +651,9 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 1.0, longWindowBurnRate: 2.0 },
             { shortWindowBurnRate: 1.9, longWindowBurnRate: 1.2 },
           ],
+          groupings: {
+            group: { by: { field: 'foo' } },
+          },
         },
         {
           instanceId: 'bar',
@@ -620,6 +661,9 @@ describe('BurnRateRuleExecutor', () => {
             { shortWindowBurnRate: 1.0, longWindowBurnRate: 2.0 },
             { shortWindowBurnRate: 1.5, longWindowBurnRate: 1.1 },
           ],
+          groupings: {
+            group: { by: { field: 'bar' } },
+          },
         },
       ];
       esClientMock.search.mockResolvedValueOnce(
@@ -675,6 +719,9 @@ describe('BurnRateRuleExecutor', () => {
               value: 'foo',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'foo' } },
+          },
         },
       });
       expect(servicesMock.alertsClient!.report).toBeCalledWith({
@@ -697,6 +744,9 @@ describe('BurnRateRuleExecutor', () => {
               value: 'bar',
             },
           ],
+          [ALERT_GROUPING]: {
+            group: { by: { field: 'bar' } },
+          },
         },
       });
 
@@ -770,6 +820,7 @@ interface ResponseBucket {
     shortWindowBurnRate: number;
     longWindowBurnRate: number;
   }>;
+  groupings?: Record<string, unknown> | undefined;
 }
 
 interface AfterKey {
@@ -818,7 +869,20 @@ function generateEsResponse(
               {
                 key: { instanceId: bucket.instanceId },
                 doc_count: 100,
-              } as EvaluationBucket
+                groupings: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          slo: {
+                            groupings: bucket.groupings,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              } as unknown as EvaluationBucket
             );
           })
           .filter((bucket: any) =>
