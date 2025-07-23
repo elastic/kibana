@@ -7,180 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniq } from 'lodash';
 import { createEsqlDataSource } from '../../../common/data_sources';
-import { FEATURE_ID_1, FEATURE_ID_2, createContextAwarenessMocks } from '../__mocks__';
+import { createContextAwarenessMocks } from '../__mocks__';
 import { createExampleRootProfileProvider } from './example/example_root_profile';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
-import {
-  registerProfileProviders,
-  registerEnabledProfileProviders,
-} from './register_profile_providers';
-import type { CellRenderersExtensionParams } from '../types';
+import { registerProfileProviders } from './register_profile_providers';
+import type { BaseProfileProvider } from '../profile_service';
+
+let mockAllCollectedProfileIds: string[] = [];
+
+jest.mock('./register_enabled_profile_providers', () => {
+  const real = jest.requireActual('./register_enabled_profile_providers');
+  return {
+    ...real,
+    registerEnabledProfileProviders: jest.fn((params) => {
+      mockAllCollectedProfileIds.push(
+        ...params.providers.map((p: BaseProfileProvider<{}, {}>) => p.profileId)
+      );
+      return real.registerEnabledProfileProviders(params);
+    }),
+  };
+});
 
 const exampleRootProfileProvider = createExampleRootProfileProvider();
 const exampleDataSourceProfileProvider = createExampleDataSourceProfileProvider();
 const exampleDocumentProfileProvider = createExampleDocumentProfileProvider();
 
-describe('registerEnabledProfileProviders', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should register all profile providers', async () => {
-    const { rootProfileServiceMock, rootProfileProviderMock, profileProviderServices } =
-      createContextAwarenessMocks({
-        shouldRegisterProviders: false,
-      });
-
-    registerEnabledProfileProviders({
-      profileService: rootProfileServiceMock,
-      providers: [rootProfileProviderMock],
-      enabledExperimentalProfileIds: [],
-      services: profileProviderServices,
-    });
-    const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const profile = rootProfileServiceMock.getProfile({ context });
-    const baseImpl = () => ({});
-    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
-    expect(rootProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledTimes(1);
-    expect(rootProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
-      context,
-    });
-  });
-
-  it('should not register experimental profile providers by default', async () => {
-    jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
-    const { rootProfileServiceMock, profileProviderServices } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-    registerEnabledProfileProviders({
-      profileService: rootProfileServiceMock,
-      providers: [exampleRootProfileProvider],
-      enabledExperimentalProfileIds: [],
-      services: profileProviderServices,
-    });
-    const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const profile = rootProfileServiceMock.getProfile({ context });
-    const baseImpl = () => ({});
-    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
-    expect(exampleRootProfileProvider.profile.getCellRenderers).not.toHaveBeenCalled();
-    expect(profile).toMatchObject({});
-  });
-
-  it('should register experimental profile providers when enabled by config', async () => {
-    jest.spyOn(exampleRootProfileProvider.profile, 'getCellRenderers');
-    const { rootProfileServiceMock, rootProfileProviderMock, profileProviderServices } =
-      createContextAwarenessMocks({
-        shouldRegisterProviders: false,
-      });
-    registerEnabledProfileProviders({
-      profileService: rootProfileServiceMock,
-      providers: [exampleRootProfileProvider],
-      enabledExperimentalProfileIds: [exampleRootProfileProvider.profileId],
-      services: profileProviderServices,
-    });
-    const context = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const profile = rootProfileServiceMock.getProfile({ context });
-    const baseImpl = () => ({});
-    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
-    expect(exampleRootProfileProvider.profile.getCellRenderers).toHaveBeenCalledTimes(1);
-    expect(exampleRootProfileProvider.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
-      context,
-    });
-    expect(rootProfileProviderMock.profile.getCellRenderers).not.toHaveBeenCalled();
-  });
-
-  it('should register restricted profile when product feature is available', async () => {
-    const {
-      rootProfileServiceMock,
-      dataSourceProfileServiceMock,
-      dataSourceProfileProviderMock,
-      profileProviderServices,
-    } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-
-    // Mock feature availability
-    jest
-      .spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable')
-      .mockImplementation((featureId) => {
-        if (featureId === FEATURE_ID_1) {
-          return true;
-        }
-        return false;
-      });
-
-    // Sanity check
-    expect(profileProviderServices.core.pricing.isFeatureAvailable(FEATURE_ID_1)).toBeTruthy();
-
-    registerEnabledProfileProviders({
-      profileService: dataSourceProfileServiceMock,
-      providers: [dataSourceProfileProviderMock],
-      enabledExperimentalProfileIds: [],
-      services: profileProviderServices,
-    });
-    const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const dataSourceContext = await dataSourceProfileServiceMock.resolve({
-      rootContext,
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from my-example-logs' },
-    });
-
-    const profile = dataSourceProfileServiceMock.getProfile({ context: dataSourceContext });
-    const baseImpl = () => ({});
-    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
-    expect(dataSourceProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledTimes(1);
-    expect(dataSourceProfileProviderMock.profile.getCellRenderers).toHaveBeenCalledWith(baseImpl, {
-      context: dataSourceContext,
-    });
-  });
-
-  it('should not register restricted profile when product feature is not available', async () => {
-    const {
-      rootProfileServiceMock,
-      dataSourceProfileServiceMock,
-      dataSourceProfileProviderMock,
-      profileProviderServices,
-    } = createContextAwarenessMocks({
-      shouldRegisterProviders: false,
-    });
-
-    // Mock feature availability
-    jest
-      .spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable')
-      .mockImplementation((featureId) => {
-        if (featureId === FEATURE_ID_2) {
-          return true;
-        }
-        return false;
-      });
-
-    // Sanity check
-    expect(profileProviderServices.core.pricing.isFeatureAvailable(FEATURE_ID_1)).not.toBeTruthy();
-
-    registerEnabledProfileProviders({
-      profileService: dataSourceProfileServiceMock,
-      providers: [dataSourceProfileProviderMock],
-      enabledExperimentalProfileIds: [],
-      services: profileProviderServices,
-    });
-    const rootContext = await rootProfileServiceMock.resolve({ solutionNavId: null });
-    const dataSourceContext = await dataSourceProfileServiceMock.resolve({
-      rootContext,
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from my-example-logs' },
-    });
-
-    const profile = dataSourceProfileServiceMock.getProfile({ context: dataSourceContext });
-    const baseImpl = () => ({});
-    profile.getCellRenderers?.(baseImpl)({} as unknown as CellRenderersExtensionParams);
-    expect(dataSourceProfileProviderMock.profile.getCellRenderers).not.toHaveBeenCalled();
-    expect(profile).toMatchObject({});
-  });
-});
-
 describe('registerProfileProviders', () => {
+  beforeEach(() => {
+    mockAllCollectedProfileIds = [];
+  });
+
   it('should register enabled experimental profile providers', async () => {
     const {
       rootProfileServiceMock,
@@ -255,5 +114,28 @@ describe('registerProfileProviders', () => {
     expect(rootContext.profileId).not.toBe(exampleRootProfileProvider.profileId);
     expect(dataSourceContext.profileId).not.toBe(exampleDataSourceProfileProvider.profileId);
     expect(documentContext.profileId).not.toBe(exampleDocumentProfileProvider.profileId);
+  });
+
+  it('all profile ids should be unique', async () => {
+    expect(mockAllCollectedProfileIds.length).toBe(0);
+
+    const {
+      rootProfileServiceMock,
+      dataSourceProfileServiceMock,
+      documentProfileServiceMock,
+      profileProviderServices,
+    } = createContextAwarenessMocks({
+      shouldRegisterProviders: false,
+    });
+    await registerProfileProviders({
+      rootProfileService: rootProfileServiceMock,
+      dataSourceProfileService: dataSourceProfileServiceMock,
+      documentProfileService: documentProfileServiceMock,
+      enabledExperimentalProfileIds: [],
+      services: profileProviderServices,
+    });
+
+    expect(mockAllCollectedProfileIds.length).toBeGreaterThan(0);
+    expect(mockAllCollectedProfileIds).toEqual(uniq(mockAllCollectedProfileIds));
   });
 });
