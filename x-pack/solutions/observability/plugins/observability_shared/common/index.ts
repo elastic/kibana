@@ -10,6 +10,10 @@ export const observabilityFeatureId = 'observability';
 export const observabilityAppId = 'observability-overview';
 export const casesFeatureId = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
+export const uptimeFeatureId = 'uptime';
+export const apmFeatureId = 'apm';
+export const logsFeatureId = 'logs';
+export const infraFeatureId = 'infrastructure';
 
 // SLO alerts table in slo detail page
 export const SLO_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
