@@ -18,17 +18,33 @@ import { z } from '@kbn/zod';
 import { isNonEmptyString } from '@kbn/zod-helpers';
 
 import { AlertClosingReasonSchema } from '../../../../constants';
-import { AlertStatus } from '../../../model/alert.gen';
+import { AlertStatus, AlertStatusEnum } from '../../../model/alert.gen';
 
-export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
-export const SetAlertsStatusByIds = z.object({
+const SetAlertsStatusByIdsBase = z.object({
   /**
    * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
    */
   signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
-  status: AlertStatus,
+  status: z.enum([
+    AlertStatusEnum['in-progress'],
+    AlertStatusEnum.acknowledged,
+    AlertStatusEnum.open,
+  ]),
+});
+const SetAlertsClosedWithReasonByIds = z.object({
+  /**
+   * List of alert `id`s.
+   */
+  signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+  status: z.literal(AlertStatusEnum.closed),
   reason: AlertClosingReasonSchema.optional(),
 });
+
+export type SetAlertsStatusByIds = z.infer<typeof SetAlertsStatusByIds>;
+export const SetAlertsStatusByIds = z.discriminatedUnion('status', [
+  SetAlertsStatusByIdsBase,
+  SetAlertsClosedWithReasonByIds,
+]);
 
 export type SetAlertsStatusByQuery = z.infer<typeof SetAlertsStatusByQuery>;
 export const SetAlertsStatusByQuery = z.object({

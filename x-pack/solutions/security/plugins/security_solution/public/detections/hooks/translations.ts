@@ -111,3 +111,31 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
     defaultMessage: 'Mark as closed',
   }
 );
+
+export const BULK_ACTION_CLOSE_SELECTED_AS_NONE = i18n.translate(
+  'xpack.securitySolution.bulkActions.closeSelectedAsNone',
+  {
+    defaultMessage: 'None',
+  }
+);
+
+export const BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE = i18n.translate(
+  'xpack.securitySolution.bulkActions.closeSelectedAsDuplicate',
+  {
+    defaultMessage: 'Deplicate',
+  }
+);
+
+export const BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE = i18n.translate(
+  'xpack.securitySolution.bulkActions.closeSelectedAsFalsePositive',
+  {
+    defaultMessage: 'False positive',
+  }
+);
+
+export const BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED = i18n.translate(
+  'xpack.securitySolution.bulkActions.closeSelectedAsInvestigationRequired',
+  {
+    defaultMessage: 'Investigation required',
+  }
+);

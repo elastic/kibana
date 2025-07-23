@@ -16,6 +16,7 @@ import {
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
+import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
   DEFAULT_ALERTS_INDEX,
@@ -54,7 +55,13 @@ export const setSignalsStatusRoute = (
         },
       },
       async (context, request, response) => {
-        const { status, reason } = request.body;
+        const { status } = request.body;
+        let reason;
+
+        if (request.body.status === AlertStatusEnum.closed) {
+          reason = request.body.reason;
+        }
+
         const core = await context.core;
         const securitySolution = await context.securitySolution;
         const esClient = core.elasticsearch.client.asCurrentUser;
