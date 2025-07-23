@@ -72,7 +72,5 @@ actions:
     description: Add x-metaTags for Kibana product name
     update:
       x-metaTags:
-        - content: Kibana
-          name: product_name
-        - content: Elastic Cloud Serverless
+        - content: Kibana, Elastic Cloud Serverless
           name: product_name
