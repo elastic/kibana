@@ -127,6 +127,10 @@ export const SavedPlayground = () => {
     return isSavedPlaygroundFormDirty(dirtyFields);
   }, [isDirty, dirtyFields]);
   const onCloseModal = useCallback(() => setShownModal(SavedPlaygroundModals.None), []);
+  const onDeleteSuccess = useCallback(() => {
+    onCloseModal();
+    application.navigateToApp(PLUGIN_ID);
+  }, [application, onCloseModal]);
 
   const handleModeChange = (id: PlaygroundViewMode) =>
     navigateToView(playgroundId, pageMode ?? PlaygroundPageMode.Search, id, location.search);
@@ -193,6 +197,7 @@ export const SavedPlayground = () => {
           playgroundId={playgroundId}
           playgroundName={playgroundName}
           onClose={onCloseModal}
+          onDeleteSuccess={onDeleteSuccess}
         />
       )}
       {shownModal === SavedPlaygroundModals.Copy && (
@@ -200,7 +205,7 @@ export const SavedPlayground = () => {
           saveAs
           playgroundName={playgroundName}
           onClose={onCloseModal}
-          navigateToNewPlayground={(id: string) => {
+          onNavigateToNewPlayground={(id: string) => {
             navigateToView(id, pageMode ?? PlaygroundPageMode.Chat, viewMode, location.search);
           }}
         />
