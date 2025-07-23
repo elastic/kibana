@@ -35,6 +35,7 @@ export default async ({ readConfigFile }: FtrConfigProviderContext) => {
       },
       elasticsearch: {
         ...svlSharedConfig.get('servers.elasticsearch'),
+        protocol: 'http',
         port: '9200',
       },
     },
