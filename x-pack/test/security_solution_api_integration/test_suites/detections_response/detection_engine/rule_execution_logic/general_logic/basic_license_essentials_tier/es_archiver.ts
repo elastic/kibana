@@ -30,8 +30,8 @@ export default ({ getService }: FtrProviderContext) => {
       describe('assertions on inserted documents', () => {
         Array(100)
           .fill(0)
-          .forEach(() => {
-            it('should have one document from the timestamp_override_3 archive', async () => {
+          .forEach((_, index) => {
+            it(`finds one document from the timestamp_override_3 archive (run ${index})`, async () => {
               const searchResponse = await es.search({
                 index: 'myfakeindex-3',
               });
