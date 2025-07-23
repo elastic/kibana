@@ -27,7 +27,7 @@ import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hook
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
-import { ProductDocEntry } from './product_doc_entry';
+import { ProductDocSetting } from './product_doc_setting';
 import { ChangeKbModel } from './change_kb_model';
 import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useProductDoc } from '../../../hooks/use_product_doc';
@@ -186,7 +186,7 @@ export function SettingsTab() {
       </EuiDescribedFormGroup>
 
       {productDocBase ? (
-        <ProductDocEntry
+        <ProductDocSetting
           knowledgeBase={knowledgeBase}
           productDoc={productDoc}
           currentlyDeployedInferenceId={currentlyDeployedInferenceId}

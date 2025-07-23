@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { ProductDocEntry } from './product_doc_entry';
+import { ProductDocSetting } from './product_doc_setting';
 import {
   APIReturnType,
   ELSER_ON_ML_NODE_INFERENCE_ID,
@@ -60,7 +60,7 @@ const createProductDoc = (overrides: Partial<UseProductDoc> = {}) => ({
   ...overrides,
 });
 
-describe('ProductDocEntry', () => {
+describe('ProductDocSetting', () => {
   it('should render the installed state correctly', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase({
       status: createMockStatus({
@@ -79,7 +79,7 @@ describe('ProductDocEntry', () => {
     });
 
     render(
-      <ProductDocEntry
+      <ProductDocSetting
         knowledgeBase={mockKnowledgeBase}
         productDoc={productDoc}
         currentlyDeployedInferenceId={undefined}
@@ -96,7 +96,7 @@ describe('ProductDocEntry', () => {
     const productDoc = createProductDoc();
 
     render(
-      <ProductDocEntry
+      <ProductDocSetting
         knowledgeBase={mockKnowledgeBase}
         productDoc={productDoc}
         currentlyDeployedInferenceId={undefined}

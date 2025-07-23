@@ -44,7 +44,7 @@ const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'load
   }),
 };
 
-export function ProductDocEntry({
+export function ProductDocSetting({
   knowledgeBase,
   productDoc,
   currentlyDeployedInferenceId,
@@ -58,7 +58,7 @@ export function ProductDocEntry({
   const canInstallProductDoc =
     currentlyDeployedInferenceId !== undefined &&
     !(knowledgeBase.isInstalling || knowledgeBase.isWarmingUpModel || knowledgeBase.isPolling) &&
-    knowledgeBase.status?.value?.kbState === KnowledgeBaseState.READY;
+    knowledgeBase.status?.value?.inferenceModelState === KnowledgeBaseState.READY;
 
   const { status, isLoading: isStatusLoading, installProductDoc, uninstallProductDoc } = productDoc;
 
