@@ -114,12 +114,11 @@ export const getSuggestionsAfterCompleteExpression = (
     { ...sortModifierSuggestions.NULLS_LAST },
   ];
 
-  const pipeSuggestion = { ...pipeCompleteItem, sortText: 'AAA' };
+  const pipeSuggestion = { ...pipeCompleteItem };
   const commaSuggestion = {
     ...commaCompleteItem,
     text: ', ',
     command: TRIGGER_SUGGESTION_COMMAND,
-    sortText: 'AAA',
   };
 
   // does the query end with whitespace?

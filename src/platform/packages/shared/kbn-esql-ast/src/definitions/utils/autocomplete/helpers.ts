@@ -348,7 +348,7 @@ export async function suggestForExpression({
   location,
   preferredExpressionType,
   context,
-  advanceCursorInitially = true,
+  advanceCursorAfterInitialField = true,
   hasMinimumLicenseRequired,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
@@ -357,7 +357,7 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType: GetColumnsByTypeFn;
   context?: ICommandContext;
-  advanceCursorInitially?: boolean;
+  advanceCursorAfterInitialField?: boolean;
   // @TODO should this be required?
   hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
 }): Promise<ISuggestionItem[]> {
@@ -466,7 +466,7 @@ export async function suggestForExpression({
 
     case 'empty_expression':
       const columnSuggestions: ISuggestionItem[] = await getColumnsByType('any', [], {
-        advanceCursor: advanceCursorInitially,
+        advanceCursor: advanceCursorAfterInitialField,
         openSuggestions: true,
       });
       suggestions.push(
