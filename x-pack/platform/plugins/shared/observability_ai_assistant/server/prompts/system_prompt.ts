@@ -74,7 +74,7 @@ export function getSystemPrompt({
               }${isProductDocAvailable ? ' and the product documentation' : ''}.`
             : ''
         }
-        </RoleAndGoal>
+        \n</RoleAndGoal>
       `)
     );
 
@@ -138,7 +138,7 @@ export function getSystemPrompt({
     );
 
     promptSections.push(
-      '\n<CorePrinciples>\n\n' + corePrinciples.join('\n\n') + '\n</CorePrinciples>\n'
+      '\n<CorePrinciples>\n\n' + corePrinciples.join('\n\n') + '\n\n</CorePrinciples>\n'
     );
   }
 
@@ -146,7 +146,7 @@ export function getSystemPrompt({
   if (isFunctionAvailable(QUERY_FUNCTION_NAME)) {
     promptSections.push(
       dedent(`
-      <QueryLanguages>
+      <QueryLanguages>\n
       ${
         isObservabilityDeployment
           ? '1.  **ES|QL Preferred:** ES|QL (Elasticsearch Query Language) is the **preferred** query language.'
@@ -176,7 +176,7 @@ export function getSystemPrompt({
       7. **Critical ES|QL syntax rules:**
           * When using \`DATE_FORMAT\`, any literal text in the format string **MUST** be in single quotes. Example: \`DATE_FORMAT("d 'of' MMMM yyyy", @timestamp)\`.
           * When grouping with \`STATS\`, use the field name directly. Example: \`STATS count = COUNT(*) BY destination.domain\`.
-      </QueryLanguages>`)
+      \n</QueryLanguages>`)
     );
   }
 
@@ -295,7 +295,7 @@ export function getSystemPrompt({
 
     if (usage.length) {
       promptSections.push(
-        '\n<FunctionUsageGuidelines>\n\n' + usage.join('\n\n') + '\n</FunctionUsageGuidelines>\n'
+        '\n<FunctionUsageGuidelines>\n\n' + usage.join('\n\n') + '\n\n</FunctionUsageGuidelines>\n'
       );
     }
   }
@@ -303,10 +303,10 @@ export function getSystemPrompt({
   // Section Five: User Interaction section
   promptSections.push(
     dedent(`
-    <UserInteraction>
+    <UserInteraction>\n
       **Language Settings:** If the user asks how to change the language, explain that it's done in the AI Assistant settings within ${
         isServerless ? 'Project settings' : 'Stack Management'
-      }, replying in the *same language* the user asked in.
+      }, replying in the *same language* the user asked in.\n
     </UserInteraction>
     `)
   );
