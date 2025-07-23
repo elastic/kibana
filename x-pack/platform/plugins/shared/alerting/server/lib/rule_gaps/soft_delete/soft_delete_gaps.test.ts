@@ -53,7 +53,7 @@ describe('softDeleteGaps', () => {
       expect(processAllRuleGapsMock).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
-        ruleId: ['test-rule-id'],
+        ruleIds: ['test-rule-id'],
         processGapsBatch: expect.any(Function),
         statuses: Object.values(gapStatus),
       });
@@ -85,7 +85,7 @@ describe('softDeleteGaps', () => {
       });
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        `Failed to soft delete gaps for rule test-rule-id: Some gaps failed to soft delete`
+        `Failed to soft delete gaps for rules test-rule-id: Some gaps failed to soft delete`
       );
     });
   });
