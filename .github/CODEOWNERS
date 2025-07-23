@@ -1376,7 +1376,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/functional/ftr_provider_context.d.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/page_objects/index.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/functional/services/index.ts @elastic/observability-ui
-/x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @@elastic/observability-ui
+/x-pack/solutions/observability/test/functional_with_es_ssl/apps/index.ts @elastic/observability-ui
 
 ### Observability Plugins
 
