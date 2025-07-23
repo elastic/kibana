@@ -8,7 +8,7 @@ import type { EntityDescription } from '../types';
 import { getCommonFieldDescriptions } from './common';
 import { collectValues as collect } from './field_utils';
 
-export const USER_DEFINITION_VERSION = '1.0.0';
+export const USER_DEFINITION_VERSION = '1.1.0';
 export const USER_IDENTITY_FIELD = 'user.name';
 export const userEntityEngineDescription: EntityDescription = {
   entityType: 'user',
