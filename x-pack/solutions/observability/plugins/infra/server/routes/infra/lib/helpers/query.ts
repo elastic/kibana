@@ -17,14 +17,18 @@ import {
   DATASTREAM_DATASET,
   EVENT_MODULE,
   METRICSET_MODULE,
+  METRIC_SCHEMA_ECS,
 } from '../../../../../common/constants';
 import type { InfraEntityMetricType } from '../../../../../common/http_api/infra';
 
-export const getFilterForEntityType = (entityType: EntityTypes, schema: SchemaTypes = 'ecs') => {
+export const getFilterForEntityType = (
+  entityType: EntityTypes,
+  schema: SchemaTypes = METRIC_SCHEMA_ECS
+) => {
   const source = integrationNameByEntityType[entityType];
   return {
     bool:
-      schema === 'ecs'
+      schema === METRIC_SCHEMA_ECS
         ? {
             should: [
               ...termQuery(EVENT_MODULE, source.beats),
