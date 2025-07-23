@@ -94,6 +94,7 @@
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
+    "@kbn/page-attachment-schema",
     "@kbn/react-hooks",
     "@kbn/observability-ai-assistant-plugin"
   ],
