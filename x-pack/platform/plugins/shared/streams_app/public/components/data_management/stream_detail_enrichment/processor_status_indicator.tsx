@@ -65,7 +65,7 @@ export const ProcessorStatusIndicator = ({
       'xpack.streams.streamDetailView.managementTab.enrichment.mixedProcessorTooltip',
       {
         defaultMessage:
-          'Currently, is not possible to simulate persisted and new processors together. Move the new processors after the persisted processors to restore the simulation behavior.',
+          'Simulation is disabled when new processors are placed between previously made processors. To enable simulation, move all new processors to the end.',
       }
     );
     variant = {
@@ -79,14 +79,14 @@ export const ProcessorStatusIndicator = ({
       ? i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.skippedNewProcessorTooltip',
           {
-            defaultMessage:
-              'This processor is skipped since it comes after the processor under edit.',
+            defaultMessage: 'Processor skipped because it follows a processor being edited.',
           }
         )
       : i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.skippedConfiguredProcessorTooltip',
           {
-            defaultMessage: 'This processor is skipped since it is persisted already.',
+            defaultMessage:
+              'Processor skipped because it was created in a previous simulation session.',
           }
         );
 
@@ -122,7 +122,7 @@ export const ProcessorStatusIndicator = ({
       const name = i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.failingProcessorTooltip',
         {
-          defaultMessage: 'This processor configuration has failed the simulation.',
+          defaultMessage: 'Processor configuration failed simulation.',
         }
       );
       variant = {
@@ -135,8 +135,7 @@ export const ProcessorStatusIndicator = ({
       const name = i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.newProcessorTooltip',
         {
-          defaultMessage:
-            'This processor configuration has successfully gone throught the simulation.',
+          defaultMessage: 'Processor configuration simulated successfully.',
         }
       );
       variant = {
