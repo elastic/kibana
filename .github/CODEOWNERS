@@ -1175,6 +1175,7 @@ x-pack/test
 =======
 x-pack/test_serverless
 <<<<<<< HEAD
+<<<<<<< HEAD
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
@@ -1203,6 +1204,8 @@ x-pack/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana
 =======
 x-pack/test/spaces_api_integration/common/plugins/read_only_objects_test_plugin @elastic/kibana-security
 >>>>>>> ed3ee85e543 ([CI] Auto-commit changed files from 'node scripts/generate codeowners')
+=======
+>>>>>>> 65481ee9d81 (fix codeowners)
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:

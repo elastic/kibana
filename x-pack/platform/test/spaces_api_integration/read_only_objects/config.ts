@@ -10,14 +10,14 @@ import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { services as apiIntegrationServices } from '../../api_integration/services';
-import { services as commonServices } from '../../common/services';
+import { services as commonServices } from '../common/services';
 
 export const services = {
   ...commonServices,
   esSupertest: apiIntegrationServices.esSupertest,
   supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
 };
-// eslint-disable-next-line import/no-default-export
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(
     require.resolve('../../api_integration/config.ts')
@@ -28,7 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../common/plugins/read_only_objects_test_plugin'
   );
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
+  const idpPath = require.resolve('@kbn/security-api-integration-helpers/');
   return {
     testFiles: [resolve(__dirname, './apis/spaces/read_only_objects.ts')],
     services,
