@@ -11,7 +11,7 @@ import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alert
 import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getEcsGroups, getFormattedGroups } from '@kbn/alerting-rule-utils';
+import { getEcsGroups, getFormattedGroups, getEcsGroupings } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -52,7 +52,6 @@ import {
   WindowSchema,
 } from './types';
 
-// should I add ALERT_GROUPING here?
 export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
   [ALERT_GROUP]?: Group[];
 };
@@ -178,7 +177,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [SLO_ID_FIELD]: slo.id,
               [SLO_REVISION_FIELD]: slo.revision,
               [SLO_INSTANCE_ID_FIELD]: instanceId,
-              ...getEcsGroups(groups),
+              ...getEcsGroupings(groupings),
             },
           });
 
