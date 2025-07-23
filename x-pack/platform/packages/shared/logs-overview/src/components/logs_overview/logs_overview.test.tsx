@@ -13,6 +13,7 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { logsDataAccessPluginMock } from '@kbn/logs-data-access-plugin/public/mocks';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import '@testing-library/jest-dom';
@@ -31,6 +32,7 @@ import {
 jest.mock('@kbn/saved-search-component', () => ({
   LazySavedSearchComponent: jest.fn((props) => <div data-test-subj="embeddedSavedSearchMock" />),
 }));
+const LazySavedSearchComponentMock = jest.mocked(LazySavedSearchComponent);
 
 const commonDependencies = {
   dataViews: dataViewPluginMocks.createStartContract(),
@@ -88,14 +90,130 @@ describe('LogsOverview', () => {
     });
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   afterAll(() => {
     jest.resetAllMocks();
   });
 
-  it('displays the log events by default', async () => {
-    const { findByTestId } = renderWithKibanaRenderContext(<LogsOverview {...defaultProps} />);
+  describe('without the default logs source', () => {
+    it('displays the log events from the shared settings by default', async () => {
+      const { findByTestId } = renderWithKibanaRenderContext(<LogsOverview {...defaultProps} />);
 
-    expect(await findByTestId('embeddedSavedSearchMock')).toBeInTheDocument();
+      expect(await findByTestId('embeddedSavedSearchMock')).toBeInTheDocument();
+
+      // Check that LazySavedSearchComponent was called with the expected props
+      expect(LazySavedSearchComponentMock.mock.calls[0][0]).toMatchInlineSnapshot(
+        {
+          dependencies: expect.any(Object),
+        },
+        `
+      Object {
+        "dependencies": Any<Object>,
+        "displayOptions": Object {
+          "enableDocumentViewer": true,
+          "enableFilters": false,
+          "solutionNavIdOverride": "oblt",
+        },
+        "filters": Array [],
+        "index": "logs",
+        "timeRange": Object {
+          "from": "2023-01-01T00:00:00Z",
+          "to": "2023-01-02T00:00:00Z",
+        },
+        "timestampField": "@timestamp",
+      }
+    `
+      );
+    });
+  });
+
+  describe('with an index name as logs source', () => {
+    const indexNameLogsSource = {
+      type: 'index_name' as const,
+      indexName: 'logs-custom.indexname-*',
+      timestampField: 'custom_timestamp',
+      messageField: 'custom_message',
+    };
+
+    it('displays the log events from the passed index name', async () => {
+      const { findByTestId } = renderWithKibanaRenderContext(
+        <LogsOverview {...defaultProps} logsSource={indexNameLogsSource} />
+      );
+
+      expect(await findByTestId('embeddedSavedSearchMock')).toBeInTheDocument();
+
+      // Check that LazySavedSearchComponent was called with the expected props
+      expect(LazySavedSearchComponentMock.mock.calls[0][0]).toMatchInlineSnapshot(
+        {
+          dependencies: expect.any(Object),
+        },
+        `
+      Object {
+        "dependencies": Any<Object>,
+        "displayOptions": Object {
+          "enableDocumentViewer": true,
+          "enableFilters": false,
+          "solutionNavIdOverride": "oblt",
+        },
+        "filters": Array [],
+        "index": "logs-custom.indexname-*",
+        "timeRange": Object {
+          "from": "2023-01-01T00:00:00Z",
+          "to": "2023-01-02T00:00:00Z",
+        },
+        "timestampField": "custom_timestamp",
+      }
+    `
+      );
+    });
+  });
+
+  describe('with a data view as logs source', () => {
+    const dataViewLogsSource = {
+      type: 'data_view' as const,
+      dataView: createStubDataView({
+        spec: {
+          title: 'logs-custom.dataview-*',
+          timeFieldName: 'custom_timestamp',
+        },
+      }),
+      messageField: 'custom_message',
+    };
+
+    it('displays the log events from the passed index name', async () => {
+      const { findByTestId } = renderWithKibanaRenderContext(
+        <LogsOverview {...defaultProps} logsSource={dataViewLogsSource} />
+      );
+
+      expect(await findByTestId('embeddedSavedSearchMock')).toBeInTheDocument();
+
+      // Check that LazySavedSearchComponent was called with the expected props
+      expect(LazySavedSearchComponentMock.mock.calls[0][0]).toMatchInlineSnapshot(
+        {
+          dependencies: expect.any(Object),
+        },
+        `
+      Object {
+        "dependencies": Any<Object>,
+        "displayOptions": Object {
+          "enableDocumentViewer": true,
+          "enableFilters": false,
+          "solutionNavIdOverride": "oblt",
+        },
+        "filters": Array [],
+        "index": "logs-custom.dataview-*",
+        "timeRange": Object {
+          "from": "2023-01-01T00:00:00Z",
+          "to": "2023-01-02T00:00:00Z",
+        },
+        "timestampField": "custom_timestamp",
+      }
+    `
+      );
+    });
   });
 
   describe('with patterns feature flag enabled', () => {
