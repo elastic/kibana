@@ -13,7 +13,7 @@ import { GenAiSettingsApp } from './gen_ai_settings_app';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 
 // Mock the context hook
-jest.mock('../contexts/serverless_context');
+jest.mock('../contexts/enabled_features_context');
 const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof useEnabledFeatures>;
 
 describe('GenAiSettingsApp', () => {
