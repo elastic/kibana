@@ -8,16 +8,19 @@
 import { getMockDataView, getMockDataViewWithMatchedIndices } from '../../mocks/mock_data_view';
 import type { UseDataViewReturnValue } from '../use_data_view';
 
+const dataViewWithoutMatchedIndices = getMockDataView();
+
 export const defaultImplementation = () =>
   ({
-    dataView: getMockDataView(),
+    dataView: dataViewWithoutMatchedIndices,
     status: 'ready',
   } as UseDataViewReturnValue);
 
+const dataViewWithMatchedIndices = getMockDataViewWithMatchedIndices();
 // TODO: consider if this should be the default mock implementation?
 export const withMatchedIndices = () =>
   ({
-    dataView: getMockDataViewWithMatchedIndices(),
+    dataView: dataViewWithMatchedIndices,
     status: 'ready',
   } as UseDataViewReturnValue);
 
