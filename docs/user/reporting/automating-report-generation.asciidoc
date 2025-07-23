@@ -81,20 +81,20 @@ Save time by setting up a recurring task that automatically generates reports an
 * To use the scheduled reports feature, your role needs <<grant-user-access, access to reporting>>.
 * (Optional) To view and manage other users' reports and schedules, your role needs `All` privileges for the **Manage Scheduled Reports** feature. You can set this by configuring your role's {kib} privileges. If your role doesn't have the **Manage Scheduled Reporting** feature privilege, you can only share reports with yourself.
 * Sharing reports outside of {kib} requires a default preconfigured email connector.
-
-   * **{ech} or {serverless-short} users**: You do not need to set up a default preconfigured email connector. Kibana provides you with a built-in preconfigured email connector that uses the SMTP protocol to send emails. To view it, go to the **Connectors** page and find the Elastic-Cloud-SMTP connector.
-   * **Self-managed users**: You must set up a default preconfigured email connector to send notifications outside of {kib}. To do this:
-
-     . Open your `kibana.yml` file.
-     . Add the `xpack.actions.preconfigured` {kib} setting. This setting specifies configuration details for the preconfigured connector that you're defining. 
-     . Under the `xpack.actions.preconfigured` setting, define the email connector. Refer to <<preconfigured-email-configuration>> to learn about requirements for different email services and providers.
-     +
-     NOTE: You must define preconfigured email connector details in the `kibana.yml` file. You cannot create a preconfigured email connector from the {kib} UI. 
-     +
-     . Add the `notifications.connectors.default.email` {kib} setting, and provide the name of your email connector. The `notifications.connectors.default.email` setting specifies the default email connector to use when sending notifications. This is especially useful if you have multiple email connectors and want to set a default one. 
-     +
-     The following example shows a modified `kibana.yml` file with a preconfigured email connector that's set as the default connector for email notifications:
-     
++
+** **{ech} or {serverless-short} users**: You do not need to set up a default preconfigured email connector. Kibana provides you with a built-in preconfigured email connector that uses the SMTP protocol to send emails. To view it, go to the **Connectors** page and find the Elastic-Cloud-SMTP connector.
+** **Self-managed users**: You must set up a default preconfigured email connector to send notifications outside of {kib}. To do this:
++
+. Open your `kibana.yml` file.
+. Add the `xpack.actions.preconfigured` {kib} setting. This setting specifies configuration details for the preconfigured connector that you're defining. 
+. Under the `xpack.actions.preconfigured` setting, define the email connector. Refer to <<preconfigured-email-configuration>> to learn about requirements for different email services and providers.
++
+NOTE: You must define preconfigured email connector details in the `kibana.yml` file. You cannot create a preconfigured email connector from the {kib} UI. 
++
+. Add the `notifications.connectors.default.email` {kib} setting, and provide the name of your email connector. The `notifications.connectors.default.email` setting specifies the default email connector to use when sending notifications. This is especially useful if you have multiple email connectors and want to set a default one. 
++
+The following example shows a modified `kibana.yml` file with a preconfigured email connector that's set as the default connector for email notifications:
++    
 [source,yaml]
 ----
 xpack.actions.preconfigured:
