@@ -255,7 +255,7 @@ export interface SharingData {
 
 export type ShareIntegrationMapKey = `integration-${string}`;
 
-export interface RegisterShareIntegrationArgs<I extends ShareIntegration>
+export interface RegisterShareIntegrationArgs<I extends ShareIntegration = ShareIntegration>
   extends Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> {
   getShareIntegrationConfig: I['config'];
 }
