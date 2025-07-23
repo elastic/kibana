@@ -9,6 +9,7 @@ import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { getConnectorById } from './get_connector_by_id';
+import { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 describe('getConnectorById', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -29,68 +30,69 @@ describe('getConnectorById', () => {
   });
 
   it('calls `actionsClient.get` with the right parameters', async () => {
-    actionsClient.get.mockResolvedValue(
+    actionsClient.getAll.mockResolvedValue([
       createMockConnector({
         id: 'foo',
         name: 'Foo',
         actionTypeId: InferenceConnectorType.OpenAI,
-      })
-    );
+      }),
+      createMockConnector({
+        id: connectorId,
+        name: 'Foo',
+        actionTypeId: InferenceConnectorType.OpenAI,
+      }),
+    ] as ConnectorWithExtraFindData[]);
 
     await getConnectorById({ actionsClient, connectorId });
 
-    expect(actionsClient.get).toHaveBeenCalledTimes(1);
-    expect(actionsClient.get).toHaveBeenCalledWith({
-      id: connectorId,
-      throwIfSystemAction: true,
-    });
+    expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
   });
 
   it('throws if `actionsClient.get` throws', async () => {
-    actionsClient.get.mockImplementation(() => {
+    actionsClient.getAll.mockImplementation(() => {
       throw new Error('Something wrong');
     });
 
     await expect(() => getConnectorById({ actionsClient, connectorId })).rejects
       .toThrowErrorMatchingInlineSnapshot(`
-      "No connector found for id 'my-connector-id'
+      "An error occur fetching connectors for id 'my-connector-id'
       Something wrong"
     `);
   });
 
   it('throws the connector type is not compatible', async () => {
-    actionsClient.get.mockResolvedValue(
+    actionsClient.getAll.mockResolvedValue([
       createMockConnector({
-        id: 'tcp-pigeon-3-0',
+        id: connectorId,
         name: 'Tcp Pigeon',
         actionTypeId: '.tcp-pigeon',
-      })
-    );
+      }),
+    ] as ConnectorWithExtraFindData[]);
 
     await expect(() =>
       getConnectorById({ actionsClient, connectorId })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Connector 'tcp-pigeon-3-0' of type '.tcp-pigeon' not recognized as a supported connector"`
+      `"Connector '${connectorId}' of type '.tcp-pigeon' not recognized as a supported connector"`
     );
   });
 
   it('returns the inference connector when successful', async () => {
-    actionsClient.get.mockResolvedValue(
+    actionsClient.getAll.mockResolvedValue([
       createMockConnector({
-        id: 'my-id',
+        id: connectorId,
         name: 'My Name',
         actionTypeId: InferenceConnectorType.OpenAI,
         config: {
           propA: 'foo',
           propB: 42,
         },
-      })
-    );
+      }),
+    ] as ConnectorWithExtraFindData[]);
 
     const connector = await getConnectorById({ actionsClient, connectorId });
 
     expect(connector).toEqual({
-      connectorId: 'my-id',
+      connectorId,
       name: 'My Name',
       type: InferenceConnectorType.OpenAI,
       config: {
