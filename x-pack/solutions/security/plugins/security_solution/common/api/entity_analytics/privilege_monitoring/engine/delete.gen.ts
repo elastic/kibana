@@ -20,7 +20,7 @@ import { BooleanFromString } from '@kbn/zod-helpers';
 export type DeleteMonitoringEngineRequestQuery = z.infer<typeof DeleteMonitoringEngineRequestQuery>;
 export const DeleteMonitoringEngineRequestQuery = z.object({
   /**
-   * Whether to delete all the privilege users data
+   * Whether to delete all the privileged user data
    */
   data: BooleanFromString.optional().default(false),
 });
