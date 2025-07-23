@@ -560,12 +560,12 @@ export function alertingServiceProvider(
    * @param source - The source object to process
    * @returns A new object with string fields processed with escapeLinkLike
    */
-  const processSourceWithEscapeLinkLike = <T extends Record<string, any>>(source: T): T => {
+  const processSourceWithEscapeLinkLike = <T extends Record<string, unknown>>(source: T): T => {
     const processed = { ...source };
     // Process only the string fields
     Object.entries(source).forEach(([key, value]) => {
       if (typeof value === 'string') {
-        (processed as any)[key] = escapeLinkLike(value);
+        (processed as Record<string, unknown>)[key] = escapeLinkLike(value);
       }
     });
     return processed;
