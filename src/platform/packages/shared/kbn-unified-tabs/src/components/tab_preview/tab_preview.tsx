@@ -62,7 +62,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   tabItem,
   previewData,
   stopPreviewOnHover,
-  previewDelay = 500,
+  previewDelay = 1250, // as "long" EuiToolTip delay
 }) => {
   const { euiTheme } = useEuiTheme();
   const [previewTimer, setPreviewTimer] = useState<NodeJS.Timeout | null>(null);
