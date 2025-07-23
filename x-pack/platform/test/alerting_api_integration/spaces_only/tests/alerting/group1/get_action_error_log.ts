@@ -115,7 +115,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
       }
     });
 
-    it.only('get and filter action error logs for rules with multiple action errors', async () => {
+    it('get and filter action error logs for rules with multiple action errors', async () => {
       const { body: createdConnector1 } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
