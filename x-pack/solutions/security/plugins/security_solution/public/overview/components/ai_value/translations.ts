@@ -106,6 +106,17 @@ export const FILTERING_RATE_DESC = i18n.translate(
   }
 );
 
+export const ESCALATED_RATE = i18n.translate('xpack.securitySolution.aiValue.escalatedRate', {
+  defaultMessage: 'Escalated alert rate',
+});
+
+export const ESCALATED_RATE_DESC = i18n.translate(
+  'xpack.securitySolution.aiValue.escalatedRateDesc',
+  {
+    defaultMessage: 'AI-escalated alerts',
+  }
+);
+
 export const TIME_SAVED = i18n.translate('xpack.securitySolution.aiValue.timeSavedTitle', {
   defaultMessage: 'Analyst time saved',
 });
@@ -138,6 +149,6 @@ export const ALERT_PROCESSING_TITLE = i18n.translate(
 export const ALERT_PROCESSING_DESC = i18n.translate(
   'xpack.securitySolution.aiValue.alertProcessingDesc',
   {
-    defaultMessage: 'AI alert handling breakdow ',
+    defaultMessage: 'AI alert handling breakdown',
   }
 );

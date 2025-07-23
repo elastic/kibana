@@ -24,7 +24,6 @@ export const AlertProcessingDonut: React.FC<Props> = ({ attackAlertIds, from, to
   const spaceId = useSpaceId();
   return (
     <div
-      data-test-subj="hellohello"
       css={css`
         // hide filtering actions in the legend
         .echLegendItem__action {

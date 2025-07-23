@@ -15,6 +15,7 @@ export interface ValueMetrics {
   attackDiscoveryCount: number;
   filteredAlerts: number;
   filteredAlertsPerc: number;
+  escalatedAlertsPerc: number;
   hoursSaved: number;
   totalAlerts: number;
 }
@@ -32,6 +33,7 @@ export const getValueMetrics = ({
   attackDiscoveryCount,
   filteredAlerts: totalAlerts - attackAlertsCount,
   filteredAlertsPerc: ((totalAlerts - attackAlertsCount) / totalAlerts) * 100,
+  escalatedAlertsPerc: (attackAlertsCount / totalAlerts) * 100,
   hoursSaved: getTimeSavedHours(totalAlerts - attackAlertsCount, minutesPerAlert),
   totalAlerts,
 });

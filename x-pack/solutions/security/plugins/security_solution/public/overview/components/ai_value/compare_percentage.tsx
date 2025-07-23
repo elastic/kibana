@@ -17,7 +17,7 @@ interface Props {
   previousCount: number;
   stat: string;
   statType: string;
-  timeRange: string;
+  timeRange?: string;
   positionForLens?: boolean; // Optional prop for positioning in Lens Metric
 }
 export const ComparePercentage = ({
@@ -68,9 +68,11 @@ export const ComparePercentage = ({
         <EuiToolTip content={percentInfo.note}>
           <EuiBadge color={percentInfo.color}>{percentInfo.percent}</EuiBadge>
         </EuiToolTip>
-        <EuiText size="xs" color="subdued">
-          <p>{i18n.TIME_RANGE(timeRange)}</p>
-        </EuiText>
+        {timeRange && (
+          <EuiText size="xs" color="subdued">
+            <p>{i18n.TIME_RANGE(timeRange)}</p>
+          </EuiText>
+        )}
       </span>
       {description && (
         <span
