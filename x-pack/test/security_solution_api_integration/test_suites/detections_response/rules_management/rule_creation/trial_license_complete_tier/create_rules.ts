@@ -39,6 +39,7 @@ import {
   createUserAndRole,
   deleteUserAndRole,
 } from '../../../../../config/services/detections_response';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
