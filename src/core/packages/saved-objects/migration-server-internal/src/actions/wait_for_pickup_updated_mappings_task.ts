@@ -37,18 +37,21 @@ export const waitForPickupUpdatedMappingsTask = flow(
             JSON.stringify(res.failures.value)
         );
       } else if (Option.isSome(res.error)) {
-        if (res.error.value.type === 'search_phase_execution_exception') {
+        const error = res.error.value;
+        if (
+          error.type === 'search_phase_execution_exception' &&
+          error.caused_by?.reason?.includes('Search rejected due to missing shards')
+        ) {
           // This error is normally fixed in the next try, so let's retry
           // the update mappings task instead of throwing
           return TaskEither.left({
             type: 'task_completed_with_retriable_error' as const,
-            message: `The task being waited on encountered a ${res.error.value.type} error`,
+            message: `The task being waited on encountered a ${error.type} error`,
           });
         }
 
         throw new Error(
-          'pickupUpdatedMappings task failed with the following error:\n' +
-            JSON.stringify(res.error.value)
+          'pickupUpdatedMappings task failed with the following error:\n' + JSON.stringify(error)
         );
       } else {
         return TaskEither.right('pickup_updated_mappings_succeeded' as const);
