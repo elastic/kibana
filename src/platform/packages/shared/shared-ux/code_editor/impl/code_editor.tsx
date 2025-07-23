@@ -142,6 +142,11 @@ export interface CodeEditorProps {
    */
   'aria-label'?: string;
 
+  /**
+   * ID of the element that describes the editor.
+   */
+  'aria-describedby'?: string;
+
   isCopyable?: boolean;
   allowFullScreen?: boolean;
   /**
@@ -219,6 +224,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
+  'aria-describedby': ariaDescribedBy,
   isCopyable = false,
   allowFullScreen = false,
   readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
@@ -547,6 +553,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       textboxMutationObserver.current?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    // apply aria described by on editor element
+    if (_editor && ariaDescribedBy) {
+      _editor
+        .getDomNode()
+        ?.querySelector('textarea[aria-roledescription="editor"]')
+        ?.setAttribute('aria-describedby', ariaDescribedBy);
+    }
+  }, [_editor, ariaDescribedBy]);
 
   useFitToContent({ editor: _editor, fitToContent, isFullScreen });
   usePlaceholder({ placeholder, euiTheme, editor: _editor, value });
