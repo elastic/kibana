@@ -9,7 +9,7 @@ import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { getConnectorById } from './get_connector_by_id';
-import { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 describe('getConnectorById', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
