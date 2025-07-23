@@ -555,7 +555,8 @@ export class PrivilegeMonitoringDataClient {
     indexName: string;
     kuery?: string | unknown;
   }): Promise<string[]> {
-    let batchUniqueUsernames: string[] = [];
+    // let batchUniqueUsernames: string[] = [];
+    const allUsernames: string[] = []; // Collect all usernames across batches
     let searchAfter: SortResults | undefined;
     const batchSize = 100;
 
@@ -574,8 +575,8 @@ export class PrivilegeMonitoringDataClient {
       const batchUsernames = hits
         .map((hit) => hit._source?.user?.name)
         .filter((username): username is string => !!username);
-
-      batchUniqueUsernames = uniq(batchUsernames);
+      allUsernames.push(...batchUsernames); // Collect usernames from this batch
+      const batchUniqueUsernames = uniq(batchUsernames); // Ensure uniqueness within the batch
 
       this.log(
         'debug',
@@ -609,7 +610,7 @@ export class PrivilegeMonitoringDataClient {
       }
       searchAfter = hits[hits.length - 1].sort;
     }
-    return batchUniqueUsernames;
+    return uniq(allUsernames); // Return all unique usernames collected across batches
   }
 
   private async findStaleUsersForIndex(
