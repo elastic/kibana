@@ -23,15 +23,15 @@ import { CoreStart } from '@kbn/core/public';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { SearchSessionStatus } from '../../../../../common';
-import { OnActionComplete, PopoverActionsMenu, TableText } from '../components';
-import { StatusIndicator } from '../components/status';
-import { dateString } from './date_string';
-import { SearchSessionsMgmtAPI } from './api';
-import { getExpirationStatus } from './get_expiration_status';
-import { UISession } from '../types';
-import { SearchUsageCollector } from '../../../collectors';
-import type { SearchSessionsConfigSchema } from '../../../../../server/config';
+import { SearchSessionStatus } from '../../../../../../../common';
+import { OnActionComplete, PopoverActionsMenu, TableText } from '../..';
+import { StatusIndicator } from '../../status';
+import { dateString } from '../../../lib/date_string';
+import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import { getExpirationStatus } from '../../../lib/get_expiration_status';
+import { UISession } from '../../../types';
+import { SearchUsageCollector } from '../../../../../collectors';
+import type { SearchSessionsConfigSchema } from '../../../../../../../server/config';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {
