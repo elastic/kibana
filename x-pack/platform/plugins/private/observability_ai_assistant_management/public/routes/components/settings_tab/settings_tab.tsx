@@ -27,7 +27,7 @@ import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hook
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
-import { ProductDocEntry } from './product_doc_entry';
+import { ProductDocsSetting } from './product_doc_setting';
 import { ChangeKbModel } from './change_kb_model';
 
 const GoToSpacesButton = ({ getUrlForSpaces }: { getUrlForSpaces: () => string }) => {
@@ -178,7 +178,7 @@ export function SettingsTab() {
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
-      {productDocBase ? <ProductDocEntry knowledgeBase={knowledgeBase} /> : undefined}
+      {productDocBase ? <ProductDocsSetting knowledgeBase={knowledgeBase} /> : undefined}
 
       {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
         <ChangeKbModel knowledgeBase={knowledgeBase} />

@@ -24,7 +24,7 @@ import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
-export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
+export function ProductDocsSetting({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
 
   const selectedInferenceId = getMappedInferenceId(knowledgeBase.status.value?.currentInferenceId);
