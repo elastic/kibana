@@ -16,7 +16,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSampleDataStatus } from '../hooks/use_sample_data_status';
 import { useKibana } from '../hooks/use_kibana';
-import { navigateToIndexDetails } from './utils';
 import { useNavigateToDiscover } from '../hooks/use_navigate_to_discover';
 
 interface SampleDataActionButtonProps {
@@ -28,7 +27,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
   isLoading,
   onIngestSampleData,
 }) => {
-  const { application, http, share, uiSettings } = useKibana().services;
+  const { share, uiSettings } = useKibana().services;
   const { isInstalled, indexName, isLoading: isStatusLoading } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
 
@@ -53,6 +52,13 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
   }, [share, uiSettings, indexName]);
 
   const navigateToDiscover = useNavigateToDiscover(indexName || '');
+
+  const navigateToIndexDetails = useCallback(async () => {
+    const indexDetailsLocator = share.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID');
+    if (indexDetailsLocator && indexName) {
+      await indexDetailsLocator.navigate({ indexName });
+    }
+  }, [share, indexName]);
 
   if (isStatusLoading) {
     return null;
@@ -95,13 +101,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
                   defaultMessage="Playground"
                 />
               </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                key="index"
-                onClick={() => {
-                  navigateToIndexDetails(application, http, indexName);
-                }}
-                icon="index"
-              >
+              <EuiContextMenuItem key="index" onClick={navigateToIndexDetails} icon="index">
                 <FormattedMessage
                   id="xpack.searchHomepage.sampleData.linkToIndex"
                   defaultMessage="View index"
