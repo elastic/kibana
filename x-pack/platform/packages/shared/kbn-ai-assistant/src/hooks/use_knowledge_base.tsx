@@ -11,7 +11,7 @@ import {
   type AbortableAsyncState,
   useAbortableAsync,
   APIReturnType,
-  KnowledgeBaseState,
+  InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
@@ -47,7 +47,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   // 1. The model is currently being deployed to ML nodes
   // 2. The knowledge base is being reindexed (e.g., during model updates)
   if (
-    statusRequest.value?.inferenceModelState === KnowledgeBaseState.DEPLOYING_MODEL ||
+    statusRequest.value?.inferenceModelState === InferenceModelState.DEPLOYING_MODEL ||
     statusRequest.value?.isReIndexing ||
     statusRequest.value?.productDocStatus === 'installing'
   ) {
@@ -59,7 +59,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     // 1. The knowledge base is not in READY state yet
     // 2. We're installing a specific model but its ID doesn't match the current model
     if (
-      statusRequest.value?.inferenceModelState !== KnowledgeBaseState.READY ||
+      statusRequest.value?.inferenceModelState !== InferenceModelState.READY ||
       (installingInferenceId !== undefined &&
         statusRequest.value?.currentInferenceId !== installingInferenceId)
     ) {
@@ -71,7 +71,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     // Only reset installation state when the KB is ready and the endpoint model matches what we're installing
     if (
       installingInferenceId &&
-      statusRequest.value?.inferenceModelState === KnowledgeBaseState.READY &&
+      statusRequest.value?.inferenceModelState === InferenceModelState.READY &&
       statusRequest.value?.currentInferenceId === installingInferenceId
     ) {
       setInstallingInferenceId(undefined);
@@ -80,7 +80,10 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   useEffect(() => {
     // toggle warming up state to false once KB is ready
-    if (isWarmingUpModel && statusRequest.value?.inferenceModelState === KnowledgeBaseState.READY) {
+    if (
+      isWarmingUpModel &&
+      statusRequest.value?.inferenceModelState === InferenceModelState.READY
+    ) {
       setIsWarmingUpModel(false);
     }
   }, [isWarmingUpModel, statusRequest]);
@@ -158,7 +161,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     const interval = setInterval(statusRequest.refresh, 5000);
 
     if (
-      statusRequest.value?.inferenceModelState === KnowledgeBaseState.READY &&
+      statusRequest.value?.inferenceModelState === InferenceModelState.READY &&
       statusRequest.value?.currentInferenceId === installingInferenceId
     ) {
       // done installing

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common';
 import { UseKnowledgeBaseResult } from '../use_knowledge_base';
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
@@ -18,7 +18,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       refresh: () => {},
       error: undefined,
       value: {
-        inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
+        inferenceModelState: InferenceModelState.NOT_INSTALLED,
         enabled: true,
         concreteWriteIndex: undefined,
         currentInferenceId: undefined,

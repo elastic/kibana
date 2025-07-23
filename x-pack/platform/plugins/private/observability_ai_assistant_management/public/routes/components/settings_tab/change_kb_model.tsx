@@ -27,7 +27,7 @@ import {
 import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
-  KnowledgeBaseState,
+  InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
   useKibana,
 } from '@kbn/observability-ai-assistant-plugin/public';
@@ -56,9 +56,9 @@ export function ChangeKbModel({
 
   const doesModelNeedRedeployment =
     knowledgeBase.status?.value?.inferenceModelState ===
-      KnowledgeBaseState.MODEL_PENDING_ALLOCATION ||
+      InferenceModelState.MODEL_PENDING_ALLOCATION ||
     knowledgeBase.status?.value?.inferenceModelState ===
-      KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
+      InferenceModelState.MODEL_PENDING_DEPLOYMENT;
 
   const isSelectedModelCurrentModel = selectedInferenceId === currentlyDeployedInferenceId;
 
@@ -88,7 +88,7 @@ export function ChangeKbModel({
   }, [knowledgeBase.isInstalling, knowledgeBase.isPolling, isUpdatingModel]);
 
   const buttonText = useMemo(() => {
-    if (knowledgeBase.status?.value?.inferenceModelState === KnowledgeBaseState.NOT_INSTALLED) {
+    if (knowledgeBase.status?.value?.inferenceModelState === InferenceModelState.NOT_INSTALLED) {
       return i18n.translate(
         'xpack.observabilityAiAssistantManagement.knowledgeBase.installModelLabel',
         {
@@ -145,7 +145,7 @@ export function ChangeKbModel({
   const handleInstall = useCallback(() => {
     if (selectedInferenceId) {
       if (
-        knowledgeBase.status?.value?.inferenceModelState === KnowledgeBaseState.NOT_INSTALLED ||
+        knowledgeBase.status?.value?.inferenceModelState === InferenceModelState.NOT_INSTALLED ||
         (doesModelNeedRedeployment && isSelectedModelCurrentModel)
       ) {
         setIsUpdatingModel(true);
@@ -239,7 +239,7 @@ export function ChangeKbModel({
               (knowledgeBase.status?.value?.endpoint?.inference_id === LEGACY_CUSTOM_INFERENCE_ID &&
                 selectedInferenceId === ELSER_ON_ML_NODE_INFERENCE_ID) ||
               (knowledgeBase.status?.value?.inferenceModelState !==
-                KnowledgeBaseState.NOT_INSTALLED &&
+                InferenceModelState.NOT_INSTALLED &&
                 selectedInferenceId === knowledgeBase.status?.value?.endpoint?.inference_id &&
                 !doesModelNeedRedeployment)
             }
@@ -315,14 +315,14 @@ export function ChangeKbModel({
                     <EuiBadge
                       data-test-subj="observabilityAiAssistantKnowledgeBaseStatus"
                       color={
-                        knowledgeBase.status.value.inferenceModelState === KnowledgeBaseState.READY
+                        knowledgeBase.status.value.inferenceModelState === InferenceModelState.READY
                           ? isKnowledgeBaseInLoadingState
                             ? 'warning'
                             : 'success'
                           : 'default'
                       }
                     >
-                      {knowledgeBase.status.value.inferenceModelState === KnowledgeBaseState.READY
+                      {knowledgeBase.status.value.inferenceModelState === InferenceModelState.READY
                         ? isKnowledgeBaseInLoadingState
                           ? i18n.translate(
                               'xpack.observabilityAiAssistantManagement.knowledgeBase.stateUpdatingModel',

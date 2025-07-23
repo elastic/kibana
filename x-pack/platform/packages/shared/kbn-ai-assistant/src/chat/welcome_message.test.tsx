@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { WelcomeMessage } from './welcome_message';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
@@ -58,7 +58,7 @@ const createMockKnowledgeBase = (
     value: {
       enabled: true,
       errorMessage: undefined,
-      inferenceModelState: KnowledgeBaseState.NOT_INSTALLED,
+      inferenceModelState: InferenceModelState.NOT_INSTALLED,
       concreteWriteIndex: undefined,
       currentInferenceId: undefined,
       isReIndexing: false,
@@ -80,7 +80,7 @@ describe('WelcomeMessage', () => {
     const knowledgeBase = createMockKnowledgeBase({
       status: {
         value: {
-          inferenceModelState: KnowledgeBaseState.READY,
+          inferenceModelState: InferenceModelState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
@@ -113,7 +113,7 @@ describe('WelcomeMessage', () => {
     const updatedKnowledgeBase = createMockKnowledgeBase({
       status: {
         value: {
-          inferenceModelState: KnowledgeBaseState.READY,
+          inferenceModelState: InferenceModelState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',

@@ -11,7 +11,7 @@ import { ProductDocSetting } from './product_doc_setting';
 import {
   APIReturnType,
   ELSER_ON_ML_NODE_INFERENCE_ID,
-  KnowledgeBaseState,
+  InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
@@ -23,7 +23,7 @@ const createMockStatus = (
 ): UseKnowledgeBaseResult['status'] => ({
   value: {
     enabled: true,
-    inferenceModelState: KnowledgeBaseState.READY,
+    inferenceModelState: InferenceModelState.READY,
     isReIndexing: false,
     currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
     concreteWriteIndex: 'index_1',

@@ -13,7 +13,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import {
   E5_SMALL_INFERENCE_ID,
   ELSER_ON_ML_NODE_INFERENCE_ID,
-  KnowledgeBaseState,
+  InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import {
@@ -64,7 +64,7 @@ describe('SettingsTab', () => {
       },
     });
     useKnowledgeBaseMock.mockReturnValue({
-      status: { value: { enabled: true, inferenceModelState: KnowledgeBaseState.READY } },
+      status: { value: { enabled: true, inferenceModelState: InferenceModelState.READY } },
       isInstalling: false,
       isPolling: false,
       isWarmingUpModel: false,
@@ -135,7 +135,7 @@ describe('SettingsTab', () => {
 
   it('should show loading state when knowledge base is being updated', () => {
     useKnowledgeBaseMock.mockReturnValue({
-      status: { value: { enabled: true, inferenceModelState: KnowledgeBaseState.READY } },
+      status: { value: { enabled: true, inferenceModelState: InferenceModelState.READY } },
       isInstalling: true,
       isPolling: true,
       isWarmingUpModel: false,
@@ -157,7 +157,7 @@ describe('SettingsTab', () => {
         status: {
           value: {
             enabled: true,
-            kbState: KnowledgeBaseState.READY,
+            kbState: InferenceModelState.READY,
             currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
           },
         },
@@ -175,7 +175,7 @@ describe('SettingsTab', () => {
         status: {
           value: {
             enabled: true,
-            kbState: KnowledgeBaseState.READY,
+            kbState: InferenceModelState.READY,
             currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
           },
         },
@@ -193,7 +193,7 @@ describe('SettingsTab', () => {
         status: {
           value: {
             enabled: true,
-            kbState: KnowledgeBaseState.READY,
+            kbState: InferenceModelState.READY,
             currentInferenceId: E5_SMALL_INFERENCE_ID,
           },
         },

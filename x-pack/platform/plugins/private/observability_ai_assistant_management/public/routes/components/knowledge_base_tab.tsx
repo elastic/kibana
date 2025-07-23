@@ -33,7 +33,7 @@ import {
 import { css } from '@emotion/css';
 import {
   KnowledgeBaseEntry,
-  KnowledgeBaseState,
+  InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseInstallationStatusPanel } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_installation_status_panel';
@@ -253,7 +253,7 @@ export function KnowledgeBaseTab() {
     );
   }
 
-  if (knowledgeBase.status.value?.inferenceModelState === KnowledgeBaseState.READY) {
+  if (knowledgeBase.status.value?.inferenceModelState === InferenceModelState.READY) {
     return (
       <>
         <EuiFlexGroup direction="column">

@@ -18,7 +18,7 @@ import {
   Instruction,
   KnowledgeBaseEntry,
   KnowledgeBaseEntryRole,
-  KnowledgeBaseState,
+  InferenceModelState,
 } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
@@ -35,7 +35,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     enabled: boolean;
     endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
-    inferenceModelState: KnowledgeBaseState;
+    inferenceModelState: InferenceModelState;
     currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
@@ -286,7 +286,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 
     const { inferenceModelState } = await client.getKnowledgeBaseStatus();
 
-    if (inferenceModelState !== KnowledgeBaseState.READY) {
+    if (inferenceModelState !== InferenceModelState.READY) {
       throw new Error('Knowledge base is not ready');
     }
 
