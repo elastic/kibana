@@ -19,9 +19,7 @@ export type BetterTest = <T extends any>(options: {
 }) => Promise<{ status: number; body: T }>;
 
 /*
- * This is a wrapper around supertest that throws an error if the response status is not 200.
- * This is useful for tests that expect a 200 response
- * It also makes it easier to debug tests that fail because of a 500 response.
+ * This is a wrapper around supertest that add the correct headers
  */
 export function getBettertest(st: supertest.Agent): BetterTest {
   return async ({ pathname, method = 'get', query, body }) => {
