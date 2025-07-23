@@ -382,12 +382,6 @@ src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
-src/platform/packages/private/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/analytics_no_data/types @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/kibana_no_data/impl @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/kibana_no_data/mocks @elastic/appex-sharedux
-src/platform/packages/private/shared-ux/page/kibana_no_data/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -644,6 +638,12 @@ src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/modal/tabbed @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/analytics_no_data/types @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/kibana_no_data/impl @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/kibana_no_data/mocks @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/page/kibana_no_data/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/kibana_template/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/kibana_template/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/page/kibana_template/types @elastic/appex-sharedux
@@ -675,7 +675,6 @@ src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-presentation
 src/platform/plugins/private/maps_ems @elastic/kibana-presentation
-src/platform/plugins/private/no_data_page @elastic/appex-sharedux
 src/platform/plugins/private/presentation_panel @elastic/kibana-presentation
 src/platform/plugins/private/url_forwarding @elastic/kibana-visualizations
 src/platform/plugins/private/vis_default_editor @elastic/kibana-visualizations
@@ -727,6 +726,7 @@ src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux
 src/platform/plugins/shared/management @elastic/kibana-management
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
+src/platform/plugins/shared/no_data_page @elastic/appex-sharedux
 src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 src/platform/plugins/shared/saved_objects @elastic/appex-sharedux
 src/platform/plugins/shared/saved_objects_finder @elastic/kibana-data-discovery
