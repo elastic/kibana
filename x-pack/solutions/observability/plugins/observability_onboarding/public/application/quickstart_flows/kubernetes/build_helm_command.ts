@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { ElasticAgentVersionInfo } from '../../../../common/types';
+
 interface Params {
   encodedApiKey: string;
   onboardingId: string;
   elasticsearchUrl: string;
   metricsEnabled: boolean;
+  elasticAgentVersionInfo: ElasticAgentVersionInfo;
 }
 
 export function buildHelmCommand({
@@ -17,6 +20,7 @@ export function buildHelmCommand({
   onboardingId,
   elasticsearchUrl,
   metricsEnabled,
+  elasticAgentVersionInfo,
 }: Params) {
   const escapedElasticsearchUrl = elasticsearchUrl.replace(/\//g, '\\/');
 
@@ -30,7 +34,7 @@ export function buildHelmCommand({
 
   return `
     helm repo add elastic https://helm.elastic.co/ && \
-    helm install elastic-agent elastic/elastic-agent \
+    helm install elastic-agent elastic/elastic-agent --version ${elasticAgentVersionInfo.agentVersion} \
       -n kube-system \
       --set outputs.default.url=${escapedElasticsearchUrl} \
       --set kubernetes.onboardingID=${onboardingId} \

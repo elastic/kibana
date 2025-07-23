@@ -13,12 +13,14 @@ import { buildHelmCommand } from './build_helm_command';
 import { CopyToClipboardButton } from '../shared/copy_to_clipboard_button';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
+import { ElasticAgentVersionInfo } from '../../../../common/types';
 
 interface Props {
   encodedApiKey: string;
   onboardingId: string;
   elasticsearchUrl: string;
   isCopyPrimaryAction: boolean;
+  elasticAgentVersionInfo: ElasticAgentVersionInfo;
 }
 
 export function CommandSnippet({
@@ -26,6 +28,7 @@ export function CommandSnippet({
   onboardingId,
   elasticsearchUrl,
   isCopyPrimaryAction,
+  elasticAgentVersionInfo,
 }: Props) {
   const metricsEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
@@ -35,6 +38,7 @@ export function CommandSnippet({
     onboardingId,
     elasticsearchUrl,
     metricsEnabled,
+    elasticAgentVersionInfo,
   });
 
   return (
