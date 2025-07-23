@@ -56,7 +56,7 @@ import {
   MonitoringLogstashSummaryStatusProvider,
   MonitoringNoDataProvider,
   MonitoringSetupModeProvider,
-// @ts-ignore not ts yet
+  // @ts-ignore not ts yet
 } from './monitoring';
 
 // define the name and providers for services that should be
