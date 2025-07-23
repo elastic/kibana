@@ -41,7 +41,6 @@ export const createMetricAggregations = async (
     const aggregations = await inventoryModel.metrics.getAggregations();
     const metricAgg = aggregations.get(metric);
 
-    aggregations.getAll();
     if (isInterfaceRateAgg(metricAgg)) {
       const field = get(
         metricAgg,
