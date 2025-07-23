@@ -164,11 +164,16 @@ export function registerChatRoutes({
         const chatEvents$ = callConverse({ chatService, payload, request });
 
         return response.ok({
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+          },
           body: observableIntoEventSourceStream(
             chatEvents$ as unknown as Observable<ServerSentEvent>,
             {
               signal: abortController.signal,
-              flushThrottleMs: 150,
+              flushThrottleMs: 100,
               flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
               logger,
             }
