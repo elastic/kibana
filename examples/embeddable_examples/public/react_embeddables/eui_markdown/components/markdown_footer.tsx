@@ -37,9 +37,9 @@ const footerStyles = {
         inset: 0,
       },
     }),
-    flexGroup: {
-      position: 'relative',
-    },
+  flexGroup: css({
+    position: 'relative',
+  }),
   previewFooter: ({ euiTheme }: UseEuiTheme) =>
     css({
       opacity: 0,
@@ -70,26 +70,24 @@ export const MarkdownFooter = ({
 }) => {
   const styles = useMemoCss(footerStyles);
   return (
-    <div 
-    css={[styles.footer, isPreview && styles.previewFooter]}
-    >
-    <EuiFlexGroup
-      responsive={false}
-      gutterSize="xs"
-      justifyContent="flexEnd"
-      css={styles.flexGroup}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty color="primary" size="xs" onClick={onCancel}>
-          {markdownFooterStrings.discardButton}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton size={'xs' as 's'} iconType={'check'} color="primary" fill onClick={onSave}>
-          {markdownFooterStrings.applyButton}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div css={[styles.footer, isPreview && styles.previewFooter]}>
+      <EuiFlexGroup
+        responsive={false}
+        gutterSize="xs"
+        justifyContent="flexEnd"
+        css={styles.flexGroup}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty color="primary" size="xs" onClick={onCancel}>
+            {markdownFooterStrings.discardButton}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton size={'xs' as 's'} iconType={'check'} color="primary" fill onClick={onSave}>
+            {markdownFooterStrings.applyButton}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

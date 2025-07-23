@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonGroup, EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
+import { EuiLink, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,
@@ -31,6 +31,7 @@ import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
 import { MarkdownRenderer } from './components/markdown_renderer';
 import { MarkdownEditor } from './components/markdown_editor';
+import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 
 const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
   content: '',
@@ -119,46 +120,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       isEditingEnabled: () => true,
       getTypeDisplayName: () => 'Markdown',
       overrideHoverActions$,
-      OverriddenHoverActionsComponent: () => {
-        const [isEditing, isPreview] = useBatchedPublishingSubjects(isEditing$, isPreview$);
-        if (!isEditing) {
-          return null;
-        }
-        const toggleButtonsCompressed = [
-          {
-            id: `edit__0`,
-            label: 'Editor',
-          },
-          {
-            id: `preview__0`,
-            label: 'Preview',
-          },
-        ];
-        return (
-          <EuiButtonGroup
-            legend="This is a basic group"
-            options={toggleButtonsCompressed}
-            idSelected={isPreview ? 'preview__0' : 'edit__0'}
-            onChange={(id) => {
-              isPreview$.next(id === 'preview__0');
-            }}
-            buttonSize="compressed"
-            type="single"
-            css={{
-              background: 'none',
-              padding: 0,
-              marginBottom: '4px',
-              '*': {
-                border: 'none !important',
-              },
-              button: {
-                marginBottom: 0,
-                marginTop: 0,
-              },
-            }}
-          />
-        );
-      },
+      OverriddenHoverActionsComponent: () => (
+        <MarkdownEditorPreviewSwitch isPreview$={isPreview$} />
+      ),
     });
 
     return {

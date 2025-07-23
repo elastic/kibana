@@ -46,8 +46,6 @@ const dashboardMarkdownEditorAriaLabel = () =>
     defaultMessage: 'Dashboard markdown editor',
   });
 
-
-
 export const MarkdownEditor = ({
   processingPluginList,
   content,
@@ -116,15 +114,15 @@ export const MarkdownEditor = ({
         <EuiMarkdownEditor
           ref={editorRef}
           css={styles.editorStyles}
-          toolbarProps={{
-            right: <div>TODO</div>,
-          }}
           value={value}
           onChange={(v) => onChange(v)}
           aria-label={dashboardMarkdownEditorAriaLabel}
           processingPluginList={processingPluginList}
           height="full"
-          showFooter="false"
+          toolbarProps={{
+            right: <div>TODO</div>,
+          }}
+          showFooter={false}
         />
       </div>
       {isPreview && (
