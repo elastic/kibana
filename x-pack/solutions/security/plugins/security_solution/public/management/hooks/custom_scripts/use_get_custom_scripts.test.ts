@@ -84,7 +84,7 @@ describe('useGetCustomScripts', () => {
 
     await queryFn();
 
-    expect(mockHttpGet).toHaveBeenCalledWith('/api/endpoint/action/custom_scripts', {
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/api/endpoint/action/custom_scripts', {
       version: '1',
       query: {
         agentType: 'endpoint',
