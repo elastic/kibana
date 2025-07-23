@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { WORKFLOW_ZOD_SCHEMA } from '../../../../common';
+import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -36,14 +36,9 @@ export const WorkflowYAMLEditor = ({
   onValidationErrors,
   ...props
 }: WorkflowYAMLEditorProps) => {
-  const monacoRef = useRef<typeof monaco | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
     null
   );
-
-  const { validationErrors, validateVariables, handleMarkersChanged } = useYamlValidation({
-    onValidationErrors,
-  });
 
   const workflowJsonSchema = useWorkflowJsonSchema();
   const schemas = useMemo(() => {
@@ -56,19 +51,24 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchema]);
 
+  const { validationErrors, validateVariables, handleMarkersChanged } = useYamlValidation({
+    workflowYamlSchema: WORKFLOW_ZOD_SCHEMA_LOOSE,
+    onValidationErrors,
+  });
+
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
   const validateMustacheExpressionsEverywhere = useCallback(() => {
-    if (editorRef.current && monacoRef.current) {
+    if (editorRef.current) {
       const model = editorRef.current.getModel();
       if (!model) {
         return;
       }
       if ('original' in model) {
-        validateVariables(model.original, monacoRef.current);
-        validateVariables(model.modified, monacoRef.current);
+        validateVariables(model.original);
+        validateVariables(model.modified);
       } else {
-        validateVariables(model, monacoRef.current);
+        validateVariables(model);
       }
     }
   }, [validateVariables]);
@@ -105,7 +105,7 @@ export const WorkflowYAMLEditor = ({
 
   useEffect(() => {
     // After editor is mounted, validate the initial content
-    if (isEditorMounted && editorRef.current && monacoRef.current) {
+    if (isEditorMounted && editorRef.current) {
       validateMustacheExpressionsEverywhere();
     }
   }, [validateMustacheExpressionsEverywhere, isEditorMounted]);

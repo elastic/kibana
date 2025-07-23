@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 import { useCallback, useState } from 'react';
 import { parseDocument } from 'yaml';
 import _ from 'lodash';
@@ -19,6 +19,7 @@ import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_g
 import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 
 interface UseYamlValidationProps {
+  workflowYamlSchema: z.ZodSchema;
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
 }
 
@@ -30,10 +31,7 @@ const SEVERITY_MAP = {
 
 export interface UseYamlValidationResult {
   validationErrors: YamlValidationError[] | null;
-  validateVariables: (
-    model: monaco.editor.ITextModel | null,
-    monaco: typeof import('monaco-editor') | null
-  ) => void;
+  validateVariables: (model: monaco.editor.ITextModel | null) => void;
   handleMarkersChanged: (
     editor: monaco.editor.IStandaloneCodeEditor,
     modelUri: monaco.Uri,
@@ -43,75 +41,73 @@ export interface UseYamlValidationResult {
 }
 
 export function useYamlValidation({
+  workflowYamlSchema,
   onValidationErrors,
 }: UseYamlValidationProps): UseYamlValidationResult {
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
 
   // Function to validate mustache expressions and apply decorations
-  const validateVariables = useCallback(
-    (model: monaco.editor.ITextModel | null, monaco: typeof import('monaco-editor') | null) => {
-      if (!model || !monaco) {
-        return;
+  const validateVariables = useCallback((model: monaco.editor.ITextModel | null) => {
+    if (!model) {
+      return;
+    }
+
+    try {
+      const text = model.getValue();
+
+      // Parse the YAML to JSON to get the workflow definition
+      const result = parseWorkflowYamlToJSON(text, workflowYamlSchema);
+      if (!result.success) {
+        throw new Error('Failed to parse YAML');
       }
+      const yamlDocument = parseDocument(text);
+      const workflowGraph = getWorkflowGraph(result.data);
 
-      try {
-        const text = model.getValue();
+      // Collect markers to add to the model
+      const markers: monaco.editor.IMarkerData[] = [];
 
-        // Parse the YAML to JSON to get the workflow definition
-        const result = parseWorkflowYamlToJSON(text);
-        if (!result.success) {
-          throw new Error('Failed to parse YAML');
-        }
-        const yamlDocument = parseDocument(text);
-        const workflowGraph = getWorkflowGraph(result.data);
+      const matches = [...text.matchAll(MUSTACHE_REGEX)];
+      // TODO: check if the variable is inside quouted string or yaml | or > string section
+      for (const match of matches) {
+        const matchStart = match.index ?? 0;
+        const matchEnd = matchStart + match[0].length; // match[0] is the entire {{...}} expression
 
-        // Collect markers to add to the model
-        const markers: monaco.editor.IMarkerData[] = [];
+        // Get the position (line, column) for the match
+        const startPos = model.getPositionAt(matchStart);
+        const endPos = model.getPositionAt(matchEnd);
 
-        const matches = [...text.matchAll(MUSTACHE_REGEX)];
-        // TODO: check if the variable is inside quouted string or yaml | or > string section
-        for (const match of matches) {
-          const matchStart = match.index ?? 0;
-          const matchEnd = matchStart + match[0].length; // match[0] is the entire {{...}} expression
+        let errorMessage: string | null = null;
+        const severity: YamlValidationErrorSeverity = 'warning';
 
-          // Get the position (line, column) for the match
-          const startPos = model.getPositionAt(matchStart);
-          const endPos = model.getPositionAt(matchEnd);
+        const path = getCurrentPath(yamlDocument, matchStart);
+        const context = getContextForPath(result.data, workflowGraph, path);
 
-          let errorMessage: string | null = null;
-          const severity: YamlValidationErrorSeverity = 'warning';
-
-          const path = getCurrentPath(yamlDocument, matchStart);
-          const context = getContextForPath(result.data, workflowGraph, path);
-
-          // TODO: validate mustache variable for YAML step
-          if (!_.get(context, match[1])) {
-            errorMessage = `Variable ${match[1]} is not defined`;
-          }
-
-          // Add marker for validation issues
-          if (errorMessage) {
-            markers.push({
-              severity: SEVERITY_MAP[severity],
-              message: errorMessage,
-              startLineNumber: startPos.lineNumber,
-              startColumn: startPos.column,
-              endLineNumber: endPos.lineNumber,
-              endColumn: endPos.column,
-              source: 'mustache-validation',
-            });
-          }
+        // TODO: validate mustache variable for YAML step
+        if (!_.get(context, match[1])) {
+          errorMessage = `Variable ${match[1]} is not defined`;
         }
 
-        // Set markers on the model for the problems panel
-        monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
+        // Add marker for validation issues
+        if (errorMessage) {
+          markers.push({
+            severity: SEVERITY_MAP[severity],
+            message: errorMessage,
+            startLineNumber: startPos.lineNumber,
+            startColumn: startPos.column,
+            endLineNumber: endPos.lineNumber,
+            endColumn: endPos.column,
+            source: 'mustache-validation',
+          });
+        }
       }
-    },
-    []
-  );
+
+      // Set markers on the model for the problems panel
+      monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }, []);
 
   const handleMarkersChanged = useCallback(
     (
