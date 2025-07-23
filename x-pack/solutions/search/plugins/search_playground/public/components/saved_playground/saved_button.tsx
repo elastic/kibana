@@ -78,7 +78,10 @@ export const SavedPlaygroundSaveButton = ({ hasChanges }: SavedPlaygroundSaveBut
       isLoading={isSaving}
       onClick={onSave}
     >
-      <FormattedMessage id="xpack.searchPlayground.header.saveButton.text" defaultMessage="Save" />
+      <FormattedMessage
+        id="xpack.searchPlayground.savedPlayground.header.saveButton.text"
+        defaultMessage="Save"
+      />
     </EuiButton>
   );
 };
