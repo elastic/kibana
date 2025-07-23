@@ -67,7 +67,5 @@ export const getGraph = async ({
   });
 
   // Convert results into set of nodes and edges
-  const graphData = parseRecords(logger, results.records, nodesLimit);
-
-  return graphData;
+  return parseRecords(logger, results.records, nodesLimit);
 };

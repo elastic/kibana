@@ -88,6 +88,6 @@ export const transformEntityTypeToIcon = (entityType: string | undefined): strin
   const mappingResult = entityTypeMappings.find((mapping) =>
     mapping.values.some((type: string) => entityTypeLower === type.toLowerCase())
   );
-  // Return the icon name if found, otherwise default to 'question'
+  // Return the icon name if found, otherwise we return undefined
   return mappingResult?.icon ?? undefined;
 };
