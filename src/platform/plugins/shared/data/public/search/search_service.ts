@@ -74,6 +74,7 @@ import { ISessionsClient, ISessionService, SessionsClient, SessionService } from
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 import { ISearchSetup, ISearchStart } from './types';
+import { openSearchSessionsFlyout } from './session/sessions_mgmt';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -217,7 +218,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public start(
-    { http, uiSettings, chrome, application, notifications, ...startServices }: CoreStart,
+    coreStart: CoreStart,
     {
       fieldFormats,
       indexPatterns,
@@ -226,6 +227,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       scriptedFieldsEnabled,
     }: SearchServiceStartDependencies
   ): ISearchStart {
+    const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
+
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
@@ -305,6 +308,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
+      showSearchSessionsFlyout: openSearchSessionsFlyout({
+        coreStart,
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        usageCollector: this.usageCollector!,
+        config: config.search.sessions,
+        sessionsClient: this.sessionsClient,
+      }),
       showWarnings: (adapter, callback) => {
         adapter?.getRequests().forEach((request) => {
           const rawResponse = (
