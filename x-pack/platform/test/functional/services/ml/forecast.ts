@@ -166,6 +166,14 @@ export function MachineLearningForecastProvider({ getPageObject, getService }: F
         const newFrom = moment(zoom.from).add(moment.duration(shiftAmount)).toISOString();
         const newTo = moment(zoom.to).add(moment.duration(shiftAmount)).toISOString();
 
+        // eslint-disable-next-line no-console
+        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+
+        // eslint-disable-next-line no-console
+        console.log(
+          `Moving zoom slider from ${zoom.from} to ${newFrom} and ${zoom.to} to ${newTo}`
+        );
+
         // Update the URL with the new zoom range
         _a.timeseriesexplorer.mlTimeSeriesExplorer.zoom = { from: newFrom, to: newTo };
 
