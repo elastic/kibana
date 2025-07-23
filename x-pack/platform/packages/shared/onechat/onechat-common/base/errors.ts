@@ -165,8 +165,6 @@ export const createConversationNotFoundError = ({
   );
 };
 
-////
-
 /**
  * Represents an internal error
  */
@@ -185,8 +183,6 @@ export const createRequestAbortedError = (
 ): OnechatRequestAbortedError => {
   return new OnechatError(OnechatErrorCode.requestAborted, message, meta ?? {});
 };
-
-////
 
 /**
  * Global utility exposing all error utilities from a single export.
