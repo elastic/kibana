@@ -116,6 +116,7 @@ function generateFilters(definition: EntityDefinition) {
     bool: {
       must: [] as QueryDslQueryContainer[],
       must_not: [] as QueryDslQueryContainer[],
+      should: [] as QueryDslQueryContainer[],
     },
   };
 
@@ -127,13 +128,29 @@ function generateFilters(definition: EntityDefinition) {
     filter.bool.must.push({ exists: { field } });
   });
 
-  filter.bool.must.push({
-    range: {
-      [definition.latest.timestampField]: {
-        gte: `now-${definition.latest.lookbackPeriod}`,
+  filter.bool.should.push(
+    // Matches synthetic timestamp for docs in backfill indices
+    {
+      range: {
+        synthetic_ingest_ts: {
+          gte: `now-${definition.latest.lookbackPeriod}`,
+        },
       },
     },
-  });
+    // Matches timestamp for documents in regular indices
+    {
+      bool: {
+        must_not: { exists: { field: 'synthetic_ingest_ts' } },
+        filter: {
+          range: {
+            [definition.latest.timestampField]: {
+              gte: `now-${definition.latest.lookbackPeriod}`,
+            },
+          },
+        },
+      },
+    }
+  );
 
   filter.bool.must_not.push({
     terms: {
